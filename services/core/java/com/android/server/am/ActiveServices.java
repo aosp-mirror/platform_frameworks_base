@@ -168,13 +168,10 @@ public final class ActiveServices {
      */
     class ServiceMap extends Handler {
         final int mUserId;
-        final ArrayMap<ComponentName, ServiceRecord> mServicesByName
-                = new ArrayMap<ComponentName, ServiceRecord>();
-        final ArrayMap<Intent.FilterComparison, ServiceRecord> mServicesByIntent
-                = new ArrayMap<Intent.FilterComparison, ServiceRecord>();
+        final ArrayMap<ComponentName, ServiceRecord> mServicesByName = new ArrayMap<>();
+        final ArrayMap<Intent.FilterComparison, ServiceRecord> mServicesByIntent = new ArrayMap<>();
 
-        final ArrayList<ServiceRecord> mDelayedStartList
-                = new ArrayList<ServiceRecord>();
+        final ArrayList<ServiceRecord> mDelayedStartList = new ArrayList<>();
         /* XXX eventually I'd like to have this based on processes instead of services.
          * That is, if we try to start two services in a row both running in the same
          * process, this should be one entry in mStartingBackground for that one process
@@ -185,8 +182,7 @@ public final class ActiveServices {
                 = new ArrayList<DelayingProcess>();
         */
 
-        final ArrayList<ServiceRecord> mStartingBackground
-                = new ArrayList<ServiceRecord>();
+        final ArrayList<ServiceRecord> mStartingBackground = new ArrayList<>();
 
         static final int MSG_BG_START_TIMEOUT = 1;
 
@@ -338,7 +334,7 @@ public final class ActiveServices {
         ServiceRecord r = res.record;
 
         if (!mAm.mUserController.exists(r.userId)) {
-            Slog.d(TAG, "Trying to start service with non-existent user! " + r.userId);
+            Slog.w(TAG, "Trying to start service with non-existent user! " + r.userId);
             return null;
         }
 
@@ -508,6 +504,35 @@ public final class ActiveServices {
         }
 
         return 0;
+    }
+
+    void stopInBackgroundLocked(int uid) {
+        // Stop all services associated with this uid due to it going to the background
+        // stopped state.
+        ServiceMap services = mServiceMap.get(UserHandle.getUserId(uid));
+        ArrayList<ServiceRecord> stopping = null;
+        if (services != null) {
+            for (int i=services.mServicesByName.size()-1; i>=0; i--) {
+                ServiceRecord service = services.mServicesByName.valueAt(i);
+                if (service.appInfo.uid == uid && service.startRequested) {
+                    if (mAm.mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
+                            uid, service.packageName) != AppOpsManager.MODE_ALLOWED) {
+                        if (stopping == null) {
+                            stopping = new ArrayList<>();
+                            stopping.add(service);
+                        }
+                    }
+                }
+            }
+            if (stopping != null) {
+                for (int i=stopping.size()-1; i>=0; i--) {
+                    ServiceRecord service = stopping.get(i);
+                    service.delayed = false;
+                    services.ensureNotStartingBackground(service);
+                    stopServiceLocked(service);
+                }
+            }
+        }
     }
 
     IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
@@ -1069,6 +1094,17 @@ public final class ActiveServices {
                 }
                 r = smap.mServicesByName.get(name);
                 if (r == null && createIfNeeded) {
+                    // Before going further -- if this app is not allowed to run in the background,
+                    // then at this point we aren't going to let it period.
+                    if (!mAm.checkAllowBackgroundLocked(sInfo.applicationInfo.uid,
+                            sInfo.packageName, callingPid)) {
+                        Slog.w(TAG, "Background execution not allowed: service "
+                                + r.intent + " to " + name.flattenToShortString()
+                                + " from pid=" + callingPid + " uid=" + callingUid
+                                + " pkg=" + callingPackage);
+                        return null;
+                    }
+
                     Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     ServiceRestarter res = new ServiceRestarter();

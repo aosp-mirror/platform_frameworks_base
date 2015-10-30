@@ -54,7 +54,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -557,12 +556,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ArraySet<String> reportedPackageNames = callbackSpecs.valueAt(i);
                 try {
                     if (reportedPackageNames == null) {
-                        callback.mCallback.opChanged(code, null);
+                        callback.mCallback.opChanged(code, uid, null);
                     } else {
                         final int reportedPackageCount = reportedPackageNames.size();
                         for (int j = 0; j < reportedPackageCount; j++) {
                             String reportedPackageName = reportedPackageNames.valueAt(j);
-                            callback.mCallback.opChanged(code, reportedPackageName);
+                            callback.mCallback.opChanged(code, uid, reportedPackageName);
                         }
                     }
                 } catch (RemoteException e) {
@@ -620,7 +619,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             try {
                 for (int i = 0; i < repCbs.size(); i++) {
                     try {
-                        repCbs.get(i).mCallback.opChanged(code, packageName);
+                        repCbs.get(i).mCallback.opChanged(code, uid, packageName);
                     } catch (RemoteException e) {
                     }
                 }
@@ -630,37 +629,49 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private static HashMap<Callback, ArrayList<Pair<String, Integer>>> addCallbacks(
-            HashMap<Callback, ArrayList<Pair<String, Integer>>> callbacks,
-            String packageName, int op, ArrayList<Callback> cbs) {
+    private static HashMap<Callback, ArrayList<ChangeRec>> addCallbacks(
+            HashMap<Callback, ArrayList<ChangeRec>> callbacks,
+            int op, int uid, String packageName, ArrayList<Callback> cbs) {
         if (cbs == null) {
             return callbacks;
         }
         if (callbacks == null) {
-            callbacks = new HashMap<Callback, ArrayList<Pair<String, Integer>>>();
+            callbacks = new HashMap<>();
         }
         boolean duplicate = false;
         for (int i=0; i<cbs.size(); i++) {
             Callback cb = cbs.get(i);
-            ArrayList<Pair<String, Integer>> reports = callbacks.get(cb);
+            ArrayList<ChangeRec> reports = callbacks.get(cb);
             if (reports == null) {
-                reports = new ArrayList<Pair<String, Integer>>();
+                reports = new ArrayList<>();
                 callbacks.put(cb, reports);
             } else {
                 final int reportCount = reports.size();
                 for (int j = 0; j < reportCount; j++) {
-                    Pair<String, Integer> report = reports.get(j);
-                    if (report.second == op && report.first.equals(packageName)) {
+                    ChangeRec report = reports.get(j);
+                    if (report.op == op && report.pkg.equals(packageName)) {
                         duplicate = true;
                         break;
                     }
                 }
             }
             if (!duplicate) {
-                reports.add(new Pair<>(packageName, op));
+                reports.add(new ChangeRec(op, uid, packageName));
             }
         }
         return callbacks;
+    }
+
+    static final class ChangeRec {
+        final int op;
+        final int uid;
+        final String pkg;
+
+        ChangeRec(int _op, int _uid, String _pkg) {
+            op = _op;
+            uid = _uid;
+            pkg = _pkg;
+        }
     }
 
     @Override
@@ -682,7 +693,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        HashMap<Callback, ArrayList<Pair<String, Integer>>> callbacks = null;
+        HashMap<Callback, ArrayList<ChangeRec>> callbacks = null;
         synchronized (this) {
             boolean changed = false;
             for (int i = mUidStates.size() - 1; i >= 0; i--) {
@@ -699,9 +710,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 uidState.opModes = null;
                             }
                             for (String packageName : getPackagesForUid(uidState.uid)) {
-                                callbacks = addCallbacks(callbacks, packageName, code,
+                                callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         mOpModeWatchers.get(code));
-                                callbacks = addCallbacks(callbacks, packageName, code,
+                                callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         mPackageModeWatchers.get(packageName));
                             }
                         }
@@ -734,9 +745,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 && curOp.mode != AppOpsManager.opToDefaultMode(curOp.op)) {
                             curOp.mode = AppOpsManager.opToDefaultMode(curOp.op);
                             changed = true;
-                            callbacks = addCallbacks(callbacks, packageName, curOp.op,
+                            callbacks = addCallbacks(callbacks, curOp.op, curOp.uid, packageName,
                                     mOpModeWatchers.get(curOp.op));
-                            callbacks = addCallbacks(callbacks, packageName, curOp.op,
+                            callbacks = addCallbacks(callbacks, curOp.op, curOp.uid, packageName,
                                     mPackageModeWatchers.get(packageName));
                             if (curOp.time == 0 && curOp.rejectTime == 0) {
                                 pkgOps.removeAt(j);
@@ -757,13 +768,13 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         if (callbacks != null) {
-            for (Map.Entry<Callback, ArrayList<Pair<String, Integer>>> ent : callbacks.entrySet()) {
+            for (Map.Entry<Callback, ArrayList<ChangeRec>> ent : callbacks.entrySet()) {
                 Callback cb = ent.getKey();
-                ArrayList<Pair<String, Integer>> reports = ent.getValue();
+                ArrayList<ChangeRec> reports = ent.getValue();
                 for (int i=0; i<reports.size(); i++) {
-                    Pair<String, Integer> rep = reports.get(i);
+                    ChangeRec rep = reports.get(i);
                     try {
-                        cb.mCallback.opChanged(rep.second, rep.first);
+                        cb.mCallback.opChanged(rep.op, rep.uid, rep.pkg);
                     } catch (RemoteException e) {
                     }
                 }
@@ -1163,8 +1174,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (pkgUid != uid) {
                         // Oops!  The package name is not valid for the uid they are calling
                         // under.  Abort.
+                        RuntimeException ex = new RuntimeException("here");
+                        ex.fillInStackTrace();
                         Slog.w(TAG, "Bad call: specified package " + packageName
-                                + " under uid " + uid + " but it is really " + pkgUid);
+                                + " under uid " + uid + " but it is really " + pkgUid, ex);
                         return null;
                     }
                 } finally {

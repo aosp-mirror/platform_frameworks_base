@@ -466,7 +466,7 @@ public final class ContentService extends IContentService.Stub {
                 if (cname == null) {
                     info = new SyncStorageEngine.EndPoint(account, authority, userId);
                 } else {
-                    info = new SyncStorageEngine.EndPoint(cname, userId);
+                    info = new SyncStorageEngine.EndPoint(cname, userId, -1);
                 }
                 syncManager.clearScheduledSyncOperations(info);
                 syncManager.cancelActiveSync(info, null /* all syncs for this adapter */);

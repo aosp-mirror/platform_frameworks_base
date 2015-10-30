@@ -400,7 +400,7 @@ public interface IActivityManager extends IInterface {
     public void registerProcessObserver(IProcessObserver observer) throws RemoteException;
     public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException;
 
-    public void registerUidObserver(IUidObserver observer) throws RemoteException;
+    public void registerUidObserver(IUidObserver observer, int which) throws RemoteException;
     public void unregisterUidObserver(IUidObserver observer) throws RemoteException;
 
     public boolean isIntentSenderTargetedToPackage(IIntentSender sender) throws RemoteException;
@@ -541,6 +541,8 @@ public interface IActivityManager extends IInterface {
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException;
 
     public void removeStack(int stackId) throws RemoteException;
+
+    public int getAppStartMode(int uid, String packageName) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -899,6 +901,7 @@ public interface IActivityManager extends IInterface {
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
     int MOVE_TASK_TO_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
     int SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
-    int REMOVE_STACK = IBinder.FIRST_CALL_TRANSACTION + 348;
-    int MOVE_TOP_ACTIVITY_TO_PINNED_STACK = IBinder.FIRST_CALL_TRANSACTION + 349;
+    int REMOVE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 348;
+    int MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 349;
+    int GET_APP_START_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 350;
 }

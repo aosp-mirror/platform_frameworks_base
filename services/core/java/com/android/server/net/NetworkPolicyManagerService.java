@@ -459,7 +459,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         updateScreenOn();
 
         try {
-            mActivityManager.registerUidObserver(mUidObserver);
+            mActivityManager.registerUidObserver(mUidObserver,
+                    ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE);
             mNetworkManager.registerObserver(mAlertObserver);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
@@ -540,6 +541,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mRulesLock) {
                 removeUidStateLocked(uid);
             }
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid) throws RemoteException {
         }
     };
 

@@ -556,6 +556,17 @@ public final class BroadcastQueue {
                     + " (uid " + r.callingUid + ")");
             skip = true;
         }
+        if (!skip) {
+            if (!mService.checkAllowBackgroundLocked(filter.receiverList.uid, filter.packageName,
+                    -1)) {
+                Slog.w(TAG, "Background execution not allowed: receiving "
+                        + r.intent
+                        + " to " + filter.receiverList.app
+                        + " (pid=" + filter.receiverList.pid
+                        + ", uid=" + filter.receiverList.uid + ")");
+                skip = true;
+            }
+        }
 
         if (!mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
                 r.callingPid, r.resolvedType, filter.receiverList.uid)) {
@@ -936,6 +947,15 @@ public final class BroadcastQueue {
                         + " due to sender " + r.callerPackage
                         + " (uid " + r.callingUid + ")");
                 skip = true;
+            }
+            if (!skip) {
+                if (!mService.checkAllowBackgroundLocked(info.activityInfo.applicationInfo.uid,
+                        info.activityInfo.packageName, -1)) {
+                    Slog.w(TAG, "Background execution not allowed: receiving "
+                            + r.intent + " to "
+                            + component.flattenToShortString());
+                    skip = true;
+                }
             }
             if (!skip) {
                 skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,

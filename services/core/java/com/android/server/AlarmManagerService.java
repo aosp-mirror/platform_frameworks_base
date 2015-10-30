@@ -25,6 +25,7 @@ import android.app.BroadcastOptions;
 import android.app.IAlarmCompleteListener;
 import android.app.IAlarmListener;
 import android.app.IAlarmManager;
+import android.app.IUidObserver;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -41,6 +42,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -459,7 +461,7 @@ class AlarmManagerService extends SystemService {
             long newStart = 0;  // recalculate endpoints as we go
             long newEnd = Long.MAX_VALUE;
             int newFlags = 0;
-            for (int i = 0; i < alarms.size(); ) {
+            for (int i = alarms.size()-1; i >= 0; i--) {
                 Alarm alarm = alarms.get(i);
                 if (alarm.matches(packageName)) {
                     alarms.remove(i);
@@ -475,7 +477,42 @@ class AlarmManagerService extends SystemService {
                         newEnd = alarm.maxWhenElapsed;
                     }
                     newFlags |= alarm.flags;
-                    i++;
+                }
+            }
+            if (didRemove) {
+                // commit the new batch bounds
+                start = newStart;
+                end = newEnd;
+                flags = newFlags;
+            }
+            return didRemove;
+        }
+
+        boolean removeForStopped(final int uid) {
+            boolean didRemove = false;
+            long newStart = 0;  // recalculate endpoints as we go
+            long newEnd = Long.MAX_VALUE;
+            int newFlags = 0;
+            for (int i = alarms.size()-1; i >= 0; i--) {
+                Alarm alarm = alarms.get(i);
+                try {
+                    if (alarm.uid == uid && ActivityManagerNative.getDefault().getAppStartMode(
+                            uid, alarm.packageName) == ActivityManager.APP_START_MODE_DISABLED) {
+                        alarms.remove(i);
+                        didRemove = true;
+                        if (alarm.alarmClock != null) {
+                            mNextAlarmClockMayChange = true;
+                        }
+                    } else {
+                        if (alarm.whenElapsed > newStart) {
+                            newStart = alarm.whenElapsed;
+                        }
+                        if (alarm.maxWhenElapsed < newEnd) {
+                            newEnd = alarm.maxWhenElapsed;
+                        }
+                        newFlags |= alarm.flags;
+                    }
+                } catch (RemoteException e) {
                 }
             }
             if (didRemove) {
@@ -890,6 +927,13 @@ class AlarmManagerService extends SystemService {
             Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
         }
 
+        try {
+            ActivityManagerNative.getDefault().registerUidObserver(new UidObserver(),
+                    ActivityManager.UID_OBSERVER_IDLE);
+        } catch (RemoteException e) {
+            // ignored; both services live in system_server
+        }
+
         publishBinderService(Context.ALARM_SERVICE, mService);
     }
 
@@ -1035,6 +1079,15 @@ class AlarmManagerService extends SystemService {
         Alarm a = new Alarm(type, when, whenElapsed, windowLength, maxWhen, interval,
                 operation, directReceiver, listenerTag, workSource, flags, alarmClock,
                 callingUid, callingPackage);
+        try {
+            if (ActivityManagerNative.getDefault().getAppStartMode(callingUid, callingPackage)
+                    == ActivityManager.APP_START_MODE_DISABLED) {
+                Slog.w(TAG, "Not setting alarm from " + callingUid + ":" + a
+                        + " -- package not allowed to start");
+                return;
+            }
+        } catch (RemoteException e) {
+        }
         removeLocked(operation, directReceiver);
         setImplLocked(a, false, doValidate);
     }
@@ -1828,6 +1881,37 @@ class AlarmManagerService extends SystemService {
             if (a.matches(packageName)) {
                 // Don't set didRemove, since this doesn't impact the scheduled alarms.
                 mPendingWhileIdleAlarms.remove(i);
+            }
+        }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(package) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
+            updateNextAlarmClockLocked();
+        }
+    }
+
+    void removeForStoppedLocked(int uid) {
+        boolean didRemove = false;
+        for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
+            Batch b = mAlarmBatches.get(i);
+            didRemove |= b.removeForStopped(uid);
+            if (b.size() == 0) {
+                mAlarmBatches.remove(i);
+            }
+        }
+        for (int i = mPendingWhileIdleAlarms.size() - 1; i >= 0; i--) {
+            final Alarm a = mPendingWhileIdleAlarms.get(i);
+            try {
+                if (a.uid == uid && ActivityManagerNative.getDefault().getAppStartMode(
+                        uid, a.packageName) == ActivityManager.APP_START_MODE_DISABLED) {
+                    // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                    mPendingWhileIdleAlarms.remove(i);
+                }
+            } catch (RemoteException e) {
             }
         }
 
@@ -2673,7 +2757,22 @@ class AlarmManagerService extends SystemService {
             }
         }
     }
-    
+
+    final class UidObserver extends IUidObserver.Stub {
+        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        }
+
+        @Override public void onUidGone(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid) throws RemoteException {
+            removeForStoppedLocked(uid);
+        }
+    };
+
     private final BroadcastStats getStatsLocked(PendingIntent pi) {
         String pkg = pi.getCreatorPackage();
         int uid = pi.getCreatorUid();

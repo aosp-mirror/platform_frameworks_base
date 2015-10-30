@@ -756,7 +756,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case MOVE_TOP_ACTIVITY_TO_PINNED_STACK: {
+        case MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int stackId = data.readInt();
             final Rect r = Rect.CREATOR.createFromParcel(data);
@@ -2029,7 +2029,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IUidObserver observer = IUidObserver.Stub.asInterface(
                     data.readStrongBinder());
-            registerUidObserver(observer);
+            int which = data.readInt();
+            registerUidObserver(observer, which);
             return true;
         }
 
@@ -2698,11 +2699,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        case REMOVE_STACK: {
+        case REMOVE_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int stackId = data.readInt();
             removeStack(stackId);
             reply.writeNoException();
+            return true;
+        }
+        case GET_APP_START_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int uid = data.readInt();
+            final String pkg = data.readString();
+            int res = getAppStartMode(uid, pkg);
+            reply.writeNoException();
+            reply.writeInt(res);
             return true;
         }
         }
@@ -3579,7 +3589,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(stackId);
         r.writeToParcel(data, 0);
-        mRemote.transact(MOVE_TOP_ACTIVITY_TO_PINNED_STACK, data, reply, 0);
+        mRemote.transact(MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         final boolean res = reply.readInt() != 0;
         data.recycle();
@@ -5326,11 +5336,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void registerUidObserver(IUidObserver observer) throws RemoteException {
+    public void registerUidObserver(IUidObserver observer, int which) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        data.writeInt(which);
         mRemote.transact(REGISTER_UID_OBSERVER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -6292,10 +6303,25 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(stackId);
-        mRemote.transact(REMOVE_STACK, data, reply, 0);
+        mRemote.transact(REMOVE_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    @Override
+    public int getAppStartMode(int uid, String packageName) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(uid);
+        data.writeString(packageName);
+        mRemote.transact(GET_APP_START_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res;
     }
 
     private IBinder mRemote;

@@ -23,7 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.IUidObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
@@ -85,6 +87,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     static final int MSG_JOB_EXPIRED = 0;
     static final int MSG_CHECK_JOB = 1;
+    static final int MSG_STOP_JOB = 2;
 
     // Policy constants
     /**
@@ -162,7 +165,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (DEBUG) {
                         Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
                     }
-                    cancelJobsForUid(uidRemoved);
+                    cancelJobsForUid(uidRemoved, true);
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
@@ -177,6 +180,21 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 || mPowerManager.isLightDeviceIdleMode())
                         : false);
             }
+        }
+    };
+
+    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        }
+
+        @Override public void onUidGone(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid) throws RemoteException {
+            cancelJobsForUid(uid, false);
         }
     };
 
@@ -202,6 +220,15 @@ public class JobSchedulerService extends com.android.server.SystemService
     public int schedule(JobInfo job, int uId) {
         JobStatus jobStatus = new JobStatus(job, uId);
         cancelJob(uId, job.getId());
+        try {
+            if (ActivityManagerNative.getDefault().getAppStartMode(uId,
+                    job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
+                Slog.w(TAG, "Not scheduling job " + uId + ":" + job.toString()
+                        + " -- package not allowed to start");
+                return JobScheduler.RESULT_FAILURE;
+            }
+        } catch (RemoteException e) {
+        }
         startTrackingJob(jobStatus);
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
         return JobScheduler.RESULT_SUCCESS;
@@ -237,14 +264,26 @@ public class JobSchedulerService extends com.android.server.SystemService
      * This will remove the job from the master list, and cancel the job if it was staged for
      * execution or being executed.
      * @param uid Uid to check against for removal of a job.
+     * @param forceAll If true, all jobs for the uid will be canceled; if false, only those
+     * whose apps are stopped.
      */
-    public void cancelJobsForUid(int uid) {
+    public void cancelJobsForUid(int uid, boolean forceAll) {
         List<JobStatus> jobsForUid;
         synchronized (mJobs) {
             jobsForUid = mJobs.getJobsByUid(uid);
         }
         for (int i=0; i<jobsForUid.size(); i++) {
             JobStatus toRemove = jobsForUid.get(i);
+            if (!forceAll) {
+                String packageName = toRemove.getServiceComponent().getPackageName();
+                try {
+                    if (ActivityManagerNative.getDefault().getAppStartMode(uid, packageName)
+                            != ActivityManager.APP_START_MODE_DISABLED) {
+                        continue;
+                    }
+                } catch (RemoteException e) {
+                }
+            }
             cancelJobImpl(toRemove);
         }
     }
@@ -384,6 +423,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
             mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
+            try {
+                ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
+                        ActivityManager.UID_OBSERVER_IDLE);
+            } catch (RemoteException e) {
+                // ignored; both services live in system_server
+            }
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mJobs) {
                 // Let's go!
@@ -635,6 +680,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         maybeQueueReadyJobsForExecutionLockedH();
                     }
                     break;
+                case MSG_STOP_JOB:
+                    cancelJobImpl((JobStatus)message.obj);
+                    break;
             }
             maybeRunPendingJobsH();
             // Don't remove JOB_EXPIRED in case one came along while processing the queue.
@@ -686,11 +734,22 @@ public class JobSchedulerService extends com.android.server.SystemService
             int idleCount =  0;
             int backoffCount = 0;
             int connectivityCount = 0;
-            List<JobStatus> runnableJobs = new ArrayList<JobStatus>();
+            List<JobStatus> runnableJobs = null;
             ArraySet<JobStatus> jobs = mJobs.getJobs();
             for (int i=0; i<jobs.size(); i++) {
                 JobStatus job = jobs.valueAt(i);
                 if (isReadyToBeExecutedLocked(job)) {
+                    try {
+                        if (ActivityManagerNative.getDefault().getAppStartMode(job.getUid(),
+                                job.getJob().getService().getPackageName())
+                                == ActivityManager.APP_START_MODE_DISABLED) {
+                            Slog.w(TAG, "Aborting job " + job.getUid() + ":"
+                                    + job.getJob().toString() + " -- package not allowed to start");
+                            mHandler.obtainMessage(MSG_STOP_JOB, job).sendToTarget();
+                            continue;
+                        }
+                    } catch (RemoteException e) {
+                    }
                     if (job.getNumFailures() > 0) {
                         backoffCount++;
                     }
@@ -703,6 +762,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (job.hasChargingConstraint()) {
                         chargingCount++;
                     }
+                    if (runnableJobs == null) {
+                        runnableJobs = new ArrayList<>();
+                    }
                     runnableJobs.add(job);
                 } else if (isReadyToBeCancelledLocked(job)) {
                     stopJobOnServiceContextLocked(job);
@@ -712,7 +774,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     idleCount >= MIN_IDLE_COUNT ||
                     connectivityCount >= MIN_CONNECTIVITY_COUNT ||
                     chargingCount >= MIN_CHARGING_COUNT ||
-                    runnableJobs.size() >= MIN_READY_JOBS_COUNT) {
+                    (runnableJobs != null && runnableJobs.size() >= MIN_READY_JOBS_COUNT)) {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
                 }
@@ -908,7 +970,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             long ident = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.cancelJobsForUid(uid);
+                JobSchedulerService.this.cancelJobsForUid(uid, true);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
