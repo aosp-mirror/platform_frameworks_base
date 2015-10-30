@@ -80,6 +80,7 @@ extern int register_android_opengl_jni_GLES20(JNIEnv* env);
 extern int register_android_opengl_jni_GLES30(JNIEnv* env);
 extern int register_android_opengl_jni_GLES31(JNIEnv* env);
 extern int register_android_opengl_jni_GLES31Ext(JNIEnv* env);
+extern int register_android_opengl_jni_GLES32(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
 extern int register_android_hardware_camera2_CameraMetadata(JNIEnv *env);
@@ -1280,6 +1281,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_opengl_jni_GLES30),
     REG_JNI(register_android_opengl_jni_GLES31),
     REG_JNI(register_android_opengl_jni_GLES31Ext),
+    REG_JNI(register_android_opengl_jni_GLES32),
 
     REG_JNI(register_android_graphics_Bitmap),
     REG_JNI(register_android_graphics_BitmapFactory),

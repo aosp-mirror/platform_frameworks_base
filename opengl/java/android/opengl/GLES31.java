@@ -204,7 +204,8 @@ public class GLES31 extends GLES30 {
         _nativeClassInit();
     }
 
-    private GLES31() {}
+    /** @hide */
+    GLES31() {}
     // C function void glDispatchCompute ( GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z )
 
     public static native void glDispatchCompute(
