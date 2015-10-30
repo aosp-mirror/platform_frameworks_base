@@ -7675,6 +7675,12 @@ i
         <attr name="label" />
         <!-- The key character map file resource. -->
         <attr name="keyboardLayout" format="reference" />
+        <!-- The locales the given keyboard layout corresponds to. -->
+        <attr name="locale" format="string" />
+        <!-- The vendor ID of the hardware the given layout corresponds to. @hide -->
+        <attr name="vendorId" format="integer" />
+        <!-- The product ID of the hardware the given layout corresponds to. @hide -->
+        <attr name="productId" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="MediaRouteButton">
