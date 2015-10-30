@@ -1077,13 +1077,15 @@ public class UserManager {
     /**
      * Checks whether it's possible to add more managed profiles. Caller must hold the MANAGE_USERS
      * permission.
+     * if allowedToRemoveOne is true and if the user already has a managed profile, then return if
+     * we could add a new managed profile to this user after removing the existing one.
      *
      * @return true if more managed profiles can be added, false if limit has been reached.
      * @hide
      */
-    public boolean canAddMoreManagedProfiles(int userId) {
+    public boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne) {
         try {
-            return mService.canAddMoreManagedProfiles(userId);
+            return mService.canAddMoreManagedProfiles(userId, allowedToRemoveOne);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not check if we can add more managed profiles", re);
             return false;

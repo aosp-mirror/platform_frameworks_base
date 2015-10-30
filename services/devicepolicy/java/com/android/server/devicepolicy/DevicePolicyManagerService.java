@@ -1220,6 +1220,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Settings.Secure.putInt(mContext.getContentResolver(), name, value);
         }
 
+        int settingsGlobalGetInt(String name, int def) {
+            return Settings.Global.getInt(mContext.getContentResolver(), name, def);
+        }
+
         void settingsGlobalPutInt(String name, int value) {
             Settings.Global.putInt(mContext.getContentResolver(), name, value);
         }
@@ -6621,5 +6625,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (RemoteException re) {
             throw new RuntimeException("Package manager has died", re);
         }
+    }
+
+    @Override
+    public boolean isProvisioningAllowed(String action) {
+        if (mOwners.hasDeviceOwner()) {
+            return false;
+        }
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        if (DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE.equals(action)) {
+            try {
+                if (!mIPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS)) {
+                    return false;
+                }
+            } catch (RemoteException e) {
+                return false;
+            }
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
+                if (!mUserManager.canAddMoreManagedProfiles(callingUserId, true)) {
+                    return false;
+                }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
+            }
+            return true;
+        } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE.equals(action)) {
+            if (getProfileOwner(callingUserId) != null) {
+                return false;
+            }
+            if (mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
+                return false;
+            }
+            if (callingUserId != UserHandle.USER_SYSTEM) {
+                // Device owner provisioning can only be initiated from system user.
+                return false;
+            }
+            return true;
+        }
+        throw new IllegalArgumentException("Unknown provisioning action " + action);
     }
 }
