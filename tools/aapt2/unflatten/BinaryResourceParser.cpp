@@ -116,7 +116,7 @@ bool BinaryResourceParser::getSymbol(const void* data, ResourceNameRef* outSymbo
         if (util::deviceToHost32(mSymbolEntries[i].offset) == offset) {
             // This offset is a symbol!
             const StringPiece16 str = util::getString(
-                    mSymbolPool, util::deviceToHost32(mSymbolEntries[i].stringIndex));
+                    mSymbolPool, util::deviceToHost32(mSymbolEntries[i].name.index));
 
             StringPiece16 typeStr;
             ResourceUtils::extractResourceName(str, &outSymbol->package, &typeStr,
@@ -425,8 +425,14 @@ bool BinaryResourceParser::parsePublic(const ResourceTablePackage* package,
         Symbol symbol;
         if (mSourcePool.getError() == NO_ERROR) {
             symbol.source.path = util::utf16ToUtf8(util::getString(
-                    mSourcePool, util::deviceToHost32(entry->source.index)));
-            symbol.source.line = util::deviceToHost32(entry->sourceLine);
+                    mSourcePool, util::deviceToHost32(entry->source.path.index)));
+            symbol.source.line = util::deviceToHost32(entry->source.line);
+        }
+
+        StringPiece16 comment = util::getString(mSourcePool,
+                                                util::deviceToHost32(entry->source.comment.index));
+        if (!comment.empty()) {
+            symbol.comment = comment.toString();
         }
 
         switch (util::deviceToHost16(entry->state)) {
@@ -560,12 +566,18 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
         Source source = mSource;
         if (sourceBlock) {
             size_t len;
-            const char* str = mSourcePool.string8At(util::deviceToHost32(sourceBlock->pathIndex),
+            const char* str = mSourcePool.string8At(util::deviceToHost32(sourceBlock->path.index),
                                                     &len);
             if (str) {
                 source.path.assign(str, len);
             }
             source.line = util::deviceToHost32(sourceBlock->line);
+        }
+
+        StringPiece16 comment = util::getString(mSourcePool,
+                                                util::deviceToHost32(sourceBlock->comment.index));
+        if (!comment.empty()) {
+            resourceValue->setComment(comment);
         }
 
         resourceValue->setSource(source);

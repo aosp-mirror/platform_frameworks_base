@@ -198,4 +198,35 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
     EXPECT_NE(std::string::npos, output.find("int foo_com_lib_bar ="));
 }
 
+TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:id/foo", ResourceId(0x01010000))
+            .build();
+    test::getValue<Id>(table.get(), u"@android:id/foo")
+            ->setComment(std::u16string(u"This is a comment\n@deprecated"));
+
+    JavaClassGenerator generator(table.get(), {});
+
+    std::stringstream out;
+    ASSERT_TRUE(generator.generate(u"android", &out));
+    std::string actual = out.str();
+
+    EXPECT_NE(std::string::npos, actual.find(
+    R"EOF(/**
+     * This is a comment
+     * @deprecated
+     */
+    @Deprecated
+    public static final int foo = 0x01010000;)EOF"));
+}
+
+TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {
+
+}
+
+TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
+
+}
+
 } // namespace aapt

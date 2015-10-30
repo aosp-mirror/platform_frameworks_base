@@ -21,15 +21,9 @@
 
 namespace aapt {
 
-void AnnotationProcessor::appendCommentLine(const StringPiece16& line) {
+void AnnotationProcessor::appendCommentLine(const std::string& comment) {
     static const std::string sDeprecated = "@deprecated";
     static const std::string sSystemApi = "@SystemApi";
-
-    if (line.empty()) {
-        return;
-    }
-
-    std::string comment = util::utf16ToUtf8(line);
 
     if (comment.find(sDeprecated) != std::string::npos && !mDeprecated) {
         mDeprecated = true;
@@ -63,14 +57,28 @@ void AnnotationProcessor::appendCommentLine(const StringPiece16& line) {
 void AnnotationProcessor::appendComment(const StringPiece16& comment) {
     // We need to process line by line to clean-up whitespace and append prefixes.
     for (StringPiece16 line : util::tokenize(comment, u'\n')) {
-        appendCommentLine(util::trimWhitespace(line));
+        line = util::trimWhitespace(line);
+        if (!line.empty()) {
+            appendCommentLine(util::utf16ToUtf8(line));
+        }
+    }
+}
+
+void AnnotationProcessor::appendComment(const StringPiece& comment) {
+    for (StringPiece line : util::tokenize(comment, '\n')) {
+        line = util::trimWhitespace(line);
+        if (!line.empty()) {
+            appendCommentLine(line.toString());
+        }
     }
 }
 
 std::string AnnotationProcessor::buildComment() {
-    mComment += "\n";
-    mComment += mPrefix;
-    mComment += " */";
+    if (!mComment.empty()) {
+        mComment += "\n";
+        mComment += mPrefix;
+        mComment += " */";
+    }
     return std::move(mComment);
 }
 
