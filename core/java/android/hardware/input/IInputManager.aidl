@@ -24,6 +24,7 @@ import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.PointerIcon;
 
 /** @hide */
 interface IInputManager {
@@ -71,4 +72,5 @@ interface IInputManager {
     void cancelVibrate(int deviceId, IBinder token);
 
     void setPointerIconShape(int shapeId);
+    void setCustomPointerIcon(in PointerIcon icon);
 }

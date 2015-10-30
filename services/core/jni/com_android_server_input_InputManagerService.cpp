@@ -206,6 +206,7 @@ public:
     void reloadCalibration();
     void setPointerIconShape(int32_t iconId);
     void reloadPointerIcons();
+    void setCustomPointerIcon(const SpriteIcon& icon);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -248,6 +249,7 @@ public:
     virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
             std::map<int32_t, PointerAnimation>* outAnimationResources);
     virtual int32_t getDefaultPointerIconId();
+    virtual int32_t getCustomPointerIconId();
 
 private:
     sp<InputManager> mInputManager;
@@ -790,6 +792,14 @@ void NativeInputManager::reloadPointerIcons() {
     }
 }
 
+void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
+    AutoMutex _l(mLock);
+    sp<PointerController> controller = mLocked.pointerController.promote();
+    if (controller != NULL) {
+        controller->setCustomPointerIcon(icon);
+    }
+}
+
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
         JNIEnv *env, jfloatArray matrixArr) {
     ScopedFloatArrayRO matrix(env, matrixArr);
@@ -1088,6 +1098,10 @@ void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIc
 
 int32_t NativeInputManager::getDefaultPointerIconId() {
     return POINTER_ICON_STYLE_ARROW;
+}
+
+int32_t NativeInputManager::getCustomPointerIconId() {
+    return POINTER_ICON_STYLE_CUSTOM;
 }
 
 // ----------------------------------------------------------------------------
@@ -1437,6 +1451,20 @@ static void nativeReloadPointerIcons(JNIEnv* /* env */, jclass /* clazz */, jlon
     im->reloadPointerIcons();
 }
 
+static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
+                                       jlong ptr, jobject iconObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    PointerIcon pointerIcon;
+    android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
+
+    SpriteIcon spriteIcon;
+    pointerIcon.bitmap.copyTo(&spriteIcon.bitmap, kN32_SkColorType);
+    spriteIcon.hotSpotX = pointerIcon.hotSpotX;
+    spriteIcon.hotSpotY = pointerIcon.hotSpotY;
+    im->setCustomPointerIcon(spriteIcon);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -1499,6 +1527,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetPointerIconShape },
     { "nativeReloadPointerIcons", "(J)V",
             (void*) nativeReloadPointerIcons },
+    { "nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",
+            (void*) nativeSetCustomPointerIcon },
 };
 
 #define FIND_CLASS(var, className) \

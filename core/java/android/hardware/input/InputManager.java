@@ -16,6 +16,7 @@
 
 package android.hardware.input;
 
+import android.view.PointerIcon;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 
@@ -814,6 +815,15 @@ public final class InputManager {
     public void setPointerIconShape(int iconId) {
         try {
             mIm.setPointerIconShape(iconId);
+        } catch (RemoteException ex) {
+            // Do nothing.
+        }
+    }
+
+    /** @hide */
+    public void setCustomPointerIcon(PointerIcon icon) {
+        try {
+            mIm.setCustomPointerIcon(icon);
         } catch (RemoteException ex) {
             // Do nothing.
         }

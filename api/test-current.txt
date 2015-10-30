@@ -40339,6 +40339,38 @@ package android.view {
     field public static final int ORIENTATION_UNKNOWN = -1; // 0xffffffff
   }
 
+  public final class PointerIcon implements android.os.Parcelable {
+    method public static android.view.PointerIcon createCustomIcon(android.graphics.Bitmap, float, float);
+    method public int describeContents();
+    method public static android.view.PointerIcon getSystemIcon(android.content.Context, int);
+    method public static android.view.PointerIcon loadCustomIcon(android.content.res.Resources, int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.PointerIcon> CREATOR;
+    field public static final int STYLE_ALIAS = 1010; // 0x3f2
+    field public static final int STYLE_ALL_SCROLL = 1013; // 0x3f5
+    field public static final int STYLE_ARROW = 1000; // 0x3e8
+    field public static final int STYLE_CELL = 1006; // 0x3ee
+    field public static final int STYLE_CONTEXT_MENU = 1001; // 0x3e9
+    field public static final int STYLE_COPY = 1011; // 0x3f3
+    field public static final int STYLE_CROSSHAIR = 1007; // 0x3ef
+    field public static final int STYLE_DEFAULT = 1000; // 0x3e8
+    field public static final int STYLE_GRAB = 1020; // 0x3fc
+    field public static final int STYLE_GRABBING = 1021; // 0x3fd
+    field public static final int STYLE_HAND = 1002; // 0x3ea
+    field public static final int STYLE_HELP = 1003; // 0x3eb
+    field public static final int STYLE_HORIZONTAL_DOUBLE_ARROW = 1014; // 0x3f6
+    field public static final int STYLE_NO_DROP = 1012; // 0x3f4
+    field public static final int STYLE_NULL = 0; // 0x0
+    field public static final int STYLE_TEXT = 1008; // 0x3f0
+    field public static final int STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW = 1017; // 0x3f9
+    field public static final int STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW = 1016; // 0x3f8
+    field public static final int STYLE_VERTICAL_DOUBLE_ARROW = 1015; // 0x3f7
+    field public static final int STYLE_VERTICAL_TEXT = 1009; // 0x3f1
+    field public static final int STYLE_WAIT = 1004; // 0x3ec
+    field public static final int STYLE_ZOOM_IN = 1018; // 0x3fa
+    field public static final int STYLE_ZOOM_OUT = 1019; // 0x3fb
+  }
+
   public class ScaleGestureDetector {
     ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener);
     ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener, android.os.Handler);
@@ -40698,6 +40730,7 @@ package android.view {
     method public android.view.ViewParent getParentForAccessibility();
     method public float getPivotX();
     method public float getPivotY();
+    method public android.view.PointerIcon getPointerIcon(android.view.MotionEvent, float, float);
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
@@ -40980,6 +41013,7 @@ package android.view {
     method public void setPaddingRelative(int, int, int, int);
     method public void setPivotX(float);
     method public void setPivotY(float);
+    method public void setPointerIcon(android.view.PointerIcon);
     method public void setPressed(boolean);
     method public final void setRight(int);
     method public void setRotation(float);

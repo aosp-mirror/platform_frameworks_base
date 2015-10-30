@@ -67,6 +67,7 @@ public:
     virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
             std::map<int32_t, PointerAnimation>* outAnimationResources) = 0;
     virtual int32_t getDefaultPointerIconId() = 0;
+    virtual int32_t getCustomPointerIconId() = 0;
 };
 
 
@@ -105,6 +106,7 @@ public:
     virtual void clearSpots();
 
     void updatePointerShape(int32_t iconId);
+    void setCustomPointerIcon(const SpriteIcon& icon);
     void setDisplayViewport(int32_t width, int32_t height, int32_t orientation);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void reloadPointerResources();

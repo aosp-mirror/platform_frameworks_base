@@ -439,6 +439,17 @@ void PointerController::updatePointerShape(int32_t iconId) {
     }
 }
 
+void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
+    AutoMutex _l(mLock);
+
+    const int32_t iconId = mPolicy->getCustomPointerIconId();
+    mLocked.additionalMouseResources[iconId] = icon;
+    mLocked.requestedPointerShape = iconId;
+    mLocked.presentationChanged = true;
+
+    updatePointerLocked();
+}
+
 void PointerController::handleMessage(const Message& message) {
     switch (message.what) {
     case MSG_INACTIVITY_TIMEOUT:

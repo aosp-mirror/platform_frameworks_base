@@ -332,6 +332,7 @@ public final class ViewRootImpl implements ViewParent,
     private int mFpsNumFrames;
 
     private int mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+    private PointerIcon mCustomPointerIcon = null;
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -4210,16 +4211,23 @@ public final class ViewRootImpl implements ViewParent,
                 final float y = event.getY();
                 if (event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT
                         && x >= 0 && x < mView.getWidth() && y >= 0 && y < mView.getHeight()) {
-                    int pointerShape = mView.getPointerShape(event, x, y);
-                    if (pointerShape == PointerIcon.STYLE_NOT_SPECIFIED) {
-                        pointerShape = PointerIcon.STYLE_DEFAULT;
-                    }
+                    PointerIcon pointerIcon = mView.getPointerIcon(event, x, y);
+                    int pointerShape = (pointerIcon != null) ?
+                            pointerIcon.getStyle() : PointerIcon.STYLE_DEFAULT;
 
-                    if (mPointerIconShape != pointerShape) {
-                        mPointerIconShape = pointerShape;
-                        final InputDevice inputDevice = event.getDevice();
-                        if (inputDevice != null) {
-                            inputDevice.setPointerShape(pointerShape);
+                    final InputDevice inputDevice = event.getDevice();
+                    if (inputDevice != null) {
+                        if (mPointerIconShape != pointerShape) {
+                            mPointerIconShape = pointerShape;
+                            if (mPointerIconShape != PointerIcon.STYLE_CUSTOM) {
+                                mCustomPointerIcon = null;
+                                inputDevice.setPointerShape(pointerShape);
+                            }
+                        }
+                        if (mPointerIconShape == PointerIcon.STYLE_CUSTOM &&
+                                !pointerIcon.equals(mCustomPointerIcon)) {
+                            mCustomPointerIcon = pointerIcon;
+                            inputDevice.setCustomPointerIcon(mCustomPointerIcon);
                         }
                     }
                 } else if (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {

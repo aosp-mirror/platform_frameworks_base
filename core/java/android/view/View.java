@@ -2628,7 +2628,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG3_POINTER_ICON_LSHIFT = 15;
 
     /**
-     * Value indicating {@link PointerIcon.STYLE_NOT_SPECIFIED}.
+     * Value indicating no specific pointer icons.
      */
     private static final int PFLAG3_POINTER_ICON_NOT_SPECIFIED = 0 << PFLAG3_POINTER_ICON_LSHIFT;
 
@@ -2638,14 +2638,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG3_POINTER_ICON_NULL = 1 << PFLAG3_POINTER_ICON_LSHIFT;
 
     /**
-     * Value incicating {@link PointerIcon.STYLE_CUSTOM}.
-     */
-    private static final int PFLAG3_POINTER_ICON_CUSTOM = 2 << PFLAG3_POINTER_ICON_LSHIFT;
-
-    /**
      * The base value for other pointer icon shapes.
      */
-    private static final int PFLAG3_POINTER_ICON_VALUE_START = 3 << PFLAG3_POINTER_ICON_LSHIFT;
+    private static final int PFLAG3_POINTER_ICON_VALUE_START = 2 << PFLAG3_POINTER_ICON_LSHIFT;
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -3927,6 +3922,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private HandlerActionQueue mRunQueue;
 
     /**
+     * The pointer icon when the mouse hovers on this view. The default is null.
+     */
+    private PointerIcon mPointerIcon;
+
+    /**
      * @hide
      */
     String mStartActivityRequestWho;
@@ -4490,7 +4490,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_pointerShape:
                     final int pointerShape = a.getInt(attr, PointerIcon.STYLE_NOT_SPECIFIED);
                     if (pointerShape != PointerIcon.STYLE_NOT_SPECIFIED) {
-                        setPointerShape(pointerShape);
+                        setPointerIcon(PointerIcon.getSystemIcon(context, pointerShape));
                     }
                     break;
             }
@@ -21191,42 +21191,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /** @hide */
-    public int getPointerShape(MotionEvent event, float x, float y) {
-        final int value = (mPrivateFlags3 & PFLAG3_POINTER_ICON_MASK);
-        switch (value) {
-            case PFLAG3_POINTER_ICON_NOT_SPECIFIED:
-                return PointerIcon.STYLE_NOT_SPECIFIED;
-            case PFLAG3_POINTER_ICON_NULL:
-                return PointerIcon.STYLE_NULL;
-            case PFLAG3_POINTER_ICON_CUSTOM:
-                return PointerIcon.STYLE_CUSTOM;
-            default:
-                return ((value - PFLAG3_POINTER_ICON_VALUE_START) >> PFLAG3_POINTER_ICON_LSHIFT)
-                        + PointerIcon.STYLE_ARROW;
-        }
+    /**
+     * Returns the pointer icon for the motion event, or null if it doesn't specify the icon.
+     * The default implementation does not care the location or event types, but some subclasses
+     * may use it (such as WebViews).
+     * @param event The MotionEvent from a mouse
+     * @param x The x position of the event, local to the view
+     * @param y The y position of the event, local to the view
+     * @see PointerIcon
+     */
+    public PointerIcon getPointerIcon(MotionEvent event, float x, float y) {
+        return mPointerIcon;
     }
 
-    /** @hide */
-    public void setPointerShape(int pointerShape) {
-        int newValue;
-        if (pointerShape == PointerIcon.STYLE_NOT_SPECIFIED) {
-            newValue = PFLAG3_POINTER_ICON_NOT_SPECIFIED;
-        } else if (pointerShape == PointerIcon.STYLE_NULL) {
-            newValue = PFLAG3_POINTER_ICON_NULL;
-        } else if (pointerShape == PointerIcon.STYLE_CUSTOM) {
-            newValue = PFLAG3_POINTER_ICON_CUSTOM;
-        } else if (pointerShape >= PointerIcon.STYLE_ARROW
-                && pointerShape <= PointerIcon.STYLE_GRABBING) {
-            newValue = ((pointerShape - PointerIcon.STYLE_ARROW) << PFLAG3_POINTER_ICON_LSHIFT)
-                    + PFLAG3_POINTER_ICON_VALUE_START;
-        } else {
-            Log.w(VIEW_LOG_TAG, "Invalid pointer shape " + pointerShape + " is specified.");
-            return;
-        }
-        if (newValue != (mPrivateFlags3 & PFLAG3_POINTER_ICON_MASK)) {
-            mPrivateFlags3 = (mPrivateFlags3 & ~PFLAG3_POINTER_ICON_MASK) | newValue;
-        }
+    /**
+     * Set the pointer icon for the current view.
+     * @param pointerIcon A PointerIcon instance which will be shown when the mouse hovers.
+     */
+    public void setPointerIcon(PointerIcon pointerIcon) {
+        mPointerIcon = pointerIcon;
     }
 
     //
