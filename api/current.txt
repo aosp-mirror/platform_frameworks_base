@@ -5881,6 +5881,7 @@ package android.app.assist {
     method public java.lang.String getStructuredData();
     method public android.net.Uri getWebUri();
     method public boolean isAppProvidedIntent();
+    method public boolean isAppProvidedWebUri();
     method public void setClipData(android.content.ClipData);
     method public void setIntent(android.content.Intent);
     method public void setStructuredData(java.lang.String);
