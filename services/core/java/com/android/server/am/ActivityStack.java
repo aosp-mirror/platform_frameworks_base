@@ -4153,9 +4153,7 @@ final class ActivityStack {
         if ((taskChanges & ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE) != 0) {
             final int oldSmallest = oldTaskOverride.smallestScreenWidthDp;
             final int newSmallest = taskConfig.smallestScreenWidthDp;
-            final boolean crosses = record.crossesHorizontalSizeThreshold(oldSmallest, newSmallest)
-                    || record.crossesVerticalSizeThreshold(oldSmallest, newSmallest);
-            if (!crosses) {
+            if (!record.crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
                 taskChanges &= ~ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
             }
         }

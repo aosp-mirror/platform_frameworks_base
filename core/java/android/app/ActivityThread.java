@@ -88,6 +88,7 @@ import android.util.LogPrinter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
 import android.view.Display;
 import android.view.HardwareRenderer;
@@ -2638,32 +2639,24 @@ public final class ActivityThread {
         if (configurations == null) {
             return;
         }
-        IntArray horizontal = new IntArray();
-        IntArray vertical = new IntArray();
+        SparseIntArray horizontal = new SparseIntArray();
+        SparseIntArray vertical = new SparseIntArray();
+        SparseIntArray smallest = new SparseIntArray();
         for (int i = configurations.length - 1; i >= 0; i--) {
             Configuration config = configurations[i];
             if (config.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-                vertical.add(config.screenHeightDp);
+                vertical.put(config.screenHeightDp, 0);
             }
             if (config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
-                horizontal.add(config.screenWidthDp);
+                horizontal.put(config.screenWidthDp, 0);
             }
             if (config.smallestScreenWidthDp != Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-                vertical.add(config.smallestScreenWidthDp);
-                horizontal.add(config.smallestScreenWidthDp);
+                smallest.put(config.smallestScreenWidthDp, 0);
             }
         }
-        int[] horizontalArray = null;
-        if (horizontal.size() > 0) {
-            horizontalArray = horizontal.toArray();
-        }
-        int[] verticalArray = null;
-        if (vertical.size() > 0) {
-            verticalArray = vertical.toArray();
-        }
         try {
-            ActivityManagerNative.getDefault().reportSizeConfigurations(r.token, horizontalArray,
-                    verticalArray);
+            ActivityManagerNative.getDefault().reportSizeConfigurations(r.token,
+                    horizontal.copyKeys(), vertical.copyKeys(), smallest.copyKeys());
         } catch (RemoteException ex) {
         }
 

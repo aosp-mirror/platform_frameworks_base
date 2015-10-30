@@ -123,7 +123,8 @@ public interface IActivityManager extends IInterface {
     public void activitySlept(IBinder token) throws RemoteException;
     public void activityDestroyed(IBinder token) throws RemoteException;
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations) throws RemoteException;
+            int[] verticalSizeConfigurations, int[] smallestWidthConfigurations)
+            throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
     public List<IAppTask> getAppTasks(String callingPackage) throws RemoteException;

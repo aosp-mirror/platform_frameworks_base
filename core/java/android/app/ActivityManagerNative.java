@@ -2681,19 +2681,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case REPORT_SIZE_CONFIGURATIONS: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            int horizontalSize = data.readInt();
-            int[] horizontal = null;
-            if (horizontalSize > 0) {
-                horizontal = new int[horizontalSize];
-                data.readIntArray(horizontal);
-            }
-            int[] vertical = null;
-            int verticalSize = data.readInt();
-            if (verticalSize > 0) {
-                vertical = new int[verticalSize];
-                data.readIntArray(vertical);
-            }
-            reportSizeConfigurations(token, horizontal, vertical);
+            int[] horizontal = readIntArray(data);
+            int[] vertical = readIntArray(data);
+            int[] smallest = readIntArray(data);
+            reportSizeConfigurations(token, horizontal, vertical, smallest);
             return true;
         }
         case SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION: {
@@ -2713,6 +2704,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         }
 
         return super.onTransact(code, data, reply, flags);
+    }
+
+    private int[] readIntArray(Parcel data) {
+        int[] smallest = null;
+        int smallestSize = data.readInt();
+        if (smallestSize > 0) {
+            smallest = new int[smallestSize];
+            data.readIntArray(smallest);
+        }
+        return smallest;
     }
 
     public IBinder asBinder() {
@@ -6241,27 +6242,28 @@ class ActivityManagerProxy implements IActivityManager
 
     @Override
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations) throws RemoteException {
+            int[] verticalSizeConfigurations, int[] smallestSizeConfigurations)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        if (horizontalSizeConfiguration == null) {
-            data.writeInt(0);
-        } else {
-            data.writeInt(horizontalSizeConfiguration.length);
-            data.writeIntArray(horizontalSizeConfiguration);
-        }
-        if (verticalSizeConfigurations == null) {
-            data.writeInt(0);
-        } else {
-            data.writeInt(verticalSizeConfigurations.length);
-            data.writeIntArray(verticalSizeConfigurations);
-        }
+        writeIntArray(horizontalSizeConfiguration, data);
+        writeIntArray(verticalSizeConfigurations, data);
+        writeIntArray(smallestSizeConfigurations, data);
         mRemote.transact(REPORT_SIZE_CONFIGURATIONS, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    private static void writeIntArray(int[] array, Parcel data) {
+        if (array == null) {
+            data.writeInt(0);
+        } else {
+            data.writeInt(array.length);
+            data.writeIntArray(array);
+        }
     }
 
     @Override

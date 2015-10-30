@@ -190,6 +190,7 @@ final class ActivityRecord {
     // and drawable-sw400dp will be added to both as 400.
     private int[] mVerticalSizeConfigurations;
     private int[] mHorizontalSizeConfigurations;
+    private int[] mSmallestSizeConfigurations;
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -342,6 +343,10 @@ final class ActivityRecord {
         return crossesSizeThreshold(mVerticalSizeConfigurations, firstDp, secondDp);
     }
 
+    public boolean crossesSmallestSizeThreshold(int firstDp, int secondDp) {
+        return crossesSizeThreshold(mSmallestSizeConfigurations, firstDp, secondDp);
+    }
+
     /**
      * The purpose of this method is to decide whether the activity needs to be relaunched upon
      * changing its size. In most cases the activities don't need to be relaunched, if the resize
@@ -372,9 +377,10 @@ final class ActivityRecord {
     }
 
     public void setSizeConfigurations(int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations) {
+            int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
         mHorizontalSizeConfigurations = horizontalSizeConfiguration;
         mVerticalSizeConfigurations = verticalSizeConfigurations;
+        mSmallestSizeConfigurations = smallestSizeConfigurations;
     }
 
     static class Token extends IApplicationToken.Stub {
