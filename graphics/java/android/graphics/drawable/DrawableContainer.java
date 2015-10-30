@@ -701,13 +701,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
-
-            final Resources sourceRes = res != null ? res : (orig != null ? orig.mSourceRes : null);
-            mSourceRes = sourceRes;
-
-            final int densityDpi = sourceRes == null ? 0 : sourceRes.getDisplayMetrics().densityDpi;
-            final int sourceDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-            mDensity = sourceDensity;
+            mSourceRes = res != null ? res : (orig != null ? orig.mSourceRes : null);
+            mDensity = Drawable.resolveDensity(res, orig != null ? orig.mDensity : 0);
 
             if (orig != null) {
                 mChangingConfigurations = orig.mChangingConfigurations;
@@ -731,7 +726,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mHasTintList = orig.mHasTintList;
                 mHasTintMode = orig.mHasTintMode;
 
-                if (orig.mDensity == sourceDensity) {
+                if (orig.mDensity == mDensity) {
                     if (orig.mCheckedPadding) {
                         mConstantPadding = new Rect(orig.mConstantPadding);
                         mCheckedPadding = true;
@@ -903,13 +898,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
             // The density may have changed since the last update (if any). Any
             // dimension-type attributes will need their default values scaled.
-            final int densityDpi = res.getDisplayMetrics().densityDpi;
-            final int newSourceDensity = densityDpi == 0 ?
-                    DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-            final int oldSourceDensity = mDensity;
-            mDensity = newSourceDensity;
+            final int targetDensity = Drawable.resolveDensity(res, mDensity);
+            final int sourceDensity = mDensity;
+            mDensity = targetDensity;
 
-            if (oldSourceDensity != newSourceDensity) {
+            if (sourceDensity != targetDensity) {
                 mCheckedConstantSize = false;
                 mCheckedPadding = false;
             }

@@ -17,11 +17,13 @@
 package android.graphics.drawable;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -40,6 +42,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -1136,10 +1139,14 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
+        super.inflate(r, parser, attrs, theme);
+
+        mGradientState.setDensity(Drawable.resolveDensity(r, 0));
+
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.GradientDrawable);
-        super.inflateWithAttributes(r, parser, a, R.styleable.GradientDrawable_visible);
         updateStateFromTypedArray(a);
         a.recycle();
 
@@ -1149,13 +1156,15 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
-    public void applyTheme(Theme t) {
+    public void applyTheme(@NonNull Theme t) {
         super.applyTheme(t);
 
         final GradientState state = mGradientState;
         if (state == null) {
             return;
         }
+
+        state.setDensity(Drawable.resolveDensity(t.getResources(), 0));
 
         if (state.mThemeAttrs != null) {
             final TypedArray a = t.resolveAttributes(
@@ -1668,7 +1677,7 @@ public class GradientDrawable extends Drawable {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mGradientState = new GradientState(mGradientState);
+            mGradientState = new GradientState(mGradientState, null);
             updateLocalState(null);
             mMutated = true;
         }
@@ -1723,6 +1732,8 @@ public class GradientDrawable extends Drawable {
         ColorStateList mTint = null;
         PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
 
+        int mDensity = DisplayMetrics.DENSITY_DEFAULT;
+
         int[] mThemeAttrs;
         int[] mAttrSize;
         int[] mAttrGradient;
@@ -1736,55 +1747,145 @@ public class GradientDrawable extends Drawable {
             setGradientColors(gradientColors);
         }
 
-        public GradientState(GradientState state) {
-            mChangingConfigurations = state.mChangingConfigurations;
-            mShape = state.mShape;
-            mGradient = state.mGradient;
-            mAngle = state.mAngle;
-            mOrientation = state.mOrientation;
-            mSolidColors = state.mSolidColors;
-            if (state.mGradientColors != null) {
-                mGradientColors = state.mGradientColors.clone();
+        public GradientState(@NonNull GradientState orig, @Nullable Resources res) {
+            mChangingConfigurations = orig.mChangingConfigurations;
+            mShape = orig.mShape;
+            mGradient = orig.mGradient;
+            mAngle = orig.mAngle;
+            mOrientation = orig.mOrientation;
+            mSolidColors = orig.mSolidColors;
+            if (orig.mGradientColors != null) {
+                mGradientColors = orig.mGradientColors.clone();
             }
-            if (state.mPositions != null) {
-                mPositions = state.mPositions.clone();
+            if (orig.mPositions != null) {
+                mPositions = orig.mPositions.clone();
             }
-            mStrokeColors = state.mStrokeColors;
-            mStrokeWidth = state.mStrokeWidth;
-            mStrokeDashWidth = state.mStrokeDashWidth;
-            mStrokeDashGap = state.mStrokeDashGap;
-            mRadius = state.mRadius;
-            if (state.mRadiusArray != null) {
-                mRadiusArray = state.mRadiusArray.clone();
+            mStrokeColors = orig.mStrokeColors;
+            mStrokeWidth = orig.mStrokeWidth;
+            mStrokeDashWidth = orig.mStrokeDashWidth;
+            mStrokeDashGap = orig.mStrokeDashGap;
+            mRadius = orig.mRadius;
+            if (orig.mRadiusArray != null) {
+                mRadiusArray = orig.mRadiusArray.clone();
             }
-            if (state.mPadding != null) {
-                mPadding = new Rect(state.mPadding);
+            if (orig.mPadding != null) {
+                mPadding = new Rect(orig.mPadding);
             }
-            mWidth = state.mWidth;
-            mHeight = state.mHeight;
-            mInnerRadiusRatio = state.mInnerRadiusRatio;
-            mThicknessRatio = state.mThicknessRatio;
-            mInnerRadius = state.mInnerRadius;
-            mThickness = state.mThickness;
-            mDither = state.mDither;
-            mOpticalInsets = state.mOpticalInsets;
-            mCenterX = state.mCenterX;
-            mCenterY = state.mCenterY;
-            mGradientRadius = state.mGradientRadius;
-            mGradientRadiusType = state.mGradientRadiusType;
-            mUseLevel = state.mUseLevel;
-            mUseLevelForShape = state.mUseLevelForShape;
-            mOpaqueOverBounds = state.mOpaqueOverBounds;
-            mOpaqueOverShape = state.mOpaqueOverShape;
-            mTint = state.mTint;
-            mTintMode = state.mTintMode;
-            mThemeAttrs = state.mThemeAttrs;
-            mAttrSize = state.mAttrSize;
-            mAttrGradient = state.mAttrGradient;
-            mAttrSolid = state.mAttrSolid;
-            mAttrStroke = state.mAttrStroke;
-            mAttrCorners = state.mAttrCorners;
-            mAttrPadding = state.mAttrPadding;
+            mWidth = orig.mWidth;
+            mHeight = orig.mHeight;
+            mInnerRadiusRatio = orig.mInnerRadiusRatio;
+            mThicknessRatio = orig.mThicknessRatio;
+            mInnerRadius = orig.mInnerRadius;
+            mThickness = orig.mThickness;
+            mDither = orig.mDither;
+            mOpticalInsets = orig.mOpticalInsets;
+            mCenterX = orig.mCenterX;
+            mCenterY = orig.mCenterY;
+            mGradientRadius = orig.mGradientRadius;
+            mGradientRadiusType = orig.mGradientRadiusType;
+            mUseLevel = orig.mUseLevel;
+            mUseLevelForShape = orig.mUseLevelForShape;
+            mOpaqueOverBounds = orig.mOpaqueOverBounds;
+            mOpaqueOverShape = orig.mOpaqueOverShape;
+            mTint = orig.mTint;
+            mTintMode = orig.mTintMode;
+            mThemeAttrs = orig.mThemeAttrs;
+            mAttrSize = orig.mAttrSize;
+            mAttrGradient = orig.mAttrGradient;
+            mAttrSolid = orig.mAttrSolid;
+            mAttrStroke = orig.mAttrStroke;
+            mAttrCorners = orig.mAttrCorners;
+            mAttrPadding = orig.mAttrPadding;
+
+            mDensity = Drawable.resolveDensity(res, orig.mDensity);
+            if (orig.mDensity != mDensity) {
+                applyDensityScaling(orig.mDensity, mDensity);
+            }
+        }
+
+        /**
+         * Sets the constant state density.
+         * <p>
+         * If the density has been previously set, dispatches the change to
+         * subclasses so that density-dependent properties may be scaled as
+         * necessary.
+         *
+         * @param targetDensity the new constant state density
+         */
+        public final void setDensity(int targetDensity) {
+            if (mDensity != targetDensity) {
+                final int sourceDensity = mDensity;
+                mDensity = targetDensity;
+
+                applyDensityScaling(sourceDensity, targetDensity);
+            }
+        }
+
+        private void applyDensityScaling(int sourceDensity, int targetDensity) {
+            if (mInnerRadius > 0) {
+                mInnerRadius = Drawable.scaleFromDensity(
+                        mInnerRadius, sourceDensity, targetDensity, true);
+            }
+            if (mThickness > 0) {
+                mThickness = Drawable.scaleFromDensity(
+                        mThickness, sourceDensity, targetDensity, true);
+            }
+            if (mOpticalInsets != Insets.NONE) {
+                final int left = Drawable.scaleFromDensity(
+                        mOpticalInsets.left, sourceDensity, targetDensity, true);
+                final int top = Drawable.scaleFromDensity(
+                        mOpticalInsets.top, sourceDensity, targetDensity, true);
+                final int right = Drawable.scaleFromDensity(
+                        mOpticalInsets.right, sourceDensity, targetDensity, true);
+                final int bottom = Drawable.scaleFromDensity(
+                        mOpticalInsets.bottom, sourceDensity, targetDensity, true);
+                mOpticalInsets = Insets.of(left, top, right, bottom);
+            }
+            if (mPadding != null) {
+                mPadding.left = Drawable.scaleFromDensity(
+                        mPadding.left, sourceDensity, targetDensity, false);
+                mPadding.top = Drawable.scaleFromDensity(
+                        mPadding.top, sourceDensity, targetDensity, false);
+                mPadding.right = Drawable.scaleFromDensity(
+                        mPadding.right, sourceDensity, targetDensity, false);
+                mPadding.bottom = Drawable.scaleFromDensity(
+                        mPadding.bottom, sourceDensity, targetDensity, false);
+            }
+            if (mRadius > 0) {
+                mRadius = Drawable.scaleFromDensity(mRadius, sourceDensity, targetDensity);
+            }
+            if (mRadiusArray != null) {
+                mRadiusArray[0] = Drawable.scaleFromDensity(
+                        (int) mRadiusArray[0], sourceDensity, targetDensity, true);
+                mRadiusArray[1] = Drawable.scaleFromDensity(
+                        (int) mRadiusArray[1], sourceDensity, targetDensity, true);
+                mRadiusArray[2] = Drawable.scaleFromDensity(
+                        (int) mRadiusArray[2], sourceDensity, targetDensity, true);
+                mRadiusArray[3] = Drawable.scaleFromDensity(
+                        (int) mRadiusArray[3], sourceDensity, targetDensity, true);
+            }
+            if (mStrokeWidth > 0) {
+                mStrokeWidth = Drawable.scaleFromDensity(
+                        mStrokeWidth, sourceDensity, targetDensity, true);
+            }
+            if (mStrokeDashWidth > 0) {
+                mStrokeDashWidth = Drawable.scaleFromDensity(
+                        mStrokeDashGap, sourceDensity, targetDensity);
+            }
+            if (mStrokeDashGap > 0) {
+                mStrokeDashGap = Drawable.scaleFromDensity(
+                        mStrokeDashGap, sourceDensity, targetDensity);
+            }
+            if (mGradientRadiusType == RADIUS_TYPE_PIXELS) {
+                mGradientRadius = Drawable.scaleFromDensity(
+                        mGradientRadius, sourceDensity, targetDensity);
+            }
+            if (mWidth > 0) {
+                mWidth = Drawable.scaleFromDensity(mWidth, sourceDensity, targetDensity, true);
+            }
+            if (mHeight > 0) {
+                mHeight = Drawable.scaleFromDensity(mHeight, sourceDensity, targetDensity, true);
+            }
         }
 
         @Override
@@ -1805,8 +1906,18 @@ public class GradientDrawable extends Drawable {
         }
 
         @Override
-        public Drawable newDrawable(Resources res) {
-            return new GradientDrawable(this, res);
+        public Drawable newDrawable(@Nullable Resources res) {
+            // If this drawable is being created for a different density,
+            // just create a new constant state and call it a day.
+            final GradientState state;
+            final int density = Drawable.resolveDensity(res, mDensity);
+            if (density != mDensity) {
+                state = new GradientState(this, res);
+            } else {
+                state = this;
+            }
+
+            return new GradientDrawable(state, res);
         }
 
         @Override
@@ -1913,7 +2024,7 @@ public class GradientDrawable extends Drawable {
      *
      * @param state Constant state from which the drawable inherits
      */
-    private GradientDrawable(GradientState state, Resources res) {
+    private GradientDrawable(@NonNull GradientState state, @Nullable Resources res) {
         mGradientState = state;
 
         updateLocalState(res);

@@ -1008,7 +1008,8 @@ public class RippleDrawable extends LayerDrawable {
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
             if (mMaxRadius != RADIUS_AUTO) {
-                mMaxRadius = Bitmap.scaleFromDensity(mMaxRadius, sourceDensity, targetDensity);
+                mMaxRadius = Drawable.scaleFromDensity(
+                        mMaxRadius, sourceDensity, targetDensity, true);
             }
         }
 
@@ -1039,14 +1040,11 @@ public class RippleDrawable extends LayerDrawable {
     private RippleDrawable(RippleState state, Resources res) {
         mState = new RippleState(state, this, res);
         mLayerState = mState;
+        mDensity = Drawable.resolveDensity(res, mState.mDensity);
 
         if (mState.mNum > 0) {
             ensurePadding();
             refreshPadding();
-        }
-
-        if (res != null) {
-            mDensity = res.getDisplayMetrics().density;
         }
 
         updateLocalState();

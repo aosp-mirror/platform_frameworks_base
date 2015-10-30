@@ -1075,8 +1075,7 @@ public abstract class Drawable {
         // to the compatibility density only to have them scaled back up when
         // drawn to the screen.
         if (opts == null) opts = new BitmapFactory.Options();
-        opts.inScreenDensity = res != null
-                ? res.getDisplayMetrics().noncompatDensityDpi : DisplayMetrics.DENSITY_DEVICE;
+        opts.inScreenDensity = Drawable.resolveDensity(res, 0);
         Bitmap  bm = BitmapFactory.decodeResourceStream(res, value, is, pad, opts);
         if (bm != null) {
             byte[] np = bm.getNinePatchChunk();
@@ -1337,6 +1336,65 @@ public abstract class Drawable {
             return res.obtainAttributes(set, attrs);
         }
         return theme.obtainStyledAttributes(set, attrs, 0, 0);
+    }
+
+    /**
+     * Scales a floating-point pixel value from the source density to the
+     * target density.
+     *
+     * @param pixels the pixel value for use in source density
+     * @param sourceDensity the source density
+     * @param targetDensity the target density
+     * @return the scaled pixel value for use in target density
+     */
+    static float scaleFromDensity(float pixels, int sourceDensity, int targetDensity) {
+        return pixels * targetDensity / sourceDensity;
+    }
+
+    /**
+     * Scales a pixel value from the source density to the target density,
+     * optionally handling the resulting pixel value as a size rather than an
+     * offset.
+     * <p>
+     * A size conversion involves rounding the base value and ensuring that
+     * a non-zero base value is at least one pixel in size.
+     * <p>
+     * An offset conversion involves simply truncating the base value to an
+     * integer.
+     *
+     * @param pixels the pixel value for use in source density
+     * @param sourceDensity the source density
+     * @param targetDensity the target density
+     * @param isSize {@code true} to handle the resulting scaled value as a
+     *               size, or {@code false} to handle it as an offset
+     * @return the scaled pixel value for use in target density
+     */
+    static int scaleFromDensity(
+            int pixels, int sourceDensity, int targetDensity, boolean isSize) {
+        if (pixels == 0 || sourceDensity == targetDensity) {
+            return pixels;
+        }
+
+        final float result = pixels * targetDensity / (float) sourceDensity;
+        if (!isSize) {
+            return (int) result;
+        }
+
+        final int rounded = Math.round(result);
+        if (rounded != 0) {
+            return rounded;
+        } else if (pixels == 0) {
+            return 0;
+        } else if (pixels > 0) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
+    static int resolveDensity(@NonNull Resources r, int parentDensity) {
+        final int densityDpi = r == null ? parentDensity : r.getDisplayMetrics().densityDpi;
+        return densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
 
     /**

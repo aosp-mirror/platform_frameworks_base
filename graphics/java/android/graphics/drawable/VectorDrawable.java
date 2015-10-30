@@ -259,13 +259,7 @@ public class VectorDrawable extends Drawable {
      *            displayed, or {@code null} to use the constant state defaults
      */
     private void updateLocalState(Resources res) {
-        if (res != null) {
-            final int densityDpi = res.getDisplayMetrics().densityDpi;
-            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-        } else {
-            mTargetDensity = mVectorState.mVPathRenderer.mSourceDensity;
-        }
-
+        mTargetDensity = Drawable.resolveDensity(res, mVectorState.mVPathRenderer.mSourceDensity);
         mTintFilter = updateTintFilter(mTintFilter, mVectorState.mTint, mVectorState.mTintMode);
         computeVectorSize();
     }
@@ -453,18 +447,18 @@ public class VectorDrawable extends Drawable {
         final int sourceDensity = pathRenderer.mSourceDensity;
         final int targetDensity = mTargetDensity;
         if (targetDensity != sourceDensity) {
-            mDpiScaledWidth = Bitmap.scaleFromDensity(
-                    (int) pathRenderer.mBaseWidth, sourceDensity, targetDensity);
-            mDpiScaledHeight = Bitmap.scaleFromDensity(
-                    (int) pathRenderer.mBaseHeight,sourceDensity, targetDensity);
-            final int left = Bitmap.scaleFromDensity(
-                    opticalInsets.left, sourceDensity, targetDensity);
-            final int right = Bitmap.scaleFromDensity(
-                    opticalInsets.right, sourceDensity, targetDensity);
-            final int top = Bitmap.scaleFromDensity(
-                    opticalInsets.top, sourceDensity, targetDensity);
-            final int bottom = Bitmap.scaleFromDensity(
-                    opticalInsets.bottom, sourceDensity, targetDensity);
+            mDpiScaledWidth = Drawable.scaleFromDensity(
+                    (int) pathRenderer.mBaseWidth, sourceDensity, targetDensity, true);
+            mDpiScaledHeight = Drawable.scaleFromDensity(
+                    (int) pathRenderer.mBaseHeight,sourceDensity, targetDensity, true);
+            final int left = Drawable.scaleFromDensity(
+                    opticalInsets.left, sourceDensity, targetDensity, false);
+            final int right = Drawable.scaleFromDensity(
+                    opticalInsets.right, sourceDensity, targetDensity, false);
+            final int top = Drawable.scaleFromDensity(
+                    opticalInsets.top, sourceDensity, targetDensity, false);
+            final int bottom = Drawable.scaleFromDensity(
+                    opticalInsets.bottom, sourceDensity, targetDensity, false);
             mDpiScaledInsets = Insets.of(left, top, right, bottom);
         } else {
             mDpiScaledWidth = (int) pathRenderer.mBaseWidth;
@@ -600,11 +594,10 @@ public class VectorDrawable extends Drawable {
 
         // The density may have changed since the last update (if any). Any
         // dimension-type attributes will need their default values scaled.
-        final int densityDpi = a.getResources().getDisplayMetrics().densityDpi;
-        final int newSourceDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-        final int oldSourceDensity = pathRenderer.mSourceDensity;
-        final float densityScale = newSourceDensity / (float) oldSourceDensity;
-        pathRenderer.mSourceDensity = newSourceDensity;
+        final int targetDensity = Drawable.resolveDensity(a.getResources(), 0);
+        final int sourceDensity = pathRenderer.mSourceDensity;
+        final float densityScale = targetDensity / (float) sourceDensity;
+        pathRenderer.mSourceDensity = targetDensity;
 
         final int tintMode = a.getInt(R.styleable.VectorDrawable_tintMode, -1);
         if (tintMode != -1) {
@@ -647,16 +640,16 @@ public class VectorDrawable extends Drawable {
                     "<vector> tag requires height > 0");
         }
 
-        final int insetLeft = a.getDimensionPixelSize(
+        final int insetLeft = a.getDimensionPixelOffset(
                 R.styleable.VectorDrawable_opticalInsetLeft,
                 (int) (pathRenderer.mOpticalInsets.left * densityScale));
-        final int insetTop = a.getDimensionPixelSize(
+        final int insetTop = a.getDimensionPixelOffset(
                 R.styleable.VectorDrawable_opticalInsetTop,
                 (int) (pathRenderer.mOpticalInsets.top * densityScale));
-        final int insetRight = a.getDimensionPixelSize(
+        final int insetRight = a.getDimensionPixelOffset(
                 R.styleable.VectorDrawable_opticalInsetRight,
                 (int) (pathRenderer.mOpticalInsets.right * densityScale));
-        final int insetBottom = a.getDimensionPixelSize(
+        final int insetBottom = a.getDimensionPixelOffset(
                 R.styleable.VectorDrawable_opticalInsetBottom,
                 (int) (pathRenderer.mOpticalInsets.bottom * densityScale));
         pathRenderer.mOpticalInsets = Insets.of(insetLeft, insetTop, insetRight, insetBottom);
