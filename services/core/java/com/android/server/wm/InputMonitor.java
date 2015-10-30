@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerService.DEBUG_INPUT;
-import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
+
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -61,8 +61,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     // is received to indicate that the input devices are ready.
     private final Object mInputDevicesReadyMonitor = new Object();
     private boolean mInputDevicesReady;
-
-    Rect mTmpRect = new Rect();
 
     public InputMonitor(WindowManagerService service) {
         mService = service;
@@ -176,27 +174,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             final boolean hasFocus, final boolean hasWallpaper, DisplayContent displayContent) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
-        final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)) == 0;
-        if (modal && child.mAppToken != null) {
-            // Limit the outer touch to the activity stack region.
-            flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-            // If this is a modal window we need to dismiss it if it's not full screen and the touch
-            // happens outside of the frame that displays the content. This means we need to
-            // intercept touches outside of that window. The dim layer user associated with the
-            // window (task or stack) will give us the good bounds, as they would be used to display
-            // the dim layer.
-            final DimLayer.DimLayerUser dimLayerUser = child.getDimLayerUser();
-            if (dimLayerUser != null) {
-                dimLayerUser.getBounds(mTmpRect);
-            } else {
-                child.getVisibleBounds(mTmpRect, BOUNDS_FOR_TOUCH);
-            }
-            inputWindowHandle.touchableRegion.set(mTmpRect);
-        } else {
-            // Not modal or full screen modal
-            child.getTouchableRegion(inputWindowHandle.touchableRegion);
-        }
+        flags = child.getTouchableRegion(inputWindowHandle.touchableRegion, flags, this);
         inputWindowHandle.layoutParamsFlags = flags;
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
