@@ -160,6 +160,7 @@ public class AppTransition implements Dump {
     // Used for thumbnail transitions. True if we're scaling up, false if scaling down
     private boolean mNextAppTransitionScaleUp;
     private IRemoteCallback mNextAppTransitionCallback;
+    private IRemoteCallback mAnimationFinishedCallback;
     private int mNextAppTransitionEnter;
     private int mNextAppTransitionExit;
     private int mNextAppTransitionInPlace;
@@ -932,6 +933,22 @@ public class AppTransition implements Dump {
                 : new TranslateAnimation(0, fromX, 0, fromY);
         set.addAnimation(scale);
         set.addAnimation(translation);
+
+        final IRemoteCallback callback = mAnimationFinishedCallback;
+        if (callback != null) {
+            set.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) { }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mH.obtainMessage(H.DO_ANIMATION_CALLBACK, callback).sendToTarget();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
+        }
         return set;
     }
 
@@ -1356,7 +1373,8 @@ public class AppTransition implements Dump {
     }
 
     public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
-            IRemoteCallback callback, boolean scaleUp) {
+            IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
+            boolean scaleUp) {
         if (isTransitionSet()) {
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
@@ -1378,7 +1396,8 @@ public class AppTransition implements Dump {
                 }
             }
             postAnimationCallback();
-            mNextAppTransitionCallback = callback;
+            mNextAppTransitionCallback = onAnimationStartedCallback;
+            mAnimationFinishedCallback = onAnimationFinishedCallback;
         } else {
             postAnimationCallback();
         }

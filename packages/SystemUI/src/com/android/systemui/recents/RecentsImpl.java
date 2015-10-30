@@ -45,6 +45,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -69,7 +70,7 @@ import java.util.ArrayList;
  * be called remotely from the system user.
  */
 public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
-        implements ActivityOptions.OnAnimationStartedListener {
+        implements ActivityOptions.OnAnimationStartedListener, ActivityOptions.OnAnimationFinishedListener {
 
     private final static String TAG = "RecentsImpl";
     private final static boolean DEBUG = false;
@@ -78,7 +79,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
     public final static String RECENTS_PACKAGE = "com.android.systemui";
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
-
 
     /**
      * An implementation of ITaskStackListener, that allows us to listen for changes to the system
@@ -579,7 +579,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
             specs.toArray(specsArray);
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    specsArray, mHandler, this);
+                    specsArray, mHandler, this, this);
         } else {
             // Update the destination rect
             Task toTask = new Task();
@@ -757,6 +757,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         launchState.launchedNumVisibleTasks = vr.numVisibleTasks;
         launchState.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
         launchState.launchedHasConfigurationChanged = false;
+        launchState.startHidden = topTask != null && topTask.stackId == FREEFORM_WORKSPACE_STACK_ID;
 
         Intent intent = new Intent();
         intent.setClassName(RECENTS_PACKAGE, RECENTS_ACTIVITY);
@@ -780,5 +781,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             mStartAnimationTriggered = true;
             EventBus.getDefault().post(new EnterRecentsWindowAnimationStartedEvent());
         }
+    }
+
+    @Override
+    public void onAnimationFinished() {
+        EventBus.getDefault().post(new EnterRecentsWindowLastAnimationFrameEvent());
     }
 }

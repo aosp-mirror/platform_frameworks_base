@@ -868,7 +868,8 @@ final class ActivityRecord {
                     if (animationType == ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
                             && specs != null) {
                         service.mWindowManager.overridePendingAppTransitionMultiThumb(
-                                specs, pendingOptions.getOnAnimationStartListener(), false);
+                                specs, pendingOptions.getOnAnimationStartListener(),
+                                pendingOptions.getAnimationFinishedListener(), false);
                     } else {
                         service.mWindowManager.overridePendingAppTransitionAspectScaledThumb(
                                 pendingOptions.getThumbnail(),

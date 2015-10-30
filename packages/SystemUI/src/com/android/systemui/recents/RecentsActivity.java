@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
@@ -43,6 +42,7 @@ import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEven
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -419,6 +419,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        final RecentsActivityLaunchState state = Recents.getConfiguration().getLaunchState();
+        if (state.startHidden) {
+            state.startHidden = false;
+            mRecentsView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (mAfterPauseRunnable != null) {
@@ -641,6 +652,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         });
         mRecentsView.startEnterRecentsAnimation(ctx);
         ctx.postAnimationTrigger.decrement();
+    }
+
+    public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
+        mRecentsView.setVisibility(View.VISIBLE);
     }
 
     public final void onBusEvent(AppWidgetProviderChangedEvent event) {

@@ -282,9 +282,8 @@ class WindowStateAnimator {
         }
         mTransformation.clear();
         final boolean more = mAnimation.getTransformation(currentTime, mTransformation);
-        if (false && DEBUG_ANIM) Slog.v(
-            TAG, "Stepped animation in " + this +
-            ": more=" + more + ", xform=" + mTransformation);
+        if (false && DEBUG_ANIM) Slog.v(TAG, "Stepped animation in " + this + ": more=" + more
+                + ", xform=" + mTransformation);
         return more;
     }
 

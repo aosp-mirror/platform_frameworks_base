@@ -3637,9 +3637,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
-            IRemoteCallback callback, boolean scaleUp) {
+            IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
+            boolean scaleUp) {
         synchronized (mWindowMap) {
-            mAppTransition.overridePendingAppTransitionMultiThumb(specs, callback, scaleUp);
+            mAppTransition.overridePendingAppTransitionMultiThumb(specs, onAnimationStartedCallback,
+                    onAnimationFinishedCallback, scaleUp);
         }
     }
 
