@@ -29,8 +29,17 @@
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">280dip</dimen>
 
-    <!-- The width of the view containing the menu/ime navigation bar icons -->
-    <dimen name="navigation_extra_key_width">48dip</dimen>
+    <!-- The padding on the side of the navigation bar. -->
+    <dimen name="navigation_side_padding">16dp</dimen>
+
+    <!-- The maximum width of the navigation bar ripples. -->
+    <dimen name="key_button_ripple_max_width">76dp</dimen>
+
+    <!-- The width of the view containing navigation buttons -->
+    <dimen name="navigation_key_width">80dp</dimen>
+
+    <!-- The padding around the navigation buttons -->
+    <dimen name="navigation_key_padding">5dp</dimen>
 
     <!-- Size of application thumbnail -->
     <dimen name="status_bar_recents_thumbnail_width">200dp</dimen>

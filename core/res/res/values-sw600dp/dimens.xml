@@ -70,8 +70,11 @@
          (the screen is in landscape). This may be either a fraction or a dimension.-->
     <item type="dimen" name="dialog_fixed_height_minor">90%</item>
 
-    <!-- Height of the bottom navigation bar in portrait; on sw600dp devices
-         this is a bit taller -->
+    <!-- Height of the bottom navigation / system bar. -->
+    <dimen name="navigation_bar_height">56dp</dimen>
+    <!-- Height of the bottom navigation bar in landscape; often the same as @dimen/navigation_bar_height -->
+    <dimen name="navigation_bar_height_landscape">56dp</dimen>
+    <!-- Height of the bottom navigation bar in portrait -->
     <dimen name="navigation_bar_height_portrait">56dp</dimen>
 
     <!-- Preference fragment padding, sides -->
