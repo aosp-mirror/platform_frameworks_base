@@ -5604,11 +5604,6 @@ public final class Settings {
         public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
                 "enabled_notification_policy_access_packages";
 
-        /**
-         * @hide
-         */
-        public static final String ENABLED_CONDITION_PROVIDERS = "enabled_condition_providers";
-
         /** @hide */
         public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
 

@@ -70,7 +70,7 @@ abstract public class ManagedServices {
     protected final String TAG = getClass().getSimpleName();
     protected final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String ENABLED_SERVICES_SEPARATOR = ":";
+    protected static final String ENABLED_SERVICES_SEPARATOR = ":";
 
     protected final Context mContext;
     protected final Object mMutex;
@@ -279,7 +279,8 @@ abstract public class ManagedServices {
     }
 
 
-    private ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName, int userId) {
+    protected ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
+            int userId) {
         final ContentResolver cr = mContext.getContentResolver();
         String settingValue = Settings.Secure.getStringForUser(
                 cr,
@@ -319,7 +320,6 @@ abstract public class ManagedServices {
                 userId);
     }
 
-
     /**
      * Remove access for any services that no longer exist.
      */
@@ -332,18 +332,15 @@ abstract public class ManagedServices {
         rebuildRestoredPackages();
     }
 
-    private void updateSettingsAccordingToInstalledServices(int userId) {
-        boolean restoredChanged = false;
-        boolean currentChanged = false;
-        Set<ComponentName> restored =
-                loadComponentNamesFromSetting(restoredSettingName(mConfig), userId);
-        Set<ComponentName> current =
-                loadComponentNamesFromSetting(mConfig.secureSettingName, userId);
+    protected Set<ComponentName> queryPackageForServices(String packageName, int userId) {
         Set<ComponentName> installed = new ArraySet<>();
-
         final PackageManager pm = mContext.getPackageManager();
+        Intent queryIntent = new Intent(mConfig.serviceInterface);
+        if (!TextUtils.isEmpty(packageName)) {
+            queryIntent.setPackage(packageName);
+        }
         List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
-                new Intent(mConfig.serviceInterface),
+                queryIntent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
                 userId);
         if (DEBUG)
@@ -363,6 +360,18 @@ abstract public class ManagedServices {
             }
             installed.add(component);
         }
+        return installed;
+    }
+
+    private void updateSettingsAccordingToInstalledServices(int userId) {
+        boolean restoredChanged = false;
+        boolean currentChanged = false;
+        Set<ComponentName> restored =
+                loadComponentNamesFromSetting(restoredSettingName(mConfig), userId);
+        Set<ComponentName> current =
+                loadComponentNamesFromSetting(mConfig.secureSettingName, userId);
+        // Load all services for all packages.
+        Set<ComponentName> installed = queryPackageForServices(null, userId);
 
         ArraySet<ComponentName> retained = new ArraySet<>();
 
