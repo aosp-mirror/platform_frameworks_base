@@ -552,7 +552,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * view.
      */
     boolean shouldClipViewInStack() {
-        return mClipViewInStack && (getVisibility() == View.VISIBLE);
+        // Never clip for freeform tasks or if invisible
+        if (mTask.isFreeformTask() || getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        return mClipViewInStack;
     }
 
     /** Sets whether this view should be clipped, or clipped against. */

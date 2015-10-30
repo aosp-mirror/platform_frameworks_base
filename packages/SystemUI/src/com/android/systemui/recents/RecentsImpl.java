@@ -57,7 +57,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
-import com.android.systemui.recents.views.TaskStackViewLayoutAlgorithm;
+import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -469,10 +469,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
                 mSearchBarBounds, mTaskStackBounds);
 
         // Rebind the header bar and draw it for the transition
-        TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
+        TaskStackLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         algo.setSystemInsets(systemInsets);
-        algo.computeRects(taskStackBounds);
+        algo.initialize(taskStackBounds);
         Rect taskViewBounds = algo.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
             mLastTaskViewBounds.set(taskViewBounds);
@@ -695,7 +695,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
         // Prepare the dummy stack for the transition
         mDummyStackView.updateMinMaxScrollForStack(stack);
-        TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
+        TaskStackLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
         boolean hasRecentTasks = stack.getTaskCount() > 0;
         boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
@@ -742,7 +742,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
               ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
-              TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
+              TaskStackLayoutAlgorithm.VisibilityReport vr) {
         mStartAnimationTriggered = false;
 
         // Update the configuration based on the launch options

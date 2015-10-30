@@ -399,6 +399,21 @@ public class TaskStack {
         return mTaskList.size();
     }
 
+    /**
+     * Returns the task in this stack which is the launch target.
+     */
+    public Task getLaunchTarget() {
+        ArrayList<Task> tasks = mTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (task.isLaunchTarget) {
+                return task;
+            }
+        }
+        return null;
+    }
+
     /** Returns the index of this task in this current task stack */
     public int indexOfTask(Task t) {
         return mTaskList.indexOf(t);
@@ -415,6 +430,21 @@ public class TaskStack {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns whether this stack has freeform tasks.
+     */
+    public boolean hasFreeformTasks() {
+        ArrayList<Task> tasks = mTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (task.isFreeformTask()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /******** Filtering ********/

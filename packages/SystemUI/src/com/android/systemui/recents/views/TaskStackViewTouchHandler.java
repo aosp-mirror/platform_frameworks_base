@@ -16,8 +16,10 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -30,6 +32,8 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.util.List;
 
@@ -37,7 +41,7 @@ import java.util.List;
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     private static final String TAG = "TaskStackViewTouchHandler";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static int INACTIVE_POINTER_ID = -1;
 
@@ -45,6 +49,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     TaskStackView mSv;
     TaskStackViewScroller mScroller;
     VelocityTracker mVelocityTracker;
+    FlingAnimationUtils mFlingAnimUtils;
+    ValueAnimator mScrollFlingAnimator;
 
     boolean mIsScrolling;
     float mDownScrollP;
@@ -74,6 +80,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
         mSv = sv;
         mScroller = scroller;
+        mFlingAnimUtils = new FlingAnimationUtils(context, 0.2f);
 
         float densityScale = res.getDisplayMetrics().density;
         mOverscrollSize = res.getDimensionPixelSize(R.dimen.recents_stack_overscroll);
@@ -140,7 +147,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             return false;
         }
 
-        TaskStackViewLayoutAlgorithm layoutAlgorithm = mSv.mLayoutAlgorithm;
+        final TaskStackLayoutAlgorithm layoutAlgorithm = mSv.mLayoutAlgorithm;
         int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
@@ -154,6 +161,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 // Stop the current scroll if it is still flinging
                 mScroller.stopScroller();
                 mScroller.stopBoundScrollAnimation();
+                Utilities.cancelAnimationWithoutCallbacks(mScrollFlingAnimator);
 
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
@@ -189,6 +197,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     float deltaP = layoutAlgorithm.getDeltaPForY(mDownY, y);
                     float curScrollP = mDownScrollP + deltaP;
                     mScroller.setStackScroll(curScrollP);
+                    if (DEBUG) {
+                        Log.d(TAG, "scroll: " + curScrollP);
+                    }
                 }
 
                 mVelocityTracker.addMovement(ev);
@@ -211,21 +222,53 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int y = (int) ev.getY(activePointerIndex);
                 int velocity = (int) mVelocityTracker.getYVelocity(mActivePointerId);
+                float curScrollP = mScroller.getStackScroll();
                 if (mIsScrolling) {
-                    if (mScroller.isScrollOutOfBounds()) {
-                        // Animate the scroll back into bounds
+                    boolean hasFreeformTasks = mSv.mStack.hasFreeformTasks();
+                    if (hasFreeformTasks && velocity > 0 &&
+                            curScrollP > layoutAlgorithm.mStackEndScrollP) {
+                        // Snap to workspace
+                        float finalY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
+                                layoutAlgorithm.mPreferredStackEndScrollP);
+                        mScrollFlingAnimator = ValueAnimator.ofInt(y, (int) finalY);
+                        mScrollFlingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                float deltaP = layoutAlgorithm.getDeltaPForY(mDownY,
+                                        (Integer) animation.getAnimatedValue());
+                                float scroll = mDownScrollP + deltaP;
+                                mScroller.setStackScroll(scroll);
+                            }
+                        });
+                        mFlingAnimUtils.apply(mScrollFlingAnimator, y, finalY, velocity);
+                        mScrollFlingAnimator.start();
+                    } else if (hasFreeformTasks && velocity < 0 &&
+                            curScrollP > (layoutAlgorithm.mStackEndScrollP -
+                                    layoutAlgorithm.mTaskHalfHeightPOffset)) {
+                        // Snap to stack
+                        float finalY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
+                                layoutAlgorithm.mMaxScrollP);
+                        mScrollFlingAnimator = ValueAnimator.ofInt(y, (int) finalY);
+                        mScrollFlingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                float deltaP = layoutAlgorithm.getDeltaPForY(mDownY,
+                                        (Integer) animation.getAnimatedValue());
+                                float scroll = mDownScrollP + deltaP;
+                                mScroller.setStackScroll(scroll);
+                            }
+                        });
+                        mFlingAnimUtils.apply(mScrollFlingAnimator, y, finalY, velocity);
+                        mScrollFlingAnimator.start();
+                    } else if (mScroller.isScrollOutOfBounds()) {
                         mScroller.animateBoundScroll();
                     } else if (Math.abs(velocity) > mMinimumVelocity) {
-                        float deltaP = layoutAlgorithm.getDeltaPForY(mDownY, y);
-                        float curScrollP = mDownScrollP + deltaP;
-                        float downToCurY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
-                                curScrollP);
-                        float downToMinY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
-                                layoutAlgorithm.mMaxScrollP);
-                        float downToMaxY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
+                        float minY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
+                                layoutAlgorithm.mPreferredStackEndScrollP);
+                        float maxY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
                                 layoutAlgorithm.mMinScrollP);
-                        mScroller.fling(mDownScrollP, mDownY, (int) downToCurY, velocity,
-                                (int) downToMinY, (int) downToMaxY, mOverscrollSize);
+                        mScroller.fling(mDownScrollP, mDownY, y, velocity, (int) minY, (int) maxY,
+                                mOverscrollSize);
                         mSv.invalidate();
                     }
                 } else if (mActiveTaskView == null) {
@@ -239,10 +282,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
-                if (mScroller.isScrollOutOfBounds()) {
-                    // Animate the scroll back into bounds
-                    mScroller.animateBoundScroll();
-                }
                 mActivePointerId = INACTIVE_POINTER_ID;
                 mIsScrolling = false;
                 recycleVelocityTracker();
@@ -308,9 +347,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     @Override
     public boolean canChildBeDismissed(View v) {
-        if (v instanceof TaskView) {
-            return !((TaskView) v).getTask().isFreeformTask();
-        }
         return true;
     }
 

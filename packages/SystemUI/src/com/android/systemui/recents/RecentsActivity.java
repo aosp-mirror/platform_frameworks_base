@@ -616,15 +616,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         ctx.postAnimationTrigger.increment();
         if (mSearchWidgetInfo != null) {
-            ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    // Start listening for widget package changes if there is one bound
-                    if (!Constants.DebugFlags.App.DisableSearchBar && mAppWidgetHost != null) {
-                        mAppWidgetHost.startListening();
+            if (!Constants.DebugFlags.App.DisableSearchBar) {
+                ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Start listening for widget package changes if there is one bound
+                        if (mAppWidgetHost != null) {
+                            mAppWidgetHost.startListening();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
         ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
             @Override
