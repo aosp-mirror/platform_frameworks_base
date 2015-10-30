@@ -6527,7 +6527,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
-            int[] verticalSizeConfigurations) {
+            int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Report configuration: " + token + " "
                 + horizontalSizeConfiguration + " " + verticalSizeConfigurations);
         synchronized (this) {
@@ -6537,7 +6537,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + "found for: " + token);
             }
             record.setSizeConfigurations(horizontalSizeConfiguration,
-                    verticalSizeConfigurations);
+                    verticalSizeConfigurations, smallestSizeConfigurations);
         }
     }
 
