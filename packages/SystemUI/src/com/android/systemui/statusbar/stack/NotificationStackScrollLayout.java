@@ -2788,16 +2788,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return touchY > mTopPadding + mStackTranslation;
     }
 
-    private void updateExpandButtons() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                row.updateExpandButton();
-            }
-        }
-    }
-
     @Override
     public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
         boolean animated = mAnimationsEnabled && mIsExpanded;
@@ -2811,7 +2801,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupsProhibitedChanged() {
-        updateExpandButtons();
     }
 
     @Override

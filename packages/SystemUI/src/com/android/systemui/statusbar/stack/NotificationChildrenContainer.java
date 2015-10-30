@@ -21,7 +21,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -40,10 +39,9 @@ public class NotificationChildrenContainer extends ViewGroup {
     private final int mMaxNotificationHeight;
     private final List<View> mDividers = new ArrayList<>();
     private final List<ExpandableNotificationRow> mChildren = new ArrayList<>();
-    private final View mCollapseButton;
-    private final View mCollapseDivider;
-    private final int mCollapseButtonHeight;
+    private final int mNotificationHeaderHeight;
     private final int mNotificationAppearDistance;
+    private final float mHeaderTopPaddingSubstraction;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -68,14 +66,9 @@ public class NotificationChildrenContainer extends ViewGroup {
                 R.dimen.notification_max_height);
         mNotificationAppearDistance = getResources().getDimensionPixelSize(
                 R.dimen.notification_appear_distance);
-        LayoutInflater inflater = mContext.getSystemService(LayoutInflater.class);
-        mCollapseButton = inflater.inflate(R.layout.notification_collapse_button, this,
-                false);
-        mCollapseButtonHeight = getResources().getDimensionPixelSize(
-                R.dimen.notification_bottom_decor_height);
-        addView(mCollapseButton);
-        mCollapseDivider = inflateDivider();
-        addView(mCollapseDivider);
+        mNotificationHeaderHeight = getResources().getDimensionPixelSize(
+                R.dimen.notification_header_height);
+        mHeaderTopPaddingSubstraction = 2 * getResources().getDisplayMetrics().density;
     }
 
     @Override
@@ -103,9 +96,6 @@ public class NotificationChildrenContainer extends ViewGroup {
                 firstChild = false;
             }
         }
-        mCollapseButton.layout(0, 0, getWidth(), mCollapseButtonHeight);
-        mCollapseDivider.layout(0, mCollapseButtonHeight - mDividerHeight, getWidth(),
-                mCollapseButtonHeight);
     }
 
     @Override
@@ -120,11 +110,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
         int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
         int dividerHeightSpec = MeasureSpec.makeMeasureSpec(mDividerHeight, MeasureSpec.EXACTLY);
-        int collapseButtonHeightSpec = MeasureSpec.makeMeasureSpec(mCollapseButtonHeight,
-                MeasureSpec.EXACTLY);
-        mCollapseButton.measure(widthMeasureSpec, collapseButtonHeightSpec);
-        mCollapseDivider.measure(widthMeasureSpec, dividerHeightSpec);
-        int height = mCollapseButtonHeight;
+        int height = mNotificationHeaderHeight;
         int childCount = mChildren.size();
         boolean firstChild = true;
         for (int i = 0; i < childCount; i++) {
@@ -247,7 +233,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      */
     public void getState(StackScrollState resultState, StackViewState parentState) {
         int childCount = mChildren.size();
-        int yPosition = mCollapseButtonHeight;
+        int yPosition = mNotificationHeaderHeight;
         boolean firstChild = true;
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
@@ -300,10 +286,6 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
             state.applyState(child, viewState);
         }
-    }
-
-    public void setCollapseClickListener(OnClickListener collapseClickListener) {
-        mCollapseButton.setOnClickListener(collapseClickListener);
     }
 
     /**
@@ -376,13 +358,6 @@ public class NotificationChildrenContainer extends ViewGroup {
             stateAnimator.startStackAnimations(child, viewState, state, -1, delay);
             notGoneIndex++;
         }
-        dividerState.initFrom(mCollapseButton);
-        dividerState.alpha = 1.0f;
-        stateAnimator.startViewAnimations(mCollapseButton, dividerState, baseDelay, duration);
-        dividerState.initFrom(mCollapseDivider);
-        dividerState.alpha = 1.0f;
-        dividerState.yTranslation = 0.0f;
-        stateAnimator.startViewAnimations(mCollapseDivider, dividerState, baseDelay, duration);
     }
 
     public ExpandableNotificationRow getViewAtPosition(float y) {

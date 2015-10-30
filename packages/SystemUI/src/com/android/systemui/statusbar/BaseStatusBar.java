@@ -891,8 +891,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private void bindGuts(ExpandableNotificationRow row) {
         row.inflateGuts();
         final StatusBarNotification sbn = row.getStatusBarNotification();
-        PackageManager pmUser = getPackageManagerForUser(
-                sbn.getUser().getIdentifier());
+        PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
         final View guts = row.getGuts();
         final String pkg = sbn.getPackageName();
@@ -1270,7 +1269,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean inflateViews(Entry entry, ViewGroup parent) {
-        PackageManager pmUser = getPackageManagerForUser(
+        PackageManager pmUser = getPackageManagerForUser(mContext,
                 entry.notification.getUser().getIdentifier());
 
         int maxHeight = mRowMaxHeight;
@@ -1502,7 +1501,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setUserExpanded(userExpanded);
         }
         row.setUserLocked(userLocked);
-        row.setStatusBarNotification(entry.notification);
+        row.setEntry(entry);
         applyRemoteInput(entry);
         return true;
     }
@@ -2113,7 +2112,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         mNotificationClicker.register(entry.row, sbn);
 
-        entry.row.setStatusBarNotification(sbn);
+        entry.row.setEntry(entry);
         entry.row.notifyContentUpdated();
         entry.row.resetHeight();
 
@@ -2207,15 +2206,15 @@ public abstract class BaseStatusBar extends SystemUI implements
      * @return a PackageManger for userId or if userId is < 0 (USER_ALL etc) then
      *         return PackageManager for mContext
      */
-    protected PackageManager getPackageManagerForUser(int userId) {
-        Context contextForUser = mContext;
+    public static PackageManager getPackageManagerForUser(Context context, int userId) {
+        Context contextForUser = context;
         // UserHandle defines special userId as negative values, e.g. USER_ALL
         if (userId >= 0) {
             try {
                 // Create a context for the correct user so if a package isn't installed
                 // for user 0 we can still load information about the package.
                 contextForUser =
-                        mContext.createPackageContextAsUser(mContext.getPackageName(),
+                        context.createPackageContextAsUser(context.getPackageName(),
                         Context.CONTEXT_RESTRICTED,
                         new UserHandle(userId));
             } catch (NameNotFoundException e) {

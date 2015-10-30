@@ -42,6 +42,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -401,21 +402,11 @@ public class StatusBarIconController implements Tunable {
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
             StatusBarIconView v = (StatusBarIconView) mNotificationIcons.getChildAt(i);
             boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
-            boolean colorize = !isPreL || isGrayscale(v);
+            boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
             if (colorize) {
                 v.setImageTintList(ColorStateList.valueOf(mIconTint));
             }
         }
-    }
-
-    private boolean isGrayscale(StatusBarIconView v) {
-        Object isGrayscale = v.getTag(R.id.icon_is_grayscale);
-        if (isGrayscale != null) {
-            return Boolean.TRUE.equals(isGrayscale);
-        }
-        boolean grayscale = mNotificationColorUtil.isGrayscaleIcon(v.getDrawable());
-        v.setTag(R.id.icon_is_grayscale, grayscale);
-        return grayscale;
     }
 
     public void appTransitionPending() {

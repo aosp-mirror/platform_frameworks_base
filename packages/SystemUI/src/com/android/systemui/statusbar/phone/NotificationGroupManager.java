@@ -106,7 +106,7 @@ public class NotificationGroupManager {
                         }
                     });
                 } else {
-                    group.summary.row.updateExpandButton();
+                    group.summary.row.updateNotificationHeader();
                 }
             }
         }
@@ -130,7 +130,7 @@ public class NotificationGroupManager {
         } else {
             group.children.add(added);
             if (group.summary != null && group.children.size() == 1 && !group.expanded) {
-                group.summary.row.updateExpandButton();
+                group.summary.row.updateNotificationHeader();
             }
         }
     }

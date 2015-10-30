@@ -70,13 +70,4 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
     public NotificationOverflowIconsView getIconsView() {
         return mIconsView;
     }
-
-    protected int getContentHeightFromActualHeight(int actualHeight) {
-        int realActualHeight = actualHeight;
-        if (hasBottomDecor()) {
-            realActualHeight -= getBottomDecorHeight();
-        }
-        realActualHeight = Math.max(getMinHeight(), realActualHeight);
-        return realActualHeight;
-    }
 }
