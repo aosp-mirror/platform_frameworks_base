@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
@@ -41,6 +42,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Keeps track of notification activity, display, and user interaction.
@@ -367,26 +369,37 @@ public class NotificationUsageStats {
                     break;
             }
 
-            for (String Key : n.extras.keySet()) {
-                if (Notification.EXTRA_BIG_TEXT.equals(key)) {
-                    numWithBigText++;
-                } else if (Notification.EXTRA_PICTURE.equals(key)) {
-                    numWithBigPicture++;
-                } else if (Notification.EXTRA_LARGE_ICON.equals(key)) {
-                    numWithLargeIcon++;
-                } else if (Notification.EXTRA_TEXT_LINES.equals(key)) {
-                    numWithInbox++;
-                } else if (Notification.EXTRA_MEDIA_SESSION.equals(key)) {
-                    numWithMediaSession++;
-                } else if (Notification.EXTRA_TITLE.equals(key)) {
-                    numWithTitle++;
-                } else if (Notification.EXTRA_TEXT.equals(key)) {
-                    numWithText++;
-                } else if (Notification.EXTRA_SUB_TEXT.equals(key)) {
-                    numWithSubText++;
-                } else if (Notification.EXTRA_INFO_TEXT.equals(key)) {
-                    numWithInfoText++;
-                }
+            final Set<String> names = n.extras.keySet();
+            if (names.contains(Notification.EXTRA_BIG_TEXT)) {
+                numWithBigText++;
+            }
+            if (names.contains(Notification.EXTRA_PICTURE)) {
+                numWithBigPicture++;
+            }
+            if (names.contains(Notification.EXTRA_LARGE_ICON)) {
+                numWithLargeIcon++;
+            }
+            if (names.contains(Notification.EXTRA_TEXT_LINES)) {
+                numWithInbox++;
+            }
+            if (names.contains(Notification.EXTRA_MEDIA_SESSION)) {
+                numWithMediaSession++;
+            }
+            if (names.contains(Notification.EXTRA_TITLE) &&
+                    !TextUtils.isEmpty(n.extras.getCharSequence(Notification.EXTRA_TITLE))) {
+                numWithTitle++;
+            }
+            if (names.contains(Notification.EXTRA_TEXT) &&
+                    !TextUtils.isEmpty(n.extras.getCharSequence(Notification.EXTRA_TEXT))) {
+                numWithText++;
+            }
+            if (names.contains(Notification.EXTRA_SUB_TEXT) &&
+                    !TextUtils.isEmpty(n.extras.getCharSequence(Notification.EXTRA_SUB_TEXT))) {
+                numWithSubText++;
+            }
+            if (names.contains(Notification.EXTRA_INFO_TEXT) &&
+                    !TextUtils.isEmpty(n.extras.getCharSequence(Notification.EXTRA_INFO_TEXT))) {
+                numWithInfoText++;
             }
         }
 
