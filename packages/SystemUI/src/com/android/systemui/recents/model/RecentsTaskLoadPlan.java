@@ -137,12 +137,19 @@ public class RecentsTaskLoadPlan {
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
             if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
 
-            stackTasks.add(task);
+            if (task.isFreeformTask()) {
+                freeformTasks.add(task);
+            } else {
+                stackTasks.add(task);
+            }
         }
 
         // Initialize the stacks
+        ArrayList<Task> allTasks = new ArrayList<>();
+        allTasks.addAll(stackTasks);
+        allTasks.addAll(freeformTasks);
         mStack = new TaskStack();
-        mStack.setTasks(stackTasks);
+        mStack.setTasks(allTasks);
         mStack.createAffiliatedGroupings(mContext);
     }
 

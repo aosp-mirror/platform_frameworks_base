@@ -255,6 +255,10 @@ public class TaskViewHeader extends FrameLayout
         mApplicationIcon.setImageDrawable(null);
         mApplicationIcon.setOnClickListener(null);
         mMoveTaskButton.setOnClickListener(null);
+
+        // Stop any focus animations
+        Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
+        mBackground.jumpToCurrentState();
     }
 
     /** Updates the resize task bar button. */
@@ -370,8 +374,9 @@ public class TaskViewHeader extends FrameLayout
         boolean isRunning = false;
         if (mFocusAnimator != null) {
             isRunning = mFocusAnimator.isRunning();
-            Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
         }
+        Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
+        mBackground.jumpToCurrentState();
 
         if (focused) {
             // If we are not animating the visible state, just return

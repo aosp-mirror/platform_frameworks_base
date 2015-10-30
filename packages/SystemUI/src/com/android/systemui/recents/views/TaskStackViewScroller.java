@@ -39,7 +39,7 @@ public class TaskStackViewScroller {
     }
 
     Context mContext;
-    TaskStackViewLayoutAlgorithm mLayoutAlgorithm;
+    TaskStackLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewScrollerCallbacks mCb;
 
     float mStackScrollP;
@@ -52,7 +52,7 @@ public class TaskStackViewScroller {
 
     Interpolator mLinearOutSlowInInterpolator;
 
-    public TaskStackViewScroller(Context context, TaskStackViewLayoutAlgorithm layoutAlgorithm) {
+    public TaskStackViewScroller(Context context, TaskStackLayoutAlgorithm layoutAlgorithm) {
         mContext = context;
         mScroller = new OverScroller(context);
         mLayoutAlgorithm = layoutAlgorithm;
@@ -121,7 +121,8 @@ public class TaskStackViewScroller {
 
     /** Returns the bounded stack scroll */
     float getBoundedStackScroll(float scroll) {
-        return Math.max(mLayoutAlgorithm.mMinScrollP, Math.min(mLayoutAlgorithm.mMaxScrollP, scroll));
+        return Math.max(mLayoutAlgorithm.mMinScrollP,
+                Math.min(mLayoutAlgorithm.getPreferredMaxScrollPosition(scroll), scroll));
     }
 
     /** Returns the amount that the absolute value of how much the scroll is out of bounds. */
