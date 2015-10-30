@@ -86,7 +86,7 @@ public class DocumentsActivity extends BaseActivity {
         mShowAsDialog = res.getBoolean(R.bool.show_as_dialog);
 
         if (!mShowAsDialog) {
-            setTheme(R.style.DocumentsNonDialogTheme);
+            setTheme(R.style.DocumentsFullScreenTheme);
         }
 
         if (mShowAsDialog) {

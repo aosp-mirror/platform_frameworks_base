@@ -15,23 +15,15 @@
 -->
 
 <resources>
-    <color name="material_grey_50">#fffafafa</color>
-    <color name="material_grey_300">#ffeeeeee</color>
-    <color name="material_grey_600">#ff757575</color>
-    <color name="material_grey_800">#ff424242</color>
+    <color name="material_grey_400">#ffbdbdbd</color>
 
-    <color name="primary_dark">@*android:color/material_blue_grey_900</color>
-    <color name="primary">@*android:color/material_blue_grey_800</color>
-    <color name="accent">@*android:color/material_deep_teal_500</color>
-
-    <color name="platform_blue_100">#ffd0d9ff</color>
-    <color name="platform_blue_500">#ff5677fc</color>
-    <color name="platform_blue_700">#ff455ede</color>
-    <color name="platform_blue_a100">#ffa6baff</color>
-    <color name="platform_blue_a200">#ffff5177</color>
+    <color name="primary_dark">@*android:color/primary_dark_material_dark</color>
+    <color name="primary">@*android:color/material_blue_grey_900</color>
+    <color name="accent">@*android:color/accent_material_light</color>
+    <color name="action_mode">@color/material_grey_400</color>
     
-    <color name="directory_background">@color/material_grey_300</color>
-    <color name="item_doc_grid_background">#FFFFFFFF</color>
+    <color name="directory_background">@*android:color/material_grey_300</color>
+    <color name="item_doc_grid_background">@android:color/white</color>
     <color name="item_doc_grid_protect_background">#88000000</color>
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>

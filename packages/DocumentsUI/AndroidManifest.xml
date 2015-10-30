@@ -40,7 +40,7 @@
 
         <activity
             android:name=".ManageRootActivity"
-            android:theme="@style/DocumentsNonDialogTheme"
+            android:theme="@style/DocumentsFullScreenTheme"
             android:icon="@drawable/ic_doc_text">
             <intent-filter>
                 <action android:name="android.provider.action.MANAGE_ROOT" />
@@ -63,7 +63,7 @@
 
         <activity
             android:name=".FilesActivity"
-            android:theme="@style/FilesTheme"
+            android:theme="@style/DocumentsFullScreenTheme"
             android:icon="@drawable/ic_files_app"
             android:label="@string/files_label"
             android:documentLaunchMode="intoExisting">
