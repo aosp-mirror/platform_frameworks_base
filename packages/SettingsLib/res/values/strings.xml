@@ -675,6 +675,11 @@
     <!-- Sound & display settings screen, theme setting value to automatically switch between a light- or dark-colored user interface [CHAR LIMIT=30] -->
     <string name="night_mode_auto">Automatic</string>
 
+    <!-- Developer settings: select WebView provider title -->
+    <string name="select_webview_provider_title">WebView implementation</string>
+    <!-- Developer settings: select WebView provider dialog title -->
+    <string name="select_webview_provider_dialog_title">Set WebView implementation</string>
+
     <!-- Developer settings screen, convert userdata to file encryption option name -->
     <string name="convert_to_file_encryption">Convert to file encryption</string>
     <!-- Developer settings screen, convert userdata to file encryption summary when option is available -->

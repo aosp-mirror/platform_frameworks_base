@@ -150,6 +150,7 @@ public final class SystemServer {
     // TODO: remove all of these references by improving dependency resolution and boot phases
     private PowerManagerService mPowerManagerService;
     private ActivityManagerService mActivityManagerService;
+    private WebViewUpdateService mWebViewUpdateService;
     private DisplayManagerService mDisplayManagerService;
     private PackageManagerService mPackageManagerService;
     private PackageManager mPackageManager;
@@ -409,7 +410,7 @@ public final class SystemServer {
                 LocalServices.getService(UsageStatsManagerInternal.class));
 
         // Tracks whether the updatable WebView is in a ready state and watches for update installs.
-        mSystemServiceManager.startService(WebViewUpdateService.class);
+        mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
     }
 
     /**
@@ -1180,7 +1181,7 @@ public final class SystemServer {
 
                 Slog.i(TAG, "WebViewFactory preparation");
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
-                WebViewFactory.prepareWebViewInSystemServer();
+                mWebViewUpdateService.prepareWebViewInSystemServer();
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "StartSystemUI");
