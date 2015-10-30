@@ -1336,6 +1336,37 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null && mAppToken.mTask != null && mAppToken.mTask.inDockedWorkspace();
     }
 
+    int getTouchableRegion(Region region, int flags, InputMonitor inputMonitor) {
+        final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)) == 0;
+        if (modal && mAppToken != null) {
+            // Limit the outer touch to the activity stack region.
+            flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            if (!inFreeformWorkspace()) {
+                // If this is a modal window we need to dismiss it if it's not full screen and the
+                // touch happens outside of the frame that displays the content. This means we
+                // need to intercept touches outside of that window. The dim layer user
+                // associated with the window (task or stack) will give us the good bounds, as
+                // they would be used to display the dim layer.
+                final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
+                if (dimLayerUser != null) {
+                    dimLayerUser.getBounds(mTmpRect);
+                } else {
+                    getVisibleBounds(mTmpRect, BOUNDS_FOR_TOUCH);
+                }
+            } else {
+                // For freeform windows we the touch region to include the whole surface for the
+                // shadows.
+                getVisibleBounds(mTmpRect, BOUNDS_FOR_TOUCH);
+            }
+            region.set(mTmpRect);
+        } else {
+            // Not modal or full screen modal
+            getTouchableRegion(region);
+        }
+        return flags;
+    }
+
     private class DeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
