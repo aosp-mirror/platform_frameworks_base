@@ -476,7 +476,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 new AppTransitionAnimationSpec[specs.size()];
         try {
             WindowManagerGlobal.getWindowManagerService().overridePendingAppTransitionMultiThumb(
-                    specs.toArray(specsArray), callback, true /* scaleUp */);
+                    specs.toArray(specsArray), callback, null, true /* scaleUp */);
 
         } catch (RemoteException e) {
             Log.w(TAG, "Error overriding app transition", e);

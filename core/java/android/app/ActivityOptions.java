@@ -131,6 +131,13 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
+     * Callback for when the last frame of the animation is played.
+     * @hide
+     */
+    private static final String KEY_ANIMATION_FINISHED_LISTENER =
+            "android:activity.animationFinishedListener";
+
+    /**
      * Descriptions of app transition animations to be played during the activity launch.
      */
     private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
@@ -198,6 +205,7 @@ public class ActivityOptions {
     private int mWidth;
     private int mHeight;
     private IRemoteCallback mAnimationStartedListener;
+    private IRemoteCallback mAnimationFinishedListener;
     private ResultReceiver mTransitionReceiver;
     private boolean mIsReturning;
     private ArrayList<String> mSharedElementNames;
@@ -280,16 +288,15 @@ public class ActivityOptions {
         return opts;
     }
 
-    private void setOnAnimationStartedListener(Handler handler,
-            OnAnimationStartedListener listener) {
+    private void setOnAnimationStartedListener(final Handler handler,
+            final OnAnimationStartedListener listener) {
         if (listener != null) {
-            final Handler h = handler;
-            final OnAnimationStartedListener finalListener = listener;
             mAnimationStartedListener = new IRemoteCallback.Stub() {
-                @Override public void sendResult(Bundle data) throws RemoteException {
-                    h.post(new Runnable() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    handler.post(new Runnable() {
                         @Override public void run() {
-                            finalListener.onAnimationStarted();
+                            listener.onAnimationStarted();
                         }
                     });
                 }
@@ -304,6 +311,32 @@ public class ActivityOptions {
      */
     public interface OnAnimationStartedListener {
         void onAnimationStarted();
+    }
+
+    private void setOnAnimationFinishedListener(final Handler handler,
+            final OnAnimationFinishedListener listener) {
+        if (listener != null) {
+            mAnimationFinishedListener = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onAnimationFinished();
+                        }
+                    });
+                }
+            };
+        }
+    }
+
+    /**
+     * Callback for use with {@link ActivityOptions#makeThumbnailAspectScaleDownAnimation}
+     * to find out when the given animation has drawn its last frame.
+     * @hide
+     */
+    public interface OnAnimationFinishedListener {
+        void onAnimationFinished();
     }
 
     /**
@@ -523,12 +556,14 @@ public class ActivityOptions {
     /** @hide */
     public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
             AppTransitionAnimationSpec[] specs, Handler handler,
-            OnAnimationStartedListener listener) {
+            OnAnimationStartedListener onAnimationStartedListener,
+            OnAnimationFinishedListener onAnimationFinishedListener) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
         opts.mAnimSpecs = specs;
-        opts.setOnAnimationStartedListener(handler, listener);
+        opts.setOnAnimationStartedListener(handler, onAnimationStartedListener);
+        opts.setOnAnimationFinishedListener(handler, onAnimationFinishedListener);
         return opts;
     }
 
@@ -725,6 +760,10 @@ public class ActivityOptions {
                 mAnimSpecs[i] = (AppTransitionAnimationSpec) specs[i];
             }
         }
+        if (opts.containsKey(KEY_ANIMATION_FINISHED_LISTENER)) {
+            mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
+                    opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
+        }
     }
 
     /** @hide */
@@ -797,6 +836,11 @@ public class ActivityOptions {
     /** @hide */
     public IRemoteCallback getOnAnimationStartListener() {
         return mAnimationStartedListener;
+    }
+
+    /** @hide */
+    public IRemoteCallback getAnimationFinishedListener() {
+        return mAnimationFinishedListener;
     }
 
     /** @hide */
@@ -929,6 +973,7 @@ public class ActivityOptions {
                 break;
         }
         mAnimSpecs = otherOptions.mAnimSpecs;
+        mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
     }
 
     /**
@@ -997,6 +1042,9 @@ public class ActivityOptions {
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
+        }
+        if (mAnimationFinishedListener != null) {
+            b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
         }
 
         return b;

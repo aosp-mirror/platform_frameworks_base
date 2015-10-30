@@ -138,7 +138,7 @@ interface IWindowManager
      * @hide
      */
     void overridePendingAppTransitionMultiThumb(in AppTransitionAnimationSpec[] specs,
-            IRemoteCallback startedCallback, boolean scaleUp);
+            IRemoteCallback startedCallback, IRemoteCallback finishedCallback, boolean scaleUp);
     void overridePendingAppTransitionInPlace(String packageName, int anim);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
