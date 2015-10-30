@@ -201,6 +201,11 @@ interface IWindowManager
      */
     void setScreenCaptureDisabled(int userId, boolean disabled);
 
+    /**
+     * Cancels the window transitions for the given task.
+     */
+    void cancelTaskWindowTransition(int taskId);
+
     // These can only be called with the SET_ORIENTATION permission.
     /**
      * Update the current screen rotation based on the current state of
