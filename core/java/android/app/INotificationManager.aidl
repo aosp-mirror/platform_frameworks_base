@@ -83,10 +83,8 @@ interface INotificationManager
 
     int getZenMode();
     ZenModeConfig getZenModeConfig();
-    boolean setZenModeConfig(in ZenModeConfig config, String reason);
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
-    oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
     boolean isNotificationPolicyAccessGranted(String pkg);
     NotificationManager.Policy getNotificationPolicy(String pkg);
     void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);

@@ -348,29 +348,6 @@ public class NotificationManager
     /**
      * @hide
      */
-    public boolean setZenModeConfig(ZenModeConfig config, String reason) {
-        INotificationManager service = getService();
-        try {
-            return service.setZenModeConfig(config, reason);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void requestZenModeConditions(IConditionListener listener, int relevance) {
-        INotificationManager service = getService();
-        try {
-            service.requestZenModeConditions(listener, relevance);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * @hide
-     */
     public int getZenMode() {
         INotificationManager service = getService();
         try {
