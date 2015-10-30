@@ -197,7 +197,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_SET_DEVICE_VOLUME = 0;
     private static final int MSG_PERSIST_VOLUME = 1;
     private static final int MSG_PERSIST_RINGER_MODE = 3;
-    private static final int MSG_MEDIA_SERVER_DIED = 4;
+    private static final int MSG_AUDIO_SERVER_DIED = 4;
     private static final int MSG_PLAY_SOUND_EFFECT = 5;
     private static final int MSG_BTA2DP_DOCK_TIMEOUT = 6;
     private static final int MSG_LOAD_SOUND_EFFECTS = 7;
@@ -358,7 +358,7 @@ public class AudioService extends IAudioService.Stub {
         public void onError(int error) {
             switch (error) {
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
-                sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED,
+                sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
                         SENDMSG_NOOP, 0, 0, null, 0);
                 break;
             default:
@@ -772,15 +772,15 @@ public class AudioService extends IAudioService.Stub {
                 INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
     }
 
-    public void onMediaServerDied() {
+    public void onAudioServerDied() {
         if (!mSystemReady ||
                 (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK)) {
-            Log.e(TAG, "Media server died.");
-            sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
+            Log.e(TAG, "Audioserver died.");
+            sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                     null, 500);
             return;
         }
-        Log.e(TAG, "Media server started.");
+        Log.e(TAG, "Audioserver started.");
 
         // indicate to audio HAL that we start the reconfiguration phase after a media
         // server crash
@@ -4406,8 +4406,8 @@ public class AudioService extends IAudioService.Stub {
                     persistRingerMode(getRingerModeInternal());
                     break;
 
-                case MSG_MEDIA_SERVER_DIED:
-                    onMediaServerDied();
+                case MSG_AUDIO_SERVER_DIED:
+                    onAudioServerDied();
                     break;
 
                 case MSG_UNLOAD_SOUND_EFFECTS:
