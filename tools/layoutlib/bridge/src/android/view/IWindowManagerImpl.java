@@ -242,7 +242,7 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
-            IRemoteCallback callback, boolean scaleUp) {
+            IRemoteCallback callback0, IRemoteCallback callback1, boolean scaleUp) {
         // TODO Auto-generated method stub
     }
 
