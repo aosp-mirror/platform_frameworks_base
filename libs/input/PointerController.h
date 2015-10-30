@@ -28,6 +28,7 @@
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
 #include <utils/String8.h>
+#include <gui/DisplayEventReceiver.h>
 
 #include <SkBitmap.h>
 
@@ -68,7 +69,8 @@ public:
  *
  * Handles pointer acceleration and animation.
  */
-class PointerController : public PointerControllerInterface, public MessageHandler {
+class PointerController : public PointerControllerInterface, public MessageHandler,
+                          public LooperCallback {
 protected:
     virtual ~PointerController();
 
@@ -106,7 +108,6 @@ private:
     static const size_t MAX_SPOTS = 12;
 
     enum {
-        MSG_ANIMATE,
         MSG_INACTIVITY_TIMEOUT,
     };
 
@@ -135,6 +136,8 @@ private:
     sp<Looper> mLooper;
     sp<SpriteController> mSpriteController;
     sp<WeakMessageHandler> mHandler;
+
+    DisplayEventReceiver mDisplayEventReceiver;
 
     PointerResources mResources;
 
@@ -173,7 +176,8 @@ private:
     void setPositionLocked(float x, float y);
 
     void handleMessage(const Message& message);
-    void doAnimate();
+    int handleEvent(int fd, int events, void* data);
+    void doAnimate(nsecs_t timestamp);
     void doInactivityTimeout();
 
     void startAnimationLocked();

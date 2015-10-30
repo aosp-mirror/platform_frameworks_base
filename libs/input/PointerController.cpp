@@ -42,15 +42,14 @@ namespace android {
 static const nsecs_t INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL = 15 * 1000 * 1000000LL; // 15 seconds
 static const nsecs_t INACTIVITY_TIMEOUT_DELAY_TIME_SHORT = 3 * 1000 * 1000000LL; // 3 seconds
 
-// Time to wait between animation frames.
-static const nsecs_t ANIMATION_FRAME_INTERVAL = 1000000000LL / 60;
-
 // Time to spend fading out the spot completely.
 static const nsecs_t SPOT_FADE_DURATION = 200 * 1000000LL; // 200 ms
 
 // Time to spend fading out the pointer completely.
 static const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
 
+// The number of events to be read at once for DisplayEventReceiver.
+static const int EVENT_BUFFER_SIZE = 100;
 
 // --- PointerController ---
 
@@ -58,6 +57,13 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
         const sp<Looper>& looper, const sp<SpriteController>& spriteController) :
         mPolicy(policy), mLooper(looper), mSpriteController(spriteController) {
     mHandler = new WeakMessageHandler(this);
+
+    if (mDisplayEventReceiver.initCheck() == NO_ERROR) {
+        mLooper->addFd(mDisplayEventReceiver.getFd(), Looper::POLL_CALLBACK,
+                       Looper::EVENT_INPUT, this, nullptr);
+    } else {
+        ALOGE("Failed to initialize DisplayEventReceiver.");
+    }
 
     AutoMutex _l(mLock);
 
@@ -416,21 +422,49 @@ void PointerController::setPointerIcon(const SpriteIcon& icon) {
 
 void PointerController::handleMessage(const Message& message) {
     switch (message.what) {
-    case MSG_ANIMATE:
-        doAnimate();
-        break;
     case MSG_INACTIVITY_TIMEOUT:
         doInactivityTimeout();
         break;
     }
 }
 
-void PointerController::doAnimate() {
+int PointerController::handleEvent(int /* fd */, int events, void* /* data */) {
+    if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
+        ALOGE("Display event receiver pipe was closed or an error occurred.  "
+              "events=0x%x", events);
+        return 0; // remove the callback
+    }
+
+    if (!(events & Looper::EVENT_INPUT)) {
+        ALOGW("Received spurious callback for unhandled poll event.  "
+              "events=0x%x", events);
+        return 1; // keep the callback
+    }
+
+    bool gotVsync = false;
+    ssize_t n;
+    nsecs_t timestamp;
+    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
+    while ((n = mDisplayEventReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+        for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
+            if (buf[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
+                timestamp = buf[i].header.timestamp;
+                gotVsync = true;
+            }
+        }
+    }
+    if (gotVsync) {
+        doAnimate(timestamp);
+    }
+    return 1;  // keep the callback
+}
+
+void PointerController::doAnimate(nsecs_t timestamp) {
     AutoMutex _l(mLock);
 
     bool keepAnimating = false;
     mLocked.animationPending = false;
-    nsecs_t frameDelay = systemTime(SYSTEM_TIME_MONOTONIC) - mLocked.animationTime;
+    nsecs_t frameDelay = timestamp - mLocked.animationTime;
 
     // Animate pointer fade.
     if (mLocked.pointerFadeDirection < 0) {
@@ -481,7 +515,7 @@ void PointerController::startAnimationLocked() {
     if (!mLocked.animationPending) {
         mLocked.animationPending = true;
         mLocked.animationTime = systemTime(SYSTEM_TIME_MONOTONIC);
-        mLooper->sendMessageDelayed(ANIMATION_FRAME_INTERVAL, mHandler, Message(MSG_ANIMATE));
+        mDisplayEventReceiver.requestNextVsync();
     }
 }
 
