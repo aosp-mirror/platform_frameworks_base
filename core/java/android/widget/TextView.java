@@ -310,6 +310,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     static final int PROCESS_TEXT_REQUEST_CODE = 100;
 
+    /**
+     *  Return code of {@link #doKeyDown}.
+     */
+    private static final int KEY_EVENT_NOT_HANDLED = 0;
+    private static final int KEY_EVENT_HANDLED = -1;
+    private static final int KEY_DOWN_HANDLED_BY_KEY_LISTENER = 1;
+    private static final int KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD = 2;
+
     // System wide time for last cut, copy or text changed action.
     static long sLastCutCopyOrTextChangedTime;
 
@@ -5955,8 +5963,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        int which = doKeyDown(keyCode, event, null);
-        if (which == 0) {
+        final int which = doKeyDown(keyCode, event, null);
+        if (which == KEY_EVENT_NOT_HANDLED) {
             return super.onKeyDown(keyCode, event);
         }
 
@@ -5966,13 +5974,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         KeyEvent down = KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
-
-        int which = doKeyDown(keyCode, down, event);
-        if (which == 0) {
+        final int which = doKeyDown(keyCode, down, event);
+        if (which == KEY_EVENT_NOT_HANDLED) {
             // Go through default dispatching.
             return super.onKeyMultiple(keyCode, repeatCount, event);
         }
-        if (which == -1) {
+        if (which == KEY_EVENT_HANDLED) {
             // Consumed the whole thing.
             return true;
         }
@@ -5985,7 +5992,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // It would be nice if those interfaces had an onKeyMultiple() method,
         // but adding that is a more complicated change.
         KeyEvent up = KeyEvent.changeAction(event, KeyEvent.ACTION_UP);
-        if (which == 1) {
+        if (which == KEY_DOWN_HANDLED_BY_KEY_LISTENER) {
             // mEditor and mEditor.mInput are not null from doKeyDown
             mEditor.mKeyListener.onKeyUp(this, (Editable)mText, keyCode, up);
             while (--repeatCount > 0) {
@@ -5994,7 +6001,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             hideErrorIfUnchanged();
 
-        } else if (which == 2) {
+        } else if (which == KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD) {
             // mMovement is not null from doKeyDown
             mMovement.onKeyUp(this, (Spannable)mText, keyCode, up);
             while (--repeatCount > 0) {
@@ -6051,7 +6058,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
         if (!isEnabled()) {
-            return 0;
+            return KEY_EVENT_NOT_HANDLED;
         }
 
         // If this is the initial keydown, we don't want to prevent a movement away from this view.
@@ -6078,7 +6085,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 this, EditorInfo.IME_NULL, event)) {
                             mEditor.mInputContentType.enterDown = true;
                             // We are consuming the enter key for them.
-                            return -1;
+                            return KEY_EVENT_HANDLED;
                         }
                     }
 
@@ -6088,9 +6095,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if ((event.getFlags() & KeyEvent.FLAG_EDITOR_ACTION) != 0
                             || shouldAdvanceFocusOnEnter()) {
                         if (hasOnClickListeners()) {
-                            return 0;
+                            return KEY_EVENT_NOT_HANDLED;
                         }
-                        return -1;
+                        return KEY_EVENT_HANDLED;
                     }
                 }
                 break;
@@ -6098,7 +6105,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if (event.hasNoModifiers()) {
                     if (shouldAdvanceFocusOnEnter()) {
-                        return 0;
+                        return KEY_EVENT_NOT_HANDLED;
                     }
                 }
                 break;
@@ -6106,7 +6113,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case KeyEvent.KEYCODE_TAB:
                 if (event.hasNoModifiers() || event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
                     if (shouldAdvanceFocusOnTab()) {
-                        return 0;
+                        return KEY_EVENT_NOT_HANDLED;
                     }
                 }
                 break;
@@ -6115,14 +6122,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case KeyEvent.KEYCODE_BACK:
                 if (mEditor != null && mEditor.mTextActionMode != null) {
                     stopTextActionMode();
-                    return -1;
+                    return KEY_EVENT_HANDLED;
                 }
                 break;
 
             case KeyEvent.KEYCODE_CUT:
                 if (event.hasNoModifiers() && canCut()) {
                     if (onTextContextMenuItem(ID_CUT)) {
-                        return -1;
+                        return KEY_EVENT_HANDLED;
                     }
                 }
                 break;
@@ -6130,7 +6137,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case KeyEvent.KEYCODE_COPY:
                 if (event.hasNoModifiers() && canCopy()) {
                     if (onTextContextMenuItem(ID_COPY)) {
-                        return -1;
+                        return KEY_EVENT_HANDLED;
                     }
                 }
                 break;
@@ -6138,7 +6145,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case KeyEvent.KEYCODE_PASTE:
                 if (event.hasNoModifiers() && canPaste()) {
                     if (onTextContextMenuItem(ID_PASTE)) {
-                        return -1;
+                        return KEY_EVENT_HANDLED;
                     }
                 }
                 break;
@@ -6154,7 +6161,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     hideErrorIfUnchanged();
                     doDown = false;
                     if (handled) {
-                        return -1;
+                        return KEY_EVENT_HANDLED;
                     }
                 } catch (AbstractMethodError e) {
                     // onKeyOther was added after 1.0, so if it isn't
@@ -6170,7 +6177,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         keyCode, event);
                 endBatchEdit();
                 hideErrorIfUnchanged();
-                if (handled) return 1;
+                if (handled) return KEY_DOWN_HANDLED_BY_KEY_LISTENER;
             }
         }
 
@@ -6185,7 +6192,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             otherEvent);
                     doDown = false;
                     if (handled) {
-                        return -1;
+                        return KEY_EVENT_HANDLED;
                     }
                 } catch (AbstractMethodError e) {
                     // onKeyOther was added after 1.0, so if it isn't
@@ -6197,12 +6204,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
                         mPreventDefaultMovement = true;
                     }
-                    return 2;
+                    return KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD;
                 }
             }
         }
 
-        return mPreventDefaultMovement && !KeyEvent.isModifierKey(keyCode) ? -1 : 0;
+        return mPreventDefaultMovement && !KeyEvent.isModifierKey(keyCode) ?
+                KEY_EVENT_HANDLED : KEY_EVENT_NOT_HANDLED;
     }
 
     /**
