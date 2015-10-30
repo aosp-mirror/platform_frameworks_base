@@ -533,6 +533,15 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 boolean hasRepKeyTimeElapsed = (SystemClock.elapsedRealtime() -
                         mLastTabKeyEventTime) > mConfig.altTabKeyDelay;
                 if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
+                    // As we iterate to the next/previous task, cancel any current/lagging window
+                    // transition animations
+                    if (mConfig.launchedToTaskId != -1) {
+                        SystemServicesProxy ssp =
+                                RecentsTaskLoader.getInstance().getSystemServicesProxy();
+                        ssp.cancelThumbnailTransition(getTaskId());
+                        ssp.cancelWindowTransition(mConfig.launchedToTaskId);
+                    }
+
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
                     mRecentsView.focusNextTask(!backward);
