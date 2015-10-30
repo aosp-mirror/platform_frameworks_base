@@ -25,6 +25,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -41,14 +42,11 @@ import com.google.android.collect.Lists;
 import libcore.io.Streams;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.util.ArrayList;
@@ -107,11 +105,6 @@ public class BugreportReceiver extends BroadcastReceiver {
      */
     private void triggerLocalNotification(final Context context, final File bugreportFile,
             final File screenshotFile) {
-        // Files are kept on private storage, so turn into Uris that we can
-        // grant temporary permissions for.
-        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
-        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
-
         boolean isPlainText = bugreportFile.getName().toLowerCase().endsWith(".txt");
         if (!isPlainText) {
             // Already zipped, send it right away.
@@ -133,12 +126,22 @@ public class BugreportReceiver extends BroadcastReceiver {
      */
     private static Intent buildSendIntent(Context context, Uri bugreportUri, Uri screenshotUri) {
         final Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        final String mimeType = "application/vnd.android.bugreport";
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.setType("application/vnd.android.bugreport");
+        intent.setType(mimeType);
 
         intent.putExtra(Intent.EXTRA_SUBJECT, bugreportUri.getLastPathSegment());
+
+        // EXTRA_TEXT should be an ArrayList, but some clients are expecting a single String.
+        // So, to avoid an exception on Intent.migrateExtraStreamToClipData(), we need to manually
+        // create the ClipData object with the attachments URIs.
         intent.putExtra(Intent.EXTRA_TEXT, SystemProperties.get("ro.build.description"));
+        final ClipData clipData = new ClipData(
+                null, new String[] { mimeType },
+                new ClipData.Item(null, null, null, bugreportUri));
+        clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
+        intent.setClipData(clipData);
 
         final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri, screenshotUri);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
