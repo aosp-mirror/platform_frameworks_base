@@ -37,6 +37,7 @@ class TestScene {
 public:
     struct Options {
         int count = 0;
+        int reportFrametimeWeight = 0;
     };
 
     template <class T>

@@ -285,6 +285,9 @@ public:
 
     static ProfileType getProfileType();
 
+    // Should be used only by test apps
+    static bool waitForGpuCompletion;
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
