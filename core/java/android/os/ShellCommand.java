@@ -44,7 +44,7 @@ public abstract class ShellCommand {
     private FastPrintWriter mOutPrintWriter;
     private FastPrintWriter mErrPrintWriter;
 
-    public void exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
+    public int exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ResultReceiver resultReceiver) {
         mTarget = target;
         mIn = in;
@@ -89,6 +89,7 @@ public abstract class ShellCommand {
             mResultReceiver.send(res, null);
         }
         if (DEBUG) Slog.d(TAG, "Finished command " + mCmd + " on " + mTarget);
+        return res;
     }
 
     public PrintWriter getOutPrintWriter() {

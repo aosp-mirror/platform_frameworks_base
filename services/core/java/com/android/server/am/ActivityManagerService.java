@@ -69,6 +69,7 @@ import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.ResultReceiver;
 import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
@@ -13083,6 +13084,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+        (new ActivityManagerShellCommand(this, false)).exec(
+                this, in, out, err, args, resultReceiver);
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (checkCallingPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -13119,34 +13127,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 dumpClient = true;
             } else if ("-h".equals(opt)) {
-                pw.println("Activity manager dump options:");
-                pw.println("  [-a] [-c] [-p package] [-h] [cmd] ...");
-                pw.println("  cmd may be one of:");
-                pw.println("    a[ctivities]: activity stack state");
-                pw.println("    r[recents]: recent activities state");
-                pw.println("    b[roadcasts] [PACKAGE_NAME] [history [-s]]: broadcast state");
-                pw.println("    i[ntents] [PACKAGE_NAME]: pending intent state");
-                pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
-                pw.println("    o[om]: out of memory management");
-                pw.println("    perm[issions]: URI permission grant state");
-                pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
-                pw.println("    provider [COMP_SPEC]: provider client-side state");
-                pw.println("    s[ervices] [COMP_SPEC ...]: service state");
-                pw.println("    as[sociations]: tracked app associations");
-                pw.println("    service [COMP_SPEC]: service client-side state");
-                pw.println("    package [PACKAGE_NAME]: all state related to given package");
-                pw.println("    all: dump all activities");
-                pw.println("    top: dump the top activity");
-                pw.println("    write: write all pending state to storage");
-                pw.println("    track-associations: enable association tracking");
-                pw.println("    untrack-associations: disable and clear association tracking");
-                pw.println("  cmd may also be a COMP_SPEC to dump activities.");
-                pw.println("  COMP_SPEC may be a component name (com.foo/.myApp),");
-                pw.println("    a partial substring in a component name, a");
-                pw.println("    hex object identifier.");
-                pw.println("  -a: include all available server state.");
-                pw.println("  -c: include client state.");
-                pw.println("  -p: limit output to given package.");
+                ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
@@ -13283,36 +13264,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     mServices.dumpServicesLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
                 }
-            } else if ("write".equals(cmd)) {
-                mTaskPersister.flush();
-                pw.println("All tasks persisted.");
-                return;
-            } else if ("track-associations".equals(cmd)) {
-                synchronized (this) {
-                    if (!mTrackingAssociations) {
-                        mTrackingAssociations = true;
-                        pw.println("Association tracking started.");
-                    } else {
-                        pw.println("Association tracking already enabled.");
-                    }
-                }
-                return;
-            } else if ("untrack-associations".equals(cmd)) {
-                synchronized (this) {
-                    if (mTrackingAssociations) {
-                        mTrackingAssociations = false;
-                        mAssociations.clear();
-                        pw.println("Association tracking stopped.");
-                    } else {
-                        pw.println("Association tracking not running.");
-                    }
-                }
-                return;
             } else {
                 // Dumping a single activity?
                 if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
-                    pw.println("Bad activity command, or no activities match: " + cmd);
-                    pw.println("Use -h for help.");
+                    ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
+                    int res = shell.exec(this, null, fd, null, args, new ResultReceiver(null));
+                    if (res < 0) {
+                        pw.println("Bad activity command, or no activities match: " + cmd);
+                        pw.println("Use -h for help.");
+                    }
                 }
             }
             if (!more) {
@@ -13563,17 +13523,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (mActiveUids.size() > 0) {
-            if (needSep) {
-                pw.println();
+            boolean printed = false;
+            int whichAppId = -1;
+            if (dumpPackage != null) {
+                try {
+                    ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
+                            dumpPackage, 0);
+                    whichAppId = UserHandle.getAppId(info.uid);
+                } catch (NameNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
-            pw.println("  UID states:");
             for (int i=0; i<mActiveUids.size(); i++) {
                 UidRecord uidRec = mActiveUids.valueAt(i);
+                if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != whichAppId) {
+                    continue;
+                }
+                if (!printed) {
+                    printed = true;
+                    if (needSep) {
+                        pw.println();
+                    }
+                    pw.println("  UID states:");
+                    needSep = true;
+                    printedAnything = true;
+                }
                 pw.print("    UID "); UserHandle.formatUid(pw, uidRec.uid);
                 pw.print(": "); pw.println(uidRec);
             }
-            needSep = true;
-            printedAnything = true;
         }
 
         if (mLruProcesses.size() > 0) {
