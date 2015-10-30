@@ -44,6 +44,8 @@ public class TaskStackLayoutAlgorithm {
     private static final float STACK_PEEK_MIN_SCALE = 0.85f;
     // The scale of the last task
     private static final float SINGLE_TASK_SCALE = 0.95f;
+    // The percentage of the height of the stack that we want to show the last task at
+    private static final float VISIBLE_LAST_TASK_HEIGHT_PCT = 0.45f;
     // The percentage of height of task to show between tasks
     private static final float VISIBLE_TASK_HEIGHT_BETWEEN_TASKS = 0.5f;
     // The percentage between the maxStackScroll and the maxScroll where a given scroll will still
@@ -316,15 +318,20 @@ public class TaskStackLayoutAlgorithm {
             mFrontMostTaskP = pAtFrontMostTaskTop;
             // Set the stack end scroll progress to the point at which the bottom of the front-most
             // task is aligned to the bottom of the stack
-            mStackEndScrollP = alignToStackBottom(pAtFrontMostTaskTop,
-                    mTaskHeightPOffset);
-            // Set the preferred stack end scroll progress to the point where the bottom of the
-            // front-most task is offset by the navbar and padding from the bottom of the stack
-            mPreferredStackEndScrollP = mStackEndScrollP + mStackBottomPOffset;
-            // Basically align the back-most task such that its progress is the same as the top of
-            // the front most task at the max stack scroll
-            mMinScrollP = alignToStackBottom(pAtBackMostTaskTop,
-                    mStackBottomPOffset + mTaskHeightPOffset);
+            mStackEndScrollP = alignToStackBottom(pAtFrontMostTaskTop, mTaskHeightPOffset);
+            if (mNumStackTasks > 1) {
+                // Set the preferred stack end scroll progress to the point where the bottom of the
+                // front-most task is offset by the navbar and padding from the bottom of the stack
+                mPreferredStackEndScrollP = mStackEndScrollP + mStackBottomPOffset;
+
+                // Basically align the back-most task such that the last two tasks would be visible
+                mMinScrollP = alignToStackBottom(pAtBackMostTaskTop, 2 *
+                        mBetweenAffiliationPOffset);
+            } else {
+                // When there is a single item, then just make all the stack progresses the same
+                mPreferredStackEndScrollP = mStackEndScrollP;
+                mMinScrollP = mStackEndScrollP;
+            }
         } else {
             // TODO: In the case where there is only freeform tasks, then the scrolls should be
             // set to zero
@@ -455,7 +462,7 @@ public class TaskStackLayoutAlgorithm {
             // Center the task in the stack, changing the scale will not follow the curve, but just
             // modulate some values directly
             float pTaskRelative = mMinScrollP - stackScroll;
-            float scale = SINGLE_TASK_SCALE;
+            float scale = (mNumFreeformTasks > 0) ? 1f : SINGLE_TASK_SCALE;
             int topOffset = (mStackRect.height() - mTaskRect.height()) / 2;
             transformOut.scale = scale;
             transformOut.translationX = 0;
