@@ -5724,6 +5724,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public Bundle getUserRestrictions(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            final ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return activeAdmin.userRestrictions;
+        }
+    }
+
+    @Override
     public boolean setApplicationHidden(ComponentName who, String packageName,
             boolean hidden) {
         Preconditions.checkNotNull(who, "ComponentName is null");

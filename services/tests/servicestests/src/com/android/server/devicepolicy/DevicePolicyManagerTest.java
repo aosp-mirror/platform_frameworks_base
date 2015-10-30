@@ -739,6 +739,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmTestUtils.newRestrictions(),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
         );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                dpm.getUserRestrictions(admin1)
+        );
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_SMS);
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
@@ -748,6 +752,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         UserManager.DISALLOW_SMS, UserManager.DISALLOW_OUTGOING_CALLS),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
         );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(
+                        UserManager.DISALLOW_SMS, UserManager.DISALLOW_OUTGOING_CALLS),
+                dpm.getUserRestrictions(admin1)
+        );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_SMS);
 
@@ -755,12 +764,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmTestUtils.newRestrictions(UserManager.DISALLOW_OUTGOING_CALLS),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
         );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(UserManager.DISALLOW_OUTGOING_CALLS),
+                dpm.getUserRestrictions(admin1)
+        );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
+        );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                dpm.getUserRestrictions(admin1)
         );
 
         // TODO Check inner calls.
@@ -787,6 +804,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
                         .ensureUserRestrictions()
         );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                        UserManager.DISALLOW_OUTGOING_CALLS
+                ),
+                dpm.getUserRestrictions(admin1)
+        );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
 
@@ -798,6 +822,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
                         .ensureUserRestrictions()
         );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(
+                        UserManager.DISALLOW_OUTGOING_CALLS
+                ),
+                dpm.getUserRestrictions(admin1)
+        );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
 
@@ -805,6 +835,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmTestUtils.newRestrictions(),
                 dpms.getProfileOwnerAdminLocked(DpmMockContext.CALLER_USER_HANDLE)
                         .ensureUserRestrictions()
+        );
+        DpmTestUtils.assertRestrictions(
+                DpmTestUtils.newRestrictions(),
+                dpm.getUserRestrictions(admin1)
         );
 
         // TODO Check inner calls.
