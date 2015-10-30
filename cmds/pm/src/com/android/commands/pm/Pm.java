@@ -25,7 +25,6 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.IActivityManager;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,30 +33,25 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
-import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
-import android.content.pm.PermissionGroupInfo;
-import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
-import android.content.res.AssetManager;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IUserManager;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -80,11 +74,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.WeakHashMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -95,9 +84,6 @@ public final class Pm {
     IPackageInstaller mInstaller;
     IUserManager mUm;
     IAccountManager mAm;
-
-    private WeakHashMap<String, Resources> mResourceCache
-            = new WeakHashMap<String, Resources>();
 
     private String[] mArgs;
     private int mNextArg;
@@ -275,10 +261,10 @@ public final class Pm {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
                     validCommand = true;
-                    return runListPackages(false);
-                } else if (args[0].equalsIgnoreCase("-lf")){
+                    return runShellCommand("package", new String[] { "list", "package" });
+                } else if (args[0].equalsIgnoreCase("-lf")) {
                     validCommand = true;
-                    return runListPackages(true);
+                    return runShellCommand("package", new String[] { "list", "package", "-f" });
                 }
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("-p")) {
@@ -297,6 +283,22 @@ public final class Pm {
         }
     }
 
+    private int runShellCommand(String serviceName, String[] args) {
+        final HandlerThread handlerThread = new HandlerThread("results");
+        handlerThread.start();
+        try {
+            ServiceManager.getService(serviceName).shellCommand(
+                    FileDescriptor.in, FileDescriptor.out, FileDescriptor.err,
+                    args, new ResultReceiver(new Handler(handlerThread.getLooper())));
+            return 0;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            handlerThread.quitSafely();
+        }
+        return -1;
+    }
+
     /**
      * Execute the list sub-command.
      *
@@ -308,462 +310,11 @@ public final class Pm {
      * pm list instrumentation
      */
     private int runList() {
-        String type = nextArg();
-        if (type == null) {
-            System.err.println("Error: didn't specify type of data to list");
-            return 1;
+        final String type = nextArg();
+        if ("users".equals(type)) {
+            return runShellCommand("user", new String[] { "list" });
         }
-        if ("package".equals(type) || "packages".equals(type)) {
-            return runListPackages(false);
-        } else if ("permission-groups".equals(type)) {
-            return runListPermissionGroups();
-        } else if ("permissions".equals(type)) {
-            return runListPermissions();
-        } else if ("features".equals(type)) {
-            return runListFeatures();
-        } else if ("libraries".equals(type)) {
-            return runListLibraries();
-        } else if ("instrumentation".equals(type)) {
-            return runListInstrumentation();
-        } else if ("users".equals(type)) {
-            return runListUsers();
-        } else {
-            System.err.println("Error: unknown list type '" + type + "'");
-            return 1;
-        }
-    }
-
-    /**
-     * Lists all the installed packages.
-     */
-    private int runListPackages(boolean showApplicationPackage) {
-        int getFlags = 0;
-        boolean listDisabled = false, listEnabled = false;
-        boolean listSystem = false, listThirdParty = false;
-        boolean listInstaller = false;
-        int userId = UserHandle.USER_SYSTEM;
-        try {
-            String opt;
-            while ((opt=nextOption()) != null) {
-                if (opt.equals("-l")) {
-                    // old compat
-                } else if (opt.equals("-lf")) {
-                    showApplicationPackage = true;
-                } else if (opt.equals("-f")) {
-                    showApplicationPackage = true;
-                } else if (opt.equals("-d")) {
-                    listDisabled = true;
-                } else if (opt.equals("-e")) {
-                    listEnabled = true;
-                } else if (opt.equals("-s")) {
-                    listSystem = true;
-                } else if (opt.equals("-3")) {
-                    listThirdParty = true;
-                } else if (opt.equals("-i")) {
-                    listInstaller = true;
-                } else if (opt.equals("--user")) {
-                    userId = Integer.parseInt(nextArg());
-                } else if (opt.equals("-u")) {
-                    getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
-                } else {
-                    System.err.println("Error: Unknown option: " + opt);
-                    return 1;
-                }
-            }
-        } catch (RuntimeException ex) {
-            System.err.println("Error: " + ex.toString());
-            return 1;
-        }
-
-        String filter = nextArg();
-
-        try {
-            final List<PackageInfo> packages = getInstalledPackages(mPm, getFlags, userId);
-
-            int count = packages.size();
-            for (int p = 0 ; p < count ; p++) {
-                PackageInfo info = packages.get(p);
-                if (filter != null && !info.packageName.contains(filter)) {
-                    continue;
-                }
-                final boolean isSystem =
-                        (info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0;
-                if ((!listDisabled || !info.applicationInfo.enabled) &&
-                        (!listEnabled || info.applicationInfo.enabled) &&
-                        (!listSystem || isSystem) &&
-                        (!listThirdParty || !isSystem)) {
-                    System.out.print("package:");
-                    if (showApplicationPackage) {
-                        System.out.print(info.applicationInfo.sourceDir);
-                        System.out.print("=");
-                    }
-                    System.out.print(info.packageName);
-                    if (listInstaller) {
-                        System.out.print("  installer=");
-                        System.out.print(mPm.getInstallerPackageName(info.packageName));
-                    }
-                    System.out.println();
-                }
-            }
-            return 0;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<PackageInfo> getInstalledPackages(IPackageManager pm, int flags, int userId)
-            throws RemoteException {
-        ParceledListSlice<PackageInfo> slice = pm.getInstalledPackages(flags, userId);
-        return slice.getList();
-    }
-
-    /**
-     * Lists all of the features supported by the current device.
-     *
-     * pm list features
-     */
-    private int runListFeatures() {
-        try {
-            List<FeatureInfo> list = new ArrayList<FeatureInfo>();
-            FeatureInfo[] rawList = mPm.getSystemAvailableFeatures();
-            for (int i=0; i<rawList.length; i++) {
-                list.add(rawList[i]);
-            }
-
-
-            // Sort by name
-            Collections.sort(list, new Comparator<FeatureInfo>() {
-                public int compare(FeatureInfo o1, FeatureInfo o2) {
-                    if (o1.name == o2.name) return 0;
-                    if (o1.name == null) return -1;
-                    if (o2.name == null) return 1;
-                    return o1.name.compareTo(o2.name);
-                }
-            });
-
-            int count = (list != null) ? list.size() : 0;
-            for (int p = 0; p < count; p++) {
-                FeatureInfo fi = list.get(p);
-                System.out.print("feature:");
-                if (fi.name != null) System.out.println(fi.name);
-                else System.out.println("reqGlEsVersion=0x"
-                        + Integer.toHexString(fi.reqGlEsVersion));
-            }
-            return 0;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
-    /**
-     * Lists all of the libraries supported by the current device.
-     *
-     * pm list libraries
-     */
-    private int runListLibraries() {
-        try {
-            List<String> list = new ArrayList<String>();
-            String[] rawList = mPm.getSystemSharedLibraryNames();
-            for (int i=0; i<rawList.length; i++) {
-                list.add(rawList[i]);
-            }
-
-
-            // Sort by name
-            Collections.sort(list, new Comparator<String>() {
-                public int compare(String o1, String o2) {
-                    if (o1 == o2) return 0;
-                    if (o1 == null) return -1;
-                    if (o2 == null) return 1;
-                    return o1.compareTo(o2);
-                }
-            });
-
-            int count = (list != null) ? list.size() : 0;
-            for (int p = 0; p < count; p++) {
-                String lib = list.get(p);
-                System.out.print("library:");
-                System.out.println(lib);
-            }
-            return 0;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
-    /**
-     * Lists all of the installed instrumentation, or all for a given package
-     *
-     * pm list instrumentation [package] [-f]
-     */
-    private int runListInstrumentation() {
-        int flags = 0;      // flags != 0 is only used to request meta-data
-        boolean showPackage = false;
-        String targetPackage = null;
-
-        try {
-            String opt;
-            while ((opt=nextArg()) != null) {
-                if (opt.equals("-f")) {
-                    showPackage = true;
-                } else if (opt.charAt(0) != '-') {
-                    targetPackage = opt;
-                } else {
-                    System.err.println("Error: Unknown option: " + opt);
-                    return 1;
-                }
-            }
-        } catch (RuntimeException ex) {
-            System.err.println("Error: " + ex.toString());
-            return 1;
-        }
-
-        try {
-            List<InstrumentationInfo> list = mPm.queryInstrumentation(targetPackage, flags);
-
-            // Sort by target package
-            Collections.sort(list, new Comparator<InstrumentationInfo>() {
-                public int compare(InstrumentationInfo o1, InstrumentationInfo o2) {
-                    return o1.targetPackage.compareTo(o2.targetPackage);
-                }
-            });
-
-            int count = (list != null) ? list.size() : 0;
-            for (int p = 0; p < count; p++) {
-                InstrumentationInfo ii = list.get(p);
-                System.out.print("instrumentation:");
-                if (showPackage) {
-                    System.out.print(ii.sourceDir);
-                    System.out.print("=");
-                }
-                ComponentName cn = new ComponentName(ii.packageName, ii.name);
-                System.out.print(cn.flattenToShortString());
-                System.out.print(" (target=");
-                System.out.print(ii.targetPackage);
-                System.out.println(")");
-            }
-            return 0;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
-    /**
-     * Lists all the known permission groups.
-     */
-    private int runListPermissionGroups() {
-        try {
-            List<PermissionGroupInfo> pgs = mPm.getAllPermissionGroups(0);
-
-            int count = pgs.size();
-            for (int p = 0 ; p < count ; p++) {
-                PermissionGroupInfo pgi = pgs.get(p);
-                System.out.print("permission group:");
-                System.out.println(pgi.name);
-            }
-            return 0;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
-    private String loadText(PackageItemInfo pii, int res, CharSequence nonLocalized) {
-        if (nonLocalized != null) {
-            return nonLocalized.toString();
-        }
-        if (res != 0) {
-            Resources r = getResources(pii);
-            if (r != null) {
-                try {
-                    return r.getString(res);
-                } catch (Resources.NotFoundException e) {
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Lists all the permissions in a group.
-     */
-    private int runListPermissions() {
-        try {
-            boolean labels = false;
-            boolean groups = false;
-            boolean userOnly = false;
-            boolean summary = false;
-            boolean dangerousOnly = false;
-            String opt;
-            while ((opt=nextOption()) != null) {
-                if (opt.equals("-f")) {
-                    labels = true;
-                } else if (opt.equals("-g")) {
-                    groups = true;
-                } else if (opt.equals("-s")) {
-                    groups = true;
-                    labels = true;
-                    summary = true;
-                } else if (opt.equals("-u")) {
-                    userOnly = true;
-                } else if (opt.equals("-d")) {
-                    dangerousOnly = true;
-                } else {
-                    System.err.println("Error: Unknown option: " + opt);
-                    return 1;
-                }
-            }
-
-            String grp = nextArg();
-            ArrayList<String> groupList = new ArrayList<String>();
-            if (groups) {
-                List<PermissionGroupInfo> infos =
-                        mPm.getAllPermissionGroups(0);
-                for (int i=0; i<infos.size(); i++) {
-                    groupList.add(infos.get(i).name);
-                }
-                groupList.add(null);
-            } else {
-                groupList.add(grp);
-            }
-
-            if (dangerousOnly) {
-                System.out.println("Dangerous Permissions:");
-                System.out.println("");
-                doListPermissions(groupList, groups, labels, summary,
-                        PermissionInfo.PROTECTION_DANGEROUS,
-                        PermissionInfo.PROTECTION_DANGEROUS);
-                if (userOnly) {
-                    System.out.println("Normal Permissions:");
-                    System.out.println("");
-                    doListPermissions(groupList, groups, labels, summary,
-                            PermissionInfo.PROTECTION_NORMAL,
-                            PermissionInfo.PROTECTION_NORMAL);
-                }
-            } else if (userOnly) {
-                System.out.println("Dangerous and Normal Permissions:");
-                System.out.println("");
-                doListPermissions(groupList, groups, labels, summary,
-                        PermissionInfo.PROTECTION_NORMAL,
-                        PermissionInfo.PROTECTION_DANGEROUS);
-            } else {
-                System.out.println("All Permissions:");
-                System.out.println("");
-                doListPermissions(groupList, groups, labels, summary,
-                        -10000, 10000);
-            }
-            return 0;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
-    private void doListPermissions(ArrayList<String> groupList,
-            boolean groups, boolean labels, boolean summary,
-            int startProtectionLevel, int endProtectionLevel)
-            throws RemoteException {
-        for (int i=0; i<groupList.size(); i++) {
-            String groupName = groupList.get(i);
-            String prefix = "";
-            if (groups) {
-                if (i > 0) System.out.println("");
-                if (groupName != null) {
-                    PermissionGroupInfo pgi = mPm.getPermissionGroupInfo(
-                            groupName, 0);
-                    if (summary) {
-                        Resources res = getResources(pgi);
-                        if (res != null) {
-                            System.out.print(loadText(pgi, pgi.labelRes,
-                                    pgi.nonLocalizedLabel) + ": ");
-                        } else {
-                            System.out.print(pgi.name + ": ");
-
-                        }
-                    } else {
-                        System.out.println((labels ? "+ " : "")
-                                + "group:" + pgi.name);
-                        if (labels) {
-                            System.out.println("  package:" + pgi.packageName);
-                            Resources res = getResources(pgi);
-                            if (res != null) {
-                                System.out.println("  label:"
-                                        + loadText(pgi, pgi.labelRes,
-                                                pgi.nonLocalizedLabel));
-                                System.out.println("  description:"
-                                        + loadText(pgi, pgi.descriptionRes,
-                                                pgi.nonLocalizedDescription));
-                            }
-                        }
-                    }
-                } else {
-                    System.out.println(((labels && !summary)
-                            ? "+ " : "") + "ungrouped:");
-                }
-                prefix = "  ";
-            }
-            List<PermissionInfo> ps = mPm.queryPermissionsByGroup(
-                    groupList.get(i), 0);
-            int count = ps.size();
-            boolean first = true;
-            for (int p = 0 ; p < count ; p++) {
-                PermissionInfo pi = ps.get(p);
-                if (groups && groupName == null && pi.group != null) {
-                    continue;
-                }
-                final int base = pi.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
-                if (base < startProtectionLevel
-                        || base > endProtectionLevel) {
-                    continue;
-                }
-                if (summary) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        System.out.print(", ");
-                    }
-                    Resources res = getResources(pi);
-                    if (res != null) {
-                        System.out.print(loadText(pi, pi.labelRes,
-                                pi.nonLocalizedLabel));
-                    } else {
-                        System.out.print(pi.name);
-                    }
-                } else {
-                    System.out.println(prefix + (labels ? "+ " : "")
-                            + "permission:" + pi.name);
-                    if (labels) {
-                        System.out.println(prefix + "  package:" + pi.packageName);
-                        Resources res = getResources(pi);
-                        if (res != null) {
-                            System.out.println(prefix + "  label:"
-                                    + loadText(pi, pi.labelRes,
-                                            pi.nonLocalizedLabel));
-                            System.out.println(prefix + "  description:"
-                                    + loadText(pi, pi.descriptionRes,
-                                            pi.nonLocalizedDescription));
-                        }
-                        System.out.println(prefix + "  protectionLevel:"
-                                + PermissionInfo.protectionToString(pi.protectionLevel));
-                    }
-                }
-            }
-
-            if (summary) {
-                System.out.println("");
-            }
-        }
+        return runShellCommand("package", mArgs);
     }
 
     private int runPath() {
@@ -1467,29 +1018,6 @@ public final class Pm {
         }
     }
 
-    public int runListUsers() {
-        try {
-            IActivityManager am = ActivityManagerNative.getDefault();
-
-            List<UserInfo> users = mUm.getUsers(false);
-            if (users == null) {
-                System.err.println("Error: couldn't get users");
-                return 1;
-            } else {
-                System.out.println("Users:");
-                for (int i = 0; i < users.size(); i++) {
-                    String running = am.isUserRunning(users.get(i).id, false) ? " running" : "";
-                    System.out.println("\t" + users.get(i).toString() + running);
-                }
-                return 0;
-            }
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return 1;
-        }
-    }
-
     public int runGetMaxUsers() {
         System.out.println("Maximum supported users: " + UserManager.getMaxSupportedUsers());
         return 0;
@@ -1997,24 +1525,6 @@ public final class Pm {
         return 1;
     }
 
-    private Resources getResources(PackageItemInfo pii) {
-        Resources res = mResourceCache.get(pii.packageName);
-        if (res != null) return res;
-
-        try {
-            ApplicationInfo ai = mPm.getApplicationInfo(pii.packageName, 0, 0);
-            AssetManager am = new AssetManager();
-            am.addAssetPath(ai.publicSourceDir);
-            res = new Resources(am, null, null);
-            mResourceCache.put(pii.packageName, res);
-            return res;
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-            return null;
-        }
-    }
-
     private static String checkAbiArgument(String abi) {
         if (TextUtils.isEmpty(abi)) {
             throw new IllegalArgumentException("Missing ABI argument");
@@ -2110,14 +1620,7 @@ public final class Pm {
     }
 
     private static int showUsage() {
-        System.err.println("usage: pm list packages [-f] [-d] [-e] [-s] [-3] [-i] [-u] [--user USER_ID] [FILTER]");
-        System.err.println("       pm list permission-groups");
-        System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
-        System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
-        System.err.println("       pm list features");
-        System.err.println("       pm list libraries");
-        System.err.println("       pm list users");
-        System.err.println("       pm path [--user USER_ID] PACKAGE");
+        System.err.println("usage: pm path [--user USER_ID] PACKAGE");
         System.err.println("       pm dump PACKAGE");
         System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [--user USER_ID] [PATH]");
         System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
@@ -2151,34 +1654,8 @@ public final class Pm {
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");
         System.err.println("");
-        System.err.println("pm list packages: prints all packages, optionally only");
-        System.err.println("  those whose package name contains the text in FILTER.  Options:");
-        System.err.println("    -f: see their associated file.");
-        System.err.println("    -d: filter to only show disbled packages.");
-        System.err.println("    -e: filter to only show enabled packages.");
-        System.err.println("    -s: filter to only show system packages.");
-        System.err.println("    -3: filter to only show third party packages.");
-        System.err.println("    -i: see the installer for the packages.");
-        System.err.println("    -u: also include uninstalled packages.");
-        System.err.println("");
-        System.err.println("pm list permission-groups: prints all known permission groups.");
-        System.err.println("");
-        System.err.println("pm list permissions: prints all known permissions, optionally only");
-        System.err.println("  those in GROUP.  Options:");
-        System.err.println("    -g: organize by group.");
-        System.err.println("    -f: print all information.");
-        System.err.println("    -s: short summary.");
-        System.err.println("    -d: only list dangerous permissions.");
-        System.err.println("    -u: list only the permissions users will see.");
-        System.err.println("");
-        System.err.println("pm list instrumentation: use to list all test packages; optionally");
-        System.err.println("  supply <TARGET-PACKAGE> to list the test packages for a particular");
-        System.err.println("  application.  Options:");
-        System.err.println("    -f: list the .apk file for the test package.");
-        System.err.println("");
-        System.err.println("pm list features: prints all features of the system.");
-        System.err.println("");
-        System.err.println("pm list users: prints all users on the system.");
+        System.err.println("NOTE: 'pm list' commands have moved! Run 'adb shell cmd package'");
+        System.err.println("  to display the new commands.");
         System.err.println("");
         System.err.println("pm path: print the path to the .apk of the given PACKAGE.");
         System.err.println("");
