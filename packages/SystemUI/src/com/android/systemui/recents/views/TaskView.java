@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -637,7 +638,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * Returns whether we have explicitly been focused.
      */
     public boolean isFocusedTask() {
-        return mIsFocused || isFocused();
+        return mIsFocused;
     }
 
     /** Enables all focus animations. */

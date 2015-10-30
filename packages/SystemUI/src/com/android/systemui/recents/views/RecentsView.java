@@ -160,7 +160,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Gets the next task in the stack - or if the last - the top task */
     public Task getNextTaskOrTopTask(Task taskToSearch) {
-        Task returnTask = null; 
+        Task returnTask = null;
         boolean found = false;
         List<TaskStackView> stackViews = getTaskStackViews();
         int stackCount = stackViews.size();
@@ -199,6 +199,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 Task task = tv.getTask();
                 if (tv.isFocusedTask()) {
                     onTaskViewClicked(stackView, tv, stack, task, false);
+                    tv.unsetFocusedTask();
                     return true;
                 }
             }
@@ -368,7 +369,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);
         }
 
-        // Layout each TaskStackView with the full width and height of the window since the 
+        // Layout each TaskStackView with the full width and height of the window since the
         // transition view is a child of that stack view
         List<TaskStackView> stackViews = getTaskStackViews();
         int stackCount = stackViews.size();
