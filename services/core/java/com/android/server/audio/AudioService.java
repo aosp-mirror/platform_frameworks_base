@@ -280,7 +280,7 @@ public class AudioService extends IAudioService.Stub {
         0,  // STREAM_MUSIC
         0,  // STREAM_ALARM
         0,  // STREAM_NOTIFICATION
-        1,  // STREAM_BLUETOOTH_SCO
+        0,  // STREAM_BLUETOOTH_SCO
         0,  // STREAM_SYSTEM_ENFORCED
         0,  // STREAM_DTMF
         0   // STREAM_TTS
@@ -803,7 +803,8 @@ public class AudioService extends IAudioService.Stub {
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
             VolumeStreamState streamState = mStreamStates[streamType];
-            AudioSystem.initStreamVolume(streamType, 0, (streamState.mIndexMax + 5) / 10);
+            AudioSystem.initStreamVolume(
+                streamType, streamState.mIndexMin / 10, streamState.mIndexMax / 10);
 
             streamState.applyAllVolumes();
         }
