@@ -714,7 +714,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     R.color.notification_panel_solid_background)));
         }
 
-        mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow);
+        mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow, mGroupManager);
         mHeadsUpManager.setBar(this);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
@@ -3859,7 +3859,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             clearNotificationEffects();
         }
         mState = state;
-        mGroupManager.setStatusBarState(state);
         mFalsingManager.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
         updateDozing();
@@ -3986,9 +3985,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanel.animateToFullShade(0 /* delay */);
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
-            if (row != null) {
-                row.setUserLocked(false);
-            }
         }
     }
 

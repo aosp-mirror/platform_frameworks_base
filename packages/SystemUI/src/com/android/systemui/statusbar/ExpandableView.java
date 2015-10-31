@@ -33,7 +33,6 @@ import java.util.ArrayList;
  */
 public abstract class ExpandableView extends FrameLayout {
 
-    private final int mBottomDecorHeight;
     protected OnHeightChangedListener mOnHeightChangedListener;
     protected int mMaxViewHeight;
     private int mActualHeight;
@@ -50,17 +49,12 @@ public abstract class ExpandableView extends FrameLayout {
         super(context, attrs);
         mMaxViewHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_max_height);
-        mBottomDecorHeight = resolveBottomDecorHeight();
-    }
-
-    protected int resolveBottomDecorHeight() {
-        return getResources().getDimensionPixelSize(
-                R.dimen.notification_bottom_decor_height);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int ownMaxHeight = mMaxViewHeight;
+        boolean limitViewHeight = shouldLimitViewHeight();
+        int ownMaxHeight = limitViewHeight ? mMaxViewHeight : Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         if (hasFixedHeight) {
@@ -72,7 +66,7 @@ public abstract class ExpandableView extends FrameLayout {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE || isChildInvisible(child)) {
+            if (child.getVisibility() == GONE) {
                 continue;
             }
             int childHeightSpec = newHeightSpec;
@@ -80,7 +74,7 @@ public abstract class ExpandableView extends FrameLayout {
             if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
                 if (layoutParams.height >= 0) {
                     // An actual height is set
-                    childHeightSpec = layoutParams.height > ownMaxHeight
+                    childHeightSpec = layoutParams.height > ownMaxHeight && limitViewHeight
                         ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
                         : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
                 }
@@ -102,11 +96,11 @@ public abstract class ExpandableView extends FrameLayout {
         }
         mMatchParentViews.clear();
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        if (canHaveBottomDecor()) {
-            // We always account for the expandAction as well.
-            ownHeight += mBottomDecorHeight;
-        }
         setMeasuredDimension(width, ownHeight);
+    }
+
+    protected boolean shouldLimitViewHeight() {
+        return true;
     }
 
     @Override
@@ -115,7 +109,7 @@ public abstract class ExpandableView extends FrameLayout {
         if (!mActualHeightInitialized && mActualHeight == 0) {
             int initialHeight = getInitialHeight();
             if (initialHeight != 0) {
-                setContentHeight(initialHeight);
+                setActualHeight(initialHeight);
             }
         }
         updateClipping();
@@ -173,8 +167,8 @@ public abstract class ExpandableView extends FrameLayout {
         }
     }
 
-    public void setContentHeight(int contentHeight) {
-        setActualHeight(contentHeight + getBottomDecorHeight(), true);
+    public void setActualHeight(int actualHeight) {
+        setActualHeight(actualHeight, true /* notifyListeners */);
     }
 
     /**
@@ -184,31 +178,6 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public int getActualHeight() {
         return mActualHeight;
-    }
-
-    /**
-     * This view may have a bottom decor which will be placed below the content. If it has one, this
-     * view will be layouted higher than just the content by {@link #mBottomDecorHeight}.
-     * @return the height of the decor if it currently has one
-     */
-    public int getBottomDecorHeight() {
-        return hasBottomDecor() ? mBottomDecorHeight : 0;
-    }
-
-    /**
-     * @return whether this view may have a bottom decor at all. This will force the view to layout
-     *         itself higher than just it's content
-     */
-    protected boolean canHaveBottomDecor() {
-        return false;
-    }
-
-    /**
-     * @return whether this view has a decor view below it's content. This will make the intrinsic
-     *         height from {@link #getIntrinsicHeight()} higher as well
-     */
-    protected boolean hasBottomDecor() {
-        return false;
     }
 
     /**
@@ -358,14 +327,7 @@ public abstract class ExpandableView extends FrameLayout {
         outRect.top += getClipTopOptimization();
     }
 
-    public int getContentHeight() {
-        return mActualHeight - getBottomDecorHeight();
-    }
-
-    /**
-     * @return whether the given child can be ignored for layouting and measuring purposes
-     */
-    protected boolean isChildInvisible(View child) {
+    public boolean isSummaryWithChildren() {
         return false;
     }
 

@@ -244,6 +244,10 @@
         <item name="android:textColor">#60000000</item>
     </style>
 
+    <style name="TextAppearance.Material.Notification.HeaderTitle"
+        parent="@*android:style/TextAppearance.Material.Notification.Info">
+    </style>
+
     <style name="SearchPanelCircle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>

@@ -21,7 +21,6 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.StatusBarState;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,21 +92,8 @@ public class NotificationGroupManager {
         if (group.children.isEmpty()) {
             if (group.summary == null) {
                 mGroupMap.remove(groupKey);
-            } else {
-                if (group.expanded) {
-                    // only the summary is left. Change it to unexpanded in a few ms. We do this to
-                    // avoid raceconditions
-                    removed.row.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (group.children.isEmpty()) {
-                                setGroupExpanded(sbn, false);
-                            }
-                        }
-                    });
-                } else {
-                    group.summary.row.updateExpandButton();
-                }
+            } else if (!group.expanded) {
+                group.summary.row.updateNotificationHeader();
             }
         }
     }
@@ -130,7 +116,7 @@ public class NotificationGroupManager {
         } else {
             group.children.add(added);
             if (group.summary != null && group.children.size() == 1 && !group.expanded) {
-                group.summary.row.updateExpandButton();
+                group.summary.row.updateNotificationHeader();
             }
         }
     }
@@ -155,9 +141,6 @@ public class NotificationGroupManager {
     }
 
     public boolean hasGroupChildren(StatusBarNotification sbn) {
-        if (areGroupsProhibited()) {
-            return false;
-        }
         if (!sbn.getNotification().isGroupSummary()) {
             return false;
         }
@@ -166,29 +149,6 @@ public class NotificationGroupManager {
             return false;
         }
         return !group.children.isEmpty();
-    }
-
-    public void setStatusBarState(int newState) {
-        if (mBarState == newState) {
-            return;
-        }
-        boolean prohibitedBefore = areGroupsProhibited();
-        mBarState = newState;
-        boolean nowProhibited = areGroupsProhibited();
-        if (nowProhibited != prohibitedBefore) {
-            if (nowProhibited) {
-                for (NotificationGroup group : mGroupMap.values()) {
-                    if (group.expanded) {
-                        setGroupExpanded(group, false);
-                    }
-                }
-            }
-            mListener.onGroupsProhibitedChanged();
-        }
-    }
-
-    private boolean areGroupsProhibited() {
-        return mBarState == StatusBarState.KEYGUARD;
     }
 
     /**
@@ -205,11 +165,37 @@ public class NotificationGroupManager {
         return true;
     }
 
+    /**
+     * @return whether a given notification is a summary in a group which has children
+     */
+    public boolean isSummaryOfGroup(StatusBarNotification sbn) {
+        if (sbn.getNotification().isGroupChild()) {
+            return false;
+        }
+        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        if (group == null) {
+            return false;
+        }
+        return !group.children.isEmpty();
+    }
+
     public ExpandableNotificationRow getGroupSummary(StatusBarNotification sbn) {
         NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
         return group == null ? null
                 : group.summary == null ? null
                 : group.summary.row;
+    }
+
+    public void onEntryHeadsUped(NotificationData.Entry headsUp) {
+        // TODO: handle this nicely
+    }
+
+    public void toggleGroupExpansion(StatusBarNotification sbn) {
+        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        if (group == null) {
+            return;
+        }
+        setGroupExpanded(group, !group.expanded);
     }
 
     public static class NotificationGroup {
@@ -226,11 +212,6 @@ public class NotificationGroupManager {
          * @param expanded a boolean indicating the new expanded state
          */
         void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded);
-
-        /**
-         * Children group policy has changed and children may no be prohibited or allowed.
-         */
-        void onGroupsProhibitedChanged();
 
         /**
          * A group of children just received a summary notification and should therefore become

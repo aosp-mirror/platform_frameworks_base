@@ -747,7 +747,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setUserExpandedChild(View v, boolean userExpanded) {
         if (v instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) v).setUserExpanded(userExpanded);
+            ((ExpandableNotificationRow) v).setUserExpanded(userExpanded,
+                    true /* allowChildrenExpansion */);
         }
     }
 
@@ -1726,7 +1727,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             ExpandableNotificationRow groupSummary =
                     mGroupManager.getGroupSummary(row.getStatusBarNotification());
             if (groupSummary != null && groupSummary != row) {
-                return !groupSummary.areChildrenExpanded();
+                return row.getVisibility() == View.INVISIBLE;
             }
         }
         return false;
@@ -2344,7 +2345,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (row.isUserLocked() && row != getFirstChildNotGone()) {
                 // We are actually expanding this view
-                float endPosition = row.getTranslationY() + row.getActualHeight();
+                float endPosition;
+                if (row.isChildInGroup()) {
+                    ExpandableNotificationRow parent = row.getNotificationParent();
+                    endPosition = parent.getTranslationY() + parent.getActualHeight();
+                } else {
+                    endPosition = row.getTranslationY() + row.getActualHeight();
+                }
                 int stackEnd = mMaxLayoutHeight - mBottomStackPeekSize -
                         mBottomStackSlowDownHeight + (int) mStackTranslation;
                 if (endPosition > stackEnd) {
@@ -2788,16 +2795,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return touchY > mTopPadding + mStackTranslation;
     }
 
-    private void updateExpandButtons() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                row.updateExpandButton();
-            }
-        }
-    }
-
     @Override
     public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
         boolean animated = mAnimationsEnabled && mIsExpanded;
@@ -2807,11 +2804,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         changedRow.setChildrenExpanded(expanded, animated);
         onHeightChanged(changedRow, false /* needsAnimation */);
-    }
-
-    @Override
-    public void onGroupsProhibitedChanged() {
-        updateExpandButtons();
     }
 
     @Override

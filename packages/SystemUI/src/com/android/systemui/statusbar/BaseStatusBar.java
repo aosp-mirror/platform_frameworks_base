@@ -891,8 +891,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private void bindGuts(ExpandableNotificationRow row) {
         row.inflateGuts();
         final StatusBarNotification sbn = row.getStatusBarNotification();
-        PackageManager pmUser = getPackageManagerForUser(
-                sbn.getUser().getIdentifier());
+        PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
         final View guts = row.getGuts();
         final String pkg = sbn.getPackageName();
@@ -1270,7 +1269,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean inflateViews(Entry entry, ViewGroup parent) {
-        PackageManager pmUser = getPackageManagerForUser(
+        PackageManager pmUser = getPackageManagerForUser(mContext,
                 entry.notification.getUser().getIdentifier());
 
         int maxHeight = mRowMaxHeight;
@@ -1502,7 +1501,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setUserExpanded(userExpanded);
         }
         row.setUserLocked(userLocked);
-        row.setStatusBarNotification(entry.notification);
+        row.setEntry(entry);
         applyRemoteInput(entry);
         return true;
     }
@@ -1930,27 +1929,29 @@ public abstract class BaseStatusBar extends SystemUI implements
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
             if (onKeyguard) {
-                entry.row.setExpansionDisabled(true);
+                entry.row.setOnKeyguard(true);
             } else {
-                entry.row.setExpansionDisabled(false);
-                if (!entry.row.isUserLocked()) {
-                    boolean top = (i == 0);
-                    entry.row.setSystemExpanded(top);
-                }
+                entry.row.setOnKeyguard(false);
+                boolean top = (i == 0);
+                entry.row.setSystemExpanded(top);
             }
-            boolean isInvisibleChild = !mGroupManager.isVisible(entry.notification);
+            boolean childNotification = mGroupManager.isChildInGroupWithSummary(entry.notification);
+            boolean childWithVisibleSummary = childNotification
+                    && mGroupManager.getGroupSummary(entry.notification).getVisibility()
+                    == View.VISIBLE;
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if ((isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
                     (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
-                            || !showOnKeyguard || isInvisibleChild))) {
+                            && !childWithVisibleSummary
+                            || !showOnKeyguard))) {
                 entry.row.setVisibility(View.GONE);
-                if (onKeyguard && showOnKeyguard && !isInvisibleChild) {
+                if (onKeyguard && showOnKeyguard && !childNotification) {
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
                 boolean wasGone = entry.row.getVisibility() == View.GONE;
                 entry.row.setVisibility(View.VISIBLE);
-                if (!isInvisibleChild) {
+                if (!childNotification) {
                     if (wasGone) {
                         // notify the scroller of a child addition
                         mStackScroller.generateAddAnimation(entry.row, true /* fromMoreCard */);
@@ -2113,7 +2114,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         mNotificationClicker.register(entry.row, sbn);
 
-        entry.row.setStatusBarNotification(sbn);
+        entry.row.setEntry(entry);
         entry.row.notifyContentUpdated();
         entry.row.resetHeight();
 
@@ -2207,15 +2208,15 @@ public abstract class BaseStatusBar extends SystemUI implements
      * @return a PackageManger for userId or if userId is < 0 (USER_ALL etc) then
      *         return PackageManager for mContext
      */
-    protected PackageManager getPackageManagerForUser(int userId) {
-        Context contextForUser = mContext;
+    public static PackageManager getPackageManagerForUser(Context context, int userId) {
+        Context contextForUser = context;
         // UserHandle defines special userId as negative values, e.g. USER_ALL
         if (userId >= 0) {
             try {
                 // Create a context for the correct user so if a package isn't installed
                 // for user 0 we can still load information about the package.
                 contextForUser =
-                        mContext.createPackageContextAsUser(mContext.getPackageName(),
+                        context.createPackageContextAsUser(context.getPackageName(),
                         Context.CONTEXT_RESTRICTED,
                         new UserHandle(userId));
             } catch (NameNotFoundException e) {

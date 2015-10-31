@@ -134,6 +134,8 @@ public class DragDownHelper implements Gefingerpoken {
                         (int) (y - mInitialTouchY))) {
                     if (mStartingChild == null) {
                         mDragDownCallback.setEmptyDragAmount(0f);
+                    } else {
+                        mCallback.setUserLockedChild(mStartingChild, false);
                     }
                     mDraggingDown = false;
                 } else {
@@ -175,15 +177,16 @@ public class DragDownHelper implements Gefingerpoken {
             overshoot *= (1 - RUBBERBAND_FACTOR_STATIC);
             rubberband -= overshoot;
         }
-        child.setContentHeight((int) (child.getMinHeight() + rubberband));
+        child.setActualHeight((int) (child.getMinHeight() + rubberband));
     }
 
     private void cancelExpansion(final ExpandableView child) {
-        if (child.getContentHeight() == child.getMinHeight()) {
+        if (child.getActualHeight() == child.getMinHeight()) {
+            mCallback.setUserLockedChild(child, false);
             return;
         }
-        ObjectAnimator anim = ObjectAnimator.ofInt(child, "contentHeight",
-                child.getContentHeight(), child.getMinHeight());
+        ObjectAnimator anim = ObjectAnimator.ofInt(child, "actualHeight",
+                child.getActualHeight(), child.getMinHeight());
         anim.setInterpolator(mInterpolator);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
         anim.addListener(new AnimatorListenerAdapter() {

@@ -15,26 +15,25 @@
   ~ limitations under the License
   -->
 
-<FrameLayout
+<com.android.systemui.statusbar.notification.HybridNotificationView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/notification_bottom_decor_height">
+    android:layout_height="@dimen/notification_max_height">
     <TextView
-        android:id="@+id/notification_expand_button"
+        android:id="@+id/notification_title"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/notification_bottom_decor_height"
-        android:background="@null"
-        android:layout_gravity="top|center_horizontal"
-        android:gravity="center_vertical|center_horizontal"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:singleLine="true"
         android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
-        android:text="@string/notification_expand_button_text"
-        android:drawableEnd="@drawable/ic_expand_children"
-        android:drawablePadding="1dp"
+        android:paddingEnd="4dp"
+    />
+    <TextView
+        android:id="@+id/notification_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textAppearance="@*android:style/TextAppearance.Material.Notification"
+        android:singleLine="true"
         />
-    <com.android.systemui.statusbar.AlphaOptimizedView
-        android:id="@+id/notification_expand_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="top|center"
-        android:background="@*android:drawable/notification_template_divider" />
-</FrameLayout>
+</com.android.systemui.statusbar.notification.HybridNotificationView>

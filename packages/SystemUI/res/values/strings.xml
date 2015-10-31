@@ -751,6 +751,9 @@
     <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
     <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>
 
+    <!-- The divider symbol between different parts of the notification header. not translatable [CHAR LIMIT=1] -->
+    <string name="notification_header_divider_symbol" translatable="false">•</string>
+
     <!-- An explanation for the visual speed bump in the notifications, which will appear when you click on it. [CHAR LIMIT=50] -->
     <string name="speed_bump_explanation">Less urgent notifications below</string>
 
@@ -978,12 +981,6 @@
     <!-- continue action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
     <string name="hidden_notifications_setup">Set up</string>
 
-    <!-- Text for the button to expand the notifications to show notification children [CHAR LIMIT=20] -->
-    <string name="notification_expand_button_text">See all</string>
-
-    <!-- Text for the button to expand the notifications to hide notification children [CHAR LIMIT=20] -->
-    <string name="notification_collapse_button_text">Hide all</string>
-
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
 
@@ -1028,6 +1025,9 @@
 
     <!-- VolumeUI restoration notification: text -->
     <string name="volumeui_notification_text">Touch to restore the original.</string>
+
+    <!-- Describes the way 2 names are concatenated. An example would be ", " to produce "Peter Muller, Paul Curry". Please also include a space here if it's appropriate in the language and if it's a RTL language include it on the left. [CHAR LIMIT=3] -->
+    <string name="group_summary_concadenation">, </string>
 
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
     <string name="managed_profile_foreground_toast">You\'re using your work profile</string>

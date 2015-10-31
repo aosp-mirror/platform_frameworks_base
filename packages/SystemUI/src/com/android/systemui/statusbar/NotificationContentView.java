@@ -22,6 +22,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,9 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.HybridNotificationView;
+import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
@@ -44,8 +48,10 @@ public class NotificationContentView extends FrameLayout {
     private static final int VISIBLE_TYPE_CONTRACTED = 0;
     private static final int VISIBLE_TYPE_EXPANDED = 1;
     private static final int VISIBLE_TYPE_HEADSUP = 2;
+    private static final int VISIBLE_TYPE_SINGLELINE = 3;
 
     private final Rect mClipBounds = new Rect();
+    private final int mSingleLineHeight;
     private final int mSmallHeight;
     private final int mHeadsUpHeight;
     private final int mRoundRectRadius;
@@ -55,10 +61,12 @@ public class NotificationContentView extends FrameLayout {
     private View mContractedChild;
     private View mExpandedChild;
     private View mHeadsUpChild;
+    private HybridNotificationView mSingleLineView;
 
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
     private NotificationViewWrapper mHeadsUpWrapper;
+    private HybridNotificationViewManager mHybridViewManager;
     private int mClipTopAmount;
     private int mContentHeight;
     private int mUnrestrictedContentHeight;
@@ -68,6 +76,8 @@ public class NotificationContentView extends FrameLayout {
     private boolean mAnimate;
     private boolean mIsHeadsUp;
     private boolean mShowingLegacyBackground;
+    private boolean mIsChildInGroup;
+    private StatusBarNotification mStatusBarNotification;
 
     private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -86,10 +96,14 @@ public class NotificationContentView extends FrameLayout {
                     mRoundRectRadius);
         }
     };
+    private NotificationGroupManager mGroupManager;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        mSingleLineHeight = getResources().getDimensionPixelSize(
+                R.dimen.notification_single_line_height);
         mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
         mRoundRectRadius = getResources().getDimensionPixelSize(
@@ -139,6 +153,12 @@ public class NotificationContentView extends FrameLayout {
             mHeadsUpChild.measure(widthMeasureSpec,
                     MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST));
             maxChildHeight = Math.max(maxChildHeight, mHeadsUpChild.getMeasuredHeight());
+        }
+        if (mSingleLineView != null) {
+            int size = Math.min(maxSize, mSingleLineHeight);
+            mSingleLineView.measure(widthMeasureSpec,
+                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY));
+            maxChildHeight = Math.max(maxChildHeight, mSingleLineView.getMeasuredHeight());
         }
         int ownHeight = Math.min(maxChildHeight, maxSize);
         int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -271,7 +291,15 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMinHeight() {
-        return mSmallHeight;
+        if (mIsChildInGroup && !isGroupExpanded()) {
+            return mSingleLineHeight;
+        } else {
+            return mSmallHeight;
+        }
+    }
+
+    private boolean isGroupExpanded() {
+        return mGroupManager.isGroupExpanded(mStatusBarNotification);
     }
 
     public void setClipTopAmount(int clipTopAmount) {
@@ -313,6 +341,7 @@ public class NotificationContentView extends FrameLayout {
         if (visibleType != mVisibleType || force) {
             if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
                     || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
+                    || (visibleType == VISIBLE_TYPE_SINGLELINE && mSingleLineView != null)
                     || visibleType == VISIBLE_TYPE_CONTRACTED)) {
                 runSwitchAnimation(visibleType);
             } else {
@@ -338,6 +367,12 @@ public class NotificationContentView extends FrameLayout {
             mHeadsUpChild.setVisibility(headsUpVisible ? View.VISIBLE : View.INVISIBLE);
             mHeadsUpChild.setAlpha(headsUpVisible ? 1f : 0f);
             mHeadsUpChild.setLayerType(LAYER_TYPE_NONE, null);
+        }
+        if (mSingleLineView != null) {
+            boolean singleLineVisible = visibleType == VISIBLE_TYPE_SINGLELINE;
+            mSingleLineView.setVisibility(singleLineVisible ? View.VISIBLE : View.INVISIBLE);
+            mSingleLineView.setAlpha(singleLineVisible ? 1f : 0f);
+            mSingleLineView.setLayerType(LAYER_TYPE_NONE, null);
         }
         setLayerType(LAYER_TYPE_NONE, null);
         updateRoundRectClipping();
@@ -379,6 +414,8 @@ public class NotificationContentView extends FrameLayout {
                 return mExpandedChild;
             case VISIBLE_TYPE_HEADSUP:
                 return mHeadsUpChild;
+            case VISIBLE_TYPE_SINGLELINE:
+                return mSingleLineView;
             default:
                 return mContractedChild;
         }
@@ -396,7 +433,9 @@ public class NotificationContentView extends FrameLayout {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
-            if (mContentHeight <= mSmallHeight || noExpandedChild) {
+            if (mIsChildInGroup && !isGroupExpanded()) {
+                return VISIBLE_TYPE_SINGLELINE;
+            } else if (mContentHeight <= mSmallHeight || noExpandedChild) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
@@ -405,6 +444,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void notifyContentUpdated() {
+        updateSingleLineView();
         selectLayout(false /* animate */, true /* force */);
         if (mContractedChild != null) {
             mContractedWrapper.notifyContentUpdated();
@@ -441,5 +481,38 @@ public class NotificationContentView extends FrameLayout {
 
     public void setShowingLegacyBackground(boolean showing) {
         mShowingLegacyBackground = showing;
+    }
+
+    public void setIsChildInGroup(boolean isChildInGroup) {
+        mIsChildInGroup = isChildInGroup;
+        updateSingleLineView();
+    }
+
+    public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
+        mStatusBarNotification = statusBarNotification;
+        updateSingleLineView();
+    }
+
+    private void updateSingleLineView() {
+        if (mIsChildInGroup) {
+            mSingleLineView = mHybridViewManager.bindFromNotification(
+                    mSingleLineView, mStatusBarNotification.getNotification());
+        }
+    }
+
+    public void setSubTextVisible(boolean visible) {
+        if (mExpandedChild != null) {
+            mExpandedWrapper.setSubTextVisible(visible);
+        }
+        if (mContractedChild != null) {
+            mContractedWrapper.setSubTextVisible(visible);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.setSubTextVisible(visible);
+        }
+    }
+
+    public void setGroupManager(NotificationGroupManager groupManager) {
+        mGroupManager = groupManager;
     }
 }

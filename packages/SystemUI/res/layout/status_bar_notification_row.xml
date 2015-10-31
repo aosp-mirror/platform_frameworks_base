@@ -61,11 +61,11 @@
         />
 
     <ViewStub
-        android:layout="@layout/notification_expand_button"
-        android:id="@+id/more_button_stub"
-        android:inflatedId="@+id/notification_more_button_container"
+        android:layout="@layout/notification_header"
+        android:id="@+id/notification_header_stub"
+        android:inflatedId="@+id/notification_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_bottom_decor_height"
+        android:layout_height="@dimen/notification_header_height"
         />
 
     <ViewStub
