@@ -1784,9 +1784,9 @@ public class AudioTrack implements AudioRouting
      * Note that the actual playback of this data might occur after this function returns.
      *
      * @param audioData the array that holds the data to play.
-     * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
+     * @param offsetInBytes the offset expressed in bytes in audioData where the data to write
      *    starts.
-     * @param sizeInBytes the number of bytes to read in audioData after the offset.
+     * @param sizeInBytes the number of bytes to write in audioData after the offset.
      * @return zero or the positive number of bytes that were written, or
      *    {@link #ERROR_INVALID_OPERATION}
      *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
@@ -1821,9 +1821,9 @@ public class AudioTrack implements AudioRouting
      * Note that the actual playback of this data might occur after this function returns.
      *
      * @param audioData the array that holds the data to play.
-     * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
+     * @param offsetInBytes the offset expressed in bytes in audioData where the data to write
      *    starts.
-     * @param sizeInBytes the number of bytes to read in audioData after the offset.
+     * @param sizeInBytes the number of bytes to write in audioData after the offset.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
      *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
@@ -1920,8 +1920,8 @@ public class AudioTrack implements AudioRouting
      * In static buffer mode, copies the data to the buffer starting at offset 0.
      * Note that the actual playback of this data might occur after this function returns.
      *
-     * @param audioData the array that holds the data to play.
-     * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
+     * @param audioData the array that holds the data to write.
+     * @param offsetInShorts the offset expressed in shorts in audioData where the data to write
      *     starts.
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
@@ -1987,7 +1987,7 @@ public class AudioTrack implements AudioRouting
      * and the write mode is ignored.
      * Note that the actual playback of this data might occur after this function returns.
      *
-     * @param audioData the array that holds the data to play.
+     * @param audioData the array that holds the data to write.
      *     The implementation does not clip for sample values within the nominal range
      *     [-1.0f, 1.0f], provided that all gains in the audio pipeline are
      *     less than or equal to unity (1.0f), and in the absence of post-processing effects
@@ -1998,8 +1998,8 @@ public class AudioTrack implements AudioRouting
      *     and later processing in the audio path.  Therefore applications are encouraged
      *     to provide samples values within the nominal range.
      * @param offsetInFloats the offset, expressed as a number of floats,
-     *     in audioData where the data to play starts.
-     * @param sizeInFloats the number of floats to read in audioData after the offset.
+     *     in audioData where the data to write starts.
+     * @param sizeInFloats the number of floats to write in audioData after the offset.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
      *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
@@ -2070,7 +2070,7 @@ public class AudioTrack implements AudioRouting
      * and the write mode is ignored.
      * Note that the actual playback of this data might occur after this function returns.
      *
-     * @param audioData the buffer that holds the data to play, starting at the position reported
+     * @param audioData the buffer that holds the data to write, starting at the position reported
      *     by <code>audioData.position()</code>.
      *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
      *     have been advanced to reflect the amount of data that was successfully written to
@@ -2137,7 +2137,7 @@ public class AudioTrack implements AudioRouting
     /**
      * Writes the audio data to the audio sink for playback in streaming mode on a HW_AV_SYNC track.
      * The blocking behavior will depend on the write mode.
-     * @param audioData the buffer that holds the data to play, starting at the position reported
+     * @param audioData the buffer that holds the data to write, starting at the position reported
      *     by <code>audioData.position()</code>.
      *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
      *     have been advanced to reflect the amount of data that was successfully written to
