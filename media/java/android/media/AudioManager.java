@@ -3199,8 +3199,10 @@ public class AudioManager {
     /**
      * Returns the value of the property with the specified key.
      * @param key One of the strings corresponding to a property key: either
-     *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE} or
-     *            {@link #PROPERTY_OUTPUT_FRAMES_PER_BUFFER}
+     *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE},
+     *            {@link #PROPERTY_OUTPUT_FRAMES_PER_BUFFER},
+     *            {@link #PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND}, or
+     *            {@link #PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND}.
      * @return A string representing the associated value for that property key,
      *         or null if there is no value for that key.
      */
