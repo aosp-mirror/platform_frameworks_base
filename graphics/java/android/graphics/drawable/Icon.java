@@ -382,7 +382,9 @@ public final class Icon implements Parcelable {
      * @hide
      */
     public void convertToAshmem() {
-        if (mType == TYPE_BITMAP && getBitmap().isMutable()) {
+        if (mType == TYPE_BITMAP &&
+            getBitmap().isMutable() &&
+            getBitmap().getAllocationByteCount() >= (128 * (1 << 10))) {
             setBitmap(getBitmap().createAshmemBitmap());
         }
     }
