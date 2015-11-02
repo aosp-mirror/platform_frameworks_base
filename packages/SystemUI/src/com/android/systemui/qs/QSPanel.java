@@ -19,12 +19,14 @@ package com.android.systemui.qs;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +36,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -619,5 +622,10 @@ public class QSPanel extends FrameLayout implements Tunable {
         void setTileVisibility(TileRecord tile, int visibility);
         int getOffsetTop(TileRecord tile);
         void updateResources();
+    }
+
+    public static boolean isTheNewQS(Context context) {
+        return Settings.Secure.getIntForUser(context.getContentResolver(), QS_THE_NEW_QS,
+                ActivityManager.getCurrentUser(), 0) != 0;
     }
 }
