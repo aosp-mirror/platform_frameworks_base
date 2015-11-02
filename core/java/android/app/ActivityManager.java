@@ -1016,6 +1016,12 @@ public class ActivityManager {
          */
         public int numActivities;
 
+        /**
+         * The bounds of the task.
+         * @hide
+         */
+        public Rect bounds;
+
         public RecentTaskInfo() {
         }
 
@@ -1053,6 +1059,12 @@ public class ActivityManager {
             ComponentName.writeToParcel(baseActivity, dest);
             ComponentName.writeToParcel(topActivity, dest);
             dest.writeInt(numActivities);
+            if (bounds != null) {
+                dest.writeInt(1);
+                bounds.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -1073,6 +1085,8 @@ public class ActivityManager {
             baseActivity = ComponentName.readFromParcel(source);
             topActivity = ComponentName.readFromParcel(source);
             numActivities = source.readInt();
+            bounds = source.readInt() > 0 ?
+                    Rect.CREATOR.createFromParcel(source) : null;
         }
 
         public static final Creator<RecentTaskInfo> CREATOR

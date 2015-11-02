@@ -8362,6 +8362,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.affiliatedTaskId = tr.mAffiliatedTaskId;
         rti.affiliatedTaskColor = tr.mAffiliatedTaskColor;
         rti.numActivities = 0;
+        if (tr.mBounds != null) {
+            rti.bounds = new Rect(tr.mBounds);
+        }
 
         ActivityRecord base = null;
         ActivityRecord top = null;

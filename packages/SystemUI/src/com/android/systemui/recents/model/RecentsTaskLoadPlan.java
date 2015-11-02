@@ -133,9 +133,11 @@ public class RecentsTaskLoadPlan {
             Task task = new Task(taskKey, (t.id != INVALID_TASK_ID), t.affiliatedTaskId,
                     t.affiliatedTaskColor, activityLabel, contentDescription, activityIcon,
                     activityColor, (i == (taskCount - 1)), config.lockToAppEnabled, icon,
-                    iconFilename);
+                    iconFilename, t.bounds);
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
-            if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
+            if (DEBUG) {
+                Log.d(TAG, activityLabel + " bounds: " + t.bounds);
+            }
 
             if (task.isFreeformTask()) {
                 freeformTasks.add(task);

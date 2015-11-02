@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import com.android.systemui.recents.misc.Utilities;
 
@@ -105,6 +106,7 @@ public class Task {
     public boolean lockToTaskEnabled;
     public Bitmap icon;
     public String iconFilename;
+    public Rect bounds;
 
     private TaskCallbacks mCb;
 
@@ -115,7 +117,7 @@ public class Task {
     public Task(TaskKey key, boolean isActive, int taskAffiliation, int taskAffiliationColor,
                 String activityTitle, String contentDescription, Drawable activityIcon,
                 int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
-                String iconFilename) {
+                String iconFilename, Rect bounds) {
         boolean isInAffiliationGroup = (taskAffiliation != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
         this.key = key;
@@ -132,6 +134,7 @@ public class Task {
         this.lockToTaskEnabled = lockToTaskEnabled;
         this.icon = icon;
         this.iconFilename = iconFilename;
+        this.bounds = bounds;
     }
 
     /** Copies the other task. */
