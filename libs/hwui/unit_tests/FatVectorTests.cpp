@@ -56,6 +56,27 @@ TEST(FatVector, simpleAllocate) {
     }
 }
 
+TEST(FatVector, preSizeConstructor) {
+    {
+        FatVector<int, 4> v(32);
+        EXPECT_EQ(32u, v.capacity());
+        EXPECT_EQ(32u, v.size());
+        EXPECT_FALSE(allocationIsInternal(v));
+    }
+    {
+        FatVector<int, 4> v(4);
+        EXPECT_EQ(4u, v.capacity());
+        EXPECT_EQ(4u, v.size());
+        EXPECT_TRUE(allocationIsInternal(v));
+    }
+    {
+        FatVector<int, 4> v(2);
+        EXPECT_EQ(4u, v.capacity());
+        EXPECT_EQ(2u, v.size());
+        EXPECT_TRUE(allocationIsInternal(v));
+    }
+}
+
 TEST(FatVector, shrink) {
     FatVector<int, 10> v;
     EXPECT_TRUE(allocationIsInternal(v));

@@ -47,6 +47,7 @@ class GlopBuilder {
 public:
     GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop);
 
+    GlopBuilder& setMeshTexturedIndexedVbo(GLuint vbo, GLsizei elementCount);
     GlopBuilder& setMeshUnitQuad();
     GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper);
     GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);

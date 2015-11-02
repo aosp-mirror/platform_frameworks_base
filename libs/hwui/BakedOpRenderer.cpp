@@ -20,6 +20,7 @@
 #include "Glop.h"
 #include "GlopBuilder.h"
 #include "renderstate/RenderState.h"
+#include "utils/FatVector.h"
 #include "utils/GLUtils.h"
 
 namespace android {
@@ -29,12 +30,13 @@ namespace uirenderer {
 // OffscreenBuffer
 ////////////////////////////////////////////////////////////////////////////////
 
-OffscreenBuffer::OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t textureHeight,
+OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
+        uint32_t textureWidth, uint32_t textureHeight,
         uint32_t viewportWidth, uint32_t viewportHeight)
-        : viewportWidth(viewportWidth)
+        : renderState(renderState)
+        , viewportWidth(viewportWidth)
         , viewportHeight(viewportHeight)
-        , texture(caches)
-        , texCoords(0, viewportHeight / float(textureHeight), viewportWidth / float(textureWidth), 0) {
+        , texture(caches) {
     texture.width = textureWidth;
     texture.height = textureHeight;
 
@@ -50,19 +52,58 @@ OffscreenBuffer::OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t
             GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 }
 
+void OffscreenBuffer::updateMeshFromRegion() {
+    // avoid T-junctions as they cause artifacts in between the resultant
+    // geometry when complex transforms occur.
+    // TODO: generate the safeRegion only if necessary based on drawing transform
+    Region safeRegion = Region::createTJunctionFreeRegion(region);
+
+    size_t count;
+    const android::Rect* rects = safeRegion.getArray(&count);
+
+    const float texX = 1.0f / float(viewportWidth);
+    const float texY = 1.0f / float(viewportHeight);
+
+    FatVector<TextureVertex, 64> meshVector(count * 4); // uses heap if more than 64 vertices needed
+    TextureVertex* mesh = &meshVector[0];
+    for (size_t i = 0; i < count; i++) {
+        const android::Rect* r = &rects[i];
+
+        const float u1 = r->left * texX;
+        const float v1 = (viewportHeight - r->top) * texY;
+        const float u2 = r->right * texX;
+        const float v2 = (viewportHeight - r->bottom) * texY;
+
+        TextureVertex::set(mesh++, r->left, r->top, u1, v1);
+        TextureVertex::set(mesh++, r->right, r->top, u2, v1);
+        TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
+        TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
+    }
+    elementCount = count * 6;
+    renderState.meshState().genOrUpdateMeshBuffer(&vbo,
+            sizeof(TextureVertex) * count * 4,
+            &meshVector[0],
+            GL_DYNAMIC_DRAW); // TODO: GL_STATIC_DRAW if savelayer
+}
+
+OffscreenBuffer::~OffscreenBuffer() {
+    texture.deleteTexture();
+    renderState.meshState().deleteMeshBuffer(vbo);
+    elementCount = 0;
+    vbo = 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BakedOpRenderer
 ////////////////////////////////////////////////////////////////////////////////
 
-OffscreenBuffer* BakedOpRenderer::createOffscreenBuffer(uint32_t width, uint32_t height) {
+OffscreenBuffer* BakedOpRenderer::createOffscreenBuffer(RenderState& renderState,
+        uint32_t width, uint32_t height) {
     // TODO: get from cache!
-    return new OffscreenBuffer(Caches::getInstance(), width, height, width, height);
+    return new OffscreenBuffer(renderState, Caches::getInstance(), width, height, width, height);
 }
 
 void BakedOpRenderer::destroyOffscreenBuffer(OffscreenBuffer* offscreenBuffer) {
-    // destroy and delete, since each clipped saveLayer is only drawn once.
-    offscreenBuffer->texture.deleteTexture();
-
     // TODO: return texture/offscreenbuffer to cache!
     delete offscreenBuffer;
 }
@@ -70,7 +111,7 @@ void BakedOpRenderer::destroyOffscreenBuffer(OffscreenBuffer* offscreenBuffer) {
 OffscreenBuffer* BakedOpRenderer::createLayer(uint32_t width, uint32_t height) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
-    OffscreenBuffer* buffer = createOffscreenBuffer(width, height);
+    OffscreenBuffer* buffer = createOffscreenBuffer(mRenderState, width, height);
     startLayer(buffer);
     return buffer;
 }
@@ -98,6 +139,7 @@ void BakedOpRenderer::startLayer(OffscreenBuffer* offscreenBuffer) {
 }
 
 void BakedOpRenderer::endLayer() {
+    mRenderTarget.offscreenBuffer->updateMeshFromRegion();
     mRenderTarget.offscreenBuffer = nullptr;
 
     // Detach the texture from the FBO
@@ -162,6 +204,12 @@ void BakedOpRenderer::renderGlop(const BakedOpState& state, const Glop& glop) {
         mRenderState.scissor().set(clip.left, mRenderTarget.viewportHeight - clip.bottom,
             clip.getWidth(), clip.getHeight());
     }
+    if (mRenderTarget.offscreenBuffer) { // TODO: not with multi-draw
+        // register layer damage to draw-back region
+        const Rect& uiDirty = state.computedState.clippedBounds;
+        android::Rect dirty(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
+        mRenderTarget.offscreenBuffer->region.orSelf(dirty);
+    }
     mRenderState.render(glop, mRenderTarget.orthoMatrix);
     mHasDrawn = true;
 }
@@ -171,6 +219,14 @@ void BakedOpRenderer::renderGlop(const BakedOpState& state, const Glop& glop) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void BakedOpDispatcher::onRenderNodeOp(BakedOpRenderer&, const RenderNodeOp&, const BakedOpState&) {
+    LOG_ALWAYS_FATAL("unsupported operation");
+}
+
+void BakedOpDispatcher::onBeginLayerOp(BakedOpRenderer& renderer, const BeginLayerOp& op, const BakedOpState& state) {
+    LOG_ALWAYS_FATAL("unsupported operation");
+}
+
+void BakedOpDispatcher::onEndLayerOp(BakedOpRenderer& renderer, const EndLayerOp& op, const BakedOpState& state) {
     LOG_ALWAYS_FATAL("unsupported operation");
 }
 
@@ -217,28 +273,20 @@ void BakedOpDispatcher::onSimpleRectsOp(BakedOpRenderer& renderer, const SimpleR
     renderer.renderGlop(state, glop);
 }
 
-void BakedOpDispatcher::onBeginLayerOp(BakedOpRenderer& renderer, const BeginLayerOp& op, const BakedOpState& state) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
-void BakedOpDispatcher::onEndLayerOp(BakedOpRenderer& renderer, const EndLayerOp& op, const BakedOpState& state) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
     OffscreenBuffer* buffer = *op.layerHandle;
 
     // TODO: extend this to handle HW layers & paint properties which
     // reside in node.properties().layerProperties()
     float layerAlpha = op.alpha * state.alpha;
-    const bool tryToSnap = state.computedState.transform.isPureTranslate();
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
-            .setMeshTexturedUvQuad(nullptr, buffer->texCoords)
+            .setMeshTexturedIndexedVbo(buffer->vbo, buffer->elementCount)
             .setFillLayer(buffer->texture, op.colorFilter, layerAlpha, op.mode, Blend::ModeOrderSwap::NoSwap)
             .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, op.unmappedBounds)
+            .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
+                    Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
             .build();
     renderer.renderGlop(state, glop);
 

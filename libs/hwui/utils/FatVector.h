@@ -91,6 +91,10 @@ public:
             InlineStdAllocator<T, SIZE>(mAllocation)) {
         this->reserve(SIZE);
     }
+
+    FatVector(size_t capacity) : FatVector() {
+        this->resize(capacity);
+    }
 private:
     typename InlineStdAllocator<T, SIZE>::Allocation mAllocation;
 };

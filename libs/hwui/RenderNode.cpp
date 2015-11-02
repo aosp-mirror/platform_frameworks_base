@@ -250,7 +250,7 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 
 layer_t* createLayer(RenderState& renderState, uint32_t width, uint32_t height) {
 #if HWUI_NEW_OPS
-    return BakedOpRenderer::createOffscreenBuffer(width, height);
+    return BakedOpRenderer::createOffscreenBuffer(renderState, width, height);
 #else
     return LayerRenderer::createRenderLayer(renderState, width, height);
 #endif

@@ -35,13 +35,24 @@ class RenderState;
  */
 class OffscreenBuffer {
 public:
-    OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t textureHeight,
+    OffscreenBuffer(RenderState& renderState, Caches& caches,
+            uint32_t textureWidth, uint32_t textureHeight,
             uint32_t viewportWidth, uint32_t viewportHeight);
+    ~OffscreenBuffer();
+
+    // must be called prior to rendering, to construct/update vertex buffer
+    void updateMeshFromRegion();
+
+    RenderState& renderState;
     uint32_t viewportWidth;
     uint32_t viewportHeight;
     Texture texture;
-    Rect texCoords;
+
+    // Portion of offscreen buffer that has been drawn to. Used to minimize drawing area when
+    // drawing back to screen / parent FBO.
     Region region;
+    GLsizei elementCount = 0;
+    GLuint vbo = 0;
 };
 
 /**
@@ -61,7 +72,8 @@ public:
             , mOpaque(opaque) {
     }
 
-    static OffscreenBuffer* createOffscreenBuffer(uint32_t width, uint32_t height);
+    static OffscreenBuffer* createOffscreenBuffer(RenderState& renderState,
+            uint32_t width, uint32_t height);
     static void destroyOffscreenBuffer(OffscreenBuffer*);
 
     RenderState& renderState() { return mRenderState; }
