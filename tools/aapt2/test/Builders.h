@@ -19,8 +19,8 @@
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
-#include "util/Util.h"
 #include "XmlDom.h"
+#include "util/Util.h"
 
 #include "test/Common.h"
 

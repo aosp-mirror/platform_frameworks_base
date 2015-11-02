@@ -45,9 +45,11 @@ sources := \
 	ConfigDescription.cpp \
 	Debug.cpp \
 	Flags.cpp \
-	JavaClassGenerator.cpp \
+	java/AnnotationProcessor.cpp \
+	java/JavaClassGenerator.cpp \
+	java/ManifestClassGenerator.cpp \
+	java/ProguardRules.cpp \
 	Locale.cpp \
-	ProguardRules.cpp \
 	Resource.cpp \
 	ResourceParser.cpp \
 	ResourceTable.cpp \
@@ -76,7 +78,8 @@ testSources := \
 	util/StringPiece_test.cpp \
 	util/Util_test.cpp \
 	ConfigDescription_test.cpp \
-	JavaClassGenerator_test.cpp \
+	java/JavaClassGenerator_test.cpp \
+	java/ManifestClassGenerator_test.cpp \
 	Locale_test.cpp \
 	Resource_test.cpp \
 	ResourceParser_test.cpp \

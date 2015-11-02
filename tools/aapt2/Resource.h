@@ -47,7 +47,6 @@ enum class ResourceType {
     kFraction,
     kId,
     kInteger,
-    kIntegerArray,
     kInterpolator,
     kLayout,
     kMenu,

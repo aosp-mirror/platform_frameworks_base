@@ -36,6 +36,7 @@ template <typename TChar>
 class BasicStringPiece {
 public:
     using const_iterator = const TChar*;
+    using difference_type = size_t;
 
     BasicStringPiece();
     BasicStringPiece(const BasicStringPiece<TChar>& str);

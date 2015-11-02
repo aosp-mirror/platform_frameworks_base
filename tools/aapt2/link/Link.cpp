@@ -17,15 +17,16 @@
 #include "AppInfo.h"
 #include "Debug.h"
 #include "Flags.h"
-#include "JavaClassGenerator.h"
 #include "NameMangler.h"
-#include "ProguardRules.h"
 #include "XmlDom.h"
 
 #include "compile/IdAssigner.h"
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
+#include "java/JavaClassGenerator.h"
+#include "java/ManifestClassGenerator.h"
+#include "java/ProguardRules.h"
 #include "link/Linkers.h"
 #include "link/TableMerger.h"
 #include "process/IResourceTableConsumer.h"
@@ -354,6 +355,36 @@ struct LinkCommand {
         return true;
     }
 
+    bool writeManifestJavaFile(XmlResource* manifestXml) {
+        if (!mOptions.generateJavaClassPath) {
+            return true;
+        }
+
+        std::string outPath = mOptions.generateJavaClassPath.value();
+        file::appendPath(&outPath,
+                         file::packageToPath(util::utf16ToUtf8(mContext.getCompilationPackage())));
+        file::mkdirs(outPath);
+        file::appendPath(&outPath, "Manifest.java");
+
+        std::ofstream fout(outPath, std::ofstream::binary);
+        if (!fout) {
+            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            return false;
+        }
+
+        ManifestClassGenerator generator;
+        if (!generator.generate(mContext.getDiagnostics(), mContext.getCompilationPackage(),
+                                manifestXml, &fout)) {
+            return false;
+        }
+
+        if (!fout) {
+            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            return false;
+        }
+        return true;
+    }
+
     bool writeProguardFile(const proguard::KeepSet& keepSet) {
         if (!mOptions.generateProguardRulesPath) {
             return true;
@@ -546,6 +577,12 @@ struct LinkCommand {
                                                                manifestXml.get(),
                                                                &proguardKeepSet)) {
                     error = true;
+                }
+
+                if (mOptions.generateJavaClassPath) {
+                    if (!writeManifestJavaFile(manifestXml.get())) {
+                        error = true;
+                    }
                 }
 
                 if (!flattenXml(manifestXml.get(), "AndroidManifest.xml", {},

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "JavaClassGenerator.h"
+#include "java/JavaClassGenerator.h"
 #include "util/Util.h"
 
 #include "test/Builders.h"

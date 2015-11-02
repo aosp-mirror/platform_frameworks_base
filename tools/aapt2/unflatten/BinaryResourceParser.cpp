@@ -678,8 +678,6 @@ std::unique_ptr<Value> BinaryResourceParser::parseMapEntry(const ResourceNameRef
             // fallthrough
         case ResourceType::kAttr:
             return parseAttr(name, config, map);
-        case ResourceType::kIntegerArray:
-            // fallthrough
         case ResourceType::kArray:
             return parseArray(name, config, map);
         case ResourceType::kStyleable:
