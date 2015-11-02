@@ -320,6 +320,15 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
+    /**
+     * Cancels any running app transitions associated with the task.
+     */
+    void cancelTaskWindowTransition() {
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            mAppTokens.get(activityNdx).mAppAnimator.clearAnimation();
+        }
+    }
+
     boolean showForAllUsers() {
         final int tokensCount = mAppTokens.size();
         return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;

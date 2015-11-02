@@ -44,6 +44,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
@@ -587,6 +588,20 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return new AppTransitionAnimationSpec(taskId, b, rect);
     }
 
+    /**
+     * Cancels any running window transitions for the launched task (the task animating into
+     * Recents).
+     */
+    private void cancelLaunchedTaskWindowTransition(final Task task) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
+        if (launchState.launchedToTaskId != -1 &&
+                launchState.launchedToTaskId != task.key.id) {
+            ssp.cancelWindowTransition(launchState.launchedToTaskId);
+        }
+    }
+
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override
@@ -617,34 +632,37 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Compute the thumbnail to scale up from
         final SystemServicesProxy ssp = Recents.getSystemServices();
+        boolean screenPinningRequested = false;
         ActivityOptions opts = null;
         ActivityOptions.OnAnimationStartedListener animStartedListener = null;
         if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
                 task.thumbnail.getHeight() > 0) {
-            if (lockToTask) {
-                animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                    boolean mTriggered = false;
-                    @Override
-                    public void onAnimationStarted() {
-                        if (!mTriggered) {
-                            postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    EventBus.getDefault().send(new ScreenPinningRequestEvent(
-                                            getContext(), ssp));
-                                }
-                            }, 350);
-                            mTriggered = true;
-                        }
+            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
+                @Override
+                public void onAnimationStarted() {
+                    // If we are launching into another task, cancel the previous task's
+                    // window transition
+                    cancelLaunchedTaskWindowTransition(task);
+
+                    if (lockToTask) {
+                        // Request screen pinning after the animation runs
+                        postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                EventBus.getDefault().send(new ScreenPinningRequestEvent(
+                                        getContext(), ssp));
+                            }
+                        }, 350);
                     }
-                };
-            }
+                }
+            };
             postDrawHeaderThumbnailTransitionRunnable(stackView, tv, offsetX, offsetY, stackScroll,
                     animStartedListener, destinationStack);
             opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
                     Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
                     offsetX, offsetY, (int) transform.rect.width(), (int) transform.rect.height(),
                     sourceView.getHandler(), animStartedListener);
+            screenPinningRequested = true;
         } else {
             opts = ActivityOptions.makeBasic();
         }
@@ -652,7 +670,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             opts.setBounds(bounds.isEmpty() ? null : bounds);
         }
         final ActivityOptions launchOpts = opts;
-        final boolean screenPinningRequested = (animStartedListener == null) && lockToTask;
+        final boolean finalScreenPinningRequested = screenPinningRequested;
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
@@ -660,9 +678,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     // Bring an active task to the foreground
                     ssp.moveTaskToFront(task.key.id, launchOpts);
                 } else {
-                    if (ssp.startActivityFromRecents(getContext(), task.key.id,
-                            task.activityLabel, launchOpts)) {
-                        if (screenPinningRequested) {
+                    if (ssp.startActivityFromRecents(getContext(), task.key.id, task.activityLabel,
+                            launchOpts)) {
+                        if (!finalScreenPinningRequested) {
+                            // If we have not requested this already to be run after the window
+                            // transition, then just run it now
                             EventBus.getDefault().send(new ScreenPinningRequestEvent(
                                     getContext(), ssp));
                         }
