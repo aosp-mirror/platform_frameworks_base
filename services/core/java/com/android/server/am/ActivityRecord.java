@@ -932,7 +932,7 @@ final class ActivityRecord {
         if (newThumbnail != null) {
             if (DEBUG_THUMBNAILS) Slog.i(TAG_THUMBNAILS,
                     "Setting thumbnail of " + this + " to " + newThumbnail);
-            boolean thumbnailUpdated = task.setLastThumbnail(newThumbnail);
+            boolean thumbnailUpdated = task.setLastThumbnailLocked(newThumbnail);
             if (thumbnailUpdated && isPersistable()) {
                 mStackSupervisor.mService.notifyTaskPersisterLocked(task, false);
             }
