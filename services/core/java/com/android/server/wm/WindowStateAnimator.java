@@ -1223,14 +1223,6 @@ class WindowStateAnimator {
                     mShownAlpha *= appTransformation.getAlpha();
                     if (appTransformation.hasClipRect()) {
                         mClipRect.set(appTransformation.getClipRect());
-                        if (mWin.mHScale > 0) {
-                            mClipRect.left /= mWin.mHScale;
-                            mClipRect.right /= mWin.mHScale;
-                        }
-                        if (mWin.mVScale > 0) {
-                            mClipRect.top /= mWin.mVScale;
-                            mClipRect.bottom /= mWin.mVScale;
-                        }
                         mHasClipRect = true;
                     }
                 }
@@ -1350,11 +1342,7 @@ class WindowStateAnimator {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
         // Need to recompute a new system decor rect each time.
-        if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
-            // Currently can't do this cropping for scaled windows.  We'll
-            // just keep the crop rect the same as the source surface.
-            w.mSystemDecorRect.set(0, 0, w.mRequestedWidth, w.mRequestedHeight);
-        } else if (!w.isDefaultDisplay()) {
+        if (!w.isDefaultDisplay()) {
             // On a different display there is no system decor.  Crop the window
             // by the screen boundaries.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
@@ -1407,9 +1395,13 @@ class WindowStateAnimator {
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
         // We don't want to clip to stack bounds windows that are currently doing entrance
         // animation for docked window, otherwise the animating window will be suddenly cut off.
+
         if (!(mAnimator.mAnimating && w.inDockedWorkspace())) {
             adjustCropToStackBounds(w, clipRect);
         }
+
+        w.transformFromScreenToSurfaceSpace(clipRect);
+
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
             try {
