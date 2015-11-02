@@ -20,6 +20,7 @@
 #include "utils/LinearAllocator.h"
 #include "Rect.h"
 #include "Matrix.h"
+#include "RenderNode.h"
 
 #include "SkXfermode.h"
 
@@ -136,13 +137,42 @@ struct EndLayerOp : RecordedOp {
             : RecordedOp(RecordedOpId::EndLayerOp, Rect(0, 0), Matrix4::identity(), Rect(0, 0), nullptr) {}
 };
 
+/**
+ * Draws an OffscreenBuffer.
+ *
+ * Alpha, mode, and colorfilter are embedded, since LayerOps are always dynamically generated,
+ * when creating/tracking a SkPaint* during defer isn't worth the bother.
+ */
 struct LayerOp : RecordedOp {
+    // Records a one-use (saveLayer) layer for drawing. Once drawn, the layer will be destroyed.
     LayerOp(BASE_PARAMS, OffscreenBuffer** layerHandle)
-            : SUPER(LayerOp)
-            , layerHandle(layerHandle) {}
+            : SUPER_PAINTLESS(LayerOp)
+            , layerHandle(layerHandle)
+            , alpha(paint->getAlpha() / 255.0f)
+            , mode(PaintUtils::getXfermodeDirect(paint))
+            , colorFilter(paint->getColorFilter())
+            , destroy(true) {}
+
+    LayerOp(RenderNode& node)
+        : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), Rect(node.getWidth(), node.getHeight()), nullptr)
+        , layerHandle(node.getLayerHandle())
+        , alpha(node.properties().layerProperties().alpha() / 255.0f)
+        , mode(node.properties().layerProperties().xferMode())
+        , colorFilter(node.properties().layerProperties().colorFilter())
+        , destroy(false) {}
+
     // Records a handle to the Layer object, since the Layer itself won't be
     // constructed until after this operation is constructed.
     OffscreenBuffer** layerHandle;
+    const float alpha;
+    const SkXfermode::Mode mode;
+
+    // pointer to object owned by either LayerProperties, or a recorded Paint object in a
+    // BeginLayerOp. Lives longer than LayerOp in either case, so no skia ref counting is used.
+    SkColorFilter* colorFilter;
+
+    // whether to destroy the layer, once rendered
+    const bool destroy;
 };
 
 }; // namespace uirenderer

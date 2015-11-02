@@ -56,6 +56,7 @@ hwui_src_files := \
     Layer.cpp \
     LayerCache.cpp \
     LayerRenderer.cpp \
+    LayerUpdateQueue.cpp \
     Matrix.cpp \
     OpenGLRenderer.cpp \
     Patch.cpp \
@@ -204,6 +205,7 @@ LOCAL_SRC_FILES += \
     unit_tests/ClipAreaTests.cpp \
     unit_tests/DamageAccumulatorTests.cpp \
     unit_tests/FatVectorTests.cpp \
+    unit_tests/LayerUpdateQueueTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
     unit_tests/StringUtilsTests.cpp
 

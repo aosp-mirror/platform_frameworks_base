@@ -20,6 +20,7 @@
 #include "Caches.h"
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
+#include "LayerUpdateQueue.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "Properties.h"
@@ -198,7 +199,11 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     mCurrentFrameInfo->markSyncStart();
 
     info.damageAccumulator = &mDamageAccumulator;
+#if HWUI_NEW_OPS
+    info.layerUpdateQueue = &mLayerUpdateQueue;
+#else
     info.renderer = mCanvas;
+#endif
 
     mAnimationContext->startFrame(info.mode);
     for (const sp<RenderNode>& node : mRenderNodes) {
@@ -333,7 +338,8 @@ void CanvasContext::draw() {
     mEglManager.damageFrame(frame, dirty);
 
 #if HWUI_NEW_OPS
-    OpReorderer reorderer(dirty, frame.width(), frame.height(), mRenderNodes);
+    OpReorderer reorderer(mLayerUpdateQueue, dirty, frame.width(), frame.height(), mRenderNodes);
+    mLayerUpdateQueue.clear();
     BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(), mOpaque);
     // TODO: profiler().draw(mCanvas);
     reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
@@ -555,7 +561,11 @@ void CanvasContext::buildLayer(RenderNode* node) {
 
     TreeInfo info(TreeInfo::MODE_FULL, *this);
     info.damageAccumulator = &mDamageAccumulator;
+#if HWUI_NEW_OPS
+    info.layerUpdateQueue = &mLayerUpdateQueue;
+#else
     info.renderer = mCanvas;
+#endif
     info.runAnimations = false;
     node->prepareTree(info);
     SkRect ignore;

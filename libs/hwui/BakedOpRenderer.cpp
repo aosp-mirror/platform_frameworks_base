@@ -31,7 +31,9 @@ namespace uirenderer {
 
 OffscreenBuffer::OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t textureHeight,
         uint32_t viewportWidth, uint32_t viewportHeight)
-        : texture(caches)
+        : viewportWidth(viewportWidth)
+        , viewportHeight(viewportHeight)
+        , texture(caches)
         , texCoords(0, viewportHeight / float(textureHeight), viewportWidth / float(textureWidth), 0) {
     texture.width = textureWidth;
     texture.height = textureHeight;
@@ -52,12 +54,29 @@ OffscreenBuffer::OffscreenBuffer(Caches& caches, uint32_t textureWidth, uint32_t
 // BakedOpRenderer
 ////////////////////////////////////////////////////////////////////////////////
 
-OffscreenBuffer* BakedOpRenderer::startLayer(uint32_t width, uint32_t height) {
+OffscreenBuffer* BakedOpRenderer::createOffscreenBuffer(uint32_t width, uint32_t height) {
+    // TODO: get from cache!
+    return new OffscreenBuffer(Caches::getInstance(), width, height, width, height);
+}
+
+void BakedOpRenderer::destroyOffscreenBuffer(OffscreenBuffer* offscreenBuffer) {
+    // destroy and delete, since each clipped saveLayer is only drawn once.
+    offscreenBuffer->texture.deleteTexture();
+
+    // TODO: return texture/offscreenbuffer to cache!
+    delete offscreenBuffer;
+}
+
+OffscreenBuffer* BakedOpRenderer::createLayer(uint32_t width, uint32_t height) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
-    // TODO: really should be caching these!
-    OffscreenBuffer* buffer = new OffscreenBuffer(mCaches, width, height, width, height);
-    mRenderTarget.offscreenBuffer = buffer;
+    OffscreenBuffer* buffer = createOffscreenBuffer(width, height);
+    startLayer(buffer);
+    return buffer;
+}
+
+void BakedOpRenderer::startLayer(OffscreenBuffer* offscreenBuffer) {
+    mRenderTarget.offscreenBuffer = offscreenBuffer;
 
     // create and bind framebuffer
     mRenderTarget.frameBufferId = mRenderState.genFramebuffer();
@@ -65,7 +84,7 @@ OffscreenBuffer* BakedOpRenderer::startLayer(uint32_t width, uint32_t height) {
 
     // attach the texture to the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            buffer->texture.id, 0);
+            offscreenBuffer->texture.id, 0);
     LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "startLayer FAILED");
     LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
             "framebuffer incomplete!");
@@ -75,8 +94,7 @@ OffscreenBuffer* BakedOpRenderer::startLayer(uint32_t width, uint32_t height) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Change the viewport & ortho projection
-    setViewport(width, height);
-    return buffer;
+    setViewport(offscreenBuffer->viewportWidth, offscreenBuffer->viewportHeight);
 }
 
 void BakedOpRenderer::endLayer() {
@@ -212,23 +230,21 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
 
     // TODO: extend this to handle HW layers & paint properties which
     // reside in node.properties().layerProperties()
-    float layerAlpha = (op.paint->getAlpha() / 255.0f) * state.alpha;
+    float layerAlpha = op.alpha * state.alpha;
     const bool tryToSnap = state.computedState.transform.isPureTranslate();
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshTexturedUvQuad(nullptr, buffer->texCoords)
-            .setFillLayer(buffer->texture, op.paint->getColorFilter(), layerAlpha, PaintUtils::getXfermodeDirect(op.paint), Blend::ModeOrderSwap::NoSwap)
+            .setFillLayer(buffer->texture, op.colorFilter, layerAlpha, op.mode, Blend::ModeOrderSwap::NoSwap)
             .setTransform(state.computedState.transform, TransformFlags::None)
             .setModelViewMapUnitToRectOptionalSnap(tryToSnap, op.unmappedBounds)
             .build();
     renderer.renderGlop(state, glop);
 
-    // destroy and delete, since each clipped saveLayer is only drawn once.
-    buffer->texture.deleteTexture();
-
-    // TODO: return texture/offscreenbuffer to cache!
-    delete buffer;
+    if (op.destroy) {
+        BakedOpRenderer::destroyOffscreenBuffer(buffer);
+    }
 }
 
 } // namespace uirenderer

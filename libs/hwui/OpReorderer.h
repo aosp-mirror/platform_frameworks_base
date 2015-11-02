@@ -32,6 +32,7 @@ namespace uirenderer {
 
 class BakedOpState;
 class BatchBase;
+class LayerUpdateQueue;
 class MergingOpBatch;
 class OffscreenBuffer;
 class OpBatch;
@@ -64,9 +65,14 @@ class OpReorderer : public CanvasStateClient {
      */
     class LayerReorderer {
     public:
+        // Create LayerReorderer for Fbo0
         LayerReorderer(uint32_t width, uint32_t height)
-                : width(width)
-                , height(height) {}
+                : LayerReorderer(width, height, nullptr, nullptr) {};
+
+        // Create LayerReorderer for an offscreen layer, where beginLayerOp is present for a
+        // saveLayer, renderNode is present for a HW layer.
+        LayerReorderer(uint32_t width, uint32_t height,
+                const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
 
         // iterate back toward target to see if anything drawn since should overlap the new op
         // if no target, merging ops still iterate to find similar batch to insert after
@@ -92,12 +98,12 @@ class OpReorderer : public CanvasStateClient {
 
         void dump() const;
 
-        OffscreenBuffer* offscreenBuffer = nullptr;
-        const BeginLayerOp* beginLayerOp = nullptr;
         const uint32_t width;
         const uint32_t height;
+        OffscreenBuffer* offscreenBuffer;
+        const BeginLayerOp* beginLayerOp;
+        const RenderNode* renderNode;
     private:
-
         std::vector<BatchBase*> mBatches;
 
         /**
@@ -112,8 +118,8 @@ class OpReorderer : public CanvasStateClient {
 
     };
 public:
-    // TODO: not final, just presented this way for simplicity. Layers too?
-    OpReorderer(const SkRect& clip, uint32_t viewportWidth, uint32_t viewportHeight,
+    OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
+            uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes);
 
     OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList);
@@ -144,8 +150,13 @@ public:
         // later in the list will be drawn by earlier ones
         for (int i = mLayerReorderers.size() - 1; i >= 1; i--) {
             LayerReorderer& layer = mLayerReorderers[i];
-            if (!layer.empty()) {
-                layer.offscreenBuffer = renderer.startLayer(layer.width, layer.height);
+            if (layer.renderNode) {
+                // cached HW layer - can't skip layer if empty
+                renderer.startLayer(layer.offscreenBuffer);
+                layer.replayBakedOpsImpl((void*)&renderer, receivers);
+                renderer.endLayer();
+            } else if (!layer.empty()) { // save layer - skip entire layer if empty
+                layer.offscreenBuffer = renderer.createLayer(layer.width, layer.height);
                 layer.replayBakedOpsImpl((void*)&renderer, receivers);
                 renderer.endLayer();
             }
@@ -171,11 +182,18 @@ public:
     virtual GLuint getTargetFbo() const override { return 0; }
 
 private:
+    void saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
+            const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
+    void restoreForLayer();
+
     LayerReorderer& currentLayer() { return mLayerReorderers[mLayerStack.back()]; }
 
     BakedOpState* tryBakeOpState(const RecordedOp& recordedOp) {
         return BakedOpState::tryConstruct(mAllocator, *mCanvasState.currentSnapshot(), recordedOp);
     }
+
+    // should always be surrounded by a save/restore pair
+    void deferNodePropsAndOps(RenderNode& node);
 
     void deferImpl(const DisplayList& displayList);
 

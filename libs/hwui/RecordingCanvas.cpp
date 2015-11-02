@@ -77,7 +77,6 @@ SkCanvas* RecordingCanvas::asSkCanvas() {
 // ----------------------------------------------------------------------------
 
 void RecordingCanvas::onViewportInitialized() {
-
 }
 
 void RecordingCanvas::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {

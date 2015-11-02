@@ -16,11 +16,11 @@
 #ifndef TREEINFO_H
 #define TREEINFO_H
 
-#include <string>
+#include "utils/Macros.h"
 
 #include <utils/Timers.h>
 
-#include "utils/Macros.h"
+#include <string>
 
 namespace android {
 namespace uirenderer {
@@ -30,6 +30,7 @@ class CanvasContext;
 }
 
 class DamageAccumulator;
+class LayerUpdateQueue;
 class OpenGLRenderer;
 class RenderState;
 
@@ -75,9 +76,14 @@ public:
 
     // Must not be null during actual usage
     DamageAccumulator* damageAccumulator = nullptr;
+
+#if HWUI_NEW_OPS
+    LayerUpdateQueue* layerUpdateQueue = nullptr;
+#else
     // The renderer that will be drawing the next frame. Use this to push any
     // layer updates or similar. May be NULL.
     OpenGLRenderer* renderer = nullptr;
+#endif
     ErrorHandler* errorHandler = nullptr;
 
     struct Out {

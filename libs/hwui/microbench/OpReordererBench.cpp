@@ -56,7 +56,9 @@ void BM_OpReorderer_defer::Run(int iters) {
 
 BENCHMARK_NO_ARG(BM_OpReorderer_deferAndRender);
 void BM_OpReorderer_deferAndRender::Run(int iters) {
-    TestUtils::runOnRenderThread([this, iters](RenderState& renderState, Caches& caches) {
+    TestUtils::runOnRenderThread([this, iters](renderthread::RenderThread& thread) {
+        RenderState& renderState = thread.renderState();
+        Caches& caches = Caches::getInstance();
         StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
             OpReorderer reorderer(200, 200, *sReorderingDisplayList);

@@ -20,6 +20,7 @@
 #include <OpReorderer.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
+#include <renderthread/CanvasContext.h> // todo: remove
 #include <unit_tests/TestUtils.h>
 
 #include <unordered_map>
@@ -27,6 +28,7 @@
 namespace android {
 namespace uirenderer {
 
+LayerUpdateQueue sEmptyLayerUpdateQueue;
 
 /**
  * Virtual class implemented by each test to redirect static operation / state transitions to
@@ -42,7 +44,8 @@ namespace uirenderer {
 class TestRendererBase {
 public:
     virtual ~TestRendererBase() {}
-    virtual OffscreenBuffer* startLayer(uint32_t width, uint32_t height) { ADD_FAILURE(); return nullptr; }
+    virtual OffscreenBuffer* createLayer(uint32_t, uint32_t) { ADD_FAILURE(); return nullptr; }
+    virtual void startLayer(OffscreenBuffer*) { ADD_FAILURE(); }
     virtual void endLayer() { ADD_FAILURE(); }
     virtual void startFrame(uint32_t width, uint32_t height) {}
     virtual void endFrame() {}
@@ -192,7 +195,8 @@ TEST(OpReorderer, renderNode) {
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(parent.get());
 
-    OpReorderer reorderer(SkRect::MakeWH(200, 200), 200, 200, nodes);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue,
+            SkRect::MakeWH(200, 200), 200, 200, nodes);
 
     RenderNodeTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -216,7 +220,8 @@ TEST(OpReorderer, clipped) {
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(node.get());
 
-    OpReorderer reorderer(SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
+    OpReorderer reorderer(sEmptyLayerUpdateQueue,
+            SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
             200, 200, nodes);
 
     ClippedTestRenderer renderer;
@@ -226,7 +231,7 @@ TEST(OpReorderer, clipped) {
 
 class SaveLayerSimpleTestRenderer : public TestRendererBase {
 public:
-    OffscreenBuffer* startLayer(uint32_t width, uint32_t height) override {
+    OffscreenBuffer* createLayer(uint32_t width, uint32_t height) override {
         EXPECT_EQ(0, mIndex++);
         EXPECT_EQ(180u, width);
         EXPECT_EQ(180u, height);
@@ -268,13 +273,13 @@ TEST(OpReorderer, saveLayerSimple) {
 
 
 /* saveLayer1 {rect1, saveLayer2 { rect2 } } will play back as:
- * - startLayer2, rect2 endLayer2
- * - startLayer1, rect1, drawLayer2, endLayer1
+ * - createLayer2, rect2 endLayer2
+ * - createLayer1, rect1, drawLayer2, endLayer1
  * - startFrame, layerOp1, endFrame
  */
 class SaveLayerNestedTestRenderer : public TestRendererBase {
 public:
-    OffscreenBuffer* startLayer(uint32_t width, uint32_t height) override {
+    OffscreenBuffer* createLayer(uint32_t width, uint32_t height) override {
         const int index = mIndex++;
         if (index == 0) {
             EXPECT_EQ(400u, width);
@@ -354,6 +359,163 @@ TEST(OpReorderer, saveLayerContentRejection) {
     FailRenderer renderer;
     // should see no ops, even within the layer, since the layer should be rejected
     reorderer.replayBakedOps<TestDispatcher>(renderer);
+}
+
+class HwLayerSimpleTestRenderer : public TestRendererBase {
+public:
+    void startLayer(OffscreenBuffer* offscreenBuffer) override {
+        EXPECT_EQ(0, mIndex++);
+        EXPECT_EQ(offscreenBuffer, (OffscreenBuffer*) 0x0124);
+    }
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(1, mIndex++);
+
+        // verify transform is reset
+        EXPECT_TRUE(state.computedState.transform.isIdentity());
+
+        // verify damage rect is used as clip
+        EXPECT_EQ(state.computedState.clipRect, Rect(25, 25, 75, 75));
+    }
+    void endLayer() override {
+        EXPECT_EQ(2, mIndex++);
+    }
+    void startFrame(uint32_t width, uint32_t height) override {
+        EXPECT_EQ(3, mIndex++);
+    }
+    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(4, mIndex++);
+    }
+    void endFrame() override {
+        EXPECT_EQ(5, mIndex++);
+    }
+};
+TEST(OpReorderer, hwLayerSimple) {
+    sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+    node->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+    node->setPropertyFieldsDirty(RenderNode::GENERIC);
+    OffscreenBuffer** bufferHandle = node->getLayerHandle();
+    *bufferHandle = (OffscreenBuffer*) 0x0124;
+
+    TestUtils::syncNodePropertiesAndDisplayList(node);
+
+    std::vector< sp<RenderNode> > nodes;
+    nodes.push_back(node.get());
+
+    // only enqueue partial damage
+    LayerUpdateQueue layerUpdateQueue;
+    layerUpdateQueue.enqueueLayerWithDamage(node.get(), Rect(25, 25, 75, 75));
+
+    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes);
+
+    HwLayerSimpleTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(6, renderer.getIndex());
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    *bufferHandle = nullptr;
+}
+
+
+/* parentLayer { greyRect, saveLayer { childLayer { whiteRect } } } will play back as:
+ * - startLayer(child), rect(grey), endLayer
+ * - createLayer, drawLayer(child), endLayer
+ * - startLayer(parent), rect(white), drawLayer(saveLayer), endLayer
+ * - startFrame, drawLayer(parent), endLayerb
+ */
+class HwLayerComplexTestRenderer : public TestRendererBase {
+public:
+    OffscreenBuffer* createLayer(uint32_t width, uint32_t height) {
+        EXPECT_EQ(3, mIndex++); // savelayer first
+        return (OffscreenBuffer*)0xabcd;
+    }
+    void startLayer(OffscreenBuffer* offscreenBuffer) override {
+        int index = mIndex++;
+        if (index == 0) {
+            // starting inner layer
+            EXPECT_EQ((OffscreenBuffer*)0x4567, offscreenBuffer);
+        } else if (index == 6) {
+            // starting outer layer
+            EXPECT_EQ((OffscreenBuffer*)0x0123, offscreenBuffer);
+        } else { ADD_FAILURE(); }
+    }
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        int index = mIndex++;
+        if (index == 1) {
+            // inner layer's rect (white)
+            EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
+        } else if (index == 7) {
+            // outer layer's rect (grey)
+            EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
+        } else { ADD_FAILURE(); }
+    }
+    void endLayer() override {
+        int index = mIndex++;
+        EXPECT_TRUE(index == 2 || index == 5 || index == 9);
+    }
+    void startFrame(uint32_t width, uint32_t height) override {
+        EXPECT_EQ(10, mIndex++);
+    }
+    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+        int index = mIndex++;
+        if (index == 4) {
+            EXPECT_EQ((OffscreenBuffer*)0x4567, *op.layerHandle);
+        } else if (index == 8) {
+            EXPECT_EQ((OffscreenBuffer*)0xabcd, *op.layerHandle);
+        } else if (index == 11) {
+            EXPECT_EQ((OffscreenBuffer*)0x0123, *op.layerHandle);
+        } else { ADD_FAILURE(); }
+    }
+    void endFrame() override {
+        EXPECT_EQ(12, mIndex++);
+    }
+};
+TEST(OpReorderer, hwLayerComplex) {
+    sp<RenderNode> child = TestUtils::createNode<RecordingCanvas>(50, 50, 150, 150, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+    child->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+    child->setPropertyFieldsDirty(RenderNode::GENERIC);
+    *(child->getLayerHandle()) = (OffscreenBuffer*) 0x4567;
+
+    RenderNode* childPtr = child.get();
+    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [childPtr](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorDKGRAY);
+        canvas.drawRect(0, 0, 200, 200, paint);
+
+        canvas.saveLayerAlpha(50, 50, 150, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.drawRenderNode(childPtr);
+        canvas.restore();
+    });
+    parent->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+    parent->setPropertyFieldsDirty(RenderNode::GENERIC);
+    *(parent->getLayerHandle()) = (OffscreenBuffer*) 0x0123;
+
+    TestUtils::syncNodePropertiesAndDisplayList(child);
+    TestUtils::syncNodePropertiesAndDisplayList(parent);
+
+    std::vector< sp<RenderNode> > nodes;
+    nodes.push_back(parent.get());
+
+    LayerUpdateQueue layerUpdateQueue;
+    layerUpdateQueue.enqueueLayerWithDamage(child.get(), Rect(100, 100));
+    layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(200, 200));
+
+    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes);
+
+    HwLayerComplexTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(13, renderer.getIndex());
+
+    // clean up layer pointers, so we can safely destruct RenderNodes
+    *(child->getLayerHandle()) = nullptr;
+    *(parent->getLayerHandle()) = nullptr;
 }
 
 } // namespace uirenderer
