@@ -91,7 +91,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -179,6 +178,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final SecurityPolicy mSecurityPolicy;
 
     private final MainHandler mMainHandler;
+
+    private MagnificationController mMagnificationController;
 
     private InteractionBridge mInteractionBridge;
 
@@ -1934,6 +1935,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
         }
+    }
+
+    MagnificationController getMagnificationController() {
+        if (mMagnificationController == null) {
+            mMagnificationController = new MagnificationController(mContext, this);
+        }
+        return mMagnificationController;
     }
 
     /**
