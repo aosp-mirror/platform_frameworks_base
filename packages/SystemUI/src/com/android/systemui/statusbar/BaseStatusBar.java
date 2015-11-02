@@ -62,6 +62,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -175,6 +176,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected boolean mDeviceInteractive;
 
     protected boolean mVisible;
+    protected ArraySet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new ArraySet<>();
 
     // mScreenOnFromKeyguard && mVisible.
     private boolean mVisibleToUser;
@@ -2016,6 +2018,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         Entry entry = mNotificationData.get(key);
         if (entry == null) {
             return;
+        } else if (mHeadsUpEntriesToRemoveOnSwitch.contains(entry)) {
+            mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
         }
 
         Notification n = notification.getNotification();
