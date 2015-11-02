@@ -1016,6 +1016,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    // DO NOT call it while taking the "this" lock, which could cause a dead lock.
     private void handlePackagesChanged(String packageName, int userHandle) {
         boolean removed = false;
         if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
@@ -1042,7 +1043,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (removed) {
                 validatePasswordOwnerLocked(policy);
-                syncDeviceCapabilitiesLocked(policy);
                 saveSettingsLocked(policy.mUserHandle);
             }
 
@@ -1058,6 +1058,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 } catch (RemoteException e) {
                     // Shouldn't happen
+                }
+            }
+        }
+        if (removed) {
+            synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
+                synchronized (DevicePolicyManagerService.this) {
+                    mUserManagerInternal.updateEffectiveUserRestrictionsRL(
+                            userHandle);
                 }
             }
         }
@@ -1682,7 +1690,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    void removeActiveAdminLocked(final ComponentName adminReceiver, int userHandle) {
+    void removeActiveAdminLocked(final ComponentName adminReceiver, final int userHandle) {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
         if (admin != null) {
             synchronized (this) {
@@ -1701,13 +1709,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 policy.mAdminList.remove(admin);
                                 policy.mAdminMap.remove(adminReceiver);
                                 validatePasswordOwnerLocked(policy);
-                                syncDeviceCapabilitiesLocked(policy);
                                 if (doProxyCleanup) {
                                     resetGlobalProxyLocked(getUserData(userHandle));
                                 }
                                 saveSettingsLocked(userHandle);
                                 updateMaximumTimeToLockLocked(policy);
                                 policy.mRemovingAdmins.remove(adminReceiver);
+                            }
+                            synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
+                                synchronized (DevicePolicyManagerService.this) {
+                                    mUserManagerInternal.updateEffectiveUserRestrictionsRL(
+                                            userHandle);
+                                }
                             }
                         }
                     });
@@ -2022,7 +2035,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         validatePasswordOwnerLocked(policy);
-        syncDeviceCapabilitiesLocked(policy);
         updateMaximumTimeToLockLocked(policy);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         if (policy.mStatusBarDisabled) {
@@ -2085,31 +2097,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slog.w(LOG_TAG, "Previous password owner " + policy.mPasswordOwner
                         + " no longer active; disabling");
                 policy.mPasswordOwner = -1;
-            }
-        }
-    }
-
-    /**
-     * Pushes down policy information to the system for any policies related to general device
-     * capabilities that need to be enforced by lower level services (e.g. Camera services).
-     */
-    void syncDeviceCapabilitiesLocked(DevicePolicyData policy) {
-        // Ensure the status of the camera is synced down to the system. Interested native services
-        // should monitor this value and act accordingly.
-        String cameraPropertyForUser = SYSTEM_PROP_DISABLE_CAMERA_PREFIX + policy.mUserHandle;
-        boolean systemState = mInjector.systemPropertiesGetBoolean(cameraPropertyForUser, false);
-        boolean cameraDisabled = getCameraDisabled(null, policy.mUserHandle);
-        if (cameraDisabled != systemState) {
-            long token = mInjector.binderClearCallingIdentity();
-            try {
-                String value = cameraDisabled ? "1" : "0";
-                if (VERBOSE_LOG) {
-                    Slog.v(LOG_TAG, "Change in camera state ["
-                            + cameraPropertyForUser + "] = " + value);
-                }
-                mInjector.systemPropertiesSet(cameraPropertyForUser, value);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(token);
             }
         }
     }
@@ -4329,13 +4316,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * The system property used to share the state of the camera. The native camera service
-     * is expected to read this property and act accordingly. The userId should be appended
-     * to this key.
-     */
-    public static final String SYSTEM_PROP_DISABLE_CAMERA_PREFIX = "sys.secpolicy.camera.off_";
-
-    /**
      * Disables all device cameras according to the specified admin.
      */
     @Override
@@ -4352,7 +4332,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ap.disableCamera = disabled;
                 saveSettingsLocked(userHandle);
             }
-            syncDeviceCapabilitiesLocked(getUserData(userHandle));
+        }
+        // Tell the user manager that the restrictions have changed.
+        synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
+            synchronized (this) {
+                if (isDeviceOwner(who)) {
+                    mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersRL();
+                } else {
+                    mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle);
+                }
+            }
         }
     }
 
@@ -4370,7 +4359,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
                 return (admin != null) ? admin.disableCamera : false;
             }
+            // First, see if DO has set it.  If so, it's device-wide.
+            final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            if (deviceOwner != null && deviceOwner.disableCamera) {
+                return true;
+            }
 
+            // Then check each device admin on the user.
             DevicePolicyData policy = getUserData(userHandle);
             // Determine whether or not the device camera is disabled for any active admins.
             final int N = policy.mAdminList.size();
@@ -4404,7 +4399,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ap.disabledKeyguardFeatures = which;
                 saveSettingsLocked(userHandle);
             }
-            syncDeviceCapabilitiesLocked(getUserData(userHandle));
         }
     }
 
@@ -5036,7 +5030,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
             ap.trustAgentInfos.put(agent.flattenToString(), new TrustAgentInfo(args));
             saveSettingsLocked(userHandle);
-            syncDeviceCapabilitiesLocked(getUserData(userHandle));
         }
     }
 
@@ -5602,6 +5595,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    // DO NOT call it while taking the "this" lock, which could cause a dead lock.
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
         Preconditions.checkNotNull(who, "ComponentName is null");
@@ -5612,7 +5606,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ActiveAdmin activeAdmin =
                         getActiveAdminForCallerLocked(who,
                                 DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-                boolean isDeviceOwner = isDeviceOwner(who);
+                final boolean isDeviceOwner = isDeviceOwner(who);
                 if (!isDeviceOwner && userHandle != UserHandle.USER_SYSTEM
                         && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                     throw new SecurityException(
@@ -6463,8 +6457,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         deviceOwner == null ? null : deviceOwner.userRestrictions;
                 final Bundle profileOwnerRestrictions =
                         profileOwner == null ? null : profileOwner.userRestrictions;
+                final boolean cameraDisabled = getCameraDisabled(null, userId);
 
-                if (deviceOwnerRestrictions == null && profileOwnerRestrictions == null) {
+                if (deviceOwnerRestrictions == null && profileOwnerRestrictions == null
+                        && !cameraDisabled) {
                     // No restrictions to merge.
                     return inBundle;
                 }
@@ -6472,6 +6468,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final Bundle composed = new Bundle(inBundle);
                 UserRestrictionsUtils.merge(composed, deviceOwnerRestrictions);
                 UserRestrictionsUtils.merge(composed, profileOwnerRestrictions);
+
+                // Also merge in the camera restriction.
+                if (cameraDisabled) {
+                    composed.putBoolean(UserManager.DISALLOW_CAMERA, true);
+                }
 
                 return composed;
             }

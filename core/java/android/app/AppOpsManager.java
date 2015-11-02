@@ -653,7 +653,7 @@ public class AppOpsManager {
             null, //WRITE_SETTINGS
             UserManager.DISALLOW_CREATE_WINDOWS, //SYSTEM_ALERT_WINDOW
             null, //ACCESS_NOTIFICATIONS
-            null, //CAMERA
+            UserManager.DISALLOW_CAMERA, //CAMERA
             UserManager.DISALLOW_RECORD_AUDIO, //RECORD_AUDIO
             null, //PLAY_AUDIO
             null, //READ_CLIPBOARD
