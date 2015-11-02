@@ -21,6 +21,7 @@ import android.provider.Settings.Secure;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.UsageTracker;
@@ -110,7 +111,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
-        state.visible = enabled || mUsageTracker.isRecentlyUsed();
+        state.visible = enabled || mUsageTracker.isRecentlyUsed() || QSPanel.isTheNewQS(mContext);
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = enabled ? mEnable : mDisable;

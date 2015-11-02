@@ -23,6 +23,7 @@ import android.content.Intent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -88,7 +89,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = mController.isHotspotSupported() && mUsageTracker.isRecentlyUsed();
+        state.visible = (mController.isHotspotSupported() && mUsageTracker.isRecentlyUsed())
+                || QSPanel.isTheNewQS(mContext);
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         if (arg instanceof Boolean) {
