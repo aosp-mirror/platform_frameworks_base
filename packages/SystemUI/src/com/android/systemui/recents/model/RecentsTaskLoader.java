@@ -560,6 +560,11 @@ public class RecentsTaskLoader {
         ActivityInfo activityInfo = mActivityInfoCache.get(cn);
         if (activityInfo == null) {
             activityInfo = ssp.getActivityInfo(cn, taskKey.userId);
+            if (cn == null || activityInfo == null) {
+                Log.e(TAG, "Unexpected null component name or activity info: " + cn + ", " +
+                        activityInfo);
+                return null;
+            }
             mActivityInfoCache.put(cn, activityInfo);
         }
         return activityInfo;

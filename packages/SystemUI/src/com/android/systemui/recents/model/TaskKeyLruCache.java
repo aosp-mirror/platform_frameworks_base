@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.model;
 
+import android.util.Log;
 import android.util.LruCache;
 import android.util.SparseArray;
 
@@ -28,6 +29,8 @@ import android.util.SparseArray;
  * changed.
  */
 public class TaskKeyLruCache<V> {
+
+    private static final String TAG = "TaskKeyLruCache";
 
     private final SparseArray<Task.TaskKey> mKeys = new SparseArray<>();
     private final LruCache<Integer, V> mCache;
@@ -71,6 +74,10 @@ public class TaskKeyLruCache<V> {
 
     /** Puts an entry in the cache for a specific key. */
     final void put(Task.TaskKey key, V value) {
+        if (key == null || value == null) {
+            Log.e(TAG, "Unexpected null key or value: " + key + ", " + value);
+            return;
+        }
         mKeys.put(key.id, key);
         mCache.put(key.id, value);
     }
