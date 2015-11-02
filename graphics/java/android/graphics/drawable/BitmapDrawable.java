@@ -812,8 +812,7 @@ public class BitmapDrawable extends Drawable {
             setTileModeY(parseTileMode(tileModeY));
         }
 
-        final int densityDpi = r.getDisplayMetrics().densityDpi;
-        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+        state.mTargetDensity = Drawable.resolveDensity(r, 0);
     }
 
     @Override
@@ -975,13 +974,7 @@ public class BitmapDrawable extends Drawable {
      * after inflating or applying a theme.
      */
     private void updateLocalState(Resources res) {
-        if (res != null) {
-            final int densityDpi = res.getDisplayMetrics().densityDpi;
-            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-        } else {
-            mTargetDensity = mBitmapState.mTargetDensity;
-        }
-
+        mTargetDensity = resolveDensity(res, mBitmapState.mTargetDensity);
         mTintFilter = updateTintFilter(mTintFilter, mBitmapState.mTint, mBitmapState.mTintMode);
         computeBitmapSize();
     }

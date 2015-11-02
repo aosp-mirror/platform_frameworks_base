@@ -170,8 +170,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         // The density may have changed since the last update. This will
         // apply scaling to any existing constant state properties.
-        final int densityDpi = r.getDisplayMetrics().densityDpi;
-        final int density = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+        final int density = Drawable.resolveDensity(r, 0);
         state.setDensity(density);
 
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.LayerDrawable);
@@ -200,8 +199,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             return;
         }
 
-        final int densityDpi = t.getResources().getDisplayMetrics().densityDpi;
-        final int density = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+        final int density = Drawable.resolveDensity(t.getResources(), 0);
         state.setDensity(density);
 
         if (state.mThemeAttrs != null) {
@@ -1800,9 +1798,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             mGravity = orig.mGravity;
             mId = orig.mId;
 
-            final int densityDpi = res == null ? orig.mDensity : res.getDisplayMetrics().densityDpi;
-            mDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-
+            mDensity = Drawable.resolveDensity(res, orig.mDensity);
             if (orig.mDensity != mDensity) {
                 applyDensityScaling(orig.mDensity, mDensity);
             }
@@ -1823,21 +1819,21 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
-            mInsetL = Bitmap.scaleFromDensity(mInsetL, sourceDensity, targetDensity);
-            mInsetT = Bitmap.scaleFromDensity(mInsetT, sourceDensity, targetDensity);
-            mInsetR = Bitmap.scaleFromDensity(mInsetR, sourceDensity, targetDensity);
-            mInsetB = Bitmap.scaleFromDensity(mInsetB, sourceDensity, targetDensity);
+            mInsetL = Drawable.scaleFromDensity(mInsetL, sourceDensity, targetDensity, false);
+            mInsetT = Drawable.scaleFromDensity(mInsetT, sourceDensity, targetDensity, false);
+            mInsetR = Drawable.scaleFromDensity(mInsetR, sourceDensity, targetDensity, false);
+            mInsetB = Drawable.scaleFromDensity(mInsetB, sourceDensity, targetDensity, false);
             if (mInsetS != UNDEFINED_INSET) {
-                mInsetS = Bitmap.scaleFromDensity(mInsetS, sourceDensity, targetDensity);
+                mInsetS = Drawable.scaleFromDensity(mInsetS, sourceDensity, targetDensity, false);
             }
             if (mInsetE != UNDEFINED_INSET) {
-                mInsetE = Bitmap.scaleFromDensity(mInsetE, sourceDensity, targetDensity);
+                mInsetE = Drawable.scaleFromDensity(mInsetE, sourceDensity, targetDensity, false);
             }
             if (mWidth > 0) {
-                mWidth = Bitmap.scaleFromDensity(mWidth, sourceDensity, targetDensity);
+                mWidth = Drawable.scaleFromDensity(mWidth, sourceDensity, targetDensity, true);
             }
             if (mHeight > 0) {
-                mHeight = Bitmap.scaleFromDensity(mHeight, sourceDensity, targetDensity);
+                mHeight = Drawable.scaleFromDensity(mHeight, sourceDensity, targetDensity, true);
             }
         }
     }
@@ -1874,16 +1870,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         LayerState(@Nullable LayerState orig, @NonNull LayerDrawable owner,
                 @Nullable Resources res) {
-            final int densityDpi;
-            if (res != null) {
-                densityDpi = res.getDisplayMetrics().densityDpi;
-            } else if (orig != null) {
-                densityDpi = orig.mDensity;
-            } else {
-                densityDpi = 0;
-            }
-
-            mDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+            mDensity = Drawable.resolveDensity(res, orig != null ? orig.mDensity : 0);
 
             if (orig != null) {
                 final ChildDrawable[] origChildDrawable = orig.mChildren;
@@ -1939,28 +1926,28 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
             if (mPaddingLeft > 0) {
-                mPaddingLeft = Bitmap.scaleFromDensity(
-                        mPaddingLeft, sourceDensity, targetDensity);
+                mPaddingLeft = Drawable.scaleFromDensity(
+                        mPaddingLeft, sourceDensity, targetDensity, false);
             }
             if (mPaddingTop > 0) {
-                mPaddingTop = Bitmap.scaleFromDensity(
-                        mPaddingTop, sourceDensity, targetDensity);
+                mPaddingTop = Drawable.scaleFromDensity(
+                        mPaddingTop, sourceDensity, targetDensity, false);
             }
             if (mPaddingRight > 0) {
-                mPaddingRight = Bitmap.scaleFromDensity(
-                        mPaddingRight, sourceDensity, targetDensity);
+                mPaddingRight = Drawable.scaleFromDensity(
+                        mPaddingRight, sourceDensity, targetDensity, false);
             }
             if (mPaddingBottom > 0) {
-                mPaddingBottom = Bitmap.scaleFromDensity(
-                        mPaddingBottom, sourceDensity, targetDensity);
+                mPaddingBottom = Drawable.scaleFromDensity(
+                        mPaddingBottom, sourceDensity, targetDensity, false);
             }
             if (mPaddingStart > 0) {
-                mPaddingStart = Bitmap.scaleFromDensity(
-                        mPaddingStart, sourceDensity, targetDensity);
+                mPaddingStart = Drawable.scaleFromDensity(
+                        mPaddingStart, sourceDensity, targetDensity, false);
             }
             if (mPaddingEnd > 0) {
-                mPaddingEnd = Bitmap.scaleFromDensity(
-                        mPaddingEnd, sourceDensity, targetDensity);
+                mPaddingEnd = Drawable.scaleFromDensity(
+                        mPaddingEnd, sourceDensity, targetDensity, false);
             }
         }
 

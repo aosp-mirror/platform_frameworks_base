@@ -181,10 +181,10 @@ public class NinePatchDrawable extends Drawable {
     }
 
     private static Insets scaleFromDensity(Insets insets, int sdensity, int tdensity) {
-        int left = Bitmap.scaleFromDensity(insets.left, sdensity, tdensity);
-        int top = Bitmap.scaleFromDensity(insets.top, sdensity, tdensity);
-        int right = Bitmap.scaleFromDensity(insets.right, sdensity, tdensity);
-        int bottom = Bitmap.scaleFromDensity(insets.bottom, sdensity, tdensity);
+        int left = Drawable.scaleFromDensity(insets.left, sdensity, tdensity, true);
+        int top = Drawable.scaleFromDensity(insets.top, sdensity, tdensity, true);
+        int right = Drawable.scaleFromDensity(insets.right, sdensity, tdensity, true);
+        int bottom = Drawable.scaleFromDensity(insets.bottom, sdensity, tdensity, true);
         return Insets.of(left, top, right, bottom);
     }
 
@@ -196,18 +196,20 @@ public class NinePatchDrawable extends Drawable {
             mBitmapHeight = mNinePatch.getHeight();
             mOpticalInsets = mNinePatchState.mOpticalInsets;
         } else {
-            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(), sdensity, tdensity);
-            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(), sdensity, tdensity);
+            mBitmapWidth = Drawable.scaleFromDensity(
+                    mNinePatch.getWidth(), sdensity, tdensity, true);
+            mBitmapHeight = Drawable.scaleFromDensity(
+                    mNinePatch.getHeight(), sdensity, tdensity, true);
             if (mNinePatchState.mPadding != null && mPadding != null) {
                 Rect dest = mPadding;
                 Rect src = mNinePatchState.mPadding;
                 if (dest == src) {
                     mPadding = dest = new Rect(src);
                 }
-                dest.left = Bitmap.scaleFromDensity(src.left, sdensity, tdensity);
-                dest.top = Bitmap.scaleFromDensity(src.top, sdensity, tdensity);
-                dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
-                dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
+                dest.left = Drawable.scaleFromDensity(src.left, sdensity, tdensity, true);
+                dest.top = Drawable.scaleFromDensity(src.top, sdensity, tdensity, true);
+                dest.right = Drawable.scaleFromDensity(src.right, sdensity, tdensity, true);
+                dest.bottom = Drawable.scaleFromDensity(src.bottom, sdensity, tdensity, true);
             }
             mOpticalInsets = scaleFromDensity(mNinePatchState.mOpticalInsets, sdensity, tdensity);
         }
@@ -490,8 +492,7 @@ public class NinePatchDrawable extends Drawable {
             state.mTint = tint;
         }
 
-        final int densityDpi = r.getDisplayMetrics().densityDpi;
-        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+        state.mTargetDensity = Drawable.resolveDensity(r, state.mTargetDensity);
     }
 
     @Override
