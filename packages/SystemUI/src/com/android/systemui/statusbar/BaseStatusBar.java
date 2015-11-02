@@ -1664,7 +1664,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 return;
             }
 
-            final PendingIntent intent = sbn.getNotification().contentIntent;
+            Notification notification = sbn.getNotification();
+            final PendingIntent intent = notification.contentIntent != null
+                    ? notification.contentIntent
+                    : notification.fullScreenIntent;
             final String notificationKey = sbn.getKey();
 
             // Mark notification for one frame.
@@ -1746,8 +1749,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
-            final PendingIntent contentIntent = sbn.getNotification().contentIntent;
-            if (contentIntent != null) {
+            Notification notification = sbn.getNotification();
+            if (notification.contentIntent != null || notification.fullScreenIntent != null) {
                 row.setOnClickListener(this);
             } else {
                 row.setOnClickListener(null);
