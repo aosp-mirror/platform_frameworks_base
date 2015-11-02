@@ -1719,7 +1719,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 BasePermission bp = mSettings.mPermissions.get(permission);
                 if (bp != null && (bp.isRuntime() || bp.isDevelopment())
                         && (grantedPermissions == null
-                               || ArrayUtils.contains(grantedPermissions, permission))) {
+                               || ArrayUtils.contains(grantedPermissions, permission))
+                        && (getPermissionFlags(permission, pkg.packageName, userId)
+                                & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) == 0) {
                     grantRuntimePermission(pkg.packageName, permission, userId);
                 }
             }
