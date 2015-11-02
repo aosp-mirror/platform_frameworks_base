@@ -16,11 +16,9 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.HOME_STACK_ID;
-import static android.app.ActivityManager.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
@@ -35,6 +33,7 @@ import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
@@ -1193,14 +1192,14 @@ final class TaskRecord {
 
         mFullscreen = bounds == null;
         if (mFullscreen) {
-            if (mBounds != null && stack.mPersistTaskBounds) {
+            if (mBounds != null && StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
             mBounds = null;
             mOverrideConfig = Configuration.EMPTY;
         } else {
             mBounds = new Rect(bounds);
-            if (stack == null || stack.mPersistTaskBounds) {
+            if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
 
@@ -1244,7 +1243,7 @@ final class TaskRecord {
                 || stackId == HOME_STACK_ID
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             return (mResizeable && stack != null) ? stack.mBounds : null;
-        } else if (!stack.mPersistTaskBounds) {
+        } else if (!StackId.persistTaskBounds(stackId)) {
             return stack.mBounds;
         }
         return mLastNonFullscreenBounds;

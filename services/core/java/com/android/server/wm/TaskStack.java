@@ -17,17 +17,16 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.FIRST_STATIC_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.LAST_STATIC_STACK_ID;
-import static android.app.ActivityManager.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
 import static com.android.server.wm.WindowManagerService.TAG;
 
 import android.annotation.IntDef;
+import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -122,12 +121,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
     }
 
-    boolean allowTaskResize() {
-        return mStackId == FREEFORM_WORKSPACE_STACK_ID
-                || mStackId == DOCKED_STACK_ID
-                || mStackId == PINNED_STACK_ID;
-    }
-
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.
@@ -203,8 +196,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
         if (mFullscreen
-                || mStackId == DOCKED_STACK_ID
-                || mStackId == PINNED_STACK_ID
+                || !StackId.isResizeableByDockedStack(mStackId)
                 || mDisplayContent == null
                 || mDisplayContent.getDockedStackLocked() != null) {
             return true;
@@ -396,9 +388,9 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
         Rect bounds = null;
         final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
-        if (mStackId == DOCKED_STACK_ID || (dockedStack != null && mStackId != PINNED_STACK_ID
-                && mStackId >= FIRST_STATIC_STACK_ID && mStackId <= LAST_STATIC_STACK_ID)) {
-            // The existence of a docked stack affects the size of any static stack created since
+        if (mStackId == DOCKED_STACK_ID
+                || (dockedStack != null && StackId.isResizeableByDockedStack(mStackId))) {
+            // The existence of a docked stack affects the size of other static stack created since
             // the docked stack occupies a dedicated region on screen.
             bounds = new Rect();
             displayContent.getLogicalDisplayRect(mTmpRect);
@@ -424,10 +416,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     void getStackDockedModeBoundsLocked(Rect outBounds) {
-        if (mStackId == DOCKED_STACK_ID
-                || mStackId == PINNED_STACK_ID
-                || mStackId > LAST_STATIC_STACK_ID
-                || mDisplayContent == null) {
+        if (!StackId.isResizeableByDockedStack(mStackId) || mDisplayContent == null) {
             outBounds.set(mBounds);
             return;
         }
@@ -537,9 +526,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         for (int i = 0; i < count; i++) {
             final TaskStack otherStack = mService.mStackIdToStack.valueAt(i);
             final int otherStackId = otherStack.mStackId;
-            if (otherStackId != DOCKED_STACK_ID && mStackId != PINNED_STACK_ID
-                    && otherStackId >= FIRST_STATIC_STACK_ID
-                    && otherStackId <= LAST_STATIC_STACK_ID) {
+            if (StackId.isResizeableByDockedStack(otherStackId)) {
                 mService.mH.sendMessage(
                         mService.mH.obtainMessage(RESIZE_STACK, otherStackId,
                                 1 /*allowResizeInDockedMode*/, bounds));

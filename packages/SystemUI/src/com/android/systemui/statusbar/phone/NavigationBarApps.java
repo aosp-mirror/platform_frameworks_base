@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.ActivityManager.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;

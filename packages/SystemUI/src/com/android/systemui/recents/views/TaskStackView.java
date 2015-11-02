@@ -58,7 +58,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import static android.app.ActivityManager.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 
 /* The visual representation of a task stack view */

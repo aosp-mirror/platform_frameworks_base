@@ -18,6 +18,15 @@ package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.app.ActivityManager.*;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
+import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -40,6 +49,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -554,8 +564,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * @param id Id of the task we would like returned.
      * @param restoreFromRecents If the id was not in the active list, but was found in recents,
      *                           restore the task from recents to the active list.
-     * @param stackId The stack to restore the task to (default launch stack will be used
-     *                if stackId is {@link android.app.ActivityManager#INVALID_STACK_ID}).
+     * @param stackId The stack to restore the task to (default launch stack will be used if
+     *                stackId is {@link android.app.ActivityManager.StackId#INVALID_STACK_ID}).
      */
     TaskRecord anyTaskForIdLocked(int id, boolean restoreFromRecents, int stackId) {
         int numDisplays = mActivityDisplays.size();
@@ -1820,8 +1830,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
         for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             stack = homeDisplayStacks.get(stackNdx);
-            final boolean isDynamicStack = stack.mStackId >= FIRST_DYNAMIC_STACK_ID;
-            if (isDynamicStack) {
+            if (!StackId.isStaticStack(stack.mStackId)) {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                         "computeStackFocus: Setting focused stack=" + stack);
                 return stack;
@@ -2899,15 +2908,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (activityContainer != null) {
             return activityContainer.mStack;
         }
-        if (!createStaticStackIfNeeded
-                || (stackId < FIRST_STATIC_STACK_ID || stackId > LAST_STATIC_STACK_ID)) {
+        if (!createStaticStackIfNeeded || !StackId.isStaticStack(stackId)) {
             return null;
         }
         return createStackOnDisplay(stackId, Display.DEFAULT_DISPLAY, createOnTop);
     }
 
     ArrayList<ActivityStack> getStacks() {
-        ArrayList<ActivityStack> allStacks = new ArrayList<ActivityStack>();
+        ArrayList<ActivityStack> allStacks = new ArrayList<>();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             allStacks.addAll(mActivityDisplays.valueAt(displayNdx).mStacks);
         }
@@ -3025,7 +3033,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // In this case we make all other static stacks fullscreen and move all
                     // docked stack tasks to the fullscreen stack.
                     for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                        if (i != DOCKED_STACK_ID && getStack(i) != null) {
+                        if (StackId.isResizeableByDockedStack(i) && getStack(i) != null) {
                             resizeStackLocked(i, null, preserveWindows, true);
                         }
                     }
@@ -3046,7 +3054,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     mWindowManager.getStackDockedModeBounds(HOME_STACK_ID, tempRect);
 
                     for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                        if (i != DOCKED_STACK_ID) {
+                        if (StackId.isResizeableByDockedStack(i)) {
                             ActivityStack otherStack = getStack(i);
                             if (otherStack != null) {
                                 resizeStackLocked(i, tempRect, PRESERVE_WINDOWS, true);
@@ -3190,7 +3198,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * Restores a recent task to a stack
      * @param task The recent task to be restored.
      * @param stackId The stack to restore the task to (default launch stack will be used
-     *                if stackId is {@link android.app.ActivityManager#INVALID_STACK_ID}).
+     *                if stackId is {@link android.app.ActivityManager.StackId#INVALID_STACK_ID}).
      * @return true if the task has been restored successfully.
      */
     private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
@@ -3275,8 +3283,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
             return;
         }
-        if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID
-                || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+        if (StackId.preserveWindowOnTaskMove(stackId)) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
             // and then add a new one. This call will tell window manager about this, so it can

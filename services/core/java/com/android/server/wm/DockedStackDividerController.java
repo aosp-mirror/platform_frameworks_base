@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;

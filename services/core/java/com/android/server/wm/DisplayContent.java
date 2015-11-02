@@ -16,14 +16,15 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.HOME_STACK_ID;
-import static android.app.ActivityManager.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 
+import android.app.ActivityManager.StackId;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.DisplayMetrics;
@@ -311,7 +312,7 @@ class DisplayContent {
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
-            if (!stack.allowTaskResize()) {
+            if (!StackId.isTaskResizeAllowed(stack.mStackId)) {
                 break;
             }
             final ArrayList<Task> tasks = stack.getTasks();

@@ -72,8 +72,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -311,14 +313,14 @@ public class SystemServicesProxy {
      * Returns whether the given stack id is the home stack id.
      */
     public static boolean isHomeStack(int stackId) {
-        return stackId == ActivityManager.HOME_STACK_ID;
+        return stackId == HOME_STACK_ID;
     }
 
     /**
      * Returns whether the given stack id is the freeform workspace stack id.
      */
     public static boolean isFreeformStack(int stackId) {
-        return stackId == ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
+        return stackId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
     /**
@@ -728,7 +730,7 @@ public class SystemServicesProxy {
 
         try {
             // Use the home stack bounds
-            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(ActivityManager.HOME_STACK_ID);
+            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(HOME_STACK_ID);
             if (stackInfo != null) {
                 windowRect.set(stackInfo.bounds);
             }

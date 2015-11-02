@@ -18,7 +18,7 @@
 
 package com.android.commands.am;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 

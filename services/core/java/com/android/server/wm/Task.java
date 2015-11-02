@@ -16,22 +16,21 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.DOCKED_STACK_ID;
-import static android.app.ActivityManager.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.HOME_STACK_ID;
-import static android.app.ActivityManager.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
 
-
+import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -245,7 +244,7 @@ class Task implements DimLayer.DimLayerUser {
     private boolean useCurrentBounds() {
         final DisplayContent displayContent = mStack.getDisplayContent();
         if (mFullscreen
-                || mStack.allowTaskResize()
+                || !StackId.isTaskResizeableByDockedStack(mStack.mStackId)
                 || displayContent == null
                 || displayContent.getDockedStackLocked() != null) {
             return true;
