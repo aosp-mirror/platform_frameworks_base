@@ -116,7 +116,7 @@ class Task implements DimLayer.DimLayerUser {
         mDeferRemoval = false;
         DisplayContent content = getDisplayContent();
         if (content != null) {
-            content.mDimBehindController.removeDimLayerUser(this);
+            content.mDimLayerController.removeDimLayerUser(this);
         }
         mStack.removeTask(this);
         mService.mTaskIdToTask.delete(mTaskId);
@@ -220,7 +220,7 @@ class Task implements DimLayer.DimLayerUser {
         mBounds.set(bounds);
         mRotation = rotation;
         if (displayContent != null) {
-            displayContent.mDimBehindController.updateDimLayer(this);
+            displayContent.mDimLayerController.updateDimLayer(this);
         }
         mOverrideConfig = mFullscreen ? Configuration.EMPTY : config;
         return boundsChange;

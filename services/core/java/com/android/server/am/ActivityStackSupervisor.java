@@ -2872,23 +2872,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        int stackId = task.stack.mStackId;
         if (task.mResizeable && options != null) {
             ActivityOptions opts = new ActivityOptions(options);
             if (opts.hasBounds()) {
                 Rect bounds = opts.getBounds();
                 task.updateOverrideConfiguration(bounds);
+                final int stackId = task.getLaunchStackId();
+                if (stackId != task.stack.mStackId) {
+                    moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
+                    // moveTaskToStackUncheckedLocked() should already placed the task on top,
+                    // still need moveTaskToFrontLocked() below for any transition settings.
+                }
+                // WM resizeTask must be done after the task is moved to the correct stack,
+                // because Task's setBounds() also updates dim layer's bounds, but that has
+                // dependency on the stack.
                 mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig,
                         false /*relayout*/, false /*forced*/);
-                stackId = task.getLaunchStackId();
             }
-        }
-
-        if (stackId != task.stack.mStackId) {
-            moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
-
-            // moveTaskToStackUncheckedLocked() should already placed the task on top,
-            // still need moveTaskToFrontLocked() below for any transition settings.
         }
 
         final ActivityRecord r = task.getTopActivity();

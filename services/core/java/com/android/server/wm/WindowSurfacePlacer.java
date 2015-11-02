@@ -670,7 +670,7 @@ class WindowSurfacePlacer {
                     handleNotObscuredLocked(w, innerDw, innerDh);
                 }
 
-                w.handleFlagDimBehind();
+                w.applyDimLayerIfNeeded();
 
                 if (isDefaultDisplay && obscuredChanged
                         && mWallpaperControllerLocked.isWallpaperTarget(w) && w.isVisibleLw()) {
@@ -781,7 +781,7 @@ class WindowSurfacePlacer {
                                         + " a=" + winAnimator.mAnimating);
                             }
                         }
-                        if (w != atoken.startingWindow) {
+                        if (w != atoken.startingWindow && !w.mAppDied) {
                             if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
                                 atoken.numInterestingWindows++;
                                 if (w.isDrawnLw()) {

@@ -1426,12 +1426,13 @@ class WindowStateAnimator {
 
     private void adjustCropToStackBounds(WindowState w, Rect clipRect) {
         final AppWindowToken appToken = w.mAppToken;
+        final Task task = w.getTask();
         // We don't apply the the stack bounds to the window that is being replaced, because it was
         // living in a different stack. If we suddenly crop it to the new stack bounds, it might
         // get cut off. We don't want it to happen, so we let it ignore the stack bounds until it
         // gets removed. The window that will replace it will abide them.
-        if (appToken != null && appToken.mCropWindowsToStack && !appToken.mWillReplaceWindow) {
-            TaskStack stack = w.getTask().mStack;
+        if (task != null && appToken.mCropWindowsToStack && !appToken.mWillReplaceWindow) {
+            TaskStack stack = task.mStack;
             stack.getBounds(mTmpStackBounds);
             // When we resize we use the big surface approach, which means we can't trust the
             // window frame bounds anymore. Instead, the window will be placed at 0, 0, but to avoid
@@ -1543,7 +1544,7 @@ class WindowStateAnimator {
                         mDsDy * w.mHScale, mDtDy * w.mVScale);
                 mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
-                w.handleFlagDimBehind();
+                w.applyDimLayerIfNeeded();
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
                 // as running out of memory), don't take down the
@@ -1858,6 +1859,9 @@ class WindowStateAnimator {
 
             if (mWin.mAttrs.type != TYPE_APPLICATION_STARTING && mWin.mAppToken != null) {
                 mWin.mAppToken.firstWindowDrawn = true;
+
+                // We now have a good window to show, remove dead placeholders
+                mWin.mAppToken.removeAllDeadWindows();
 
                 if (mWin.mAppToken.startingData != null) {
                     if (WindowManagerService.DEBUG_STARTING_WINDOW ||

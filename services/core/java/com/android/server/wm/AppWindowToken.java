@@ -102,6 +102,7 @@ class AppWindowToken extends WindowToken {
     // Set to true when the token has been removed from the window mgr.
     boolean removed;
 
+    boolean appDied;
     // Information about an application starting window if displayed.
     StartingData startingData;
     WindowState startingWindow;
@@ -363,6 +364,26 @@ class AppWindowToken extends WindowToken {
         }
         allAppWindows.clear();
         windows.clear();
+    }
+
+    void removeAllDeadWindows() {
+        for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
+                // removeWindowLocked at bottom of loop may remove multiple entries from
+                // allAppWindows if the window to be removed has child windows. It also may
+                // not remove any windows from allAppWindows at all if win is exiting and
+                // currently animating away. This ensures that winNdx is monotonically decreasing
+                // and never beyond allAppWindows bounds.
+                winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
+            WindowState win = allAppWindows.get(winNdx);
+            if (win.mAppDied) {
+                if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) {
+                    Slog.w(WindowManagerService.TAG, "removeAllDeadWindows: " + win);
+                }
+                // Set mDestroying, we don't want any animation or delayed removal here.
+                win.mDestroying = true;
+                service.removeWindowLocked(win);
+            }
+        }
     }
 
     @Override

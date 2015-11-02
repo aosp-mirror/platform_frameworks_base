@@ -176,7 +176,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
 
         if (mDisplayContent != null) {
-            mDisplayContent.mDimBehindController.updateDimLayer(this);
+            mDisplayContent.mDimLayerController.updateDimLayer(this);
             mAnimationBackgroundSurface.setBounds(bounds);
         }
 

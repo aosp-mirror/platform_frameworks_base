@@ -116,7 +116,7 @@ class DisplayContent {
 
     final DockedStackDividerController mDividerControllerLocked;
 
-    final DimBehindController mDimBehindController;
+    final DimLayerController mDimLayerController;
 
     /**
      * @param display May not be null.
@@ -131,7 +131,7 @@ class DisplayContent {
         mService = service;
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service.mContext, this);
-        mDimBehindController = new DimBehindController(this);
+        mDimLayerController = new DimLayerController(this);
     }
 
     int getDisplayId() {
@@ -271,7 +271,7 @@ class DisplayContent {
     }
 
     void detachStack(TaskStack stack) {
-        mDimBehindController.removeDimLayerUser(stack);
+        mDimLayerController.removeDimLayerUser(stack);
         mStacks.remove(stack);
     }
 
@@ -415,23 +415,23 @@ class DisplayContent {
     }
 
     boolean animateDimLayers() {
-        return mDimBehindController.animateDimLayers();
+        return mDimLayerController.animateDimLayers();
     }
 
     void resetDimming() {
-        mDimBehindController.resetDimming();
+        mDimLayerController.resetDimming();
     }
 
     boolean isDimming() {
-        return mDimBehindController.isDimming();
+        return mDimLayerController.isDimming();
     }
 
     void stopDimmingIfNeeded() {
-        mDimBehindController.stopDimmingIfNeeded();
+        mDimLayerController.stopDimmingIfNeeded();
     }
 
     void close() {
-        mDimBehindController.close();
+        mDimLayerController.close();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             mStacks.get(stackNdx).close();
         }
@@ -578,7 +578,7 @@ class DisplayContent {
             }
         }
         pw.println();
-        mDimBehindController.dump(prefix + "  ", pw);
+        mDimLayerController.dump(prefix + "  ", pw);
     }
 
     @Override
