@@ -53,6 +53,14 @@ public final class Installer extends SystemService {
         mInstaller = new InstallerConnection();
     }
 
+    /**
+     * Yell loudly if someone tries making future calls while holding a lock on
+     * the given object.
+     */
+    public void setWarnIfHeld(Object warnIfHeld) {
+        mInstaller.setWarnIfHeld(warnIfHeld);
+    }
+
     @Override
     public void onStart() {
         Slog.i(TAG, "Waiting for installd to be ready.");

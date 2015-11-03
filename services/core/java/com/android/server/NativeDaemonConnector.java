@@ -25,10 +25,10 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.LocalLog;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
@@ -58,7 +58,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private LocalLog mLocalLog;
 
     private volatile boolean mDebug = false;
-    private volatile Object mLockWarning;
+    private volatile Object mWarnIfHeld;
 
     private final ResponseQueue mResponseQueue;
 
@@ -110,11 +110,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
-     * Yell loudly if someone tries making future {@link #execute(Command)} calls while holding a
-     * lock on the given object.
+     * Yell loudly if someone tries making future {@link #execute(Command)}
+     * calls while holding a lock on the given object.
      */
-    public void setLockWarning(Object lockWarning) {
-        mLockWarning = lockWarning;
+    public void setWarnIfHeld(Object warnIfHeld) {
+        Preconditions.checkState(mWarnIfHeld == null);
+        mWarnIfHeld = Preconditions.checkNotNull(warnIfHeld);
     }
 
     @Override
@@ -404,8 +405,9 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public NativeDaemonEvent[] executeForList(long timeoutMs, String cmd, Object... args)
             throws NativeDaemonConnectorException {
-        if (mLockWarning != null && Thread.holdsLock(mLockWarning)) {
-            Log.wtf(TAG, "Calling thread is holding lock " + mLockWarning, new Throwable());
+        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
         }
 
         final long startTime = SystemClock.elapsedRealtime();
