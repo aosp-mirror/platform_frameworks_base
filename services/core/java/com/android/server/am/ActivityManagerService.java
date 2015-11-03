@@ -4098,8 +4098,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (debug) {
                             Slog.v(TAG, "Next matching activity: found current " + r.packageName
                                     + "/" + r.info.name);
-                            Slog.v(TAG, "Next matching activity: next is " + aInfo.packageName
-                                    + "/" + aInfo.name);
+                            Slog.v(TAG, "Next matching activity: next is " + ((aInfo == null)
+                                    ? "null" : aInfo.packageName + "/" + aInfo.name));
                         }
                         break;
                     }
