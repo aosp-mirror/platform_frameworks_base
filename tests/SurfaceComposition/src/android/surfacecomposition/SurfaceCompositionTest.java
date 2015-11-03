@@ -17,6 +17,7 @@ package android.surfacecomposition;
 
 import android.app.Activity;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Bundle;
 import android.surfacecomposition.SurfaceCompositionMeasuringActivity.AllocationScore;
 import android.surfacecomposition.SurfaceCompositionMeasuringActivity.CompositorScore;
@@ -44,10 +45,15 @@ public class SurfaceCompositionTest extends
         PixelFormat.OPAQUE,
     };
 
-    // Based on Nexus 9 performance which is usually < 9.0.
-    private final static double[] MIN_ACCEPTED_COMPOSITION_SCORE = new double[] {
+    // Nexus 9 performance is around 8.8. We distinguish results for Andromeda and
+    // Android devices. Andromeda devices require higher performance score.
+    private final static double[] MIN_ACCEPTED_COMPOSITION_SCORE_ANDROMDEDA = new double[] {
         8.0,
         8.0,
+    };
+    private final static double[] MIN_ACCEPTED_COMPOSITION_SCORE_ANDROID = new double[] {
+        4.0,
+        4.0,
     };
 
     // Based on Nexus 6 performance which is usually < 28.0.
@@ -66,6 +72,8 @@ public class SurfaceCompositionTest extends
     @SmallTest
     public void testSurfaceCompositionPerformance() {
         Bundle status = new Bundle();
+        double[] minScores = getActivity().isAndromeda() ?
+                MIN_ACCEPTED_COMPOSITION_SCORE_ANDROMDEDA : MIN_ACCEPTED_COMPOSITION_SCORE_ANDROID;
         for (int i = 0; i < TEST_PIXEL_FORMATS.length; ++i) {
             int pixelFormat = TEST_PIXEL_FORMATS[i];
             String formatName = SurfaceCompositionMeasuringActivity.getPixelFormatInfo(pixelFormat);
@@ -73,8 +81,8 @@ public class SurfaceCompositionTest extends
             Log.i(TAG, "testSurfaceCompositionPerformance(" + formatName + ") = " + score);
             assertTrue("Device does not support surface(" + formatName + ") composition " +
                     "performance score. " + score.mSurfaces + " < " +
-                    MIN_ACCEPTED_COMPOSITION_SCORE[i] + ".",
-                    score.mSurfaces >= MIN_ACCEPTED_COMPOSITION_SCORE[i]);
+                    minScores[i] + ". Build: " + Build.FINGERPRINT + ".",
+                    score.mSurfaces >= minScores[i]);
             // Send status only for TRANSLUCENT format.
             if (pixelFormat == PixelFormat.TRANSLUCENT) {
                 status.putDouble(KEY_SURFACE_COMPOSITION_PERFORMANCE, score.mSurfaces);
@@ -96,7 +104,8 @@ public class SurfaceCompositionTest extends
             Log.i(TAG, "testSurfaceAllocationPerformance(" + formatName + ") = " + score);
             assertTrue("Device does not support surface(" + formatName + ") allocation " +
                     "performance score. " + score.mMedian + " < " +
-                    MIN_ACCEPTED_ALLOCATION_SCORE[i] + ".",
+                    MIN_ACCEPTED_ALLOCATION_SCORE[i] + ". Build: " +
+                    Build.FINGERPRINT + ".",
                     score.mMedian >= MIN_ACCEPTED_ALLOCATION_SCORE[i]);
             // Send status only for TRANSLUCENT format.
             if (pixelFormat == PixelFormat.TRANSLUCENT) {
