@@ -100,6 +100,24 @@ bool MeshState::bindMeshBufferInternal(GLuint buffer) {
     return false;
 }
 
+void MeshState::genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size,
+        const void* data, GLenum usage) {
+    if (!*buffer) {
+        glGenBuffers(1, buffer);
+    }
+    bindMeshBuffer(*buffer);
+    glBufferData(GL_ARRAY_BUFFER, size, data, usage);
+}
+
+void MeshState::deleteMeshBuffer(GLuint buffer) {
+    if (buffer == mCurrentBuffer) {
+        // GL defines that deleting the currently bound VBO rebinds to 0 (no VBO).
+        // Reflect this in our cached value.
+        mCurrentBuffer = 0;
+    }
+    glDeleteBuffers(1, &buffer);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vertices
 ///////////////////////////////////////////////////////////////////////////////

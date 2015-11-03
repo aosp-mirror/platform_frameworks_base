@@ -70,6 +70,20 @@ GlopBuilder::GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop
 // Mesh
 ////////////////////////////////////////////////////////////////////////////////
 
+GlopBuilder& GlopBuilder::setMeshTexturedIndexedVbo(GLuint vbo, GLsizei elementCount) {
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
+    mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
+    mOutGlop->mesh.vertices = {
+            vbo,
+            VertexAttribFlags::TextureCoord,
+            nullptr, nullptr, nullptr,
+            kTextureVertexStride };
+    mOutGlop->mesh.elementCount = elementCount;
+    return *this;
+}
+
 GlopBuilder& GlopBuilder::setMeshUnitQuad() {
     TRIGGER_STAGE(kMeshStage);
 
