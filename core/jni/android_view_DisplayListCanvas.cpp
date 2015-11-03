@@ -23,7 +23,6 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <cutils/properties.h>
-#include <EGL/egl.h>
 
 #include <SkBitmap.h>
 #include <SkRegion.h>
@@ -147,17 +146,15 @@ static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 static jboolean android_view_DisplayListCanvas_isAvailable(JNIEnv* env, jobject clazz) {
-    static EGLint numES2Configs = -1;
-
-    if (numES2Configs == -1) {
-        EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        EGLint major; EGLint minor;
-        eglInitialize(display, &major, &minor);
-        EGLint configAttribs[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE};
-        eglChooseConfig(display, configAttribs, NULL, 0, &numES2Configs);
+    char prop[PROPERTY_VALUE_MAX];
+    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
+        // not in the emulator
+        return JNI_TRUE;
     }
-
-    return (numES2Configs > 0) ? JNI_TRUE : JNI_FALSE;
+    // In the emulator this property will be set to 1 when hardware GLES is
+    // enabled, 0 otherwise. On old emulator versions it will be undefined.
+    property_get("ro.kernel.qemu.gles", prop, "0");
+    return atoi(prop) == 1 ? JNI_TRUE : JNI_FALSE;
 }
 
 // ----------------------------------------------------------------------------
