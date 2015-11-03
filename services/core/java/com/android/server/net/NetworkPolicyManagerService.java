@@ -2316,7 +2316,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final int userId = UserHandle.getUserId(uid);
 
         for (String packageName : packages) {
-            if (!mUsageStats.isAppIdle(packageName, userId)) {
+            if (!mUsageStats.isAppIdle(packageName, uid, userId)) {
                 return false;
             }
         }
