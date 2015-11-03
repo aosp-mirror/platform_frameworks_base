@@ -50,8 +50,8 @@ class AppIdleMonitor extends AppIdleStateChangeListener {
         }
     }
 
-    boolean isAppIdle(String packageName, int userId) {
-        return !mAppIdleParoleOn && mUsageStats.isAppIdle(packageName, userId);
+    boolean isAppIdle(String packageName, int uidForAppId, int userId) {
+        return !mAppIdleParoleOn && mUsageStats.isAppIdle(packageName, uidForAppId, userId);
     }
 
     @Override

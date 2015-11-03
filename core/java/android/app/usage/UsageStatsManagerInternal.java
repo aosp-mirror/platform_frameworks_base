@@ -71,10 +71,11 @@ public abstract class UsageStatsManagerInternal {
      * Could be hours, could be days, who knows?
      *
      * @param packageName
+     * @param uidForAppId The uid of the app, which will be used for its app id
      * @param userId
      * @return
      */
-    public abstract boolean isAppIdle(String packageName, int userId);
+    public abstract boolean isAppIdle(String packageName, int uidForAppId, int userId);
 
     /**
      * Returns all of the uids for a given user where all packages associating with that uid
