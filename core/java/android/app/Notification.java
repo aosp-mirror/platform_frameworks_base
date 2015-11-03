@@ -3829,7 +3829,9 @@ public class Notification implements Parcelable
         @Override
         public void purgeResources() {
             super.purgeResources();
-            if (mPicture != null && mPicture.isMutable()) {
+            if (mPicture != null &&
+                mPicture.isMutable() &&
+                mPicture.getAllocationByteCount() >= (128 * (1 << 10))) {
                 mPicture = mPicture.createAshmemBitmap();
             }
             if (mBigLargeIcon != null) {
