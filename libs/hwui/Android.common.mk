@@ -1,6 +1,9 @@
 # getConfig in external/skia/include/core/SkBitmap.h is deprecated.
 # Allow Gnu extension: in-class initializer of static 'const float' member.
 # DeferredLayerUpdater.h: private field 'mRenderThread' is not used.
+
+LOCAL_CLANG := true
+
 LOCAL_CLANG_CFLAGS += \
     -Wno-deprecated-declarations \
     -Wno-gnu-static-float-init \
