@@ -66,7 +66,6 @@ import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.support.v7.widget.SimpleItemAnimator;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
@@ -162,6 +161,9 @@ public class DirectoryFragment extends Fragment {
     private MessageBar mMessageBar;
     private View mProgressBar;
 
+    private int mSelectedItemColor;
+    private int mDefaultItemColor;
+
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
     }
@@ -254,8 +256,7 @@ public class DirectoryFragment extends Fragment {
                     }
                 });
 
-        // TODO: Restore transition animations.  See b/24802917.
-        ((SimpleItemAnimator) mRecView.getItemAnimator()).setSupportsChangeAnimations(false);
+        mRecView.setItemAnimator(new DirectoryItemAnimator(getActivity()));
 
         // TODO: Add a divider between views (which might use RecyclerView.ItemDecoration).
         if (DEBUG_ENABLE_DND) {
@@ -292,6 +293,13 @@ public class DirectoryFragment extends Fragment {
 
         mAdapter = new DocumentsAdapter(context);
         mRecView.setAdapter(mAdapter);
+
+        mDefaultItemColor = context.getResources().getColor(android.R.color.transparent);
+        // Get the accent color.
+        TypedValue selColor = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.colorAccent, selColor, true);
+        // Set the opacity to 10%.
+        mSelectedItemColor = (selColor.data & 0x00ffffff) | 0x16000000;
 
         GestureDetector.SimpleOnGestureListener listener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -897,24 +905,26 @@ public class DirectoryFragment extends Fragment {
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    private static final class DocumentHolder
+    private final class DocumentHolder
             extends RecyclerView.ViewHolder
             implements View.OnKeyListener
     {
-        // each data item is just a string in this case
-        public View view;
         public String docId;  // The stable document id.
         private ClickListener mClickListener;
         private View.OnKeyListener mKeyListener;
 
         public DocumentHolder(View view) {
             super(view);
-            this.view = view;
             // Setting this using android:focusable in the item layouts doesn't work for list items.
             // So we set it here.  Note that touch mode focus is a separate issue - see
             // View.setFocusableInTouchMode and View.isInTouchMode for more info.
-            this.view.setFocusable(true);
-            this.view.setOnKeyListener(this);
+            view.setFocusable(true);
+            view.setOnKeyListener(this);
+        }
+
+        public void setSelected(boolean selected) {
+            itemView.setActivated(selected);
+            itemView.setBackgroundColor(selected ? mSelectedItemColor : mDefaultItemColor);
         }
 
         @Override
@@ -943,10 +953,10 @@ public class DirectoryFragment extends Fragment {
             checkState(mKeyListener == null);
             mKeyListener = listener;
         }
+    }
 
-        interface ClickListener {
-            public void onClick(DocumentHolder doc);
-        }
+    interface ClickListener {
+        public void onClick(DocumentHolder doc);
     }
 
     void showEmptyView() {
@@ -1005,6 +1015,24 @@ public class DirectoryFragment extends Fragment {
             return holder;
         }
 
+        /**
+         * Deal with selection changed events by using a custom ItemAnimator that just changes the
+         * background color.  This works around focus issues (otherwise items lose focus when their
+         * selection state changes) but also optimizes change animations for selection.
+         */
+        @Override
+        public void onBindViewHolder(DocumentHolder holder, int position, List<Object> payload) {
+            final View itemView = holder.itemView;
+
+            if (payload.contains(MultiSelectManager.SELECTION_CHANGED_MARKER)) {
+                final boolean selected = isSelected(position);
+                itemView.setActivated(selected);
+                return;
+            } else {
+                onBindViewHolder(holder, position);
+            }
+        }
+
         @Override
         public void onBindViewHolder(DocumentHolder holder, int position) {
 
@@ -1030,8 +1058,9 @@ public class DirectoryFragment extends Fragment {
             final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
             holder.docId = docId;
-            final View itemView = holder.view;
-            itemView.setActivated(isSelected(position));
+            final View itemView = holder.itemView;
+
+            holder.setSelected(isSelected(position));
 
             final View line1 = itemView.findViewById(R.id.line1);
             final View line2 = itemView.findViewById(R.id.line2);
@@ -1959,7 +1988,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private class ItemClickListener implements DocumentHolder.ClickListener {
+    private class ItemClickListener implements ClickListener {
         @Override
         public void onClick(DocumentHolder doc) {
             final int position = doc.getAdapterPosition();
