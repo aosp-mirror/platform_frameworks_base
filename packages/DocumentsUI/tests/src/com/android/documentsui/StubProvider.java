@@ -50,12 +50,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StubProvider extends DocumentsProvider {
+
+    public static final String DEFAULT_AUTHORITY = "com.android.documentsui.stubprovider";
+    public static final String ROOT_0_ID = "TEST_ROOT_0";
+    public static final String ROOT_1_ID = "TEST_ROOT_1";
+
+    private static final String TAG = "StubProvider";
     private static final String EXTRA_SIZE = "com.android.documentsui.stubprovider.SIZE";
     private static final String EXTRA_ROOT = "com.android.documentsui.stubprovider.ROOT";
     private static final String STORAGE_SIZE_KEY = "documentsui.stubprovider.size";
-    private static int DEFAULT_SIZE = 1024 * 1024; // 1 MB.
-    private static final String TAG = "StubProvider";
-    private static final String MY_ROOT_ID = "sd0";
+    private static int DEFAULT_ROOT_SIZE = 1024 * 1024 * 100; // 100 MB.
+
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
             Root.COLUMN_AVAILABLE_BYTES
@@ -65,11 +70,12 @@ public class StubProvider extends DocumentsProvider {
             Document.COLUMN_LAST_MODIFIED, Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
-    private HashMap<String, StubDocument> mStorage = new HashMap<String, StubDocument>();
-    private Object mWriteLock = new Object();
-    private String mAuthority;
+    private final Map<String, StubDocument> mStorage = new HashMap<>();
+    private final Map<String, RootInfo> mRoots = new HashMap<>();
+    private final Object mWriteLock = new Object();
+
+    private String mAuthority = DEFAULT_AUTHORITY;
     private SharedPreferences mPrefs;
-    private Map<String, RootInfo> mRoots;
     private String mSimulateReadErrors;
 
     @Override
@@ -86,20 +92,18 @@ public class StubProvider extends DocumentsProvider {
 
     @VisibleForTesting
     public void clearCacheAndBuildRoots() {
-        final File cacheDir = getContext().getCacheDir();
-        removeRecursively(cacheDir);
+        Log.d(TAG, "Resetting storage.");
+        removeChildrenRecursively(getContext().getCacheDir());
         mStorage.clear();
 
         mPrefs = getContext().getSharedPreferences(
                 "com.android.documentsui.stubprovider.preferences", Context.MODE_PRIVATE);
         Collection<String> rootIds = mPrefs.getStringSet("roots", null);
         if (rootIds == null) {
-            rootIds = Arrays.asList(new String[] {
-                    "sd0", "sd1"
-            });
+            rootIds = Arrays.asList(new String[] { ROOT_0_ID, ROOT_1_ID });
         }
-        // Create new roots.
-        mRoots = new HashMap<>();
+
+        mRoots.clear();
         for (String rootId : rootIds) {
             final RootInfo rootInfo = new RootInfo(rootId, getSize(rootId));
             mRoots.put(rootId, rootInfo);
@@ -111,7 +115,7 @@ public class StubProvider extends DocumentsProvider {
      */
     private long getSize(String rootId) {
         final String key = STORAGE_SIZE_KEY + "." + rootId;
-        return mPrefs.getLong(key, DEFAULT_SIZE);
+        return mPrefs.getLong(key, DEFAULT_ROOT_SIZE);
     }
 
     @Override
@@ -125,7 +129,7 @@ public class StubProvider extends DocumentsProvider {
             row.add(Root.COLUMN_ROOT_ID, id);
             row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD);
             row.add(Root.COLUMN_TITLE, id);
-            row.add(Root.COLUMN_DOCUMENT_ID, info.rootDocument.documentId);
+            row.add(Root.COLUMN_DOCUMENT_ID, info.document.documentId);
             row.add(Root.COLUMN_AVAILABLE_BYTES, info.getRemainingCapacity());
         }
         return result;
@@ -152,28 +156,48 @@ public class StubProvider extends DocumentsProvider {
     }
 
     @Override
-    public String createDocument(String parentDocumentId, String mimeType, String displayName)
+    public String createDocument(String parentId, String mimeType, String displayName)
             throws FileNotFoundException {
-        final StubDocument parentDocument = mStorage.get(parentDocumentId);
-        if (parentDocument == null || !parentDocument.file.isDirectory()) {
-            throw new FileNotFoundException();
+
+        final StubDocument parent = mStorage.get(parentId);
+        if (parent == null) {
+            throw new IllegalArgumentException(
+                    "Can't create file " + displayName + " in null parent.");
         }
-        final File file = new File(parentDocument.file, displayName);
-        if (mimeType.equals(Document.MIME_TYPE_DIR)) {
-            if (!file.mkdirs()) {
-                throw new FileNotFoundException();
-            }
-        } else {
-            try {
-                if (!file.createNewFile()) {
-                    throw new IllegalStateException("The file " + file.getPath() + " already exists");
-                }
-            } catch (IOException e) {
-                throw new FileNotFoundException();
-            }
+        if (!parent.file.isDirectory()) {
+            throw new IllegalArgumentException(
+                    "Can't create file " + displayName + " inside non-directory parent "
+                    + parent.file.getName());
         }
 
-        final StubDocument document = new StubDocument(file, mimeType, parentDocument);
+        final File file = new File(parent.file, displayName);
+        if (file.exists()) {
+            throw new FileNotFoundException(
+                    "Duplicate file names not supported for " + file);
+        }
+
+        if (mimeType.equals(Document.MIME_TYPE_DIR)) {
+            if (!file.mkdirs()) {
+                throw new FileNotFoundException(
+                        "Failed to create directory(s): " + file);
+            }
+            Log.i(TAG, "Created new directory: " + file);
+        } else {
+            boolean created = false;
+            try {
+                created = file.createNewFile();
+            } catch (IOException e) {
+                // We'll throw an FNF exception later :)
+                Log.e(TAG, "createnewFile operation failed for file: " + file, e);
+            }
+            if (!created) {
+                throw new FileNotFoundException(
+                        "createNewFile operation failed for: " + file);
+            }
+            Log.i(TAG, "Created new file: " + file);
+        }
+
+        final StubDocument document = new StubDocument(file, mimeType, parent);
         Log.d(TAG, "Created document " + document.documentId);
         notifyParentChanged(document.parentId);
         getContext().getContentResolver().notifyChange(
@@ -349,7 +373,7 @@ public class StubProvider extends DocumentsProvider {
 
     private void configure(String arg, Bundle extras) {
         Log.d(TAG, "Configure " + arg);
-        String rootName = extras.getString(EXTRA_ROOT, MY_ROOT_ID);
+        String rootName = extras.getString(EXTRA_ROOT, ROOT_0_ID);
         long rootSize = extras.getLong(EXTRA_SIZE, 1) * 1024 * 1024;
         setSize(rootName, rootSize);
     }
@@ -379,10 +403,10 @@ public class StubProvider extends DocumentsProvider {
         row.add(Document.COLUMN_LAST_MODIFIED, document.file.lastModified());
     }
 
-    private void removeRecursively(File file) {
+    private void removeChildrenRecursively(File file) {
         for (File childFile : file.listFiles()) {
             if (childFile.isDirectory()) {
-                removeRecursively(childFile);
+                removeChildrenRecursively(childFile);
             }
             childFile.delete();
         }
@@ -411,8 +435,8 @@ public class StubProvider extends DocumentsProvider {
     @VisibleForTesting
     public Uri createFile(String rootId, String path, String mimeType, byte[] content)
             throws FileNotFoundException, IOException {
-        Log.d(TAG, "Creating file " + rootId + ":" + path);
-        StubDocument root = mRoots.get(rootId).rootDocument;
+        Log.d(TAG, "Creating test file " + rootId + ":" + path);
+        StubDocument root = mRoots.get(rootId).document;
         if (root == null) {
             throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
         }
@@ -445,7 +469,7 @@ public class StubProvider extends DocumentsProvider {
 
     @VisibleForTesting
     public File getFile(String rootId, String path) throws FileNotFoundException {
-        StubDocument root = mRoots.get(rootId).rootDocument;
+        StubDocument root = mRoots.get(rootId).document;
         if (root == null) {
             throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
         }
@@ -461,7 +485,7 @@ public class StubProvider extends DocumentsProvider {
 
     final class RootInfo {
         public final String name;
-        public final StubDocument rootDocument;
+        public final StubDocument document;
         public long capacity;
         public long size;
 
@@ -469,9 +493,11 @@ public class StubProvider extends DocumentsProvider {
             this.name = name;
             this.capacity = 1024 * 1024;
             // Make a subdir in the cache dir for each root.
-            File rootDir = new File(getContext().getCacheDir(), name);
-            rootDir.mkdir();
-            this.rootDocument = new StubDocument(rootDir, Document.MIME_TYPE_DIR, this);
+            File file = new File(getContext().getCacheDir(), name);
+            if (file.mkdir()) {
+                Log.i(TAG, "Created new root directory @ " + file.getPath());
+            }
+            this.document = new StubDocument(file, Document.MIME_TYPE_DIR, this);
             this.capacity = capacity;
             this.size = 0;
         }
