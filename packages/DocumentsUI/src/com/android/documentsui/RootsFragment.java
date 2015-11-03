@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -30,6 +32,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,12 +59,13 @@ import java.util.Objects;
  */
 public class RootsFragment extends Fragment {
 
+    private static final String TAG = "RootsFragment";
+    private static final String EXTRA_INCLUDE_APPS = "includeApps";
+
     private ListView mList;
     private RootsAdapter mAdapter;
-
     private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
 
-    private static final String EXTRA_INCLUDE_APPS = "includeApps";
 
     public static void show(FragmentManager fm, Intent includeApps) {
         final Bundle args = new Bundle();
@@ -180,6 +184,8 @@ public class RootsFragment extends Fragment {
             } else if (item instanceof AppItem) {
                 DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
                 activity.onAppPicked(((AppItem) item).info);
+            } else if (item instanceof SpacerItem) {
+                if (DEBUG) Log.d(TAG, "Ignoring click on spacer item.");
             } else {
                 throw new IllegalStateException("Unknown root: " + item);
             }
