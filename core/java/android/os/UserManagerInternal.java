@@ -36,7 +36,7 @@ public abstract class UserManagerInternal {
      *
      * Must be called while taking the {@link #getUserRestrictionsLock()} lock.
      */
-    public abstract void updateEffectiveUserRestrictionsRL(int userId);
+    public abstract void updateEffectiveUserRestrictionsLR(int userId);
 
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to get
@@ -44,7 +44,7 @@ public abstract class UserManagerInternal {
      *
      * Must be called while taking the {@link #getUserRestrictionsLock()} lock.
      */
-    public abstract void updateEffectiveUserRestrictionsForAllUsersRL();
+    public abstract void updateEffectiveUserRestrictionsForAllUsersLR();
 
     /**
      * Returns the "base" user restrictions.

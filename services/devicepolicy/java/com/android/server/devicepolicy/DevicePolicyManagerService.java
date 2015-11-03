@@ -1064,8 +1064,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (removed) {
             synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
                 synchronized (DevicePolicyManagerService.this) {
-                    mUserManagerInternal.updateEffectiveUserRestrictionsRL(
-                            userHandle);
+                    mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
                 }
             }
         }
@@ -1718,7 +1717,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             }
                             synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
                                 synchronized (DevicePolicyManagerService.this) {
-                                    mUserManagerInternal.updateEffectiveUserRestrictionsRL(
+                                    mUserManagerInternal.updateEffectiveUserRestrictionsLR(
                                             userHandle);
                                 }
                             }
@@ -4337,9 +4336,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
             synchronized (this) {
                 if (isDeviceOwner(who)) {
-                    mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersRL();
+                    mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersLR();
                 } else {
-                    mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle);
+                    mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
                 }
             }
         }
@@ -4651,7 +4650,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     0  /* flagValues */, userHandle.getIdentifier());
             // TODO This will not revert audio mute restrictions if they were set.  b/24981972
             synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
-                mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle.getIdentifier());
+                mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle.getIdentifier());
             }
         } catch (RemoteException re) {
         } finally {
@@ -5628,9 +5627,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                     // Tell UserManager the new value.
                     if (isDeviceOwner) {
-                        mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersRL();
+                        mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersLR();
                     } else {
-                        mUserManagerInternal.updateEffectiveUserRestrictionsRL(userHandle);
+                        mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
                     }
                 } finally {
                     mInjector.binderRestoreCallingIdentity(id);
