@@ -78,9 +78,9 @@ TEST(FatVector, destructorInternal) {
         FatVector<TestUtils::SignalingDtor, 0> v;
         v.emplace_back(&count);
         EXPECT_FALSE(allocationIsInternal(v));
-        EXPECT_EQ(0, count);
+        EXPECT_EQ(0, count) << "Destruction shouldn't have happened yet";
     }
-    EXPECT_EQ(1, count);
+    EXPECT_EQ(1, count) << "Destruction should happen exactly once";
 }
 
 TEST(FatVector, destructorExternal) {
@@ -92,7 +92,7 @@ TEST(FatVector, destructorExternal) {
             v.emplace_back(&count);
             EXPECT_TRUE(allocationIsInternal(v));
         }
-        EXPECT_EQ(0, count);
+        EXPECT_EQ(0, count) << "Destruction shouldn't have happened yet";
     }
-    EXPECT_EQ(10, count);
+    EXPECT_EQ(10, count) << "Destruction should happen exactly once";
 }

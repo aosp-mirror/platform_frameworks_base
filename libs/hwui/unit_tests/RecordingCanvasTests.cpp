@@ -53,7 +53,7 @@ TEST(RecordingCanvas, testSimpleRectRecord) {
         ASSERT_EQ(Rect(0, 0, 100, 200), op.localClipRect);
         ASSERT_EQ(Rect(10, 20, 90, 180), op.unmappedBounds);
     });
-    ASSERT_EQ(1, count); // only one observed
+    ASSERT_EQ(1, count);
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {
@@ -106,7 +106,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
         }
         count++;
     });
-    ASSERT_EQ(2, count); // two draws observed
+    ASSERT_EQ(2, count);
 }
 
 TEST(RecordingCanvas, saveLayerSimple) {
@@ -121,7 +121,9 @@ TEST(RecordingCanvas, saveLayerSimple) {
         switch(count++) {
         case 0:
             EXPECT_EQ(RecordedOpId::BeginLayerOp, op.opId);
-            // TODO: add asserts
+            EXPECT_EQ(Rect(10, 20, 190, 180), op.unmappedBounds);
+            EXPECT_EQ(Rect(0, 0, 200, 200), op.localClipRect);
+            EXPECT_TRUE(op.localMatrix.isIdentity());
             break;
         case 1:
             EXPECT_EQ(RecordedOpId::RectOp, op.opId);
@@ -132,7 +134,7 @@ TEST(RecordingCanvas, saveLayerSimple) {
             break;
         case 2:
             EXPECT_EQ(RecordedOpId::EndLayerOp, op.opId);
-            // TODO: add asserts
+            // Don't bother asserting recording state data - it's not used
             break;
         default:
             ADD_FAILURE();
@@ -155,10 +157,8 @@ TEST(RecordingCanvas, saveLayerViewportCrop) {
         if (count++ == 1) {
             Matrix4 expectedMatrix;
             EXPECT_EQ(RecordedOpId::RectOp, op.opId);
-
-            // recorded clip rect should be intersection of
-            // viewport and saveLayer bounds, in layer space
-            EXPECT_EQ(Rect(0, 0, 100, 100), op.localClipRect);
+            EXPECT_EQ(Rect(0, 0, 100, 100), op.localClipRect) << "Recorded clip rect should be"
+                    " intersection of viewport and saveLayer bounds, in layer space";
             EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds);
             expectedMatrix.loadTranslate(-100, -100, 0);
             EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
@@ -183,14 +183,11 @@ TEST(RecordingCanvas, saveLayerRotateUnclipped) {
     int count = 0;
     playbackOps(*dl, [&count](const RecordedOp& op) {
         if (count++ == 1) {
-            Matrix4 expectedMatrix;
             EXPECT_EQ(RecordedOpId::RectOp, op.opId);
-
-            // recorded rect doesn't see rotate, since recorded relative to saveLayer bounds
             EXPECT_EQ(Rect(0, 0, 100, 100), op.localClipRect);
             EXPECT_EQ(Rect(0, 0, 100, 100), op.unmappedBounds);
-            expectedMatrix.loadIdentity();
-            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
+            EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), op.localMatrix)
+                    << "Recorded op shouldn't see any canvas transform before the saveLayer";
         }
     });
     EXPECT_EQ(3, count);

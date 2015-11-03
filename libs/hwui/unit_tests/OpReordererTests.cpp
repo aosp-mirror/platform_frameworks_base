@@ -44,15 +44,24 @@ LayerUpdateQueue sEmptyLayerUpdateQueue;
 class TestRendererBase {
 public:
     virtual ~TestRendererBase() {}
-    virtual OffscreenBuffer* createLayer(uint32_t, uint32_t) { ADD_FAILURE(); return nullptr; }
-    virtual void startLayer(OffscreenBuffer*) { ADD_FAILURE(); }
-    virtual void endLayer() { ADD_FAILURE(); }
+    virtual OffscreenBuffer* createLayer(uint32_t, uint32_t) {
+        ADD_FAILURE() << "Layer creation not expected in this test";
+        return nullptr;
+    }
+    virtual void startLayer(OffscreenBuffer*) {
+        ADD_FAILURE() << "Layer repaint not expected in this test";
+    }
+    virtual void endLayer() {
+        ADD_FAILURE() << "Layer updates not expected in this test";
+    }
     virtual void startFrame(uint32_t width, uint32_t height) {}
     virtual void endFrame() {}
 
     // define virtual defaults for direct
 #define BASE_OP_METHOD(Type) \
-    virtual void on##Type(const Type&, const BakedOpState&) { ADD_FAILURE(); }
+    virtual void on##Type(const Type&, const BakedOpState&) { \
+        ADD_FAILURE() << #Type " not expected in this test"; \
+    }
     MAP_OPS(BASE_OP_METHOD)
     int getIndex() { return mIndex; }
 
@@ -370,11 +379,11 @@ public:
     void onRectOp(const RectOp& op, const BakedOpState& state) override {
         EXPECT_EQ(1, mIndex++);
 
-        // verify transform is reset
-        EXPECT_TRUE(state.computedState.transform.isIdentity());
+        EXPECT_TRUE(state.computedState.transform.isIdentity())
+                << "Transform should be reset within layer";
 
-        // verify damage rect is used as clip
-        EXPECT_EQ(state.computedState.clipRect, Rect(25, 25, 75, 75));
+        EXPECT_EQ(state.computedState.clipRect, Rect(25, 25, 75, 75))
+                << "Damage rect should be used to clip layer content";
     }
     void endLayer() override {
         EXPECT_EQ(2, mIndex++);
