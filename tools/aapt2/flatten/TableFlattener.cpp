@@ -54,9 +54,16 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
 struct FlatEntry {
     ResourceEntry* entry;
     Value* value;
+
+    // The entry string pool index to the entry's name.
     uint32_t entryKey;
+
+    // The source string pool index to the source file path.
     uint32_t sourcePathKey;
     uint32_t sourceLine;
+
+    // The source string pool index to the comment.
+    uint32_t commentKey;
 };
 
 class SymbolWriter {
@@ -318,8 +325,9 @@ private:
         if (mOptions.useExtendedChunks) {
             // Write the extra source block. This will be ignored by the Android runtime.
             ResTable_entry_source* sourceBlock = buffer->nextBlock<ResTable_entry_source>();
-            sourceBlock->pathIndex = util::hostToDevice32(entry->sourcePathKey);
+            sourceBlock->path.index = util::hostToDevice32(entry->sourcePathKey);
             sourceBlock->line = util::hostToDevice32(entry->sourceLine);
+            sourceBlock->comment.index = util::hostToDevice32(entry->commentKey);
             outEntry->size += sizeof(*sourceBlock);
         }
 
@@ -486,12 +494,14 @@ private:
                 publicEntry->entryId = util::hostToDevice32(entry->id.value());
                 publicEntry->key.index = util::hostToDevice32(mKeyPool.makeRef(
                         entry->name).getIndex());
-                publicEntry->source.index = util::hostToDevice32(mSourcePool->makeRef(
+                publicEntry->source.path.index = util::hostToDevice32(mSourcePool->makeRef(
                         util::utf8ToUtf16(entry->symbolStatus.source.path)).getIndex());
                 if (entry->symbolStatus.source.line) {
-                    publicEntry->sourceLine = util::hostToDevice32(
+                    publicEntry->source.line = util::hostToDevice32(
                             entry->symbolStatus.source.line.value());
                 }
+                publicEntry->source.comment.index = util::hostToDevice32(mSourcePool->makeRef(
+                        entry->symbolStatus.comment).getIndex());
 
                 switch (entry->symbolStatus.state) {
                 case SymbolState::kPrivate:
@@ -565,13 +575,16 @@ private:
                         lineNumber = value->getSource().line.value();
                     }
 
+                    const StringPool::Ref commentRef = mSourcePool->makeRef(value->getComment());
+
                     configToEntryListMap[configValue.config]
                             .push_back(FlatEntry{
                                     entry,
                                     value,
                                     keyIndex,
                                     (uint32_t) sourceRef.getIndex(),
-                                    lineNumber });
+                                    lineNumber,
+                                    (uint32_t) commentRef.getIndex() });
                 }
             }
 
@@ -680,7 +693,7 @@ bool TableFlattener::consume(IAaptContext* context, ResourceTable* table) {
     // Update the offsets to their final values.
     if (symbolEntryData) {
         for (SymbolWriter::Entry& entry : symbolOffsets) {
-            symbolEntryData->stringIndex = util::hostToDevice32(entry.name.getIndex());
+            symbolEntryData->name.index = util::hostToDevice32(entry.name.getIndex());
 
             // The symbols were all calculated with the packageBuffer offset. We need to
             // add the beginning of the output buffer.

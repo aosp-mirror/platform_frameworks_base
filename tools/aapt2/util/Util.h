@@ -62,6 +62,8 @@ bool stringEndsWith(const BasicStringPiece<T>& str, const BasicStringPiece<T>& s
  */
 StringPiece16 trimWhitespace(const StringPiece16& str);
 
+StringPiece trimWhitespace(const StringPiece& str);
+
 /**
  * UTF-16 isspace(). It basically checks for lower range characters that are
  * whitespace.

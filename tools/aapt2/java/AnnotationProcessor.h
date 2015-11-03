@@ -65,6 +65,7 @@ public:
      * we need to collect all the comments.
      */
     void appendComment(const StringPiece16& comment);
+    void appendComment(const StringPiece& comment);
 
     /**
      * Finishes the comment and moves it to the caller. Subsequent calls to buildComment() have
@@ -85,7 +86,7 @@ private:
     bool mDeprecated = false;
     bool mSystemApi = false;
 
-    void appendCommentLine(const StringPiece16& line);
+    void appendCommentLine(const std::string& line);
 };
 
 } // namespace aapt

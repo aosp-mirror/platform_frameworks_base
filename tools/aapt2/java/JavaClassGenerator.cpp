@@ -18,6 +18,8 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "ValueVisitor.h"
+
 #include "java/AnnotationProcessor.h"
 #include "java/JavaClassGenerator.h"
 #include "util/StringPiece.h"
@@ -109,13 +111,13 @@ void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGen
     std::sort(sortedAttributes.begin(), sortedAttributes.end());
 
     // First we emit the array containing the IDs of each attribute.
-    *out << "        "
+    *out << "    "
          << "public static final int[] " << transform(entryName) << " = {";
 
     const size_t attrCount = sortedAttributes.size();
     for (size_t i = 0; i < attrCount; i++) {
         if (i % kAttribsPerLine == 0) {
-            *out << "\n            ";
+            *out << "\n      ";
         }
 
         *out << sortedAttributes[i].first;
@@ -123,11 +125,11 @@ void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGen
             *out << ", ";
         }
     }
-    *out << "\n        };\n";
+    *out << "\n    };\n";
 
     // Now we emit the indices into the array.
     for (size_t i = 0; i < attrCount; i++) {
-        *out << "        "
+        *out << "    "
              << "public static" << finalModifier
              << " int " << transform(entryName);
 
@@ -138,6 +140,85 @@ void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGen
             *out << "_" << transform(itemName.package);
         }
         *out << "_" << transform(itemName.entry) << " = " << i << ";\n";
+    }
+}
+
+static void addAttributeFormatDoc(AnnotationProcessor* processor, Attribute* attr) {
+    const uint32_t typeMask = attr->typeMask;
+    if (typeMask & android::ResTable_map::TYPE_REFERENCE) {
+        processor->appendComment(
+                "<p>May be a reference to another resource, in the form\n"
+                "\"<code>@[+][<i>package</i>:]<i>type</i>/<i>name</i></code>\" or a theme\n"
+                "attribute in the form\n"
+                "\"<code>?[<i>package</i>:]<i>type</i>/<i>name</i></code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_STRING) {
+        processor->appendComment(
+                "<p>May be a string value, using '\\;' to escape characters such as\n"
+                "'\\n' or '\\uxxxx' for a unicode character;");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_INTEGER) {
+        processor->appendComment("<p>May be an integer value, such as \"<code>100</code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_BOOLEAN) {
+        processor->appendComment(
+                "<p>May be a boolean value, such as \"<code>true</code>\" or\n"
+                "\"<code>false</code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_COLOR) {
+        processor->appendComment(
+                "<p>May be a color value, in the form of \"<code>#<i>rgb</i></code>\",\n"
+                "\"<code>#<i>argb</i></code>\", \"<code>#<i>rrggbb</i></code\", or \n"
+                "\"<code>#<i>aarrggbb</i></code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_FLOAT) {
+        processor->appendComment(
+                "<p>May be a floating point value, such as \"<code>1.2</code>\".");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_DIMENSION) {
+        processor->appendComment(
+                "<p>May be a dimension value, which is a floating point number appended with a\n"
+                "unit such as \"<code>14.5sp</code>\".\n"
+                "Available units are: px (pixels), dp (density-independent pixels),\n"
+                "sp (scaled pixels based on preferred font size), in (inches), and\n"
+                "mm (millimeters).");
+    }
+
+    if (typeMask & android::ResTable_map::TYPE_FRACTION) {
+        processor->appendComment(
+                "<p>May be a fractional value, which is a floating point number appended with\n"
+                "either % or %p, such as \"<code>14.5%</code>\".\n"
+                "The % suffix always means a percentage of the base size;\n"
+                "the optional %p suffix provides a size relative to some parent container.");
+    }
+
+    if (typeMask & (android::ResTable_map::TYPE_FLAGS | android::ResTable_map::TYPE_ENUM)) {
+        if (typeMask & android::ResTable_map::TYPE_FLAGS) {
+            processor->appendComment(
+                    "<p>Must be one or more (separated by '|') of the following "
+                    "constant values.</p>");
+        } else {
+            processor->appendComment("<p>Must be one of the following constant values.</p>");
+        }
+
+        processor->appendComment("<table>\n<colgroup align=\"left\" />\n"
+                                 "<colgroup align=\"left\" />\n"
+                                 "<colgroup align=\"left\" />\n"
+                                 "<tr><th>Constant</th><th>Value</th><th>Description</th></tr>\n");
+        for (const Attribute::Symbol& symbol : attr->symbols) {
+            std::stringstream line;
+            line << "<tr><td>" << symbol.symbol.name.value().entry << "</td>"
+                 << "<td>" << std::hex << symbol.value << std::dec << "</td>"
+                 << "<td>" << util::trimWhitespace(symbol.symbol.getComment()) << "</td></tr>";
+            processor->appendComment(line.str());
+        }
+        processor->appendComment("</table>");
     }
 }
 
@@ -186,7 +267,33 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
             generateStyleable(packageNameToGenerate, unmangledName, static_cast<const Styleable*>(
                     entry->values.front().value.get()), out);
         } else {
-            *out << "        " << "public static" << finalModifier
+            AnnotationProcessor processor("    ");
+            if (entry->symbolStatus.state != SymbolState::kUndefined) {
+                processor.appendComment(entry->symbolStatus.comment);
+            }
+
+            for (const auto& configValue : entry->values) {
+                processor.appendComment(configValue.value->getComment());
+            }
+
+            if (!entry->values.empty()) {
+                if (Attribute* attr = valueCast<Attribute>(entry->values.front().value.get())) {
+                    // We list out the available values for the given attribute.
+                    addAttributeFormatDoc(&processor, attr);
+                }
+            }
+
+            std::string comment = processor.buildComment();
+            if (!comment.empty()) {
+                *out << comment << "\n";
+            }
+
+            std::string annotations = processor.buildAnnotations();
+            if (!annotations.empty()) {
+                *out << annotations << "\n";
+            }
+
+            *out << "    " << "public static" << finalModifier
                  << " int " << transform(unmangledName) << " = " << id << ";\n";
         }
     }
@@ -211,11 +318,11 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
             } else {
                 typeStr = toString(type->type);
             }
-            *out << "    public static final class " << typeStr << " {\n";
+            *out << "  public static final class " << typeStr << " {\n";
             if (!generateType(packageNameToGenerate, package.get(), type.get(), out)) {
                 return false;
             }
-            *out << "    }\n";
+            *out << "  }\n";
         }
     }
 

@@ -132,6 +132,32 @@ struct Public_header {
     uint32_t count;
 };
 
+/**
+ * A structure representing source data for a resource entry.
+ * Appears after an android::ResTable_entry or android::ResTable_map_entry.
+ *
+ * TODO(adamlesinski): This causes some issues when runtime code checks
+ * the size of an android::ResTable_entry. It assumes it is an
+ * android::ResTable_map_entry if the size is bigger than an android::ResTable_entry
+ * which may not be true if this structure is present.
+ */
+struct ResTable_entry_source {
+    /**
+     * File path reference.
+     */
+    android::ResStringPool_ref path;
+
+    /**
+     * Line number this resource was defined on.
+     */
+    uint32_t line;
+
+    /**
+     * Comment string reference.
+     */
+    android::ResStringPool_ref comment;
+};
+
 struct Public_entry {
     uint16_t entryId;
 
@@ -143,8 +169,7 @@ struct Public_entry {
 
     uint16_t state;
     android::ResStringPool_ref key;
-    android::ResStringPool_ref source;
-    uint32_t sourceLine;
+    ResTable_entry_source source;
 };
 
 /**
@@ -173,28 +198,7 @@ struct SymbolTable_entry {
      * The index into the string pool where the name of this
      * symbol exists.
      */
-    uint32_t stringIndex;
-};
-
-/**
- * A structure representing the source of a resourc entry.
- * Appears after an android::ResTable_entry or android::ResTable_map_entry.
- *
- * TODO(adamlesinski): This causes some issues when runtime code checks
- * the size of an android::ResTable_entry. It assumes it is an
- * android::ResTable_map_entry if the size is bigger than an android::ResTable_entry
- * which may not be true if this structure is present.
- */
-struct ResTable_entry_source {
-    /**
-     * Index into the source string pool.
-     */
-    uint32_t pathIndex;
-
-    /**
-     * Line number this resource was defined on.
-     */
-    uint32_t line;
+    android::ResStringPool_ref name;
 };
 
 /**
