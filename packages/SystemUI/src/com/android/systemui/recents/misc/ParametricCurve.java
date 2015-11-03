@@ -189,6 +189,7 @@ public class ParametricCurve {
     public float computePOffsetForScaledHeight(int height, Rect bounds) {
         int top = bounds.top;
         int bottom = bounds.bottom;
+        height = Math.min(height, bottom - top);
 
         if (bounds.height() == 0) {
             return 0;
@@ -231,6 +232,7 @@ public class ParametricCurve {
     public float computePOffsetForHeight(int height, Rect bounds) {
         int top = bounds.top;
         int bottom = bounds.bottom;
+        height = Math.min(height, bottom - top);
 
         if (bounds.height() == 0) {
             return 0;

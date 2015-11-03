@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -29,9 +30,11 @@ import android.view.ViewParent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
@@ -222,49 +225,12 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int y = (int) ev.getY(activePointerIndex);
                 int velocity = (int) mVelocityTracker.getYVelocity(mActivePointerId);
-                float curScrollP = mScroller.getStackScroll();
                 if (mIsScrolling) {
-                    boolean hasFreeformTasks = mSv.mStack.hasFreeformTasks();
-                    if (hasFreeformTasks && velocity > 0 &&
-                            curScrollP > layoutAlgorithm.mStackEndScrollP) {
-                        // Snap to workspace
-                        float finalY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
-                                layoutAlgorithm.mPreferredStackEndScrollP);
-                        mScrollFlingAnimator = ValueAnimator.ofInt(y, (int) finalY);
-                        mScrollFlingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                float deltaP = layoutAlgorithm.getDeltaPForY(mDownY,
-                                        (Integer) animation.getAnimatedValue());
-                                float scroll = mDownScrollP + deltaP;
-                                mScroller.setStackScroll(scroll);
-                            }
-                        });
-                        mFlingAnimUtils.apply(mScrollFlingAnimator, y, finalY, velocity);
-                        mScrollFlingAnimator.start();
-                    } else if (hasFreeformTasks && velocity < 0 &&
-                            curScrollP > (layoutAlgorithm.mStackEndScrollP -
-                                    layoutAlgorithm.mTaskHalfHeightPOffset)) {
-                        // Snap to stack
-                        float finalY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
-                                layoutAlgorithm.mMaxScrollP);
-                        mScrollFlingAnimator = ValueAnimator.ofInt(y, (int) finalY);
-                        mScrollFlingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                float deltaP = layoutAlgorithm.getDeltaPForY(mDownY,
-                                        (Integer) animation.getAnimatedValue());
-                                float scroll = mDownScrollP + deltaP;
-                                mScroller.setStackScroll(scroll);
-                            }
-                        });
-                        mFlingAnimUtils.apply(mScrollFlingAnimator, y, finalY, velocity);
-                        mScrollFlingAnimator.start();
-                    } else if (mScroller.isScrollOutOfBounds()) {
+                    if (mScroller.isScrollOutOfBounds()) {
                         mScroller.animateBoundScroll();
                     } else if (Math.abs(velocity) > mMinimumVelocity) {
                         float minY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
-                                layoutAlgorithm.mPreferredStackEndScrollP);
+                                layoutAlgorithm.mMaxScrollP);
                         float maxY = mDownY + layoutAlgorithm.getYForDeltaP(mDownScrollP,
                                 layoutAlgorithm.mMinScrollP);
                         mScroller.fling(mDownScrollP, mDownY, y, velocity, (int) minY, (int) maxY,
@@ -311,6 +277,17 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         }
         if (findViewAtPoint(shiftedX, y) != null) {
             return;
+        }
+
+        // If tapping on the freeform workspace background, just launch the first freeform task
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.hasFreeformWorkspaceSupport()) {
+            Rect freeformRect = mSv.mLayoutAlgorithm.mFreeformRect;
+            if (freeformRect.top <= y && y <= freeformRect.bottom) {
+                if (mSv.launchFreeformTasks()) {
+                    return;
+                }
+            }
         }
 
         // The user intentionally tapped on the background, which is like a tap on the "desktop".
