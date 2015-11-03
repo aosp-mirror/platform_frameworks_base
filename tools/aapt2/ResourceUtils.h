@@ -59,6 +59,11 @@ bool isReference(const StringPiece16& str);
  */
 bool tryParseAttributeReference(const StringPiece16& str, ResourceNameRef* outReference);
 
+/**
+ * Returns true if the value is a boolean, putting the result in `outValue`.
+ */
+bool tryParseBool(const StringPiece16& str, bool* outValue);
+
 /*
  * Returns a Reference, or None Maybe instance if the string `str` was parsed as a
  * valid reference to a style.

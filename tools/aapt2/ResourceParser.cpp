@@ -62,6 +62,7 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
                                        StyleString* outStyleString) {
     std::vector<Span> spanStack;
 
+    bool error = false;
     outRawString->clear();
     outStyleString->spans.clear();
     util::StringBuilder builder;
@@ -84,7 +85,6 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
             spanStack.pop_back();
 
         } else if (event == XmlPullParser::Event::kText) {
-            // TODO(adamlesinski): Verify format strings.
             outRawString->append(parser->getText());
             builder.append(parser->getText());
 
@@ -116,9 +116,10 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
             if (builder.str().size() > std::numeric_limits<uint32_t>::max()) {
                 mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                              << "style string '" << builder.str() << "' is too long");
-                return false;
+                error = true;
+            } else {
+                spanStack.push_back(Span{ spanName, static_cast<uint32_t>(builder.str().size()) });
             }
-            spanStack.push_back(Span{ spanName, static_cast<uint32_t>(builder.str().size()) });
 
         } else if (event == XmlPullParser::Event::kComment) {
             // Skip
@@ -129,7 +130,7 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
     assert(spanStack.empty() && "spans haven't been fully processed");
 
     outStyleString->str = builder.str();
-    return true;
+    return !error;
 }
 
 bool ResourceParser::parse(XmlPullParser* parser) {
@@ -437,12 +438,38 @@ std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, const uint
 bool ResourceParser::parseString(XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
-    // TODO(adamlesinski): Read "untranslateable" attribute.
+    bool formatted = true;
+    if (Maybe<StringPiece16> formattedAttr = findAttribute(parser, u"formatted")) {
+        if (!ResourceUtils::tryParseBool(formattedAttr.value(), &formatted)) {
+            mDiag->error(DiagMessage(source) << "invalid value for 'formatted'. Must be a boolean");
+            return false;
+        }
+    }
+
+    bool untranslateable = false;
+    if (Maybe<StringPiece16> untranslateableAttr = findAttribute(parser, u"untranslateable")) {
+        if (!ResourceUtils::tryParseBool(untranslateableAttr.value(), &untranslateable)) {
+            mDiag->error(DiagMessage(source)
+                         << "invalid value for 'untranslateable'. Must be a boolean");
+            return false;
+        }
+    }
 
     outResource->value = parseXml(parser, android::ResTable_map::TYPE_STRING, kNoRawString);
     if (!outResource->value) {
         mDiag->error(DiagMessage(source) << "not a valid string");
         return false;
+    }
+
+    if (formatted || untranslateable) {
+        if (String* stringValue = valueCast<String>(outResource->value.get())) {
+            if (!util::verifyJavaStringFormat(*stringValue->value)) {
+                mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                             << "multiple substitutions specified in non-positional format; "
+                                "did you mean to add the formatted=\"false\" attribute?");
+                return false;
+            }
+        }
     }
     return true;
 }

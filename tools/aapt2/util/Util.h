@@ -158,6 +158,14 @@ inline StringPiece16 getString(const android::ResStringPool& pool, size_t idx) {
     return StringPiece16();
 }
 
+/**
+ * Checks that the Java string format contains no non-positional arguments (arguments without
+ * explicitly specifying an index) when there are more than one argument. This is an error
+ * because translations may rearrange the order of the arguments in the string, which will
+ * break the string interpolation.
+ */
+bool verifyJavaStringFormat(const StringPiece16& str);
+
 class StringBuilder {
 public:
     StringBuilder& append(const StringPiece16& str);
