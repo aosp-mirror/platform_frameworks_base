@@ -1765,6 +1765,7 @@ android.util.StateSet
 android.util.SuperNotCalledException
 android.util.TypedValue
 android.util.Xml
+android.util.jar.StrictJarFile
 android.view.AbsSavedState
 android.view.AbsSavedState$1
 android.view.AbsSavedState$2
@@ -3361,9 +3362,6 @@ java.util.jar.Attributes$Name
 java.util.jar.JarEntry
 java.util.jar.JarFile
 java.util.jar.JarFile$JarFileEnumerator
-java.util.jar.Manifest
-java.util.jar.ManifestReader
-java.util.jar.StrictJarFile
 java.util.logging.ConsoleHandler
 java.util.logging.ErrorManager
 java.util.logging.Filter
@@ -3824,4 +3822,11 @@ org.xml.sax.helpers.DefaultHandler
 org.xmlpull.v1.XmlPullParser
 org.xmlpull.v1.XmlPullParserException
 org.xmlpull.v1.XmlSerializer
+<<<<<<< HEAD
 sun.misc.Unsafe
+=======
+<<<<<<< HEAD
+=======
+sun.misc.Unsafe
+>>>>>>> 631d21f... Move StrictJarFile from libcore to framework
+>>>>>>> 43ea2cc... DO NOT MERGE Move StrictJarFile from libcore to framework
