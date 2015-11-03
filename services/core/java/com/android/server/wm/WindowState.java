@@ -1878,8 +1878,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             Configuration newConfig) throws RemoteException {
         DisplayInfo displayInfo = getDisplayInfo();
         mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        boolean resizing = computeDragResizing();
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                outsets, reportDraw, newConfig, inFreeformWorkspace() ? frame : mTmpRect);
+                outsets, reportDraw, newConfig, inFreeformWorkspace() || !resizing
+                         ? frame : mTmpRect);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
