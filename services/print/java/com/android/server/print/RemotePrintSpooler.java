@@ -279,6 +279,35 @@ final class RemotePrintSpooler {
         }
     }
 
+    /**
+     * Connect to the print spooler service and remove an approved print service.
+     *
+     * @param serviceToRemove The {@link ComponentName} of the service to be removed.
+     */
+    public final void removeApprovedPrintService(ComponentName serviceToRemove) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().removeApprovedPrintService(serviceToRemove);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error removing approved print service.", re);
+        } catch (TimeoutException te) {
+            Slog.e(LOG_TAG, "Error removing approved print service.", te);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
+                        + "] removing approved print service()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
     public final void removeObsoletePrintJobs() {
         throwIfCalledOnMainThread();
         synchronized (mLock) {

@@ -19,14 +19,10 @@ package com.android.server.print;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -51,7 +47,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
-import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.SystemService;
@@ -527,6 +522,7 @@ public final class PrintManagerService extends SystemService {
                         while (iterator.hasNext()) {
                             ComponentName componentName = iterator.next();
                             if (packageName.equals(componentName.getPackageName())) {
+                                userState.removeApprovedPrintService(componentName);
                                 iterator.remove();
                                 servicesRemoved = true;
                             }
@@ -587,15 +583,29 @@ public final class PrintManagerService extends SystemService {
                         return;
                     }
 
-                    final int installedServiceCount = installedServices.size();
-                    for (int i = 0; i < installedServiceCount; i++) {
-                        ServiceInfo serviceInfo = installedServices.get(i).serviceInfo;
-                        ComponentName component = new ComponentName(serviceInfo.packageName,
-                                serviceInfo.name);
-                        String label = serviceInfo.loadLabel(mContext.getPackageManager())
-                                .toString();
-                        showEnableInstalledPrintServiceNotification(component, label,
-                                getChangingUserId());
+                    // Enable all added services by default
+                    synchronized (mLock) {
+                        UserState userState = getOrCreateUserStateLocked(getChangingUserId());
+
+                        Set<ComponentName> enabledServices = userState.getEnabledServices();
+                        boolean servicesAdded = false;
+
+                        final int installedServiceCount = installedServices.size();
+                        for (int i = 0; i < installedServiceCount; i++) {
+                            ServiceInfo serviceInfo = installedServices.get(i).serviceInfo;
+                            ComponentName component = new ComponentName(serviceInfo.packageName,
+                                    serviceInfo.name);
+
+                            enabledServices.add(component);
+                            servicesAdded = true;
+                        }
+
+                        if (servicesAdded) {
+                            persistComponentNamesToSettingLocked(
+                                    Settings.Secure.ENABLED_PRINT_SERVICES, enabledServices,
+                                    getChangingUserId());
+                            userState.updateIfNeededLocked();
+                        }
                     }
                 }
 
@@ -732,44 +742,6 @@ public final class PrintManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-        }
-
-        private void showEnableInstalledPrintServiceNotification(ComponentName component,
-                String label, int userId) {
-            UserHandle userHandle = new UserHandle(userId);
-
-            Intent intent = new Intent(Settings.ACTION_PRINT_SETTINGS);
-            intent.putExtra(EXTRA_PRINT_SERVICE_COMPONENT_NAME, component.flattenToString());
-
-            PendingIntent pendingIntent = PendingIntent.getActivityAsUser(mContext, 0, intent,
-                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT, null,
-                    userHandle);
-
-            Context builderContext = mContext;
-            try {
-                builderContext = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
-                        userHandle);
-            } catch (NameNotFoundException e) {
-                // Ignore can't find the package the system is running as.
-            }
-            Notification.Builder builder = new Notification.Builder(builderContext)
-                    .setSmallIcon(R.drawable.ic_print)
-                    .setContentTitle(mContext.getString(R.string.print_service_installed_title,
-                            label))
-                    .setContentText(mContext.getString(R.string.print_service_installed_message))
-                    .setContentIntent(pendingIntent)
-                    .setWhen(System.currentTimeMillis())
-                    .setAutoCancel(true)
-                    .setShowWhen(true)
-                    .setColor(mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color));
-
-            NotificationManager notificationManager = (NotificationManager) mContext
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-
-            String notificationTag = getClass().getName() + ":" + component.flattenToString();
-            notificationManager.notifyAsUser(notificationTag, 0, builder.build(),
-                    userHandle);
         }
     }
 }

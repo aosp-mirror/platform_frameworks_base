@@ -187,6 +187,18 @@
     <!-- Label for a printer that is not available. [CHAR LIMIT=25] -->
     <string name="printer_unavailable"><xliff:g id="print_job_name" example="Canon-123GHT">%1$s</xliff:g> &#8211; unavailable</string>
 
+    <!-- Title for a warning message about security implications of using a print service,
+         displayed as a dialog message when the user prints using a print service that has not been
+         used before. [CHAR LIMIT=NONE] -->
+    <string name="print_service_security_warning_title">Use
+         <xliff:g id="service" example="My Print Service">%1$s</xliff:g>?</string>
+
+    <!-- Summary for a warning message about security implications of using a print service,
+         displayed as a dialog message when the user prints using a print service that has not been
+         used before. [CHAR LIMIT=NONE] -->
+    <string name="print_service_security_warning_summary">Your document may pass through one or
+         more servers on its way to the printer.</string>
+
     <!-- Arrays -->
 
     <!-- Color mode labels. -->

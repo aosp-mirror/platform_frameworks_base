@@ -297,6 +297,15 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
+    /**
+     * Remove an approved print service.
+     *
+     * @param serviceToRemove The {@link ComponentName} of the service to be removed.
+     */
+    public void removeApprovedPrintService(ComponentName serviceToRemove) {
+        mSpooler.removeApprovedPrintService(serviceToRemove);
+    }
+
     public void restartPrintJob(PrintJobId printJobId, int appId) {
         PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, appId);
         if (printJobInfo == null || printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
