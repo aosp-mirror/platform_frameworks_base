@@ -1772,7 +1772,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             final Drawable clone;
             if (dr != null) {
                 final ConstantState cs = dr.getConstantState();
-                if (res != null) {
+                if (cs == null) {
+                    clone = dr;
+                } else if (res != null) {
                     clone = cs.newDrawable(res);
                 } else {
                     clone = cs.newDrawable();
