@@ -36,7 +36,6 @@ import com.android.frameworks.coretests.R;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.OrientationUtil;
 import android.view.KeyEvent;
 
 /**
@@ -44,16 +43,13 @@ import android.view.KeyEvent;
  */
 public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextViewActivity>{
 
-    private OrientationUtil mOrientationUtil;
-
     public TextViewActivityTest() {
         super(TextViewActivity.class);
     }
 
     @Override
     public void setUp() {
-        mOrientationUtil = OrientationUtil.initializeAndStartActivityIfNotStarted(this);
-        mOrientationUtil.setPortraitOrientation();
+        getActivity();
     }
 
     @SmallTest
