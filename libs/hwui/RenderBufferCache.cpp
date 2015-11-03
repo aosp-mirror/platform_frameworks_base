@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-#include <utils/Log.h>
-
 #include "Debug.h"
 #include "Properties.h"
 #include "RenderBufferCache.h"
+
+#include <utils/Log.h>
+
+#include <cstdlib>
 
 namespace android {
 namespace uirenderer {

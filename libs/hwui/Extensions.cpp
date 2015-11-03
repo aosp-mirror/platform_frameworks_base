@@ -20,6 +20,7 @@
 #include "Properties.h"
 #include "utils/StringUtils.h"
 
+#include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <utils/Log.h>
 

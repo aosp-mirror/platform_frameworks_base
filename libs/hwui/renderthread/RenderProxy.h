@@ -117,9 +117,6 @@ private:
 
     DrawFrameTask mDrawFrameTask;
 
-    Mutex mSyncMutex;
-    Condition mSyncCondition;
-
     void destroyContext();
 
     void post(RenderTask* task);

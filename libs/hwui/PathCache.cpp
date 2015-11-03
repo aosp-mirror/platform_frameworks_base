@@ -30,6 +30,8 @@
 #include "thread/Signal.h"
 #include "thread/TaskProcessor.h"
 
+#include <cutils/properties.h>
+
 namespace android {
 namespace uirenderer {
 

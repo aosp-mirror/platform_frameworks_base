@@ -25,11 +25,11 @@
 #include <cutils/compiler.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
-#include <utils/Mutex.h>
-#include <utils/Singleton.h>
 #include <utils/Thread.h>
 
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <set>
 
 namespace android {
@@ -72,7 +72,7 @@ protected:
     ~IFrameCallback() {}
 };
 
-class ANDROID_API RenderThread : public Thread, protected Singleton<RenderThread> {
+class ANDROID_API RenderThread : public Thread {
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
@@ -100,13 +100,15 @@ protected:
     virtual bool threadLoop() override;
 
 private:
-    friend class Singleton<RenderThread>;
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
     friend class android::uirenderer::TestUtils;
 
     RenderThread();
     virtual ~RenderThread();
+
+    static bool hasInstance();
+    static RenderThread& getInstance();
 
     void initThreadLocals();
     void initializeDisplayEventReceiver();
@@ -125,6 +127,8 @@ private:
 
     nsecs_t mNextWakeup;
     TaskQueue mQueue;
+    Mutex mSyncMutex;
+    Condition mSyncCondition;
 
     DisplayInfo mDisplayInfo;
 

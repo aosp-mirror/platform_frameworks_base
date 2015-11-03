@@ -28,9 +28,6 @@
 #include <utils/Log.h>
 
 namespace android {
-using namespace uirenderer::renderthread;
-ANDROID_SINGLETON_STATIC_INSTANCE(RenderThread);
-
 namespace uirenderer {
 namespace renderthread {
 
@@ -136,7 +133,22 @@ public:
     }
 };
 
-RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
+static bool gHasRenderThreadInstance = false;
+
+bool RenderThread::hasInstance() {
+    return gHasRenderThreadInstance;
+}
+
+RenderThread& RenderThread::getInstance() {
+    // This is a pointer because otherwise __cxa_finalize
+    // will try to delete it like a Good Citizen but that causes us to crash
+    // because we don't want to delete the RenderThread normally.
+    static RenderThread* sInstance = new RenderThread();
+    gHasRenderThreadInstance = true;
+    return *sInstance;
+}
+
+RenderThread::RenderThread() : Thread(true)
         , mNextWakeup(LLONG_MAX)
         , mDisplayEventReceiver(nullptr)
         , mVsyncRequested(false)
@@ -313,13 +325,10 @@ void RenderThread::queue(RenderTask* task) {
 }
 
 void RenderThread::queueAndWait(RenderTask* task) {
-    Mutex mutex;
-    Condition condition;
-    SignalingRenderTask syncTask(task, &mutex, &condition);
-
-    AutoMutex _lock(mutex);
+    SignalingRenderTask syncTask(task, &mSyncMutex, &mSyncCondition);
+    AutoMutex _lock(mSyncMutex);
     queue(&syncTask);
-    condition.wait(mutex);
+    mSyncCondition.wait(mSyncMutex);
 }
 
 void RenderThread::queueAtFront(RenderTask* task) {

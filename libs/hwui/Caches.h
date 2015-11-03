@@ -43,7 +43,6 @@
 #include <GLES3/gl3.h>
 
 #include <utils/KeyedVector.h>
-#include <utils/Singleton.h>
 
 #include <cutils/compiler.h>
 
