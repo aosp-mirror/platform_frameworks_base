@@ -16,23 +16,24 @@
 #ifndef RENDERNODEPROPERTIES_H
 #define RENDERNODEPROPERTIES_H
 
-#include <algorithm>
-#include <stddef.h>
-#include <vector>
-#include <cutils/compiler.h>
-#include <androidfw/ResourceTypes.h>
-#include <utils/Log.h>
+#include "Caches.h"
+#include "DeviceInfo.h"
+#include "Rect.h"
+#include "RevealClip.h"
+#include "Outline.h"
+#include "utils/MathUtils.h"
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
 #include <SkXfermode.h>
 
-#include "Caches.h"
-#include "Rect.h"
-#include "RevealClip.h"
-#include "Outline.h"
-#include "utils/MathUtils.h"
+#include <algorithm>
+#include <stddef.h>
+#include <vector>
+#include <cutils/compiler.h>
+#include <androidfw/ResourceTypes.h>
+#include <utils/Log.h>
 
 class SkBitmap;
 class SkColorFilter;
@@ -608,10 +609,11 @@ public:
     }
 
     bool promotedToLayer() const {
-        const int maxTextureSize = Caches::getInstance().maxTextureSize;
+        const DeviceInfo* deviceInfo = DeviceInfo::get();
+        LOG_ALWAYS_FATAL_IF(!deviceInfo, "DeviceInfo uninitialized");
         return mLayerProperties.mType == LayerType::None
-                && mPrimitiveFields.mWidth <= maxTextureSize
-                && mPrimitiveFields.mHeight <= maxTextureSize
+                && mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
+                && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize()
                 && (mComputedFields.mNeedLayerForFunctors
                         || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
                                 && mPrimitiveFields.mAlpha < 1

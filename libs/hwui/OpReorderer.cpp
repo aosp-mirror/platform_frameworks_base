@@ -359,7 +359,7 @@ void OpReorderer::onViewportInitialized() {}
 void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
 
 void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
-    if (node.applyViewProperties(mCanvasState)) {
+    if (node.applyViewProperties(mCanvasState, mAllocator)) {
         // not rejected so render
         if (node.getLayer()) {
             // HW layer

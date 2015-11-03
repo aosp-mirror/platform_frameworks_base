@@ -16,6 +16,7 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
 
+#include <DeviceInfo.h>
 #include <Matrix.h>
 #include <Rect.h>
 #include <RenderNode.h>
@@ -90,6 +91,10 @@ public:
     }
 
     static sp<RenderNode> createNode(int left, int top, int right, int bottom, bool onLayer = false) {
+        // if RenderNodes are being sync'd/used, device info will be needed, since
+        // DeviceInfo::maxTextureSize() affects layer property
+        DeviceInfo::initialize();
+
         sp<RenderNode> node = new RenderNode();
         node->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-
-#include "DeviceInfo.h"
+#include <DeviceInfo.h>
 
 #include <gtest/gtest.h>
 
@@ -23,10 +22,9 @@ using namespace android;
 using namespace android::uirenderer;
 
 TEST(DeviceInfo, basic) {
-    const DeviceInfo* di = DeviceInfo::get();
-    EXPECT_EQ(nullptr, di) << "DeviceInfo was already initialized?";
+    // can't assert state before init - another test may have initialized the singleton
     DeviceInfo::initialize();
-    di = DeviceInfo::get();
+    const DeviceInfo* di = DeviceInfo::get();
     ASSERT_NE(nullptr, di) << "DeviceInfo initialization failed";
     EXPECT_EQ(2048, di->maxTextureSize()) << "Max texture size didn't match";
 }
