@@ -36566,6 +36566,18 @@ package android.util {
   public deprecated class FloatMath {
   }
 
+  public abstract class FloatProperty extends android.util.Property {
+    ctor public FloatProperty(java.lang.String);
+    method public final void set(T, java.lang.Float);
+    method public abstract void setValue(T, float);
+  }
+
+  public abstract class IntProperty extends android.util.Property {
+    ctor public IntProperty(java.lang.String);
+    method public final void set(T, java.lang.Integer);
+    method public abstract void setValue(T, int);
+  }
+
   public final class JsonReader implements java.io.Closeable {
     ctor public JsonReader(java.io.Reader);
     method public void beginArray() throws java.io.IOException;
