@@ -74,9 +74,11 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* 
             return false;
         }
 
-        outRef->package = package;
-        outRef->type = *parsedType;
-        outRef->entry = entry;
+        if (outRef != nullptr) {
+            outRef->package = package;
+            outRef->type = *parsedType;
+            outRef->entry = entry;
+        }
         if (outCreate) {
             *outCreate = create;
         }
@@ -86,6 +88,10 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* 
         return true;
     }
     return false;
+}
+
+bool isReference(const StringPiece16& str) {
+    return tryParseReference(str, nullptr, nullptr, nullptr);
 }
 
 bool tryParseAttributeReference(const StringPiece16& str, ResourceNameRef* outRef) {

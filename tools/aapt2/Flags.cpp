@@ -16,6 +16,7 @@
 
 #include "Flags.h"
 #include "util/StringPiece.h"
+#include "util/Util.h"
 
 #include <iomanip>
 #include <iostream>
@@ -94,7 +95,14 @@ void Flags::usage(const StringPiece& command, std::ostream* out) {
         if (flag.numArgs > 0) {
             argLine += " arg";
         }
-        *out << " " << std::setw(30) << std::left << argLine << flag.description << "\n";
+
+        // Split the description by newlines and write out the argument (which is empty after
+        // the first line) followed by the description line. This will make sure that multiline
+        // descriptions are still right justified and aligned.
+        for (StringPiece line : util::tokenize<char>(flag.description, '\n')) {
+            *out << " " << std::setw(30) << std::left << argLine << line << "\n";
+            argLine = " ";
+        }
     }
     *out << " " << std::setw(30) << std::left << "-h" << "Displays this help menu\n";
     out->flush();

@@ -32,6 +32,7 @@ sources := \
 	flatten/TableFlattener.cpp \
 	flatten/XmlFlattener.cpp \
 	link/AutoVersioner.cpp \
+	link/ManifestFixer.cpp \
 	link/PrivateAttributeMover.cpp \
 	link/ReferenceLinker.cpp \
 	link/TableMerger.cpp \
@@ -67,6 +68,7 @@ testSources := \
 	flatten/TableFlattener_test.cpp \
 	flatten/XmlFlattener_test.cpp \
 	link/AutoVersioner_test.cpp \
+	link/ManifestFixer_test.cpp \
 	link/PrivateAttributeMover_test.cpp \
 	link/ReferenceLinker_test.cpp \
 	link/TableMerger_test.cpp \
@@ -113,7 +115,7 @@ else
 endif
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
-cppFlags := -std=c++11 -Wno-missing-field-initializers -fno-exceptions
+cppFlags := -std=c++11 -Wno-missing-field-initializers -fno-exceptions -fno-rtti
 
 # ==========================================================
 # Build the host static library: libaapt2

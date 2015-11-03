@@ -25,8 +25,6 @@
 namespace aapt {
 namespace proguard {
 
-constexpr const char16_t* kSchemaAndroid = u"http://schemas.android.com/apk/res/android";
-
 class BaseVisitor : public xml::Visitor {
 public:
     BaseVisitor(const Source& source, KeepSet* keepSet) : mSource(source), mKeepSet(keepSet) {
@@ -83,7 +81,7 @@ struct LayoutVisitor : public BaseVisitor {
         bool checkName = false;
         if (node->namespaceUri.empty()) {
             checkClass = node->name == u"view" || node->name == u"fragment";
-        } else if (node->namespaceUri == kSchemaAndroid) {
+        } else if (node->namespaceUri == xml::kSchemaAndroid) {
             checkName = node->name == u"fragment";
         }
 
@@ -91,10 +89,10 @@ struct LayoutVisitor : public BaseVisitor {
             if (checkClass && attr.namespaceUri.empty() && attr.name == u"class" &&
                     util::isJavaClassName(attr.value)) {
                 addClass(node->lineNumber, attr.value);
-            } else if (checkName && attr.namespaceUri == kSchemaAndroid && attr.name == u"name" &&
-                    util::isJavaClassName(attr.value)) {
+            } else if (checkName && attr.namespaceUri == xml::kSchemaAndroid &&
+                    attr.name == u"name" && util::isJavaClassName(attr.value)) {
                 addClass(node->lineNumber, attr.value);
-            } else if (attr.namespaceUri == kSchemaAndroid && attr.name == u"onClick") {
+            } else if (attr.namespaceUri == xml::kSchemaAndroid && attr.name == u"onClick") {
                 addMethod(node->lineNumber, attr.value);
             }
         }
@@ -114,7 +112,7 @@ struct XmlResourceVisitor : public BaseVisitor {
         }
 
         if (checkFragment) {
-            xml::Attribute* attr = node->findAttribute(kSchemaAndroid, u"fragment");
+            xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"fragment");
             if (attr && util::isJavaClassName(attr->value)) {
                 addClass(node->lineNumber, attr->value);
             }
@@ -156,7 +154,7 @@ struct ManifestVisitor : public BaseVisitor {
                 }
             } else if (node->name == u"application") {
                 getName = true;
-                xml::Attribute* attr = node->findAttribute(kSchemaAndroid, u"backupAgent");
+                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"backupAgent");
                 if (attr) {
                     Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
                                                                                     attr->value);
@@ -171,7 +169,7 @@ struct ManifestVisitor : public BaseVisitor {
             }
 
             if (getName) {
-                xml::Attribute* attr = node->findAttribute(kSchemaAndroid, u"name");
+                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"name");
                 if (attr) {
                     Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
                                                                                     attr->value);

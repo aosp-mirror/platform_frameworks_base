@@ -28,6 +28,7 @@
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
 #include "link/Linkers.h"
+#include "link/ManifestFixer.h"
 #include "link/TableMerger.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -54,6 +55,8 @@ struct LinkOptions {
     bool verbose = false;
     bool outputToDirectory = false;
     Maybe<std::u16string> privateSymbols;
+    Maybe<std::u16string> minSdkVersionDefault;
+    Maybe<std::u16string> targetSdkVersionDefault;
 };
 
 struct LinkContext : public IAaptContext {
@@ -240,15 +243,8 @@ struct LinkCommand {
     }
 
     Maybe<AppInfo> extractAppInfoFromManifest(XmlResource* xmlRes) {
-        xml::Node* node = xmlRes->root.get();
-
-        // Find the first xml::Element.
-        while (node && !xml::nodeCast<xml::Element>(node)) {
-            node = !node->children.empty() ? node->children.front().get() : nullptr;
-        }
-
         // Make sure the first element is <manifest> with package attribute.
-        if (xml::Element* manifestEl = xml::nodeCast<xml::Element>(node)) {
+        if (xml::Element* manifestEl = xml::findRootElement(xmlRes->root.get())) {
             if (manifestEl->namespaceUri.empty() && manifestEl->name == u"manifest") {
                 if (xml::Attribute* packageAttr = manifestEl->findAttribute({}, u"package")) {
                     return AppInfo{ packageAttr->value };
@@ -570,9 +566,16 @@ struct LinkCommand {
         }
 
         {
+            ManifestFixerOptions manifestFixerOptions;
+            manifestFixerOptions.minSdkVersionDefault = mOptions.minSdkVersionDefault;
+            manifestFixerOptions.targetSdkVersionDefault = mOptions.targetSdkVersionDefault;
+            ManifestFixer manifestFixer(manifestFixerOptions);
+            if (!manifestFixer.consume(&mContext, manifestXml.get())) {
+                error = true;
+            }
+
             XmlReferenceLinker manifestLinker;
             if (manifestLinker.consume(&mContext, manifestXml.get())) {
-
                 if (!proguard::collectProguardRulesForManifest(Source(mOptions.manifestPath),
                                                                manifestXml.get(),
                                                                &proguardKeepSet)) {
@@ -742,6 +745,7 @@ struct LinkCommand {
 int link(const std::vector<StringPiece>& args) {
     LinkOptions options;
     Maybe<std::string> privateSymbolsPackage;
+    Maybe<std::string> minSdkVersion, targetSdkVersion;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
@@ -757,10 +761,15 @@ int link(const std::vector<StringPiece>& args) {
             .optionalSwitch("--output-to-dir", "Outputs the APK contents to a directory specified "
                             "by -o",
                             &options.outputToDirectory)
+            .optionalFlag("--min-sdk-version", "Default minimum SDK version to use for "
+                          "AndroidManifest.xml", &minSdkVersion)
+            .optionalFlag("--target-sdk-version", "Default target SDK version to use for "
+                          "AndroidManifest.xml", &targetSdkVersion)
             .optionalSwitch("--static-lib", "Generate a static Android library", &options.staticLib)
             .optionalFlag("--private-symbols", "Package name to use when generating R.java for "
-                          "private symbols. If not specified, public and private symbols will "
-                          "use the application's package name", &privateSymbolsPackage)
+                          "private symbols.\n"
+                          "If not specified, public and private symbols will use the application's "
+                          "package name", &privateSymbolsPackage)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
@@ -769,6 +778,14 @@ int link(const std::vector<StringPiece>& args) {
 
     if (privateSymbolsPackage) {
         options.privateSymbols = util::utf8ToUtf16(privateSymbolsPackage.value());
+    }
+
+    if (minSdkVersion) {
+        options.minSdkVersionDefault = util::utf8ToUtf16(minSdkVersion.value());
+    }
+
+    if (targetSdkVersion) {
+        options.targetSdkVersionDefault = util::utf8ToUtf16(targetSdkVersion.value());
     }
 
     LinkCommand cmd = { options };
