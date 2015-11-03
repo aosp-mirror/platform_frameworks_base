@@ -33,12 +33,16 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class ActivityInfo extends ComponentInfo
         implements Parcelable {
+
+     // NOTE: When adding new data members be sure to update the copy-constructor, Parcel
+     // constructor, and writeToParcel.
+
     /**
      * A style resource identifier (in the package's resources) of this
      * activity's theme.  From the "theme" attribute or, if not set, 0.
      */
     public int theme;
-    
+
     /**
      * Constant corresponding to <code>standard</code> in
      * the {@link android.R.attr#launchMode} attribute.
@@ -705,6 +709,7 @@ public class ActivityInfo extends ComponentInfo
         super(orig);
         theme = orig.theme;
         launchMode = orig.launchMode;
+        documentLaunchMode = orig.documentLaunchMode;
         permission = orig.permission;
         taskAffinity = orig.taskAffinity;
         targetActivity = orig.targetActivity;
@@ -780,6 +785,7 @@ public class ActivityInfo extends ComponentInfo
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(theme);
         dest.writeInt(launchMode);
+        dest.writeInt(documentLaunchMode);
         dest.writeString(permission);
         dest.writeString(taskAffinity);
         dest.writeString(targetActivity);
@@ -809,6 +815,7 @@ public class ActivityInfo extends ComponentInfo
         super(source);
         theme = source.readInt();
         launchMode = source.readInt();
+        documentLaunchMode = source.readInt();
         permission = source.readString();
         taskAffinity = source.readString();
         targetActivity = source.readString();

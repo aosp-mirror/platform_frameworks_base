@@ -2415,8 +2415,13 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mCryptConnector.execute("cryptfs", "enablecrypto", "inplace", CRYPTO_TYPES[type],
-                               new SensitiveArg(password));
+            if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
+                mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
+                                CRYPTO_TYPES[type]);
+            } else {
+                mCryptConnector.execute("cryptfs", "enablecrypto", "inplace",
+                                CRYPTO_TYPES[type], new SensitiveArg(password));
+            }
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();

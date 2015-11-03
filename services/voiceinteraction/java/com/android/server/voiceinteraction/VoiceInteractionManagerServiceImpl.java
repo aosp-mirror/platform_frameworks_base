@@ -36,6 +36,7 @@ import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
@@ -114,9 +115,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mAm = ActivityManagerNative.getDefault();
         VoiceInteractionServiceInfo info;
         try {
-            info = new VoiceInteractionServiceInfo(context.getPackageManager(), service);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Voice interaction service not found: " + service);
+            info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
+        } catch (RemoteException|PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Voice interaction service not found: " + service, e);
             mInfo = null;
             mSessionComponentName = null;
             mIWindowManager = null;
@@ -260,9 +261,18 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             }
             return;
         }
+        pw.print("  mUser="); pw.println(mUser);
         pw.print("  mComponent="); pw.println(mComponent.flattenToShortString());
         pw.print("  Session service="); pw.println(mInfo.getSessionService());
+        pw.println("  Service info:");
+        mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), "    ");
+        pw.println("  Application info:");
+        mInfo.getServiceInfo().applicationInfo.dump(new PrintWriterPrinter(pw), "    ");
+        pw.print("  Recognition service="); pw.println(mInfo.getRecognitionService());
         pw.print("  Settings activity="); pw.println(mInfo.getSettingsActivity());
+        pw.print("  Supports assist="); pw.println(mInfo.getSupportsAssist());
+        pw.print("  Supports launch from keyguard=");
+        pw.println(mInfo.getSupportsLaunchFromKeyguard());
         if (mDisabledShowContext != 0) {
             pw.print("  mDisabledShowContext=");
             pw.println(Integer.toHexString(mDisabledShowContext));

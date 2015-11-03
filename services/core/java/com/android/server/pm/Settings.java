@@ -517,7 +517,18 @@ final class Settings {
         ArrayList<String> removeStage = new ArrayList<String>();
         for (Map.Entry<String,SharedUserSetting> entry : mSharedUsers.entrySet()) {
             final SharedUserSetting sus = entry.getValue();
-            if (sus == null || sus.packages.size() == 0) {
+            if (sus == null) {
+                removeStage.add(entry.getKey());
+                continue;
+            }
+            // remove packages that are no longer installed
+            for (Iterator<PackageSetting> iter = sus.packages.iterator(); iter.hasNext();) {
+                PackageSetting ps = iter.next();
+                if (mPackages.get(ps.name) == null) {
+                    iter.remove();
+                }
+            }
+            if (sus.packages.size() == 0) {
                 removeStage.add(entry.getKey());
             }
         }

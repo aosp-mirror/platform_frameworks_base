@@ -73,7 +73,7 @@ import com.android.server.job.controllers.TimeController;
  */
 public class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
-    static final boolean DEBUG = false;
+    public static final boolean DEBUG = false;
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT
             = ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
@@ -99,7 +99,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
      * things early.
      */
-    static final int MIN_CONNECTIVITY_COUNT = 2;
+    static final int MIN_CONNECTIVITY_COUNT = 1;  // Run connectivity jobs as soon as ready.
     /**
      * Minimum # of jobs (with no particular constraints) for which the JMS will be happy running
      * some work early.
@@ -443,13 +443,16 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * A job is rescheduled with exponential back-off if the client requests this from their
-     * execution logic.
-     * A caveat is for idle-mode jobs, for which the idle-mode constraint will usurp the
-     * timeliness of the reschedule. For an idle-mode job, no deadline is given.
+     * Reschedules the given job based on the job's backoff policy. It doesn't make sense to
+     * specify an override deadline on a failed job (the failed job will run even though it's not
+     * ready), so we reschedule it with {@link JobStatus#NO_LATEST_RUNTIME}, but specify that any
+     * ready job with {@link JobStatus#numFailures} > 0 will be executed.
+     *
      * @param failureToReschedule Provided job status that we will reschedule.
      * @return A newly instantiated JobStatus with the same constraints as the last job except
      * with adjusted timing constraints.
+     *
+     * @see JobHandler#maybeQueueReadyJobsForExecutionLockedH
      */
     private JobStatus getRescheduleJobForFailure(JobStatus failureToReschedule) {
         final long elapsedNowMillis = SystemClock.elapsedRealtime();
@@ -479,8 +482,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * Called after a periodic has executed so we can to re-add it. We take the last execution time
-     * of the job to be the time of completion (i.e. the time at which this function is called).
+     * Called after a periodic has executed so we can reschedule it. We take the last execution
+     * time of the job to be the time of completion (i.e. the time at which this function is
+     * called).
      * This could be inaccurate b/c the job can run for as long as
      * {@link com.android.server.job.JobServiceContext#EXECUTING_TIMESLICE_MILLIS}, but will lead
      * to underscheduling at least, rather than if we had taken the last execution time to be the
@@ -491,7 +495,12 @@ public class JobSchedulerService extends com.android.server.SystemService
     private JobStatus getRescheduleJobForPeriodic(JobStatus periodicToReschedule) {
         final long elapsedNow = SystemClock.elapsedRealtime();
         // Compute how much of the period is remaining.
-        long runEarly = Math.max(periodicToReschedule.getLatestRunTimeElapsed() - elapsedNow, 0);
+        long runEarly = 0L;
+
+        // If this periodic was rescheduled it won't have a deadline.
+        if (periodicToReschedule.hasDeadlineConstraint()) {
+            runEarly = Math.max(periodicToReschedule.getLatestRunTimeElapsed() - elapsedNow, 0L);
+        }
         long newEarliestRunTimeElapsed = elapsedNow + runEarly;
         long period = periodicToReschedule.getJob().getIntervalMillis();
         long newLatestRuntimeElapsed = newEarliestRunTimeElapsed + period;

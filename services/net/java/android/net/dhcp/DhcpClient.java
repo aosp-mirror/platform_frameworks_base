@@ -299,6 +299,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_REUSEADDR, 1);
             Os.setsockoptIfreq(mUdpSock, SOL_SOCKET, SO_BINDTODEVICE, mIfaceName);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_BROADCAST, 1);
+            Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_RCVBUF, 0);
             Os.bind(mUdpSock, Inet4Address.ANY, DhcpPacket.DHCP_CLIENT);
             NetworkUtils.protectFromVpn(mUdpSock);
         } catch(SocketException|ErrnoException e) {
@@ -306,6 +307,16 @@ public class DhcpClient extends BaseDhcpStateMachine {
             return false;
         }
         return true;
+    }
+
+    private boolean connectUdpSock(Inet4Address to) {
+        try {
+            Os.connect(mUdpSock, to, DhcpPacket.DHCP_SERVER);
+            return true;
+        } catch (SocketException|ErrnoException e) {
+            Log.e(TAG, "Error connecting UDP socket", e);
+            return false;
+        }
     }
 
     private static void closeQuietly(FileDescriptor fd) {
@@ -325,7 +336,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         try {
             mNMService.setInterfaceConfig(mIfaceName, ifcg);
         } catch (RemoteException|IllegalStateException e) {
-            Log.e(TAG, "Error configuring IP address : " + e);
+            Log.e(TAG, "Error configuring IP address " + address + ": ", e);
             return false;
         }
         return true;
@@ -345,20 +356,21 @@ public class DhcpClient extends BaseDhcpStateMachine {
         public void run() {
             maybeLog("Receive thread started");
             while (!stopped) {
+                int length = 0;  // Or compiler can't tell it's initialized if a parse error occurs.
                 try {
-                    int length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
+                    length = Os.read(mPacketSock, mPacket, 0, mPacket.length);
                     DhcpPacket packet = null;
                     packet = DhcpPacket.decodeFullPacket(mPacket, length, DhcpPacket.ENCAP_L2);
-                    if (packet != null) {
-                        maybeLog("Received packet: " + packet);
-                        sendMessage(CMD_RECEIVED_PACKET, packet);
-                    } else if (PACKET_DBG) {
-                        Log.d(TAG,
-                                "Can't parse packet" + HexDump.dumpHexString(mPacket, 0, length));
-                    }
+                    maybeLog("Received packet: " + packet);
+                    sendMessage(CMD_RECEIVED_PACKET, packet);
                 } catch (IOException|ErrnoException e) {
                     if (!stopped) {
                         Log.e(TAG, "Read error", e);
+                    }
+                } catch (DhcpPacket.ParseException e) {
+                    Log.e(TAG, "Can't parse packet: " + e.getMessage());
+                    if (PACKET_DBG) {
+                        Log.d(TAG, HexDump.dumpHexString(mPacket, 0, length));
                     }
                 }
             }
@@ -376,8 +388,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 maybeLog("Broadcasting " + description);
                 Os.sendto(mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
             } else {
-                maybeLog("Unicasting " + description + " to " + to.getHostAddress());
-                Os.sendto(mUdpSock, buf, 0, to, DhcpPacket.DHCP_SERVER);
+                // It's safe to call getpeername here, because we only send unicast packets if we
+                // have an IP address, and we connect the UDP socket in DhcpHaveAddressState#enter.
+                maybeLog("Unicasting " + description + " to " + Os.getpeername(mUdpSock));
+                Os.write(mUdpSock, buf);
             }
         } catch(ErrnoException|IOException e) {
             Log.e(TAG, "Can't send packet: ", e);
@@ -403,9 +417,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 encap, mTransactionId, getSecs(), clientAddress,
                 DO_UNICAST, mHwAddr, requestedAddress,
                 serverAddress, REQUESTED_PARAMS, null);
+        String serverStr = (serverAddress != null) ? serverAddress.getHostAddress() : null;
         String description = "DHCPREQUEST ciaddr=" + clientAddress.getHostAddress() +
                              " request=" + requestedAddress.getHostAddress() +
-                             " to=" + serverAddress.getHostAddress();
+                             " serverid=" + serverStr;
         return transmitPacket(packet, description, to);
     }
 
@@ -789,6 +804,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
                     transitionTo(mDhcpBoundState);
                 }
             } else if (packet instanceof DhcpNakPacket) {
+                // TODO: Wait a while before returning into INIT state.
                 Log.d(TAG, "Received NAK, returning to INIT");
                 mOffer = null;
                 transitionTo(mDhcpInitState);
@@ -806,10 +822,9 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
-            if (setIpAddress(mDhcpLease.ipAddress)) {
-                maybeLog("Configured IP address " + mDhcpLease.ipAddress);
-            } else {
-                Log.e(TAG, "Failed to configure IP address " + mDhcpLease.ipAddress);
+            if (!setIpAddress(mDhcpLease.ipAddress) ||
+                    (mDhcpLease.serverAddress != null &&
+                            !connectUdpSock((mDhcpLease.serverAddress)))) {
                 notifyFailure();
                 // There's likely no point in going into DhcpInitState here, we'll probably just
                 // repeat the transaction, get the same IP address as before, and fail.
@@ -865,11 +880,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
 
         protected boolean sendPacket() {
+            // Not specifying a SERVER_IDENTIFIER option is a violation of RFC 2131, but...
+            // http://b/25343517 . Try to make things work anyway by using broadcast renews.
+            Inet4Address to = (mDhcpLease.serverAddress != null) ?
+                    mDhcpLease.serverAddress : INADDR_BROADCAST;
             return sendRequestPacket(
                     (Inet4Address) mDhcpLease.ipAddress.getAddress(),  // ciaddr
                     INADDR_ANY,                                        // DHCP_REQUESTED_IP
-                    INADDR_ANY,                                        // DHCP_SERVER_IDENTIFIER
-                    (Inet4Address) mDhcpLease.serverAddress);          // packet destination address
+                    null,                                              // DHCP_SERVER_IDENTIFIER
+                    to);                                               // packet destination address
         }
 
         protected void receivePacket(DhcpPacket packet) {

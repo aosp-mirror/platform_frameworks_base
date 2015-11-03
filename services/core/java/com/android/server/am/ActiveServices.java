@@ -1314,6 +1314,15 @@ public final class ActiveServices {
         if (!mRestartingServices.contains(r)) {
             return;
         }
+        if (!isServiceNeeded(r, false, false)) {
+            // Paranoia: is this service actually needed?  In theory a service that is not
+            // needed should never remain on the restart list.  In practice...  well, there
+            // have been bugs where this happens, and bad things happen because the process
+            // ends up just being cached, so quickly killed, then restarted again and again.
+            // Let's not let that happen.
+            Slog.wtf(TAG, "Restarting service that is not needed: " + r);
+            return;
+        }
         try {
             bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
         } catch (TransactionTooLargeException e) {
@@ -2043,6 +2052,13 @@ public final class ActiveServices {
                             mAm.mProcessStats);
                     realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;
+                    if (!isServiceNeeded(sr, false, false)) {
+                        // We were waiting for this service to start, but it is actually no
+                        // longer needed.  This could happen because bringDownServiceIfNeeded
+                        // won't bring down a service that is pending...  so now the pending
+                        // is done, so let's drop it.
+                        bringDownServiceLocked(sr);
+                    }
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception in new application when starting service "
@@ -2055,7 +2071,7 @@ public final class ActiveServices {
         // be weird to bring up the process but arbitrarily not let the services
         // run at this point just because their restart time hasn't come up.
         if (mRestartingServices.size() > 0) {
-            ServiceRecord sr = null;
+            ServiceRecord sr;
             for (int i=0; i<mRestartingServices.size(); i++) {
                 sr = mRestartingServices.get(i);
                 if (proc != sr.isolatedProc && (proc.uid != sr.appInfo.uid

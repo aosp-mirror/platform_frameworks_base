@@ -169,7 +169,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      */
     public void showNotification(NotificationData.Entry headsUp) {
         if (DEBUG) Log.v(TAG, "showNotification");
-        MetricsLogger.count(mContext, "note_peek", 1);
         addHeadsUpEntry(headsUp);
         updateNotification(headsUp, true);
         headsUp.setInterruption();
@@ -246,6 +245,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             return;
         }
         mHasPinnedNotification = hasPinnedNotification;
+        if (mHasPinnedNotification) {
+            MetricsLogger.count(mContext, "note_peek", 1);
+        }
         updateTouchableRegionListener();
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
@@ -580,6 +582,13 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
         @Override
         public int compareTo(HeadsUpEntry o) {
+            boolean selfFullscreen = hasFullScreenIntent(entry);
+            boolean otherFullscreen = hasFullScreenIntent(o.entry);
+            if (selfFullscreen && !otherFullscreen) {
+                return -1;
+            } else if (!selfFullscreen && otherFullscreen) {
+                return 1;
+            }
             return postTime < o.postTime ? 1
                     : postTime == o.postTime ? entry.key.compareTo(o.entry.key)
                             : -1;

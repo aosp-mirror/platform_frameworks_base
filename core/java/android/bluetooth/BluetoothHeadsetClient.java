@@ -1059,6 +1059,41 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     }
 
     /**
+     * Sets whether audio routing is allowed.
+     *
+     * Note: This is an internal function and shouldn't be exposed
+     */
+    public void setAudioRouteAllowed(boolean allowed) {
+        if (VDBG) log("setAudioRouteAllowed");
+        if (mService != null && isEnabled()) {
+            try {
+                mService.setAudioRouteAllowed(allowed);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+    }
+
+    /**
+     * Returns whether audio routing is allowed.
+     *
+     * Note: This is an internal function and shouldn't be exposed
+     */
+    public boolean getAudioRouteAllowed() {
+        if (VDBG) log("getAudioRouteAllowed");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.getAudioRouteAllowed();
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
      * Initiates a connection of audio channel.
      *
      * It setup SCO channel with remote connected Handsfree AG device.

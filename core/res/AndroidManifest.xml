@@ -1469,7 +1469,7 @@
     <permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
         android:label="@string/permlab_systemAlertWindow"
         android:description="@string/permdesc_systemAlertWindow"
-        android:protectionLevel="signature|preinstalled|appop|pre23" />
+        android:protectionLevel="signature|preinstalled|appop|pre23|development" />
 
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
@@ -1707,12 +1707,12 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows applications to change network connectivity state.
-         <p>Protection level: signature
+         <p>Protection level: normal
     -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:description="@string/permdesc_changeNetworkState"
         android:label="@string/permlab_changeNetworkState"
-        android:protectionLevel="signature|preinstalled|appop|pre23" />
+        android:protectionLevel="normal" />
 
     <!-- Allows an application to clear the caches of all installed
          applications on the device.
@@ -2067,10 +2067,11 @@
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to monitor changes in tablet mode.
+    <!-- Allows an application to query tablet mode state and monitor changes
+         in it.
          <p>Not for use by third-party applications.
          @hide -->
-    <permission android:name="android.permission.TABLET_MODE_LISTENER"
+    <permission android:name="android.permission.TABLET_MODE"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to request installing packages. Apps

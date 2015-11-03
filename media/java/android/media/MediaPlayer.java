@@ -479,11 +479,6 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setPlaybackRate</p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
  * <tr><td>setPlaybackParams</p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
@@ -2243,10 +2238,14 @@ public class MediaPlayer implements SubtitleController.Listener
         final InputStream fIs = is;
         final MediaFormat fFormat = format;
 
-        // Ensure all input streams are closed.  It is also a handy
-        // way to implement timeouts in the future.
-        synchronized(mOpenSubtitleSources) {
-            mOpenSubtitleSources.add(is);
+        if (is != null) {
+            // Ensure all input streams are closed.  It is also a handy
+            // way to implement timeouts in the future.
+            synchronized(mOpenSubtitleSources) {
+                mOpenSubtitleSources.add(is);
+            }
+        } else {
+            Log.w(TAG, "addSubtitleSource called with null InputStream");
         }
 
         // process each subtitle in its own thread

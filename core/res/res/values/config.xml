@@ -938,6 +938,9 @@
     <!-- Is the device capable of hot swapping an UICC Card -->
     <bool name="config_hotswapCapable">false</bool>
 
+    <!-- Component name of the ICC hotswap prompt for restart dialog -->
+    <string name="config_iccHotswapPromptForRestartDialogComponent" translateable="false">@null</string>
+
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
     <bool name="config_enable_puk_unlock_screen">true</bool>
@@ -1246,6 +1249,9 @@
     <!-- Operating volatage for bluetooth controller. 0 by default-->
     <integer translatable="false" name="config_bluetooth_operating_voltage_mv">4</integer>
 
+    <!-- Whether supported profiles should be reloaded upon enabling bluetooth -->
+    <bool name="config_bluetooth_reload_supported_profiles_when_enabled">false</bool>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
@@ -1281,6 +1287,10 @@
          available on *any* device with a telephony radio, even if the
          device is data-only. -->
     <bool name="config_voice_capable">true</bool>
+
+    <!-- Flag indicating that an outbound call must have a call capable phone account
+         that has declared it can process the call's handle. -->
+    <bool name="config_requireCallCapableAccountForHandle">false</bool>
 
     <!-- Flag indicating if the user is notified when the mobile network access is restricted -->
     <bool name="config_user_notification_of_restrictied_mobile_access">true</bool>
@@ -2348,4 +2358,8 @@
     <!-- Name of the component to handle network policy notifications. If present,
          disables NetworkPolicyManagerService's presentation of data-usage notifications. -->
     <string translatable="false" name="config_networkPolicyNotificationComponent"></string>
+
+    <!-- The BT name of the keyboard packaged with the device. If this is defined, SystemUI will
+         automatically try to pair with it when the device exits tablet mode. -->
+    <string translatable="false" name="config_packagedKeyboardName"></string>
 </resources>

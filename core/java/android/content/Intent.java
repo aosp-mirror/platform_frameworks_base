@@ -3159,6 +3159,13 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_HOME = "android.intent.category.HOME";
     /**
+     * This is the home activity that is displayed when the device is finished setting up and ready
+     * for use.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_HOME_MAIN = "android.intent.category.HOME_MAIN";
+    /**
      * This is the setup wizard activity, that is the first activity that is displayed
      * when the user sets up the device for the first time.
      * @hide

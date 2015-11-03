@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.View.OnAttachStateChangeListener;
 import android.widget.AbsListView;
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
@@ -102,6 +103,8 @@ public class ResolverActivity extends Activity {
     private final ArrayList<Intent> mIntents = new ArrayList<>();
     private ResolverComparator mResolverComparator;
     private PickTargetOptionRequest mPickOptionRequest;
+
+    protected ResolverDrawerLayout mResolverDrawerLayout;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -253,6 +256,7 @@ public class ResolverActivity extends Activity {
             if (isVoiceInteraction()) {
                 rdl.setCollapsed(false);
             }
+            mResolverDrawerLayout = rdl;
         }
 
         if (title == null) {
@@ -328,6 +332,18 @@ public class ResolverActivity extends Activity {
         if (isVoiceInteraction()) {
             onSetupVoiceInteraction();
         }
+
+        getWindow().getDecorView().addOnAttachStateChangeListener(
+                new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                v.getViewRootImpl().setDrawDuringWindowsAnimating(true);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+            }
+        });
     }
 
     /**
@@ -1570,7 +1586,10 @@ public class ResolverActivity extends Activity {
 
         private void onBindView(View view, TargetInfo info) {
             final ViewHolder holder = (ViewHolder) view.getTag();
-            holder.text.setText(info.getDisplayLabel());
+            final CharSequence label = info.getDisplayLabel();
+            if (!TextUtils.equals(holder.text.getText(), label)) {
+                holder.text.setText(info.getDisplayLabel());
+            }
             if (showsExtendedInfo(info)) {
                 holder.text2.setVisibility(View.VISIBLE);
                 holder.text2.setText(info.getExtendedInfo());

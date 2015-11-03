@@ -178,7 +178,7 @@ class AlarmManagerService extends SystemService {
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_SHORT_TIME = DEFAULT_MIN_FUTURITY;
-        private static final long DEFAULT_ALLOW_WHILE_IDLE_LONG_TIME = 15*60*1000;
+        private static final long DEFAULT_ALLOW_WHILE_IDLE_LONG_TIME = 9*60*1000;
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WHITELIST_DURATION = 10*1000;
 
         // Minimum futurity of a new alarm
@@ -971,8 +971,8 @@ class AlarmManagerService extends SystemService {
             // This is a special alarm that will put the system into idle until it goes off.
             // The caller has given the time they want this to happen at, however we need
             // to pull that earlier if there are existing alarms that have requested to
-            // bring us out of idle.
-            if (mNextWakeFromIdle != null) {
+            // bring us out of idle at an earlier time.
+            if (mNextWakeFromIdle != null && a.whenElapsed > mNextWakeFromIdle.whenElapsed) {
                 a.when = a.whenElapsed = a.maxWhenElapsed = mNextWakeFromIdle.whenElapsed;
             }
             // Add fuzz to make the alarm go off some time before the actual desired time.
@@ -1256,7 +1256,7 @@ class AlarmManagerService extends SystemService {
                 pw.print("      Idling until: ");
                 if (mPendingIdleUntil != null) {
                     pw.println(mPendingIdleUntil);
-                    mPendingIdleUntil.dump(pw, "    ", nowRTC, nowELAPSED, sdf);
+                    mPendingIdleUntil.dump(pw, "        ", nowRTC, nowELAPSED, sdf);
                 } else {
                     pw.println("null");
                 }

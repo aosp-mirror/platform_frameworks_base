@@ -1714,13 +1714,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        PermissionsState permissionsState = sb.getPermissionsState();
-
-        for (String permission : pkg.requestedPermissions) {
-            BasePermission bp = mSettings.mPermissions.get(permission);
-            if (bp != null && bp.isRuntime() && (grantedPermissions == null
-                    || ArrayUtils.contains(grantedPermissions, permission))) {
-                permissionsState.grantRuntimePermission(bp, userId);
+        synchronized (mPackages) {
+            for (String permission : pkg.requestedPermissions) {
+                BasePermission bp = mSettings.mPermissions.get(permission);
+                if (bp != null && (bp.isRuntime() || bp.isDevelopment())
+                        && (grantedPermissions == null
+                               || ArrayUtils.contains(grantedPermissions, permission))) {
+                    grantRuntimePermission(pkg.packageName, permission, userId);
+                }
             }
         }
     }
@@ -2285,7 +2286,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + mSdkVersion + "; regranting permissions for internal storage");
                 updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
             }
-            updatePermissionsLPw(null, null, updateFlags);
+            updatePermissionsLPw(null, null, StorageManager.UUID_PRIVATE_INTERNAL, updateFlags);
             ver.sdkVersion = mSdkVersion;
 
             // If this is the first boot or an update from pre-M, and it is a normal
@@ -3522,7 +3523,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             killUid(appId, userId, KILL_APP_REASON_GIDS_CHANGED);
                         }
                     });
-                } break;
+                }
+                break;
             }
 
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
@@ -4775,18 +4777,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             // First try to add the "always" resolution(s) for the current user, if any
             if (alwaysList.size() > 0) {
                 result.addAll(alwaysList);
-            // if there is an "always" for the parent user, add it.
-            } else if (xpDomainInfo != null && xpDomainInfo.bestDomainVerificationStatus
-                    == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-                result.add(xpDomainInfo.resolveInfo);
             } else {
                 // Add all undefined apps as we want them to appear in the disambiguation dialog.
                 result.addAll(undefinedList);
+                // Maybe add one for the other profile.
                 if (xpDomainInfo != null && (
                         xpDomainInfo.bestDomainVerificationStatus
-                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
-                        || xpDomainInfo.bestDomainVerificationStatus
-                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK)) {
+                        != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER)) {
                     result.add(xpDomainInfo.resolveInfo);
                 }
                 includeBrowser = true;
@@ -7554,8 +7551,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // We would never need to extract libs for forward-locked and external packages,
         // since the container service will do it for us. We shouldn't attempt to
         // extract libs from system app when it was not updated.
-        if (pkg.isForwardLocked() || isExternal(pkg) ||
-            (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) ) {
+        if (pkg.isForwardLocked() || pkg.applicationInfo.isExternalAsec() ||
+                (isSystemApp(pkg) && !pkg.isUpdatedSystemApp())) {
             extractLibs = false;
         }
 
@@ -7832,7 +7829,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String codePath = pkg.codePath;
         final File codeFile = new File(codePath);
         final boolean bundledApp = info.isSystemApp() && !info.isUpdatedSystemApp();
-        final boolean asecApp = info.isForwardLocked() || isExternal(info);
+        final boolean asecApp = info.isForwardLocked() || info.isExternalAsec();
 
         info.nativeLibraryRootDir = null;
         info.nativeLibraryRootRequiresIsa = false;
@@ -8230,8 +8227,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int UPDATE_PERMISSIONS_REPLACE_PKG = 1<<1;
     static final int UPDATE_PERMISSIONS_REPLACE_ALL = 1<<2;
 
+    private void updatePermissionsLPw(String changingPkg, PackageParser.Package pkgInfo,
+            int flags) {
+        final String volumeUuid = (pkgInfo != null) ? getVolumeUuidForPackage(pkgInfo) : null;
+        updatePermissionsLPw(changingPkg, pkgInfo, volumeUuid, flags);
+    }
+
     private void updatePermissionsLPw(String changingPkg,
-            PackageParser.Package pkgInfo, int flags) {
+            PackageParser.Package pkgInfo, String replaceVolumeUuid, int flags) {
         // Make sure there are no dangling permission trees.
         Iterator<BasePermission> it = mSettings.mPermissionTrees.values().iterator();
         while (it.hasNext()) {
@@ -8300,14 +8303,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         if ((flags&UPDATE_PERMISSIONS_ALL) != 0) {
             for (PackageParser.Package pkg : mPackages.values()) {
                 if (pkg != pkgInfo) {
-                    grantPermissionsLPw(pkg, (flags&UPDATE_PERMISSIONS_REPLACE_ALL) != 0,
-                            changingPkg);
+                    // Only replace for packages on requested volume
+                    final String volumeUuid = getVolumeUuidForPackage(pkg);
+                    final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_ALL) != 0)
+                            && Objects.equals(replaceVolumeUuid, volumeUuid);
+                    grantPermissionsLPw(pkg, replace, changingPkg);
                 }
             }
         }
 
         if (pkgInfo != null) {
-            grantPermissionsLPw(pkgInfo, (flags&UPDATE_PERMISSIONS_REPLACE_PKG) != 0, changingPkg);
+            // Only replace for packages on requested volume
+            final String volumeUuid = getVolumeUuidForPackage(pkgInfo);
+            final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_PKG) != 0)
+                    && Objects.equals(replaceVolumeUuid, volumeUuid);
+            grantPermissionsLPw(pkgInfo, replace, changingPkg);
         }
     }
 
@@ -8334,6 +8344,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
 
+        boolean runtimePermissionsRevoked = false;
         int[] changedRuntimePermissionUserIds = EMPTY_INT_ARRAY;
 
         boolean changedInstallPermission = false;
@@ -8343,6 +8354,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!ps.isSharedUser()) {
                 origPermissions = new PermissionsState(permissionsState);
                 permissionsState.reset();
+            } else {
+                // We need to know only about runtime permission changes since the
+                // calling code always writes the install permissions state but
+                // the runtime ones are written only if changed. The only cases of
+                // changed runtime permissions here are promotion of an install to
+                // runtime and revocation of a runtime from a shared user.
+                changedRuntimePermissionUserIds = revokeUnusedSharedUserPermissionsLPw(
+                        ps.sharedUser, UserManagerService.getInstance().getUserIds());
+                if (!ArrayUtils.isEmpty(changedRuntimePermissionUserIds)) {
+                    runtimePermissionsRevoked = true;
+                }
             }
         }
 
@@ -8558,9 +8580,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             ps.installPermissionsFixed = true;
         }
 
-        // Persist the runtime permissions state for users with changes.
+        // Persist the runtime permissions state for users with changes. If permissions
+        // were revoked because no app in the shared user declares them we have to
+        // write synchronously to avoid losing runtime permissions state.
         for (int userId : changedRuntimePermissionUserIds) {
-            mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+            mSettings.writeRuntimePermissionsForUserLPr(userId, runtimePermissionsRevoked);
         }
     }
 
@@ -12057,6 +12081,66 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private int[] revokeUnusedSharedUserPermissionsLPw(SharedUserSetting su, int[] allUserIds) {
+        // Collect all used permissions in the UID
+        ArraySet<String> usedPermissions = new ArraySet<>();
+        final int packageCount = su.packages.size();
+        for (int i = 0; i < packageCount; i++) {
+            PackageSetting ps = su.packages.valueAt(i);
+            if (ps.pkg == null) {
+                continue;
+            }
+            final int requestedPermCount = ps.pkg.requestedPermissions.size();
+            for (int j = 0; j < requestedPermCount; j++) {
+                String permission = ps.pkg.requestedPermissions.get(j);
+                BasePermission bp = mSettings.mPermissions.get(permission);
+                if (bp != null) {
+                    usedPermissions.add(permission);
+                }
+            }
+        }
+
+        PermissionsState permissionsState = su.getPermissionsState();
+        // Prune install permissions
+        List<PermissionState> installPermStates = permissionsState.getInstallPermissionStates();
+        final int installPermCount = installPermStates.size();
+        for (int i = installPermCount - 1; i >= 0;  i--) {
+            PermissionState permissionState = installPermStates.get(i);
+            if (!usedPermissions.contains(permissionState.getName())) {
+                BasePermission bp = mSettings.mPermissions.get(permissionState.getName());
+                if (bp != null) {
+                    permissionsState.revokeInstallPermission(bp);
+                    permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
+                            PackageManager.MASK_PERMISSION_FLAGS, 0);
+                }
+            }
+        }
+
+        int[] runtimePermissionChangedUserIds = EmptyArray.INT;
+
+        // Prune runtime permissions
+        for (int userId : allUserIds) {
+            List<PermissionState> runtimePermStates = permissionsState
+                    .getRuntimePermissionStates(userId);
+            final int runtimePermCount = runtimePermStates.size();
+            for (int i = runtimePermCount - 1; i >= 0; i--) {
+                PermissionState permissionState = runtimePermStates.get(i);
+                if (!usedPermissions.contains(permissionState.getName())) {
+                    BasePermission bp = mSettings.mPermissions.get(permissionState.getName());
+                    if (bp != null) {
+                        permissionsState.revokeRuntimePermission(bp, userId);
+                        permissionsState.updatePermissionFlags(bp, userId,
+                                PackageManager.MASK_PERMISSION_FLAGS, 0);
+                        runtimePermissionChangedUserIds = ArrayUtils.appendInt(
+                                runtimePermissionChangedUserIds, userId);
+                    }
+                }
+            }
+        }
+
+        return runtimePermissionChangedUserIds;
+    }
+
     private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
             String volumeUuid, int[] allUsers, boolean[] perUserInstalled, PackageInstalledInfo res,
             UserHandle user) {
@@ -12552,6 +12636,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
         }
         return installFlags;
+    }
+
+    private String getVolumeUuidForPackage(PackageParser.Package pkg) {
+        if (isExternal(pkg)) {
+            if (TextUtils.isEmpty(pkg.volumeUuid)) {
+                return StorageManager.UUID_PRIMARY_PHYSICAL;
+            } else {
+                return pkg.volumeUuid;
+            }
+        } else {
+            return StorageManager.UUID_PRIVATE_INTERNAL;
+        }
     }
 
     private VersionInfo getSettingsVersionForPackage(PackageParser.Package pkg) {
@@ -13576,7 +13672,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ps != null) {
                 libDirRoot = ps.legacyNativeLibraryPathString;
             }
-            if (p != null && (isExternal(p) || p.isForwardLocked())) {
+            if (p != null && (p.isForwardLocked() || p.applicationInfo.isExternalAsec())) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
@@ -15430,7 +15526,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (isMounted) {
             if (DEBUG_SD_INSTALL)
                 Log.i(TAG, "Loading packages");
-            loadMediaPackages(processCids, uidArr);
+            loadMediaPackages(processCids, uidArr, externalStorage);
             startCleaningPackages();
             mInstallerService.onSecureContainersAvailable();
         } else {
@@ -15485,7 +15581,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      * the cid is added to list of removeCids. We currently don't delete stale
      * containers.
      */
-    private void loadMediaPackages(ArrayMap<AsecInstallArgs, String> processCids, int[] uidArr) {
+    private void loadMediaPackages(ArrayMap<AsecInstallArgs, String> processCids, int[] uidArr,
+            boolean externalStorage) {
         ArrayList<String> pkgList = new ArrayList<String>();
         Set<AsecInstallArgs> keys = processCids.keySet();
 
@@ -15557,7 +15654,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             // cases get permissions that the user didn't initially explicitly
             // allow... it would be nice to have some better way to handle
             // this situation.
-            final VersionInfo ver = mSettings.getExternalVersion();
+            final VersionInfo ver = externalStorage ? mSettings.getExternalVersion()
+                    : mSettings.getInternalVersion();
+            final String volumeUuid = externalStorage ? StorageManager.UUID_PRIMARY_PHYSICAL
+                    : StorageManager.UUID_PRIVATE_INTERNAL;
 
             int updateFlags = UPDATE_PERMISSIONS_ALL;
             if (ver.sdkVersion != mSdkVersion) {
@@ -15565,7 +15665,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + mSdkVersion + "; regranting permissions for external");
                 updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
             }
-            updatePermissionsLPw(null, null, updateFlags);
+            updatePermissionsLPw(null, null, volumeUuid, updateFlags);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
@@ -15698,7 +15798,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + mSdkVersion + "; regranting permissions for " + vol.fsUuid);
                 updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
             }
-            updatePermissionsLPw(null, null, updateFlags);
+            updatePermissionsLPw(null, null, vol.fsUuid, updateFlags);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
