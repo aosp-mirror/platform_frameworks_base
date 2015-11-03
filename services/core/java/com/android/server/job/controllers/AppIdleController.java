@@ -67,7 +67,7 @@ public class AppIdleController extends StateController {
             mTrackedTasks.add(jobStatus);
             String packageName = jobStatus.job.getService().getPackageName();
             final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
-                    jobStatus.getUserId());
+                    jobStatus.uId, jobStatus.getUserId());
             if (DEBUG) {
                 Slog.d(LOG_TAG, "Start tracking, setting idle state of "
                         + packageName + " to " + appIdle);
@@ -108,7 +108,7 @@ public class AppIdleController extends StateController {
             for (JobStatus task : mTrackedTasks) {
                 String packageName = task.job.getService().getPackageName();
                 final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
-                        task.getUserId());
+                        task.uId, task.getUserId());
                 if (DEBUG) {
                     Slog.d(LOG_TAG, "Setting idle state of " + packageName + " to " + appIdle);
                 }
