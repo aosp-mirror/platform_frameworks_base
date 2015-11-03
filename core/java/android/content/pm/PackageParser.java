@@ -81,8 +81,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.jar.StrictJarFile;
 import java.util.zip.ZipEntry;
+
+import android.util.jar.StrictJarFile;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
