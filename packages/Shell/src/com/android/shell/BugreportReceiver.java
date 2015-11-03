@@ -136,9 +136,10 @@ public class BugreportReceiver extends BroadcastReceiver {
         // EXTRA_TEXT should be an ArrayList, but some clients are expecting a single String.
         // So, to avoid an exception on Intent.migrateExtraStreamToClipData(), we need to manually
         // create the ClipData object with the attachments URIs.
-        intent.putExtra(Intent.EXTRA_TEXT, SystemProperties.get("ro.build.description"));
-        final ClipData clipData = new ClipData(
-                null, new String[] { mimeType },
+        String messageBody = String.format("Build info: %s\nSerial number:%s",
+                SystemProperties.get("ro.build.description"), SystemProperties.get("ro.serialno"));
+        intent.putExtra(Intent.EXTRA_TEXT, messageBody);
+        final ClipData clipData = new ClipData(null, new String[] { mimeType },
                 new ClipData.Item(null, null, null, bugreportUri));
         clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
         intent.setClipData(clipData);
