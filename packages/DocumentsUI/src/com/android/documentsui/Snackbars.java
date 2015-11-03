@@ -22,7 +22,7 @@ import android.app.Activity;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 
-final class Snackbars {
+public final class Snackbars {
     private Snackbars() {}
 
     public static final Snackbar makeSnackbar(Activity activity, int messageId, int duration) {

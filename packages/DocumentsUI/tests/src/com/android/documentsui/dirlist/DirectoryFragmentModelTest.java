@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.dirlist;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -27,8 +27,9 @@ import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.view.ViewGroup;
 
-import com.android.documentsui.DirectoryFragment.Model;
-import com.android.documentsui.MultiSelectManager.Selection;
+import com.android.documentsui.DirectoryResult;
+import com.android.documentsui.dirlist.DirectoryFragment.Model;
+import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 
 import java.util.List;

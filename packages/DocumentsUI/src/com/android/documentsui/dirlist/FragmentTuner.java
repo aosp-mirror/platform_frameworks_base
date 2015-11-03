@@ -24,7 +24,6 @@ import android.os.SystemProperties;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.documentsui.DirectoryFragment;
 import com.android.documentsui.Menus;
 import com.android.documentsui.R;
 import com.android.documentsui.State;

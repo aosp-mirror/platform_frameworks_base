@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.dirlist;
 
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;

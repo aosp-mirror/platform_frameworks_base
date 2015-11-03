@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+package com.android.documentsui.dirlist;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -26,7 +23,7 @@ import android.test.AndroidTestCase;
 import android.util.SparseBooleanArray;
 import android.view.View;
 
-import com.android.documentsui.MultiSelectManager.GridModel;
+import com.android.documentsui.dirlist.MultiSelectManager.GridModel;
 
 public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 

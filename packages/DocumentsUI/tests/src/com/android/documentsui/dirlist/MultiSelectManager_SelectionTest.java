@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
-
-import static org.junit.Assert.*;
+package com.android.documentsui.dirlist;
 
 import android.test.AndroidTestCase;
 
-import com.android.documentsui.MultiSelectManager.Selection;
+import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
 
 public class MultiSelectManager_SelectionTest extends AndroidTestCase{

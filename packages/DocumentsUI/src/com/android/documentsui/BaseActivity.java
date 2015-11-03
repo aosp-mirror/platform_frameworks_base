@@ -16,11 +16,11 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
-import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
-import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_DOWN;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_UP;
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
@@ -55,6 +55,7 @@ import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
@@ -69,7 +70,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends Activity {
 
     static final String EXTRA_STATE = "state";
 
@@ -383,7 +384,7 @@ abstract class BaseActivity extends Activity {
         invalidateOptionsMenu();
     }
 
-    void onStateChanged() {
+    public void onStateChanged() {
         invalidateOptionsMenu();
     }
 
@@ -421,7 +422,7 @@ abstract class BaseActivity extends Activity {
         super.onRestoreInstanceState(state);
     }
 
-    RootInfo getCurrentRoot() {
+    public RootInfo getCurrentRoot() {
         if (mState.stack.root != null) {
             return mState.stack.root;
         } else {
@@ -825,7 +826,7 @@ abstract class BaseActivity extends Activity {
      * Interface providing access to current view of documents
      * even when all documents are not homed to the same parent.
      */
-    interface DocumentContext {
+    public interface DocumentContext {
         /**
          * Returns the cursor for the selected document. The cursor can be used to retrieve
          * details about a document and its siblings.

@@ -39,7 +39,7 @@ import java.util.List;
  * ClipboardManager wrapper class providing higher level logical
  * support for dealing with Documents.
  */
-final class DocumentClipper {
+public final class DocumentClipper {
 
     private static final String TAG = "DocumentClipper";
 
