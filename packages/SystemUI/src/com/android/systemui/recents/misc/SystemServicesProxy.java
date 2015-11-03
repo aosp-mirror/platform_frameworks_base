@@ -235,6 +235,15 @@ public class SystemServicesProxy {
         return null;
     }
 
+    /**
+     * Returns whether this device has freeform workspaces.
+     */
+    public boolean hasFreeformWorkspaceSupport() {
+        if (mPm == null) return false;
+
+        return mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+    }
+
     /** Returns whether the recents is currently running */
     public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
             MutableBoolean isHomeTopMost) {

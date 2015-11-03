@@ -122,7 +122,7 @@ public class TaskStackViewScroller {
     /** Returns the bounded stack scroll */
     float getBoundedStackScroll(float scroll) {
         return Math.max(mLayoutAlgorithm.mMinScrollP,
-                Math.min(mLayoutAlgorithm.getPreferredMaxScrollPosition(scroll), scroll));
+                Math.min(mLayoutAlgorithm.mMaxScrollP, scroll));
     }
 
     /** Returns the amount that the absolute value of how much the scroll is out of bounds. */
@@ -194,7 +194,7 @@ public class TaskStackViewScroller {
     // TODO: Remove
     @Deprecated
     int progressToScrollRange(float p) {
-        return (int) (p * mLayoutAlgorithm.mStackRect.height());
+        return (int) (p * mLayoutAlgorithm.mCurrentStackRect.height());
     }
 
     /** Called from the view draw, computes the next scroll. */
