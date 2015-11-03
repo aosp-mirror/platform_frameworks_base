@@ -82,6 +82,14 @@ public class AppWindowAnimator {
     // This flag is set if the animator has deferThumbnailDestruction set and has reached the final
     // frame of animation.  It will extend the animation by one frame and then clean up afterwards.
     boolean deferFinalFrameCleanup;
+    // If true when the animation hits the last frame, it will keep running on that last frame.
+    // This is used to synchronize animation with Recents and we wait for Recents to tell us to
+    // finish or for a new animation be set as fail-safe mechanism.
+    private boolean mProlongAnimation;
+    // Whether the prolong animation can be removed when animation is set. The purpose of this is
+    // that if recents doesn't tell us to remove the prolonged animation, we will get rid of it
+    // when new animation is set.
+    private boolean mClearProlongedAnimation;
 
     /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
     ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<>();
@@ -132,6 +140,11 @@ public class AppWindowAnimator {
 
         if (!mAppToken.appFullscreen) {
             anim.setBackgroundColor(0);
+        }
+        if (mClearProlongedAnimation) {
+            mProlongAnimation = false;
+        } else {
+            mClearProlongedAnimation = true;
         }
     }
 
@@ -263,9 +276,13 @@ public class AppWindowAnimator {
             } else {
                 if (false && DEBUG_ANIM) Slog.v(TAG,
                         "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
-                        ", xform=" + transformation);
+                        ", xform=" + transformation + ", mProlongAnimation=" + mProlongAnimation);
                 deferFinalFrameCleanup = false;
-                animation = null;
+                if (mProlongAnimation) {
+                    hasMoreFrames = true;
+                } else {
+                    animation = null;
+                }
                 clearThumbnail();
                 if (DEBUG_ANIM) Slog.v(TAG,
                         "Finished animation in " + mAppToken + " @ " + currentTime);
@@ -415,6 +432,15 @@ public class AppWindowAnimator {
             pw.print(prefix); pw.print("App Win Anim #"); pw.print(i);
                     pw.print(": "); pw.println(wanim);
         }
+    }
+
+    void startProlongAnimation() {
+        mProlongAnimation = true;
+        mClearProlongedAnimation = false;
+    }
+
+    void endProlongedAnimation() {
+        mProlongAnimation = false;
     }
 
     // This is an animation that does nothing: it just immediately finishes

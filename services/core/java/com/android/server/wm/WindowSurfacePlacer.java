@@ -155,8 +155,7 @@ class WindowSurfacePlacer {
             if (DEBUG) {
                 throw new RuntimeException("Recursive call!");
             }
-            Slog.w(TAG,
-                    "performLayoutAndPlaceSurfacesLocked called while in layout. Callers="
+            Slog.w(TAG, "performLayoutAndPlaceSurfacesLocked called while in layout. Callers="
                     + Debug.getCallers(3));
             return;
         }

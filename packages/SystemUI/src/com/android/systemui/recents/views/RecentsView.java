@@ -75,6 +75,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private static final boolean DEBUG = false;
 
     private static final boolean ADD_HEADER_BITMAP = true;
+    private int mStackViewVisibility = View.VISIBLE;
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
@@ -151,6 +152,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.setCallbacks(this);
             addView(mTaskStackView);
         }
+        mTaskStackView.setVisibility(mStackViewVisibility);
 
         // Trigger a new layout
         requestLayout();
@@ -859,6 +861,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 viewState.dockAreaOverlay.setCallback(this);
                 viewState.startAlphaAnimation(alpha, 150);
             }
+        }
+    }
+
+    public void setStackViewVisibility(int stackViewVisibility) {
+        mStackViewVisibility = stackViewVisibility;
+        if (mTaskStackView != null) {
+            mTaskStackView.setVisibility(stackViewVisibility);
+            invalidate();
         }
     }
 }

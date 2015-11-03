@@ -335,7 +335,7 @@ public interface WindowManagerPolicy {
          * Return true if this window (or a window it is attached to, but not
          * considering its app token) is currently animating.
          */
-        public boolean isAnimatingLw();
+        boolean isAnimatingLw();
 
         /**
          * Is this window considered to be gone for purposes of layout?

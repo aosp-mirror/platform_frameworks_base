@@ -517,4 +517,8 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void cancelTaskWindowTransition(int taskId) {
     }
+
+    @Override
+    public void endProlongedAnimations() {
+    }
 }
