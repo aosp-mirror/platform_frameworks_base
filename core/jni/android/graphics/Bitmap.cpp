@@ -28,6 +28,7 @@
 #include <cutils/ashmem.h>
 
 #define DEBUG_PARCEL 0
+#define ASHMEM_BITMAP_MIN_SIZE (128 * (1 << 10))
 
 namespace android {
 
@@ -993,7 +994,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     // Map the bitmap in place from the ashmem region if possible otherwise copy.
     Bitmap* nativeBitmap;
-    if (blob.fd() >= 0 && (blob.isMutable() || !isMutable)) {
+    if (blob.fd() >= 0 && (blob.isMutable() || !isMutable) && (size >= ASHMEM_BITMAP_MIN_SIZE)) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.createFromParcel: mapped contents of %s bitmap from %s blob "
                 "(fds %s)",
