@@ -25,6 +25,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.LocalLog;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -57,6 +58,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private LocalLog mLocalLog;
 
     private volatile boolean mDebug = false;
+    private volatile Object mLockWarning;
 
     private final ResponseQueue mResponseQueue;
 
@@ -105,6 +107,14 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public void setDebug(boolean debug) {
         mDebug = debug;
+    }
+
+    /**
+     * Yell loudly if someone tries making future {@link #execute(Command)} calls while holding a
+     * lock on the given object.
+     */
+    public void setLockWarning(Object lockWarning) {
+        mLockWarning = lockWarning;
     }
 
     @Override
@@ -394,6 +404,10 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public NativeDaemonEvent[] executeForList(long timeoutMs, String cmd, Object... args)
             throws NativeDaemonConnectorException {
+        if (mLockWarning != null && Thread.holdsLock(mLockWarning)) {
+            Log.wtf(TAG, "Calling thread is holding lock " + mLockWarning, new Throwable());
+        }
+
         final long startTime = SystemClock.elapsedRealtime();
 
         final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();
