@@ -23,6 +23,7 @@
 #include "ShadowTessellator.h"
 #include "utils/GLUtils.h"
 
+#include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
 

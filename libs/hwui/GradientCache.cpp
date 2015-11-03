@@ -21,6 +21,8 @@
 #include "GradientCache.h"
 #include "Properties.h"
 
+#include <cutils/properties.h>
+
 namespace android {
 namespace uirenderer {
 

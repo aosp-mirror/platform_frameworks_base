@@ -17,8 +17,12 @@
 
 #include "Debug.h"
 
-#include <algorithm>
+#include <cutils/compiler.h>
 #include <cutils/log.h>
+#include <cutils/properties.h>
+
+#include <algorithm>
+#include <cstdlib>
 
 namespace android {
 namespace uirenderer {

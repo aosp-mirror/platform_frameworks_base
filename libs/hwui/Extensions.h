@@ -19,12 +19,6 @@
 
 #include <cutils/compiler.h>
 
-#include <utils/Singleton.h>
-#include <utils/SortedVector.h>
-#include <utils/String8.h>
-
-#include <GLES2/gl2.h>
-
 namespace android {
 namespace uirenderer {
 

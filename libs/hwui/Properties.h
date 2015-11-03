@@ -18,8 +18,6 @@
 #define ANDROID_HWUI_PROPERTIES_H
 
 #include <cutils/properties.h>
-#include <stdlib.h>
-#include <utils/Singleton.h>
 
 /**
  * This file contains the list of system properties used to configure
