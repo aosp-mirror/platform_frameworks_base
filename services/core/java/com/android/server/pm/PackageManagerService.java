@@ -162,6 +162,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -15083,6 +15084,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         public void setSharedUser(SharedUserSetting user) {
             mSharedUser = user;
         }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+        (new PackageManagerShellCommand(this)).exec(
+                this, in, out, err, args, resultReceiver);
     }
 
     @Override

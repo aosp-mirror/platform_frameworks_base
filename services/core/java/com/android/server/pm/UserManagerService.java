@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -44,7 +45,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -2165,6 +2168,45 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+        (new Shell()).exec(this, in, out, err, args, resultReceiver);
+    }
+
+    int onShellCommand(Shell shell, String cmd) {
+        if (cmd == null) {
+            return shell.handleDefaultCommands(cmd);
+        }
+
+        final PrintWriter pw = shell.getOutPrintWriter();
+        try {
+            switch(cmd) {
+                case "list":
+                    return runList(pw);
+            }
+        } catch (RemoteException e) {
+            pw.println("Remote exception: " + e);
+        }
+        return -1;
+    }
+
+    private int runList(PrintWriter pw) throws RemoteException {
+        final IActivityManager am = ActivityManagerNative.getDefault();
+        final List<UserInfo> users = getUsers(false);
+        if (users == null) {
+            pw.println("Error: couldn't get users");
+            return 1;
+        } else {
+            pw.println("Users:");
+            for (int i = 0; i < users.size(); i++) {
+                String running = am.isUserRunning(users.get(i).id, false) ? " running" : "";
+                pw.println("\t" + users.get(i).toString() + running);
+            }
+            return 0;
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -2286,6 +2328,24 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.w(LOG_TAG, "UserInfo not found for " + userId);
                 }
             }
+        }
+    }
+
+    private class Shell extends ShellCommand {
+        @Override
+        public int onCommand(String cmd) {
+            return onShellCommand(this, cmd);
+        }
+
+        @Override
+        public void onHelp() {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.println("User manager (user) commands:");
+            pw.println("  help");
+            pw.println("    Print this help text.");
+            pw.println("");
+            pw.println("  list");
+            pw.println("    Prints all users on the system.");
         }
     }
 }
