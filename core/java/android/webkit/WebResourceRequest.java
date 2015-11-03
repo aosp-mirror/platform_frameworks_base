@@ -40,9 +40,9 @@ public interface WebResourceRequest {
     boolean isForMainFrame();
 
     /**
-     * Gets whether the request was a result of a redirect.
+     * Gets whether the request was a result of a server-side redirect.
      *
-     * @return whether the request was a result of a redirect.
+     * @return whether the request was a result of a server-side redirect.
      */
     boolean isRedirect();
 
