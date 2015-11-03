@@ -95,6 +95,13 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
+    public void repositionChild(IWindow childWindow, int x, int y, long deferTransactionUntilFrame,
+            Rect outFrame) {
+        // pass for now.
+        return;
+    }
+
+    @Override
     public void performDeferredDestroy(IWindow window) {
         // pass for now.
     }
