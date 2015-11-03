@@ -562,6 +562,8 @@ class MountService extends IMountService.Stub
     private static final int H_VOLUME_BROADCAST = 6;
     private static final int H_INTERNAL_BROADCAST = 7;
     private static final int H_VOLUME_UNMOUNT = 8;
+    private static final int H_PARTITION_FORGET = 9;
+    private static final int H_RESET = 10;
 
     class MountServiceHandler extends Handler {
         public MountServiceHandler(Looper looper) {
@@ -669,6 +671,16 @@ class MountService extends IMountService.Stub
                     final Intent intent = (Intent) msg.obj;
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             android.Manifest.permission.WRITE_MEDIA_STORAGE);
+                    break;
+                }
+                case H_PARTITION_FORGET: {
+                    final String partGuid = (String) msg.obj;
+                    forgetPartition(partGuid);
+                    break;
+                }
+                case H_RESET: {
+                    resetIfReadyAndConnected();
+                    break;
                 }
             }
         }
@@ -753,9 +765,7 @@ class MountService extends IMountService.Stub
     }
 
     private void handleSystemReady() {
-        synchronized (mLock) {
-            resetIfReadyAndConnectedLocked();
-        }
+        resetIfReadyAndConnected();
 
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
@@ -793,7 +803,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private void addInternalVolume() {
+    private void addInternalVolumeLocked() {
         // Create a stub volume that represents internal storage
         final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
                 VolumeInfo.TYPE_PRIVATE, null, null);
@@ -802,18 +812,22 @@ class MountService extends IMountService.Stub
         mVolumes.put(internal.id, internal);
     }
 
-    private void resetIfReadyAndConnectedLocked() {
+    private void resetIfReadyAndConnected() {
         Slog.d(TAG, "Thinking about reset, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
         if (mSystemReady && mDaemonConnected) {
-            final UserManager um = UserManager.get(mContext);
-            final List<UserInfo> users = um.getUsers();
+            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             killMediaProvider(users);
 
-            mDisks.clear();
-            mVolumes.clear();
+            final int[] startedUsers;
+            synchronized (mLock) {
+                startedUsers = mStartedUsers;
 
-            addInternalVolume();
+                mDisks.clear();
+                mVolumes.clear();
+
+                addInternalVolumeLocked();
+            }
 
             try {
                 mConnector.execute("volume", "reset");
@@ -822,7 +836,7 @@ class MountService extends IMountService.Stub
                 for (UserInfo user : users) {
                     mConnector.execute("volume", "user_added", user.id, user.serialNumber);
                 }
-                for (int userId : mStartedUsers) {
+                for (int userId : startedUsers) {
                     mConnector.execute("volume", "user_started", userId);
                 }
             } catch (NativeDaemonConnectorException e) {
@@ -898,9 +912,7 @@ class MountService extends IMountService.Stub
     }
 
     private void handleDaemonConnected() {
-        synchronized (mLock) {
-            resetIfReadyAndConnectedLocked();
-        }
+        resetIfReadyAndConnected();
 
         /*
          * Now that we've done our initialization, release
@@ -1445,7 +1457,9 @@ class MountService extends IMountService.Stub
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
 
-        addInternalVolume();
+        synchronized (mLock) {
+            addInternalVolumeLocked();
+        }
 
         // Add ourself to the Watchdog monitors if enabled.
         if (WATCHDOG_ENABLE) {
@@ -1791,10 +1805,11 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         Preconditions.checkNotNull(fsUuid);
+
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.remove(fsUuid);
             if (rec != null && !TextUtils.isEmpty(rec.partGuid)) {
-                forgetPartition(rec.partGuid);
+                mHandler.obtainMessage(H_PARTITION_FORGET, rec.partGuid).sendToTarget();
             }
             mCallbacks.notifyVolumeForgotten(fsUuid);
 
@@ -1802,7 +1817,7 @@ class MountService extends IMountService.Stub
             // reset vold so we bind into new volume into place.
             if (Objects.equals(mPrimaryStorageUuid, fsUuid)) {
                 mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
-                resetIfReadyAndConnectedLocked();
+                mHandler.obtainMessage(H_RESET).sendToTarget();
             }
 
             writeSettingsLocked();
@@ -1819,7 +1834,7 @@ class MountService extends IMountService.Stub
                 final String fsUuid = mRecords.keyAt(i);
                 final VolumeRecord rec = mRecords.valueAt(i);
                 if (!TextUtils.isEmpty(rec.partGuid)) {
-                    forgetPartition(rec.partGuid);
+                    mHandler.obtainMessage(H_PARTITION_FORGET, rec.partGuid).sendToTarget();
                 }
                 mCallbacks.notifyVolumeForgotten(fsUuid);
             }
@@ -1830,7 +1845,7 @@ class MountService extends IMountService.Stub
             }
 
             writeSettingsLocked();
-            resetIfReadyAndConnectedLocked();
+            mHandler.obtainMessage(H_RESET).sendToTarget();
         }
     }
 
@@ -1878,7 +1893,7 @@ class MountService extends IMountService.Stub
             }
 
             writeSettingsLocked();
-            resetIfReadyAndConnectedLocked();
+            mHandler.obtainMessage(H_RESET).sendToTarget();
         }
     }
 
@@ -1915,7 +1930,7 @@ class MountService extends IMountService.Stub
                 Slog.d(TAG, "Skipping move to/from primary physical");
                 onMoveStatusLocked(MOVE_STATUS_COPY_FINISHED);
                 onMoveStatusLocked(PackageManager.MOVE_SUCCEEDED);
-                resetIfReadyAndConnectedLocked();
+                mHandler.obtainMessage(H_RESET).sendToTarget();
 
             } else {
                 final VolumeInfo from = findStorageForUuid(mPrimaryStorageUuid);
