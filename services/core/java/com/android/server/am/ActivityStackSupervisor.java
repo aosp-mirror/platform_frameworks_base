@@ -4671,7 +4671,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         @Override
         public final int startActivity(Intent intent) {
             mService.enforceNotIsolatedCaller("ActivityContainer.startActivity");
-            final int userId = mService.handleIncomingUser(Binder.getCallingPid(),
+            final int userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), mCurrentUser, false,
                     ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
 
@@ -4697,7 +4697,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 throw new IllegalArgumentException("Bad PendingIntent object");
             }
 
-            final int userId = mService.handleIncomingUser(Binder.getCallingPid(),
+            final int userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), mCurrentUser, false,
                     ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
 
