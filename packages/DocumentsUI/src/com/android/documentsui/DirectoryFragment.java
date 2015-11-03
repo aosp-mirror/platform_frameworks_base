@@ -677,7 +677,7 @@ public class DirectoryFragment extends Fragment {
             getActivity().getWindow().setStatusBarColor(color.data);
 
             if (mActionMode != null) {
-                mActionMode.setTitle(TextUtils.formatSelectedCount(mSelected.size()));
+                mActionMode.setTitle(String.valueOf(mSelected.size()));
             }
         }
 
