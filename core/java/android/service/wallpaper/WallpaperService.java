@@ -270,7 +270,7 @@ public abstract class WallpaperService extends Service {
             @Override
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                    Configuration newConfig) {
+                    Configuration newConfig, Rect backDropRect) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);

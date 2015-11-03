@@ -372,7 +372,7 @@ public class NonClientDecorView extends LinearLayout
     @Override
     public void onRequestDraw(boolean reportNextDraw) {
         if (mFrameRendererThread != null) {
-            mFrameRendererThread.onRequsetDraw(reportNextDraw);
+            mFrameRendererThread.onRequestDraw(reportNextDraw);
         } else if (reportNextDraw) {
             // If render thread is gone, just report immediately.
             if (isAttachedToWindow()) {
@@ -517,7 +517,12 @@ public class NonClientDecorView extends LinearLayout
         public void run() {
             try {
                 Looper.prepare();
-                mChoreographer = Choreographer.getInstance();
+                synchronized (this) {
+                    mChoreographer = Choreographer.getInstance();
+
+                    // Draw at least once.
+                    mChoreographer.postFrameCallback(this);
+                }
                 Looper.loop();
             } finally {
                 releaseRenderer();
@@ -580,7 +585,7 @@ public class NonClientDecorView extends LinearLayout
             }
         }
 
-        public void onRequsetDraw(boolean reportNextDraw) {
+        public void onRequestDraw(boolean reportNextDraw) {
             synchronized (this) {
                 mReportNextDraw = reportNextDraw;
                 mOldTargetRect.set(0, 0, 0, 0);

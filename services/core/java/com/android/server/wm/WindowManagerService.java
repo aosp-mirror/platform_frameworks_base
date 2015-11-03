@@ -10117,6 +10117,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    boolean isDockedStackResizingLocked() {
+        return getDefaultDisplayContentLocked().getDockedDividerController().isResizing();
+    }
+
     static int dipToPixel(int dip, DisplayMetrics displayMetrics) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
     }

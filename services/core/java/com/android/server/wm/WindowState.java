@@ -1836,15 +1836,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     @Override
                     public void run() {
                         try {
-                            mClient.resized(frame, overscanInsets, contentInsets,
-                                    visibleInsets, stableInsets, outsets, reportDraw, newConfig);
+                            dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
+                                    stableInsets, outsets, reportDraw, newConfig);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
                         }
                     }
                 });
             } else {
-                mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
+                dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
                         outsets, reportDraw, newConfig);
             }
 
@@ -1871,6 +1871,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mService.mWindowPlacerLocked.requestTraversal();
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
+            Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
+            Configuration newConfig) throws RemoteException {
+        DisplayInfo displayInfo = getDisplayInfo();
+        mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
+                outsets, reportDraw, newConfig, inFreeformWorkspace() ? frame : mTmpRect);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {

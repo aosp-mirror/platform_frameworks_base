@@ -5647,7 +5647,7 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig) {
+            Configuration newConfig, Rect backDropFrame) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -5658,7 +5658,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mDragResizing) {
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowSizeIsChanging(frame);
+                    mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame);
                 }
             }
         }
@@ -6677,11 +6677,11 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                Configuration newConfig) {
+                Configuration newConfig, Rect backDropFrame) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
-                        visibleInsets, stableInsets, outsets, reportDraw, newConfig);
+                        visibleInsets, stableInsets, outsets, reportDraw, newConfig, backDropFrame);
             }
         }
 
