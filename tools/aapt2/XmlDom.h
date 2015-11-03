@@ -34,6 +34,8 @@
 namespace aapt {
 namespace xml {
 
+constexpr const char16_t* kSchemaAndroid = u"http://schemas.android.com/apk/res/android";
+
 struct RawVisitor;
 
 /**

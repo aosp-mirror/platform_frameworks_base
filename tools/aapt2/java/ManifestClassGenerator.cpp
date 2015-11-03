@@ -25,8 +25,6 @@
 
 namespace aapt {
 
-constexpr const char16_t* kSchemaAndroid = u"http://schemas.android.com/apk/res/android";
-
 static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Source& source,
                                                   const StringPiece16& value) {
     const StringPiece16 sep = u".";
@@ -62,7 +60,7 @@ static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Sour
 
 static bool writeSymbol(IDiagnostics* diag, const Source& source, xml::Element* el,
                         std::ostream* out) {
-    xml::Attribute* attr = el->findAttribute(kSchemaAndroid, u"name");
+    xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name");
     if (!attr) {
         diag->error(DiagMessage(source) << "<" << el->name << "> must define 'android:name'");
         return false;

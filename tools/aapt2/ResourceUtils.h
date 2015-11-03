@@ -49,6 +49,11 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outReference,
                        bool* outCreate = nullptr, bool* outPrivate = nullptr);
 
 /*
+ * Returns true if the string is in the form of a resource reference (@[+][package:]type/name).
+ */
+bool isReference(const StringPiece16& str);
+
+/*
  * Returns true if the string was parsed as an attribute reference (?[package:]type/name),
  * with `outReference` set to the parsed reference.
  */
