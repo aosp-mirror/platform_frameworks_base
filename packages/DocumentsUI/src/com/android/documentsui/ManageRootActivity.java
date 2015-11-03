@@ -34,6 +34,7 @@ import android.provider.DocumentsContract;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
@@ -49,7 +50,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ManageRootActivity extends BaseActivity {
-    private static final int CODE_FORWARD = 42;
     private static final String TAG = "ManageRootsActivity";
 
     private Toolbar mToolbar;
@@ -140,6 +140,21 @@ public class ManageRootActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+
+        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
+        final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
+        final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
+        final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
+        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
+        final MenuItem search = menu.findItem(R.id.menu_search);
+
+        advanced.setVisible(false);
+        createDir.setVisible(false);
+        pasteFromCb.setEnabled(false);
+        newWindow.setEnabled(false);
+        fileSize.setVisible(false);
+        search.setVisible(false);
+
         Menus.disableHiddenItems(menu);
         return true;
     }
