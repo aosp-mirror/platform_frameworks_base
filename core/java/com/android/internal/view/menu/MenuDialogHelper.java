@@ -111,7 +111,7 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
                     if (decor != null) {
                         KeyEvent.DispatcherState ds = decor.getKeyDispatcherState();
                         if (ds != null && ds.isTracking(event)) {
-                            mMenu.close(true);
+                            mMenu.close(true /* closeAllMenus */);
                             dialog.dismiss();
                             return true;
                         }

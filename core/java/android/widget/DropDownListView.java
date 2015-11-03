@@ -127,13 +127,15 @@ public class DropDownListView extends ListView {
     }
 
     @Override
-    protected boolean shouldShowSelector() {
-        View selectedView = getSelectedView();
-        return selectedView != null && selectedView.isEnabled() || super.shouldShowSelector();
+    boolean shouldShowSelector() {
+        return isHovered() || super.shouldShowSelector();
     }
 
     @Override
     public boolean onHoverEvent(MotionEvent ev) {
+        // Allow the super class to handle hover state management first.
+        final boolean handled = super.onHoverEvent(ev);
+
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_HOVER_ENTER
                 || action == MotionEvent.ACTION_HOVER_MOVE) {
@@ -154,26 +156,11 @@ public class DropDownListView extends ListView {
             // Do not cancel the selected position if the selection is visible by other reasons.
             if (!super.shouldShowSelector()) {
                 setSelectedPositionInt(INVALID_POSITION);
+                setNextSelectedPositionInt(INVALID_POSITION);
             }
         }
-        return super.onHoverEvent(ev);
-    }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        final int x = (int) event.getX();
-        final int y = (int) event.getY();
-        final int position = pointToPosition(x, y);
-        if (position == INVALID_POSITION) {
-            return super.onTouchEvent(event);
-        }
-
-        if (position != mSelectedPosition) {
-            setSelectedPositionInt(position);
-            setNextSelectedPositionInt(position);
-        }
-
-        return super.onTouchEvent(event);
+        return handled;
     }
 
     /**

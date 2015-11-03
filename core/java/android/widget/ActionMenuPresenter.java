@@ -788,7 +788,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             // Not a submenu, but treat it like one.
             super.onSubMenuSelected(null);
         } else {
-            mMenu.close(false);
+            mMenu.close(false /* closeAllMenus */);
         }
     }
 
@@ -981,7 +981,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         @Override
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
             if (menu instanceof SubMenuBuilder) {
-                ((SubMenuBuilder) menu).getRootMenu().close(false);
+                menu.getRootMenu().close(false /* closeAllMenus */);
             }
             final Callback cb = getCallback();
             if (cb != null) {

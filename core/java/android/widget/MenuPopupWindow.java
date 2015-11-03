@@ -16,12 +16,14 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.transition.Transition;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -72,10 +74,18 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
     }
 
     @Override
-    public void onItemHovered(MenuBuilder menu, int position) {
+    public void onItemHoverEnter(@NonNull MenuBuilder menu, @NonNull MenuItem item) {
         // Forward up the chain
         if (mHoverListener != null) {
-            mHoverListener.onItemHovered(menu, position);
+            mHoverListener.onItemHoverEnter(menu, item);
+        }
+    }
+
+    @Override
+    public void onItemHoverExit(@NonNull MenuBuilder menu, @NonNull MenuItem item) {
+        // Forward up the chain
+        if (mHoverListener != null) {
+            mHoverListener.onItemHoverExit(menu, item);
         }
     }
 
@@ -87,6 +97,7 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
         final int mRetreatKey;
 
         private MenuItemHoverListener mHoverListener;
+        private MenuItem mHoveredMenuItem;
 
         public MenuDropDownListView(Context context, boolean hijackFocus) {
             super(context, hijackFocus);
@@ -115,8 +126,7 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
         public boolean onKeyDown(int keyCode, KeyEvent event) {
             ListMenuItemView selectedItem = (ListMenuItemView) getSelectedView();
             if (selectedItem != null && keyCode == mAdvanceKey) {
-                if (selectedItem.isEnabled() &&
-                        ((ListMenuItemView) selectedItem).getItemData().hasSubMenu()) {
+                if (selectedItem.isEnabled() && selectedItem.getItemData().hasSubMenu()) {
                     performItemClick(
                             selectedItem,
                             getSelectedItemPosition(),
@@ -127,7 +137,8 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
                 setSelectedPositionInt(INVALID_POSITION);
                 setNextSelectedPositionInt(INVALID_POSITION);
 
-                ((MenuAdapter) getAdapter()).getAdapterMenu().close();
+                // Close only the top-level menu.
+                ((MenuAdapter) getAdapter()).getAdapterMenu().close(false /* closeAllMenus */);
                 return true;
             }
             return super.onKeyDown(keyCode, event);
@@ -135,36 +146,49 @@ public class MenuPopupWindow extends ListPopupWindow implements MenuItemHoverLis
 
         @Override
         public boolean onHoverEvent(MotionEvent ev) {
-            boolean dispatchHover = false;
-            final int position = pointToPosition((int) ev.getX(), (int) ev.getY());
+            // Dispatch any changes in hovered item index to the listener.
+            if (mHoverListener != null) {
+                // The adapter may be wrapped. Adjust the index if necessary.
+                final int headersCount;
+                final MenuAdapter menuAdapter;
+                final ListAdapter adapter = getAdapter();
+                if (adapter instanceof HeaderViewListAdapter) {
+                    final HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) adapter;
+                    headersCount = headerAdapter.getHeadersCount();
+                    menuAdapter = (MenuAdapter) headerAdapter.getWrappedAdapter();
+                } else {
+                    headersCount = 0;
+                    menuAdapter = (MenuAdapter) adapter;
+                }
 
-            final int action = ev.getActionMasked();
-            if (action == MotionEvent.ACTION_HOVER_ENTER
-                    || action == MotionEvent.ACTION_HOVER_MOVE) {
-                if (position != INVALID_POSITION && position != mSelectedPosition) {
-                    final View hoveredItem = getChildAt(position - getFirstVisiblePosition());
-                    if (hoveredItem.isEnabled()) {
-                        dispatchHover = true;
+                // Find the menu item for the view at the event coordinates.
+                MenuItem menuItem = null;
+                if (ev.getAction() != MotionEvent.ACTION_HOVER_EXIT) {
+                    final int position = pointToPosition((int) ev.getX(), (int) ev.getY());
+                    if (position != INVALID_POSITION) {
+                        final int itemPosition = position - headersCount;
+                        if (itemPosition >= 0 && itemPosition < menuAdapter.getCount()) {
+                            menuItem = menuAdapter.getItem(itemPosition);
+                        }
+                    }
+                }
+
+                final MenuItem oldMenuItem = mHoveredMenuItem;
+                if (oldMenuItem != menuItem) {
+                    final MenuBuilder menu = menuAdapter.getAdapterMenu();
+                    if (oldMenuItem != null) {
+                        mHoverListener.onItemHoverExit(menu, oldMenuItem);
+                    }
+
+                    mHoveredMenuItem = menuItem;
+
+                    if (menuItem != null) {
+                        mHoverListener.onItemHoverEnter(menu, menuItem);
                     }
                 }
             }
 
-            boolean superVal = super.onHoverEvent(ev);
-
-            if (dispatchHover && mHoverListener != null) {
-                ListAdapter adapter = getAdapter();
-                MenuAdapter menuAdapter;
-                if (adapter instanceof HeaderViewListAdapter) {
-                    menuAdapter = (MenuAdapter) ((HeaderViewListAdapter) adapter)
-                            .getWrappedAdapter();
-                } else {
-                    menuAdapter = (MenuAdapter) adapter;
-                }
-
-                mHoverListener.onItemHovered(menuAdapter.getAdapterMenu(), position);
-            }
-
-            return superVal;
+            return super.onHoverEvent(ev);
         }
     }
 }
