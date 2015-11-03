@@ -114,6 +114,7 @@ final class ProcessRecord {
     boolean killed;             // True once we know the process has been killed
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     boolean reportedInteraction;// Whether we have told usage stats about it being an interaction
+    long interactionEventTime;  // The time we sent the last interaction event
     long fgInteractionTime;     // When we became foreground for interaction purposes
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
@@ -297,6 +298,10 @@ final class ProcessRecord {
         if (reportedInteraction || fgInteractionTime != 0) {
             pw.print(prefix); pw.print("reportedInteraction=");
             pw.print(reportedInteraction);
+            if (interactionEventTime != 0) {
+                pw.print(" time=");
+                TimeUtils.formatDuration(interactionEventTime, SystemClock.elapsedRealtime(), pw);
+            }
             if (fgInteractionTime != 0) {
                 pw.print(" fgInteractionTime=");
                 TimeUtils.formatDuration(fgInteractionTime, SystemClock.elapsedRealtime(), pw);
