@@ -193,7 +193,10 @@ repository in the Android SDK manager. </p>
 
 <p>
 To configure your app to use data binding, add the <code>dataBinding</code> element to your
-top-level <code>build.gradle</code> file with the following configuration: </p>
+<code>build.gradle</code> file in the app module.
+</p>
+
+ <p>Use the following code snippet to configure data binding: </p>
 
 <pre>
 android {
@@ -203,6 +206,9 @@ android {
     }
 }
 </pre>
+
+<p>If you have an app module that depends on a library which uses data binding, your app module
+ must configure data binding in its <code>build.gradle</code> file as well.</p>
 
 <p>Also, make sure you are using a compatible version of Android Studio.
 <strong>Android Studio 1.3</strong> adds the code-completion and layout-preview
