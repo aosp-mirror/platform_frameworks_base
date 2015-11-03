@@ -136,7 +136,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.TextViewActivity" android:label="TextViewActivity">
+        <activity android:name="android.widget.TextViewActivity"
+                android:label="TextViewActivity"
+                android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
