@@ -212,8 +212,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_UNMUTE_MICROPHONE);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADJUST_VOLUME);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FUN);
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SAFE_BOOT);
@@ -4648,7 +4646,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mIPackageManager.updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                     0  /* flagValues */, userHandle.getIdentifier());
-            // TODO This will not revert audio mute restrictions if they were set.  b/24981972
             synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
                 mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle.getIdentifier());
             }
@@ -5599,7 +5596,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
-        final UserHandle user = new UserHandle(userHandle);
         synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
             synchronized (this) {
                 ActiveAdmin activeAdmin =

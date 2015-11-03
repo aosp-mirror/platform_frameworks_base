@@ -52,6 +52,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.system.ErrnoException;
@@ -231,6 +232,10 @@ public class UserManagerService extends IUserManager.Stub {
     private IAppOpsService mAppOpsService;
 
     private final LocalService mLocalService;
+
+    @GuardedBy("mUserRestrictionsListeners")
+    private final ArrayList<UserRestrictionsListener> mUserRestrictionsListeners =
+            new ArrayList<>();
 
     private static UserManagerService sInstance;
 
@@ -781,7 +786,14 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mRestrictionsLock")
     private void applyUserRestrictionsLR(int userId, Bundle newRestrictions) {
-        final Bundle prevRestrictions = mAppliedUserRestrictions.get(userId);
+        if (newRestrictions == null) {
+            newRestrictions = Bundle.EMPTY;
+        }
+
+        Bundle prevRestrictions = mAppliedUserRestrictions.get(userId);
+        if (prevRestrictions == null) {
+            prevRestrictions = Bundle.EMPTY;
+        }
 
         if (DBG) {
             Log.d(LOG_TAG, "applyUserRestrictionsRL userId=" + userId
@@ -797,10 +809,34 @@ public class UserManagerService extends IUserManager.Stub {
             Binder.restoreCallingIdentity(token);
         }
 
-        UserRestrictionsUtils.applyUserRestrictions(
+        UserRestrictionsUtils.applyUserRestrictionsLR(
                 mContext, userId, newRestrictions, prevRestrictions);
 
+        notifyUserRestrictionsListeners(userId, newRestrictions, prevRestrictions);
+
         mAppliedUserRestrictions.put(userId, new Bundle(newRestrictions));
+    }
+
+    private void notifyUserRestrictionsListeners(final int userId,
+            Bundle newRestrictions, Bundle prevRestrictions) {
+
+        final Bundle newRestrictionsFinal = new Bundle(newRestrictions);
+        final Bundle prevRestrictionsFinal = new Bundle(prevRestrictions);
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final UserRestrictionsListener[] listeners;
+                synchronized (mUserRestrictionsListeners) {
+                    listeners = new UserRestrictionsListener[mUserRestrictionsListeners.size()];
+                    mUserRestrictionsListeners.toArray(listeners);
+                }
+                for (int i = 0; i < listeners.length; i++) {
+                    listeners[i].onUserRestrictionsChanged(userId,
+                            newRestrictionsFinal, prevRestrictionsFinal);
+                }
+            }
+        });
     }
 
     @GuardedBy("mRestrictionsLock")
@@ -2386,6 +2422,25 @@ public class UserManagerService extends IUserManager.Stub {
                 } else {
                     Slog.w(LOG_TAG, "UserInfo not found for " + userId);
                 }
+            }
+        }
+
+        @Override
+        public boolean getUserRestriction(int userId, String key) {
+            return getUserRestrictions(userId).getBoolean(key);
+        }
+
+        @Override
+        public void addUserRestrictionsListener(UserRestrictionsListener listener) {
+            synchronized (mUserRestrictionsListeners) {
+                mUserRestrictionsListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void removeUserRestrictionsListener(UserRestrictionsListener listener) {
+            synchronized (mUserRestrictionsListeners) {
+                mUserRestrictionsListeners.remove(listener);
             }
         }
     }

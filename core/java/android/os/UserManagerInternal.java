@@ -19,6 +19,17 @@ package android.os;
  * @hide Only for use within the system server.
  */
 public abstract class UserManagerInternal {
+    public interface UserRestrictionsListener {
+        /**
+         * Called when a user restriction changes.
+         *
+         * @param userId target user id
+         * @param newRestrictions new user restrictions
+         * @param prevRestrictions user restrictions that were previously set
+         */
+        void onUserRestrictionsChanged(int userId, Bundle newRestrictions, Bundle prevRestrictions);
+    }
+
     /**
      * Lock that must be held when calling certain methods in this class.
      *
@@ -60,4 +71,13 @@ public abstract class UserManagerInternal {
      */
     public abstract void setBaseUserRestrictionsByDpmsForMigration(int userId,
             Bundle baseRestrictions);
+
+    /** Return a user restriction. */
+    public abstract boolean getUserRestriction(int userId, String key);
+
+    /** Adds a listener to user restriction changes. */
+    public abstract void addUserRestrictionsListener(UserRestrictionsListener listener);
+
+    /** Remove a {@link UserRestrictionsListener}. */
+    public abstract void removeUserRestrictionsListener(UserRestrictionsListener listener);
 }

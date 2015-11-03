@@ -18,19 +18,14 @@ package com.android.server.pm;
 
 import com.google.android.collect.Sets;
 
-import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.media.IAudioService;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Slog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -39,6 +34,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
 
+/**
+ * Utility methods for uesr restrictions.
+ *
+ * <p>See {@link UserManagerService} for the method suffixes.
+ */
 public class UserRestrictionsUtils {
     private static final String TAG = "UserRestrictionsUtils";
 
@@ -129,26 +129,31 @@ public class UserRestrictionsUtils {
     /**
      * Takes a new use restriction set and the previous set, and apply the restrictions that have
      * changed.
+     *
+     * <p>Note this method is called by {@link UserManagerService} while holding
+     * {@code mRestrictionLock}. Be aware when calling into other services, which could cause
+     * a deadlock.
      */
-    public static void applyUserRestrictions(Context context, int userId,
-            @Nullable Bundle newRestrictions, @Nullable Bundle prevRestrictions) {
-        if (newRestrictions == null) {
-            newRestrictions = Bundle.EMPTY;
-        }
-        if (prevRestrictions == null) {
-            prevRestrictions = Bundle.EMPTY;
-        }
+    public static void applyUserRestrictionsLR(Context context, int userId,
+            Bundle newRestrictions, Bundle prevRestrictions) {
         for (String key : USER_RESTRICTIONS) {
             final boolean newValue = newRestrictions.getBoolean(key);
             final boolean prevValue = prevRestrictions.getBoolean(key);
 
             if (newValue != prevValue) {
-                applyUserRestriction(context, userId, key, newValue);
+                applyUserRestrictionLR(context, userId, key, newValue);
             }
         }
     }
 
-    private static void applyUserRestriction(Context context, int userId, String key,
+    /**
+     * Apply each user restriction.
+     *
+     * <p>Note this method is called by {@link UserManagerService} while holding
+     * {@code mRestrictionLock}. Be aware when calling into other services, which could cause
+     * a deadlock.
+     */
+    private static void applyUserRestrictionLR(Context context, int userId, String key,
             boolean newValue) {
         // When certain restrictions are cleared, we don't update the system settings,
         // because these settings are changeable on the Settings UI and we don't know the original
@@ -161,14 +166,6 @@ public class UserRestrictionsUtils {
         final long id = Binder.clearCallingIdentity();
         try {
             switch (key) {
-                case UserManager.DISALLOW_UNMUTE_MICROPHONE:
-                    IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE))
-                            .setMicrophoneMute(newValue, context.getPackageName(), userId);
-                    break;
-                case UserManager.DISALLOW_ADJUST_VOLUME:
-                    IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE))
-                            .setMasterMute(newValue, 0, context.getPackageName(), userId);
-                    break;
                 case UserManager.DISALLOW_CONFIG_WIFI:
                     if (newValue) {
                         android.provider.Settings.Secure.putIntForUser(cr,
@@ -231,8 +228,6 @@ public class UserRestrictionsUtils {
                     }
                     break;
             }
-        } catch (RemoteException re) {
-            Slog.e(TAG, "Failed to talk to AudioService.", re);
         } finally {
             Binder.restoreCallingIdentity(id);
         }
