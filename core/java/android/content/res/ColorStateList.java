@@ -19,6 +19,7 @@ package android.content.res;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.res.Resources.Theme;
 import android.graphics.Color;
 
@@ -34,13 +35,16 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
 import android.util.StateSet;
+import android.util.TypedValue;
 import android.util.Xml;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -328,6 +332,75 @@ public class ColorStateList implements Parcelable {
         mStateSpecs = new int[listSize][];
         System.arraycopy(colorList, 0, mColors, 0, listSize);
         System.arraycopy(stateSpecList, 0, mStateSpecs, 0, listSize);
+
+        onColorsChanged();
+    }
+
+    private void inflate(@NonNull Context context, @NonNull XmlPullParser parser)
+        throws IOException, XmlPullParserException {
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        Resources r = context.getResources();
+
+        final int innerDepth = parser.getDepth() + 2;
+        int depth;
+        int type;
+
+        List<int[]> customStateList = new ArrayList<>();
+        List<Integer> customColorList = new ArrayList<>();
+
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+            && ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
+            if (type != XmlPullParser.START_TAG || depth > innerDepth || !parser.getName().equals("item")) {
+                continue;
+            }
+            // Parse all unrecognized attributes as state specifiers.
+            int j = 0;
+            final int numAttrs = attrs.getAttributeCount();
+            int color = 0;
+            float alpha = 1.0f;
+            int[] stateSpec = new int[numAttrs];
+            for (int i = 0; i < numAttrs; i++) {
+                final int stateResId = attrs.getAttributeNameResource(i);
+                switch (stateResId) {
+                    case R.attr.color:
+                        int colorAttrId = attrs.getAttributeResourceValue(i, 0);
+                        if (colorAttrId == 0) {
+                            String colorAttrValue = attrs.getAttributeValue(i);
+                            colorAttrId = Integer.valueOf(colorAttrValue.replace("?", ""));
+                            color = getColorFromAttribute(context, colorAttrId);
+                        } else {
+                            color = r.getColor(colorAttrId);
+                        }
+                        break;
+                    case R.attr.alpha:
+                        try {
+                            alpha = attrs.getAttributeFloatValue(i, 1.0f);
+                        } catch (Exception e) {
+                            String alphaAttrValue = attrs.getAttributeValue(i);
+                            alpha = getFloatFromAttribute(context, Integer.valueOf(alphaAttrValue.replace("?", "")));
+                        }
+                        break;
+                    default:
+                        stateSpec[j++] = attrs.getAttributeBooleanValue(i, false) ? stateResId : -stateResId;
+                }
+            }
+            stateSpec = StateSet.trimStateSet(stateSpec, j);
+            color = modulateColorAlpha(color, alpha);
+
+            customColorList.add(color);
+            customStateList.add(stateSpec);
+        }
+
+        int[] colors = new int[customColorList.size()];
+        int[][] states = new int[customStateList.size()][];
+        int i = 0;
+        for (int n = states.length; i < n; i++) {
+            colors[i] = customColorList.get(i);
+            states[i] = customStateList.get(i);
+        }
+
+        mColors = colors;
+        mStateSpecs = states;
 
         onColorsChanged();
     }
@@ -668,4 +741,22 @@ public class ColorStateList implements Parcelable {
             return new ColorStateList(stateSpecs, colors);
         }
     };
+
+    public static int getColorFromAttribute(Context context, int attrId) {
+        if (attrId == 0) {
+            return 0;
+        }
+        TypedValue a = new TypedValue();
+        context.getTheme().resolveAttribute(attrId, a, true);
+        return context.getResources().getColor(a.resourceId);
+    }
+
+    public static float getFloatFromAttribute(Context context, int attrId) {
+        if (attrId == 0) {
+            return 0;
+        }
+        TypedValue a = new TypedValue();
+        context.getTheme().resolveAttribute(attrId, a, true);
+        return a.getFloat();
+    }
 }
