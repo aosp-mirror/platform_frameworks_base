@@ -226,7 +226,7 @@ bad user experiences.
   </li>
 
   <li>Use the <a href="{@docRoot}tools/help/adb.html">adb</a> tool to manage
-  permssions from the command line:
+  permissions from the command line:
     <ul>
       <li>List permissions and status by group:
 
