@@ -40,6 +40,8 @@ public class WebViewUpdateService extends SystemService {
     private boolean mRelroReady32Bit = false;
     private boolean mRelroReady64Bit = false;
 
+    private String oldWebViewPackageName = null;
+
     private BroadcastReceiver mWebViewUpdatedReceiver;
 
     public WebViewUpdateService(Context context) {
@@ -51,9 +53,22 @@ public class WebViewUpdateService extends SystemService {
         mWebViewUpdatedReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    String webviewPackage = "package:" + WebViewFactory.getWebViewPackageName();
-                    if (webviewPackage.equals(intent.getDataString())) {
-                        onWebViewUpdateInstalled();
+
+                    for (String packageName : WebViewFactory.getWebViewPackageNames()) {
+                        String webviewPackage = "package:" + packageName;
+
+                        if (webviewPackage.equals(intent.getDataString())) {
+                            String usedPackageName =
+                                WebViewFactory.findPreferredWebViewPackage().packageName;
+                            // Only trigger update actions if the updated package is the one that
+                            // will be used, or the one that was in use before the update.
+                            if (packageName.equals(usedPackageName) ||
+                                    packageName.equals(oldWebViewPackageName)) {
+                                onWebViewUpdateInstalled();
+                                oldWebViewPackageName = usedPackageName;
+                            }
+                            return;
+                        }
                     }
                 }
         };
