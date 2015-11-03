@@ -21,9 +21,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
@@ -52,9 +54,20 @@ public class Recents extends SystemUI
     public final static int EVENT_BUS_PRIORITY = 1;
     public final static int BIND_TO_SYSTEM_USER_RETRY_DELAY = 5000;
 
+    // Purely for experimentation
+    private final static String RECENTS_OVERRIDE_SYSPROP_KEY = "persist.recents_override_pkg";
+    private final static String ACTION_SHOW_RECENTS = "com.android.systemui.recents.ACTION_SHOW";
+    private final static String ACTION_HIDE_RECENTS = "com.android.systemui.recents.ACTION_HIDE";
+    private final static String ACTION_TOGGLE_RECENTS = "com.android.systemui.recents.ACTION_TOGGLE";
+
     private static SystemServicesProxy sSystemServicesProxy;
     private static RecentsTaskLoader sTaskLoader;
     private static RecentsConfiguration sConfiguration;
+
+    // For experiments only, allows another package to handle recents if it is defined in the system
+    // properties.  This is limited to show/toggle/hide, and does not tie into the ActivityManager,
+    // and does not reside in the home stack.
+    private String mOverrideRecentsPackageName;
 
     private Handler mHandler;
     private RecentsImpl mImpl;
@@ -142,6 +155,14 @@ public class Recents extends SystemUI
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 
+        // Check if there is a recents override package
+        if ("userdebug".equals(Build.TYPE) || "eng".equals(Build.TYPE)) {
+            String cnStr = SystemProperties.get(RECENTS_OVERRIDE_SYSPROP_KEY);
+            if (!cnStr.isEmpty()) {
+                mOverrideRecentsPackageName = cnStr;
+            }
+        }
+
         // Register with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
         EventBus.getDefault().register(sTaskLoader, EVENT_BUS_PRIORITY);
@@ -172,6 +193,10 @@ public class Recents extends SystemUI
      */
     @Override
     public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
+        if (proxyToOverridePackage(ACTION_SHOW_RECENTS)) {
+            return;
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.showRecents(triggeredFromAltTab);
@@ -197,6 +222,10 @@ public class Recents extends SystemUI
      */
     @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+        if (proxyToOverridePackage(ACTION_HIDE_RECENTS)) {
+            return;
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
@@ -222,6 +251,10 @@ public class Recents extends SystemUI
      */
     @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
+        if (proxyToOverridePackage(ACTION_TOGGLE_RECENTS)) {
+            return;
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.toggleRecents();
@@ -420,5 +453,20 @@ public class Recents extends SystemUI
             r.run();
         }
         mOnConnectRunnables.clear();
+    }
+
+    /**
+     * Attempts to proxy the following action to the override recents package.
+     * @return whether the proxying was successful
+     */
+    private boolean proxyToOverridePackage(String action) {
+        if (mOverrideRecentsPackageName != null) {
+            Intent intent = new Intent(action);
+            intent.setPackage(mOverrideRecentsPackageName);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            mContext.sendBroadcast(intent);
+            return true;
+        }
+        return false;
     }
 }
