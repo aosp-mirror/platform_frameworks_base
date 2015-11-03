@@ -21,6 +21,8 @@ import android.net.LocalSocketAddress;
 import android.os.SystemClock;
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
+
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -42,9 +44,20 @@ public class InstallerConnection {
     private OutputStream mOut;
     private LocalSocket mSocket;
 
+    private volatile Object mWarnIfHeld;
+
     private final byte buf[] = new byte[1024];
 
     public InstallerConnection() {
+    }
+
+    /**
+     * Yell loudly if someone tries making future calls while holding a lock on
+     * the given object.
+     */
+    public void setWarnIfHeld(Object warnIfHeld) {
+        Preconditions.checkState(mWarnIfHeld == null);
+        mWarnIfHeld = Preconditions.checkNotNull(warnIfHeld);
     }
 
     public synchronized String transact(String cmd) {
@@ -84,6 +97,11 @@ public class InstallerConnection {
     }
 
     public int execute(String cmd) {
+        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
+        }
+
         String res = transact(cmd);
         try {
             return Integer.parseInt(res);

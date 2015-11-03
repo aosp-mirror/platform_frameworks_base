@@ -1440,7 +1440,7 @@ class MountService extends IMountService.Stub
         mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG, 25,
                 null);
         mConnector.setDebug(true);
-        mConnector.setLockWarning(mLock);
+        mConnector.setWarnIfHeld(mLock);
 
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();

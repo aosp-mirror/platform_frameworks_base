@@ -2391,6 +2391,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         // tidy.
         Runtime.getRuntime().gc();
 
+        // The initial scanning above does many calls into installd while
+        // holding the mPackages lock, but we're mostly interested in yelling
+        // once we have a booted system.
+        mInstaller.setWarnIfHeld(mPackages);
+
         // Expose private service for system components to use.
         LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
     }
