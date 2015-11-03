@@ -692,8 +692,15 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
     int addedRows = 0;
     bool windowFull = false;
     bool gotException = false;
+    bool first = true;
     while (!gotException && (!windowFull || countAllRows)) {
-        int err = sqlite3_step(statement);
+        int err;
+        if (first && sqlite3_stmt_busy(statement)) {
+            err = SQLITE_ROW; // this one didn't fit in the window last time
+        } else {
+            err = sqlite3_step(statement);
+        }
+        first = false;
         if (err == SQLITE_ROW) {
             LOG_WINDOW("Stepped statement %p to row %d", statement, totalRows);
             retryCount = 0;
@@ -744,11 +751,6 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
             gotException = true;
         }
     }
-
-    LOG_WINDOW("Resetting statement %p after fetching %d rows and adding %d rows"
-            "to the window in %d bytes",
-            statement, totalRows, addedRows, window->size() - window->freeSpace());
-    sqlite3_reset(statement);
 
     // Report the total number of rows on request.
     if (startPos > totalRows) {

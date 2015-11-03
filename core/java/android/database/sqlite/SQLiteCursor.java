@@ -137,6 +137,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private void fillWindow(int requiredPos) {
         clearOrCreateWindow(getDatabase().getPath());
 
+        requiredPos = Math.max(0, requiredPos);
         try {
             if (mCount == NO_COUNT) {
                 int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos, 0);
@@ -197,6 +198,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     @Override
     public void deactivate() {
         super.deactivate();
+        mQuery.deactivate();
         mDriver.cursorDeactivated();
     }
 
@@ -226,6 +228,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             mPos = -1;
             mCount = NO_COUNT;
 
+            mQuery.onRequery();
             mDriver.cursorRequeried(this);
         }
 

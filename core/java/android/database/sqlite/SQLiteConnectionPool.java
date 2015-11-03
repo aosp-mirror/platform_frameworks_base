@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import dalvik.system.CloseGuard;
 
+import android.database.sqlite.SQLiteConnection.SQLiteContinuation;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
@@ -325,6 +326,47 @@ public final class SQLiteConnectionPool implements Closeable {
         }
     }
 
+    void discontinue(SQLiteContinuation cont, SQLiteConnection heldConnection) {
+        if (cont.isReset()) {
+            return; // no need to even try.
+        }
+        synchronized (mLock) {
+            // if the caller already holds the correct connection, we're happy
+            if (discontinueLocked(cont, heldConnection, true)) {
+                return;
+            }
+            // okay, try all the other ones...
+            if (discontinueLocked(cont, mAvailablePrimaryConnection, true)) {
+                return;
+            }
+            final int N = mAvailableNonPrimaryConnections.size();
+            for (int i=0; i<N; ++i) {
+                if (discontinueLocked(cont, mAvailableNonPrimaryConnections.get(i), true)) {
+                    return;
+                }
+            }
+            for (SQLiteConnection acquiredConnection : mAcquiredConnections.keySet()) {
+                if (discontinueLocked(cont, acquiredConnection, false)) {
+                    return;
+                }
+            }
+            // Oh. Guess the connection was closed. All this work for nothing. That's fine.
+        }
+    }
+
+    private boolean discontinueLocked(SQLiteContinuation cont, SQLiteConnection conn, boolean ours) {
+        if (conn != null && cont.belongsTo(conn)) {
+            conn.queueCancelContinuationLocked(cont);
+            if (ours) {
+                // If the caller owns the connection, or it was available, we can handle it
+                // immediately. Otherwise, it'll be handled when the connection is released.
+                conn.handleCanceledContinuationsLocked();
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Acquires a connection from the pool.
      * <p>
@@ -344,8 +386,8 @@ public final class SQLiteConnectionPool implements Closeable {
      * @throws OperationCanceledException if the operation was canceled.
      */
     public SQLiteConnection acquireConnection(String sql, int connectionFlags,
-            CancellationSignal cancellationSignal) {
-        return waitForConnection(sql, connectionFlags, cancellationSignal);
+            CancellationSignal cancellationSignal, SQLiteContinuation cont) {
+        return waitForConnection(sql, connectionFlags, cancellationSignal, cont);
     }
 
     /**
@@ -368,6 +410,7 @@ public final class SQLiteConnectionPool implements Closeable {
                         + "because the specified connection was not acquired "
                         + "from this pool or has already been released.");
             }
+            connection.handleCanceledContinuationsLocked(); // other threads may have queued stuff
 
             if (!mIsOpen) {
                 closeConnectionAndLogExceptionsLocked(connection);
@@ -589,7 +632,7 @@ public final class SQLiteConnectionPool implements Closeable {
 
     // Might throw.
     private SQLiteConnection waitForConnection(String sql, int connectionFlags,
-            CancellationSignal cancellationSignal) {
+            CancellationSignal cancellationSignal, SQLiteContinuation cont) {
         final boolean wantPrimaryConnection =
                 (connectionFlags & CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY) != 0;
 
@@ -613,6 +656,7 @@ public final class SQLiteConnectionPool implements Closeable {
                 connection = tryAcquirePrimaryConnectionLocked(connectionFlags); // might throw
             }
             if (connection != null) {
+                checkContinuationLocked(connection, cont);
                 return connection;
             }
 
@@ -681,6 +725,7 @@ public final class SQLiteConnectionPool implements Closeable {
                     if (connection != null || ex != null) {
                         recycleConnectionWaiterLocked(waiter);
                         if (connection != null) {
+                            checkContinuationLocked(connection, cont);
                             return connection;
                         }
                         throw ex; // rethrow!
@@ -701,6 +746,20 @@ public final class SQLiteConnectionPool implements Closeable {
             if (cancellationSignal != null) {
                 cancellationSignal.setOnCancelListener(null);
             }
+        }
+    }
+
+    void checkContinuation(SQLiteConnection conn, SQLiteContinuation cont) {
+        if (cont != null) {
+            synchronized (mLock) {
+                checkContinuationLocked(conn, cont);
+            }
+        }
+    }
+
+    private void checkContinuationLocked(SQLiteConnection conn, SQLiteContinuation cont) {
+        if (cont != null && !cont.belongsTo(conn)) {
+            conn.queueCancelContinuationLocked(cont);
         }
     }
 
