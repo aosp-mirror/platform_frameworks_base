@@ -374,13 +374,26 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ActivityRecord sourceRecord;
         final int startFlags;
         final ActivityStack stack;
+        final ProcessRecord callerApp;
 
         PendingActivityLaunch(ActivityRecord _r, ActivityRecord _sourceRecord,
-                int _startFlags, ActivityStack _stack) {
+                int _startFlags, ActivityStack _stack, ProcessRecord _callerApp) {
             r = _r;
             sourceRecord = _sourceRecord;
             startFlags = _startFlags;
             stack = _stack;
+            callerApp = _callerApp;
+        }
+
+        void sendErrorResult(String message) {
+            try {
+                if (callerApp.thread != null) {
+                    callerApp.thread.scheduleCrash(message);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception scheduling crash of failed "
+                        + "activity launcher sourceRecord=" + sourceRecord, e);
+            }
         }
     }
 
@@ -1678,8 +1691,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 || stack.mResumedActivity.info.applicationInfo.uid != callingUid)) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
-                PendingActivityLaunch pal =
-                        new PendingActivityLaunch(r, sourceRecord, startFlags, stack);
+                PendingActivityLaunch pal =  new PendingActivityLaunch(r, 
+                        sourceRecord, startFlags, stack, callerApp);
                 mPendingActivityLaunches.add(pal);
                 ActivityOptions.abort(options);
                 return ActivityManager.START_SWITCHES_CANCELED;
@@ -2545,9 +2558,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             try {
                 startActivityUncheckedLocked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                                             doResume && mPendingActivityLaunches.isEmpty(), null, null);
+                        doResume && mPendingActivityLaunches.isEmpty(), null, null);
             } catch (Exception e) {
-                Slog.w(TAG, "Exception during pending activity launch pal=" + pal, e);
+                Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
+                pal.sendErrorResult(e.getMessage());
             }
         }
     }
