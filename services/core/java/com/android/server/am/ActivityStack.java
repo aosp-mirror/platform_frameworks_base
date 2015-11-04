@@ -1456,29 +1456,35 @@ final class ActivityStack {
                     }
 
                     if (r.app == null || r.app.thread == null) {
-                        // This activity needs to be visible, but isn't even running...
-                        // get it started and resume if no other stack in this stack is resumed.
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                "Start and freeze screen for " + r);
-                        if (r != starting) {
-                            r.startFreezingScreenLocked(r.app, configChanges);
-                        }
-                        if (!r.visible || r.mLaunchTaskBehind) {
+                        // We need to make sure the app is running if it's the top, or it is
+                        // just made visible from invisible.
+                        // If the app is already visible, it must have died while it was visible.
+                        // In this case, we'll show the dead window but will not restart the app.
+                        // Otherwise we could end up thrashing.
+                        if (r == top || !r.visible) {
+                            // This activity needs to be visible, but isn't even running...
+                            // get it started and resume if no other stack in this stack is resumed.
                             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                    "Starting and making visible: " + r);
-                            setVisible(r, true);
-                        }
-                        if (r != starting) {
-                            mStackSupervisor.startSpecificActivityLocked(
-                                    r, noStackActivityResumed, false);
-                            if (activityNdx >= activities.size()) {
-                                // Record may be removed if its process needs to restart.
-                                activityNdx = activities.size() - 1;
-                            } else {
-                                noStackActivityResumed = false;
+                                    "Start and freeze screen for " + r);
+                            if (r != starting) {
+                                r.startFreezingScreenLocked(r.app, configChanges);
+                            }
+                            if (!r.visible || r.mLaunchTaskBehind) {
+                                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
+                                        "Starting and making visible: " + r);
+                                setVisible(r, true);
+                            }
+                            if (r != starting) {
+                                mStackSupervisor.startSpecificActivityLocked(
+                                        r, noStackActivityResumed, false);
+                                if (activityNdx >= activities.size()) {
+                                    // Record may be removed if its process needs to restart.
+                                    activityNdx = activities.size() - 1;
+                                } else {
+                                    noStackActivityResumed = false;
+                                }
                             }
                         }
-
                     } else if (r.visible) {
                         // If this activity is already visible, then there is nothing
                         // else to do here.
@@ -3731,10 +3737,13 @@ final class ActivityStack {
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
                         remove = true;
-                    } else if (r.launchCount > 2 &&
-                            r.lastLaunchTime > (SystemClock.uptimeMillis()-60000)) {
+                    } else if (!r.visible && r.launchCount > 2 &&
+                            r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
                         // We have launched this activity too many times since it was
                         // able to run, so give up and remove it.
+                        // (Note if the activity is visible, we don't remove the record.
+                        // We leave the dead window on the screen but the process will
+                        // not be restarted unless user explicitly tap on it.)
                         remove = true;
                     } else {
                         // The process may be gone, but the activity lives on!
@@ -3764,7 +3773,11 @@ final class ActivityStack {
                         if (DEBUG_APP) Slog.v(TAG_APP,
                                 "Clearing app during removeHistory for activity " + r);
                         r.app = null;
-                        r.nowVisible = false;
+                        // Set nowVisible to previous visible state. If the app was visible while
+                        // it died, we leave the dead window on screen so it's basically visible.
+                        // This is needed when user later tap on the dead window, we need to stop
+                        // other apps when user transfers focus to the restarted activity.
+                        r.nowVisible = r.visible;
                         if (!r.haveState) {
                             if (DEBUG_SAVED_STATE) Slog.i(TAG_SAVED_STATE,
                                     "App died, clearing saved state of " + r);

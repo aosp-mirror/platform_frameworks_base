@@ -340,6 +340,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mRemoveOnExit;
 
     /**
+     * Whether the app died while it was visible, if true we might need
+     * to continue to show it until it's restarted.
+     */
+    boolean mAppDied;
+
+    /**
      * Set when the orientation is changing and this window has not yet
      * been updated for the new orientation.
      */
@@ -362,6 +368,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
+    InputChannel mClientChannel;
 
     // Used to improve performance of toString()
     String mStringNameCache;
@@ -1274,16 +1281,28 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mConfigHasChanged = false;
     }
 
-    void setInputChannel(InputChannel inputChannel) {
+    void openInputChannel(InputChannel outInputChannel) {
         if (mInputChannel != null) {
             throw new IllegalStateException("Window already has an input channel.");
         }
-
-        mInputChannel = inputChannel;
-        mInputWindowHandle.inputChannel = inputChannel;
+        String name = makeInputChannelName();
+        InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
+        mInputChannel = inputChannels[0];
+        mClientChannel = inputChannels[1];
+        mInputWindowHandle.inputChannel = inputChannels[0];
+        if (outInputChannel != null) {
+            mClientChannel.transferTo(outInputChannel);
+            mClientChannel.dispose();
+            mClientChannel = null;
+        }
+        mService.mInputManager.registerInputChannel(mInputChannel, mInputWindowHandle);
     }
 
     void disposeInputChannel() {
+        if (mClientChannel != null) {
+            mClientChannel.dispose();
+            mClientChannel = null;
+        }
         if (mInputChannel != null) {
             mService.mInputManager.unregisterInputChannel(mInputChannel);
 
@@ -1294,10 +1313,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mInputWindowHandle.inputChannel = null;
     }
 
-    void handleFlagDimBehind() {
-        if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && mDisplayContent != null && !mExiting
-                && isDisplayedLw()) {
-            mDisplayContent.mDimBehindController.applyDimBehind(getDimLayerUser(), mWinAnimator);
+    void applyDimLayerIfNeeded() {
+        if (!mExiting && mAppDied) {
+            // If app died visible, apply a dim over the window to indicate that it's inactive
+            mDisplayContent.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
+        } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
+                && mDisplayContent != null && !mExiting && isDisplayedLw()) {
+            mDisplayContent.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
         }
     }
 
@@ -1375,6 +1397,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
+                        if (win.mAppToken != null && !win.mAppToken.clientHidden) {
+                            win.mAppToken.appDied = true;
+                        }
                         mService.removeWindowLocked(win);
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
@@ -1574,7 +1599,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public boolean isDimming() {
         final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
         return dimLayerUser != null && mDisplayContent != null &&
-                mDisplayContent.mDimBehindController.isDimming(dimLayerUser, mWinAnimator);
+                mDisplayContent.mDimLayerController.isDimming(dimLayerUser, mWinAnimator);
     }
 
     public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
@@ -1833,7 +1858,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
             pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
             if (mAppToken != null) {
-                pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
+                pw.print(prefix); pw.print("mAppToken="); pw.print(mAppToken);
+                pw.print(" mAppDied=");pw.println(mAppDied);
             }
             if (mTargetAppToken != null) {
                 pw.print(prefix); pw.print("mTargetAppToken="); pw.println(mTargetAppToken);

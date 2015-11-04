@@ -1924,6 +1924,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
+            if (atoken != null && atoken.appDied) {
+                Slog.d(TAG, "App is now revived: " + atoken);
+                atoken.appDied = false;
+            }
+
             mPolicy.adjustWindowParamsLw(win.mAttrs);
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
@@ -1935,11 +1940,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean openInputChannels = (outInputChannel != null
                     && (attrs.inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) == 0);
             if  (openInputChannels) {
-                String name = win.makeInputChannelName();
-                InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
-                win.setInputChannel(inputChannels[0]);
-                inputChannels[1].transferTo(outInputChannel);
-                mInputManager.registerInputChannel(win.mInputChannel, win.mInputWindowHandle);
+                win.openInputChannel(outInputChannel);
             }
 
             // From now on, no exceptions or errors allowed!
@@ -2183,13 +2184,31 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "added");
                 win.mExiting = true;
                 appToken.mReplacingRemoveRequested = true;
+                Binder.restoreCallingIdentity(origId);
                 return;
             }
             // If we are not currently running the exit animation, we
             // need to see about starting one.
             wasVisible = win.isWinVisibleLw();
-            if (wasVisible) {
 
+            if (wasVisible && appToken != null && appToken.appDied) {
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG,
+                        "Not removing " + win + " because app died while it's visible");
+
+                win.mAppDied = true;
+                win.setDisplayLayoutNeeded();
+                mWindowPlacerLocked.performSurfacePlacement();
+
+                // Set up a replacement input channel since the app is now dead.
+                // We need to catch tapping on the dead window to restart the app.
+                win.openInputChannel(null);
+                mInputMonitor.updateInputWindowsLw(true /*force*/);
+
+                Binder.restoreCallingIdentity(origId);
+                return;
+            }
+
+            if (wasVisible) {
                 final int transit = (!startingWindow)
                         ? WindowManagerPolicy.TRANSIT_EXIT
                         : WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
@@ -2240,10 +2259,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void removeWindowInnerLocked(WindowState win) {
-        removeWindowInnerLocked(win, true);
-    }
-
-    private void removeWindowInnerLocked(WindowState win, boolean performLayout) {
         if (win.mRemoved) {
             // Nothing to do.
             return;
@@ -2338,9 +2353,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!mWindowPlacerLocked.isInLayout()) {
                 assignLayersLocked(windows);
                 win.setDisplayLayoutNeeded();
-                if (performLayout) {
-                    mWindowPlacerLocked.performSurfacePlacement();
-                }
+                mWindowPlacerLocked.performSurfacePlacement();
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
                 }
@@ -4117,6 +4130,14 @@ public class WindowManagerService extends IWindowManager.Stub
             mClosingApps.remove(wtoken);
             wtoken.waitingToShow = false;
             wtoken.hiddenRequested = !visible;
+
+            if (!visible && wtoken.appDied) {
+                // This app is dead while it was visible, we kept its dead window on screen.
+                // Now that the app is going invisible, we can remove it. It will be restarted
+                // if made visible again.
+                wtoken.appDied = false;
+                wtoken.removeAllWindows();
+            }
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
@@ -8548,7 +8569,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final DimLayer.DimLayerUser dimLayerUser = w.getDimLayerUser();
             final DisplayContent displayContent = w.getDisplayContent();
             if (layerChanged && dimLayerUser != null && displayContent != null &&
-                    displayContent.mDimBehindController.isDimming(dimLayerUser, winAnimator)) {
+                    displayContent.mDimLayerController.isDimming(dimLayerUser, winAnimator)) {
                 // Force an animation pass just to update the mDimLayer layer.
                 scheduleAnimationLocked();
             }
@@ -8665,6 +8686,13 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " surfaceResized=" + winAnimator.mSurfaceResized
                             + " configChanged=" + configChanged
                             + " dragResizingChanged=" + dragResizingChanged);
+                }
+
+                // If it's a dead window left on screen, and the configuration changed,
+                // there is nothing we can do about it. Remove the window now.
+                if (w.mAppToken != null && w.mAppDied) {
+                    w.mAppToken.removeAllDeadWindows();
+                    return;
                 }
 
                 w.mLastOverscanInsets.set(w.mOverscanInsets);
