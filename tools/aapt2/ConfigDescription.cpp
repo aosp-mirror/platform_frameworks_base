@@ -164,6 +164,26 @@ static bool parseScreenLayoutLong(const char* name, ResTable_config* out) {
     return false;
 }
 
+static bool parseScreenRound(const char* name, ResTable_config* out) {
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->screenLayout2 =
+                (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
+                | ResTable_config::SCREENROUND_ANY;
+        return true;
+    } else if (strcmp(name, "round") == 0) {
+        if (out) out->screenLayout2 =
+                (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
+                | ResTable_config::SCREENROUND_YES;
+        return true;
+    } else if (strcmp(name, "notround") == 0) {
+        if (out) out->screenLayout2 =
+                (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
+                | ResTable_config::SCREENROUND_NO;
+        return true;
+    }
+    return false;
+}
+
 static bool parseOrientation(const char* name, ResTable_config* out) {
     if (strcmp(name, kWildcardName) == 0) {
         if (out) out->orientation = out->ORIENTATION_ANY;
@@ -635,6 +655,13 @@ bool ConfigDescription::parse(const StringPiece& str, ConfigDescription* out) {
         }
     }
 
+    if (parseScreenRound(partIter->c_str(), &config)) {
+        ++partIter;
+        if (partIter == partsEnd) {
+            goto success;
+        }
+    }
+
     if (parseOrientation(partIter->c_str(), &config)) {
         ++partIter;
         if (partIter == partsEnd) {
@@ -725,7 +752,9 @@ success:
 
 void ConfigDescription::applyVersionForCompatibility(ConfigDescription* config) {
     uint16_t minSdk = 0;
-    if (config->density == ResTable_config::DENSITY_ANY) {
+    if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
+        minSdk = SDK_MARSHMALLOW;
+    } else if (config->density == ResTable_config::DENSITY_ANY) {
         minSdk = SDK_LOLLIPOP;
     } else if (config->smallestScreenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || config->screenWidthDp != ResTable_config::SCREENWIDTH_ANY
