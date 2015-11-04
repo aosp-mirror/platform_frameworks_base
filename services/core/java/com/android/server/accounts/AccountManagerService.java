@@ -88,6 +88,7 @@ import com.google.android.collect.Sets;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -114,6 +115,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AccountManagerService
         extends IAccountManager.Stub
         implements RegisteredServicesCacheListener<AuthenticatorDescription> {
+
     private static final String TAG = "AccountManagerService";
 
     private static final String DATABASE_NAME = "accounts.db";
@@ -2283,6 +2285,193 @@ public class AccountManagerService
         }
     }
 
+    @Override
+    public void startAddAccountSession(final IAccountManagerResponse response, final String accountType,
+            final String authTokenType, final String[] requiredFeatures,
+            final boolean expectActivityLaunch,
+            final Bundle optionsIn) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG,
+                    "startAddAccountSession: accountType " + accountType
+                    + ", response " + response
+                    + ", authTokenType " + authTokenType
+                    + ", requiredFeatures " + stringArrayToString(requiredFeatures)
+                    + ", expectActivityLaunch " + expectActivityLaunch
+                    + ", caller's uid " + Binder.getCallingUid()
+                    + ", pid " + Binder.getCallingPid());
+        }
+        if (response == null) {
+            throw new IllegalArgumentException("response is null");
+        }
+        if (accountType == null) {
+            throw new IllegalArgumentException("accountType is null");
+        }
+
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        if (!canUserModifyAccounts(userId)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
+                        "User is not allowed to add an account!");
+            } catch (RemoteException re) {
+            }
+            showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED, userId);
+            return;
+        }
+        if (!canUserModifyAccountsForType(userId, accountType)) {
+            try {
+                response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                        "User cannot modify accounts of this type (policy).");
+            } catch (RemoteException re) {
+            }
+            showCantAddAccount(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                    userId);
+            return;
+        }
+
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
+        options.putInt(AccountManager.KEY_CALLER_UID, uid);
+        options.putInt(AccountManager.KEY_CALLER_PID, pid);
+
+        int usrId = UserHandle.getCallingUserId();
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(usrId);
+            logRecordWithUid(accounts, DebugDbHelper.ACTION_CALLED_START_ACCOUNT_ADD,
+                    TABLE_ACCOUNTS, uid);
+            new StartAccountSession(accounts, response, accountType, expectActivityLaunch,
+                    null /* accountName */, false /* authDetailsRequired */,
+                    true /* updateLastAuthenticationTime */) {
+                @Override
+                public void run() throws RemoteException {
+                    mAuthenticator.startAddAccountSession(this, mAccountType, authTokenType,
+                            requiredFeatures, options);
+                }
+
+                @Override
+                protected String toDebugString(long now) {
+                    String requiredFeaturesStr = TextUtils.join(",", requiredFeatures);
+                    return super.toDebugString(now) + ", startAddAccountSession" + ", accountType "
+                            + accountType + ", requiredFeatures "
+                            + (requiredFeatures != null ? requiredFeaturesStr : null);
+                }
+            }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    /** Session that will encrypt the KEY_ACCOUNT_SESSION_BUNDLE in result. */
+    private abstract class StartAccountSession extends Session {
+
+        public StartAccountSession(UserAccounts accounts, IAccountManagerResponse response,
+                String accountType, boolean expectActivityLaunch, String accountName,
+                boolean authDetailsRequired, boolean updateLastAuthenticationTime) {
+            super(accounts, response, accountType, expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */, accountName, authDetailsRequired,
+                    updateLastAuthenticationTime);
+        }
+
+        @Override
+        public void onResult(Bundle result) {
+            mNumResults++;
+            Intent intent = null;
+
+            if (result != null
+                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+                /*
+                 * The Authenticator API allows third party authenticators to
+                 * supply arbitrary intents to other apps that they can run,
+                 * this can be very bad when those apps are in the system like
+                 * the System Settings.
+                 */
+                int authenticatorUid = Binder.getCallingUid();
+                long bid = Binder.clearCallingIdentity();
+                try {
+                    PackageManager pm = mContext.getPackageManager();
+                    ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
+                    int targetUid = resolveInfo.activityInfo.applicationInfo.uid;
+                    if (PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authenticatorUid,
+                            targetUid)) {
+                        throw new SecurityException("Activity to be started with KEY_INTENT must "
+                                + "share Authenticator's signatures");
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(bid);
+                }
+            }
+
+            IAccountManagerResponse response;
+            if (mExpectActivityLaunch && result != null
+                    && result.containsKey(AccountManager.KEY_INTENT)) {
+                response = mResponse;
+            } else {
+                response = getResponseAndClose();
+            }
+            if (response == null) {
+                return;
+            }
+            if (result == null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, getClass().getSimpleName() + " calling onError() on response "
+                            + response);
+                }
+                sendErrorResponse(response, AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "null bundle returned");
+                return;
+            }
+
+            if ((result.getInt(AccountManager.KEY_ERROR_CODE, -1) > 0) && (intent == null)) {
+                // All AccountManager error codes are greater
+                // than 0
+                sendErrorResponse(response, result.getInt(AccountManager.KEY_ERROR_CODE),
+                        result.getString(AccountManager.KEY_ERROR_MESSAGE));
+                return;
+            }
+
+            // Strip auth token from result.
+            result.remove(AccountManager.KEY_AUTHTOKEN);
+
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG,
+                        getClass().getSimpleName() + " calling onResult() on response " + response);
+            }
+
+            // Get the session bundle created by authenticator. The
+            // bundle contains data necessary for finishing the session
+            // later. The session bundle will be encrypted here and
+            // decrypted later when trying to finish the session.
+            Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+            if (sessionBundle != null) {
+                String accountType = sessionBundle.getString(AccountManager.KEY_ACCOUNT_TYPE);
+                if (TextUtils.isEmpty(accountType)
+                        && !mAccountType.equalsIgnoreCase(mAccountType)) {
+                    Log.w(TAG, "Account type in session bundle doesn't match request.");
+                }
+                // Add accountType info to session bundle. This will
+                // override any value set by authenticator.
+                sessionBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, mAccountType);
+
+                // Encrypt session bundle before returning to caller.
+                try {
+                    CryptoHelper cryptoHelper = CryptoHelper.getInstance();
+                    Bundle encryptedBundle = cryptoHelper.encryptBundle(sessionBundle);
+                    result.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, encryptedBundle);
+                } catch (GeneralSecurityException e) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.v(TAG, "Failed to encrypt session bundle!", e);
+                    }
+                    sendErrorResponse(response, AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                            "failed to encrypt session bundle");
+                    return;
+                }
+            }
+
+            sendResponse(response, result);
+        }
+    }
+
     private void showCantAddAccount(int errorCode, int userId) {
         Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
         cantAddAccount.putExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, errorCode);
@@ -3336,6 +3525,11 @@ public class AccountManagerService
         private static String ACTION_CALLED_ACCOUNT_ADD = "action_called_account_add";
         private static String ACTION_CALLED_ACCOUNT_REMOVE = "action_called_account_remove";
 
+        // TODO: This action doesn't add account to accountdb. Account is only
+        // added in finishAddAccount or finishAddAccountAsUser which may be in
+        // a different user profile.
+        private static String ACTION_CALLED_START_ACCOUNT_ADD = "action_called_start_account_add";
+
         private static SimpleDateFormat dateFromat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         private static void createDebugTable(SQLiteDatabase db) {
@@ -4298,6 +4492,31 @@ public class AccountManagerService
         } catch (NameNotFoundException e) {
             // Default to mContext, not finding the package system is running as is unlikely.
             return mContext;
+        }
+    }
+
+    private void sendResponse(IAccountManagerResponse response, Bundle result) {
+        try {
+            response.onResult(result);
+        } catch (RemoteException e) {
+            // if the caller is dead then there is no one to care about remote
+            // exceptions
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "failure while notifying response", e);
+            }
+        }
+    }
+
+    private void sendErrorResponse(IAccountManagerResponse response, int errorCode,
+            String errorMessage) {
+        try {
+            response.onError(errorCode, errorMessage);
+        } catch (RemoteException e) {
+            // if the caller is dead then there is no one to care about remote
+            // exceptions
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "failure while notifying response", e);
+            }
         }
     }
 }

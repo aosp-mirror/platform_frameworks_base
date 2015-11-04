@@ -83,4 +83,9 @@ interface IAccountManager {
     String getPreviousName(in Account account);
     boolean renameSharedAccountAsUser(in Account accountToRename, String newName, int userId);
 
+    /* Add account in two steps. */
+    void startAddAccountSession(in IAccountManagerResponse response, String accountType,
+        String authTokenType, in String[] requiredFeatures, boolean expectActivityLaunch,
+        in Bundle options);
+
 }

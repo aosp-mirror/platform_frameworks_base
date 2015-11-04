@@ -240,6 +240,20 @@ public class AccountManager {
      */
     public static final String KEY_NOTIFY_ON_FAILURE = "notifyOnAuthFailure";
 
+    /**
+     * Bundle key used for a {@link Bundle} in result from
+     * {@link #startAddAccountSession} and friends which returns session data
+     * for installing an account later.
+     */
+    public static final String KEY_ACCOUNT_SESSION_BUNDLE = "accountSessionBundle";
+
+    /**
+     * Bundle key used for the {@link String} account status token in result
+     * from {@link #startAddAccountSession} and friends which returns
+     * information about a particular account.
+     */
+    public static final String KEY_ACCOUNT_STATUS_TOKEN = "accountStatusToken";
+
     public static final String ACTION_AUTHENTICATOR_INTENT =
             "android.accounts.AccountAuthenticator";
     public static final String AUTHENTICATOR_META_DATA_NAME =
@@ -2589,5 +2603,85 @@ public class AccountManager {
                 mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
             }
         }
+    }
+
+    /**
+     * Asks the user to authenticate with an account of a specified type. The
+     * authenticator for this account type processes this request with the
+     * appropriate user interface. If the user does elect to authenticate with a
+     * new account, a bundle of session data for installing the account later is
+     * returned with optional account password and account status token.
+     * <p>
+     * This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     * <p>
+     * <p>
+     * <b>NOTE:</b> The account will not be installed to the device by calling
+     * this api alone.
+     *
+     * @param accountType The type of account to add; must not be null
+     * @param authTokenType The type of auth token (see {@link #getAuthToken})
+     *            this account will need to be able to generate, null for none
+     * @param requiredFeatures The features (see {@link #hasFeatures}) this
+     *            account must have, null for none
+     * @param options Authenticator-specific options for the request, may be
+     *            null or empty
+     * @param activity The {@link Activity} context to use for launching a new
+     *            authenticator-defined sub-Activity to prompt the user to
+     *            create an account; used only to call startActivity(); if null,
+     *            the prompt will not be launched directly, but the necessary
+     *            {@link Intent} will be returned to the caller instead
+     * @param callback Callback to invoke when the request completes, null for
+     *            no callback
+     * @param handler {@link Handler} identifying the callback thread, null for
+     *            the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *         these fields if activity was specified and user was authenticated
+     *         with an account:
+     *         <ul>
+     *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
+     *         adding the the to the device later.
+     *         <li>{@link #KEY_PASSWORD} - optional, the password or password
+     *         hash of the account.
+     *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
+     *         status of the account
+     *         </ul>
+     *         If no activity was specified, the returned Bundle contains only
+     *         {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     *         actual account creation process. If authenticator doesn't support
+     *         this method, the returned Bundle contains only
+     *         {@link #KEY_ACCOUNT_SESSION_BUNDLE} with encrypted
+     *         {@code options} needed to add account later. If an error
+     *         occurred, {@link AccountManagerFuture#getResult()} throws:
+     *         <ul>
+     *         <li>{@link AuthenticatorException} if no authenticator was
+     *         registered for this account type or the authenticator failed to
+     *         respond
+     *         <li>{@link OperationCanceledException} if the operation was
+     *         canceled for any reason, including the user canceling the
+     *         creation process or adding accounts (of this type) has been
+     *         disabled by policy
+     *         <li>{@link IOException} if the authenticator experienced an I/O
+     *         problem creating a new account, usually because of network
+     *         trouble
+     *         </ul>
+     */
+    public AccountManagerFuture<Bundle> startAddAccountSession(final String accountType,
+            final String authTokenType, final String[] requiredFeatures, final Bundle options,
+            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (accountType == null) throw new IllegalArgumentException("accountType is null");
+        final Bundle optionsIn = new Bundle();
+        if (options != null) {
+            optionsIn.putAll(options);
+        }
+        optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+
+        return new AmsTask(activity, handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.startAddAccountSession(mResponse, accountType, authTokenType,
+                        requiredFeatures, activity != null, optionsIn);
+            }
+        }.start();
     }
 }

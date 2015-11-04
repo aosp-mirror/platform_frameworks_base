@@ -83,4 +83,11 @@ oneway interface IAccountAuthenticator {
      */
     void addAccountFromCredentials(in IAccountAuthenticatorResponse response, in Account account,
             in Bundle accountCredentials);
+
+    /**
+     * Starts the add account session by prompting the user for account information
+     * and return a Bundle containing data to finish the session later.
+     */
+    void startAddAccountSession(in IAccountAuthenticatorResponse response, String accountType,
+        String authTokenType, in String[] requiredFeatures, in Bundle options);
 }
