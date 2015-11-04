@@ -3878,6 +3878,7 @@ package android.app {
     method public void set(int, long, android.app.PendingIntent);
     method public void set(int, long, java.lang.String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
     method public void set(int, long, long, long, android.app.PendingIntent, android.os.WorkSource);
+    method public void set(int, long, long, long, android.app.AlarmManager.OnAlarmListener, android.os.Handler, android.os.WorkSource);
     method public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
     method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);

@@ -611,7 +611,7 @@ public class AlarmManager {
      *
      * @hide
      */
-    //@SystemApi
+    @SystemApi
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             OnAlarmListener listener, Handler targetHandler, WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
