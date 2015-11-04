@@ -487,7 +487,7 @@ public class DirectoryFragment extends Fragment {
 
         CopyService.start(getActivity(), getDisplayState(this).selectedDocumentsForCopy,
                 (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
-                data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_NONE));
+                data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_COPY));
     }
 
     private int getEventAdapterPosition(MotionEvent e) {

@@ -66,7 +66,6 @@ public class CopyService extends IntentService {
     public static final String EXTRA_FAILURE = "com.android.documentsui.FAILURE";
     public static final String EXTRA_TRANSFER_MODE = "com.android.documentsui.TRANSFER_MODE";
 
-    public static final int TRANSFER_MODE_NONE = 0;
     public static final int TRANSFER_MODE_COPY = 1;
     public static final int TRANSFER_MODE_MOVE = 2;
 
