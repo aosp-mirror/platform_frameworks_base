@@ -13,7 +13,8 @@ trainingnavtop=true
     <li><a href="#CreateAdd">Create and Add Geofences</a></li>
     <li><a href="#HandleGeofenceTransitions">Handle Geofence Transitions</a></li>
     <li><a href="#StopGeofenceMonitoring">Stop Geofence Monitoring</a></li>
-
+    <li><a href="#BestPractices">Use Best Practices for Geofencing</a></li>
+    <li><a href="#Troubleshooting">Troubleshoot the Geofence Entrance Event</a></li>
 </ol>
 
 <h2>You should also read</h2>
@@ -56,6 +57,16 @@ srcset="{@docRoot}images/training/geofence.png 1x, {@docRoot}images/training/geo
     This lesson shows you how to add and remove geofences, and then listen for geofence transitions
     using an {@link android.app.IntentService}.</p>
 
+<p>We recommend upgrading existing apps to use the
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationServices.html">
+LocationServices</a> class, which contains the
+<a href="{@docRoot}reference/com/google/android/gms/location/GeofencingApi.html">
+GeofencingApi</a> interface. The
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationServices.html">
+LocationServices</a> class replaces the
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationClient.html">
+LocationClient</a> (deprecated).</p>
+
 <h2 id="RequestGeofences">Set up for Geofence Monitoring</h2>
 <p>
     The first step in requesting geofence monitoring is to request the necessary permission.
@@ -96,6 +107,8 @@ srcset="{@docRoot}images/training/geofence.png 1x, {@docRoot}images/training/geo
  intents sent from Location Services when geofence transitions occur, you can define a
  {@link android.app.PendingIntent} as shown in this section.
 </p>
+
+<p class="note"><strong>Note:</strong> On single-user devices, there is a limit of 100 geofences per app. For multi-user devices, the limit is 100 geofences per app per device user.</p>
 
 <h3>Create geofence objects</h3>
 
@@ -145,25 +158,30 @@ private GeofencingRequest getGeofencingRequest() {
 </pre>
 
 <p>
-    This example shows the use of two geofence triggers. The <code><a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
+    This example shows the use of two geofence triggers. The <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
     GEOFENCE_TRANSITION_ENTER</a></code>
-    transition triggers when a device enters a geofence, and the <code><a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_EXIT">
+    transition triggers when a device enters a geofence, and the <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_EXIT">
     GEOFENCE_TRANSITION_EXIT</a></code>
     transition triggers when a device exits a geofence. Specifying
-    <code><a href="{@docRoot}reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_ENTER">
+    <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_ENTER">
         INITIAL_TRIGGER_ENTER</a></code> tells Location services that
-    <code><a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
+    <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
         GEOFENCE_TRANSITION_ENTER</a></code>
     should be triggered if the the device is already inside the geofence.</p>
 </p>
 
-<p>In many cases, it may be preferable to use instead <code><a href="{@docRoot}reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_DWELL">
+<p>In many cases, it may be preferable to use instead <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_DWELL">
     INITIAL_TRIGGER_DWELL</a></code>,
     which triggers events only when the user stops for a defined duration within a geofence.
     This approach can help reduce "alert spam" resulting from large numbers notifications when a
     device briefly enters and exits geofences. Another strategy for getting best results from your
     geofences is to set a minimum radius of 100 meters. This helps account for the location accuracy
-    of typical WiFi networks, and also helps reduce device power consumption.
+    of typical Wi-Fi networks, and also helps reduce device power consumption.
 </p>
 
 <h3>Define an Intent for geofence transitions</h3>
@@ -195,11 +213,15 @@ public class MainActivity extends FragmentActivity {
 <h3>Add geofences</h3>
 
 <p>
-    To add geofences, use the <code><a href="{@docRoot}reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.GeofencingRequest, android.app.PendingIntent)">{@code GeoencingApi.addGeofences()}</a></code> method.
-    Provide the Google API client, the <code><a href="{@docRoot}reference/com/google/android/gms/location/GeofencingRequest">
+    To add geofences, use the <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.GeofencingRequest, android.app.PendingIntent)">{@code GeoencingApi.addGeofences()}</a></code> method.
+    Provide the Google API client, the <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/GeofencingRequest">
     GeofencingRequest</a></code> object, and the {@link android.app.PendingIntent}.
-    The following snippet, which processes the results in <code><a href="{@docRoot}reference/com/google/android/gms/common/api/ResultCallback.html#onResult(R)">
-    onResult()</a></code>, assumes that the main activity implements <code><a href="{@docRoot}reference/com/google/android/gms/common/api/ResultCallback.html">
+    The following snippet, which processes the results in <code>
+<a href="{@docRoot}reference/com/google/android/gms/common/api/ResultCallback.html#onResult(R)">
+    onResult()</a></code>, assumes that the main activity implements <code>
+<a href="{@docRoot}reference/com/google/android/gms/common/api/ResultCallback.html">
     ResultCallback</a></code>:
 </p>
 <pre>
@@ -304,3 +326,112 @@ LocationServices.GeofencingApi.removeGeofences(
     You can combine geofencing with other location-aware features, such as periodic location updates.
     For more information, see the other lessons in this class.
 </p>
+
+<h2 id="BestPractices">Use Best Practices for Geofencing</h2>
+
+<p>This section outlines recommendations for using geofencing with the location
+APIs for Android.</p>
+
+<h3>Reduce power consumption</h3>
+
+<p>You can use the following techniques to optimize power consumption in your apps that use geofencing:</p>
+
+<ul>
+<li><p>Set the <a href="{@docRoot}android/reference/com/google/android/gms/location/Geofence.Builder.html#setNotificationResponsiveness(int)">
+notification responsiveness</a> to a higher value. Doing so improves power consumption by
+increasing the latency of geofence alerts. For example, if you set a responsiveness value of five
+minutes your app only checks for an entrance or exit alert once every five minutes.
+Setting lower values does not necessarily mean that users will be notified within that time period
+(for example, if you set a value of 5 seconds it may take a bit longer than that to receive the
+alert).</p></li>
+<li><p>Use a larger geofence radius for locations where a user spends a significant amount of time,
+such as home or work. While a larger radius doesn't directly reduce power consumption, it reduces
+the frequency at which the app checks for entrance or exit, effectively lowering overall power
+consumption.</p></li>
+</ul>
+
+<h3>Choose the optimal radius for your geofence</h3>
+<p>For best results, the minimium radius of the geofence should be set between 100 - 150 meters.
+When Wi-Fi is available location accuracy is usually between 20 - 50 meters. When indoor
+location is available, the accuracy range can be as small as 5 meters. Unless you know indoor
+location is available inside the geofence, assume that Wi-Fi location accuracy is about
+50 meters.</p>
+
+<p>When Wi-Fi location is not available (for example, when you are driving in rural areas) the
+location accuracy degrades. The accuracy range can be as large as several hundred meters to
+several kilometers. In cases like this, you should create geofences using a larger radius.</p>
+
+<h3>Use the dwell transition type to reduce alert spam</h3>
+
+<p>If you receive a large number of alerts when driving briefly past a geofence, the best way to
+reduce the alerts is to use a transition type of <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_DWELL">
+GEOFENCE_TRANSITION_DWELL</a></code> instead of <code>
+<a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
+GEOFENCE_TRANSITION_ENTER</a></code>. This way, the dwelling alert is sent only when the user stops
+inside a geofence for a given period of time. You can choose the duration by setting a 
+<a href="{@docRoot}reference/com/google/android/gms/location/Geofence.Builder.html#setLoiteringDelay(int)">
+loitering delay</a>.</p>
+
+<h3>Re-register geofences only when required</h3>
+
+<p>Registered geofences are kept in the <code>com.google.process.location</code> process owned by
+the <code>com.google.android.gms</code> package.
+The app doesn’t need to do anything to handle the following events, because the system
+restores geofences after these events:</p>
+<ul>
+<li>Google Play services is upgraded.</li>
+<li>Google Play services is killed and restarted by the system due resource restriction.</li>
+<li>The location process crashes.</li>
+</ul>
+<p>The app must re-register geofences if they're still needed after the following events, since
+the system cannot recover the geofences in the following cases:</p>
+
+<ul>
+<li>The device is rebooted. The app should listen for the device's boot complete action, and then re-
+register the geofences required.</li>
+<li>The app is uninstalled and re-installed.</li>
+<li>The app's data is cleared.</li>
+<li>Google Play services data is cleared.</li>
+<li>The app has received a <code><a href="{@docRoot}reference/com/google/android/gms/location/LocationStatusCodes.html#GEOFENCE_NOT_AVAILABLE">GEOFENCE_NOT_AVAILABLE</a></code>
+alert. This typically happens
+after NLP (Android's Network Location Provider) is disabled.</li>
+</ul>
+
+<h2 id="Troubleshooting">Troubleshoot the Geofence Entrance Event</h2>
+
+<p>If geofences are not being triggered when the device enters a geofence
+(the <code><a href="{@docRoot}reference/com/google/android/gms/location/Geofence.html#GEOFENCE_TRANSITION_ENTER">
+GEOFENCE_TRANSITION_ENTER</a></code> alert isn’t triggered), first ensure that your geofences are
+registered properly as described in this guide.</p>
+
+<p>Here are some possible reasons for alerts not working as expected:</p>
+
+<ul>
+<li><strong>Accurate location is not available inside your geofence or your geofence is too
+small.</strong> On most devices, the geofence service uses only network location for geofence
+triggering. The service uses this approach because network location consumes much less
+power, it takes less time to get discrete locations, and most importantly it’s available indoors.
+Starting with Google Play services 3.2, the geofence service calculates the overlapping ratio of
+the location circle and the geofence circle and only generates the entrance alert when the ratio
+is at least 85% for a bigger geofence or 75% for a smaller geofence. For an exit alert, the ratio
+threshold used is 15% or 25%. Any ratio between these thresholds makes the geofence service mark
+the geofence state as <code>INSIDE_LOW_CONFIDENCE</code> or <code>OUTSIDE_LOW_CONFIDENCE</code> and
+no alert is sent.</li>
+<li><strong>Wi-Fi is turned off on the device.</strong> Having Wi-Fi on can significantly improve
+the location accuracy, so if Wi-Fi is turned off, your application might never get geofence alerts
+depending on several settings including the radius of the geofence, the device model, or the
+Android version. Starting from Android 4.3 (API level 18), we added the capability of “Wi-Fi scan
+only mode” which allows users to disable Wi-Fi but still get good network location. It’s good
+practice to prompt the user and provide a shortcut for the user to enable Wi-Fi or Wi-Fi scan only
+mode if both of them are disabled. Use <a href="{@docRoot}reference/com/google/android/gms/location/SettingsApi">
+SettingsApi</a> to ensure that the device's system settings are properly configured for optimal
+location detection.</li>
+<li><strong>There is no reliable network connectivity inside your geofence.</strong> If there is
+no reliable data connection, alerts might not be generated. This is because the geofence service
+depends on the network location provider which in turn requires a data connection.</li>
+<li><strong>Alerts can be late.</strong> The geofence service does not continuously query for
+location, so expect some latency when receiving alerts. Usually the latency is less than 2
+minutes, even less when the device has been moving. If the device has been stationary for a
+significant period of time, the latency may increase (up to 6 minutes).</li>
+</ul>
