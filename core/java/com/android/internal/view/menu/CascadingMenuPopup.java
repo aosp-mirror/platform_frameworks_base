@@ -5,28 +5,33 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.AttrRes;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.widget.DropDownListView;
+import android.widget.AbsListView;
 import android.widget.FrameLayout;
-import android.widget.MenuItemHoverListener;
+import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
+import android.widget.MenuItemHoverListener;
 import android.widget.ListView;
 import android.widget.MenuPopupWindow;
-import android.widget.MenuPopupWindow.MenuDropDownListView;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
@@ -47,6 +52,10 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private static final int HORIZ_POSITION_LEFT = 0;
     private static final int HORIZ_POSITION_RIGHT = 1;
 
+    /**
+     * Delay between hovering over a menu item with a mouse and receiving
+     * side-effects (ex. opening a sub-menu or closing unrelated menus).
+     */
     private static final int SUBMENU_TIMEOUT_MS = 200;
 
     private final Context mContext;
@@ -54,8 +63,13 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
     private final boolean mOverflowOnly;
-    private final int mLayoutDirection;
     private final Handler mSubMenuHoverHandler;
+
+    /**
+     * List of open menus. The first item is the root menu and each
+     * subsequent item is a direct submenu of the previous item.
+     */
+    private final List<CascadingMenuInfo> mAddedMenus = new ArrayList<>();
 
     private final OnGlobalLayoutListener mGlobalLayoutListener = new OnGlobalLayoutListener() {
         @Override
@@ -66,8 +80,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                     dismiss();
                 } else if (isShowing()) {
                     // Recompute window sizes and positions.
-                    for (MenuPopupWindow popup : mPopupWindows) {
-                        popup.show();
+                    for (CascadingMenuInfo info : mAddedMenus) {
+                        info.window.show();
                     }
                 }
             }
@@ -94,13 +108,23 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     private final MenuItemHoverListener mMenuItemHoverListener = new MenuItemHoverListener() {
         @Override
-        public void onItemHovered(MenuBuilder menu, int position) {
-            int menuIndex = -1;
-            for (int i = 0; i < mListViews.size(); i++) {
-                final MenuDropDownListView view = (MenuDropDownListView) mListViews.get(i);
-                final MenuAdapter adapter = toMenuAdapter(view.getAdapter());
+        public void onItemHoverExit(@NonNull MenuBuilder menu, @NonNull MenuItem item) {
+            // If the mouse moves between two windows, hover enter/exit pairs
+            // may be received out of order. So, instead of canceling all
+            // pending runnables, only cancel runnables for the host menu.
+            mSubMenuHoverHandler.removeCallbacksAndMessages(menu);
+        }
 
-                if (adapter.getAdapterMenu() == menu) {
+        @Override
+        public void onItemHoverEnter(
+                @NonNull final MenuBuilder menu, @NonNull final MenuItem item) {
+            // Something new was hovered, cancel all scheduled runnables.
+            mSubMenuHoverHandler.removeCallbacksAndMessages(null);
+
+            // Find the position of the hovered menu within the added menus.
+            int menuIndex = -1;
+            for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
+                if (menu == mAddedMenus.get(i).menu) {
                     menuIndex = i;
                     break;
                 }
@@ -110,82 +134,43 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                 return;
             }
 
-            final MenuDropDownListView view = (MenuDropDownListView) mListViews.get(menuIndex);
-            final ListMenuItemView selectedItemView = (ListMenuItemView) view.getSelectedView();
-
-            if (selectedItemView != null && selectedItemView.isEnabled()
-                    && selectedItemView.getItemData().hasSubMenu()) {
-                // If the currently selected item corresponds to a submenu, schedule to open the
-                // submenu on a timeout.
-
-                mSubMenuHoverHandler.removeCallbacksAndMessages(null);
-                mSubMenuHoverHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Make sure the submenu item is still the one selected.
-                        if (view.getSelectedView() == selectedItemView
-                                && selectedItemView.isEnabled()
-                                && selectedItemView.getItemData().hasSubMenu()) {
-                            // Close any other submenus that might be open at the current or
-                            // a deeper level.
-                            int nextIndex = mListViews.indexOf(view) + 1;
-                            if (nextIndex < mListViews.size()) {
-                                MenuAdapter nextSubMenuAdapter =
-                                        toMenuAdapter(mListViews.get(nextIndex).getAdapter());
-                                // Disable exit animation, to prevent overlapping fading out
-                                // submenus.
-                                mPopupWindows.get(nextIndex).setExitTransition(null);
-                                nextSubMenuAdapter.getAdapterMenu().close();
-                            }
-
-                            // Then open the selected submenu.
-                            view.performItemClick(
-                                    selectedItemView,
-                                    view.getSelectedItemPosition(),
-                                    view.getSelectedItemId());
-                        }
-                    }
-                }, SUBMENU_TIMEOUT_MS);
-            } else if (menuIndex + 1 < mListViews.size()) {
-                // If the currently selected item does NOT corresponds to a submenu, check if there
-                // is a submenu already open that is one level deeper. If so, schedule to close it
-                // on a timeout.
-
-                final MenuDropDownListView nextView =
-                        (MenuDropDownListView) mListViews.get(menuIndex + 1);
-                final MenuAdapter nextAdapter = toMenuAdapter(nextView.getAdapter());
-
-                mSubMenuHoverHandler.removeCallbacksAndMessages(null);
-                mSubMenuHoverHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Make sure the menu wasn't already closed by something else and that
-                        // it wasn't re-hovered by the user since this was scheduled.
-                        int nextMenuIndex = mListViews.indexOf(nextView);
-
-                        if (nextMenuIndex != -1 && nextView.getSelectedView() == null) {
-                            // Disable exit animation, to prevent overlapping fading out submenus.
-                            for (int i = nextMenuIndex; i < mPopupWindows.size(); i++) {
-                                final MenuPopupWindow popupWindow = mPopupWindows.get(i);
-                                popupWindow.setExitTransition(null);
-                                popupWindow.setAnimationStyle(0);
-                            }
-                            nextAdapter.getAdapterMenu().close();
-                        }
-                    }
-                }, SUBMENU_TIMEOUT_MS);
+            final CascadingMenuInfo nextInfo;
+            final int nextIndex = menuIndex + 1;
+            if (nextIndex < mAddedMenus.size()) {
+                nextInfo = mAddedMenus.get(nextIndex);
+            } else {
+                nextInfo = null;
             }
+
+            final Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    // Close any other submenus that might be open at the
+                    // current or a deeper level.
+                    if (nextInfo != null) {
+                        // Disable exit animations to prevent overlapping
+                        // fading out submenus.
+                        mShouldCloseImmediately = true;
+                        nextInfo.menu.close(false /* closeAllMenus */);
+                        mShouldCloseImmediately = false;
+                    }
+
+                    // Then open the selected submenu, if there is one.
+                    if (item.isEnabled() && item.hasSubMenu()) {
+                        menu.performItemAction(item, 0);
+                    }
+                }
+            };
+            final long uptimeMillis = SystemClock.uptimeMillis() + SUBMENU_TIMEOUT_MS;
+            mSubMenuHoverHandler.postAtTime(runnable, menu, uptimeMillis);
         }
     };
 
+    private int mRawDropDownGravity = Gravity.NO_GRAVITY;
     private int mDropDownGravity = Gravity.NO_GRAVITY;
     private View mAnchorView;
     private View mShownAnchorView;
-    private List<DropDownListView> mListViews;
-    private List<MenuPopupWindow> mPopupWindows;
     private int mLastPosition;
-    private List<Integer> mPositions;
-    private List<int[]> mOffsets;
     private int mInitXOffset;
     private int mInitYOffset;
     private boolean mForceShowIcon;
@@ -194,13 +179,16 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private ViewTreeObserver mTreeObserver;
     private PopupWindow.OnDismissListener mOnDismissListener;
 
+    /** Whether popup menus should disable exit animations when closing. */
+    private boolean mShouldCloseImmediately;
+
     /**
      * Initializes a new cascading-capable menu popup.
      *
-     * @param parent A parent view to get the {@link android.view.View#getWindowToken()} token from.
+     * @param anchor A parent view to get the {@link android.view.View#getWindowToken()} token from.
      */
-    public CascadingMenuPopup(Context context, View anchor, int popupStyleAttr,
-            int popupStyleRes, boolean overflowOnly) {
+    public CascadingMenuPopup(@NonNull Context context, @NonNull View anchor,
+            @AttrRes int popupStyleAttr, @StyleRes int popupStyleRes, boolean overflowOnly) {
         mContext = Preconditions.checkNotNull(context);
         mAnchorView = Preconditions.checkNotNull(anchor);
         mPopupStyleAttr = popupStyleAttr;
@@ -208,18 +196,12 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         mOverflowOnly = overflowOnly;
 
         mForceShowIcon = false;
+        mLastPosition = getInitialMenuPosition();
 
         final Resources res = context.getResources();
-        final Configuration config = res.getConfiguration();
-        mLayoutDirection = config.getLayoutDirection();
-        mLastPosition = getInitialMenuPosition();
         mMenuMaxWidth = Math.max(res.getDisplayMetrics().widthPixels / 2,
                 res.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
 
-        mPopupWindows = new ArrayList<MenuPopupWindow>();
-        mListViews = new ArrayList<DropDownListView>();
-        mOffsets = new ArrayList<int[]>();
-        mPositions = new ArrayList<Integer>();
         mSubMenuHoverHandler = new Handler();
     }
 
@@ -246,28 +228,28 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             return;
         }
 
-        // Show any menus that have been added via #addMenu(MenuBuilder) but which have not yet been
-        // shown.
-        // In a typical use case, #addMenu(MenuBuilder) would be called once, followed by a call to
-        // this #show() method -- which would actually show the popup on the screen.
-        for (int i = 0; i < mPopupWindows.size(); i++) {
-            MenuPopupWindow popupWindow = mPopupWindows.get(i);
+        // Show any menus that have been added via #addMenu(MenuBuilder) but
+        // which have not yet been shown. In a typical use case,
+        // #addMenu(MenuBuilder) would be called once, followed by a call to
+        // this #show() method -- which would actually show the popup on the
+        // screen.
+        for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
+            final CascadingMenuInfo info = mAddedMenus.get(i);
+            final MenuPopupWindow popupWindow = info.window;
             popupWindow.show();
-            DropDownListView listView = (DropDownListView) popupWindow.getListView();
-            mListViews.add(listView);
 
-            MenuBuilder menu = toMenuAdapter(listView.getAdapter()).getAdapterMenu();
+            final MenuBuilder menu = info.menu;
             if (i == 0 && mShowTitle && menu.getHeaderTitle() != null) {
                 FrameLayout titleItemView =
                         (FrameLayout) LayoutInflater.from(mContext).inflate(
                                 com.android.internal.R.layout.popup_menu_header_item_layout,
-                                listView,
+                                info.getListView(),
                                 false);
                 TextView titleView = (TextView) titleItemView.findViewById(
                         com.android.internal.R.id.title);
                 titleView.setText(menu.getHeaderTitle());
                 titleItemView.setEnabled(false);
-                listView.addHeaderView(titleItemView, null, false);
+                info.getListView().addHeaderView(titleItemView, null, false);
 
                 // Update to show the title.
                 popupWindow.show();
@@ -287,12 +269,19 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public void dismiss() {
-        // Need to make another list to avoid a concurrent modification exception, as #onDismiss
-        // may clear mPopupWindows while we are iterating.
-        List<MenuPopupWindow> popupWindows = new ArrayList<MenuPopupWindow>(mPopupWindows);
-        for (MenuPopupWindow popupWindow : popupWindows) {
-            if (popupWindow != null && popupWindow.isShowing()) {
-                popupWindow.dismiss();
+        // Need to make another list to avoid a concurrent modification
+        // exception, as #onDismiss may clear mPopupWindows while we are
+        // iterating. Remove from the last added menu so that the callbacks
+        // are received in order from foreground to background.
+        final int length = mAddedMenus.size();
+        if (length > 0) {
+            final CascadingMenuInfo[] addedMenus =
+                    mAddedMenus.toArray(new CascadingMenuInfo[length]);
+            for (int i = length - 1; i >= 0; i--) {
+                final CascadingMenuInfo info = addedMenus[i];
+                if (info.window.isShowing()) {
+                    info.window.dismiss();
+                }
             }
         }
     }
@@ -312,7 +301,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     @HorizPosition
     private int getInitialMenuPosition() {
-        return mLayoutDirection == View.LAYOUT_DIRECTION_RTL ? HORIZ_POSITION_LEFT :
+        final int layoutDirection = mAnchorView.getLayoutDirection();
+        return layoutDirection == View.LAYOUT_DIRECTION_RTL ? HORIZ_POSITION_LEFT :
                 HORIZ_POSITION_RIGHT;
     }
 
@@ -325,7 +315,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     @HorizPosition
     private int getNextMenuPosition(int nextMenuWidth) {
-        ListView lastListView = mListViews.get(mListViews.size() - 1);
+        ListView lastListView = mAddedMenus.get(mAddedMenus.size() - 1).getListView();
 
         final int[] screenLocation = new int[2];
         lastListView.getLocationOnScreen(screenLocation);
@@ -350,76 +340,159 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public void addMenu(MenuBuilder menu) {
-        boolean addSubMenu = mListViews.size() > 0;
-
         menu.addMenuPresenter(this, mContext);
 
-        MenuPopupWindow popupWindow = createPopupWindow();
-
-        MenuAdapter adapter = new MenuAdapter(menu, LayoutInflater.from(mContext), mOverflowOnly);
+        final LayoutInflater inflater = LayoutInflater.from(mContext);
+        final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly);
         adapter.setForceShowIcon(mForceShowIcon);
 
+        final int menuWidth = measureIndividualMenuWidth(adapter, null, mContext, mMenuMaxWidth);
+        final MenuPopupWindow popupWindow = createPopupWindow();
         popupWindow.setAdapter(adapter);
+        popupWindow.setWidth(menuWidth);
+        popupWindow.setDropDownGravity(mDropDownGravity);
 
-        int menuWidth = measureIndividualMenuWidth(adapter, null, mContext, mMenuMaxWidth);
+        final CascadingMenuInfo parentInfo;
+        final View parentView;
+        if (mAddedMenus.size() > 0) {
+            parentInfo = mAddedMenus.get(mAddedMenus.size() - 1);
+            parentView = findParentViewForSubmenu(parentInfo, menu);
+        } else {
+            parentInfo = null;
+            parentView = null;
+        }
 
-        int x = 0;
-        int y = 0;
-
-        if (addSubMenu) {
+        final int x;
+        final int y;
+        if (parentView != null) {
+            // This menu is a cascading submenu anchored to a parent view.
             popupWindow.setTouchModal(false);
             popupWindow.setEnterTransition(null);
 
-            ListView lastListView = mListViews.get(mListViews.size() - 1);
-            @HorizPosition int nextMenuPosition = getNextMenuPosition(menuWidth);
-            boolean showOnRight = nextMenuPosition == HORIZ_POSITION_RIGHT;
+            final @HorizPosition int nextMenuPosition = getNextMenuPosition(menuWidth);
+            final boolean showOnRight = nextMenuPosition == HORIZ_POSITION_RIGHT;
             mLastPosition = nextMenuPosition;
 
-            int[] lastLocation = new int[2];
-            lastListView.getLocationOnScreen(lastLocation);
+            final int[] tempLocation = new int[2];
 
-            int[] lastOffset = mOffsets.get(mOffsets.size() - 1);
+            // This popup menu will be positioned relative to the top-left edge
+            // of the view representing its parent menu.
+            parentView.getLocationInWindow(tempLocation);
+            final int parentOffsetLeft = parentInfo.window.getHorizontalOffset() + tempLocation[0];
+            final int parentOffsetTop = parentInfo.window.getVerticalOffset() + tempLocation[1];
 
-            // Note: By now, mDropDownGravity is the absolute gravity, so this should work in both
-            // LTR and RTL.
+            // By now, mDropDownGravity is the resolved absolute gravity, so
+            // this should work in both LTR and RTL.
             if ((mDropDownGravity & Gravity.RIGHT) == Gravity.RIGHT) {
                 if (showOnRight) {
-                    x = lastOffset[0] + menuWidth;
+                    x = parentOffsetLeft + menuWidth;
                 } else {
-                    x = lastOffset[0] - lastListView.getWidth();
+                    x = parentOffsetLeft - parentView.getWidth();
                 }
             } else {
                 if (showOnRight) {
-                    x = lastOffset[0] + lastListView.getWidth();
+                    x = parentOffsetLeft + parentView.getWidth();
                 } else {
-                    x = lastOffset[0] - menuWidth;
+                    x = parentOffsetLeft - menuWidth;
                 }
             }
 
-            y = lastOffset[1] + lastListView.getSelectedView().getTop() -
-                    lastListView.getChildAt(0).getTop();
+            y = parentOffsetTop;
         } else {
             x = mInitXOffset;
             y = mInitYOffset;
         }
 
-        popupWindow.setWidth(menuWidth);
         popupWindow.setHorizontalOffset(x);
         popupWindow.setVerticalOffset(y);
-        mPopupWindows.add(popupWindow);
+
+        final CascadingMenuInfo menuInfo = new CascadingMenuInfo(popupWindow, menu, mLastPosition);
+        mAddedMenus.add(menuInfo);
 
         // NOTE: This case handles showing submenus once the CascadingMenuPopup has already
         // been shown via a call to its #show() method. If it hasn't yet been show()n, then
         // we deliberately do not yet show the popupWindow, as #show() will do that later.
         if (isShowing()) {
             popupWindow.show();
-            DropDownListView listView = (DropDownListView) popupWindow.getListView();
-            mListViews.add(listView);
+        }
+    }
+
+    /**
+     * Returns the menu item within the specified parent menu that owns
+     * specified submenu.
+     *
+     * @param parent the parent menu
+     * @param submenu the submenu for which the index should be returned
+     * @return the menu item that owns the submenu, or {@code null} if not
+     *         present
+     */
+    private MenuItem findMenuItemForSubmenu(
+            @NonNull MenuBuilder parent, @NonNull MenuBuilder submenu) {
+        for (int i = 0, count = parent.size(); i < count; i++) {
+            final MenuItem item = parent.getItem(i);
+            if (item.hasSubMenu() && submenu == item.getSubMenu()) {
+                return item;
+            }
         }
 
-        int[] offsets = {x, y};
-        mOffsets.add(offsets);
-        mPositions.add(mLastPosition);
+        return null;
+    }
+
+    /**
+     * Attempts to find the view for the menu item that owns the specified
+     * submenu.
+     *
+     * @param parentInfo info for the parent menu
+     * @param submenu the submenu whose parent view should be obtained
+     * @return the parent view, or {@code null} if one could not be found
+     */
+    @Nullable
+    private View findParentViewForSubmenu(
+            @NonNull CascadingMenuInfo parentInfo, @NonNull MenuBuilder submenu) {
+        final MenuItem owner = findMenuItemForSubmenu(parentInfo.menu, submenu);
+        if (owner == null) {
+            // Couldn't find the submenu owner.
+            return null;
+        }
+
+        // The adapter may be wrapped. Adjust the index if necessary.
+        final int headersCount;
+        final MenuAdapter menuAdapter;
+        final ListView listView = parentInfo.getListView();
+        final ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter instanceof HeaderViewListAdapter) {
+            final HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) listAdapter;
+            headersCount = headerAdapter.getHeadersCount();
+            menuAdapter = (MenuAdapter) headerAdapter.getWrappedAdapter();
+        } else {
+            headersCount = 0;
+            menuAdapter = (MenuAdapter) listAdapter;
+        }
+
+        // Find the index within the menu adapter's data set of the menu item.
+        int ownerPosition = AbsListView.INVALID_POSITION;
+        for (int i = 0, count = menuAdapter.getCount(); i < count; i++) {
+            if (owner == menuAdapter.getItem(i)) {
+                ownerPosition = i;
+                break;
+            }
+        }
+        if (ownerPosition == AbsListView.INVALID_POSITION) {
+            // Couldn't find the owner within the menu adapter.
+            return null;
+        }
+
+        // Adjust the index for the adapter used to display views.
+        ownerPosition += headersCount;
+
+        // Adjust the index for the visible views.
+        final int ownerViewPosition = ownerPosition - listView.getFirstVisiblePosition();
+        if (ownerViewPosition < 0 || ownerViewPosition >= listView.getChildCount()) {
+            // Not visible on screen.
+            return null;
+        }
+
+        return listView.getChildAt(ownerViewPosition);
     }
 
     /**
@@ -427,7 +500,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     @Override
     public boolean isShowing() {
-        return mPopupWindows.size() > 0 && mPopupWindows.get(0).isShowing();
+        return mAddedMenus.size() > 0 && mAddedMenus.get(0).window.isShowing();
     }
 
     /**
@@ -435,28 +508,28 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     @Override
     public void onDismiss() {
-        int dismissedIndex = -1;
-        for (int i = 0; i < mPopupWindows.size(); i++) {
-            if (!mPopupWindows.get(i).isShowing()) {
-                dismissedIndex = i;
+        // The dismiss listener doesn't pass the calling window, so walk
+        // through the stack to figure out which one was just dismissed.
+        CascadingMenuInfo dismissedInfo = null;
+        for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
+            final CascadingMenuInfo info = mAddedMenus.get(i);
+            if (!info.window.isShowing()) {
+                dismissedInfo = info;
                 break;
             }
         }
 
-        if (dismissedIndex != -1) {
-            for (int i = dismissedIndex; i < mListViews.size(); i++) {
-                ListView view = mListViews.get(i);
-                ListAdapter adapter = view.getAdapter();
-                MenuAdapter menuAdapter = toMenuAdapter(adapter);
-                menuAdapter.mAdapterMenu.close();
-            }
+        // Close all menus starting from the dismissed menu, passing false
+        // since we are manually closing only a subset of windows.
+        if (dismissedInfo != null) {
+            dismissedInfo.menu.close(false);
         }
     }
 
     @Override
     public void updateMenuView(boolean cleared) {
-        for (ListView view : mListViews) {
-            toMenuAdapter(view.getAdapter()).notifyDataSetChanged();
+        for (CascadingMenuInfo info : mAddedMenus) {
+            toMenuAdapter(info.getListView().getAdapter()).notifyDataSetChanged();
         }
     }
 
@@ -468,16 +541,17 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     @Override
     public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
         // Don't allow double-opening of the same submenu.
-        for (ListView view : mListViews) {
-            if (toMenuAdapter(view.getAdapter()).mAdapterMenu.equals(subMenu)) {
+        for (CascadingMenuInfo info : mAddedMenus) {
+            if (subMenu == info.menu) {
                 // Just re-focus that one.
-                view.requestFocus();
+                info.getListView().requestFocus();
                 return true;
             }
         }
 
         if (subMenu.hasVisibleItems()) {
-            this.addMenu(subMenu);
+            addMenu(subMenu);
+
             if (mPresenterCallback != null) {
                 mPresenterCallback.onOpenSubMenu(subMenu);
             }
@@ -486,52 +560,62 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         return false;
     }
 
+    /**
+     * Finds the index of the specified menu within the list of added menus.
+     *
+     * @param menu the menu to find
+     * @return the index of the menu, or {@code -1} if not present
+     */
+    private int findIndexOfAddedMenu(@NonNull MenuBuilder menu) {
+        for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
+            final CascadingMenuInfo info  = mAddedMenus.get(i);
+            if (menu == info.menu) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     @Override
     public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
-        int menuIndex = -1;
-        boolean wasSelected = false;
-
-        for (int i = 0; i < mListViews.size(); i++) {
-            ListView view = mListViews.get(i);
-            MenuAdapter adapter = toMenuAdapter(view.getAdapter());
-
-            if (menuIndex == -1 && menu == adapter.mAdapterMenu) {
-                menuIndex = i;
-                wasSelected = view.getSelectedView() != null;
-            }
-
-            // Once the menu has been found, remove it and all submenus beneath it from the
-            // container view. Also remove the presenter.
-            if (menuIndex != -1) {
-                adapter.mAdapterMenu.removeMenuPresenter(this);
-            }
+        final int menuIndex = findIndexOfAddedMenu(menu);
+        if (menuIndex < 0) {
+            return;
         }
 
-        // Then, actually remove the views for these [sub]menu(s) from our list of views.
-        if (menuIndex != -1) {
-            for (int i = menuIndex; i < mPopupWindows.size(); i++) {
-                mPopupWindows.get(i).dismiss();
-            }
-            mPopupWindows.subList(menuIndex, mPopupWindows.size()).clear();
-            mListViews.subList(menuIndex, mListViews.size()).clear();
-            mOffsets.subList(menuIndex, mOffsets.size()).clear();
-
-            mPositions.subList(menuIndex, mPositions.size()).clear();
-            if (mPositions.size() > 0) {
-                mLastPosition = mPositions.get(mPositions.size() - 1);
-            } else {
-                mLastPosition = getInitialMenuPosition();
-            }
+        // Recursively close descendant menus.
+        final int nextMenuIndex = menuIndex + 1;
+        if (nextMenuIndex < mAddedMenus.size()) {
+            final CascadingMenuInfo childInfo = mAddedMenus.get(nextMenuIndex);
+            childInfo.menu.close(false /* closeAllMenus */);
         }
 
-        if (mListViews.size() == 0 || wasSelected) {
+        // Close the target menu.
+        final CascadingMenuInfo info = mAddedMenus.remove(menuIndex);
+        info.menu.removeMenuPresenter(this);
+        if (mShouldCloseImmediately) {
+            // Disable all exit animations.
+            info.window.setExitTransition(null);
+            info.window.setAnimationStyle(0);
+        }
+        info.window.dismiss();
+
+        final int count = mAddedMenus.size();
+        if (count > 0) {
+            mLastPosition = mAddedMenus.get(count - 1).position;
+        } else {
+            mLastPosition = getInitialMenuPosition();
+        }
+
+        if (count == 0) {
+            // This was the last window. Clean up.
             dismiss();
-            if (mPresenterCallback != null) {
-                mPresenterCallback.onCloseMenu(menu, allMenusAreClosing);
-            }
-        }
 
-        if (mPopupWindows.size() == 0) {
+            if (mPresenterCallback != null) {
+                mPresenterCallback.onCloseMenu(menu, true);
+            }
+
             if (mTreeObserver != null) {
                 if (mTreeObserver.isAlive()) {
                     mTreeObserver.removeGlobalOnLayoutListener(mGlobalLayoutListener);
@@ -539,9 +623,16 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                 mTreeObserver = null;
             }
             mShownAnchorView.removeOnAttachStateChangeListener(mAttachStateChangeListener);
-            // If every [sub]menu was dismissed, that means the whole thing was dismissed, so notify
-            // the owner.
+
+            // If every [sub]menu was dismissed, that means the whole thing was
+            // dismissed, so notify the owner.
             mOnDismissListener.onDismiss();
+        } else if (allMenusAreClosing) {
+            // Close all menus starting from the root. This will recursively
+            // close any remaining menus, so we don't need to propagate the
+            // "closeAllMenus" flag. The last window will clean up.
+            final CascadingMenuInfo rootInfo = mAddedMenus.get(0);
+            rootInfo.menu.close(false /* closeAllMenus */);
         }
     }
 
@@ -561,12 +652,22 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public void setGravity(int dropDownGravity) {
-        mDropDownGravity = Gravity.getAbsoluteGravity(dropDownGravity, mLayoutDirection);
+        if (mRawDropDownGravity != dropDownGravity) {
+            mRawDropDownGravity = dropDownGravity;
+            mDropDownGravity = Gravity.getAbsoluteGravity(
+                    dropDownGravity, mAnchorView.getLayoutDirection());
+        }
     }
 
     @Override
-    public void setAnchorView(View anchor) {
-        mAnchorView = anchor;
+    public void setAnchorView(@NonNull View anchor) {
+        if (mAnchorView != anchor) {
+            mAnchorView = anchor;
+
+            // Gravity resolution may have changed, update from raw gravity.
+            mDropDownGravity = Gravity.getAbsoluteGravity(
+                    mRawDropDownGravity, mAnchorView.getLayoutDirection());
+        }
     }
 
     @Override
@@ -576,7 +677,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public ListView getListView() {
-        return mListViews.size() > 0 ? mListViews.get(mListViews.size() - 1) : null;
+        return mAddedMenus.isEmpty() ? null : mAddedMenus.get(mAddedMenus.size() - 1).getListView();
     }
 
     @Override
@@ -592,5 +693,22 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     @Override
     public void setShowTitle(boolean showTitle) {
         mShowTitle = showTitle;
+    }
+
+    private static class CascadingMenuInfo {
+        public final MenuPopupWindow window;
+        public final MenuBuilder menu;
+        public final int position;
+
+        public CascadingMenuInfo(@NonNull MenuPopupWindow window, @NonNull MenuBuilder menu,
+                int position) {
+            this.window = window;
+            this.menu = menu;
+            this.position = position;
+        }
+
+        public ListView getListView() {
+            return window.getListView();
+        }
     }
 }
