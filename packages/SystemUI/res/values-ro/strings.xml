@@ -387,15 +387,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Doresc să se afișeze înainte de deblocare"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nu, mulț."</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Config."</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"Afișați toate"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"Ascundeți toate"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Opriți acum"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Extindeți"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Restrângeți"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ecranul este fixat"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"Ecranul este afișat până anulați fixarea. Atingeți lung opțiunea Înapoi pentru a anula fixarea."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Am înțeles"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nu, mulțumesc"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ascundeți <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -406,6 +403,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Refuzați"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Atingeți pentru a reveni la setarea inițială."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Acum folosiți profilul de serviciu"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afișați procentajul bateriei încorporat"</string>

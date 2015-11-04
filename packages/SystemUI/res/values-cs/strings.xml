@@ -152,9 +152,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim Letadlo."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Není vložena SIM karta"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Probíhá změna sítě operátora."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Stav baterie: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systémová nastavení."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Oznámení."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Vymazat oznámení."</string>
@@ -390,15 +388,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Můžete si je přečíst před odemčením obrazovky."</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ne, děkuji"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Nastavit"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"Zobrazit vše"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"Skrýt vše"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Ukončit"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozbalit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sbalit"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je připnuta"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Zpět."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, děkuji"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Skrýt <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -409,6 +404,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odmítnout"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je dialog hlasitosti"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Klepnutím obnovíte originál."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Používáte pracovní profil"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Nástroj na ladění uživatelského rozhraní systému"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Zobrazovat vložené procento nabití baterie"</string>

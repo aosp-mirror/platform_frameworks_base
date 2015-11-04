@@ -386,15 +386,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"તમે અનલૉક કરો તે પહેલાં તેમને જુઓ"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"નહીં આભાર"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"સેટ અપ"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"બધું જુઓ"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"બધું છુપાવો"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"હવે સમાપ્ત કરો"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"વિસ્તૃત કરો"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"સંકુચિત કરો"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"સ્ક્રીન પિન કરેલ છે"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યમાં રાખે છે. અનપિન કરવા માટે પાછાં ને ટચ કરો અને પકડી રાખો."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"સમજાઈ ગયું"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"નહીં આભાર"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ને છુપાવીએ?"</string>
@@ -405,6 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"નકારો"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> એ વૉલ્યૂમ સંવાદ છે"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"મૂળને પુનઃસ્થાપિત કરવા માટે ટચ કરો."</string>
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"તમે તમારી કાર્ય પ્રોફાઇલનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"સિસ્ટમ UI ટ્યૂનર"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"એમ્બેડ કરેલ બૅટરી ટકા બતાવો"</string>

@@ -386,15 +386,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"திறக்கும் முன் அவற்றைப் பார்க்கவும்"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"வேண்டாம்"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"அமை"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"எல்லாம் காட்டு"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"எல்லாம் மறை"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"இப்போது முடி"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"விரிவாக்கு"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"சுருக்கு"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"திரை பொருத்தப்பட்டது"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"பொருத்தியதை விலக்கும்வரை இதைக் காட்சியில் வைக்கும். விலக்க, முந்தையது என்பதைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"புரிந்தது"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"வேண்டாம்"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ஐ மறைக்கவா?"</string>
@@ -405,6 +402,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"நிராகரி"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"ஒலியளவு செய்தி: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"அசலை மீட்டமைக்கத் தொடவும்."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"பணி சுயவிவரத்தைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"உள்ளிணைந்த பேட்டரி சதவீதத்தைக் காட்டு"</string>

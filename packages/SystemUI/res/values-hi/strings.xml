@@ -386,15 +386,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपके द्वारा उन्हें अनलॉक किए जाने से पहले देखें"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नहीं धन्यवाद"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट करें"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"सभी देखें"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"सभी छिपाएं"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"अब समाप्त करें"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तृत करें"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संक्षिप्त करें"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्‍क्रीन पिन कर दी गई है"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"इससे वह तब तक दृश्‍य में बना रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए वापस जाएं को स्‍पर्श करके रखें."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"समझ लिया"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"नहीं, रहने दें"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> को छिपाएं?"</string>
@@ -405,6 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"अस्वीकार करें"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> वॉल्यूम संवाद है"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल वॉल्यूम को फिर से लाने के लिए स्पर्श करें."</string>
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आप अपनी कार्य प्रोफ़ाइल का उपयोग कर रहे हैं"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेड किया गया बैटरी प्रतिशत दिखाएं"</string>

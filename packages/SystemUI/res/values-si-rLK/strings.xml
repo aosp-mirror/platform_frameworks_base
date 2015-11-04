@@ -386,8 +386,6 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ඔබ අඟුළු හැරීමට කලින් ඒවා බලන්න"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"එපා ස්තූතියි"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"සකසන්න"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"සියල්ල බලන්න"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"සියල්ල සඟවන්න"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"දැන් අවසන් කරන්න"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"දිග හරින්න"</string>
@@ -404,6 +402,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ධාරිතා සංවාදයයි"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"මුල් තත්ත්වය නැවත ප්‍රතිසාධනය කිරීමට ස්පර්ශ කරන්න."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ඔබ ඔබේ කාර්යාල පැතිකඩ භාවිත කරමින් සිටී"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"පද්ධති UI සුසරකය"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"කාවද්දන ලද බැටරි ප්‍රතිශතය පෙන්වන්න"</string>

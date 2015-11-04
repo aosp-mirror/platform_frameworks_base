@@ -386,15 +386,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Xem thông báo trước khi bạn mở khóa"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ko, cảm ơn"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Thiết lập"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"Xem tất cả"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"Ẩn tất cả"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Kết thúc bây giờ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Mở rộng"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Thu gọn"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Màn hình được ghim"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Chạm và giữ Quay lại để bỏ ghim."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ok"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Không, cảm ơn"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ẩn <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -405,6 +402,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Từ chối"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> là hộp thoại khối lượng"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Chạm để khôi phục bản gốc."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Bộ điều hướng giao diện người dùng hệ thống"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Hiển thị tỷ lệ phần trăm pin được nhúng"</string>

@@ -388,15 +388,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zobacz powiadomienia, jeszcze zanim odblokujesz ekran"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nie, dziękuję"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Skonfiguruj"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"Pokaż wszystkie"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"Ukrywaj wszystkie"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Zakończ teraz"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozwiń"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Zwiń"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran jest przypięty"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Wstecz."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nie, dziękuję"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ukryć <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -407,6 +404,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odmów"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> steruje głośnością"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dotknij, by przywrócić pierwotną."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Używasz profilu do pracy"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Kalibrator System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Pokaż procent naładowania baterii"</string>
