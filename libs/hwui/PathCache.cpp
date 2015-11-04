@@ -400,6 +400,13 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     return texture;
 }
 
+void PathCache::remove(const SkPath* path, const SkPaint* paint)
+{
+    PathDescription entry(kShapePath, paint);
+    entry.shape.path.mGenerationID = path->getGenerationID();
+    mCache.remove(entry);
+}
+
 void PathCache::precache(const SkPath* path, const SkPaint* paint) {
     if (!Caches::getInstance().tasks.canRunTasks()) {
         return;

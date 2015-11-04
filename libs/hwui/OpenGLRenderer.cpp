@@ -2325,12 +2325,15 @@ void OpenGLRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
 
     PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
-    const AutoTexture autoCleanup(texture);
 
     const float x = texture->left - texture->offset;
     const float y = texture->top - texture->offset;
 
     drawPathTexture(texture, x, y, paint);
+
+    if (texture->cleanup) {
+        mCaches.pathCache.remove(path, paint);
+    }
     mDirty = true;
 }
 
