@@ -386,15 +386,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Tingnan ang mga ito bago ka mag-unlock"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hindi"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"I-set up"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"Tingnan lahat"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"Itago lahat"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Tapusin ngayon"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Palawakin"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"I-collapse"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Naka-pin ang screen"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"Pinapanatili nitong nasa view ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik upang mag-unpin."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Nakuha ko"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Hindi, salamat na lang"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Itago ang <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -405,6 +402,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tanggihan"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Ang <xliff:g id="APP_NAME">%1$s</xliff:g> ang volume dialog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Pindutin upang ibalik ang orihinal."</string>
+    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Ginagamit mo ang iyong profile sa trabaho"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Tuner ng System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Ipakita ang naka-embed na porsyento ng baterya"</string>

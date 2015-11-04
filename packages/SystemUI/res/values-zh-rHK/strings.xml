@@ -150,9 +150,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛航模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"沒有 SIM 卡。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"流動網絡供應商網絡正在變更。"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"電池電量為百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"系統設定"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"清除通知。"</string>
@@ -388,15 +386,12 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"解鎖前顯示"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了，謝謝"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
-    <string name="notification_expand_button_text" msgid="1037425494153780718">"顯示全部"</string>
-    <string name="notification_collapse_button_text" msgid="6883253262134328057">"全部隱藏"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"立即終止"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
-    <!-- no translation found for screen_pinning_description (3577937698406151604) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="3577937698406151604">"在您取消固定前，它會保持在檢視狀態。輕觸並按住 [返回] 即可取消固定。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏 <xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
@@ -407,6 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒絕"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」為音量對話框"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸即可復原。"</string>
+    <string name="group_summary_concadenation" msgid="2705151242008937028">"、"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您正在使用工作設定檔"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"系統使用者介面調諧器"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"顯示嵌入的電池百分比"</string>
