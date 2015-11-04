@@ -747,7 +747,7 @@
     <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Testarea de fabrică nu a reuşit"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Acţiunea FACTORY_TEST este acceptată doar pentru pachetele instalate în /system/app."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"Nu s-a găsit niciun pachet care să ofere acţiunea FACTORY_TEST."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"Nu s-a găsit niciun pachet care să ofere acțiunea FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reporniți"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"La pagina de la „<xliff:g id="TITLE">%s</xliff:g>” apare:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
@@ -932,7 +932,7 @@
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Comutaţi între aplicații?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"O altă aplicație rulează deja și trebuie oprită înainte a putea porni o aplicație nouă."</string>
     <string name="old_app_action" msgid="493129172238566282">"Reveniţi la <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Nu porniţi aplicația nouă."</string>
+    <string name="old_app_description" msgid="2082094275580358049">"Nu porniți aplicația nouă."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Porniţi <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Opriți vechea aplicație fără să salvaţi."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> a depășit limita de memorie"</string>
@@ -1179,21 +1179,21 @@
     <string name="add_account_label" msgid="2935267344849993553">"Adăugaţi un cont"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Adăugaţi un cont"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Creșteți"</string>
-    <string name="number_picker_decrement_button" msgid="476050778386779067">"Reduceţi"</string>
+    <string name="number_picker_decrement_button" msgid="476050778386779067">"Reduceți"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Atingeți și țineți apăsat <xliff:g id="VALUE">%s</xliff:g>."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Glisaţi în sus pentru a creşte și în jos pentru a reduce."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Creșteți valoarea pentru minute"</string>
-    <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Reduceţi valoarea pentru minute"</string>
+    <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Reduceți valoarea pentru minute"</string>
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Creșteți valoarea pentru oră"</string>
-    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Reduceţi valoarea pentru oră"</string>
+    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Reduceți valoarea pentru oră"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Setaţi valoarea PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Setaţi valoarea AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Creșteți valoarea pentru lună"</string>
-    <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Reduceţi valoarea pentru lună"</string>
+    <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Reduceți valoarea pentru lună"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Creșteți valoarea pentru zi"</string>
-    <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Reduceţi valoarea pentru zi"</string>
+    <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Reduceți valoarea pentru zi"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Creșteți valoarea pentru an"</string>
-    <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Reduceţi valoarea pentru an"</string>
+    <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Reduceți valoarea pentru an"</string>
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Luna trecută"</string>
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"Luna viitoare"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
