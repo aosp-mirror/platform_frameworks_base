@@ -377,6 +377,9 @@ public final class Icon implements Parcelable {
         return loadDrawable(context);
     }
 
+    /** @hide */
+    public static final int MIN_ASHMEM_ICON_SIZE = 128 * (1 << 10);
+
     /**
      * Puts the memory used by this instance into Ashmem memory, if possible.
      * @hide
@@ -384,7 +387,7 @@ public final class Icon implements Parcelable {
     public void convertToAshmem() {
         if (mType == TYPE_BITMAP &&
             getBitmap().isMutable() &&
-            getBitmap().getAllocationByteCount() >= (128 * (1 << 10))) {
+            getBitmap().getAllocationByteCount() >= MIN_ASHMEM_ICON_SIZE) {
             setBitmap(getBitmap().createAshmemBitmap());
         }
     }
