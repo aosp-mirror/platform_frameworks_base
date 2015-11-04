@@ -22,5 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Докоснете, за да споделите отчета си за програмни грешки"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Отчетите за програмни грешки съдържат данни от различни регистрационни файлове на системата, включително лична и поверителна информация. Споделяйте ги само с приложения и хора, на които имате доверие."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Това съобщение да се показва следващия път"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Отчети за програмни грешки"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Отчети за прогр. грешки"</string>
 </resources>
