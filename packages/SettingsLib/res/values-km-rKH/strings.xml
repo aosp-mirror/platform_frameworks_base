@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"អ្នកប្រើ៖ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"លំនាំដើមមួយចំនួនត្រូវបានកំណត់"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"គ្មានការកំណត់លំនាំដើម"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"ការ​កំណត់​អត្ថបទ​ទៅ​ជា​កា​និយាយ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"លទ្ធផល​អត្ថបទ​ទៅ​ការ​និយាយ"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"អត្រា​និយាយ"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"ល្បឿន​ពេល​អាន​​អត្ថបទ"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"ភាសា"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"ប្រើ​ភាសា​ប្រព័ន្ធ"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"មិន​បាន​ជ្រើស​ភាសា"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"កំណត់​សំឡេង​ភាសា​ជាក់លាក់​សម្រាប់​អត្ថបទ​បាន​និយាយ"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"ស្ដាប់​​ឧទាហរណ៍"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"ចាក់​ការ​បង្ហាញ​ខ្លី​នៃ​ការ​សំយោគ​ការ​និយាយ"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"ដំឡើង​ទិន្នន័យ​សំឡេង"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"ដំឡើង​ទិន្នន័យ​សំឡេង​ដែល​ទាមទារ​សម្រាប់​ការ​សំយោគ​សំដី"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ម៉ាស៊ីន​សំយោគ​ការ​និយាយ​អាច​ប្រមូល​អត្ថបទ​ទាំងអស់​ដែល​នឹង​ត្រូវ​និយាយ​ រួមមាន​ទិន្នន័យ​ផ្ទាល់​ខ្លួន ដូច​ជា​ពាក្យ​សម្ងាត់ និង​លេខ​កាត​ឥណទាន។ វា​បាន​មក​ពី​ម៉ាស៊ីន <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ។បើក​​ការ​ប្រើ​ម៉ាស៊ីន​សំយោគ​ការ​និយាយ​នេះ?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"ភាសា​នេះ​ទាមទារ​ការ​តភ្ជាប់​បណ្ដាញ​​ដែល​ដំណើរការ​សម្រាប់​លទ្ធផល​អត្ថបទ​ត្រូវ​និយាយ។"</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"នេះ​ជា​ឧទាហរណ៍​នៃ​ការ​សំយោគ​ការ​និយាយ។"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"ស្ថានភាព​ភាសា​លំនាំដើម"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"បាន​គាំទ្រ​ពេញលេញ <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> ទាមទារ​ការ​ភ្ជាប់​បណ្ដាញ"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"មិន​គាំទ្រ <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"ការ​កំណត់​សម្រាប់ <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ចាប់ផ្ដើម​ការកំណត់​ម៉ាស៊ីន​ផ្សេង"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ម៉ាស៊ីន​ដែល​ពេញ​ចិត្ត"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"ទូទៅ"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

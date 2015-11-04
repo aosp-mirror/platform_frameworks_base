@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"사용자: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"일부 기본값이 설정됨"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"기본값이 설정되지 않음"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"TTS 설정"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"TTS 출력"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"말하는 속도"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"텍스트를 읽어주는 속도"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"언어"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"시스템 언어 사용"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"언어가 선택되지 않음"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"발음된 텍스트에 대해 언어별로 음성 설정"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"예제 듣기"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"짧은 음성 합성 데모 재생"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"음성 데이터 설치"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"음성 합성을 사용하려면 음성 데이터를 설치해야 함"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"이 음성 합성 엔진은 비밀번호와 신용카드 번호 등의 개인 데이터를 비롯한 모든 음성 데이터를 수집할 수 있습니다. 이것은 <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> 엔진의 기능입니다. 음성 합성 엔진을 사용하도록 설정하시겠습니까?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"이 언어로 TTS(Text-to-speech)를 출력하려면 네트워크 연결이 작동해야 합니다."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"음성 합성의 예입니다."</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"기본 언어 상태"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g>은(는) 완전하게 지원됩니다."</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g>은(는) 네트워크 연결이 필요합니다."</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g>은(는) 지원되지 않습니다."</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>에 대한 설정"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"엔진 설정 실행"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"기본 엔진"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"기본설정"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

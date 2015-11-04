@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ಬಳಕೆದಾರ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"ಕೆಲವು ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"ಪಠ್ಯದಿಂದ ಧ್ವನಿಗೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"ಧ್ವನಿಗೆ-ಪಠ್ಯದ ಔಟ್‌ಪುಟ್‌"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"ಧ್ವನಿಯ ದರ"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"ಪಠ್ಯವನ್ನು ಹೇಳಿದ ವೇಗ"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"ಭಾಷೆ"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"ಸಿಸ್ಟಂ ಭಾಷೆಯನ್ನು ಬಳಸು"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಲಾಗಿಲ್ಲ"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"ಮಾತಿನ ಪಠ್ಯಕ್ಕೆ ಭಾಷಾ-ನಿರ್ದಿಷ್ಟ ಧ್ವನಿಯನ್ನು ಹೊಂದಿಸುತ್ತದೆ"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"ಉದಾಹರಣೆಯೊಂದನ್ನು ಆಲಿಸಿ"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"ಧ್ವನಿ ಸಮನ್ವಯದ ಕಿರು ಪ್ರಾತ್ಯಕ್ಷಿಕೆಯನ್ನು ಪ್ಲೇ ಮಾಡು"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"ಧ್ವನಿ ಡೇಟಾವನ್ನು ಸ್ಥಾಪಿಸಿ"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"ಧ್ವನಿ ಸಮನ್ವಯಕ್ಕಾಗಿ ಅಗತ್ಯವಿರುವ ಧ್ವನಿ ಡೇಟಾ ಸ್ಥಾಪಿಸಿ"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಕ್ರೆಡಿಟ್‌ ಕಾರ್ಡ್‌ ಸಂಖ್ಯೆಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾ ಒಳಗೊಂಡಂತೆ ಮಾತನಾಡುವ ಎಲ್ಲ ಪಠ್ಯವನ್ನು ಸಂಗ್ರಹಿಸಲು ಈ ಧ್ವನಿ ಸಮನ್ವಯ ಎಂಜಿನ್‌ಗೆ ಸಾಧ್ಯವಾಗಬಹುದು. ಇದು <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ಎಂಜಿನ್‌ನಿಂದ ಬರುತ್ತದೆ. ಈ ಧ್ವನಿ ಸಮನ್ವಯ ಎಂಜಿನ್ ಬಳಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವುದೇ?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"ಪಠ್ಯದಿಂದ ಧ್ವನಿ ಔಟ್‌ಪುಟ್‌‌ಗಾಗಿ ಈ ಭಾಷೆಗೆ ಕಾರ್ಯನಿರತವಾದ ನೆಟ್‌ವರ್ಕ್‌ನ ಅಗತ್ಯವಿದೆ."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"ಇದು ಧ್ವನಿ ಸಮನ್ವಯದ ಒಂದು ಉದಾಹರಣೆಯಾಗಿದೆ"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"ಡೀಫಾಲ್ಟ್ ಭಾಷೆಯ ಸ್ಥಿತಿ"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> ಸಂಪೂರ್ಣವಾಗಿ ಬೆಂಬಲಿತವಾಗಿದೆ"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕದ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> ಬೆಂಬಲಿತವಾಗಿಲ್ಲ"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> ಗಾಗಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ಎಂಜಿನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸು"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ಪ್ರಾಶಸ್ತ್ಯದ ಎಂಜಿನ್"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"ಸಾಮಾನ್ಯ"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"ഉപയോക്താവ്: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"സ്ഥിരമായ ചിലവ സജ്ജീകരിച്ചു"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"സ്ഥിരമായൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ക്രമീകരണങ്ങൾ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ട്"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"വായന നിരക്ക്"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"വാചകം പറയുന്ന വേഗത"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"ഭാഷ"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"സി‌സ്റ്റം ഭാഷ ഉപയോഗിക്കുക"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"ഭാഷ തിരഞ്ഞെടുത്തിട്ടില്ല"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"സംഭാഷണ വാചകത്തിന് ഭാഷാ-നിർദ്ദിഷ്‌ട ശബ്ദം സജ്ജമാക്കുന്നു"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"ഒരു ഉദാഹരണം കേൾക്കുക"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"സംഭാഷണത്തിന്റെ ഒരു ഹ്രസ്വ പ്രകടനം പ്ലേ ചെയ്യുക"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"വോയ്‌സ് ഡാറ്റ ഇൻസ്റ്റാളുചെയ്യുക"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"സംഭാഷണ സിന്തസിസ്സിന് ആവശ്യമായ വോയ്‌സ് ഡാറ്റ ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"പാസ്‌വേഡുകൾ, ക്രെഡിറ്റ് കാർഡ് നമ്പറുകൾ എന്നിവ പോലുള്ള വ്യക്തിഗതമായ ഡാറ്റയുൾപ്പെടെ നിങ്ങൾ സംസാരിക്കുന്ന എല്ലാ വാചകവും ഈ സംഭാഷണ സിന്തസിസ് എഞ്ചിന് ശേഖരിക്കാനായേക്കും. ഇത് <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> എഞ്ചിനിൽ നിന്നും വരുന്നു. ഈ സംഭാഷണ സിന്തസിസ് എഞ്ചിൻ ഉപയോഗിക്കുന്നത് പ്രവർത്തനക്ഷമമാക്കണോ?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"ടെക്‌സ്‌റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ടിനായി ഈ ഭാഷയ്‌ക്ക് പ്രവർത്തിക്കുന്ന ഒരു നെറ്റ്‌വർക്ക് കണക്ഷൻ ആവശ്യമാണ്."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"സംഭാഷണം ഒരുമിച്ചുചേർക്കുന്നതിനുള്ള ഒരുദാഹരണമാണിത്"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"സ്ഥിര ഭാഷാ സ്ഥിതിവിവരക്കണക്കുകൾ"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> ഭാഷയെ പൂർണ്ണമായും പിന്തുണയ്‌ക്കുന്നു"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> ഭാഷയ്‌ക്ക് നെറ്റ്‌വർക്ക് കണക്ഷൻ ആവശ്യമാണ്"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> ഭാഷയെ പിന്തുണയ്‌ക്കുന്നില്ല"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> എന്നതിനായുള്ള ക്രമീകരണങ്ങൾ"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"എഞ്ചിൻ ക്രമീകരണങ്ങൾ സമാരംഭിക്കുക"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"തിരഞ്ഞെടുത്ത എഞ്ചിൻ"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"പൊതുവായ കാര്യങ്ങൾ"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

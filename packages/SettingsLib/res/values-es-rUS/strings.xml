@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Hay algunas configuraciones predeterminadas establecidas."</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"No hay configuraciones predeterminadas establecidas."</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Configuración de texto a voz"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Salida de texto a voz"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Velocidad de voz"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocidad en la que se habla el texto"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Idioma"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Usar el idioma del sistema"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Idioma no seleccionado"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Establece la voz específica de un idioma para el texto hablado"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Escuchar un ejemplo"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Reproducir una pequeña demostración de síntesis de voz"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instalar datos de voz"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalar los datos de voz necesarios para la síntesis de voz"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Es posible que este motor de síntesis de voz pueda recopilar todo el texto que se hablará, incluidos los datos personales como las contraseñas y los números de tarjetas de crédito. Proviene del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. ¿Deseas activar el uso de este motor de síntesis de voz?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Este idioma necesita una conexión de red en funcionamiento para la salida de texto a voz."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Ejemplo de síntesis de voz"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Estado del idioma predeterminado"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> es totalmente compatible."</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> requiere una conexión de red."</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> no es compatible."</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Configuración de <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Iniciar configuración de motor"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Motor preferido"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"General"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

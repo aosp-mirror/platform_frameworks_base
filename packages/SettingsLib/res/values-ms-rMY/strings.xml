@@ -97,4 +97,39 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Pengguna: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Beberapa lalai ditetapkan"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Tiada lalai ditetapkan"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Tetapan teks kepada pertuturan"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Output teks ke pertuturan"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kadar pertuturan"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kelajuan pertuturan teks"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Bahasa"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Gunakan bahasa sistem"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Bahasa tidak dipilih"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Menetapkan suara khusus bahasa untuk teks pertuturan"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Dengar contoh"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Mainkan tunjuk cara singkat sintesis pertuturan"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Pasang data suara"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Pasang data suara yang diperlukan untuk sintesis pertuturan"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Enjin sintesis pertuturan ini mungkin boleh mengumpul semua teks yang akan dituturkan, termasuk data peribadi seperti kata laluan dan nombor kad kredit. Ia datang daripada enjin <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Dayakan penggunaan enjin sintesis pertuturan ini?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bahasa ini memerlukan sambungan rangkaian yang berfungsi untuk output teks ke pertuturan."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Ini ialah contoh sintesis pertuturan."</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Status bahasa tetapan asal"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> disokong sepenuhnya"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> memerlukan sambungan rangkaian"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> tidak disokong"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"Menyemak…"</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Tetapan untuk <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Lancarkan tetapan enjin"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Enjin pilihan"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Umum"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Sangat perlahan"</item>
+    <item msgid="4795095314303559268">"Perlahan"</item>
+    <item msgid="8903157781070679765">"Biasa"</item>
+    <item msgid="164347302621392996">"Laju"</item>
+    <item msgid="5794028588101562009">"Lebih laju"</item>
+    <item msgid="7163942783888652942">"Sangat laju"</item>
+    <item msgid="7831712693748700507">"Pantas"</item>
+    <item msgid="5194774745031751806">"Sangat pantas"</item>
+    <item msgid="9085102246155045744">"Paling laju"</item>
+  </string-array>
 </resources>

@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"使用者：<xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"已設定部分預設值"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"未設定預設值"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"文字轉語音設定"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"文字轉語音輸出"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"語音速率"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"文字轉語音的播放速度"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"語言"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"使用系統設定"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"未選取語言"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"設定文字轉語音功能要用的語言"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"聆聽範例"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"播放簡短的語音合成範例"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"安裝語音資料"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"安裝語音合成所需的語音資料"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"此語音合成引擎可能會收集您輸入的所有語音，包括密碼和信用卡號等個人資料。此引擎來自「<xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>」引擎，是否要使用此語音合成引擎？"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"您必須連上網路才能使用文字轉語音輸出功能。"</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"您目前聽到的是我們的語音合成範例"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"預設語言狀態"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"完整支援<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"需要網路連線才支援<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"不支援<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> 設定"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"啟動引擎設定"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"偏好的引擎"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"一般"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

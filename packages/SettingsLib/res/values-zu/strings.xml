@@ -97,4 +97,39 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Umsebenzisi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Okunye okuzenzakalelayo okusethiwe"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Akukho okuzenzakalelayo okusethiwe"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Izilungiselelo zombhalo-kuya-kunkulumo"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Umbhalo-uya-kokukhishwa ngokukhuluma"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Ukukala izwi"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Isivinini leso umbhalo okhulunywe ngaso"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Ulimi"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Sebenzisa ulimi lwesistimu"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Ulimi alukhethwanga"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Ihlela izwi lolimi oluthize lombhalo okhulunyiwe"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Lalela isibonelo"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Dlala umboniso omfushane wamazwi"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Faka idatha yezwi"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Faka idatha yezwi edingekayo yamazwi ngamanye"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Lenjini yokuqaphela amagama ingase ikwazi ukuqoqa wonke umbhalo ozokhulunywa, kuhlanganise idatha yomuntu siqu njengamaphasiwedi nezinombolo zekhadi lesikoloto. Iphuma <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> kwinjini. Vumela ukusebenzisa lenjini yokuqaphela amagama?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Lolu limi ludinga ukuxhumana okusebenzayo kwenethiwekhi ekukhishweni kokuthunyelwe njengombhalo kunkulumo."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Lesi isibonelo sezwi"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Isimo solimi oluzenzakalelayo"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"I-<xliff:g id="LOCALE">%1$s</xliff:g> isekelwe ngokugcwele"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"I-<xliff:g id="LOCALE">%1$s</xliff:g> idinga ukuxhumeka kwenethiwekhi"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"I-<xliff:g id="LOCALE">%1$s</xliff:g> ayisekelwe"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"Iyahlola..."</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Izilungiselelo ze-<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Faka izilungiselelo zenjini"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Injini eyintandokazi"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Okuvamile"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Phansi kakhulu"</item>
+    <item msgid="4795095314303559268">"Phansi"</item>
+    <item msgid="8903157781070679765">"Okujwayelekile"</item>
+    <item msgid="164347302621392996">"Sheshayo"</item>
+    <item msgid="5794028588101562009">"Ngokushesha"</item>
+    <item msgid="7163942783888652942">"Kushesha kakhulu"</item>
+    <item msgid="7831712693748700507">"Esheshisayo"</item>
+    <item msgid="5194774745031751806">"Esheshisa kakhulu"</item>
+    <item msgid="9085102246155045744">"Esheshisa kakhulukhulu"</item>
+  </string-array>
 </resources>

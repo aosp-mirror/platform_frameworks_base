@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Lietotājs: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Iestatīti daži noklusējumi"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nav iestatīti noklusējumi"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Teksta-runas iestatījumi"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Teksta-runas izvade"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Runas ātrums"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Teksta ierunāšanas ātrums"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Valoda"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Izmantot sistēmas valodu"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Nav atlasīta valoda."</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Runātajam tekstam iestata valodai raksturīgu balsi"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Noklausīties piemēru"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Atskaņot īsu runas sintēzes demonstrāciju"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instalēt balss datus"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalēt runas sintēzei nepieciešamos balss datus"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Lietojot šo runas sintēzes programmu, var tikt apkopots viss ierunātais teksts, tostarp tāda personīgā informācija kā paroles un kredītkaršu numuri. Tā ir no <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> programmas. Vai iespējot šīs runas sintēzes programmas lietošanu?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Lai izmantotu teksta pārveidošanu runā šajā valodā, ir nepieciešams aktīvs tīkla savienojums."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Šis ir runas sintēzes piemērs."</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Noklusējuma valodas statuss"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"Lokalizācija <xliff:g id="LOCALE">%1$s</xliff:g> tiek pilnībā atbalstīta"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"Lokalizācijai <xliff:g id="LOCALE">%1$s</xliff:g> nepieciešams tīkla savienojums."</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"Lokalizācija <xliff:g id="LOCALE">%1$s</xliff:g> netiek atbalstīta"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Programmas <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> iestatījumi"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Programmas iestatījumu palaišana"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Vēlamā programma"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Vispārīgi"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>
