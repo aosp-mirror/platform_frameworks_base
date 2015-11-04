@@ -494,7 +494,7 @@ final class ActivityRecord {
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified, boolean _rootVoiceInteraction,
             ActivityStackSupervisor supervisor,
-            ActivityContainer container, Bundle options) {
+            ActivityContainer container, ActivityOptions options) {
         service = _service;
         appToken = new Token(this, service);
         info = aInfo;
@@ -527,7 +527,7 @@ final class ActivityRecord {
         mStackSupervisor = supervisor;
         mInitialActivityContainer = container;
         if (options != null) {
-            pendingOptions = new ActivityOptions(options);
+            pendingOptions = options;
             mLaunchTaskBehind = pendingOptions.getLaunchTaskBehind();
             PendingIntent usageReport = pendingOptions.getUsageTimeReport();
             if (usageReport != null) {
@@ -796,15 +796,6 @@ final class ActivityRecord {
         }
         if (unsent) {
             addNewIntentLocked(rintent);
-        }
-    }
-
-    void updateOptionsLocked(Bundle options) {
-        if (options != null) {
-            if (pendingOptions != null) {
-                pendingOptions.abort();
-            }
-            pendingOptions = new ActivityOptions(options);
         }
     }
 

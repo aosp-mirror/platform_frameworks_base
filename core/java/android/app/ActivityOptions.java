@@ -884,9 +884,14 @@ public class ActivityOptions {
     public AppTransitionAnimationSpec[] getAnimSpecs() { return mAnimSpecs; }
 
     /** @hide */
-    public static void abort(Bundle options) {
+    public static ActivityOptions fromBundle(Bundle bOptions) {
+        return bOptions != null ? new ActivityOptions(bOptions) : null;
+    }
+
+    /** @hide */
+    public static void abort(ActivityOptions options) {
         if (options != null) {
-            (new ActivityOptions(options)).abort();
+            options.abort();
         }
     }
 

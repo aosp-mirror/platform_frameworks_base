@@ -980,7 +980,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, WaitResult outResult, Configuration config,
-            Bundle options, boolean ignoreTargetSecurity, int userId,
+            Bundle bOptions, boolean ignoreTargetSecurity, int userId,
             IActivityContainer iContainer, TaskRecord inTask) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
@@ -995,6 +995,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityInfo aInfo =
                 resolveActivity(intent, resolvedType, startFlags, profilerInfo, userId);
 
+        ActivityOptions options = ActivityOptions.fromBundle(bOptions);
         ActivityContainer container = (ActivityContainer)iContainer;
         synchronized (mService) {
             if (container != null && container.mParentActivity != null &&
@@ -1152,7 +1153,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options, int userId) {
+            Bundle bOptions, int userId) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -1205,16 +1206,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 "FLAG_CANT_SAVE_STATE not supported here");
                     }
 
-                    Bundle theseOptions;
-                    if (options != null && i == intents.length-1) {
-                        theseOptions = options;
-                    } else {
-                        theseOptions = null;
-                    }
+                    ActivityOptions options = ActivityOptions.fromBundle(
+                            i == intents.length - 1 ? bOptions : null);
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
                             aInfo, null, null, resultTo, null, -1, callingPid, callingUid,
                             callingPackage, callingPid, callingUid,
-                            0, theseOptions, false, componentSpecified, outActivity, null, null);
+                            0, options, false, componentSpecified, outActivity, null, null);
                     if (res < 0) {
                         return res;
                     }
@@ -1453,7 +1450,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode,
             int callingPid, int callingUid, String callingPackage,
-            int realCallingPid, int realCallingUid, int startFlags, Bundle options,
+            int realCallingPid, int realCallingUid, int startFlags, ActivityOptions options,
             boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
             ActivityContainer container, TaskRecord inTask) {
         int err = ActivityManager.START_SUCCESS;
@@ -1728,7 +1725,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 || stack.mResumedActivity.info.applicationInfo.uid != callingUid)) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
-                PendingActivityLaunch pal =  new PendingActivityLaunch(r, 
+                PendingActivityLaunch pal =  new PendingActivityLaunch(r,
                         sourceRecord, startFlags, stack, callerApp);
                 mPendingActivityLaunches.add(pal);
                 ActivityOptions.abort(options);
@@ -1922,17 +1919,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     final int startActivityUncheckedLocked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,
-            boolean doResume, Bundle options, TaskRecord inTask) {
+            boolean doResume, ActivityOptions options, TaskRecord inTask) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
         boolean overrideBounds = false;
         Rect newBounds = null;
         if (options != null && (r.info.resizeable || (inTask != null && inTask.mResizeable))) {
-            ActivityOptions opts = new ActivityOptions(options);
-            if (opts.hasBounds()) {
+            if (options.hasBounds()) {
                 overrideBounds = true;
-                newBounds = opts.getBounds();
+                newBounds = options.getBounds();
             }
         }
 
@@ -2868,8 +2864,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return resumeTopActivitiesLocked(null, null, null);
     }
 
-    boolean resumeTopActivitiesLocked(ActivityStack targetStack, ActivityRecord target,
-            Bundle targetOptions) {
+    boolean resumeTopActivitiesLocked(
+            ActivityStack targetStack, ActivityRecord target, ActivityOptions targetOptions) {
         if (targetStack == null) {
             targetStack = mFocusedStack;
         }
@@ -2917,7 +2913,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void findTaskToMoveToFrontLocked(TaskRecord task, int flags, Bundle options, String reason) {
+    void findTaskToMoveToFrontLocked(
+            TaskRecord task, int flags, ActivityOptions options, String reason) {
         if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
             mUserLeaving = true;
         }
@@ -2933,9 +2930,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (task.mResizeable && options != null) {
-            ActivityOptions opts = new ActivityOptions(options);
-            if (opts.hasBounds()) {
-                Rect bounds = opts.getBounds();
+            if (options.hasBounds()) {
+                Rect bounds = options.getBounds();
                 task.updateOverrideConfiguration(bounds);
                 final int stackId = task.getLaunchStackId();
                 if (stackId != task.stack.mStackId) {

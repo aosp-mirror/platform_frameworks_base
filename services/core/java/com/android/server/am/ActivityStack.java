@@ -1702,7 +1702,7 @@ final class ActivityStack {
         return resumeTopActivityLocked(prev, null);
     }
 
-    final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
+    final boolean resumeTopActivityLocked(ActivityRecord prev, ActivityOptions options) {
         if (mStackSupervisor.inResumeTopActivity) {
             // Don't even start recursing.
             return false;
@@ -1723,7 +1723,7 @@ final class ActivityStack {
         return result;
     }
 
-    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, Bundle options) {
+    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
         if (DEBUG_LOCKSCREEN) mService.logLockScreen("");
 
         if (!mService.mBooting && !mService.mBooted) {
@@ -2257,7 +2257,7 @@ final class ActivityStack {
     }
 
     final void startActivityLocked(ActivityRecord r, boolean newTask,
-            boolean doResume, boolean keepCurTransition, Bundle options) {
+            boolean doResume, boolean keepCurTransition, ActivityOptions options) {
         TaskRecord rTask = r.task;
         final int taskId = rTask.taskId;
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
@@ -2359,7 +2359,7 @@ final class ActivityStack {
                     resetTaskIfNeededLocked(r, r);
                     doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
-            } else if (options != null && new ActivityOptions(options).getAnimationType()
+            } else if (options != null && options.getAnimationType()
                     == ActivityOptions.ANIM_SCENE_TRANSITION) {
                 doShow = false;
             }
@@ -3795,7 +3795,7 @@ final class ActivityStack {
         return hasVisibleActivities;
     }
 
-    final void updateTransitLocked(int transit, Bundle options) {
+    final void updateTransitLocked(int transit, ActivityOptions options) {
         if (options != null) {
             ActivityRecord r = topRunningActivityLocked();
             if (r != null && r.state != ActivityState.RESUMED) {
@@ -3835,7 +3835,7 @@ final class ActivityStack {
         }
     }
 
-    final void moveTaskToFrontLocked(TaskRecord tr, boolean noAnimation, Bundle options,
+    final void moveTaskToFrontLocked(TaskRecord tr, boolean noAnimation, ActivityOptions options,
             AppTimeTracker timeTracker, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
