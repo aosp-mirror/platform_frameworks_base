@@ -39,6 +39,7 @@ hwui_src_files := \
     DamageAccumulator.cpp \
     DeferredDisplayList.cpp \
     DeferredLayerUpdater.cpp \
+    DeviceInfo.cpp \
     DisplayList.cpp \
     DisplayListCanvas.cpp \
     Dither.cpp \
@@ -204,6 +205,7 @@ LOCAL_SRC_FILES += \
     unit_tests/CanvasStateTests.cpp \
     unit_tests/ClipAreaTests.cpp \
     unit_tests/DamageAccumulatorTests.cpp \
+    unit_tests/DeviceInfoTests.cpp \
     unit_tests/FatVectorTests.cpp \
     unit_tests/LayerUpdateQueueTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
