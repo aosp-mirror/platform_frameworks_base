@@ -50,7 +50,9 @@ public class SettingsDrawerActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.setContentView(R.layout.settings_with_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        // Nope.
+        if (mDrawerLayout == null) {
+            return;
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.action_bar);
         setActionBar(toolbar);
         mDrawerAdapter = new SettingsDrawerAdapter(this);
@@ -62,12 +64,12 @@ public class SettingsDrawerActivity extends Activity {
                 onTileClicked(mDrawerAdapter.getTile(position));
             };
         });
-        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
+        if (mDrawerLayout != null && item.getItemId() == android.R.id.home
+                && mDrawerAdapter.getCount() != 0) {
             openDrawer();
             return true;
         }
@@ -78,15 +80,19 @@ public class SettingsDrawerActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        mDrawerAdapter.updateCategories();
+        updateDrawer();
     }
 
     public void openDrawer() {
-        mDrawerLayout.openDrawer(Gravity.START);
+        if (mDrawerLayout != null) {
+            mDrawerLayout.openDrawer(Gravity.START);
+        }
     }
 
     public void closeDrawer() {
-        mDrawerLayout.closeDrawers();
+        if (mDrawerLayout != null) {
+            mDrawerLayout.closeDrawers();
+        }
     }
 
     @Override
@@ -106,9 +112,18 @@ public class SettingsDrawerActivity extends Activity {
     }
 
     public void updateDrawer() {
+        if (mDrawerLayout == null) {
+            return;
+        }
         // TODO: Do this in the background with some loading.
         mDrawerAdapter.updateCategories();
-        getActionBar().setDisplayHomeAsUpEnabled(mDrawerAdapter.getCount() != 0);
+        if (mDrawerAdapter.getCount() != 0) {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        } else {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
     }
 
     public List<DashboardCategory> getDashboardCategories(boolean force) {
