@@ -152,7 +152,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим польоту."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Немає SIM-карти."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Змінення мережі оператора."</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Заряд акумулятора: <xliff:g id="NUMBER">%d</xliff:g>."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Заряд акумулятора у відсотках: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Налаштування системи."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Сповіщення."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Очистити сповіщення."</string>
