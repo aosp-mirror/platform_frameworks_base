@@ -29,6 +29,7 @@
 #include "utils/Macros.h"
 
 #include <stddef.h>
+#include <stdlib.h>
 #include <type_traits>
 #include <utils/Log.h>
 
@@ -95,6 +96,7 @@ public:
     FatVector(size_t capacity) : FatVector() {
         this->resize(capacity);
     }
+
 private:
     typename InlineStdAllocator<T, SIZE>::Allocation mAllocation;
 };

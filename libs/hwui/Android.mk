@@ -64,6 +64,7 @@ hwui_src_files := \
     PatchCache.cpp \
     PathCache.cpp \
     PathTessellator.cpp \
+    PathParser.cpp \
     PixelBuffer.cpp \
     Program.cpp \
     ProgramCache.cpp \
@@ -82,6 +83,7 @@ hwui_src_files := \
     TextDropShadowCache.cpp \
     Texture.cpp \
     TextureCache.cpp \
+    VectorDrawablePath.cpp \
     protos/hwui.proto
 
 hwui_cflags := \
@@ -213,6 +215,7 @@ LOCAL_SRC_FILES += \
     unit_tests/FatVectorTests.cpp \
     unit_tests/LayerUpdateQueueTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
+    unit_tests/PathParserTests.cpp \
     unit_tests/StringUtilsTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
