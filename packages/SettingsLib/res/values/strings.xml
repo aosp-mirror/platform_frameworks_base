@@ -340,4 +340,12 @@
         <item>kor</item>
     </string-array>
 
+   <!-- Title for profile selection dialog [CHAR LIMIT=30] -->
+   <string name="choose_profile">Choose Profile</string>
+
+    <!-- Header for items under the personal user [CHAR LIMIT=30] -->
+    <string name="category_personal">Personal</string>
+    <!-- Header for items under the work user [CHAR LIMIT=30] -->
+    <string name="category_work">Work</string>
+
 </resources>

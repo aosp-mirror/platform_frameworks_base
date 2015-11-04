@@ -10,6 +10,7 @@
 
 package com.android.settingslib.drawer;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -33,7 +34,7 @@ import java.util.Map;
 
 public class TileUtils {
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final String LOG_TAG = "TileUtils";
 
@@ -114,12 +115,15 @@ public class TileUtils {
         UserManager userManager = UserManager.get(context);
         for (UserHandle user : userManager.getUserProfiles()) {
             // TODO: Needs much optimization, too many PM queries going on here.
-            getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
+            if (user.getIdentifier() == ActivityManager.getCurrentUser()) {
+                // Only add Settings for this user.
+                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
+                getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
+                        OPERATOR_DEFAULT_CATEGORY, tiles, false);
+                getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
+                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false);
+            }
             getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
-            getTilesForAction(context, user, OPERATOR_SETTINGS, cache, OPERATOR_DEFAULT_CATEGORY,
-                    tiles, false);
-            getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
-                    MANUFACTURER_DEFAULT_CATEGORY, tiles, false);
         }
         HashMap<String, DashboardCategory> categoryMap = new HashMap<>();
         for (DashboardTile tile : tiles) {

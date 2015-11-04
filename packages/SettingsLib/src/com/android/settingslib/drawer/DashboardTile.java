@@ -50,19 +50,6 @@ public class DashboardTile implements Parcelable {
     public Icon icon;
 
     /**
-     * Full class name of the fragment to display when this tile is
-     * selected.
-     * @attr ref android.R.styleable#PreferenceHeader_fragment
-     */
-    public String fragment;
-
-    /**
-     * Optional arguments to supply to the fragment when it is
-     * instantiated.
-     */
-    public Bundle fragmentArguments;
-
-    /**
      * Intent to launch when the preference is selected.
      */
     public Intent intent;
@@ -106,8 +93,6 @@ public class DashboardTile implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        dest.writeString(fragment);
-        dest.writeBundle(fragmentArguments);
         if (intent != null) {
             dest.writeByte((byte) 1);
             intent.writeToParcel(dest, flags);
@@ -130,8 +115,6 @@ public class DashboardTile implements Parcelable {
         if (in.readByte() != 0) {
             icon = Icon.CREATOR.createFromParcel(in);
         }
-        fragment = in.readString();
-        fragmentArguments = in.readBundle();
         if (in.readByte() != 0) {
             intent = Intent.CREATOR.createFromParcel(in);
         }
