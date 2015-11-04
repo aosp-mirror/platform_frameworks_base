@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
@@ -72,6 +73,7 @@ public class PhoneStatusBarPolicy implements Callback {
     private final HotspotController mHotspot;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
+    private final UserManager mUserManager;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -84,7 +86,8 @@ public class PhoneStatusBarPolicy implements Callback {
     private int mZen;
 
     private boolean mManagedProfileFocused = false;
-    private boolean mManagedProfileIconVisible = true;
+    private boolean mManagedProfileIconVisible = false;
+    private boolean mManagedProfileInQuietMode = false;
 
     private boolean mKeyguardVisible = true;
     private BluetoothController mBluetooth;
@@ -105,6 +108,10 @@ public class PhoneStatusBarPolicy implements Callback {
             }
             else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
                 updateTTY(intent);
+            }
+            else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED)) {
+                updateQuietState();
+                updateManagedProfile();
             }
         }
     };
@@ -127,6 +134,7 @@ public class PhoneStatusBarPolicy implements Callback {
         mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = userInfoController;
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -135,6 +143,7 @@ public class PhoneStatusBarPolicy implements Callback {
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // listen for user / profile change.
@@ -178,7 +187,7 @@ public class PhoneStatusBarPolicy implements Callback {
         // managed profile
         mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0,
                 mContext.getString(R.string.accessibility_managed_profile));
-        mService.setIconVisibility(SLOT_MANAGED_PROFILE, false);
+        mService.setIconVisibility(SLOT_MANAGED_PROFILE, mManagedProfileIconVisible);
     }
 
     public void setZenMode(int zen) {
@@ -349,8 +358,18 @@ public class PhoneStatusBarPolicy implements Callback {
         }
     }
 
+    private void updateQuietState() {
+        mManagedProfileInQuietMode = false;
+        int currentUserId = ActivityManager.getCurrentUser();
+        for (UserInfo ui : mUserManager.getEnabledProfiles(currentUserId)) {
+            if (ui.isManagedProfile() && ui.isQuietModeEnabled()) {
+                mManagedProfileInQuietMode = true;
+                return;
+            }
+        }
+    }
+
     private void profileChanged(int userId) {
-        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         UserInfo user = null;
         if (userId == UserHandle.USER_CURRENT) {
             try {
@@ -359,7 +378,7 @@ public class PhoneStatusBarPolicy implements Callback {
                 // Ignore
             }
         } else {
-            user = userManager.getUserInfo(userId);
+            user = mUserManager.getUserInfo(userId);
         }
 
         mManagedProfileFocused = user != null && user.isManagedProfile();
@@ -371,7 +390,18 @@ public class PhoneStatusBarPolicy implements Callback {
         if (DEBUG) Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
                 + mManagedProfileFocused
                 + " mKeyguardVisible: " + mKeyguardVisible);
-        boolean showIcon = mManagedProfileFocused && !mKeyguardVisible;
+        final boolean showIcon;
+        if (mManagedProfileFocused && !mKeyguardVisible) {
+            showIcon = true;
+            mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0,
+                    mContext.getString(R.string.accessibility_managed_profile));
+        } else if (mManagedProfileInQuietMode) {
+            showIcon = true;
+            mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status_off, 0,
+                    mContext.getString(R.string.accessibility_managed_profile));
+        } else {
+            showIcon = false;
+        }
         if (mManagedProfileIconVisible != showIcon) {
             mService.setIconVisibility(SLOT_MANAGED_PROFILE, showIcon);
             mManagedProfileIconVisible = showIcon;
@@ -395,6 +425,8 @@ public class PhoneStatusBarPolicy implements Callback {
                 public void onUserSwitchComplete(int newUserId) throws RemoteException {
                     updateAlarm();
                     profileChanged(newUserId);
+                    updateQuietState();
+                    updateManagedProfile();
                 }
 
                 @Override
@@ -430,5 +462,6 @@ public class PhoneStatusBarPolicy implements Callback {
         if (mCurrentUserSetup == userSetup) return;
         mCurrentUserSetup = userSetup;
         updateAlarm();
+        updateQuietState();
     }
 }
