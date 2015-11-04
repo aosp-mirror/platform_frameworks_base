@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import android.app.ActivityManager;
+
 /**
  * Constants
  */
@@ -64,6 +66,10 @@ public class Constants {
 
     public static class Values {
         public static class App {
+            /*
+             * Use ActivityManager.getMaxRecentTasksStatic() for a default value.
+             */
+            public static int MaxRecents = 10;
             public static int AppWidgetHostId = 1024;
             public static String DebugModeVersion = "A";
         }
