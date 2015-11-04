@@ -3846,29 +3846,29 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public final int startActivity(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle options) {
+            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions) {
         return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
-                resultWho, requestCode, startFlags, profilerInfo, options,
+                resultWho, requestCode, startFlags, profilerInfo, bOptions,
                 UserHandle.getCallingUserId());
     }
 
     @Override
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) {
+            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
         enforceNotIsolatedCaller("startActivity");
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                profilerInfo, null, null, options, false, userId, null, null);
+                profilerInfo, null, null, bOptions, false, userId, null, null);
     }
 
     @Override
     public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle options, boolean ignoreTargetSecurity,
+            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, boolean ignoreTargetSecurity,
             int userId) {
 
         // This is very dangerous -- it allows you to perform a start activity (including
@@ -3925,7 +3925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
                     resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null,
-                    null, null, options, ignoreTargetSecurity, userId, null, null);
+                    null, null, bOptions, ignoreTargetSecurity, userId, null, null);
             return ret;
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
@@ -3946,7 +3946,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public final WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) {
+            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
         enforceNotIsolatedCaller("startActivityAndWait");
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityAndWait", null);
@@ -3954,28 +3954,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 null, null, resultTo, resultWho, requestCode, startFlags, profilerInfo, res, null,
-                options, false, userId, null, null);
+                bOptions, false, userId, null, null);
         return res;
     }
 
     @Override
     public final int startActivityWithConfig(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, Configuration config, Bundle options, int userId) {
+            int startFlags, Configuration config, Bundle bOptions, int userId) {
         enforceNotIsolatedCaller("startActivityWithConfig");
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, config, options, false, userId, null, null);
+                null, null, config, bOptions, false, userId, null, null);
         return ret;
     }
 
     @Override
     public int startActivityIntentSender(IApplicationThread caller, IntentSender intent,
             Intent fillInIntent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int flagsMask, int flagsValues, Bundle options)
+            int requestCode, int flagsMask, int flagsValues, Bundle bOptions)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
@@ -4000,7 +4000,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null,
-                resultTo, resultWho, requestCode, flagsMask, flagsValues, options, null);
+                resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions, null);
         return ret;
     }
 
@@ -4008,7 +4008,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
             Intent intent, String resolvedType, IVoiceInteractionSession session,
             IVoiceInteractor interactor, int startFlags, ProfilerInfo profilerInfo,
-            Bundle options, int userId) {
+            Bundle bOptions, int userId) {
         if (checkCallingPermission(Manifest.permission.BIND_VOICE_INTERACTION)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: startVoiceActivity() from pid="
@@ -4026,7 +4026,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
                 resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo, null,
-                null, options, false, userId, null, null);
+                null, bOptions, false, userId, null, null);
     }
 
     @Override
@@ -4044,11 +4044,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean startNextMatchingActivity(IBinder callingActivity,
-            Intent intent, Bundle options) {
+            Intent intent, Bundle bOptions) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
+        ActivityOptions options = ActivityOptions.fromBundle(bOptions);
 
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(callingActivity);
@@ -4149,7 +4150,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public final int startActivityFromRecents(int taskId, int launchStackId, Bundle options) {
+    public final int startActivityFromRecents(int taskId, int launchStackId, Bundle bOptions) {
         if (checkCallingPermission(START_TASKS_FROM_RECENTS) != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: startActivityFromRecents called without " +
                     START_TASKS_FROM_RECENTS;
@@ -4158,13 +4159,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            return startActivityFromRecentsInner(taskId, launchStackId, options);
+            return startActivityFromRecentsInner(taskId, launchStackId, bOptions);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
-    final int startActivityFromRecentsInner(int taskId, int launchStackId, Bundle options) {
+    final int startActivityFromRecentsInner(int taskId, int launchStackId, Bundle bOptions) {
         final TaskRecord task;
         final int callingUid;
         final String callingPackage;
@@ -4183,8 +4184,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             if (launchStackId != INVALID_STACK_ID && task.stack.mStackId != launchStackId) {
-                if (launchStackId == DOCKED_STACK_ID && options != null) {
-                    ActivityOptions activityOptions = new ActivityOptions(options);
+                if (launchStackId == DOCKED_STACK_ID && bOptions != null) {
+                    ActivityOptions activityOptions = new ActivityOptions(bOptions);
                     mWindowManager.setDockedStackCreateMode(activityOptions.getDockCreateMode());
                 }
                 mStackSupervisor.moveTaskToStackLocked(
@@ -4192,7 +4193,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             if (task.getRootActivity() != null) {
-                moveTaskToFrontLocked(task.taskId, 0, options);
+                moveTaskToFrontLocked(task.taskId, 0, bOptions);
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingUid = task.mCallingUid;
@@ -4202,12 +4203,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             userId = task.userId;
         }
         return startActivityInPackage(callingUid, callingPackage, intent, null, null, null, 0, 0,
-                options, userId, null, task);
+                bOptions, userId, null, task);
     }
 
     final int startActivityInPackage(int uid, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Bundle options, int userId,
+            String resultWho, int requestCode, int startFlags, Bundle bOptions, int userId,
             IActivityContainer container, TaskRecord inTask) {
 
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
@@ -4216,32 +4217,32 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, options, false, userId, container, inTask);
+                null, null, null, bOptions, false, userId, container, inTask);
         return ret;
     }
 
     @Override
     public final int startActivities(IApplicationThread caller, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle bOptions,
             int userId) {
         enforceNotIsolatedCaller("startActivities");
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivities(caller, -1, callingPackage, intents,
-                resolvedTypes, resultTo, options, userId);
+                resolvedTypes, resultTo, bOptions, userId);
         return ret;
     }
 
     final int startActivitiesInPackage(int uid, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle options, int userId) {
+            Bundle bOptions, int userId) {
 
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivities(null, uid, callingPackage, intents, resolvedTypes,
-                resultTo, options, userId);
+                resultTo, bOptions, userId);
         return ret;
     }
 
@@ -6630,7 +6631,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
-            int flags, Bundle options, int userId) {
+            int flags, Bundle bOptions, int userId) {
         enforceNotIsolatedCaller("getIntentSender");
         // Refuse possible leaked file descriptors
         if (intents != null) {
@@ -6656,8 +6657,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         "Intent array length does not match resolvedTypes length");
             }
         }
-        if (options != null) {
-            if (options.hasFileDescriptors()) {
+        if (bOptions != null) {
+            if (bOptions.hasFileDescriptors()) {
                 throw new IllegalArgumentException("File descriptors passed in options");
             }
         }
@@ -6690,7 +6691,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 return getIntentSenderLocked(type, packageName, callingUid, userId,
-                        token, resultWho, requestCode, intents, resolvedTypes, flags, options);
+                        token, resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
 
             } catch (RemoteException e) {
                 throw new SecurityException(e);
@@ -6701,7 +6702,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     IIntentSender getIntentSenderLocked(int type, String packageName,
             int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
-            Bundle options) {
+            Bundle bOptions) {
         if (DEBUG_MU) Slog.v(TAG_MU, "getIntentSenderLocked(): uid=" + callingUid);
         ActivityRecord activity = null;
         if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
@@ -6722,7 +6723,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         PendingIntentRecord.Key key = new PendingIntentRecord.Key(
                 type, packageName, activity, resultWho,
-                requestCode, intents, resolvedTypes, flags, options, userId);
+                requestCode, intents, resolvedTypes, flags, bOptions, userId);
         WeakReference<PendingIntentRecord> ref;
         ref = mIntentSenderRecords.get(key);
         PendingIntentRecord rec = ref != null ? ref.get() : null;
@@ -8872,16 +8873,18 @@ public final class ActivityManagerService extends ActivityManagerNative
      * TODO: Add mController hook
      */
     @Override
-    public void moveTaskToFront(int taskId, int flags, Bundle options) {
+    public void moveTaskToFront(int taskId, int flags, Bundle bOptions) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS, "moveTaskToFront()");
 
         if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToFront: moving taskId=" + taskId);
         synchronized(this) {
-            moveTaskToFrontLocked(taskId, flags, options);
+            moveTaskToFrontLocked(taskId, flags, bOptions);
         }
     }
 
-    void moveTaskToFrontLocked(int taskId, int flags, Bundle options) {
+    void moveTaskToFrontLocked(int taskId, int flags, Bundle bOptions) {
+        ActivityOptions options = ActivityOptions.fromBundle(bOptions);
+
         if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
                 Binder.getCallingUid(), -1, -1, "Task to front")) {
             ActivityOptions.abort(options);
@@ -16611,7 +16614,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
-            Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle options,
+            Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
             boolean ordered, boolean sticky, int callingPid, int callingUid, int userId) {
         intent = new Intent(intent);
 
@@ -16648,8 +16651,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         BroadcastOptions brOptions = null;
-        if (options != null) {
-            brOptions = new BroadcastOptions(options);
+        if (bOptions != null) {
+            brOptions = new BroadcastOptions(bOptions);
             if (brOptions.getTemporaryAppWhitelistDuration() > 0) {
                 // See if the caller is allowed to do this.  Note we are checking against
                 // the actual real caller (not whoever provided the operation as say a
@@ -17114,7 +17117,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public final int broadcastIntent(IApplicationThread caller,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,
-            String[] requiredPermissions, int appOp, Bundle options,
+            String[] requiredPermissions, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         enforceNotIsolatedCaller("broadcastIntent");
         synchronized(this) {
@@ -17138,7 +17141,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     int broadcastIntentInPackage(String packageName, int uid,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,
-            String requiredPermission, Bundle options, boolean serialized, boolean sticky,
+            String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
             int userId) {
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
@@ -17148,7 +17151,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     : new String[] {requiredPermission};
             int res = broadcastIntentLocked(null, packageName, intent, resolvedType,
                     resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, AppOpsManager.OP_NONE, options, serialized,
+                    requiredPermissions, AppOpsManager.OP_NONE, bOptions, serialized,
                     sticky, -1, uid, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
@@ -20287,7 +20290,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public int startActivity(IBinder whoThread, String callingPackage,
-                Intent intent, String resolvedType, Bundle options) {
+                Intent intent, String resolvedType, Bundle bOptions) {
             checkCaller();
 
             int callingUser = UserHandle.getCallingUserId();
@@ -20305,7 +20308,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return mStackSupervisor.startActivityMayWait(appThread, -1, callingPackage, intent,
                     resolvedType, null, null, null, null, 0, 0, null, null,
-                    null, options, false, callingUser, null, tr);
+                    null, bOptions, false, callingUser, null, tr);
         }
 
         @Override

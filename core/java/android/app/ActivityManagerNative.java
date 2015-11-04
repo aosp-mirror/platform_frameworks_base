@@ -1763,7 +1763,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             } else {
                 bundle = data.readBundle();
             }
-            final ActivityOptions options = bundle == null ? null : new ActivityOptions(bundle);
+            final ActivityOptions options = ActivityOptions.fromBundle(bundle);
             boolean converted = convertToTranslucent(token, options);
             reply.writeNoException();
             reply.writeInt(converted ? 1 : 0);
@@ -2504,7 +2504,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             } else {
                 bundle = data.readBundle();
             }
-            final ActivityOptions options = bundle == null ? null : new ActivityOptions(bundle);
+            final ActivityOptions options = ActivityOptions.fromBundle(bundle);
             startInPlaceAnimationOnFrontMostApplication(options);
             reply.writeNoException();
             return true;
@@ -4922,8 +4922,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(token);
         mRemote.transact(GET_ACTIVITY_OPTIONS_TRANSACTION, data, reply, 0);
         reply.readException();
-        Bundle bundle = reply.readBundle();
-        ActivityOptions options = bundle == null ? null : new ActivityOptions(bundle);
+        ActivityOptions options = ActivityOptions.fromBundle(reply.readBundle());
         data.recycle();
         reply.recycle();
         return options;
