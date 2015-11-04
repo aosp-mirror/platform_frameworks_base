@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"ബാറ്ററി നില കുറവാണ്"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"ബാറ്ററി കുറവാണ്"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു. ബാറ്ററി സേവർ ഓണാണ്."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണയ്ക്കുന്നില്ല.\nഅതിന്റെ അനുബന്ധ ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
