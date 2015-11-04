@@ -3823,6 +3823,9 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /** @hide */
+        public static final int MIN_ASHMEM_BITMAP_SIZE = 128 * (1 << 10);
+
         /**
          * @hide
          */
@@ -3831,7 +3834,7 @@ public class Notification implements Parcelable
             super.purgeResources();
             if (mPicture != null &&
                 mPicture.isMutable() &&
-                mPicture.getAllocationByteCount() >= (128 * (1 << 10))) {
+                mPicture.getAllocationByteCount() >= MIN_ASHMEM_BITMAP_SIZE) {
                 mPicture = mPicture.createAshmemBitmap();
             }
             if (mBigLargeIcon != null) {
