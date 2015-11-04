@@ -74,7 +74,7 @@
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Mégse"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"A párosítás hozzáférést biztosít a névjegyekhez és híváselőzményekhez összekapcsolt állapotban."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Nem lehet párosítani a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"A párosítás sikertelen volt a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel hibás PIN kód vagy jelszó miatt."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"A párosítás sikertelen volt a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel hibás PIN-kód vagy jelszó miatt."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Nem lehet kommunikálni a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"A(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszköz elutasította a párosítást."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi kikapcsolva."</string>
@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Felhasználó: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Van néhány alapbeállítás"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nincs alapbeállítás"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Szöveg-beszéd átalakítás beállításai"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Szövegfelolvasás"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Beszéd sebessége"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"A szöveg kimondásának sebessége"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Nyelv"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"A rendszer nyelvének használata"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Nincs nyelv kiválasztva"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Beállítja a beszélt szöveg nyelvspecifikus hangját"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Példa meghallgatása"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Beszédszintézis rövid bemutatása"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Hangadatok telepítése"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"A beszédszintetizáláshoz szükséges hangadatok telepítése"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ez a beviteli módszer alkalmas lehet az elhangzott szövegek -- köztük az olyan személyes adatok, mint a jelszavak és a hitelkártyaszámok -- összegyűjtésére. A(z) <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> motor kapcsolta be. Engedélyezi ennek a beszédszintetizáló motornak a használatát?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Ez a nyelv működő hálózati kapcsolatot igényel a szövegfelolvasáshoz."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Ez egy példa a beszédszintézisre"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Alapértelmezett nyelv állapota"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"A(z) <xliff:g id="LOCALE">%1$s</xliff:g> nyelv teljes támogatást élvez"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"A(z) <xliff:g id="LOCALE">%1$s</xliff:g> nyelv használatához hálózati kapcsolatra van szükség"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"A(z) <xliff:g id="LOCALE">%1$s</xliff:g> nyelvet nem támogatja a rendszer"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"A(z) <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> beállításai"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Keresőmotor beállításainak indítása"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Preferált motor"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Általános"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

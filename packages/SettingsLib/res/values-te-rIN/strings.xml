@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"వినియోగదారు: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"కొన్ని డిఫాల్ట్‌లు సెట్ చేయబడ్డాయి"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"డిఫాల్ట్‌లు ఏవీ సెట్ చేయబడలేదు"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"వచనం నుండి ప్రసంగం సెట్టింగ్‌లు"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"వచనం నుండి ప్రసంగం అవుట్‌పుట్"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"ప్రసంగం రేట్"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"వచనాన్ని చదివి వినిపించాల్సిన వేగం"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"భాష"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"సిస్టమ్ భాషను ఉపయోగించు"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"భాష ఎంచుకోబడలేదు"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"చదవి వినిపించబడే వచనం కోసం భాష-నిర్దిష్ట వాయిస్‌ను సెట్ చేస్తుంది"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"ఒక ఉదాహరణ వినండి"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"ప్రసంగ సమన్వయం గురించి సంక్షిప్త ప్రదర్శనను ప్లే చేయి"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"వాయిస్ డేటాను ఇన్‌స్టాల్ చేయి"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"ప్రసంగ సమన్వయం కోసం అవసరమైన వాయిస్ డేటాను ఇన్‌స్టాల్ చేయండి"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"ఈ ప్రసంగ సమన్వయ ఇంజిన్ చదివి వినిపించబడే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ఇంజిన్‌లో అందించబడుతుంది. ఈ ప్రసంగ సమన్వయ ఇంజిన్ యొక్క వినియోగాన్ని ప్రారంభించాలా?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"వచనం నుండి ప్రసంగం అవుట్‌పుట్ కోసం ఈ భాషకు పని చేస్తున్న నెట్‌వర్క్ కనెక్షన్ కావాలి."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"ఇది ప్రసంగ సమన్వయానికి ఉదాహరణ"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"డిఫాల్ట్ భాష స్థితి"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g>కి పూర్తి మద్దతు ఉంది"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g>కి నెట్‌వర్క్ కనెక్షన్ అవసరం"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g>కు మద్దతు లేదు"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> కోసం సెట్టింగ్‌లు"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"ఇంజిన్ సెట్టింగ్‌లను ప్రారంభించండి"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"ప్రాధాన్య ఇంజిన్"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"సాధారణం"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

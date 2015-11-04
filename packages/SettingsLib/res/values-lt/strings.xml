@@ -97,4 +97,39 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Naudotojas: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Nustatyti kai kurie numatytieji nustatymai"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nenustatyta jokių numatytųjų nustatymų"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"„Teksto į kalbą“ nustatymai"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"„Teksto į kalbą“ išvestis"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kalbėjimo greitis"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Greitis, kuriuo sakomas tekstas"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Kalba"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Naudoti sistemos kalbą"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Kalba nepasirinkta"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Nustato konkrečiai kalbai būdingą sakomo teksto balsą"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Klausytis pavyzdžio"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Paleisti trumpą kalbos sintezės demonstraciją"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Įdiegti balso duomenis"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Įdiegti balso duomenis, reikalingus kalbos sintezei"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Šis kalbos sintezės variklis gali rinkti visą įvedamą tekstą, įskaitant asmeninius duomenis, pvz., kredito kortelės numerius, išskyrus slaptažodžius. Tai vyksta dėl variklio <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Įgalinti šio kalbos sintezės variklio naudojimą?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Pasirinkus šią kalbą, teksto vertimo kalba išvesčiai būtinas veikiantis tinklo ryšys."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Tai yra kalbos sintezės pavyzdys"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Numatytoji kalbos būsena"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> visiškai palaikoma"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> būtinas tinklo ryšys"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> nepalaikoma"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"Tikrinama…"</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"„<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>“ nustatymai"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Paleisti variklio nustatymus"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Pageidaujamas variklis"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Bendra"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Labai lėtas"</item>
+    <item msgid="4795095314303559268">"Lėtas"</item>
+    <item msgid="8903157781070679765">"Įprastas"</item>
+    <item msgid="164347302621392996">"Greitas"</item>
+    <item msgid="5794028588101562009">"Greitesnis"</item>
+    <item msgid="7163942783888652942">"Labai greitas"</item>
+    <item msgid="7831712693748700507">"Spartus"</item>
+    <item msgid="5194774745031751806">"Labai spartus"</item>
+    <item msgid="9085102246155045744">"Greičiausias"</item>
+  </string-array>
 </resources>

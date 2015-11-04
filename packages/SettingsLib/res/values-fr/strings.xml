@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Utilisateur : <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Certains paramètres par défaut définis"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Aucun paramètre par défaut défini"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Paramètres de la synthèse vocale"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Synthèse vocale"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Cadence"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Vitesse à laquelle le texte est énoncé"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Langue"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Utiliser la langue du système"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Langue non sélectionnée"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Définir la langue utilisée par la synthèse vocale"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Écouter un échantillon"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Lire une courte démonstration de la synthèse vocale"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Installer les données vocales"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Installer les données nécessaires à la synthèse vocale"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ce moteur de synthèse vocale est susceptible de collecter tout ce qui sera lu, y compris les données personnelles comme les mots de passe et les numéros de carte de paiement. Il provient du moteur <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Voulez-vous activer son utilisation ?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Une connexion réseau est nécessaire pour la synthèse vocale dans cette langue."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Voici un échantillon de synthèse vocale."</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"État de la langue par défaut"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"Les paramètres régionaux <xliff:g id="LOCALE">%1$s</xliff:g> sont compatibles."</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"Les paramètres régionaux <xliff:g id="LOCALE">%1$s</xliff:g> nécessitent une connexion réseau."</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"Les paramètres régionaux <xliff:g id="LOCALE">%1$s</xliff:g> ne sont pas compatibles."</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Paramètres de <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Lancer les paramètres du moteur"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Moteur préféré"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Paramètres généraux"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

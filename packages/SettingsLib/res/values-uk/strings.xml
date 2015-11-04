@@ -97,4 +97,39 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Користувач: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Налаштовано деякі значення за умовчанням"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Немає значень за умовчанням"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Налашт. синтезу мовлення"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Вивід синтезу мовлення з тексту"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Темп мовлення"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Швидкість відтворення тексту"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Мова"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Використовувати мову системи"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Мову не вибрано"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Устан. голос для відтворюваного тексту залежно від мови"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Прослухайте приклад"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Відтворити коротку демонстрацію синтезу мови"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Встановлення голосових даних"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Установіть потрібні голосові дані для синтезу мовлення"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ця система синтезу мовлення може збирати всі відтворювані тексти, зокрема особисті дані, такі як паролі та номери кредитних карток. Вона походить від системи <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Увімкнути використання цієї системи синтезу мовлення?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Для виходу синтезу мовлення цією мовою потрібно мати з’єднання з Інтернетом."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Це приклад синтезу мовлення"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Статус мови за умовчанням"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g>: підтримується повністю"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g>: потрібне з’єднання з мережею"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g>: не підтримується"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"Перевірка…"</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Запускати налаштування системи"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Бажана система"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Загальні"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Дуже повільно"</item>
+    <item msgid="4795095314303559268">"Повільно"</item>
+    <item msgid="8903157781070679765">"Звичайно"</item>
+    <item msgid="164347302621392996">"Швидко"</item>
+    <item msgid="5794028588101562009">"Швидше"</item>
+    <item msgid="7163942783888652942">"Дуже швидко"</item>
+    <item msgid="7831712693748700507">"Надзвичайно швидко"</item>
+    <item msgid="5194774745031751806">"Украй швидко"</item>
+    <item msgid="9085102246155045744">"Найшвидше"</item>
+  </string-array>
 </resources>

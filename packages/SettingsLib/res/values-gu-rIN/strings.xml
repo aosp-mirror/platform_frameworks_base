@@ -97,4 +97,39 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"વપરાશકર્તા: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"કેટલાંક ડિફોલ્ટ્સ સેટ કરેલ છે"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"કોઇ ડિફોલ્ટ્સ સેટ કરેલ નથી"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"ટેક્સ્ટ-ટુ-સ્પીચ સેટિંગ્સ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"વાણી દર"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"ટેક્સ્ટ બોલાયેલ છે તે ઝડપ"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"ભાષા"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"સિસ્ટમ ભાષાનો ઉપયોગ કરો"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"ભાષા પસંદ કરેલ નથી"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"બોલાયેલ ટેક્સ્ટ માટે ભાષા-વિશિષ્ટ વૉઇસ સેટ કરે છે"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"એક ઉદાહરણ સાંભળો"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"વાણી સંશ્લેષણનું એક ટૂંકુ પ્રદર્શન ચલાવો"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"વૉઇસ ડેટા ઇન્સ્ટોલ કરો"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"વાણી સંશ્લેષણ માટે જરૂરી વૉઇસ ડેટા ઇન્સ્ટોલ કરો"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"આ વાણી સંશ્લેષણ એન્જિન પાસવર્ડ્સ અને ક્રેડિટ કાર્ડ નંબર જેવી વ્યક્તિગત માહિતી સહિત બોલવામાં આવશે તે તમામ ટેક્સ્ટને એકત્રિત કરવા માટે સક્ષમ હોઈ શકે છે. તે <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> એન્જિન પરથી આવે છે. આ વાણી સંશ્લેષણ એન્જિનના ઉપયોગને સક્ષમ કરીએ?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"આ ભાષાને ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ માટે ચાલુ નેટવર્કની આવશ્યકતા છે."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"આ વાણી સંશ્લેષણનું એક ઉદાહરણ છે"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"ડીફોલ્ટ ભાષા સ્થિતિ"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> સંપૂર્ણપણે સમર્થિત છે"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> નેટવર્ક કનેક્શનની આવશ્યકતા છે"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> સમર્થિત નથી"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"તપાસી રહ્યું છે..."</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> માટેની સેટિંગ્સ"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"એન્જિન સેટિંગ્સ લોંચ કરો"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"મનપસંદ એન્જિન"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"સામાન્ય"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"ખૂબ જ ધીમી"</item>
+    <item msgid="4795095314303559268">"ધીમી"</item>
+    <item msgid="8903157781070679765">"સામાન્ય"</item>
+    <item msgid="164347302621392996">"ઝડપી"</item>
+    <item msgid="5794028588101562009">"વધુ ઝડપી"</item>
+    <item msgid="7163942783888652942">"ખૂબ ઝડપી"</item>
+    <item msgid="7831712693748700507">"તીવ્ર"</item>
+    <item msgid="5194774745031751806">"ખૂબ જ તીવ્ર"</item>
+    <item msgid="9085102246155045744">"સૌથી ઝડપી"</item>
+  </string-array>
 </resources>

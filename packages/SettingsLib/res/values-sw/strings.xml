@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguo-msingi zimewekwa"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Hakuna chaguo-misingi zilizowekwa"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Mipangilio ya maandishi kwa hotuba"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Kubadilisha maandishi hadi usemi"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Kiwango cha usemaji"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kasi ya kutamkwa kwa maneno"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Lugha"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Tumia lugha ya mfumo"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Lugha haijachaguliwa"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Huweka sauti maalum ya lugha inayolingana na yanayozungumzwa"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Sikiliza mfano"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Cheza onyesho fupi la usanisi usemaji"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Sakinisha data ya sauti"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Sakinisha data ya sauti inayohitajika kuunganisha usemi"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Hotuba hii inawezesha injini huenda ikaweza kukusanya maandishi ambayo yatazungumziwa, ikijumlisha data ya kibinafsi ya nenosiri na namba ya kaddi ya mkopo. Inatoka kwa injini ya <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> Wezesha matumizi ya hotuba hii iliyowezeshwa ya injini?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Lugha hii inahitaji muunganisho wa mtandao unaofanya kazi kwa towe ya maandishi hadi sauti."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Huu ni mfano wa usanisi usemaji"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Hali ya lugha chaguo-msingi"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> inaweza kutumiwa kikamilifu"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> inahitaji muunganisho wa mtandao"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> haiwezi kutumiwa"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Mipangilio ya <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Zindua mipangilio ya injini"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Injini inayofaa"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Kwa ujumla"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>

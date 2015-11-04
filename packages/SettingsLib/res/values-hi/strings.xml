@@ -97,4 +97,39 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"उपयोगकर्ता: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"कुछ डिफ़ॉल्‍ट सेट हैं"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"लेख से बोली सेटिंग"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"लेख को सुनें"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"बोली दर"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"बोलने की गति तय करें"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"भाषा"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"सिस्‍टम भाषा का उपयोग करें"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"भाषा नहीं चुनी गई है"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"बोले गए लेख के लिए भाषा-विशिष्ट ध्‍वनि सेट करता है"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"एक उदाहरण सुनें"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"बोली संश्लेषण का एक संक्षिप्त प्रदर्शन चलाएं"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"ध्‍वनि डेटा इंस्टॉल करें"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"बोली-संश्लेषण के लिए आवश्‍यक ध्‍वनि डेटा इंस्‍टॉल करें"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"यह बोली संश्लेषण इंजन पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा समेत आपके द्वारा बोले जाने वाले सभी लेख को एकत्र कर सकता है. यह <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> इंजन से आता है. इस बोली संश्लेषण इंजन के उपयोग को सक्षम करें?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"लेख-से-बोली आउटपुट के लिए इस भाषा को क्रियाशील नेटवर्क कनेक्शन की आवश्यकता है."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"यह बोली संश्लेषण का एक उदाहरण है"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"डिफ़ॉल्ट भाषा स्थिति"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> पूरी तरह से समर्थित है"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> के लिए नेटवर्क कनेक्शन की आवश्यकता है"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> समर्थित नहीं है"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"जांच की जा रही है..."</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> के लिए सेटिंग"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"इंजन सेटिंग लॉन्‍च करें"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"पसंदीदा इंजन"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"सामान्य"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"अत्‍यधिक धीमा"</item>
+    <item msgid="4795095314303559268">"धीमा"</item>
+    <item msgid="8903157781070679765">"सामान्य"</item>
+    <item msgid="164347302621392996">"तेज़"</item>
+    <item msgid="5794028588101562009">"अधिक तेज़"</item>
+    <item msgid="7163942783888652942">"अत्‍यधिक तेज़"</item>
+    <item msgid="7831712693748700507">"त्वरित"</item>
+    <item msgid="5194774745031751806">"अत्यधिक तीव्र"</item>
+    <item msgid="9085102246155045744">"सबसे तेज़"</item>
+  </string-array>
 </resources>

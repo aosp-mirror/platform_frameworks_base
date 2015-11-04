@@ -97,4 +97,38 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"User: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Some defaults set"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"No defaults set"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Text-to-speech settings"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Text-to-speech output"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Speech rate"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Speed at which the text is spoken"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Language"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Use system language"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Language not selected"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Sets the language-specific voice for the spoken text"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Listen to an example"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Play a short demonstration of speech synthesis"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Install voice data"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Install the voice data required for speech synthesis"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"This speech synthesis engine may be able to collect all the text that will be spoken, including personal data like passwords and credit card numbers. It comes from the <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> engine. Enable the use of this speech synthesis engine?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"This language requires a working network connection for text-to-speech output."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"This is an example of speech synthesis"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Default language status"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> is fully supported"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> requires network connection"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> is not supported"</string>
+    <!-- no translation found for tts_status_checking (5339150797940483592) -->
+    <skip />
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Settings for <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Launch engine settings"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Preferred engine"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"General"</string>
+    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
+    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
+    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
+    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
+    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
+    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
+    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
+    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
+    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
 </resources>
