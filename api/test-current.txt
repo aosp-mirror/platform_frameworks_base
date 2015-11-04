@@ -8254,6 +8254,7 @@ package android.content {
     field public static final java.lang.String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     field public static final java.lang.String ACTION_ASSIST = "android.intent.action.ASSIST";
     field public static final java.lang.String ACTION_ATTACH_DATA = "android.intent.action.ATTACH_DATA";
+    field public static final java.lang.String ACTION_AVAILABILITY_CHANGED = "android.intent.action.AVAILABILITY_CHANGED";
     field public static final java.lang.String ACTION_BATTERY_CHANGED = "android.intent.action.BATTERY_CHANGED";
     field public static final java.lang.String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
     field public static final java.lang.String ACTION_BATTERY_OKAY = "android.intent.action.BATTERY_OKAY";
@@ -8293,6 +8294,7 @@ package android.content {
     field public static final java.lang.String ACTION_LOCKED_BOOT_COMPLETED = "android.intent.action.LOCKED_BOOT_COMPLETED";
     field public static final java.lang.String ACTION_MAIN = "android.intent.action.MAIN";
     field public static final java.lang.String ACTION_MANAGED_PROFILE_ADDED = "android.intent.action.MANAGED_PROFILE_ADDED";
+    field public static final java.lang.String ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED = "android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED";
     field public static final java.lang.String ACTION_MANAGED_PROFILE_REMOVED = "android.intent.action.MANAGED_PROFILE_REMOVED";
     field public static final java.lang.String ACTION_MANAGE_NETWORK_USAGE = "android.intent.action.MANAGE_NETWORK_USAGE";
     field public static final java.lang.String ACTION_MANAGE_PACKAGE_STORAGE = "android.intent.action.MANAGE_PACKAGE_STORAGE";
@@ -8437,6 +8439,7 @@ package android.content {
     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
     field public static final java.lang.String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
     field public static final java.lang.String EXTRA_PROCESS_TEXT_READONLY = "android.intent.extra.PROCESS_TEXT_READONLY";
+    field public static final java.lang.String EXTRA_QUIET_MODE = "android.intent.extra.QUIET_MODE";
     field public static final java.lang.String EXTRA_REFERRER = "android.intent.extra.REFERRER";
     field public static final java.lang.String EXTRA_REFERRER_NAME = "android.intent.extra.REFERRER_NAME";
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
@@ -28069,6 +28072,7 @@ package android.os {
     method public android.os.Bundle getUserRestrictions();
     method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
     method public boolean hasUserRestriction(java.lang.String);
+    method public boolean isQuietModeEnabled(android.os.UserHandle);
     method public boolean isSystemUser();
     method public boolean isUserAGoat();
     method public boolean isUserRunning(android.os.UserHandle);

@@ -76,6 +76,7 @@ public class UserInfo implements Parcelable {
      */
     public static final int FLAG_DISABLED = 0x00000040;
 
+    public static final int FLAG_QUIET_MODE = 0x00000080;
 
     public static final int NO_PROFILE_GROUP_ID = UserHandle.USER_NULL;
 
@@ -130,6 +131,9 @@ public class UserInfo implements Parcelable {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;
     }
 
+    public boolean isQuietModeEnabled() {
+        return (flags & FLAG_QUIET_MODE) == FLAG_QUIET_MODE;
+    }
     /**
      * Returns true if the user is a split system user.
      * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,

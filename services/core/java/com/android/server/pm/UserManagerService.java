@@ -475,6 +475,66 @@ public class UserManagerService extends IUserManager.Stub {
                 && user.profileGroupId == profile.profileGroupId);
     }
 
+    private void broadcastProfileAvailabilityChanges(UserHandle profileHandle,
+            UserHandle parentHandle, Bundle extras) {
+        // Send intent to profile
+        Intent intent = new Intent(Intent.ACTION_AVAILABILITY_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.putExtras(extras);
+        mContext.sendBroadcastAsUser(intent, profileHandle);
+
+        // Send intent to parent
+        if (parentHandle != null) {
+            intent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+            intent.putExtra(Intent.EXTRA_USER, profileHandle);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            intent.putExtras(extras);
+            mContext.sendBroadcastAsUser(intent, parentHandle);
+        }
+    }
+
+    @Override
+    public void setQuietModeEnabled(int userHandle, boolean enableQuietMode) {
+        checkManageUsersPermission("silence profile");
+        boolean changed = false;
+        UserInfo profile, parent;
+        synchronized (mPackagesLock) {
+            synchronized (mUsersLock) {
+                profile = getUserInfoLU(userHandle);
+                parent = getProfileParentLU(userHandle);
+
+            }
+            if (profile == null || !profile.isManagedProfile()) {
+                throw new IllegalArgumentException("User " + userHandle + " is not a profile");
+            }
+            if (profile.isQuietModeEnabled() != enableQuietMode) {
+                profile.flags ^= UserInfo.FLAG_QUIET_MODE;
+                writeUserLP(profile);
+                changed = true;
+            }
+        }
+        if (changed) {
+            Bundle extras = new Bundle();
+            extras.putBoolean(Intent.EXTRA_QUIET_MODE, enableQuietMode);
+            broadcastProfileAvailabilityChanges(profile.getUserHandle(),
+                    parent != null ? parent.getUserHandle() : null, extras);
+        }
+    }
+
+    @Override
+    public boolean isQuietModeEnabled(int userHandle) {
+        synchronized (mPackagesLock) {
+            UserInfo info;
+            synchronized (mUsersLock) {
+                info = getUserInfoLU(userHandle);
+            }
+            if (info == null || !info.isManagedProfile()) {
+                throw new IllegalArgumentException("User " + userHandle + " is not a profile");
+            }
+            return info.isQuietModeEnabled();
+        }
+    }
+
     @Override
     public void setUserEnabled(int userId) {
         checkManageUsersPermission("enable user");
