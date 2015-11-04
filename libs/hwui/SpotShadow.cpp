@@ -1052,7 +1052,7 @@ void SpotShadow::dumpPolygon(const Vector2* poly, int polyLength, const char* po
  */
 void SpotShadow::dumpPolygon(const Vector3* poly, int polyLength, const char* polyName) {
     for (int i = 0; i < polyLength; i++) {
-        ALOGD("polygon %s i %d x %f y %f", polyName, i, poly[i].x, poly[i].y);
+        ALOGD("polygon %s i %d x %f y %f z %f", polyName, i, poly[i].x, poly[i].y, poly[i].z);
     }
 }
 
