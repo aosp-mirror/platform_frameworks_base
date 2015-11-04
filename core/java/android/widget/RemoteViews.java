@@ -21,6 +21,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -151,6 +152,13 @@ public class RemoteViews implements Parcelable, Filter {
             return new Object[1];
         }
     };
+
+    /**
+     * @hide
+     */
+    public void setRemoteInputs(int viewId, RemoteInput[] remoteInputs) {
+        mActions.add(new SetRemoteInputsAction(viewId, remoteInputs));
+    }
 
     /**
      * Handle with care!
@@ -1699,6 +1707,43 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Helper action to add a view tag with RemoteInputs.
+     */
+    private class SetRemoteInputsAction extends Action {
+
+        public SetRemoteInputsAction(int viewId, RemoteInput[] remoteInputs) {
+            this.viewId = viewId;
+            this.remoteInputs = remoteInputs;
+        }
+
+        public SetRemoteInputsAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            remoteInputs = parcel.readParcelableArray(RemoteInput.class.getClassLoader());
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeParcelableArray(remoteInputs, flags);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final TextView target = (TextView) root.findViewById(viewId);
+            if (target == null) return;
+
+            target.setTagInternal(R.id.remote_input_tag, remoteInputs);
+        }
+
+        public String getActionName() {
+            return "SetRemoteInputsAction";
+        }
+
+        final Parcelable[] remoteInputs;
+        public final static int TAG = 18;
+    }
+
+    /**
      * Simple class used to keep track of memory usage in a RemoteViews.
      *
      */
@@ -1893,6 +1938,9 @@ public class RemoteViews implements Parcelable, Filter {
                             break;
                         case TextViewDrawableColorFilterAction.TAG:
                             mActions.add(new TextViewDrawableColorFilterAction(parcel));
+                            break;
+                        case SetRemoteInputsAction.TAG:
+                            mActions.add(new SetRemoteInputsAction(parcel));
                             break;
                         default:
                             throw new ActionException("Tag " + tag + " not found");

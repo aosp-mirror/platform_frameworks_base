@@ -1101,10 +1101,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry,
-            Notification.Action action, RemoteInput remoteInput) {
-        return RemoteInputView.inflate(mContext, root, entry, action, remoteInput,
-                mRemoteInputController);
+    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry) {
+        return RemoteInputView.inflate(mContext, root, entry, mRemoteInputController);
     }
 
     public int getStatusBarHeight() {
