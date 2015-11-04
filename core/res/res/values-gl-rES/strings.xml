@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclúe datos persoais como números e contrasinais de tarxetas de crédito."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar ou modificar a barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite á aplicación desactivar a barra de estado ou engadir e eliminar as iconas do sistema."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"actuar como a barra de estado"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Permite á aplicación ser a barra de estado."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ampliar/contraer a barra de estado"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Permite á aplicación ampliar ou contraer a barra de estado."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite á aplicación recibir e procesar mensaxes WAP. Este permiso inclúe a capacidade de supervisar ou eliminar mensaxes enviadas a ti sen mostrarchas."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicacións en execución"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite á aplicación recuperar información acerca de tarefas que se están executando actualmente ou que se executaron recentemente. É posible que esta acción permita á aplicación descubrir información acerca de que aplicacións se utilizan no dispositivo."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Xestionar os propietarios do perfil e do dispositivo"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"xestionar propietarios do perfil e do dispositivo"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permite ás aplicacións establecer os propietarios do perfil e o propietario do dispositivo."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar as aplicacións en execución"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite á aplicación mover tarefas ao primeiro e segundo plano. É posible que a aplicación leve a cabo esta acción sen a túa intervención."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite á aplicación modificar o rexistro de chamadas do tablet, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite que a aplicación modifique o rexistro de chamadas da televisión, incluídos os datos sobre chamadas entrantes e saíntes. As aplicacións maliciosas poden utilizar este permiso para borrar ou modificar o rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite á aplicación modificar o rexistro de chamadas do teléfono, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"sensores de corpo (como monitores de ritmo cardíaco)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"acceder a sensores do corpo (como monitores de ritmo cardíaco)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que a aplicación acceda aos datos dos sensores que controlan o teu estado físico, como o ritmo cardíaco."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ler os eventos do calendario e a información confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite á aplicación ler todos os eventos do calendario que están almacenados no tablet, incluídos os pertencentes aos teus amigos ou compañeiros de traballo. É posible que esta acción permita á aplicación compartir ou gardar os datos do teu calendario, independentemente da confidencialidade."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite á aplicación engadir, eliminar e cambiar eventos que podes modificar no teu teléfono, incluídos os de amigos ou compañeiros de traballo. É posible que esta acción permita á aplicación enviar mensaxes que parecen proceder de propietarios de calendarios ou modificar eventos sen o coñecemento dos propietarios."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionais do provedor de situación"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite á aplicación acceder a comandos adicionais de fornecedor de localizacións. É posible que isto provoque que a aplicación interfira co funcionamento do GPS ou doutras fontes da localización."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"localización precisa (baseada en GPS e na rede)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"acceder á localización precisa (baseada no GPS e na rede)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Permite á aplicación obter a túa localización precisa co sistema de posicionamento global (GPS ou Global Positioning System) ou con fontes da localización de rede como as torres de telecomunicacións e a wifi. Estes servizos de localización deben estar activados e dispoñibles para o teu dispositivo para que a aplicación poida utilizalos. As aplicacións poden usar esta opción para determinar aproximadamente o lugar en que te atopas e é posible que consuman batería adicional."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"situación aproximada (baseada na rede)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"acceder á localización aproximada (baseada na rede)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permite á aplicación obter a túa localización aproximada. Esta localización provén dos servizos de localización que utilizan fontes da localización de rede como as torres de telecomunicacións e a wifi. Estes servizos de localización deben estar activados e dispoñibles para o teu dispositivo para que a aplicación poida utilizalos. As aplicacións poden esta opción para determinar aproximadamente o lugar en que te atopas."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar a configuración de son"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite á aplicación modificar a configuración de audio global, como o volume e que altofalante se utiliza para a saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permite á aplicación gravar audio co micrófono. Este permiso permite á aplicación gravar audio en calquera momento sen a túa confirmación."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicación SIM"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos á SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite á aplicación enviar comandos á SIM. Isto é moi perigoso."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"facer fotos e vídeos"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite á aplicación tomar imaxes e vídeos coa cámara. Con este permiso a aplicación pode utilizar a cámara en calquera momento sen a túa confirmación."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Permite á aplicación obter a lista de contas coñecidas polo teléfono. É posible que aquí se inclúan as contas creadas por aplicacións que tes instaladas."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ver conexións de rede"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Permite á aplicación ver información acerca das conexións da rede, como que redes existen e cales están conectadas."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acceso total á rede"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"ter acceso completo á rede"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permite á aplicación crear sockets de rede e utilizar protocolos de rede personalizados. O navegador e outras aplicacións ofrecen medios para enviar datos a Internet, polo que non se require este permiso para enviar datos a Internet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"cambiar a conectividade de rede"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permite á aplicación cambiar o estado da conectividade de rede."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite á aplicación configurar o teléfono Bluetooth local e descubrir e sincronizar con dispositivos remotos."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"conectar e desconectar de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite á aplicación determinar se WiMAX está activado e obter información acerca das redes WiMAX que están conectadas."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar estado de WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"cambiar estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite á aplicación conectar e desconectar o tablet de redes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Permite que a aplicación conecte ou desconecte a televisión de redes WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite á aplicación conectar e desconectar o teléfono de redes WiMAX."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite á aplicación modificar os parámetros de calibración da pantalla táctil. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"acceso a certificados DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite a unha aplicación fornecer e utilizar certificados DRM. Non se deberían precisar nunca para as aplicacións normais."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Recibir estado das transferencias de Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"recibir o estado das transferencias de Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permite a esta aplicación recibir información acerca das transferencias actuais de Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"eliminar certificados DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a unha aplicación eliminar os certificados DRM. As aplicacións normais non o deberían precisar nunca."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatando…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Non se inseriu"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Non se atoparon actividades que coincidan."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Dirixir saída multimedia"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"dirixir saída multimedia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite a unha aplicación dirixir a saída multimedia a outros dispositivos externos."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Consultar sesións de instalación"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"ler sesións de instalación"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que unha aplicación consulte as sesións de instalación. Desta forma, pode ver os detalles acerca das instalacións de paquetes activas."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Solicitar instalación dos paquetes"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar instalación de paquetes"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite a unha aplicación solicitar a instalación dos paquetes."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dúas veces para controlar o zoom"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Non se puido engadir o widget."</string>

@@ -256,7 +256,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový riadok"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"vydávanie sa za stavový riadok"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Umožňuje aplikácii fungovať ako stavový riadok."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"rozbalenie a zbalenie stavového riadka"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Umožňuje aplikácii rozbaliť alebo zbaliť stavový riadok."</string>
@@ -284,7 +284,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikácii prijímať a spracovávať správy WAP. Toto povolenie zahŕňa možnosť sledovať vaše správy alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načítať spustené aplikácie"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikácii načítať informácie o aktuálne či nedávno spustených úlohách. Toto povolenie môže aplikácii umožniť objaviť informácie o tom, ktoré aplikácie sa na zariadení používajú."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Správa vlastníkov profilov a zariadenia"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"správa vlastníkov profilov a zariadení"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Povolí aplikáciám nastaviť vlastníkov profilov a vlastníka zariadenia."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"zmeniť poradie spustených aplikácií"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Umožňuje aplikácii presunúť úlohy do popredia alebo do pozadia. Aplikácia tak môže urobiť bez vášho zásahu."</string>
@@ -326,7 +326,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Umožňuje aplikácii upravovať denník hovorov vo vašom tablete vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Umožňuje aplikácii upravovať denník hovorov vo vašom televízore vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikácii upravovať denník hovorov vo vašom telefóne vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"telesné senzory (napr. snímače tepu)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"prístup k telesným senzorom (ako sú snímače tepu)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikácii získať prístup k údajom senzorov monitorujúcich vašu fyzickú kondíciu (napríklad pulz)."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čítať udalosti v kalendári a dôverné informácie"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Umožňuje aplikácii čítať všetky udalosti kalendára uložené v tablete vrátane udalostí priateľov alebo spolupracovníkov. Aplikácii to umožní zdieľať alebo ukladať údaje kalendára bez ohľadu na dôvernosť či citlivosť týchto údajov."</string>
@@ -338,15 +338,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Umožňuje aplikácii pridávať, odstraňovať alebo meniť udalosti, ktoré môžete v telefóne upravovať, a to vrátane udalostí priateľov a spolupracovníkov. Toto povolenie umožňuje aplikácii odosielať správy, ktoré budú zdanlivo prichádzať od vlastníkov kalendára, alebo upravovať udalosti bez vedomia vlastníkov."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"prístup k ďalším príkazom poskytovateľa polohy"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Umožňuje aplikácii pristupovať k ďalším príkazom poskytovateľa informácií o polohe. Aplikácii to môže umožniť zasahovať do činnosti systému GPS alebo iných zdrojov informácií o polohe."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"zistiť presnú polohu (pomocou GPS a siete)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"prístup k presnej polohe (pomocou GPS a siete)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Umožňuje aplikácii získať vašu presnú polohu pomocou systému GPS (Global Positioning System) alebo zdrojov určenia polohy siete, napríklad mobilných veží a sietí Wi-Fi. Tieto služby určovania polohy musia byť na vašom zariadení zapnuté a dostupné, inak ich aplikácia nebude môcť využívať. Aplikácie môžu tieto služby využívať na určenie vašej polohy. Tieto služby môžu zvýšiť spotrebu batérie."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"zistiť približnú polohu (pomocou siete)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"prístup k približnej polohe (pomocou siete)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Umožňuje aplikácii získať vašu približnú polohu. Táto poloha je odvodená zo služieb určovania polohy pomocou zdrojov určenia polohy siete, napríklad mobilných veží a sietí Wi-Fi. Tieto služby určovania polohy musia byť na vašom zariadení zapnuté a dostupné, inak ich aplikácia nebude môcť využívať. Aplikácie môžu tieto služby využívať na určenie vašej približnej polohy."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"meniť nastavenia zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikácii upraviť globálne nastavenia zvuku, ako je hlasitosť, alebo určiť, z ktorého reproduktora bude zvuk vychádzať."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávať zvuk"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Umožňuje aplikácii zaznamenávať zvuk pomocou mikrofónu. Toto povolenie umožňuje aplikácii zaznamenávať zvuk kedykoľvek bez vášho potvrdenia."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikácia so SIM kartou"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"posielanie príkazov do SIM karty"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Umožňuje aplikácii odosielať príkazy na SIM kartu. Toto je veľmi nebezpečné povolenie."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotiť a nakrúcať videá"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikácii fotografovať a nahrávať videá pomocou fotoaparátu. Toto povolenie umožňuje aplikácii používať fotoaparát kedykoľvek a bez vášho potvrdenia."</string>
@@ -384,7 +384,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Umožňuje aplikácii získať zoznam účtov v telefóne. Môžu sem patriť akékoľvek účty vytvorené aplikáciami, ktoré ste nainštalovali."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"zobraziť sieťové pripojenia"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Umožňuje aplikácii zobraziť informácie o sieťových pripojeniach, ako napríklad o tom, ktoré siete sú k dispozícii a ktoré sú pripojené."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"plný prístup k sieti"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"úplný prístup k sieti"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Umožňuje aplikácii vytvárať sokety siete a používať vlastné protokoly siete. Toto povolenie sa pri odosielaní údajov na internet nevyžaduje, pretože prostriedky na odosielanie údajov na internet poskytujú prehliadač a iné aplikácie."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"zmena sieťového pripojenia"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Umožňuje aplikácii zmeniť stav sieťového pripojenia zdieľaného pomocou tetheringu."</string>
@@ -404,7 +404,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikácii konfigurovať miestny telefón s rozhraním Bluetooth, vyhľadávať a spárovať vzdialené zariadenia."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"pripojiť a odpojiť od WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Umožňuje aplikácii určiť, či je povolený štandard WiMAX, a tiež informácie o všetkých pripojených sieťach WiMAX."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Meniť stav pripojenia WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"zmeniť stav WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Umožňuje aplikácii pripojiť tablet k sieťam WiMAX a odpojiť ho od nich."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Umožňuje aplikácii pripojiť televízor k sieťam WiMAX a odpojiť ho z nich."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Umožňuje aplikácii pripojiť telefón k sieťam WiMAX a odpojiť ho od nich."</string>
@@ -487,7 +487,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Umožňuje aplikácii upraviť parametre kalibrácie dotykovej obrazovky. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"prístup k certifikátom DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Umožňuje aplikácii vydávať a používať certifikáty DRM. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Prijímať stav prenosu funkcie Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"príjem stavu prenosov Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Povoľuje tejto aplikácii prijímať informácie o aktuálnych prenosoch funkcie Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"odstránenie certifikátov DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Umožňuje aplikácii odstraňovať certifikáty DRM. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
@@ -1105,11 +1105,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Prebieha formátovanie..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nie je zapojené"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nenašli sa žiadne zodpovedajúce aktivity."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Smerovanie výstupu médií"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"smerovanie výstupu médií"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikácii smerovať výstup médií do ďalších externých zariadení."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Čítať relácie inštalácií"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"čítanie inštalačných relácií"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Toto povolenie umožňuje aplikácii čítať relácie inštalácií a zobraziť tak podrobnosti o aktívnych inštaláciách balíkov."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Vyžiadať inštaláciu balíkov"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"odosielanie žiadostí o inštaláciu balíkov"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Umožňuje aplikácii vyžiadať inštaláciu balíkov."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ovládacie prvky lupy zobrazíte dvojitým dotknutím"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Miniaplikáciu sa nepodarilo pridať."</string>

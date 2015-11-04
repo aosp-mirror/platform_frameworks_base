@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisältää henkilökohtaisia tietoja, kuten luottokortin numeroita ja salasanoja."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"tilapalkki"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"sijaita tilapalkissa"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Antaa sovelluksen sijaita tilapalkissa."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"laajentaa/tiivistää tilarivin"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Antaa sovelluksen laajentaa tai tiivistää tilarivin."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin suoritetuista tehtävistä. Sovellus voi saada tietoja laitteella käytetyistä sovelluksista."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Hallinnoi laitteen ja profiilien omistajia"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"hallinnoida laitteen ja profiilien omistajia"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Sallii sovelluksien määrittää laitteen ja profiilien omistajat."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käynnissä olevien sovellusten järjesteleminen"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Antaa sovelluksen siirtää tehtäviä etualalle ja taustalle. Sovellus ei tarvitse toimiin käyttäjän lupaa."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Antaa sovelluksen muokata television puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"kehon anturit (kuten sykemittarit)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"käyttää kehon antureita (kuten sykemittareita)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Antaa sovelluksen käyttää kehosi tilaa seuraavien anturien tietoja, esimerkiksi sykettä."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lue kalenteritapahtumia ja luottamuksellisia tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Antaa sovelluksen lukea tablet-laitteelle tallennettuja kalenteritapahtumia, myös kavereiden tai työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietojasi niiden arkaluonteisuudesta huolimatta."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Antaa sovelluksen lisätä, poistaa ja muuttaa tapahtumia, joita voit muokata puhelimellasi. Näihin kuuluvat myös kavereidesi tai työkavereidesi tapahtumat. Sovellus voi lähettää viestejä, jotka vaikuttavat kalenterin omistajien lähettämiltä, tai muokata tapahtumia ilman niiden omistajien lupaa."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"käytä lisää sijainnintarjoajakomentoja"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Antaa sovelluksen käyttää ylimääräisiä sijaintipalvelukomentoja. Sovellus saattaa tällöin häiritä GPS:n tai muiden sijaintilähteiden toimintaa."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"tarkka sijainti (GPS- ja verkkopohjainen)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"käyttää tarkkaa sijaintia (GPS- ja verkkopohjainen)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Antaa sovelluksen käyttää tarkkaa sijaintiasi, joka määritetään GPS:n tai verkon sijaintilähteiden kuten radiomastojen ja Wi-Fi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla sijaintisi ja lisätä akun käyttöä."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"likimääräinen sijainti (verkkopohjainen)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"käyttää likimääräistä sijaintia (verkkopohjainen)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Antaa sovelluksen käyttää likimääräistä sijaintiasi. Sijainnin määrittävät sijaintipalvelut verkon sijaintilähteiden kuten radiomastojen ja Wi-Fi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla likimääräisen sijaintisi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuta ääniasetuksia"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Antaa sovelluksen muokata yleisiä ääniasetuksia, kuten äänenvoimakkuutta ja käytettävää kaiutinta."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"tallentaa ääntä"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Antaa sovelluksen tallentaa ääntä mikrofonin avulla. Sovellus voi tallentaa ääntä milloin tahansa pyytämättä sinulta lupaa."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM-viestintä"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"lähettää komentoja SIM-kortille"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Antaa sovelluksen lähettää komentoja SIM-kortille. Tämä ei ole turvallista."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ota kuvia ja videoita"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Antaa sovelluksen ottaa kuvia ja kuvata videoita kameralla. Sovellus voi käyttää kameraa milloin tahansa ilman lupaasi."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Antaa sovelluksen tarkastella puhelimeen tallennettuja tilejä. Näihin voivat kuulua myös asentamiesi sovelluksien luomat tilit."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"tarkastele verkkoyhteyksiä"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Antaa sovelluksen tarkastella verkkoyhteyksiä koskevia tietoja, kuten mitä verkkoja on olemassa ja mihin on muodostettu yhteys."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"internetin käyttäminen"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"saada täydet verkon käyttöoikeudet"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Antaa sovelluksen luoda verkkovastakkeita ja käyttää muokattuja verkkoprotokollia. Tietoja voidaan lähettää verkkoon selaimen ja muiden sovellusten avulla, joten tätä lupaa ei tarvita tietojen lähettämiseksi."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"muuta verkkoyhteyksiä"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Antaa sovelluksen muuttaa verkkoyhteyden tilaa."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"muodosta yhteys WiMAXiin ja katkaise yhteys"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Antaa sovelluksen määrittää, onko WiMAX käytössä, sekä saada selville tietoja WiMAX-verkoista, joihin on muodostettu yhteys."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Antaa sovelluksen muodostaa tablet-laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Antaa sovelluksen muodostaa ja katkaista yhteyden television ja WiMAX-verkkojen välillä."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Antaa sovelluksen muodostaa puhelimella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Antaa sovelluksen muokata kosketusnäytön kalibrointiparametreja. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-varmenteiden käyttö"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Antaa sovelluksen käyttää DRM-varmenteita ja hallita niiden käyttäjiä. Ei tavallisten sovellusten käyttöön."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Vastaanota Android Beam -siirron tilatietoja"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"vastaanottaa Android Beam -siirron tilatietoja"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Antaa sovelluksen vastaanottaa tietoja nykyisistä Android Beam -siirroista"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-varmenteiden poistaminen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Antaa sovelluksen poistaa DRM-varmenteita. Ei tavallisten sovellusten käyttöön."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Alustetaan…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Ei liitetty"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Osuvia toimintoja ei löytynyt."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Median reititys"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"reitittää mediaa"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Antaa sovelluksen reitittää mediaa muihin ulkoisiin laitteisiin."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lue asennusistuntoja"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"lukea asennusistuntoja"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Sallii sovelluksen lukea asennusistuntoja. Toiminto sallii sovelluksen lukea aktiivisten asennuspakettien tietoja."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Pyydä pakettien asennusta"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"pyytää asennuspaketteja"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Antaa sovelluksen pyytää pakettien asennusta."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ohjaa zoomausta napauttamalla kahdesti"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widgetin lisääminen epäonnistui."</string>

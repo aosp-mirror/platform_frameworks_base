@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"እንደ የክሬዲት ካርድ ቁጥሮች እና የይለፍ ቃላት ያሉ የግል ውሂብ ያካትታል።"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"የሁኔቴ አሞሌ አቦዝን ወይም ቀይር"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"የስርዓት አዶዎችን ወደ ሁኔታ አሞሌ ላለማስቻል ወይም ለማከል እና ለማስወገድ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"ኹናቴ አሞሌ"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"የሁኔታ አሞሌ መሆን"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"የኹናቴ አሞሌ እንዲሆን ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"የሁኔታ አሞሌ ዘርጋ/ሰብስብ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"የሁኔታ አሞሌን ለመዝረጋት እና ለመሰብሰብ ለመተግበሪያው ይፈቅዳሉ።"</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"መተግበሪያው የWAP መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ፈቃድ የተላኩልዎን መልዕክቶች ለእርስዎ ሳያሳይዎ የመቆጣጠር ወይም የመሰረዝ ብቃትን ያጠቃልላል።"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"አሂድ መተግበሪያዎችን ሰርስረው ያውጡ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"መተግበሪያው በአሁኑ ጊዜና በቅርቡ እየተካሄዱ ስላሉ ተግባሮችን መረጃ ሰርስሮ እንዲያወጣ ይፈቅድለታል። ይህ መተግበሪያው በመሳሪያው ላይ የትኛዎቹ መተግበሪያዎች ጥቅም ላይ ስለመዋላቸው መረጃ እንዲያገኝ ሊፈቅድለት ይችላል።"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"የመገለጫ እና የመሣሪያ ባለቤቶችን ያስተዳድሩ"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"የመገለጫ እና የመሣሪያ ባለቤቶችን ማቀናበር"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"የመገለጫ ባለቤቶችን እና የመሣሪያውን ባለቤት መተግበሪያዎች እንዲያዋቅሩ ይፈቅዳል።"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"አሂድ ትግበራዎችን ድጋሚ ደርድር"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"መተግበሪያው ተግባሮችን ወደ ቅድመ ገጹ እና ወደ ዳራው እንዲያንቀሳቅስ ይፈቅድለታል። መተግበሪያው ይህንን ያላንተ ግብዓት ሊያደርግ ይችላል።"</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"መተግበሪያው ስለገቢ እና ወጪ ጥሪዎች ያለ ውሂብም ጨምሮ የቴሌቪዥንዎ ምዝግብ ማስታወሻ እንዲይቀርይ ያስችለዋል። ተንኮል-አዘል መተግበሪያዎች ይህን ተጠቅመው የስልክዎን ምዝግብ ማስታወሻ ሊደመስሱ ወይም ሊቀይሩ ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"የሰውነት መመርመሪያዎች (እንደ የልብ ምት መቆጣጠሪያዎች)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"የሰውነት ዳሳሾችን መድረስ (እንደ የልብ ምት መከታተያዎች ያሉ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"እንደ የእርስዎ የልብ ምት የመሳሰሉ ያሉበትን አካላዊ ሁኔታ ከሚቆጣጠሩ ሰውነት ዳሳሾች ውሂብ ላይ እንዲደርስ ለመተግበሪያው ይፈቅደለታል።"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"መተግበሪያው የጓደኞችን ወይም የስራ ባልደረቦችን ጨምሮ ሁሉንም በጡባዊ ቱኮህ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶች እንዲያነብ ይፈቅድለታል። ይህ መተግበሪያው የቀን መቁጠሪያ ውሂብህን ሚስጥራዊቱን ከግምት ሳያስገባ እንዲያጋራ ወይም እንዲያስቀምጥ ሊፈቅድለት ይችላል።"</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"መተግበሪያው የጓደኞችዎን እና የስራ ባልደረቦችዎን ጨምሮ በስልክዎ ላይ ሊያስተካክሏቸው የሚችሏቸውን ክስተቶች እንዲያክል፣ እንዲያስወግድ፣ እንዲለውጥ ይፈቅድለታል። ይህ መተግበሪያው ከቀን መቁጠሪያ ባለቤቶች የመጡ የሚመስሉ መልዕክቶችን እንዲልክ ወይም ያለባለቤቱ እውቀት ክስተቶችን እንዲያስተካክል ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ተጨማሪ ሥፍራ አቅራቢ ትዕዛዞችን ድረስ።"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"መተግበሪያው ተጨማሪ የአካባቢ አቅራቢ ትእዛዞችን እንዲደርስ ይፈቅድለታል። ይሄ መተግበሪያው በጂፒኤስ ወይም ሌላ የአካባቢ ምንጮች ስራ ላይ ጣልቃ እንዲገባ ሊፈቅድለት ይችላል።"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ትክክለኛ አካባቢ (በጂ ፒ ኤስ እና አውታረ መረብ ላይ የተመሠረተ)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"ትክክለኛውን አካባቢ መድረስ (በጂፒኤስ እና አውታረ መረብ ላይ የተመሠረተ)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"መተግበሪያው የእርስዎን አለምአቀፍ የመሬት አቀማመጥ ስርዓትን (ጂ ፒ ኤስ) ወይም እንደ የተንቀሳቃሽ ስልክ ማማዎች እና Wi-Fi ያሉ የአውታረ መረብ አካባቢ ምንጮችን ተጠቅሞ ትክክለኛ አካባቢዎትን እንዲያውቅ ያስችለዋል። መተግበሪያው እነዚህ የአካባቢ አገልግሎቶችን እንዲጠቀምባቸው እነሱ ሊበሩ እና ለመሣሪያዎ የሚገኙ መሆን አለባቸው። መተግበሪያዎች እርስዎ የት እንዳሉ ለማወቅ ይህንን ሊጠቀሙበት ይችላሉ፣ እና ተጨማሪ ባትሪ ሊፈጁ ይችላሉ።"</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ግምታዊ አካባቢ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ግምታዊ አካባቢን መድረስ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"መተግበሪያው ግምታዊ አካባቢዎትን እንዲያገኝ ያሽችለዋል። ይህ አካባቢ እንደ የተንቀሳቃሽ ስልክ ማማዎች እና Wi-Fi ያሉ የአውታረ መረብ አካባቢ ምንጮችን በመጠቀም የሚገኝ ነው። መተግበሪያው እነዚህ የአካባቢ አገልግሎቶችን እንዲጠቀምባቸው እነሱ ሊበሩ እና ለመሣሪያዎ የሚገኙ መሆን አለባቸው። መተግበሪያዎች እርስዎ የት እንዳሉ ለማወቅ ይህንን ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"የድምፅ ቅንብሮችን ለውጥ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"መተግበሪያው አንደ የድምጽ መጠን እና ለውጽአት የትኛውን የድምጽ ማጉያ ጥቅም ላይ እንደዋለ የመሳሰሉ ሁለንተናዊ የድምጽ ቅንብሮችን እንዲያስተካክል ይፈቅድለታል።"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ኦዲዮ ይቅዱ"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"መተግበሪያው ድምጽን በማይክሮፎን እንዲቀዳ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ያላንተ ማረጋገጫ በማንኛውም ጊዜ ድምጽ እንዲቀዳ ይፈቅድለታል።"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"የሲም ግንኙነት"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"ወደ ሲሙ ትዕዛዞችን መላክ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"መተግበሪያው ትዕዛዞችን ወደ ሲሙ እንዲልክ ያስችለዋል። ይሄ በጣማ አደገኛ ነው።"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ፎቶዎች እና ቪዲዮዎች ያንሱ"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"መተግበሪያው በካሜራው ፎቶዎችንና ቪዲዮዎችን እንዲያነሳ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ካሜራውን በማንኛውም ጊዜ ያላንተ ማረጋገጫ እንዲጠቀም ይፈቅድለታል።"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"መተግበሪያው በስልኩ የሚታወቁትን መለያዎች ዝርዝር እንዲያገኝ ይፈቅድለታል። ይህ በጫንዋቸው ማናቸውም መተግበሪያዎች የተፈጠሩ መለያዎችን ሊያጠቃልል ይችላል።"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"የአውታረ መረብ ግንኙነቶችን ይመልከቱ"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"መተግበሪያው እንደ የትኛዎቹ አውታረ መረቦች እንዳሉ እና እንደተገናኙ ያሉ የአውታረ መረብ ግንኙነቶች መረጃዎችን እንዲያይ ይፈቅድለታል።"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ሙሉ የአውታረ መረብ መዳረሻ"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"ሙሉ የአውታረ መረብ መዳረሻ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"መተግበሪያው የአውታረ መረብ መሰኪያዎችን እንዲፈጥር እና ብጁ የአውታረ መረብ ፕሮቶኮሎችን እንዲጠቀም ይፈቅድለታል። አሳሹ እና ሌሎች መተግበሪያዎች ውሂብ ወደ በይነመረብ የመላኪያ መንገዶችን ስለሚያቀርቡውሂብ ወደ በይነመረብ ለመላክ ይህ ፍቃድ አያስፈልግም።"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"የአውታረ መረብ ተያያዥነትን ለውጥ"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"የእውታረ መረቡን ግንኙነት  ሁኔታ ለመለወጥ ለመተግበሪያው ይፈቅዳሉ።"</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"የአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እና አግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ከWiMAX ጋር ይገናኙ እና ያላቅቁ"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"መተግበሪያው WiMAX እንደነቃ እና ስለማናቸውም የተገናኙ የWiMAX አውታረ መረቦች መረጃ እንዲወስን ይፈቅድለታል።"</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"የWiMAX ሁኔታ ለውጥ"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"የWiMAX ሁኔታ ለውጥ"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"መተግበሪያው ጡባዊ ተኮውን ከWiMAX አውታረ መረብ ጋር እንዲያገናኝና እንዲያለያይ ይፈቅድለታል።"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"መተግበሪያው ቴሌቪዥኑን ከWiMAX አውታረ መረቦች ጋር እንዲያገናኝ እና እንዲያላቀቅ ያስችለዋል።"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"መተግበሪያው ስልኩን ከWiMAX አውታረ መረብ ጋር እንዲያገናኝና እንዲያለያይ ይፈቅድለታል።"</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"መተግበሪያው የማያ ንካ የማስተካከያ ልኬቶቹን እንዲቀይር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"የDRM የምስክር ወረቀቶች ላይ ይድረሱ"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"አንድ መተግበሪያ የDRM የምስክር ወረቀቶችን እንዲሰጥና እንዲጠቀም ያስችላል። ለመደበኛ መተግበሪያዎች በፍጹም አስፈላጊ አይሆንም።"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"የAndroid Beam ሽግግር ሁኔታን ይቀበሉ"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"የAndroid Beam ማስተላለፍ ሁኔታን መቀበል"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ይም መተግበሪያ ስለአሁን የAndroid Beam ሽግግሮች መረጃ እንዲቀበል ይፈቅዳል"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"የDRM እውቅና ማረጋገጫዎችን ያስወግዳል"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"አንድ መተግበሪያ የDRM እውቅና ማረጋገጫዎችን እንዲያስወግድ ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"በመቅረጽ ላይ…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"አልገባም"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ምንም ተመሳሳይ እንቅስቃሴዎች አልተገኙም።"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"የሚዲያ ውፅአት መንገድ"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"የሚዲያ ውፅዓት ማዛወር"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሳሪያ እንዲመራ ይፈቅድለታል።"</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"የመጫን ክፍለ ጊዜዎችን አንብብ"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"የመጫን ክፍለ ጊዜዎችን ማንበብ"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"መተግበሪያው የመጫን ክፍለ ጊዜዎችን እንዲያነብ ይፈቅድለታል። ይህም ስለ ገቢር የጥቅል ጭነቶች ዝርዝር መረጃን እንዲያይ ይፈቅድለታል።"</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"የጭነት ጥቅሎችን ጠይቅ"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"የጭነት ጥቅሎችን መጠየቅ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"መተግበሪያ የጥቅሎች መጫንን እንዲጠይቅ ይፈቅዳል።"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ለአጉላ መቆጣጠሪያ ሁለት ጊዜ ነካ አድርግ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ምግብር ማከል አልተቻለም።"</string>

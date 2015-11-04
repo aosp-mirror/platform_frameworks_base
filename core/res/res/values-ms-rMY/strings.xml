@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Termasuk data peribadi seperti nombor kad kredit dan kata laluan."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"bar status"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"jadi bar status"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Membenarkan apl menjadi bar status."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"kembangkan/runtuhkan bar status"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Membenarkan apl mengembangkan atau meruntuhkan bar status."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Membenarkan apl menerima dan memproses mesej WAP. Kebenaran ini termasuk keupayaan untuk memantau atau memadam mesej yang dihantar kepada anda tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dapatkan semula apl yang sedang dijalankan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Membenarkan apl mengambil maklumat tentang tugasan yang sedang dan baru berjalan. Ini boleh membenarkan apl untuk menemui maklumat tentang apl mana yang digunakan pada peranti."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Urus pemilik profil dan peranti"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"urus pemilik profil dan peranti"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Membenarkan apl menetapkan pemilik profil dan pemilik peranti."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"susun semula tertib apl yang dijalankan"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Membenarkan apl memindahkan tugasan ke latar depan dan latar belakang. Apl boleh melakukan ini tanpa input anda."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Membenarkan apl untuk mengubah suai panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Membenarkan apl untuk mengubah suai log panggilan TV anda, termasuk data mengenai panggilan masuk atau keluar. Apl hasad mungkin menggunakan ini untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"penderia (spt. denyut jantung)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"akss pndia bdn (spt pmntau kdr dnyt jntg)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Membenarkan apl mengakses data dari penderia yang memantau keadaan fizikal anda, seperti kadar denyutan jantung anda."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalendar serta maklumat sulit"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Membenarkan apl membaca semua acara kalendar yang tersimpan pada tablet anda, termasuk milik rakan atau rakan sekerja. Ini boleh membenarkan apl untuk berkongsi atau menyimpan data kalendar anda, tanpa mengira kerahsiaan atau sensitiviti."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Membenarkan apl menambah, mengalih keluar, mengubah acara yang anda boleh ubah suai pada telefon anda, termasuk milik rakan atau rakan sekerja. Ini boleh membenarkan apl menghantar mesej yang kelihatan seperti datang dari pemilik kalendar atau mengubah suai acara tanpa pengetahuan pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah tambahan pembekal lokasi"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Membenarkan apl mengakses arahan pembekal lokasi tambahan. Ini boleh membenarkan apl untuk campur tangan dengan operasi GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"lokasi tepat (GPS dan berasaskan rangkaian)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"akses lokasi tepat (GPS dan berasaskan rangkaian)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Membenarkan apl mendapatkan lokasi tepat anda menggunakan Sistem Kedudukan Global (GPS) atau sumber lokasi rangkaian seperti menara sel dan Wi-Fi. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada peranti anda untuk kegunaan apl. Apl boleh menggunakan ini untuk menentukan tempat anda berada dan mungkin menggunakan kuasa bateri tambahan."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"lokasi anggaran (berasaskan rangkaian)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"akses lokasi anggaran (berasaskan rangkaian)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Membenarkan apl mendapatkan lokasi anggaran anda. Lokasi ini diperolehi oleh perkhidmatan lokasi menggunakan sumber lokasi rangkaian seperti menara sel dan Wi-Fi. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada peranti anda untuk kegunaan apl. Apl boleh menggunakan ini untuk menentukan secara anggaran tempat anda berada."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"tukar tetapan audio anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Membenarkan apl untuk mengubah suai tetapan audio global seperti kelantangan dan pembesar suara mana digunakan untuk output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rakam audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Membenarkan apl untuk merakam audio menggunakan mikrofon. Kebenaran ini membenarkan apl untuk merakam audio pada bila-bila masa tanpa pengesahan anda."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikasi sim"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"hantar perintah ke SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Membenarkan apl menghantar arahan kepada SIM. Ini amat berbahaya."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Membenarkan apl mengambil gambar dan video menggunakan kamera. Kebenaran ini membenarkan apl untuk menggunakan kamera pada bila-bila masa tanpa pengesahan anda."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Membenarkan apl mendapatkan senarai akaun yang dikenali oleh telefon. Ini mungkin termasuk sebarang akaun yang dibuat oleh aplikasi yang telah anda pasang."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"lihat sambungan rangkaian"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Membenarkan apl melihat maklumat tentang sambungan rangkaian seperti rangkaian mana yang wujud dan bersambung."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"akses rangkaian penuh"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"mempunyai akses rangkaian penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Membenarkan apl membuat soket rangkaian dan menggunakan protokol rangkaian tersuai. Penyemak imbas dan aplikasi lain menyediakan cara untuk menghantar data ke internet, jadi kebenaran ini tidak diperlukan untuk menghantar data ke internet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"tukar kesambungan rangkaian"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Membenarkan apl untuk mengubah keadaan kesambungan rangkaian."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Membenarkan apl mengkonfigurasikan telefon Bluetooth setempat dan menemui serta berpasangan dengan peranti jauh."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambung dan putuskan sambungan WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Membenarkan apl menentukan sama ada WiMaX didayakan dan maklumat tentang sebarang rangkaian WiMaX yang disambungkan."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Tukar keadaan WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"tukar keadaan WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Membenarkan apl untuk menyambungkan tablet ke dan menyahsambungkan tablet dari rangkaian WiMaX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Membenarkan apl menyambungkan TV ke dan memutuskan sambungan TV daripada rangkaian WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Membenarkan apl untuk menyambungkan telefon ke dan menyahsambung telefon dari rangkaian WiMaX."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Membenarkan apl mengubah suai parameter penentukuran skrin sentuh. Ini tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"akses sijil DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Membenarkan aplikasi memperuntuk dan menggunakan sijil DRM. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Terima status pemindahan Pancaran Android"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"terima status pemindahan Pancaran Android"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Membenarkan aplikasi ini menerima maklumat mengenai pemindahan Pancaran Android semasa"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"alih keluar sijil DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Membenarkan aplikasi mengalih keluar sijil DRM. Tidak sekali-kali diperlukan untuk apl biasa."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Memformat…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Tidak dimasukkan"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Tiada aktiviti yang sepadan ditemui."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Buat laluan output media"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"halakan output media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Membenarkan apl untuk membuat laluan output media ke peranti luaran lain."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Baca sesi pemasangan"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"baca sesi pemasangan"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Membenarkan aplikasi membaca sesi pemasangan Ini membenarkan apl melihat butiran mengenai pemasangan pakej yang aktif."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Minta pemasangan pakej"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"minta pakej pemasangan"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Membenarkan aplikasi meminta pemasangan pakej."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mendapatkan kawalan zum"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>

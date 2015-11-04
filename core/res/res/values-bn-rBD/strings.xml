@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"স্থিতি দন্ড নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"অ্যাপ্লিকেশানকে স্থিতি দন্ড অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"স্থিতি দন্ড"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"স্থিতি দন্ডে থাকুন"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"অ্যাপ্লিকেশানটিকে স্থিতি দন্ডে থাকতে দেয়৷"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"স্থিতি দন্ড সম্প্রসারিত/সঙ্কুচিত করে"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"অ্যাপ্লিকেশানটিকে স্থিতি দন্ড প্রসারিত বা সঙ্কুচিত করতে দেয়৷"</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"বর্তমানে ও সাম্প্রতিককালের সক্রিয় ক্রিয়াগুলি সম্বন্ধে তথ্য পুনরুদ্ধার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এছাড়া এটি ডিভাইসটিতে কোন অ্যাপ্লিকেশানগুলি ব্যবহৃত হচ্ছে তার বিষয়ে তথ্য খুঁজে বের করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"প্রোফাইল এবং ডিভাইস মালিকদের পরিচালনা করুন"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"প্রোফাইল এবং ডিভাইস মালিকদের পরিচালনা করুন"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"অ্যাপ্লিকেশানগুলিকে প্রোফাইলের মালিকদের এবং ডিভাইসের মালিককে সেট করার অনুমতি দেয়৷"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"চলমান অ্যাপ্লিকেশান পুনর্বিন্যাস করে"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"অ্যাপ্লিকেশানটিকে কার্যগুলিকে পুরোভাগে এবং পশ্চাদপটে সরানোর অনুমতি দেয়৷ অ্যাপ্লিকেশানটি আপনার ইনপুট ছাড়া এটি করতে পারে৷"</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ইনকামিং ও আউটগোয়িং কলগুলি সম্পর্কিত ডেটা সহ আপনার ট্যাবলেটের কল লগ পরিবর্তন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে আপনার কল লগ মুছে দিতে বা পরিবর্তন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ইনকামিং ও আউটগোয়িং কলগুলি সম্পর্কিত ডেটা সহ আপনার টিভির কল লগ পরিবর্তন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে আপনার কল লগ মুছে দিতে বা পরিবর্তন করতে ব্যবহার করতে পারে৷"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ইনকামিং ও আউটগোয়িং কলগুলি সম্পর্কিত ডেটা সহ আপনার ফোনের কল লগ পরিবর্তন করতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি এটিকে আপনার কল লগ মুছে দিতে বা পরিবর্তন করতে ব্যবহার করতে পারে৷"</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"শরীরের সেন্সর (হার্ট রেট মনিটারের মত)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"শরীরের সেন্সর (হার্ট রেট মনিটারের মত) অ্যাক্সেস করুন"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"অ্যাপ্লিকেশানটিকে আপনার শারীরিক অবস্থা যেমন, আপনার হৃৎস্পন্দন পর্যবেক্ষণ করে এমন সেন্সরগুলি অ্যাক্সেস করতে মঞ্জুরি দেয়।"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ক্যালেন্ডার ইভেন্ট, তার সাথে গোপন তথ্যও পড়ে"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"আপনার ট্যাবলেটে সঞ্চিত সমস্ত ক্যালেন্ডার ইভেন্ট পড়তে অ্যাপ্লিকেশানটিকে মঞ্জুর করে, এর মধ্যে বন্ধু ও সহকর্মীদেরগুলিও অন্তর্ভুক্ত৷ এটি গোপনীয়তা বা সংবেদনশীলতা নির্বিশেষে আপনার ক্যালেন্ডার ডেটা ভাগ ও সংরক্ষণ করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"সেইসকল বন্ধু বা সহকর্মী সহ আপনি আপনার ফোনে যে ইভেন্টগুলি সংশোধন করতে পারেন তা যুক্ত করাতে, সরাতে, পরিবর্তন করতে এই অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে বার্তা পাঠাতে দেয় যা দেখে মনে হবে যে এটি ক্যালেন্ডার মালিকদের থেকে এসেছে অথবা মালিককে না জানিয়ে ইভেন্টগুলি পরিবর্তন করতে দিতে পারে৷"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"অতিরিক্ত অবস্থান প্রদানকারী কমান্ডগুলি অ্যাক্সেস করে"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"অবস্থানের সাথে সম্পর্কিত তথ্য প্রদানকারীর অতিরিক্ত কম্যান্ডগুলিকে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এটি অ্যাপ্লিকেশানটিকে GPS অথবা অন্যান্য অবস্থান নির্ণয়ের সাথে সম্পর্কিত উৎসগুলির ক্রিয়াপ্রণালীর নিয়ন্ত্রণকে মঞ্জুর করতে পারে৷"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"সুনির্দিষ্ট অবস্থান (GPS এবং নেটওয়ার্ক ভিত্তিক)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"সুনির্দিষ্ট অবস্থান (GPS এবং নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"গ্লোবাল পজিশনিং সিস্টেম (GPS) অথবা সেল টাওয়ার ও Wi-Fi এর মতো নেটওয়ার্কের অবস্থান উৎসগুলি ব্যবহার করে আপনার যথাযথ অবস্থান নির্ণয় করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অবস্থান নির্ণয়ের সাথে সম্পর্কিত পরিষেবাগুলিকে চালু করে রাখতে হবে এবং অ্যাপ্লিকেশানটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ডিভাইসে উপলব্ধ করে রাখতে হবে৷ অ্যাপ্লিকেশানগুলি আপনার অবস্থান নির্ণয়ের কাজে এগুলির ব্যবহার করতে পারে, এবং এর জন্য অতিরিক্ত ব্যাটারি পাওয়ার লাগতে পারে৷"</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"আনুমানিক অবস্থান (নেটওয়ার্ক ভিত্তিক)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"আনুমানিক অবস্থান (নেটওয়ার্ক-ভিত্তিক) অ্যাক্সেস করুন"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"আপনার আনুমানিক অবস্থান নির্ণয় করতে অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷ এই অবস্থান নির্ণয় সেল টাওয়ার ও Wi-Fi এর মতো নেটওয়ার্কের অবস্থান উৎসগুলি ব্যবহার করে অবস্থান নির্ধারণের সাথে সম্পর্কিত পরিষেবাগুলি থেকে নেওয়া হয়ে থাকে৷ এই অবস্থান নির্ণয়ের সাথে সম্পর্কিত পরিষেবাগুলিকে চালু করে রাখতে হবে এবং অ্যাপ্লিকেশানটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ডিভাইসে উপলব্ধ করে রাখতে হবে৷ অ্যাপ্লিকেশানগুলি আপনার আনুমানিক অবস্থান নির্ণয়ের কাজে এগুলির ব্যবহার করতে পারে৷"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"আপনার অডিও সেটিংস পরিবর্তন করে"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ভলিউম এবং যেখানে স্পিকার আউটপুট সামগ্রী হিসাবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিও রেকর্ড করে"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"অ্যাপ্লিকেশানটিকে মাইক্রোফোনের দ্বারা অডিও রেকর্ড করার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার অনুমোদন ছাড়া যেকোনো সময় অডিও রেকর্ড করার অনুমতি দেয়৷"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim যোগাযোগ"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM এ আদেশগুলি পাঠান"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"অ্যাপ্লিকেশানটিকে সিম কার্ডে কমান্ডগুলি পাঠানোর অনুমতি দেয়৷ এটি খুবই বিপজ্জনক৷"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ক্যামেরার সাহায্যে ছবি তুলতে ও ভিডিও তৈরি করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার নিশ্চয়তা ছাড়াই যেকোনো সময় ক্যামেরা ব্যবহার করতে মঞ্জুর করে৷"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ফোনটির মেমরিতে থাকা অ্যাকাউন্টের তালিকাটি পেতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এতে আপনার দ্বারা ইনস্টল করা অ্যাপ্লিকেশানগুলির মাধ্যমে তৈরি যেকোনো অ্যাকাউন্ট অন্তর্ভুক্ত হতে পারে৷"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"নেটওয়ার্ক সংযোগগুলি দেখুন"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"কোন নেটওয়ার্কগুলি বিদ্যমান এবং সংযুক্ত রয়েছে তার তথ্য দেখার জন্য অ্যাপ্লিকেশানটিকে অনুমতি প্রদান করে৷"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"সম্পূর্ণ নেটওয়ার্ক অ্যাক্সেস"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"সম্পূর্ণ নেটওয়ার্ক অ্যাক্সেস রয়েছে"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"নেটওয়ার্ক সকেটগুলি তৈরি করতে এবং কাস্টম নেটওয়ার্ক প্রোটোকলগুলি ব্যবহার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ ব্রাউজার ও অন্যান্য অ্যাপ্লিকেশানগুলি ইন্টারনেটে ডেটা প্রেরণ করার উপায় সরবরাহ করে, তাই ইন্টারনেটে ডেটা প্রেরণ করতে এই অনুমতিটির প্রয়োজন হয় না৷"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"নেটওয়ার্ক সংযোগ পরিবর্তন করে"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"অ্যাপ্লিকেশানকে নেটওয়ার্ক সংযোগ অবস্থা পরিবর্তন করার অনুমতি দেয়৷"</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"অ্যাপ্লিকেশানটিকে স্থানীয় Bluetooth ফোনটিকে কনফিগার এবং দূরবর্তী ডিভাইসগুলি আবিষ্কার এবং এর সাথে যুক্ত করতে দেয়৷"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX এর সাথে সংযুক্ত হন বা সংযোগ বিচ্ছিন্ন করুন"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"অ্যাপ্লিকেশানটিকে WiMAX সক্ষম করা আছে কিনা সে বিষয়ে নিশ্চিত হতে এবং সংযুক্ত যেকোনো WiMAX নেটওয়ার্ক সম্পর্কিত তথ্য সম্বন্ধে নিশ্চিত হওয়ার অনুমতি প্রদান করে৷"</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX এর স্থিতি পরিবর্তন করুন"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX এর স্থিতি পরিবর্তন করুন"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX নেটওয়ার্কগুলির সাথে ট্যাবলেটটির সংযোগ স্থাপন করতে এবং সংযোগ বিচ্ছিন্ন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"টিভিকে WiMAX এ সংযোগ করতে এবং সংযোগ বিচ্ছিন্ন করার কাজটি করতে অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX নেটওয়ার্কগুলির সাথে ফোনটির সংযোগ স্থাপন করতে এবং সংযোগ বিচ্ছিন্ন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"অ্যাপ্লিকেশানকে টাচ স্ক্রীণের ক্রমাঙ্গন প্যারামিটার সংশোধন করতে দেয়৷ সাধারণ অ্যাপ্লিকেশানগুলির জন্য দরকারী নয়৷"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM শংসাপত্রগুলি অ্যাক্সেস করে"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM শংসাপত্রগুলির বিধান এবং ব্যবহারা করার অনুমতি দিন৷ সাধারণ অ্যাপ্লিকেশানগুলির জন্য কোনোদিন প্রয়োজন হয় না৷"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android বীম স্থানান্তর স্থিতি গ্রহণ করুন"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android বীম স্থানান্তর স্থিতি গ্রহণ করুন"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"এই অ্যাপ্লিকেশানকে বর্তমান Android বীম স্থানান্তর সম্বন্ধে তথ্য গ্রহণ করার অনুমিত দেয়"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM শংসাপত্রগুলি সরান"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"কোনো অ্যাপ্লিকেশানকে DRM শংসাপত্রগুলি সরানোর অনুমতি দেয়। সাধারণ অ্যাপ্লিকেশানগুলির জন্য কখনো প্রয়োজন হয় না।"</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"ফরম্যাট করা হচ্ছে..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ঢোকানো হয় নি"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ কার্যকলাপ খুঁজে পাওয়া যায়নি৷"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"মিডিয়া আউটপুট রুট করুন"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"মিডিয়া আউটপুট রুট করুন"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ইনস্টল সেশন পড়ুন"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"ইনস্টল সেশন পড়ুন"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"কোনো অ্যাপ্লিকেশানকে সেশনগুলি পড়ার অনুমতি দেয়। এটি সক্রিয় প্যাকেজ ইনস্টলেশনের বিশদ বিবরণ দেখতে দেয়।"</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"প্যাকেজগুলি ইনস্টল করার অনুরোধ"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"প্যাকেজগুলি ইনস্টল করার অনুরোধ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলির ইনস্টল করার অনুরোধ জানাতে অনুমতি দেয়৷"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"জুম নিয়ন্ত্রণের জন্য দুবার স্পর্শ করুন"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"উইজেট যোগ করা যায়নি৷"</string>

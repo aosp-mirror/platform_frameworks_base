@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Kredit kartı nömrələri və parollar kimi şəxsi məlumatlar daxildir."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"status panelini deaktivləşdir və ya dəyişdir"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tətbiqə status panelini deaktiv etməyə və ya sistem ikonalarını əlavə etmək və ya silmək imkanı verir."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"status paneli"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"status paneli edin"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tətbiqə status paneli olmağa imkan verir."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"status panelini genişlətmək və ya yığmaq"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Tətbiqə status panelini genişləndirməyə və ya yox etməyə imkan verir."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tətbiqə WAP mesajlar göndərmək və ya qəbul etmək imkanı verir. Buna mesajları izləmək və Sizə xəbər vermədən silmək imkanları da daxildir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"işlənən tətbiqlər əldə etmək"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tətbiqə hazırda və az öncə işləyən tapşırıqlar haqqında ətraflı məlumat əldə etməyə imkan verir. Bu da cihazda hansı tətbiqlərin istifadə olunması haqqında məlumatların əldə edilməsinə imkan verir."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profil və cihaz sahiblərini idarə edin"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"profil və cihaz sahiblərini idarə edin"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Profil və cihaz sahiblərini təyin etmək üçün tətbiqə icazə verin."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"işlənən tətbiqlərin sırasını dəyişmək"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Tətbiqə tapşırıqları ön plandan arxa plana keçirməyə imkan verir. Tətbiq bunu Sizin daxiletməniz olmadan da edə bilər."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tətbiqə planşetinizdəki zəng jurnalını, həmçinin gedən və gələn zənglərin siyahısını dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək, zəng jurnalınıza dəyişiklik edə bilər."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Proqrama TV-nizin zəng jurnalını, o cümlədən daxil olan və çıxan zənglərlə bağlı məlumatları dəyişdirmək imkanı verə bilər. Zərərli proqramlar zəng jurnalınızı silmək və ya dəyişdirmək üçün bundan istifadə edə bilər."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Tətbiqə sizin daxil olan və gedən zənglər daxil olmaqla telefon zəngi loqlarınızı redaktə etmək icazəsi verir. Zərərli tətbiqlər bundan telefon loqlarınızı silmək və ya redaktə etmək üçün istifadə edə bilər."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"bədən sensorları (ürək döyüntüsü sayı kimi)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"bədən sensorlarına (ürək döyüntüsü monitorları kimi) giriş"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Tətbiqə ürək döyüntüsü kimi fiziki durumunuzu izləməyən sensorların datasına daxil olmağa icazə verir."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"təqvim tədbirlərini və konfidensial məlumatları oxuyur"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Tətbiqə dostlarınızın və əməkdaşlarınızın planşetinizdə yerləşən kalendar tədbirlərini oxumağa icazə verir. Bu tətbiqə konfidensiallıq və ya həssaslıqdan asılı olmayaraq sizin kalendar məlumatlarınızı paylaşmaq və ya saxlamağa imkan yaradır."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Dostlarınız və həmkarlarınıza məxsus olanlar da daxil olmaqla, tətbiqə telefonunuzdakı tədbirləri dəyişməyə, tədbir əlavə etməyə və ya silməyə imkan verir. Bu, tədbirə Sizin adınızdan və Sizdən xəbərsiz, təqvim sahibi kimi mesaj göndərmək imkanı verir."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"əlavə məkan provayderi əmrlərinə çıxış"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"dəqiq yeri (GPS və şəbəkə-əsaslı)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"dəqiq məkana (GPS və şəbəkə əsasında) giriş"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Qlobal Pozisiya Sistemini və ya şəbəkə qüllələri və Wi-Fi kimi şəbəkə məkanını istifadə edərək tətbiqə Sizin dəqiq yerinizi təyin etməyə imkan verir. Bu məkan xidmətləri aktivləşdirilməlidirlər ki, Siz tətbiqi istifadə edən zaman tətbiq onları istifadə edə bilsin. Tətbiqlər Sizin harada olmağınızı bunun vasitəsilə təyin edəcək, eyni zamanda, bu xidmət əlavə batareya enerjisi apara bilər."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"təxmini məkan (şəbəkə əsaslı)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"təxmini məkana (şəbəkə əsaslı) giriş"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Tətbiqə təxmini yerinizi almaq üçün imkan verir. Bu yer, yerləşmə xidmətləri tərəfindən mobil qüllələr və Wi-Fi kimi şəbəkə yerləşmə mənbələrdən istifadə etməklə əldə edilir. Bu yerləşmə xidmətləri tətbiqin onlardan istifadəsi üçün açıq və cihazınızın onları istifadəsi üçün mövcud olmalıdır. Tətbiqlər bundan sizin təxminən harada olduğunuzu müəyyənləşdirmək üçün istifadə edə bilər."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"səs yaz"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tətbiqə mikrofonla audio yazmaq icazəsi verir. İcazə tətbiqə sizin təsdiqiniz olmadan istənilən zaman səs yazma izni verir."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim rabitəsi"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"əmrləri SIM\'ə göndərin"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tətbiqə SIM-ə əmrlər göndərməyə imkan verir. Bu, çox təhlükəlidir."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"şəkil və video çəkmək"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tətbiqə kamera ilə şəkil və video çəkməyə imkan yaradır. Bu icazə tətbiqə sizin təsdiqiniz olmadan kameradan istifadə icazəsi verir."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tətbiqə telefonda olan hesabların siyahısını əldə etməyə imkan verir. Buna quraşdırdığınız istənilən tətbiq tərəfindən yaradılan hesablar da aiddir."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"şəbəkə bağlantılarına baxmaq"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Tətbiqə mövcud olan və qoşulan şəbəkələr kimi qoşulmalar haqqında məlumatı görməyə icazə verir."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"tam şəbəkə girişi"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"tam şəbəkə girişi var"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Tətbiqə şəbəkə soketlərini yaratmağa və fərdi şəbəkə protokollarını istifadə etməyə imkan verir. Brauzer və digər tətbiqlər datanın internetə ötürülməsini təmin edən vəsaitlər verir, ona görə də datanın internetə gönrədilməsi üçün bu icazə tələb olunmur."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"şəbəkə bağlantısını dəyişir"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Tətbiqə şəbəkə vəziyyətini dəyişməyə icazə verir."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tətbiqə lokal Bluetooth telefonunu konfiqurə etməyə və uzaq cihazları kəşf etmək və onlara qoşulmaq icazəsi verir."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX\'a qoşul və bağlantını kəs"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tətbiqə WiMAX mövcudluğu və qoşulmuş WiMAX şəbəkələrini təyin etməyə icazə verir."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX vəziyyətini dəyişir"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX vəziyyətini dəyişir"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tətbiqə planşeti WiMAX şəbəkələrinə qoşmaq və onlardan ayırmaq icazəsi verir."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Proqrama TV-ni WiMAX şəbəkələrinə qoşmaq və onlarla əlaqəni kəsmək imkanı verir."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tətbiqə telefonu WiMAX şəbəkəsinə qoşmağa və ya WiMAX şəbəkəsindən ayırmağa imkan verir."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Sensor ekran parametr kalibrasiyalarını dəyişmək üçün tətbiqə icazə verin. Normal tətbiqlər belə şeyləri istəmir."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikatlarına giriş"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tətbiqə DRM sertifikatları təmin etməyə və işlətməyə icazə verir. Normal tətbiqlər tərəfindən heç vaxt istənilməməlidir."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam transfer statusunu əldə edin"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam transfer statusunu əldə edin"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Bu tətbiqə hazırkı Android Beam transferləri haqqında məlumat əldə etməyə icazə verir"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"Müəllif hüquqlarının qorunması üçün texniki vasitələr sertifikatlarını silin"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Tətbiqə müəllif hüquqlarının qorunması üçün texniki vasitələr sertifikatlarını silməyə icazə verir. Normal tətbiqlər tərəfindən heç vaxt tələb edilmir."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Format edilir..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Daxil edilməyib"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Uyğun gələn fəaliyyət tapılmadı."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Media çıxışını yönləndirir"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"media çıxışını yönləndirin"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Tətbiqə media çıxışını digər xarici cihazlara yönləndirmək imkanı verir."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Quraşdırma sessiyalarını oxuyun"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"quraşdırma sessiyalarını oxuyun"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tətbiqə quraşdırma sessiyalarını oxumağa yardım edir. Bu da aktiv paket quraşdırmaları haqqında məlumatları görməyə imkan verir."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Pektləri quraşdırma sorğusu"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"paketləri quraşdırma sorğusu"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Tətbiqə paketləri quraşdırma sorğusu göndərməyə icazə verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Zoom nəzarəti üçün iki dəfə toxunun"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget əlavə edilə bilmədi."</string>

@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"クレジットカードの番号やパスワードなどの個人データが含まれます。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"ステータスバーへの表示"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"ステータスバーへの表示"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ステータスバーへの表示をアプリに許可します。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ステータスバーの拡大/縮小"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ステータスバーの展開/折りたたみをアプリに許可します。"</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAPメッセージの受信と処理をアプリに許可します。これにより、アプリが端末に届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"実行中のアプリの取得"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"現在実行中または最近実行したタスクに関する情報の取得をアプリに許可します。これにより、その端末でどのアプリを使用しているかをアプリから識別できるようになる可能性があります。"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"プロファイルの所有者と端末の所有者の管理"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"プロファイルの所有者と端末の所有者の管理"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"プロファイルの所有者と端末の所有者の設定をアプリに許可します。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"実行中のアプリの順序変更"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。これにより、アプリがユーザーからの入力なしでこの処理を実行する可能性があります。"</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"タブレットの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"テレビの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"携帯端末の通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"ボディーセンサー（心拍数モニターなど）"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"ボディーセンサー（心拍数モニターなど）へのアクセス"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"心拍数など、身体状態を監視するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報の読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ユーザーが携帯端末から編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"正確な位置情報（GPSとネットワーク基地局）"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"正確な位置情報（GPSとネットワーク基地局）へのアクセス"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"グローバルポジショニングシステム（GPS）またはネットワーク位置情報源（携帯基地局やWi-Fiなど）を利用して正確な位置情報を取得することをアプリに許可します。これらの位置情報サービスはONの状態にして、端末でアプリがサービスを利用できるようにする必要があります。アプリはこの位置情報を利用してユーザーの現在地を特定できます。また、これにより電池の消費量が増える可能性があります。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"おおよその位置情報（ネットワーク基地局）"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"おおよその位置情報（ネットワーク基地局）へのアクセス"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ユーザーのおおよその位置情報を取得することをアプリに許可します。この位置情報はネットワーク位置情報源（携帯基地局やWi-Fiなど）を利用した位置情報サービスから取得されます。これらの位置情報サービスはONの状態にして、端末でアプリがサービスを利用できるようにする必要があります。アプリはこの位置情報を利用してユーザーのおおよその現在地を特定できます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"マイクを使った録音をアプリに許可します。これにより、アプリがいつでも確認なしで録音できるようになります。"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM通信"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"カメラでの写真と動画の撮影をアプリに許可します。これにより、アプリが確認なしでいつでもカメラを使用できるようになります。"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"携帯端末で認識されているアカウントのリストの取得をアプリに許可します。これには、インストールしたアプリによって作成されたアカウントも含まれます。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ネットワーク接続の表示"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"存在するネットワークや接続しているネットワークなど、ネットワーク接続に関する情報を表示することをアプリに許可します。"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ネットワークへのフルアクセス"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"ネットワークへのフルアクセス"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"ネットワークソケットの作成とカスタムネットワークプロトコルの使用をアプリに許可します。インターネットにデータを送信する手段はブラウザや他のアプリが提供するため、インターネットへのデータ送信のためにこれを許可する必要はありません。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ネットワーク接続の変更"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ネットワーク接続状態の変更をアプリに許可します。"</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ローカルのBluetooth携帯端末を設定することと、リモート端末を検出してペアに設定することをアプリに許可します。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXへの接続と切断"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAXがONになっているかどうかを識別し、接続されているWiMAXネットワークの情報を表示することをアプリに許可します。"</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX状態の変更"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX状態の変更"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"タブレットのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"テレビのWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"携帯端末のWiMAXネットワークへの接続と切断をアプリに許可します。"</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"タッチスクリーンの調整パラメータの変更をアプリに許可します。通常のアプリでは必要ありません。"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM証明書へのアクセス権"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM証明書のプロビジョニングと使用をアプリに許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Androidビーム転送のステータスを受信"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Androidビーム転送のステータスの受信"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"現在のAndroidビーム転送に関する情報を受信することをこのアプリに許可します。"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM証明書の削除"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM証明書の削除をアプリに許可します。通常のアプリでは不要です。"</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"フォーマットしています…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"挿入されていません"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"一致するアクティビティが見つかりません。"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"メディア出力のルーティング"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"メディア出力のルーティング"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"インストールセッションの読み取り"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"インストールセッションの読み取り"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"パッケージインストールのリクエスト"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"インストールパッケージのリクエスト"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"パッケージのインストールをリクエストすることをアプリケーションに許可します。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ダブルタップでズームコントロール"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ウィジェットを追加できませんでした。"</string>

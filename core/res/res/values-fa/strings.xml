@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را لحاظ می‌کند."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"غیرفعال کردن یا تغییر نوار وضعیت"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"‏به برنامه اجازه می‎دهد تا نوار وضعیت را غیرفعال کند یا نمادهای سیستم را اضافه یا حذف کند."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"نوار وضعیت"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"نوار وضعیت باشد"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"‏به برنامه اجازه می‎دهد که تبدیل به نوار وضعیت شود."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"گسترش دادن/جمع کردن نوار وضعیت"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"‏به برنامه اجازه می‎دهد تا نوار ابزار را جمع کند یا باز کند."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏به برنامه اجازه می‌دهد پیام‌های WAP را دریافت و پردازش کند. این مجوز می‌تواند پیام‌های ارسالی به شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"‏بازیابی برنامه‎های در حال اجرا"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"مدیریت مالکان نمایه و دستگاه"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"مدیریت نمایه و مالکان دستگاه"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"به برنامه‌ها امکان می‌دهد، مالکان نمایه و مالک دستگاه را تنظیم کنند."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"‏تنظیم مجدد ترتیب برنامه‎های در حال اجرا"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"‏به برنامه اجازه می‎دهد تا کارها را به پیش‌زمینه و پس‌زمینه منتقل کند. برنامه‎ ممکن است بدون دخالت شما این کار را انجام دهد."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"‏به برنامه اجازه می‌دهد گزارشات تماس رایانهٔ لوحی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"‏به برنامه اجازه می‌دهد گزارشات تماس تلویزیون شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب شاید از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"حسگرهای بدن (مانند پایشگرهای ضربان قلب)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"دسترسی به حسگرهای بدن (مانند پایشگرهای ضربان قلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"به برنامه امکان می‌دهد به اطلاعات حسگرهایی که بر شرایط فیزیکی شما مانند ضربان قلبتان، نظارت دارند، دسترسی داشته باشد."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"خواندن رویدادهای تقویم به همراه اطلاعات محرمانه"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"به برنامه امکان می‌دهد همه رویدادهای تقویم ذخیره شده در رایانهٔ لوحی شما را بخواند، از جمله رویدادهای دوستان یا همکاران. این ممکن است به برنامه امکان دهد داده‌های تقویم شما را صرفنظر از محرمانه یا حساس بودن آن‌ها به اشتراک گذاشته یا ذخیره کند."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در تلفن خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"دسترسی به فرمان‌های بیشتر ارائه دهنده مکان"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏به برنامه اجازه می‌دهد به دستورات ارائه‌دهنده مکان تکمیلی دسترسی داشته باشد. این کار ممکن است به برنامه امکان دهد با کارکرد GPS یا منابع دیگر مکان تداخل داشته باشد."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"‏موقعیت مکانی دقیق (مبتنی بر GPS و شبکه)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏دسترسی به مکان دقیق (مبتنی بر GPS و شبکه)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"‏به برنامه اجازه می‌دهد که موقعیت مکانی دقیق شما را با استفاده از سیستم موقعیت‌یاب جهانی (GPS) یا منابع موقعیت مکانی شبکه‌ای مانند برج‌های سلولی یا Wi-Fi دریافت کند. این سرویس‌های موقعیت مکانی باید در دستگاه شما برای برنامه‌ای که از آنها استفاده می‌کند، فعال و در دسترس باشد. برنامه‌ها ممکن است از آن برای تعیین جایی که هستید، استفاده کنند و ممکن است نیروی باتری بیشتری مصرف کنند."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"موقعیت مکانی تقریبی (مبتنی بر شبکه)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"دسترسی به مکان تقریبی (مبتنی بر شبکه)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"‏به برنامه اجازه می‌دهد که موقعیت مکانی تقریبی شما را بدست آورد. این موقعیت مکانی از سرویس‌های موقعیت مکانی که از منابع موقعیت مکانی شبکه‌ای مانند برج‌های سلولی و Wi-Fi استفاده می‌کنند، بدست می‌آید. این سرویس‌های موقعیت مکانی باید در دستگاه شما برای برنامه‌ای که از آنها استفاده می‌کند، فعال و در دسترس باشد. برنامه‌ها ممکن است از آن برای تعیین تقریبی جایی که هستید، استفاده کنند."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را اصلاح کند."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ضبط صدا"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"به برنامه اجازه می‌دهد صدا را با میکروفن ضبط کند. این مجوز به برنامه اجازه می‌دهد صدا را در هر زمان که بخواهید بدون تأیید شما ضبط کند."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"ارتباطات سیم کارت"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"ارسال فرمان به سیم کارت"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"به برنامه اجازه ارسال دستورات به سیم کارت را می‌دهد. این بسیار خطرناک است."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"عکسبرداری و فیلمبرداری"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"به برنامه اجازه می‌دهد با دوربین به عکسبرداری و فیلمبرداری بپردازد. این مجوز به برنامه اجازه می‌‌دهد از دوربین در هر زمانی بدون تأیید شما استفاده کند."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"به برنامه اجازه می‌دهد به لیست حساب‌های شناخته شده توسط تلفن دسترسی پیدا کند. این ممکن است حسا‌ب‌های ایجاد شده توسط برنامه‌هایی را که نصب کرده‌اید، شامل شود."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"مشاهدهٔ اتصالات شبکه"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"به برنامه امکان می‌دهد اطلاعات مربوط به اتصالات شبکه مانند شبکه‌های موجود و متصل را مشاهده کند."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"دسترسی کامل به شبکه"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"دسترسی کامل به شبکه"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"به برنامه امکان می‌دهد سوکت‌های شبکه را ایجاد کند و از پروتکل‌های شبکه سفارشی استفاده نماید. مرورگر و سایر برنامه‌ها روشی را برای ارسال داده‌ها به اینترنت ارائه می‌کنند بنابراین این مجوز برای ارسال داده به اینترنت ضروری نیست."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"تغییر قابلیت اتصال شبکه"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"‏به برنامه اجازه می‎دهد تا وضعیت اتصال شبکه را تغییر دهد."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها مرتبط‌سازی شود."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏اتصال و قطع اتصال از WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"به برنامه امکان می‌دهد فعال بودن وایمکس و اطلاعات مربوط به هر یک از شبکه‌های وایمکس متصل را مشخص کند."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏تغییر وضعیت WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏تغییر وضعیت WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"به برنامه امکان می‌دهد رایانهٔ لوحی را به شبکه‌های وایمکس متصل کرده یا اتصال آن را از این شبکه‌ها قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏به برنامه اجازه می‌دهد تا تلویزیون را به شبکه‌های WiMAX وصل یا ارتباط آن را با این شبکه‌ها قطع کند."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏به برنامه امکان می‎دهد تا تلفن را به شبکه‌های وایمکس متصل کرده یا اتصال آنرا از این شبکه‌ها قطع کند."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"به برنامه امکان می‌دهد پارامترهای کالیبراسیون صفحه لمسی را تغییر دهد. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏دسترسی به گواهی‌های DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏به یک برنامه کاربردی اجازه ارائه مجوز و استفاده از گواهی‌های DRM را می‌دهد. هرگز برای برنامه‌های عادی مورد نیاز نیست."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"‏دریافت وضعیت انتقال پرتوی Android"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"‏دریافت وضعیت انتقال پرتوی Android"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏به برنامه امکان می‌دهد تا اطلاعاتی درباره انتقال‌های کنونی پرتوی Android به دست آورد"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"‏حذف گواهی‌های DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏به برنامه امکان می‌دهد گواهی‌های DRM را حذف کند. نباید برای برنامه‌های عادی هیچ‌وقت لازم باشد."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"درحال قالب‌بندی…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"جاگذاری نشده"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"فعالیتی مطابق با این مورد یافت نشد."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"تعیین مسیر خروجی رسانه"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"تعیین مسیر خروجی رسانه"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"به یک برنامه اجازه می‌دهد خروجی رسانه را به دستگاه‌های خارجی دیگر تعیین مسیر کند."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"خواندن جلسات نصب"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"خواندن جلسات نصب"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"به برنامه اجازه می‌دهد جلسات نصب را بخواند. این کار به برنامه اجازه می‌دهد جزئیات نصب‌های بسته فعال را ببیند."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"درخواست نصب بسته‌بندی"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"درخواست نصب بسته"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"به برنامه اجازه می‌دهد درخواست نصب بسته‌بندی کند."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"دوبار لمس کنید تا بزرگ‌نمایی کنترل شود"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"افزودن ابزارک انجام نشد."</string>

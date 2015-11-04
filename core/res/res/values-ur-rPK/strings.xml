@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اس میں ذاتی ڈیٹا جیسے کریڈٹ کارڈ نمبرز اور پاس ورڈز شامل ہیں۔"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"حیثیت بار"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"بطور اسٹیٹس بار کام لیں"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ایپ کو اسٹیٹس بار بننے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"حیثیت بار پھیلائیں/سکیڑیں"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ایپ کو اسٹیٹس بار پھیلانے یا سکیڑنے کی اجازت دیتا ہے۔"</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏ایپ کو WAP پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس اجازت میں آپ کو مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھنے یا انہیں حذف کرنے کی اہلیت شامل ہے۔"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"پروفائل اور آلہ کے مالکان کا نظم کریں"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"پروفائل اور آلہ کے مالکان کا نظم کریں"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ایپس کو پروفائل کے مالکان اور آلہ کے مالک کو سیٹ کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"چل رہی ایپس کو دوبارہ ترتیب دیں"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ایپ کو پیش منظر یا پس منظر میں ٹاسکس کو منتقل کرنے کی اجازت دیتا ہے۔ ایپ آپ کے ان پٹ کے بغیر یہ کام کرسکتی ہے۔"</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ایپ کو آپ کے ٹیبلٹ کی کال لاگ، بشمول آنے والی اور باہر جانے والی کالوں کے بارے میں ڈیٹا میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کی کال لاگ مٹانے یا اس میں ترمیم کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"‏انکمنگ اور آؤٹ گوئنگ کالز کے بارے میں ڈیٹا سمیت، ایپ کو آپ کے TV کے کال لاگ میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کی کال لاگ مٹانے یا اس میں ترمیم کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ایپ کو آپ کے فون کی کال لاگ، بشمول آنے والی اور باہر جانے والی کالوں کے بارے میں ڈیٹا میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس آپ کی کال لاگ مٹانے یا اس میں ترمیم کرنے کیلئے اسے استعمال کرسکتی ہیں۔"</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"باڈی سینسرز (جیسے دل کی دھڑکن کے مانیٹرز)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"باڈی سینسرز تک رسائی حاصل کریں (جیسے حرکت قلب شرح مانیٹرز)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ان سینسرز سے ڈیٹا تک رسائی حاصل کرنے کی اجازت دیتی ہے جو آپ کی حرکت قلب کی شرح جیسی آپ کی فزیکل صورتحال کو مانیٹر کرتے ہیں۔"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"کیلنڈر ایونٹس کے ساتھ رازداری کی معلومات پڑھیں"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ایپ کو آپ کے، بشمول آپ کے دوستوں یا ساتھی کارکنان کے ٹیبلٹ پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھنے کی اجازت دیتا ہے۔ یہ ایپ کو رازداری یا حساسیت سے قطع نظر آپ کے کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کرنے کی اجازت دیتا ہے۔"</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ایپ کو وہ ایونٹس جن میں آپ اپنے فون پر ترمیم کرسکتے ہیں، بشمول دوسروں یا ساتھی کارکنوں کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آئے ہوئے معلوم پڑتے ہیں یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏ایپ کو اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کرنے کی اجازت دیتی ہے۔ یہ ایپ کو GPS یا دوسرے مقام کے مآخذ کے عمل کے ساتھ مداخلت کرنے کی اجازت دے سکتی ہے۔"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"‏قطعی مقام (GPS اور نیٹ ورک پر مبنی)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏قطعی مقام تک رسائی حاصل کریں (GPS اور نیٹ ورک پر مبنی)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"‏ایپ کو گلوبل پوزیشننگ سسٹم (GPS) یا نیٹ ورک کے مقام کے مآخذ جیسے سیل ٹاورز اور Wi-Fi کا استعمال کرکے آپ کا درست مقام حاصل کرنے کی اجازت دیتا ہے۔ ان مقام کی سروسز کا آن ہونا اور ایپ کو انہیں استعمال کرنے کیلئے آپ کے آلے پر دستیاب ہونا ضروری ہے۔ ایپس تخمینی طور پر آپ کے محل وقوع کا تعین کرنے کیلئے اسے استعمال کرسکتی ہیں اور بیٹری کی اضافی قوت صرف کرسکتی ہیں۔"</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"تخمینی مقام (نیٹ ورک پر مبنی)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"تخمینی مقام تک رسائی حاصل کریں (نیٹ ورک پر مبنی)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"‏ایپ کو آپ کا تخمینی مقام حاصل کرنے کی اجازت دیتا ہے۔ یہ مقام نیٹ ورک کے مقام کے مآخذ جیسے سیل ٹاورز اور Wi-Fi کا استعمال کرکے مقام کی سروسز کے ذریعہ اخذ کیا جاتا ہے۔ ان مقام کی سروسز کا آن ہونا اور آپ کے آلے پر دستیاب ہونا ضروری ہے تاکہ ایپ انہیں استعمال کرسکے۔ ایپس تخمینی طور پر آپ کے محل وقوع کا تعین کرنے کیلئے اسے استعمال کر سکتی ہیں۔"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"اپنے آڈیو کی ترتیبات کو تبدیل کریں"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ایپ کو مجموعی آڈیو ترتیبات جیسے والیوم اور آؤٹ پٹ کیلئے جو اسپیکر استعمال ہوتا ہے اس میں ترمیم کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"آڈیو ریکارڈ کریں"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"ایپ کو مائکرو فون سے آڈیو ریکارڈ کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو کسی بھی وقت آپ کی تصدیق کے بغیر آڈیو ریکارڈ کرنے کی اجازت دیتی ہے۔"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"سم مواصلت"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"‏SIM کو ہدایات بھیجیں"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏ایپ کو SIM کو کمانڈز بھیجنے کی اجازت دیتا ہے۔ یہ بہت خطرناک ہے۔"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"تصاویر لیں اور ویڈیوز بنائیں"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ایپ کو کیمرے سے تصویریں لینے اور ویڈیوز بنانے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو آپ کی تصدیق کے بغیر کسی بھی وقت کیمرا استعمال کرنے کی اجازت دیتی ہے۔"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ایپ کو فون کو معلوم اکاؤنٹس کی فہرست حاصل کرنے کی اجازت دیتا ہے۔ اس میں آپ کی انسٹال کردہ ایپلیکیشنز کے ذریعہ بنائے گئے کوئی بھی اکاؤنٹس شامل ہوسکتے ہیں۔"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"نیٹ ورک کنکشنز دیکھیں"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ایپ کو نیٹ ورک کنکشنز کے بارے میں معلومات دیکھنے کی اجازت دیتا ہے جیسے کون سے نیٹ ورکس موجود اور مربوط ہیں۔"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"پورے نیٹ ورک تک رسائی"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"پورے نیٹ ورک تک رسائی حاصل کریں"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"ایپ کو نیٹ ورک ساکیٹس بنانے اور حسب ضرورت نیٹ ورک پروٹوکولز استعمال کرنے کی اجازت دیتا ہے۔ براؤزر اور دوسری ایپلیکیشنز انٹرنیٹ کو ڈیٹا بھیجنے کا ذریعہ فراہم کرتے ہیں، لہذا انٹرنیٹ کو ڈیٹا بھیجنے کیلئے یہ اجازت درکار نہیں ہوتی ہے۔"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"نیٹ ورک کنیکٹوٹی تبدیل کریں"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ایپ کو نیٹ ورک کنیکٹوٹی کی حالت تبدیل کرنے کی اجازت دیتا ہے۔"</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ایپ کو مقامی بلوٹوتھ فون کنفیگر کرنے اور ریموٹ آلات دریافت کرنے اور ان کے ساتھ جوڑا بنانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏WiMAX سے مربوط اور غیر مربوط کریں"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"‏ایپ کو یہ تعین کرنے کی کہ آیا WiMAX فعال ہے اور کسی مربوط WiMAX نیٹ ورکس کے بارے میں معلومات کا تعین کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏WiMAX کی حیثیت تبدیل کریں"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏WiMAX کی حیثیت تبدیل کریں"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏ایپ کو WiMAX نیٹ ورکس سے ٹیبلٹ کو مربوط اور ٹیبلٹ کو منقطع کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏ایپ کو WiMAX نیٹ ورکس سے TV کو منسلک اور TV کو غیر منسلک کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏ایپ کو WiMAX نیٹ ورکس سے فون کو مربوط اور فون کو منقطع کرنے کی اجازت دیتا ہے۔"</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ایپ کو ٹچ اسکرین کے کیلیبریشن پیرامیٹرز میں ترمیم کرنے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏DRM سرٹیفکیٹس تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏ایک ایپ کو  DRM سرٹیفکیٹس فراہم کرنے اور ان کا استعمال کرنے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہوتی ہے۔"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"‏Android Beam منتقلی کی صورت حال موصول کریں"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"‏Android Beam منتقلی کی صورت حال موصول کریں"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏اس ایپلیکیشن کو Android Beam کی حالیہ منتقلیوں کے بارے میں معلومات موصول کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"‏DRM سرٹیفکیٹس کو ہٹائیں"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏ایک ایپلیکیشن کو DRM سرٹیفکیٹس کو ہٹانے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"فارمیٹ کیا جا رہا ہے…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"دلچسپی نہیں ہے"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"کوئی مماثل سرگرمیاں نہیں ملیں۔"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"میڈیا آؤٹ پٹ کی سمت طے کریں"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"میڈیا آؤٹ پٹ کی سمت طے کریں"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"کسی ایپلیکیشن کو دوسرے خارجی آلات تک میڈیا آؤٹ پٹ کا راستہ بنانے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"انسٹال سیشنز پڑھیں"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"انسٹال سیشنز پڑھیں"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ایک ایپلیکیشن کو انسٹال سیشنز پڑھنے کی اجازت دیتا ہے۔ یہ اسے فعال پیکیج انسٹالیشنز کے بارے میں تفصیلات دیکھنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"پیکجز انسٹال کرنے کی درخواست کریں"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"پیکجز انسٹال کرنے کی درخواست کریں"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ایک ایپلیکیشن کو پیکجز انسٹال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"زوم کے کنٹرول کیلئے دو بار ٹچ کریں"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ویجٹس کو شامل نہیں کرسکا۔"</string>

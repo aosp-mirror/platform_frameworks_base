@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"신용카드 번호와 비밀번호 등의 개인 데이터를 포함합니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"상태 표시줄"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"상태 표시줄에 위치"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"앱이 상태 표시줄이 되도록 허용합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"상태 표시줄 확장/축소"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"앱이 상태 표시줄을 확장하거나 축소할 수 있도록 허용합니다."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"앱이 WAP 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 앱이 기기에서 사용되는 다른 앱에 대한 정보를 검색할 수 있습니다."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"프로필 및 기기 소유자 관리"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"프로필 및 기기 소유자 관리"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"앱이 프로필 소유자와 기기 소유자를 설정하도록 허용합니다."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"실행 중인 앱 순서 재지정"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"앱이 사용자의 입력 없이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"앱에서 수신 및 발신 통화 데이터를 포함하여 TV의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 삭제하거나 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"신체 센서(예: 심박수 모니터)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"신체 센서(예: 심박수 모니터)에 액세스"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"앱이 심박수와 같은 신체 상태를 모니터링하는 센서의 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 및 기밀정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"앱이 친구나 동료의 일정을 포함하여 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성을 무시하고 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"앱이 친구나 동료의 일정을 포함하여 휴대전화에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"앱이 추가 위치 정보 제공 기능의 명령에 액세스하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"정확한 위치(GPS 및 네트워크 기반)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"정확한 위치(GPS 및 네트워크 기반)에 액세스"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"앱에서 GPS 또는 기지국 및 Wi-Fi와 같은 네트워크 위치 제공자를 사용하는 위치 서비스를 통해 내 정확한 위치를 알 수 있도록 합니다. 앱에서 이를 사용하도록 하려면 기기에서 이러한 위치 서비스는 사용하도록 설정해야 합니다. 앱에서 위치 서비스를 사용하여 내 위치를 파악할 수 있으며 배터리 소모량이 증가할 수 있습니다."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"대략적인 위치(네트워크 기반)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"대략적인 위치(네트워크 기반)에 액세스"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"앱에서 나의 대략적인 위치를 알 수 있게 합니다. 이 위치는 기지국 및 Wi-Fi와 같은 네트워크 위치 제공자를 사용하는 위치 서비스를 통해 알 수 있습니다. 앱에서 이를 사용하도록 하려면 기기에서 이러한 위치 서비스를 사용하도록 설정해야 합니다. 앱에서 이를 사용하여 나의 대략적인 위치를 파악할 수 있습니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"앱이 마이크로 오디오를 녹음할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 사용자의 확인 없이 언제든지 오디오를 녹음할 수 있습니다."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM 통신"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM에 명령어 보내기"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 위험합니다."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"앱이 카메라로 사진과 동영상을 찍을 수 있도록 허용합니다. 이 권한을 사용하면 앱이 언제든지 사용자의 확인 없이 카메라를 사용할 수 있습니다."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"앱이 휴대전화가 알고 있는 계정 목록을 가져올 수 있도록 허용합니다. 이 경우 설치한 애플리케이션에 의해 만들어진 모든 계정을 포함할 수 있습니다."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"네트워크 연결 보기"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"앱이 어떤 네트워크가 존재하며 연결되었는지 등의 네트워크 연결에 대한 정보를 볼 수 있도록 허용합니다."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"완전한 네트워크 액세스"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"전체 네트워크 액세스 권한 보유"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"앱이 네트워크 소켓을 만들고 맞춤 네트워크 프로토콜을 사용할 수 있도록 허용합니다. 브라우저 및 기타 앱이 데이터를 인터넷에 전송하는 수단을 제공하므로, 이 권한이 데이터를 인터넷에 전송하는 데 필요하지 않습니다."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"네트워크 연결 변경"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"앱이 네트워크 연결 상태를 변경할 수 있도록 허용합니다."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"앱이 로컬 블루투스 휴대전화를 설정한 다음 원격 기기를 검색하여 페어링할 수 있도록 허용합니다."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX 연결 및 연결 해제"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"앱이 WiMAX를 사용하도록 설정했는지 여부와 연결된 WiMAX 네트워크에 대한 정보를 결정할 수 있도록 허용합니다."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX 상태 변경"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX 상태 변경"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"앱이 태블릿을 WiMAX 네트워크에 연결하거나 연결을 끊을 수 있도록 허용합니다."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"앱이 WiMAX 네트워크에서 TV에 연결되거나 TV와의 연결을 해제할 수 있도록 허용합니다."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"앱이 휴대전화를 WiMAX 네트워크에 연결하거나 연결을 끊을 수 있도록 허용합니다."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"앱이 터치 스크린의 보정 매개변수를 수정할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM 인증서에 액세스"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"애플리케이션이 DRM 인증서를 프로비저닝하고 사용하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam 전송 상태 수신"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam 전송 상태 수신"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"이 애플리케이션이 현재 Android Beam 전송 관련 정보를 수신하도록 허용합니다."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM 인증서 삭제"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"포맷하는 중…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"삽입하지 않음"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"일치하는 활동이 없습니다."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"미디어 출력 연결"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"미디어 출력 연결"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"앱이 미디어 출력을 기타 외부 기기에 연결할 수 있도록 허용합니다."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"설치 세션 읽기"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"설치 세션 읽기"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"애플리케이션의 설치 세션 읽기를 허용하면, 활성 패키지 설치에 대한 세부 정보를 볼 수 있습니다."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"패키지 설치 요청"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"패키지 설치 요청"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"애플리케이션이 패키지 설치를 요청하도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"위젯을 추가할 수 없습니다."</string>

@@ -258,7 +258,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"تعطيل شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"للسماح للتطبيق بتعطيل شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"شريط الحالة"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"العمل كشريط للحالة"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"للسماح للتطبيق بأن يكون شريط الحالة."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"توسيع/تصغير شريط الحالة"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"للسماح للتطبيق بتوسيع شريط الحالة أو تصغيره."</string>
@@ -286,7 +286,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏للسماح للتطبيق بتلقي رسائل WAP ومعالجتها. ويتضمن هذا الإذن إمكانية مراقبة الرسائل التي يتم إرسالها إليك أو حذفها بدون عرضها لك."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"استرداد التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"للسماح للتطبيق باسترداد معلومات حول المهام التي يجري تشغيلها حاليًا والتي تم تشغيلها مؤخرًا. وقد يسمح هذا للتطبيق باكتشاف معلومات حول التطبيقات المستخدمة على الجهاز."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"إدارة المالكين لكل من الملف الشخصي والجهاز"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"إدارة الملف الشخصي ومالكي الجهاز"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"للسماح للتطبيقات بتعيين مالكي الملف الشخصي ومالك الجهاز."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"إعادة ترتيب التطبيقات قيد التشغيل"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"للسماح للتطبيق بنقل المهام إلى المقدمة والخلفية. وقد يجري التطبيق ذلك بدون إذنك."</string>
@@ -328,7 +328,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"للسماح للتطبيق بتعديل سجل مكالمات الجهاز اللوحي، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"يتيح للتطبيق تعديل سجل مكالمات التلفزيون، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"الوصول إلى أجهزة استشعار الجسم (مثل شاشات معدل ضربات القلب)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"للسماح للتطبيق بالدخول إلى البيانات من المستشعرات التي تراقب الحالة البدنية، مثل معدل نبضات القلب."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"قراءة أحداث التقويم بالإضافة إلى المعلومات السرية"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"للسماح للتطبيق بقراءة جميع أحداث التقويم المخزنة على الجهاز اللوحي، بما في ذلك أحداث التقويم التابعة للأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق مشاركة بيانات التقويم أو حفظها، بغض النظر عن مدى سرية البيانات أو حساسيتها."</string>
@@ -340,15 +340,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"للسماح للتطبيق بإضافة أو إزالة أو تغيير الأحداث التي يمكنك تعديلها على هاتفك، بما في ذلك أحداث الأصدقاء أو زملاء العمل. وقد يتيح هذا للتطبيق إرسال رسائل يبدو أنها واردة من أصحاب التقويم أو تعديل الأحداث بدون معرفة المالكين."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"الدخول إلى المزيد من أوامر موفر الموقع"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏للسماح للتطبيق بالدخول إلى أوامر إضافية لموفر الموقع. قد يتيح هذا للتطبيق التداخل مع تشغيل تقنية نظام تحديد المواقع العالمي (GPS) أو مصادر الموقع الأخرى."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"الموقع الدقيق (مستند إلى نظام تحديد المواقع العالمي والشبكة)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏الوصول إلى الموقع الدقيق (استنادًا إلى نظام تحديد المواقع العالمي \"GPS\" والشبكة)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"‏للسماح للتطبيق بتحديد موقعك بدقة وهذا باستخدام نظام تحديد المواقع العالمي (GPS) أو مصادر المواقع التي تستخدم الشبكات مثل أبراج الجوال أو تقنية Wi-Fi. يتعين توفر خدمات المواقع هذه وتشغيلها على جهازك للتطبيق كي يستخدمها. وقد تستخدم التطبيقات هذا لتحديد موقعك وقد تستهلك مزيدًا من طاقة البطارية."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"الموقع التقريبي (مستند إلى الشبكة)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"الوصول إلى الموقع التقريبي (استنادًا إلى الشبكة)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"‏للسماح للتطبيق بتحديد موقعك التقريبي الذي يستمد من خدمات الموقع باستخدام مصادر المواقع التي تستخدم الشبكات مثل أبراج الجوال وتقنية Wi-Fi. يتعين توفر خدمات المواقع هذه وتشغيلها على جهازك للتطبيق كي يستخدمها. وقد تستخدم التطبيقات هذا لتحديد موقعك التقريبي."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغيير إعداداتك الصوتية"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"للسماح للتطبيق بتعديل إعدادات الصوت العامة مثل مستوى الصوت وأي السماعات يتم استخدامها للاستماع."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"تسجيل الصوت"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"للسماح للتطبيق بتسجيل الصوت باستخدام الميكروفون. ويتيح هذا الإذن للتطبيق تسجيل الصوت في أي وقت وبدون موافقة منك."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"‏اتصالات SIM"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"‏إرسال أوامر إلى شريحة SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏السماح للتطبيق بإرسال أوامر إلى شريحة SIM. وهذا أمر بالغ الخطورة."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"التقاط صور ومقاطع فيديو"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"للسماح للتطبيق بالتقاط صور ومقاطع فيديو من خلال الكاميرا. ويتيح هذا الإذن للتطبيق استخدام الكاميرا في أي وقت وبدون موافقة منك."</string>
@@ -386,7 +386,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الهاتف. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"عرض اتصالات الشبكة"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"للسماح للتطبيق بعرض معلومات حول اتصالات الشبكة كعرض معلومات عن الشبكات المتوفرة والشبكات المتصلة."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"إمكانية دخول كاملة إلى الشبكة"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"حق الوصول الكامل إلى الشبكة"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"للسماح للتطبيق بإنشاء مقابس شبكات واستخدام بروتوكولات شبكات مخصصة. ويوفر المتصفح وتطبيقات أخرى طرقًا لإرسال البيانات إلى الإنترنت، ولذلك لا يعد هذا الإذن مطلوبًا لإرسال البيانات إلى الإنترنت."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"تغيير اتصال الشبكة"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"للسماح للتطبيق بتغيير حالة اتصال الشبكة."</string>
@@ -406,7 +406,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"للسماح للتطبيق بتهيئة هاتف البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏الاتصال بـشبكة WiMAX وقطع الاتصال بها"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"‏للسماح للتطبيق بتحديد ما إذا تم تمكين WiMAX وتحديد معلومات حول أية شبكات WiMAX متصلة."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏تغيير حالة WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏تغيير حالة WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏للسماح للتطبيق بتوصيل الجهاز اللوحي بشبكات WiMAX وقطع اتصاله بها."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏يتيح للتطبيق توصيل التلفزيون أو إلغاء توصيله بشبكات WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏للسماح للتطبيق بتوصيل الهاتف بشبكات WiMAX وقطع اتصاله بها."</string>
@@ -489,7 +489,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"يتيح للتطبيق إمكانية تعديل معلمات المعايرة في شاشة اللمس. يجب عدم اللجوء إليه مع التطبيقات العادية."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏الدخول إلى شهادات DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏للسماح لأحد التطبيقات بتقديم شهادات DRM واستخدامها. لا يجب أن يكون ذلك لازمًا مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"‏تلقي حالة نقل شعاع Android"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"‏تلقي حالة نقل شعاع Android"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏السماح لهذا التطبيق بتلقي معلومات حول عمليات نقل شعاع Android الحالية"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"‏إزالة شهادات DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏للسماح لأحد التطبيقات بإزالة شهادات DRM. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
@@ -1119,11 +1119,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"جارٍ التهيئة…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"لم يتم الإدخال"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"لم يتم العثور على أي أنشطة متطابقة."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"توجيه إخراج الوسائط"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"توجيه إخراج الوسائط"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"للسماح للتطبيق بتوجيه إخراج الوسائط إلى أجهزة خارجية أخرى."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"قراءة جلسات التثبيت"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"قراءة جلسات التثبيت"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"للسماح لأحد التطبيقات بقراءة جلسات التثبيت. ويسمح لك هذا بالاطلاع على تفاصيل بشأن عمليات تثبيت الحزم النشطة."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"طلب تثبيت الحزم"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"طلب حزم التثبيت"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"للسماح لتطبيق ما بطلب تثبيت الحزم."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>

@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"შეიცავს ისეთ პირად მონაცემებს, როგორიცაა საკრედიტო ბარათის ნომრები და პაროლები."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"სტატუსის ზოლის გათიშვა ან ცვლილება"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"აპს შეეძლება სტატუსების ზოლის გათიშვა და სისტემის ხატულების დამატება/წაშლა."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"სტატუსის ზოლი"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"სტატუსის ზოლის ჩანაცვლება"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"აპს შეეძლება სტატუსის ზოლის ჩანაცვლება."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"სტატუსების ზოლის გაფართოება/აკეცვა"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"აპს შეეძლება სტატუსის ზოლის გახსნა-დახურვა."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"აპს შეეძლება WAP შეტყობინებების მიღება და გენერირება. ამ უფლებით აპი ისე დააკვირდება და წაშლის თქვენთვის გამოგზავნილ შეტყობინებებს, რომ თქვენ ვერც ნახავთ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"მოქმედი აპების მოძიება"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"აპს შეეძლება მოიძიოს ინფორმაცია ამჟამად და უახლოეს წარსულში მიმდინარე ამოცანების შესახებ. ამგვარად, აპს აქვს შესაძლებლობა აღმოაჩინოს ინფორმაცია იმის შესახებ, თუ რომელი აპლიკაციებია გამოყენებული მოწყობილობაზე."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"პროფილისა და მოწყობილობის მფლობელების მართვა"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"პროფილისა და მოწყობილობის მფლობელების მართვა"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"აპებს უფლებას აძლევს, დააყენოს პროფილის მფლობელები და მოწყობილობის მფლობელი."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"მოქმედი აპების წყობის შეცვლა"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"აპს შეეძლება ამოცანების გადატანა წინა და უკანა პლანზე. ამას თქვენი ჩარევის გარეშე გააკეთებს."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"აპს შეეძლება, შეცვალოს თქვენი ტაბლეტის ზარების ჟურნალი, მათ შორის შემომავალი და გამავალი ზარების მონაცემები. მავნე აპებმა შეიძლება გამოიყენონ ეს თქვენი ზარების ჟურნალის წასაშლელად ან შესაცვლელად."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ნებას რთვს აპლიკაციას, შეცვალოს თქვენი ტელევიზორის ზარების ჟურნალი, შემომავალი და გამავალი ზარების მონაცემთა ჩათვლით. მავნე აპლიკაციებს შეუძლიათ ამოშალონ ან შეცვალონ თქვენი ზარების ჟურნალი."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"აპს შეეძლება, შეცვალოს თქვენი ტელეფონის ზარების ჟურნალი, მათ შორის შემომავალი და გამავალი ზარების მონაცემები. მავნე აპებმა შეიძლება გამოიყენონ ეს თქვენი ზარების ჟურნალის წასაშლელად ან შესაცვლელად."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"სხეულის სენსორები (მაგ. გულისცემის მონიტორები)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"სხეულის სენსორებზე წვდომა (მაგ., გულისცემის მონიტორები)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"აპისთვის ნების დართვა, რათა მას ჰქონდეს წვდომა თქვენი ფიზიკური მდგომარეობის მონიტორინგის სენსორების მონაცემებზე."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"კალენდრის ღონისძიებებისა და კონფიდენციალური ინფორმაციის წაკითხვა"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"აპს შეეძლება, წაიკითხოს თქვენ ტაბლეტზე შენახული კალენდრის ყველა მოვლენა, მათ შორის მეგობრებისა და თანამშრომლების მოვლენებიც. ამან შეიძლება უფლება მისცეს აპს, გააზიაროს ან შეინახოს თქვენი კალენდრის მონაცემები, მიუხედავად კონფიდენციალურობისა თუ მგრძობიარობისა."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"აპს შეეძლება იმ ღონისძიებების დამატება, წაშლა და შეცვლა, რომლებსაც თქვენს ტელეფონზე ქმნით, ასევე თქვენი მეგობრების და თანამშრომლების ღონისძიებებიც. ამგვარად, აპს ექნება შესაძლებლობა ისე დააგზავნოს შეტყობინებები კალენდრის მფლობელის სახელით ან შეცვალოს ღონისძიებები, რომ მფლობელმა ამის შესახებ არაფერი იცოდეს."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"მდებარეობის პროვაიდერის დამატებით ბრძანებებზე წვდომა"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"აპს შეეძლება წვდომა ჰქონდეს მდებარეობის სერვისის დამატებით ბრძანებებზე. შესაძლოა აპმა ეს გამოიყენოს GPS-ისა და მდებარეობის სხვა წყაროების მუშაობის პროცესში ჩარევისთვის."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ზუსტი მდებარეობა (GPS და ქსელის კოორდინატების მიხედვით)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"ზუსტ მდებარეობაზე წვდომა (GPS-ისა და ქსელის მეშვეობით)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"აძლევს აპს უფლებას მოიპოვოს ზუსტი მდებარეობა გლობალური პოზიციონირების სისტემის (GPS) გამოყენებით ან ქსელის მდებარეობის წყაროს მიხედვით, როგორიცაა ქსელის ანძები და Wi-Fi. მდებარეობის ეს სერვისები ჩართული უნდა იყოს და თქვენს მოწყობილობაზე აპისთვის მისაწვდომი, რათა შეძლოს მათი გამოყენება. აპებში შესაძლებელია მათი გამოყენება თქვენი მდებარეობის განსასაზღვრად და ამან ელემენტის დამატებითი ხარჯვა შეიძლება გამოიწვიოს."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"სავარაუდო (ქსელის კოორდინატების მიხედვით) მდებარეობა"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"მიახლოებით მდებარეობაზე წვდომა (ქსელის მეშვეობით)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"აპს შეეძლება გაიგოს თქვენი სავარაუდო მდებარეობა. ის გამოითვლება მდებარეობის სერვისის მიერ ქსელის მონაცემების - მობილური კავშირგაბმულობის ანძებისა და Wi-Fi-ის მიხედვით. ეს სერვისები ჩართული უნდა იყოს თქვენს მოწყობილობაზე, ხოლო აპებს უნდა ჰქონდეთ მათი გამოყენების უფლება. აპები მათი მონაცემების მიხედვით სავარაუდო მდებარეობის გამოთვლას შეძლებენ."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"თქვენი აუდიო პარამეტრების შეცვლა"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"აპს შეეძლება აუდიოს გლობალური პარამეტრების შეცვლა. მაგ.: ხმის სიმაღლე და რომელი დინამიკი გამოიყენება სიგნალის გამოსტანად."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"აუდიოს ჩაწერა"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"აპს შეეძლება აუდიო ჩაწერა მიკროფონით. ნებართვა აპს აუდიო ჩაწერის უფლებას აძლევს ნებისმიერ დროს, თქვენი თანხმობის გარეშე."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"კომუნიკაცია SIM-თან"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"ბრძანებების SIM-ზე გაგზავნა"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"აპისთვის ნების დართვა გაუგზავნოს ბრძანებები SIM-ბარათს. ეს ძალიან საშიშია."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"სურათებისა და ვიდეოების გადაღება"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"აპს შეეძლება კამერით სურათისა და ვიდეოს გადაღება. ეს ნებართვა აპს უფლებას აძლევს, ნებისმიერ დროს გამოიყენოს კამერა თქვენი დადასტურების გარეშე."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"აპს შეეძლება, მიიღოს ტელეფონისთვის ცნობილი ანგარიშების სია. ეს შეიძლება მოიცავდეს ნებისმიერ ანგარიშს, რომელიც თქვენ მიერ დაყენებული აპლიკაციებით შეიქმნა."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ქსელის კავშირების ნახვა"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"აპს შეეძლება ქსელის კავშირის შესახებ ინფორმაციის ნახვა, მაგ. რომელი ქსელები არსებობს და რომელია დაკავშირებული."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ქსელზე სრული წვდომა"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"ქსელზე სრული წვდომის მიღება"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"აპს შეეძლება შექმნას ქსელური ბუდეები და გამოიყენოს მორგებული ქსელის პროტოკოლები. ბრაუზერი და სხვა აპლიკაციები უზრუნველყოფს ინტერნეტში მონაცემების გაგზავნის საშუალებას, ამგვარად ეს უფლება ინფორმაციის გასაგზავნად საჭირო არაა."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"კავშირის მდგომარეობის/პარამეტრების შეცვლა"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"აპს შეეძლება, შეცვალოს ქსელის კავშირის მდგომარეობა."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"აპს შეეძლება ტელეფონის ადგილობრივი Bluetooth პარამეტრების დაყენება და დისტანციური მოწყობილობების აღმოჩენა და დაწყვილება."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-თან დაკავშირება და კავშირის გაწყვეტა"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"აპს შეეძლება განსაზღვროს, WiMAX არის თუ არა ჩართული და ასევე ინფორმაცია ნებისმიერი დაკავშირებული WiMAX ქსელის შესახებ."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX მდგომარეობის შეცვლა"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-ის მდგომარეობის შეცვლა"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"აპს შეეძლება, დაუკავშიროს და გამოაერთოს ტაბლეტი WiMAX ქსელებიდან."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"ნებას რთავს აპლიკაციას, ჩართოს ან გამორთოს ტელევიზორი WiMAX-ის ქსელიდან."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"აპს შეეძლება, დაუკავშიროს და გამოაერთოს ტელეფონი WiMAX ქსელებიდან."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"საშუალებას აძლევს აპს შეცვალოს სენსორული ეკრანის კალიბრაციის პარამეტრები. ჩვეულებრივ აპებს წესით არ უნდა დაჭირდეს."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM სერთიფიკატებზე წვდომა"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"საშუალებას აძლევს აპლიკაციას დანერგოს და გამოიყენოს DRM სერთიფიკატები. ეს უფლება ჩვეულებრივ აპებს არ ჭირდება."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam ტრანსფერის სტატუსის მიღება"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android სხივით გადაცემის სტატუსის მიღება"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ნებას რთავს ამ აპლიკაციას, მიიღოს ინფორმაცია მიმდინარე Android Beam-ის ტრანსფერების შესახებ"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM სერტიფიკატების ამოშლა"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"საშუალებას აძლევს აპლიკაციას ამოშალოს DRM სერtიფიკატები. ეს წესით ჩვეულებრივ აპებს არ უნდა დაჭირდეს."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"დაფორმატება…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"არ არის ჩასმული"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"შესატყვისი აქტივობები არ არის."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"მულტიმედია მონაცემების გადამისამართება"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"გამომავალი მედიის მარშრუტიზაცია"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"აპლიკაციას შეეძლება გადაამისამართოს მულტიმედია მონაცემები სხვა გარე მოწყობილობებისკენ."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ინსტალაციის სესიების წაკითხვა"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"ინსტალაციის სესიების წაკითხვა"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"საშუალებას აძლევს აპლიკაციას წაიკითხოს ინსტალაციის სესიები. ამით მას საშუალება აქვს იხილოს პაკეტის აქტიური ინსტალაციები."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"პაკეტების ინსტალაციის მოთხოვნა"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"პაკეტების ინსტალაციის მოთხოვნა"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"აპლიკაციას შეეძლება მოითხოვოს პაკეტების ინსტალაცია."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"მასშტაბის მართვისთვის შეეხეთ ორჯერ."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ვერ დაემატა ვიჯეტი."</string>

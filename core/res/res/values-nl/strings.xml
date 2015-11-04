@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"statusbalk uitschakelen of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Hiermee kan de app de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbalk"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"de statusbalk zijn"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Hiermee kan de app de statusbalk zijn."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"statusbalk uitvouwen/samenvouwen"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Hiermee kan de app de statusbalk uitvouwen of samenvouwen."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar je apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Hiermee kan de app informatie ophalen over actieve en recent uitgevoerde taken. Zo kan de app informatie vinden over welke apps op het apparaat worden gebruikt."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profiel- en apparaateigenaren beheren"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"profiel- en apparaateigenaren beheren"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Apps toestaan de profieleigenaren en apparaateigenaar in te stellen."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"actieve apps opnieuw rangschikken"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Hiermee kan de app taken naar de voor- en achtergrond verplaatsen. De app kan dit doen zonder om je bevestiging te vragen."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het gesprekkenlijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app het gesprekkenlijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het gesprekkenlijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"lichaamssensoren (zoals hartslagmeters)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"toegang tot lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die je lichamelijke conditie controleren, zoals je hartslag."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"agenda-afspraken en vertrouwelijke informatie lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op je tablet, inclusief die van vrienden of collega\'s. De app kan je agenda delen of je agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u kunt bewerken op je telefoon, inclusief afspraken van vrienden of collega\'s. Zo kan de app berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren, of afspraken aanpassen zonder medeweten van de eigenaar."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Hiermee kan de app toegang krijgen tot extra opdrachten voor de locatieprovider. De app kan hiermee de werking van GPS of andere locatiebronnen te verstoren."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"precieze locatie (GPS- en netwerkgebaseerd)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"toegang tot precieze locatie (GPS- en netwerkgebaseerd)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Hiermee kan de app je precieze locatie bepalen via GPS (Global Positioning System) of netwerklocatiebronnen zoals zendmasten en wifi. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om te bepalen waar u bent en verbruiken mogelijk extra acculading."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"geschatte locatie (netwerkgebaseerd)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"toegang tot geschatte locatie (netwerkgebaseerd)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Hiermee kan de app beschikken over je geschatte locatie. Deze locatie wordt afgeleid van locatieservices die netwerklocatiebronnen zoals zendmasten en wifi gebruiken. Deze locatieservices moeten zijn ingeschakeld en beschikbaar zijn op je apparaat voordat de app ze kan gebruiken. Apps kunnen dit gebruiken om ongeveer te bepalen waar u zich bevindt."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"je audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audio opnemen"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Hiermee kan de app audio opnemen met de microfoon. Met deze toestemming kan de app op elk moment audio opnemen, zonder om je bevestiging te vragen."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-communicatie"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"opdrachten verzenden naar de simkaart"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Hiermee kan de app opdrachten verzenden naar de simkaart. Dit is erg gevaarlijk."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"foto\'s en video\'s maken"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Hiermee kan de app foto\'s en video\'s maken met de camera. Met deze toestemming kan de app de camera altijd gebruiken, zonder je bevestiging."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Hiermee krijgt de app toegang tot de lijst met accounts die op de telefoon bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die je hebt geïnstalleerd."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"netwerkverbindingen weergeven"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Hiermee kan de app informatie bekijken over netwerkverbindingen, zoals welke netwerken er zijn en welke verbonden zijn."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"volledige netwerktoegang"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"volledige netwerktoegang"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Hiermee kan de app netwerksockets maken en aangepaste netwerkprotocollen gebruiken. De browser en andere apps bieden mogelijkheden om gegevens via internet te verzenden, dus deze toestemming is niet vereist om gegevens via internet te verzenden."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"netwerkverbinding wijzigen"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Hiermee kan de app de status van de netwerkverbinding wijzigen."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-status wijzigen"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Hiermee kan de app de tablet verbinden met WiMAX-netwerken en de verbinding daarmee verbreken."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Hiermee kan de app een verbinding maken tussen de tv en WiMAX-netwerken en deze verbinding verbreken."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Hiermee kan de app de telefoon verbinden met WiMAX-netwerken en de verbinding daarmee verbreken."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Hiermee kan de app de kalibratieparameters van het aanraakscherm aanpassen. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"toegang tot DRM-certificaten"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Toestaan dat een app DRM-certificaten registreert en gebruikt. Nooit vereist voor normale apps."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam-overdrachtsstatus ontvangen"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam-overdrachtsstatus ontvangen"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Hiermee kan deze app informatie over huidige Android Beam-overdrachten ontvangen"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-certificaten verwijderen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Toestaan dat een app DRM-certificaten verwijdert. Nooit vereist voor normale apps."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatteren…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Niet geplaatst"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Geen overeenkomende activiteiten gevonden."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Media-uitvoer aansturen"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"media-uitvoer aansturen"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Hiermee kan een app media-uitvoer naar andere externe apparaten doorsturen."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Installatiesessies lezen"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"installatiesessies lezen"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Hiermee wordt een app toegestaan installatiesessies te lezen. Zo kan de app informatie bekijken over actieve pakketinstallaties."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Installatiepakketten aanvragen"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installatiepakketten aanvragen"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Hiermee kan een app installatie van pakketten aanvragen."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer aan voor zoomregeling"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kan widget niet toevoegen."</string>

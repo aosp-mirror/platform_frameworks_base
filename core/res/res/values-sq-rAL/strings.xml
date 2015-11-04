@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Përfshi të dhënat personale si numrat e kartave të kreditit si dhe fjalëkalimet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"shiriti i statusit"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"të bëhet shiriti i statusit"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Lejon aplikacionin të bëhet shiriti i statusit."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"zgjero ose shpalos shiritin e statusit"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Lejon aplikacionin të zgjerojë ose shpalosë shiritin e statusit."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lejon aplikacionin të marrë dhe përpunojë mesazhe WAP. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"gjej aplikacionet në punë"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lejon aplikacionin të gjejë informacione mbi detyrat aktuale dhe të fundit në punë. Kjo mund të lejojë aplikacionin të zbulojë informacione rreth aplikacioneve të përdorura në pajisje."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Menaxho pronarët e profilit dhe të pajisjes"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"menaxho zotëruesit e profilit dhe të pajisjes"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Lejo aplikacionet që të caktojnë pronarët e profilit dhe pronarin e pajisjes"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ri-poziciono aplikacionet në punë"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Lejon aplikacionin të zhvendosë detyra në plan të parë dhe në sfond. Aplikacioni mund ta bëjë këtë pa hyrjen tënde."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lejon aplikacionin të modifikojë ditarin e telefonatave të tabletit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Aplikacione keqdashëse mund ta përdorin këtë leje për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Lejon aplikacionin të modifikojë ditarin e telefonatave të televizorit tënd, përfshirë të dhëna rreth telefonatave hyrëse dhe dalëse. Aplikacione keqdashëse mund ta përdorin këtë leje për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lejon aplikacionin të modifikojë ditarin e telefonatave të telefonit tënd, përfshirë të dhënat rreth telefonatave hyrëse dhe dalëse. Aplikacionet keqdashëse mund ta përdorin këtë për të fshirë ose modifikuar ditarin tënd të telefonatave."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"ndjesorët e trupit (si monitorimet e rrahjeve të zemrës)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"qasu te sensorët e trupit (si monitorimet e rrahjeve të zemrës)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Lejon aplikacionin të ketë qasje në të dhënat nga ndjesorë që monitorojnë gjendjen tënde fizike, siç janë rrahjet e zemrës."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lexo ngjarjet kalendarike si dhe informacionin e privatësisë së tyre"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Lejon aplikacionin të lexojë të gjitha ngjarjet kalendarike të ruajtura në tabletin tënd, përfshirë ato të miqve ose kolegëve. Kjo mund ta lejojë aplikacionin të ndajë ose ruajë të dhënat e tua të kalendarit, pavarësisht privatësisë ose ndjeshmërisë së tyre."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Lejon aplikacionin të shtojë, heqë, ndryshojë ngjarje që mund t\'i modifikosh në telefonin tënd, përfshi ato të miqve ose kolegëve. Kjo mund ta lejojë aplikacionin të dërgojë mesazhe që duken se vijnë nga zotëruesit e kalendarëve, ose të modifikojë ngjarje pa dijeninë e zotëruesve."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qasje në komandat shtesë të ofruesit të vendndodhjes"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lejon aplikacionin të ketë qasje në komandat shtesë të ofruesit për vendndodhjen. Kjo mund ta lejojë aplikacionin të ndërhyjë në operacionin e GPS-së apo të burimeve të tjera për vendndodhjen."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"vendndodhja e përpiktë (në bazë të GPS-së dhe rrjetit)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"qasu te vendndodhja e përpiktë (në bazë të GPS-së dhe rrjetit)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Lejon aplikacionin të gjejë vendndodhjen tënde të saktë duke përdorur \"Sistemin global të pozicionimit\" (GPS) ose burime të vendndodhjes së rrjetit sikurse antena të operatorëve celularë apo lidhje Wi-Fi. Këto shërbime vendndodhjeje duhet të aktivizohen dhe të ofrohen për pajisjen tënde, në mënyrë që të përdoren nga aplikacioni. Aplikacionet mund ta përdorin këtë për të përcaktuar vendndodhjen momentale, edhe pse ky funksion mund të kërkojë energji shtesë të baterisë."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"vendndodhja e përafërt (bazuar në rrjet)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"qasu te vendndodhja e përafërt (bazuar në rrjet)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Lejon aplikacionin të gjejë vendndodhjen tënde të përafërt. Përcaktimi i saj rrjedh nga shërbimet që përdorin burimet e vendndodhjes së rrjetit siç janë antenat e operatorëve celularë apo lidhje Wi-Fi. Këto shërbime vendndodhjeje duhet të aktivizohen dhe të ofrohen për pajisjen tënde, në mënyrë që të përdoren nga aplikacioni. Aplikacionet mund ta përdorin këtë për të përcaktuar afërsisht se ku ndodhesh."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ndrysho cilësimet e audios"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lejon aplikacionin të modifikojë cilësimet globale të audios siç është volumi dhe se cili altoparlant përdoret për daljen."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"regjistro audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Lejon aplikacionin të regjistrojë klipe audio me mikrofon. Kjo leje i mundëson aplikacionit të regjistrojë në çdo kohë pa konfirmimin tënd."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikimi i kartës SIM"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"dërgo komanda te karta SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lejon aplikacionin t\'i dërgojë komanda kartës SIM. Kjo është shumë e rrezikshme."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"bëj fotografi dhe video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Lejon aplikacion të krijojë fotografi dhe video me kamerën. Kjo leje mundëson përdorimin e kamerës në çdo kohë pa konfirmimin tënd."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Lejon aplikacionin të marrë listën e llogarive të njohura nga telefoni. Kjo mund të përfshijë çdo llogari të krijuar nga aplikacionet që ke instaluar."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"shiko lidhjet e rrjetit"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lejon aplikacionin të shohë informacionin rreth lidhjeve të rrjetit, se çfarë rrjetesh ekzistojnë dhe janë të lidhur."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"qasje e plotë në rrjet"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"qasu plotësisht në rrjet"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Lejon aplikacionin të krijojë fole rrjeti dhe të përdorë protokolle të personalizuara në të. Shfletuesi dhe aplikacionet e tjera sigurojnë mënyra për të dërguar të dhëna në internet, prandaj kjo leje nuk kërkohet për të dërguar të dhëna në internet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ndrysho lidhjen e rrjetit"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Lejon aplikacionin të ndryshojë gjendjen e lidhjes së rrjetit."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lejon aplikacionin të konfigurojë telefonin lokal \"bluetooth\" dhe të zbulojë e çiftohet me pajisjet në distancë."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"lidhu dhe shkëputu nga WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Lejon aplikacionin të përcaktojë nëse WiMAX është i aktivizuar si dhe të mësojë informacion rreth ndonjë rrjeti të lidhur WiMAX."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ndrysho gjendjen WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"ndrysho gjendjen WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Lejon aplikacionin ta lidhë tabletin dhe ta shkëpusë atë nga rrjetet WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Lejon aplikacionin të lidhet me televizorin dhe ta shkëpusë atë nga rrjetet WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Lejon aplikacionin të lidhet me telefonin dhe ta shkëpusë atë nga rrjetet WiMAX."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lejon aplikacionin të modifikojë parametrat e kalibrimit të ekranit me prekje. Nuk nevojitet për aplikacionet normale."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"qasje në certifikatat DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lejon një aplikacion të përgatisë dhe përdorë certifikatat DRM. Nuk nevojitet për aplikacionet normale."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Merr statusin e transferimit të \"rrezes android\""</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"merr statusin e transferimit përmes \"Dërgimit me rreze të Android\""</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Lejon këtë aplikacion të marrë informacion rreth transferimeve aktuale \"Rrezja android\" (Android Beam)"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"hiq certifikatat DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lejon një aplikacion të heqë certifikatat DRM. Nuk nevojitet për aplikacionet normale."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Po formaton…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nuk është futur"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nuk u gjet asnjë aktivitet që përputhet."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Kalo daljet e medias"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"kalo daljet e përmbajtjes audio-vizuale"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lejon një aplikacion të kalojë daljet mediatike në pajisje të tjera të jashtme."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lexo sesionet e instalimit"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"lexo sesionet e instalimit"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lejon një aplikacion të lexojë sesionet e instalimit. Kjo e lejon atë të shohë detaje rreth instalimeve të paketave aktive."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Kërko paketat e instalimit"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"kërko paketat e instalimit"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lejon që një aplikacion të kërkojë instalimin e paketave."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Prek dy herë për të kontrolluar zmadhimin"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nuk mundi të shtonte miniaplikacion."</string>

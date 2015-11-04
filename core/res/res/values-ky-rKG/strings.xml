@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредиттик карта номурлары жана сырсөздөр сыяктуу өздүк берилиштерди камтыйт."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"абал тилкесин өчүрүү же өзгөртүү"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Колдонмого абал тилкесин өчүрүү же тутум сүрөтчөлөрүн кошуу же алып салуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"абал тилкеси"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"абал тилкесинин милдетин аткаруу"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Колдонмого абал тилкеси болуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"абал тилкесин жайып көрсөтүү/жыйнап коюу"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Колдонмого абал тилкесин жайып көрсөтүү же жыйнап коюу мүмкүнчүлүгүн берет."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Колдонмого WAP билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"иштеп жаткан колдонмолорду түшүрүп алуу"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Колдонмого учурдагы жана акыркы убакытта пайдаланылган колдонмолор тууралуу  маалымат алууга уруксат берет. Бул колдонмого түзмөктө кандай колдонмолор колдонулаарын билип алууга жол бериши мүмкүн."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Профилди жана түзмөк ээлерин башкаруу"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"профилди жана түзмөк ээлерин башкаруу"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Колдонмолорго профиль ээлерин жана түзмөк ээсин орнотуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"иштеп жаткан колдонмолорду иреттештирүү"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Колдонмо процесстерди фонго же алдыңкы планга жылдыруу уруксатын алат. Колдонмо муну сиздин ырастооңузсуз кыла алат."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Колдонмого планшетиңиздин чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Колдонмого сыналгыңыздын чалуулар таржымалын, ошондой эле келүүчү жана чыгуучу чалуулар тууралуу дайындарды өзгөртүү мүмкүнчүлүгү берилет. Зыянкеч колдонмолор ушуну менен чалуулар таржымалыңызды жок кылып же өзгөртүп коюшу мүмкүн."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Колдонмого телефонуңуздун чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"дене-бой сенсорлору (жүрөктүн кагышын өлчөгүчтөр сыяктуу)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"дене-бой сенсорлоруна (жүрөктүн кагышын өлчөгүчтөр сыяктуу) уруксат"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Колдонмого жүрөгүңүздүн согушу сыяктуу дене-бой абалыңызды көзөмөлдөгөн сенсорлордогу дайындарды көрүп туруу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"күнбарак иш-аракеттерин жана купуя маалыматтарды окуу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Колдонмого планшетиңизде сакталган сиздин, досторуңуздун жана кесиптештериңиздин күнбарак окуяларын окуганга уруксат берет. Бул колдонмого күнбарак берилиштерин, алардын купуялуулугана жана маанилүүлүгөн карабастан бөлүшүү же сактоо уруксатын берет."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Колдонмого сиз телефонуңуздан өзгөртө ала турган, сиздин, досторуңуздун же кесиптештериңиздин күнбарак окуяларын кошуу, жок кылуу, өзгөртүү уруксатын берет. Бул, колдонмого күнбарак ээлеринен келген сыяктуу көрүнгөн билдирүүлөрдү жөнөтүү, же ээсине билгизбей окуяларды өзгөртүү уруксатын берет."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"жайгашкан жерди аныктагычтын кошумча буйруктарын пайдалануу"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Колдонмого жайгашкан жерди табуучу кошумча жабдуучулардын буйруктарын колдонуу мүмкүнчүлүгүн берет. Ушуну менен колдонмо GPS\'тин ишине жана башка жайгашкан жерлерди аныктоо кызматтарына кийлигише алат."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"так жайгаштыруу (GPS жана түйүн негизинде)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"так аныкталган жайгашкан жерге (GPS жана тармактын негизинде) уруксат"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Колдонмого Глобалдык Позициялоо Системасын (GPS), же базалык станциялар жана Wi-Fi сыяктуу түйүндүк булактардын жайгашуусунун пайдалануу аркылуу сиздин так жайгашууңузду аныктоого уруксат берет. Колдонмолор муну пайдалана алышы үчүн, жайгаштыруу кызматтары жандырылган жана түзмөгүңүзгө жеткиликтүү болушу керек. Колдонмолор муну сиздин жайгашкан жериңизди аныкташ үчүн пайдаланышы жана кошумча батарей кубаты сарпталышы мүмкүн."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"божомолдуу жайгаштыруу (түйүн негизинде)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"болжолдуу жайгашкан жерге (тармактын негизинде) уруксат"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Колдонмого сиздин болжолдуу жайгашууңузду аныктоо уруксаты берет. Мындай жайгаштыруу базалык станциялар жана Wi-Fi сыяктуу түйүндүк булактардын жайгашуусу аркылуу аныкталат. Колдонмоңуз буларды пайдалана алышы үчүн, мындай  жайгаштыруу кызматтары жандырылган жана түзмөгүңүзгө жеткиликтүү болушу керек. Колдонмолор муну сиздин жайгашкан жериңизди болжолдош үчүн пайдаланышы мүмкүн."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"аудио жөндөөлөрүңүздү өзгөртүңүз"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Колдонмого үн деңгээли жана кайсы динамик аркылуу үн чыгарылышы керек сыяктуу түзмөктүн аудио тууралоолорун өзгөртүүгө уруксат берет."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"аудио жаздыруу"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Колдонмого микрофон аркылуу аудио жаздыруу уруксатын берет. Бул уруксат колдонмого сиздин ырастооңузсуз, каалаган убакта аудио жаздыруу уруксатын берет."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-карта менен байланышуу"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM-картага буйруктарды жөнөтүү"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Колдонмого SIM-картага буйруктарды жөнөтүү мүмкүнчүлүгүн берет. Бул абдан кооптуу."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"сүрөт жана видео тартуу"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Колдонмого камера аркылуу видео жана сүрөт тартуу уруксатын берет. Бул уруксат, камераны каалаган убакта, сиздин ырастооңузсуз колдонуу уруксатын берет."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Колдонмого телефонго белгилүү эсептердин тизмегин алуу уруксатын берет. Буларга сиз орноткон колдонмолор аркылуу түзүлгөн эсептер кириши мүмкүн."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"түйүн туташууларын көрүү"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Колдонмого желелердин бардыгы жана байланыштар сыяктуу желе маалыматтарын көргөнгө уруксат берет."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"желеге толук жетки алуу"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"тармакка толук мүмкүнчүлүк алуу"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Колдонмого түйүн сокеттерин түзүү жана ылайыкташтырылган түйүн протоколдорун пайдалануу уруксаттарын берет. Серепчи жана башка колдонмолорго интернетке берилиштерди жөнөтүү жолдорун берет, ошондуктан, интернетке берилиштерди жөнөтүү үчүн, бул уруксатты алуу талап кылынбай."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"тармак туташымдуулугун өзгөртүү"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Колдонмого тармактык туташуунун абалын өзгөртүү мүмкүнчүлүгүн берет."</string>
@@ -402,7 +402,8 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Колдонмого жергиликтүү Bluetooth телефонун конфигурациялап, ыраактагы түзмөктөрдү таап, жупташуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX түйүнүнө туташуу жана андан ажыроо"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Колдонмого WiMAX жандырылгандыгы жана туташкан WiMAX түйүндөрү тууралуу маалыматтарын көрүүгө уруксат берет."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX абалын өзгөртүү"</string>
+    <!-- no translation found for permlab_changeWimaxState (340465839241528618) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Колдонмого планшетти WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Колдонмого сыналгыны WiMAX тармактарына туташтырып, алардан ажыратуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Колдонмого телефонду WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
@@ -485,7 +486,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Колдонмого сенсордук экрандын калибрлөө параметрлерин өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM тастыктамаларына кирүү"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Колдонмого DRM тастыктамаларын ишке киргизип, колдонуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam өткөрүү абалын алуу"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam өткөрүү абалын кабыл алуу"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Бул колдонмого учурдагы Android Beam өткөрүүлөрү жөнүндө маалымат алуу мүмкүнчүлүгүн берет"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM тастыктамаларын алып салуу"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Колдонмого DRM тастыктамаларын алып салуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
@@ -1098,11 +1099,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Форматталууда…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Сайылган жок"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"медиа чыгарылышын багыттоо"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"орнотуу сеанстарын окуу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Топтомдорду орнотууга уруксат суроо"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"орнотуу топтомдорун суроо"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Колдонмо топтомдорду орнотууга уруксат сурай алат."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>

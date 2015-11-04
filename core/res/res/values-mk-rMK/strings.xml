@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Опфаќа лични податоци како што се броеви на кредитни картички и лозинки."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"статусна лента"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"да стане статусна лента"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Дозволува апликацијата да биде статусната лента."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"прошири/собери статусна лента"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Дозволува апликацијата да ја прошири или собере статусната лента."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Овозможува апликацијата да прима и да обработува WAP пораки. Оваа дозвола ја опфаќа способноста за следење или за бришење пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"обнови активни апликации"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Овозможува апликацијата да поврати информации за тековно и до неодамна активни задачи. Ова може да овозможи апликацијата да открие информации за тоа кои апликации се користат на уредот."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Управувај сопственици на профил и уред"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"управување со сопствениците на профилите и уредите"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Дозволува апликациите до постават сопственици на профили и сопственик на уредот."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"преуреди активни апликации"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Овозможува апликацијата да преместува задачи во преден план и во заднина. Апликацијата може да го прави тоа без вашиот придонес."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Овозможува апликацијата да го менува дневникот на повици на вашиот таблет, вклучувајќи податоци за дојдовни и појдовни повици. Злонамерните апликации може да го искористат ова да го избришат или да го менуваат вашиот дневник на повици."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Дозволува апликацијата да го менува дневникот на повици на вашиот телевизор, вклучувајќи и податоци за дојдовните или појдовните повици. Злонамерните апликации може да го искористат ова за да го избришат или да го менуваат вашиот дневник на повици."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Овозможува апликацијата да го менува дневникот на повици на вашиот телефон, вклучувајќи податоци за дојдовни и појдовни повици. Злонамерните апликации може да го искористат ова да го избришат или да го менуваат вашиот дневник на повици."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"телесни сензори (како монитори за срцев пулс)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"пристап до телесните сензори (како мониторите за пулс)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Дозволува апликацијата да пристапува до податоци од сензори кои ја следат вашата физичка состојба, како на пр. отчукувањата на срцето."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"прочитај настани во календар и доверливи информации"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Овозможува апликацијата да ги чита сите календарски настани што се зачувани на вашиот таблет, вклучувајќи ги и оние на пријатели или соработници. Ова може да овозможи апликацијата да ги споделува или да го зачува вашите податоци од календарот, без оглед на нивната доверливост или чувствителност."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Овозможува апликацијата да додава, отстранува, менува настани кои може да ги менувате на вашиот телефон, вклучувајќи ги и оние на пријатели или соработници. Ова може да овозможи апликацијата да праќа пораки за кои се чини дека доаѓаат од сопственици на календар или да менува настани без знаење на сопствениците."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"пристапи кон наредби на давателот на дополнителна локација"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Овозможува апликацијата да пристапи кон дополнителни наредби на давател на локација. Ова може да овозможи апликацијата да го попечи функционирањето на ГПС или други извори на локација."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"прецизна локација (ГПС и базирана на мрежа)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"пристап до прецизната локација (GPS и врз база на мрежа)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Овозможува апликацијата да ја добие вашата точна локација со користење „Глобален систем за позиционирање (ГПС)“ или извори на локација, како што се мобилни кули и Wi-Fi. Овие услуги за локација мора да се вклучени и достапни за вашиот уред за апликацијата да ги користи. Апликациите може да го користат ова за да утврдат приближно каде се наоѓате и може дополнително да потрошат батерија."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"приближна локација (базирана на мрежа)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"пристап до приближната локација (врз база на мрежа)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Овозможува апликацијата да ја добие вашата приближна локација. Оваа локација е изведена од услугите за локација со користење мрежа на извори на локација, како што се мобилни кули и Wi-Fi. Овие услуги за локација мора да се вклучени и достапни за вашиот уред за апликацијата да ги користи. Апликациите може да го користат ова за да утврдат приближно каде се наоѓате."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промени аудио подесувања"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Овозможува апликацијата да ги менува глобалните аудио подесувања, како што се јачината на звукот и кој звучник се користи за излез."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"снимај аудио"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Овозможува апликацијата да снима аудио со микрофонот. Оваа дозвола овозможува апликацијата да снима аудио во кое било време без ваша потврда."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"комуникација со СИМ картичка"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"испраќање наредби до СИМ-картичката"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Овозможува апликацијата да испраќа наредби до СИМ картичката. Ова е многу опасно."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимај слики и видеа"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Овозможува апликацијата да прави фотографии и да снима видеа со камерата. Оваа дозвола овозможува апликацијата да ја користи камерата во кое било време без ваша потврда."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Овозможува апликацијата да го добие списокот со сметки познати на телефонот. Ова може да опфати кои било сметки што ги создале апликациите што сте ги инсталирале."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"прикажи мрежни врски"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Овозможува апликацијата да ги види информациите за мрежните конекции, како на пр., кои мрежи постојат и се поврзани."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"целосен пристап на мрежа"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"добивање целосен пристап до мрежата"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Овозможува апликацијата да создаде мрежни приклучоци и да користи приспособени мрежни протоколи. Прелистувачот и другите апликации обезбедуваат средства за да се испратат податоци на интернет, па оваа дозвола не е потребна за да се испратат податоци на интернет."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"промени мрежно поврзување"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Дозволува апликацијата да ја промени состојбата на мрежната поврзливост."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозволува апликацијата да го конфигурира телефонот со локалниот Bluetooth и да открива и да се спарува со уреди на далечина."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"поврзи се и исклучи се од WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Овозможува апликацијата да утврди дали WiMAX е овозможен и информации за кои било поврзани WiMAX мрежи."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промени состојба на WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"промена на состојбата на WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Овозможува апликацијата да го вклучи таблетот на и да го исклучи таблетот од WiMAX мрежи."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Дозволува апликацијата да го поврзе или да го исклучи телевизорот од WiMAX мрежи."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Овозможува апликацијата да го вклучи телефонот на и да го исклучи телефонот од WiMAX мрежи."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Дозволува апликацијата да ги изменува калибрирачките параметри на екранот на допир. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"пристап до ДРМ-сертификати"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволува апликацијата да обезбедува и користи ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Примајте статус на трансфер на Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"добивање статус на пренос на Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ѝ дозволува на оваа апликација да добива информации за моменталните трансфери на Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"отстранување ДРМ-сетификати"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Дозволува апликација да отстранува ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Се форматира..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Не е внесено"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Не се пронајдени соодветни активности."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Насочи излез за медиуми"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"насочување излез за медиуми"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Овозможува апликацијата да насочува излез за медиуми кон други надворешни уреди."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Читај сесии на инсталирање"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"читање сесии на инсталирање"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дозволува апликација да чита сесии на инсталирање. Тоа овозможува апликацијата да гледа детали за активни инсталации на пакет."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Барај инсталирање пакети"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"барање пакети за инсталирање"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Дозволува апликацијата да бара инсталација на пакети."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Допрете двапати за регулирање на зумирањето"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Не можеше да се додаде виџет."</string>
