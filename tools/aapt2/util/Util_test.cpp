@@ -185,4 +185,12 @@ TEST(UtilTest, ExtractResourcePathComponents) {
     EXPECT_EQ(suffix, u".");
 }
 
+TEST(UtilTest, VerifyJavaStringFormat) {
+    ASSERT_TRUE(util::verifyJavaStringFormat(u"%09.34f"));
+    ASSERT_TRUE(util::verifyJavaStringFormat(u"%9$.34f %8$"));
+    ASSERT_TRUE(util::verifyJavaStringFormat(u"%% %%"));
+    ASSERT_FALSE(util::verifyJavaStringFormat(u"%09$f %f"));
+    ASSERT_FALSE(util::verifyJavaStringFormat(u"%09f %08s"));
+}
+
 } // namespace aapt

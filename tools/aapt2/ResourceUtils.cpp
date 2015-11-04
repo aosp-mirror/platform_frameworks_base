@@ -328,18 +328,36 @@ std::unique_ptr<BinaryPrimitive> tryParseColor(const StringPiece16& str) {
     return error ? std::unique_ptr<BinaryPrimitive>() : util::make_unique<BinaryPrimitive>(value);
 }
 
-std::unique_ptr<BinaryPrimitive> tryParseBool(const StringPiece16& str) {
+bool tryParseBool(const StringPiece16& str, bool* outValue) {
     StringPiece16 trimmedStr(util::trimWhitespace(str));
-    uint32_t data = 0;
     if (trimmedStr == u"true" || trimmedStr == u"TRUE") {
-        data = 0xffffffffu;
-    } else if (trimmedStr != u"false" && trimmedStr != u"FALSE") {
-        return {};
+        if (outValue) {
+            *outValue = true;
+        }
+        return true;
+    } else if (trimmedStr == u"false" || trimmedStr == u"FALSE") {
+        if (outValue) {
+            *outValue = false;
+        }
+        return true;
     }
-    android::Res_value value = { };
-    value.dataType = android::Res_value::TYPE_INT_BOOLEAN;
-    value.data = data;
-    return util::make_unique<BinaryPrimitive>(value);
+    return false;
+}
+
+std::unique_ptr<BinaryPrimitive> tryParseBool(const StringPiece16& str) {
+    bool result = false;
+    if (tryParseBool(str, &result)) {
+        android::Res_value value = {};
+        value.dataType = android::Res_value::TYPE_INT_BOOLEAN;
+
+        if (result) {
+            value.data = 0xffffffffu;
+        } else {
+            value.data = 0;
+        }
+        return util::make_unique<BinaryPrimitive>(value);
+    }
+    return {};
 }
 
 std::unique_ptr<BinaryPrimitive> tryParseInt(const StringPiece16& str) {
