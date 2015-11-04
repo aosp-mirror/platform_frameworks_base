@@ -27,15 +27,23 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
-import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_ADD_REMOVE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
-import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskThumbnailInfo;
@@ -58,8 +66,10 @@ import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -237,7 +247,8 @@ final class TaskRecord {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
-        mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        userId = UserHandle.getUserId(info.applicationInfo.uid);
+        mLastThumbnailFile = new File(TaskPersister.getUserImagesDir(userId), mFilename);
         mLastThumbnailInfo = new TaskThumbnailInfo();
         taskId = _taskId;
         mAffiliatedTaskId = _taskId;
@@ -256,7 +267,8 @@ final class TaskRecord {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
-        mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        userId = UserHandle.getUserId(info.applicationInfo.uid);
+        mLastThumbnailFile = new File(TaskPersister.getUserImagesDir(userId), mFilename);
         mLastThumbnailInfo = thumbnailInfo;
         taskId = _taskId;
         mAffiliatedTaskId = _taskId;
@@ -276,7 +288,6 @@ final class TaskRecord {
 
         taskType = APPLICATION_ACTIVITY_TYPE;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
-        userId = UserHandle.getUserId(info.applicationInfo.uid);
         lastTaskDescription = _taskDescription;
         mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
     }
@@ -294,7 +305,7 @@ final class TaskRecord {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
-        mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        mLastThumbnailFile = new File(TaskPersister.getUserImagesDir(_userId), mFilename);
         mLastThumbnailInfo = lastThumbnailInfo;
         taskId = _taskId;
         intent = _intent;
@@ -537,7 +548,7 @@ final class TaskRecord {
                     mLastThumbnailFile.delete();
                 }
             } else {
-                mService.mTaskPersister.saveImage(thumbnail, mFilename);
+                mService.mTaskPersister.saveImage(thumbnail, mLastThumbnailFile.getAbsolutePath());
             }
             return true;
         }
@@ -549,7 +560,8 @@ final class TaskRecord {
         thumbs.thumbnailInfo = mLastThumbnailInfo;
         thumbs.thumbnailFileDescriptor = null;
         if (mLastThumbnail == null) {
-            thumbs.mainThumbnail = mService.mTaskPersister.getImageFromWriteQueue(mFilename);
+            thumbs.mainThumbnail = mService.mTaskPersister.getImageFromWriteQueue(
+                    mLastThumbnailFile.getAbsolutePath());
         }
         // Only load the thumbnail file if we don't have a thumbnail
         if (thumbs.mainThumbnail == null && mLastThumbnailFile.exists()) {

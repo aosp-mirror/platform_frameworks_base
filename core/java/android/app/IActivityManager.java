@@ -497,7 +497,7 @@ public interface IActivityManager extends IInterface {
     public void resizeTask(int taskId, Rect bounds, int resizeMode) throws RemoteException;
 
     public Rect getTaskBounds(int taskId) throws RemoteException;
-    public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException;
+    public Bitmap getTaskDescriptionIcon(String filename, int userId) throws RemoteException;
 
     public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts)
             throws RemoteException;

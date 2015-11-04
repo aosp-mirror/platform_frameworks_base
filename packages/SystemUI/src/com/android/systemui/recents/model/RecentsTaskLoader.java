@@ -239,7 +239,8 @@ class BackgroundTaskLoader implements Runnable {
             SystemServicesProxy ssp, Resources res) {
         Bitmap tdIcon = iconBitmap != null
                 ? iconBitmap
-                : ActivityManager.TaskDescription.loadTaskDescriptionIcon(iconFilename);
+                : ActivityManager.TaskDescription.loadTaskDescriptionIcon(iconFilename,
+                        taskKey.userId);
         if (tdIcon != null) {
             return ssp.getBadgedIcon(new BitmapDrawable(res, tdIcon), taskKey.userId);
         }
