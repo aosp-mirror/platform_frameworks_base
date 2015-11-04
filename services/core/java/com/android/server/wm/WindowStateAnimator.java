@@ -389,31 +389,10 @@ class WindowStateAnimator {
         } else if (mIsWallpaper) {
             mAnimLayer += mWallpaperControllerLocked.getAnimLayerAdjustment();
         }
-        if (DEBUG_LAYERS) Slog.v(TAG, "Stepping win " + this
-                + " anim layer: " + mAnimLayer);
+        if (DEBUG_LAYERS) Slog.v(TAG, "Stepping win " + this + " anim layer: " + mAnimLayer);
         mHasTransformation = false;
         mHasLocalTransformation = false;
-        if (mWin.mPolicyVisibility != mWin.mPolicyVisibilityAfterAnim) {
-            if (DEBUG_VISIBILITY) {
-                Slog.v(TAG, "Policy visibility changing after anim in " + this + ": "
-                        + mWin.mPolicyVisibilityAfterAnim);
-            }
-            mWin.mPolicyVisibility = mWin.mPolicyVisibilityAfterAnim;
-            if (displayContent != null) {
-                displayContent.layoutNeeded = true;
-            }
-            if (!mWin.mPolicyVisibility) {
-                if (mService.mCurrentFocus == mWin) {
-                    if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.i(TAG,
-                            "setAnimationLocked: setting mFocusMayChange true");
-                    mService.mFocusMayChange = true;
-                }
-                // Window is no longer visible -- make sure if we were waiting
-                // for it to be displayed before enabling the display, that
-                // we allow the display to be enabled now.
-                mService.enableScreenIfNeededLocked();
-            }
-        }
+        mWin.checkPolicyVisibilityChange();
         mTransformation.clear();
         if (mDrawState == HAS_DRAWN
                 && mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING

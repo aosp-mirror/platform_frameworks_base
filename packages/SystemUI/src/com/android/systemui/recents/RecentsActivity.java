@@ -35,6 +35,8 @@ import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
@@ -73,7 +75,8 @@ import java.util.ArrayList;
 /**
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
-public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks {
+public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
+        ViewTreeObserver.OnPreDrawListener {
 
     private final static String TAG = "RecentsActivity";
     private final static boolean DEBUG = false;
@@ -425,7 +428,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         final RecentsActivityLaunchState state = Recents.getConfiguration().getLaunchState();
         if (state.startHidden) {
             state.startHidden = false;
-            mRecentsView.setVisibility(View.INVISIBLE);
+            mRecentsView.setStackViewVisibility(View.INVISIBLE);
         }
     }
 
@@ -666,7 +669,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
-        mRecentsView.setVisibility(View.VISIBLE);
+        mRecentsView.setStackViewVisibility(View.VISIBLE);
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
     }
 
     public final void onBusEvent(AppWidgetProviderChangedEvent event) {
@@ -732,5 +736,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         } else {
             mRecentsView.setSearchBar(null);
         }
+    }
+
+    @Override
+    public boolean onPreDraw() {
+        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+        // We post to make sure that this information is delivered after this traversals is
+        // finished.
+        mRecentsView.post(new Runnable() {
+            @Override
+            public void run() {
+                Recents.getSystemServices().endProlongedAnimations();
+            }
+        });
+        return true;
     }
 }

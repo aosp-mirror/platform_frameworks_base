@@ -32,6 +32,7 @@ import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
+import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
@@ -1389,6 +1390,38 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return flags;
     }
 
+    void checkPolicyVisibilityChange() {
+        if (mPolicyVisibility != mPolicyVisibilityAfterAnim) {
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG, "Policy visibility changing after anim in " +
+                        mWinAnimator + ": " + mPolicyVisibilityAfterAnim);
+            }
+            mPolicyVisibility = mPolicyVisibilityAfterAnim;
+            if (mDisplayContent != null) {
+                mDisplayContent.layoutNeeded = true;
+            }
+            if (!mPolicyVisibility) {
+                if (mService.mCurrentFocus == this) {
+                    if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                            "setAnimationLocked: setting mFocusMayChange true");
+                    mService.mFocusMayChange = true;
+                }
+                // Window is no longer visible -- make sure if we were waiting
+                // for it to be displayed before enabling the display, that
+                // we allow the display to be enabled now.
+                mService.enableScreenIfNeededLocked();
+            }
+        }
+    }
+
+    void setRequestedSize(int requestedWidth, int requestedHeight) {
+        if ((mRequestedWidth != requestedWidth || mRequestedHeight != requestedHeight)) {
+            mLayoutNeeded = true;
+            mRequestedWidth = requestedWidth;
+            mRequestedHeight = requestedHeight;
+        }
+    }
+
     private class DeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
@@ -1502,7 +1535,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // we allow the display to be enabled now.
             mService.enableScreenIfNeededLocked();
             if (mService.mCurrentFocus == this) {
-                if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
                         "WindowState.hideLw: setting mFocusMayChange true");
                 mService.mFocusMayChange = true;
             }
@@ -1697,7 +1730,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         try {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
-            boolean configChanged = isConfigChanged();
+            final boolean configChanged = isConfigChanged();
             final Task task = getTask();
             final Configuration overrideConfig =
                     (task != null) ? task.mOverrideConfig : Configuration.EMPTY;

@@ -787,4 +787,15 @@ public class SystemServicesProxy {
             e.printStackTrace();
         }
     }
+
+    public void endProlongedAnimations() {
+        if (mWm == null) {
+            return;
+        }
+        try {
+            WindowManagerGlobal.getWindowManagerService().endProlongedAnimations();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

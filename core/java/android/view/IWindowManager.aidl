@@ -149,6 +149,9 @@ interface IWindowManager
     void stopAppFreezingScreen(IBinder token, boolean force);
     void removeAppToken(IBinder token);
 
+    /** Used by system ui to report that recents has shown itself. */
+    void endProlongedAnimations();
+
     // Re-evaluate the current orientation from the caller's state.
     // If there is a change, the new Configuration is returned and the
     // caller must call setNewConfiguration() sometime later.

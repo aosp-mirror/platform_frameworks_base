@@ -476,6 +476,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     static int sDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 
+    private final SparseIntArray mTmpTaskIds = new SparseIntArray();
+
     int getDragLayerLocked() {
         return mPolicy.windowTypeToLayerLw(LayoutParams.TYPE_DRAG) * TYPE_LAYER_MULTIPLIER
                 + TYPE_LAYER_OFFSET;
@@ -2552,11 +2554,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 return 0;
             }
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (viewVisibility != View.GONE && (win.mRequestedWidth != requestedWidth
-                    || win.mRequestedHeight != requestedHeight)) {
-                win.mLayoutNeeded = true;
-                win.mRequestedWidth = requestedWidth;
-                win.mRequestedHeight = requestedHeight;
+            if (viewVisibility != View.GONE) {
+                win.setRequestedSize(requestedWidth, requestedHeight);
             }
 
             if (attrs != null) {
@@ -3703,6 +3702,24 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mAppTransition.overridePendingAppTransitionMultiThumb(specs, onAnimationStartedCallback,
                     onAnimationFinishedCallback, scaleUp);
+            if (!scaleUp) {
+                // This is used by freeform to recents windows transition. We need to synchronize
+                // the animation with the appearance of the content of recents, so we will make
+                // animation stay on the last frame a little longer.
+                mTmpTaskIds.clear();
+                for (int i = specs.length - 1; i >= 0; i--) {
+                    mTmpTaskIds.put(specs[i].taskId, 0);
+                }
+                for (final WindowState win : mWindowMap.values()) {
+                    final Task task = win.getTask();
+                    if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1) {
+                        final AppWindowToken appToken = win.mAppToken;
+                        if (appToken != null && appToken.mAppAnimator != null) {
+                            appToken.mAppAnimator.startProlongAnimation();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -3710,6 +3727,18 @@ public class WindowManagerService extends IWindowManager.Stub
     public void overridePendingAppTransitionInPlace(String packageName, int anim) {
         synchronized(mWindowMap) {
             mAppTransition.overrideInPlaceAppTransition(packageName, anim);
+        }
+    }
+
+    @Override
+    public void endProlongedAnimations() {
+        synchronized (mWindowMap) {
+            for (final WindowState win : mWindowMap.values()) {
+                final AppWindowToken appToken = win.mAppToken;
+                if (appToken != null && appToken.mAppAnimator != null) {
+                    appToken.mAppAnimator.endProlongedAnimation();
+                }
+            }
         }
     }
 

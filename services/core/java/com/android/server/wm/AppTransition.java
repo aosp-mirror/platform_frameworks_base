@@ -1312,6 +1312,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionExit = exitAnim;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
+            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
@@ -1327,6 +1328,7 @@ public class AppTransition implements Dump {
                     startY + startHeight);
             postAnimationCallback();
             mNextAppTransitionCallback = null;
+            mAnimationFinishedCallback = null;
         }
     }
 
@@ -1337,6 +1339,7 @@ public class AppTransition implements Dump {
             putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight);
             postAnimationCallback();
             mNextAppTransitionCallback = null;
+            mAnimationFinishedCallback = null;
         }
     }
 
@@ -1351,6 +1354,7 @@ public class AppTransition implements Dump {
             putDefaultNextAppTransitionCoordinates(startX, startY, 0 ,0);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
+            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
@@ -1367,6 +1371,7 @@ public class AppTransition implements Dump {
             putDefaultNextAppTransitionCoordinates(startX, startY, targetWidth, targetHeight);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
+            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
@@ -1408,6 +1413,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionInPlace = anim;
+            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
