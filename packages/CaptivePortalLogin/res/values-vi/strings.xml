@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Sử dụng mạng này"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Không sử dụng mạng này"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Đăng nhập vào mạng"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Mạng mà bạn đang cố gắng tham gia có vấn đề về bảo mật."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Ví dụ, trang đăng nhập có thể không thuộc về tổ chức được hiển thị."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Vẫn tiếp tục qua trình duyệt"</string>
 </resources>
