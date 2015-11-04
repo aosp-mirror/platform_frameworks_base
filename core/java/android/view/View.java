@@ -3551,6 +3551,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     ListenerInfo mListenerInfo;
 
+    // Temporary values used to hold (x,y) coordinates when delegating from the
+    // two-arg performLongClick() method to the legacy no-arg version.
+    private float mLongClickX = Float.NaN;
+    private float mLongClickY = Float.NaN;
+
     /**
      * The application environment this view lives in.
      * This field should be made private, so it is hidden from the SDK.
@@ -5379,7 +5384,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         {@code false} otherwise
      */
     public boolean performLongClick() {
-        return performLongClickInternal(false, 0, 0);
+        return performLongClickInternal(mLongClickX, mLongClickY);
     }
 
     /**
@@ -5387,13 +5392,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * context menu if the OnLongClickListener did not consume the event,
      * anchoring it to an (x,y) coordinate.
      *
-     * @param x x coordinate of the anchoring touch event
-     * @param y y coordinate of the anchoring touch event
+     * @param x x coordinate of the anchoring touch event, or {@link Float#NaN}
+     *          to disable anchoring
+     * @param y y coordinate of the anchoring touch event, or {@link Float#NaN}
+     *          to disable anchoring
      * @return {@code true} if one of the above receivers consumed the event,
      *         {@code false} otherwise
      */
     public boolean performLongClick(float x, float y) {
-        return performLongClickInternal(true, x, y);
+        mLongClickX = x;
+        mLongClickY = y;
+        final boolean handled = performLongClick();
+        mLongClickX = Float.NaN;
+        mLongClickY = Float.NaN;
+        return handled;
     }
 
     /**
@@ -5401,15 +5413,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * context menu if the OnLongClickListener did not consume the event,
      * optionally anchoring it to an (x,y) coordinate.
      *
-     * @param isAnchored whether this long click is anchored to a touch event
-     * @param x x coordinate of the anchoring touch event, ignored if
-     *          {@code isAnchored} is set to {@code false}
-     * @param y y coordinate of the anchoring touch event, ignored if
-     *          {@code isAnchored} is set to {@code false}
+     * @param x x coordinate of the anchoring touch event, or {@link Float#NaN}
+     *          to disable anchoring
+     * @param y y coordinate of the anchoring touch event, or {@link Float#NaN}
+     *          to disable anchoring
      * @return {@code true} if one of the above receivers consumed the event,
      *         {@code false} otherwise
      */
-    private boolean performLongClickInternal(boolean isAnchored, float x, float y) {
+    private boolean performLongClickInternal(float x, float y) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
 
         boolean handled = false;
@@ -5418,6 +5429,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             handled = li.mOnLongClickListener.onLongClick(View.this);
         }
         if (!handled) {
+            final boolean isAnchored = !Float.isNaN(x) && !Float.isNaN(y);
             handled = isAnchored ? showContextMenu(x, y) : showContextMenu();
         }
         if (handled) {
