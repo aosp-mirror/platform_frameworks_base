@@ -84,8 +84,7 @@ class MtpDatabase {
             DocumentsContract.Document.COLUMN_DOCUMENT_ID + " = ?";
     private static final String SELECTION_ROOT_DOCUMENTS =
             COLUMN_DEVICE_ID + " = ? AND " + COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
-    private static final String SELECTION_ROOT_DOCUMENTS_WITH_STATE =
-            SELECTION_ROOT_DOCUMENTS + " AND " + COLUMN_ROW_STATE + " = ?";
+    private static final String SELECTION_CHILD_DOCUMENTS = COLUMN_PARENT_DOCUMENT_ID + " = ?";
 
     static class ParentNotFoundException extends Exception {}
 
@@ -136,7 +135,7 @@ class MtpDatabase {
     }
 
     @VisibleForTesting
-    Cursor queryChildDocuments(String[] columnNames) {
+    Cursor queryRootDocuments(String[] columnNames) {
         return database.query(
                 TABLE_DOCUMENTS,
                 columnNames,
@@ -159,84 +158,27 @@ class MtpDatabase {
                 null);
     }
 
-    /**
-     * Puts the roots into the database.
-     * If the database found another unmapped document that shares the same name with the root,
-     * the document may be merged into the unmapped document. In that case, the database marks the
-     * root as 'mapping' and wait for {@link #resolveRootDocuments(int)} is invoked.
-     * @param deviceId Device ID of roots.
-     * @param resources Resources used to get localized root name.
-     * @param roots Roots added to the database.
-     */
     @VisibleForTesting
     void putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
-        database.beginTransaction();
-        try {
-            // Add roots to database.
-            final ContentValues values = new ContentValues();
-            for (int i = 0; i < roots.length; i++) {
-                getRootDocumentValues(values, resources, roots[i]);
-                final String displayName =
-                        values.getAsString(DocumentsContract.Document.COLUMN_DISPLAY_NAME);
-                final long numUnmapped = DatabaseUtils.queryNumEntries(
-                        database,
-                        TABLE_DOCUMENTS,
-                        SELECTION_ROOT_DOCUMENTS_WITH_STATE + " AND " +
-                        DocumentsContract.Document.COLUMN_DISPLAY_NAME + " = ?",
-                        strings(deviceId, ROW_STATE_UNMAPPED, displayName));
-                if (numUnmapped != 0) {
-                    values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPING);
-                }
-                database.insert(TABLE_DOCUMENTS, null, values);
+        final ContentValues[] valuesList = new ContentValues[roots.length];
+        for (int i = 0; i < roots.length; i++) {
+            if (roots[i].mDeviceId != deviceId) {
+                throw new IllegalArgumentException();
             }
-            database.setTransactionSuccessful();
-        } finally {
-            database.endTransaction();
+            valuesList[i] = new ContentValues();
+            getRootDocumentValues(valuesList[i], resources, roots[i]);
         }
+        putDocuments(valuesList, SELECTION_ROOT_DOCUMENTS, Integer.toString(deviceId));
     }
 
     @VisibleForTesting
-    void putDocument(int deviceId, MtpObjectInfo info) throws Exception {
-        database.beginTransaction();
-        try {
-            final String mimeType = CursorHelper.formatTypeToMimeType(info.getFormat());
-
-            int flag = 0;
-            if (info.getProtectionStatus() == 0) {
-                flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
-                        DocumentsContract.Document.FLAG_SUPPORTS_WRITE;
-                if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-                    flag |= DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE;
-                }
-            }
-            if (info.getThumbCompressedSize() > 0) {
-                flag |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
-            }
-
-            final ContentValues values = new ContentValues();
-            values.put(COLUMN_DEVICE_ID, deviceId);
-            values.put(COLUMN_STORAGE_ID, info.getStorageId());
-            values.put(COLUMN_OBJECT_HANDLE, info.getObjectHandle());
-            // TODO: Specify correct document ID.
-            values.putNull(COLUMN_PARENT_DOCUMENT_ID);
-            values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
-            values.put(Document.COLUMN_MIME_TYPE, mimeType);
-            values.put(Document.COLUMN_DISPLAY_NAME, info.getName());
-            values.putNull(Document.COLUMN_SUMMARY);
-            values.put(
-                    Document.COLUMN_LAST_MODIFIED,
-                    info.getDateModified() != 0 ? info.getDateModified() : null);
-            values.putNull(Document.COLUMN_ICON);
-            values.put(Document.COLUMN_FLAGS, flag);
-            values.put(Document.COLUMN_SIZE, info.getCompressedSize());
-            if (database.insert(TABLE_DOCUMENTS, null, values) == -1) {
-                throw new Exception("Failed to add document.");
-            }
-
-            database.setTransactionSuccessful();
-        } finally {
-            database.endTransaction();
+    void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents) {
+        final ContentValues[] valuesList = new ContentValues[documents.length];
+        for (int i = 0; i < documents.length; i++) {
+            valuesList[i] = new ContentValues();
+            getChildDocumentValues(valuesList[i], deviceId, parentId, documents[i]);
         }
+        putDocuments(valuesList, SELECTION_CHILD_DOCUMENTS, parentId);
     }
 
     /**
@@ -261,15 +203,59 @@ class MtpDatabase {
         }
     }
 
+    @VisibleForTesting
+    void resolveRootDocuments(int deviceId) {
+        resolveDocuments(SELECTION_ROOT_DOCUMENTS, Integer.toString(deviceId));
+    }
+
+    @VisibleForTesting
+    void resolveChildDocuments(String parentId) {
+        resolveDocuments(SELECTION_CHILD_DOCUMENTS, parentId);
+    }
+
+    /**
+     * Puts the documents into the database.
+     * If the database found another unmapped document that shares the same name and parent,
+     * the document may be merged into the unmapped document. In that case, the database marks the
+     * root as 'mapping' and wait for {@link #resolveRootDocuments(int)} is invoked.
+     * @param valuesList Values that are stored in the database.
+     * @param selection SQL where closure to select rows that shares the same parent.
+     * @param arg Argument for selection SQL.
+     */
+    private void putDocuments(ContentValues[] valuesList, String selection, String arg) {
+        database.beginTransaction();
+        try {
+            for (final ContentValues values : valuesList) {
+                final String displayName =
+                        values.getAsString(DocumentsContract.Document.COLUMN_DISPLAY_NAME);
+                final long numUnmapped = DatabaseUtils.queryNumEntries(
+                        database,
+                        TABLE_DOCUMENTS,
+                        selection + " AND " +
+                        COLUMN_ROW_STATE + " = ? AND " +
+                        DocumentsContract.Document.COLUMN_DISPLAY_NAME + " = ?",
+                        strings(arg, ROW_STATE_UNMAPPED, displayName));
+                if (numUnmapped != 0) {
+                    values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPING);
+                }
+                database.insert(TABLE_DOCUMENTS, null, values);
+            }
+
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
+    }
+
     /**
      * Maps 'unmapped' document and 'mapping' document that don't have document but shares the same
      * name.
      * If the database does not find corresponding 'mapping' document, it just removes 'unmapped'
      * document from the database.
-     * @param deviceId Device ID of roots which the method tries to resolve.
+     * @param selection Query to select rows for resolving.
+     * @param arg Argument for selection SQL.
      */
-    @VisibleForTesting
-    void resolveRootDocuments(int deviceId) {
+    private void resolveDocuments(String selection, String arg) {
         database.beginTransaction();
         try {
             // Get 1-to-1 mapping of unmapped document and mapping document.
@@ -290,8 +276,8 @@ class MtpDatabase {
                             "group_concat(" + unmappedIdQuery + ")",
                             "group_concat(" + mappingIdQuery + ")"
                     },
-                    SELECTION_ROOT_DOCUMENTS,
-                    strings(deviceId),
+                    selection,
+                    strings(arg),
                     DocumentsContract.Document.COLUMN_DISPLAY_NAME,
                     "count(" + unmappedIdQuery + ") = 1 AND count(" + mappingIdQuery + ") = 1",
                     null);
@@ -335,8 +321,8 @@ class MtpDatabase {
             // Delete all unmapped rows that cannot be mapped.
             database.delete(
                     TABLE_DOCUMENTS,
-                    SELECTION_ROOT_DOCUMENTS_WITH_STATE,
-                    strings(deviceId, ROW_STATE_UNMAPPED));
+                    COLUMN_ROW_STATE + " = ? AND " + selection,
+                    strings(ROW_STATE_UNMAPPED, arg));
 
             // The database cannot find old document ID for the mapping rows.
             // Turn the all mapping rows into mapped state, which means the rows become to be
@@ -346,8 +332,8 @@ class MtpDatabase {
             database.update(
                     TABLE_DOCUMENTS,
                     values,
-                    SELECTION_ROOT_DOCUMENTS_WITH_STATE,
-                    strings(deviceId, ROW_STATE_MAPPING));
+                    COLUMN_ROW_STATE + " = ? AND " + selection,
+                    strings(ROW_STATE_MAPPING, arg));
             database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
@@ -376,6 +362,44 @@ class MtpDatabase {
         values.put(Document.COLUMN_FLAGS, 0);
         values.put(Document.COLUMN_SIZE,
                 (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE));
+    }
+
+    /**
+     * Gets {@link ContentValues} for the given MTP object.
+     * @param values {@link ContentValues} that receives values.
+     * @param deviceId Device ID of the object.
+     * @param parentId Parent document ID of the object.
+     * @param info MTP object info.
+     */
+    private void getChildDocumentValues(
+            ContentValues values, int deviceId, String parentId, MtpObjectInfo info) {
+        values.clear();
+        final String mimeType = CursorHelper.formatTypeToMimeType(info.getFormat());
+        int flag = 0;
+        if (info.getProtectionStatus() == 0) {
+            flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
+                    DocumentsContract.Document.FLAG_SUPPORTS_WRITE;
+            if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
+                flag |= DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE;
+            }
+        }
+        if (info.getThumbCompressedSize() > 0) {
+            flag |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
+        }
+        values.put(COLUMN_DEVICE_ID, deviceId);
+        values.put(COLUMN_STORAGE_ID, info.getStorageId());
+        values.put(COLUMN_OBJECT_HANDLE, info.getObjectHandle());
+        values.put(COLUMN_PARENT_DOCUMENT_ID, parentId);
+        values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
+        values.put(Document.COLUMN_MIME_TYPE, mimeType);
+        values.put(Document.COLUMN_DISPLAY_NAME, info.getName());
+        values.putNull(Document.COLUMN_SUMMARY);
+        values.put(
+                Document.COLUMN_LAST_MODIFIED,
+                info.getDateModified() != 0 ? info.getDateModified() : null);
+        values.putNull(Document.COLUMN_ICON);
+        values.put(Document.COLUMN_FLAGS, flag);
+        values.put(Document.COLUMN_SIZE, info.getCompressedSize());
     }
 
     /**
