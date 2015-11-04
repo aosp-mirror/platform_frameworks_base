@@ -9,7 +9,7 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-<section class="dac-expand dac-hero dac-section-light dac-invert" style="background-image: url(/images/tools/walking-threads-bg.jpg)">
+<section class="dac-expand dac-hero dac-section-light">
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
