@@ -168,11 +168,6 @@ public abstract class ConditionProviderService extends Service {
         }
 
         @Override
-        public void onRequestConditions(int relevance) {
-            mHandler.obtainMessage(H.ON_REQUEST_CONDITIONS, relevance, 0).sendToTarget();
-        }
-
-        @Override
         public void onSubscribe(Uri conditionId) {
             mHandler.obtainMessage(H.ON_SUBSCRIBE, conditionId).sendToTarget();
         }
@@ -185,7 +180,6 @@ public abstract class ConditionProviderService extends Service {
 
     private final class H extends Handler {
         private static final int ON_CONNECTED = 1;
-        private static final int ON_REQUEST_CONDITIONS = 2;
         private static final int ON_SUBSCRIBE = 3;
         private static final int ON_UNSUBSCRIBE = 4;
 
@@ -197,10 +191,6 @@ public abstract class ConditionProviderService extends Service {
                     case ON_CONNECTED:
                         name = "onConnected";
                         onConnected();
-                        break;
-                    case ON_REQUEST_CONDITIONS:
-                        name = "onRequestConditions";
-                        onRequestConditions(msg.arg1);
                         break;
                     case ON_SUBSCRIBE:
                         name = "onSubscribe";
