@@ -273,10 +273,12 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
                 flags |= Document.FLAG_SUPPORTS_DELETE;
                 flags |= Document.FLAG_SUPPORTS_RENAME;
+                flags |= Document.FLAG_SUPPORTS_MOVE;
             } else {
                 flags |= Document.FLAG_SUPPORTS_WRITE;
                 flags |= Document.FLAG_SUPPORTS_DELETE;
                 flags |= Document.FLAG_SUPPORTS_RENAME;
+                flags |= Document.FLAG_SUPPORTS_MOVE;
             }
         }
 
@@ -406,6 +408,21 @@ public class ExternalStorageProvider extends DocumentsProvider {
         resolver.delete(externalUri,
                 "_data LIKE ?1 AND lower(_data)=lower(?2)",
                 new String[] { path, path });
+    }
+
+    @Override
+    public String moveDocument(String sourceDocumentId, String targetParentDocumentId)
+            throws FileNotFoundException {
+        final File before = getFileForDocId(sourceDocumentId);
+        final File after = new File(getFileForDocId(targetParentDocumentId), before.getName());
+
+        if (after.exists()) {
+            throw new IllegalStateException("Already exists " + after);
+        }
+        if (!before.renameTo(after)) {
+            throw new IllegalStateException("Failed to move to " + after);
+        }
+        return getDocIdForFile(after);
     }
 
     @Override
