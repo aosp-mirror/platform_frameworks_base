@@ -18,12 +18,19 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -606,7 +613,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int ph = mContainingFrame.height();
 
         int w,h;
-        if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0) {
+        if ((mAttrs.flags & FLAG_SCALED) != 0) {
             if (mAttrs.width < 0) {
                 w = pw;
             } else if (mEnforceSizeCompat) {
@@ -1444,6 +1451,54 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mLayoutNeeded = true;
             mRequestedWidth = requestedWidth;
             mRequestedHeight = requestedHeight;
+        }
+    }
+
+    void prepareWindowToDisplayDuringRelayout(Configuration outConfig) {
+        if ((mAttrs.softInputMode & SOFT_INPUT_MASK_ADJUST)
+                == SOFT_INPUT_ADJUST_RESIZE) {
+            mLayoutNeeded = true;
+        }
+        if (isDrawnLw() && mService.okToDisplay()) {
+            mWinAnimator.applyEnterAnimationLocked();
+        }
+        if ((mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0) {
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "Relayout window turning screen on: " + this);
+            mTurnOnScreen = true;
+        }
+        if (isConfigChanged()) {
+            if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this + " visible with new config: "
+                    + mService.mCurConfiguration);
+            outConfig.setTo(mService.mCurConfiguration);
+        }
+    }
+
+    void adjustStartingWindowFlags() {
+        if (mAttrs.type == TYPE_BASE_APPLICATION && mAppToken != null
+                && mAppToken.startingWindow != null) {
+            // Special handling of starting window over the base
+            // window of the app: propagate lock screen flags to it,
+            // to provide the correct semantics while starting.
+            final int mask = FLAG_SHOW_WHEN_LOCKED | FLAG_DISMISS_KEYGUARD
+                    | FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+            WindowManager.LayoutParams sa = mAppToken.startingWindow.mAttrs;
+            sa.flags = (sa.flags & ~mask) | (mAttrs.flags & mask);
+        }
+    }
+
+    void setWindowScale(int requestedWidth, int requestedHeight) {
+        final boolean scaledWindow = (mAttrs.flags & FLAG_SCALED) != 0;
+
+        if (scaledWindow) {
+            // requested{Width|Height} Surface's physical size
+            // attrs.{width|height} Size on screen
+            // TODO: We don't check if attrs != null here. Is it implicitly checked?
+            mHScale = (mAttrs.width  != requestedWidth)  ?
+                    (mAttrs.width  / (float)requestedWidth) : 1.0f;
+            mVScale = (mAttrs.height != requestedHeight) ?
+                    (mAttrs.height / (float)requestedHeight) : 1.0f;
+        } else {
+            mHScale = mVScale = 1;
         }
     }
 
