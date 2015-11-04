@@ -22,4 +22,7 @@
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
     <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
+
+    <dimen name="docked_divider_handle_width">2dp</dimen>
+    <dimen name="docked_divider_handle_height">24dp</dimen>
 </resources>

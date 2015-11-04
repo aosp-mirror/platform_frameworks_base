@@ -193,20 +193,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         inputWindowHandle.frameTop = frame.top;
         inputWindowHandle.frameRight = frame.right;
         inputWindowHandle.frameBottom = frame.bottom;
-        if (child.mAttrs.type == TYPE_DOCK_DIVIDER) {
-            // We need to determine if the divider is horizontal or vertical and adjust its handle
-            // frame accordingly.
-            int adjustment = displayContent.mDividerControllerLocked.getWidthAdjustment();
-            if (inputWindowHandle.frameRight - inputWindowHandle.frameLeft >
-                    inputWindowHandle.frameTop - inputWindowHandle.frameBottom) {
-                // Horizontal divider.
-                inputWindowHandle.frameTop -= adjustment;
-                inputWindowHandle.frameBottom += adjustment;
-            } else {
-                inputWindowHandle.frameLeft -= adjustment;
-                inputWindowHandle.frameRight += adjustment;
-            }
-        }
 
         if (child.mGlobalScale != 1) {
             // If we are scaling the window, input coordinates need

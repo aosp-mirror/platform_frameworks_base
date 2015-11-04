@@ -32,23 +32,26 @@ public class DockedStackDividerController {
     private static final String TAG = "DockedStackDividerController";
 
     private final DisplayContent mDisplayContent;
-    private final int mDividerWidth;
+    private final int mDividerWindowWidth;
+    private final int mDividerInsets;
     private boolean mResizing;
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mDisplayContent = displayContent;
-        mDividerWidth = context.getResources().getDimensionPixelSize(
+        mDividerWindowWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
+        mDividerInsets = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_insets);
     }
 
     boolean isResizing() {
         return mResizing;
     }
 
-    int getWidthAdjustment() {
-        return mDividerWidth;
+    int getContentWidth() {
+        return mDividerWindowWidth - 2 * mDividerInsets;
     }
 
     void setResizing(boolean resizing) {
@@ -82,22 +85,21 @@ public class DockedStackDividerController {
         stack.getBounds(mTmpRect);
         switch (side) {
             case DOCKED_LEFT:
-                frame.set(mTmpRect.right, frame.top, mTmpRect.right + frame.width(), frame.bottom);
+                frame.set(mTmpRect.right - mDividerInsets, frame.top,
+                        mTmpRect.right + frame.width() - mDividerInsets, frame.bottom);
                 break;
             case DOCKED_TOP:
-                frame.set(frame.left, mTmpRect.bottom, mTmpRect.right,
-                        mTmpRect.bottom + frame.height());
+                frame.set(frame.left, mTmpRect.bottom - mDividerInsets,
+                        mTmpRect.right, mTmpRect.bottom + frame.height() - mDividerInsets);
                 break;
             case DOCKED_RIGHT:
-                frame.set(mTmpRect.left - frame.width(), frame.top, mTmpRect.left, frame.bottom);
+                frame.set(mTmpRect.left - frame.width() + mDividerInsets, frame.top,
+                        mTmpRect.left + mDividerInsets, frame.bottom);
                 break;
             case DOCKED_BOTTOM:
-                frame.set(frame.left, mTmpRect.top - frame.height(), frame.right, mTmpRect.top);
+                frame.set(frame.left, mTmpRect.top - frame.height() + mDividerInsets,
+                        frame.right, mTmpRect.top + mDividerInsets);
                 break;
         }
-    }
-
-    public boolean hasWindow() {
-        return mWindow != null;
     }
 }

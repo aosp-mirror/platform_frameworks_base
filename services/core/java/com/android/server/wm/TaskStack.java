@@ -386,7 +386,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
                     == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(mTmpRect, bounds, mStackId, mTmpRect2,
-                    mDisplayContent.mDividerControllerLocked.getWidthAdjustment(),
+                    mDisplayContent.mDividerControllerLocked.getContentWidth(),
                     dockedOnTopOrLeft);
         }
 
@@ -433,7 +433,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final boolean dockedOnTopOrLeft = dockedSide == DOCKED_TOP
                 || dockedSide == DOCKED_LEFT;
         getStackDockedModeBounds(mTmpRect, outBounds, mStackId, mTmpRect2,
-                mDisplayContent.mDividerControllerLocked.getWidthAdjustment(), dockedOnTopOrLeft);
+                mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
 
     }
 
@@ -504,7 +504,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
                     == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(bounds, bounds, FULLSCREEN_WORKSPACE_STACK_ID, dockedBounds,
-                    mDisplayContent.mDividerControllerLocked.getWidthAdjustment(), dockedOnTopOrLeft);
+                    mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
         }
 
         final int count = mService.mStackIdToStack.size();
