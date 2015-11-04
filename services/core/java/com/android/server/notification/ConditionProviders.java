@@ -168,24 +168,6 @@ public class ConditionProviders extends ManagedServices {
         }
     }
 
-    public void requestConditions(IConditionListener callback, int relevance) {
-        synchronized(mMutex) {
-            if (DEBUG) Slog.d(TAG, "requestConditions callback=" + callback
-                    + " relevance=" + Condition.relevanceToString(relevance));
-            if (callback == null) return;
-            relevance = relevance & (Condition.FLAG_RELEVANT_NOW | Condition.FLAG_RELEVANT_ALWAYS);
-            if (relevance != 0) {
-                mListeners.put(callback.asBinder(), callback);
-                requestConditionsLocked(relevance);
-            } else {
-                mListeners.remove(callback.asBinder());
-                if (mListeners.isEmpty()) {
-                    requestConditionsLocked(0);
-                }
-            }
-        }
-    }
-
     private Condition[] validateConditions(String pkg, Condition[] conditions) {
         if (conditions == null || conditions.length == 0) return null;
         final int N = conditions.length;
@@ -380,25 +362,6 @@ public class ConditionProviders extends ManagedServices {
 
     private static IConditionProvider provider(ManagedServiceInfo info) {
         return info == null ? null : (IConditionProvider) info.service;
-    }
-
-    private void requestConditionsLocked(int flags) {
-        for (ManagedServiceInfo info : mServices) {
-            final IConditionProvider provider = provider(info);
-            if (provider == null) continue;
-            // clear all stored conditions from this provider that we no longer care about
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                final ConditionRecord r = mRecords.get(i);
-                if (r.info != info) continue;
-                if (r.subscribed) continue;
-                mRecords.remove(i);
-            }
-            try {
-                provider.onRequestConditions(flags);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error requesting conditions from " + info.component, e);
-            }
-        }
     }
 
     private static class ConditionRecord {

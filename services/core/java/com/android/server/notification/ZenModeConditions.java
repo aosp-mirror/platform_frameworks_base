@@ -59,10 +59,6 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         pw.print(prefix); pw.print("mSubscriptions="); pw.println(mSubscriptions);
     }
 
-    public void requestConditions(IConditionListener callback, int relevance) {
-        mConditionProviders.requestConditions(callback, relevance);
-    }
-
     public void evaluateConfig(ZenModeConfig config, boolean processSubscriptions) {
         if (config == null) return;
         if (config.manualRule != null && config.manualRule.condition != null
