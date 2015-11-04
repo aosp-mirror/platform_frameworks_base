@@ -18,18 +18,18 @@ package com.android.systemui.recents.events.ui.dragndrop;
 
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.DropTarget;
 
 /**
- * This event is sent when a user drag enters or exits a dock region.
+ * This event is sent when a user drags in/out of a drop target.
  */
-public class DragDockStateChangedEvent extends EventBus.Event {
+public class DragDropTargetChangedEvent extends EventBus.Event {
 
     public final Task task;
-    public final TaskStack.DockState dockState;
+    public final DropTarget dropTarget;
 
-    public DragDockStateChangedEvent(Task task, TaskStack.DockState dockState) {
+    public DragDropTargetChangedEvent(Task task, DropTarget dropTarget) {
         this.task = task;
-        this.dockState = dockState;
+        this.dropTarget = dropTarget;
     }
 }

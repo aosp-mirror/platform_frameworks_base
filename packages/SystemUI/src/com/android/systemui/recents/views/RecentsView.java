@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -51,7 +50,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
-import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -336,9 +335,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         if (mDragView != null) {
+            Rect taskRect = mTaskStackView.mLayoutAlgorithm.mTaskRect;
             mDragView.measure(
-                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
+                    MeasureSpec.makeMeasureSpec(taskRect.width(), MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(taskRect.height(), MeasureSpec.AT_MOST));
         }
 
         setMeasuredDimension(width, height);
@@ -787,52 +787,76 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskStack.DockState.NONE.viewState.dockAreaAlpha);
     }
 
-    public final void onBusEvent(DragDockStateChangedEvent event) {
-        if (event.dockState == TaskStack.DockState.NONE) {
+    public final void onBusEvent(DragDropTargetChangedEvent event) {
+        if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
             updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
                     TaskStack.DockState.NONE.viewState.dockAreaAlpha);
         } else {
-            updateVisibleDockRegions(new TaskStack.DockState[] {event.dockState}, -1);
+            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            updateVisibleDockRegions(new TaskStack.DockState[] {dockState}, -1);
         }
     }
 
     public final void onBusEvent(final DragEndEvent event) {
-        event.postAnimationTrigger.increment();
-        event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+        final Runnable cleanUpRunnable = new Runnable() {
             @Override
             public void run() {
                 // Remove the drag view
                 removeView(mDragView);
                 mDragView = null;
-                updateVisibleDockRegions(null, -1);
-
-                // Dock the new task if we are hovering over a valid dock state
-                if (event.dockState != TaskStack.DockState.NONE) {
-                    SystemServicesProxy ssp = Recents.getSystemServices();
-                    ssp.startTaskInDockedMode(event.task.key.id, event.dockState.createMode);
-                    launchTask(event.task, null, INVALID_STACK_ID);
-                }
             }
-        });
-        if (event.dockState == TaskStack.DockState.NONE) {
-            // Animate the alpha back to what it was before
-            Rect taskBounds = mTaskStackView.getStackAlgorithm().getUntransformedTaskViewBounds();
-            int left = taskBounds.left + (int) ((1f - event.taskView.getScaleX()) * taskBounds.width()) / 2;
-            int top = taskBounds.top + (int) ((1f - event.taskView.getScaleY()) * taskBounds.height()) / 2;
+        };
+
+        // Animate the overlay alpha back to 0
+        updateVisibleDockRegions(null, -1);
+
+        if (event.dropTarget == null) {
+            // No drop targets for hit, so just animate the task back to its place
+            event.postAnimationTrigger.increment();
+            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    cleanUpRunnable.run();
+                }
+            });
+            // Animate the task back to where it was before then clean up afterwards
+            TaskViewTransform taskTransform = new TaskViewTransform();
+            TaskStackLayoutAlgorithm layoutAlgorithm = mTaskStackView.getStackAlgorithm();
+            layoutAlgorithm.getStackTransform(event.task,
+                    mTaskStackView.getScroller().getStackScroll(), taskTransform, null);
             event.dragView.animate()
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .translationX(left + event.taskView.getTranslationX())
-                    .translationY(top + event.taskView.getTranslationY())
+                    .scaleX(taskTransform.scale)
+                    .scaleY(taskTransform.scale)
+                    .translationX((layoutAlgorithm.mTaskRect.left - event.dragView.getLeft())
+                            + taskTransform.translationX)
+                    .translationY((layoutAlgorithm.mTaskRect.top - event.dragView.getTop())
+                            + taskTransform.translationY)
                     .setDuration(175)
                     .setInterpolator(mFastOutSlowInInterpolator)
                     .withEndAction(event.postAnimationTrigger.decrementAsRunnable())
                     .start();
 
-            // Animate the overlay alpha back to 0
-            updateVisibleDockRegions(null, -1);
+        } else if (event.dropTarget instanceof TaskStack.DockState) {
+            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+
+            // For now, just remove the drag view and the original task
+            // TODO: Animate the task to the drop target rect before launching it above
+            cleanUpRunnable.run();
+
+            // Dock the task and launch it
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);
+            launchTask(event.task, null, INVALID_STACK_ID);
+
         } else {
-            event.postAnimationTrigger.decrement();
+            // We dropped on another drop target, so just add the cleanup to the post animation
+            // trigger
+            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    cleanUpRunnable.run();
+                }
+            });
         }
     }
 

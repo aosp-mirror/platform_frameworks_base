@@ -103,6 +103,7 @@ public class SystemServicesProxy {
     Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
+    boolean mHasFreeformWorkspaceSupport;
 
     Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
@@ -123,6 +124,8 @@ public class SystemServicesProxy {
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
+        mHasFreeformWorkspaceSupport = false && mPm.hasSystemFeature(
+                PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -241,7 +244,7 @@ public class SystemServicesProxy {
     public boolean hasFreeformWorkspaceSupport() {
         if (mPm == null) return false;
 
-        return mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+        return mHasFreeformWorkspaceSupport;
     }
 
     /** Returns whether the recents is currently running */
@@ -409,6 +412,19 @@ public class SystemServicesProxy {
             }
         }
         return thumbnail;
+    }
+
+    /**
+     * Moves a task into another stack.
+     */
+    public void moveTaskToStack(int taskId, int stackId) {
+        if (mIam == null) return;
+
+        try {
+            mIam.positionTaskInStack(taskId, stackId, 0);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /** Moves a task to the front with the specified activity options. */

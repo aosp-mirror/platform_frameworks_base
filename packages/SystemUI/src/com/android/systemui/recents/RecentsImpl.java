@@ -511,7 +511,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
 
         // Update the destination rect
-        mDummyStackView.updateMinMaxScrollForStack(stack);
+        mDummyStackView.updateLayoutForStack(stack);
         final Task toTask = new Task();
         final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
                 topTask.id, toTask);
@@ -694,7 +694,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
         // Prepare the dummy stack for the transition
-        mDummyStackView.updateMinMaxScrollForStack(stack);
+        mDummyStackView.updateLayoutForStack(stack);
         TaskStackLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
         boolean hasRecentTasks = stack.getTaskCount() > 0;

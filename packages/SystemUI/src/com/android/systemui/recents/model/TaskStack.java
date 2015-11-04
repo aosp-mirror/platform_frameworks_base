@@ -17,18 +17,21 @@
 package com.android.systemui.recents.model;
 
 import android.animation.ObjectAnimator;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.views.DropTarget;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +43,8 @@ import java.util.Random;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 
 
 /**
@@ -54,9 +59,13 @@ interface TaskFilter {
  * A list of filtered tasks.
  */
 class FilteredTaskList {
-    ArrayList<Task> mTasks = new ArrayList<Task>();
-    ArrayList<Task> mFilteredTasks = new ArrayList<Task>();
-    HashMap<Task.TaskKey, Integer> mTaskIndices = new HashMap<Task.TaskKey, Integer>();
+
+    private static final String TAG = "FilteredTaskList";
+    private static final boolean DEBUG = true;
+
+    ArrayList<Task> mTasks = new ArrayList<>();
+    ArrayList<Task> mFilteredTasks = new ArrayList<>();
+    HashMap<Task.TaskKey, Integer> mTaskIndices = new HashMap<>();
     TaskFilter mFilter;
 
     /** Sets the task filter, saving the current touch state */
@@ -90,6 +99,25 @@ class FilteredTaskList {
     /** Adds a new task to the task list */
     void add(Task t) {
         mTasks.add(t);
+        updateFilteredTasks();
+    }
+
+    /**
+     * Moves the given task.
+     */
+    public void moveTaskToStack(Task task, int insertIndex, int newStackId) {
+        int taskIndex = indexOf(task);
+        if (taskIndex != insertIndex) {
+            mTasks.remove(taskIndex);
+            if (taskIndex < insertIndex) {
+                insertIndex--;
+            }
+            mTasks.add(insertIndex, task);
+        }
+
+        // Update the stack id now, after we've moved the task, and before we update the
+        // filtered tasks
+        task.setStackId(newStackId);
         updateFilteredTasks();
     }
 
@@ -187,16 +215,21 @@ public class TaskStack {
     }
 
 
-    public enum DockState {
-        NONE(-1, 96, null, null, null),
+    public enum DockState implements DropTarget {
+        NONE(-1, 96, null, null),
         LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
-                new RectF(0, 0, 0.3f, 1), new RectF(0, 0, 0.3f, 1), new RectF(0.7f, 0, 1, 1)),
+                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.25f, 1)),
         TOP(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
-                new RectF(0, 0, 1, 0.3f), new RectF(0, 0, 1, 0.3f), new RectF(0, 0.7f, 1, 1)),
+                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.25f)),
         RIGHT(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
-                new RectF(0.7f, 0, 1, 1), new RectF(0.7f, 0, 1, 1), new RectF(0, 0, 0.3f, 1)),
+                new RectF(0.75f, 0, 1, 1), new RectF(0.75f, 0, 1, 1)),
         BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
-                new RectF(0, 0.7f, 1, 1), new RectF(0, 0.7f, 1, 1), new RectF(0, 0, 1, 0.3f));
+                new RectF(0, 0.75f, 1, 1), new RectF(0, 0.75f, 1, 1));
+
+        @Override
+        public boolean acceptsDrop(int x, int y, int width, int height) {
+            return touchAreaContainsPoint(width, height, x, y);
+        }
 
         // Represents the view state of this dock state
         public class ViewState {
@@ -229,20 +262,17 @@ public class TaskStack {
         public final ViewState viewState;
         private final RectF dockArea;
         private final RectF touchArea;
-        private final RectF stackArea;
 
         /**
          * @param createMode used to pass to ActivityManager to dock the task
          * @param touchArea the area in which touch will initiate this dock state
-         * @param stackArea the area for the stack if a task is docked
+         * @param dockArea the visible dock area
          */
-        DockState(int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea,
-                RectF stackArea) {
+        DockState(int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea) {
             this.createMode = createMode;
             this.viewState = new ViewState(dockAreaAlpha);
             this.dockArea = dockArea;
             this.touchArea = touchArea;
-            this.stackArea = stackArea;
         }
 
         /**
@@ -263,18 +293,6 @@ public class TaskStack {
         public Rect getDockedBounds(int width, int height) {
             return new Rect((int) (dockArea.left * width), (int) (dockArea.top * height),
                     (int) (dockArea.right * width), (int) (dockArea.bottom * height));
-        }
-
-        /**
-         * Returns the stack bounds with the given {@param width} and {@param height}.
-         */
-        public Rect getStackBounds(Rect stackRect) {
-            int width = stackRect.width();
-            int height = stackRect.height();
-            return new Rect((int) (stackRect.left + stackArea.left * width),
-                    (int) (stackRect.top + stackArea.top * height),
-                    (int) (stackRect.left + (stackArea.right - stackArea.left) * width),
-                    (int) (stackRect.top + (stackArea.bottom - stackArea.top) * height));
         }
     }
 
@@ -305,6 +323,29 @@ public class TaskStack {
         mTaskList.add(t);
         if (mCb != null) {
             mCb.onStackTaskAdded(this, t);
+        }
+    }
+
+    /**
+     * Moves the given task to either the front of the freeform workspace or the stack.
+     */
+    public void moveTaskToStack(Task task, int newStackId) {
+        // Find the index to insert into
+        ArrayList<Task> taskList = mTaskList.getTasks();
+        int taskCount = taskList.size();
+        if (!task.isFreeformTask() && (newStackId == FREEFORM_WORKSPACE_STACK_ID)) {
+            // Insert freeform tasks at the front
+            mTaskList.moveTaskToStack(task, taskCount, newStackId);
+        } else if (task.isFreeformTask() && (newStackId == FULLSCREEN_WORKSPACE_STACK_ID)) {
+            // Insert after the first stacked task
+            int insertIndex = 0;
+            for (int i = taskCount - 1; i >= 0; i--) {
+                if (!taskList.get(i).isFreeformTask()) {
+                    insertIndex = i + 1;
+                    break;
+                }
+            }
+            mTaskList.moveTaskToStack(task, insertIndex, newStackId);
         }
     }
 
