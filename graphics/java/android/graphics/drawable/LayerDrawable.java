@@ -1601,8 +1601,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 insetR = r.mInsetE == UNDEFINED_INSET ? r.mInsetR : r.mInsetE;
             }
 
+            // Don't apply padding and insets for children that don't have
+            // an intrinsic dimension.
             final int minWidth = r.mWidth < 0 ? r.mDrawable.getIntrinsicWidth() : r.mWidth;
-            final int w = minWidth + insetL + insetR + padL + padR;
+            final int w = minWidth < 0 ? -1 : minWidth + insetL + insetR + padL + padR;
             if (w > width) {
                 width = w;
             }
@@ -1631,8 +1633,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 continue;
             }
 
+            // Don't apply padding and insets for children that don't have
+            // an intrinsic dimension.
             final int minHeight = r.mHeight < 0 ? r.mDrawable.getIntrinsicHeight() : r.mHeight;
-            final int h = minHeight + r.mInsetT + r.mInsetB + padT + padB;
+            final int h = minHeight < 0 ? -1 : minHeight + r.mInsetT + r.mInsetB + padT + padB;
             if (h > height) {
                 height = h;
             }
