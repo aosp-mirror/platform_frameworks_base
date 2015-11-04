@@ -18,10 +18,6 @@ package com.android.settingslib.drawer;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Pair;
@@ -34,7 +30,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toolbar;
-
 import com.android.settingslib.R;
 
 import java.util.HashMap;
@@ -123,13 +118,27 @@ public class SettingsDrawerActivity extends Activity {
         return mDashboardCategories;
     }
 
-    protected void openTile(DashboardTile tile) {
+    public boolean openTile(DashboardTile tile) {
         closeDrawer();
-        startActivity(tile.intent);
+        int numUserHandles = tile.userHandle.size();
+        if (numUserHandles > 1) {
+            ProfileSelectDialog.show(getFragmentManager(), tile);
+            return false;
+        } else if (numUserHandles == 1) {
+            startActivityAsUser(tile.intent, tile.userHandle.get(0));
+        } else {
+            startActivity(tile.intent);
+        }
+        return true;
     }
 
     protected void onTileClicked(DashboardTile tile) {
-        openTile(tile);
+        if (openTile(tile)) {
+            finish();
+        }
+    }
+
+    public void onProfileTileOpen() {
         finish();
     }
 }
