@@ -16,13 +16,13 @@
 
 #include <gtest/gtest.h>
 
-#include "utils/StringUtils.h"
+#include <utils/StringUtils.h>
 
-namespace android {
-namespace uirenderer {
+using namespace android;
+using namespace android::uirenderer;
 
 TEST(StringUtils, simpleBuildSet) {
-    StringCollection collection("a b c");
+    auto collection = StringUtils::split("a b c");
 
     EXPECT_TRUE(collection.has("a"));
     EXPECT_TRUE(collection.has("b"));
@@ -31,11 +31,8 @@ TEST(StringUtils, simpleBuildSet) {
 }
 
 TEST(StringUtils, advancedBuildSet) {
-    StringCollection collection("GL_ext1 GL_ext2 GL_ext3");
+    auto collection = StringUtils::split("GL_ext1 GL_ext2 GL_ext3");
 
     EXPECT_TRUE(collection.has("GL_ext1"));
     EXPECT_FALSE(collection.has("GL_ext")); // string present, but not in list
 }
-
-};
-};

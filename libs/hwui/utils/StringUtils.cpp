@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-#include "StringUtils.h"
+#include <utils/StringUtils.h>
 
 namespace android {
 namespace uirenderer {
 
-StringCollection::StringCollection(const char* spacedList) {
+unordered_string_set&& StringUtils::split(const char* spacedList) {
+    unordered_string_set set;
     const char* current = spacedList;
     const char* head = current;
     do {
         head = strchr(current, ' ');
         std::string s(current, head ? head - current : strlen(current));
         if (s.length()) {
-            mSet.insert(s);
+            set.insert(std::move(s));
         }
         current = head + 1;
     } while (head);
-}
-
-bool StringCollection::has(const char* s) {
-    return mSet.find(std::string(s)) != mSet.end();
+    return std::move(set);
 }
 
 }; // namespace uirenderer

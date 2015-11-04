@@ -17,15 +17,14 @@
 #include "EglManager.h"
 
 #include "Caches.h"
+#include "DeviceInfo.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
 #include "utils/StringUtils.h"
-
 #include <cutils/log.h>
 #include <cutils/properties.h>
 #include <EGL/eglext.h>
-
 #include <string>
 
 #define GLES_VERSION 2
@@ -129,12 +128,14 @@ void EglManager::initialize() {
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface);
+    DeviceInfo::initialize();
     mRenderThread.renderState().onGLContextCreated();
     initAtlas();
 }
 
 void EglManager::initExtensions() {
-    StringCollection extensions(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
+    auto extensions = StringUtils::split(
+            eglQueryString(mEglDisplay, EGL_EXTENSIONS));
     EglExtensions.bufferAge = extensions.has("EGL_EXT_buffer_age");
     EglExtensions.setDamage = extensions.has("EGL_KHR_partial_update");
     LOG_ALWAYS_FATAL_IF(!extensions.has("EGL_KHR_swap_buffers_with_damage"),
