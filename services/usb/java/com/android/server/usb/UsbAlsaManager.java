@@ -439,7 +439,7 @@ public final class UsbAlsaManager {
 
         UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
         if (audioDevice != null) {
-            if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
+            if (audioDevice.mHasPlayback || audioDevice.mHasCapture) {
                 notifyDeviceState(audioDevice, false);
 
                 // if there any external devices left, select one of them
