@@ -255,7 +255,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Uključuje osobne podatke kao što su brojevi kreditnih kartica i zaporke."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikaciji omogućuje onemogućavanje trake statusa ili dodavanje i uklanjanje sistemskih ikona."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"traka statusa"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"biti traka statusa"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Aplikaciji omogućuje da bude traka statusa."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"proširivanje/sažimanje trake statusa"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Omogućuje aplikaciji proširivanje ili sažimanje trake statusa."</string>
@@ -283,7 +283,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogućuje primanje i obradu WAP poruka. Ta dozvola uključuje mogućnost nadziranja ili brisanja vama poslanih poruka, a da vam ih ne prikaže."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dohvaćanje pokrenutih aplikacija"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogućuje dohvaćanje informacija o trenutačnim i nedavnim tekućim zadacima. To aplikaciji može omogućiti otkrivanje informacija o tome koje se aplikacije upotrebljavaju na uređaju."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Upravljanje vlasnicima profila i uređaja"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"upravljati vlasnicima profila i uređaja"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Omogućuje aplikaciji postavljanje vlasnika profila i vlasnika uređaja."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"promjena redoslijeda pokrenutih aplikacija"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Aplikaciji omogućuje premještanje zadataka u prednji plan ili pozadinu. Aplikacija to može napraviti bez vašeg naloga."</string>
@@ -325,7 +325,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg tabletnog računala zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Aplikaciji omogućuje izmjenu zapisnika poziva vašeg televizora zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Aplikaciji omogućuje izmjenu dnevnika poziva vašeg telefona zajedno s podacima o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu upotrebljavati za brisanje ili izmjenu vašeg dnevnika poziva."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"senzori tjelesnih funkcija (npr. monitori otkucaja srca)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"pristupati biometrijskim senzorima (kao što su monitori otkucaja srca)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Omogućuje aplikaciji pristup podacima sa senzora koji nadziru vaše fizičko stanje, na primjer, broj otkucaja srca."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"čitajte kalendarske događaje i povjerljive informacije"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Aplikaciji omogućuje čitanje svih događaja u kalendaru pohranjenih na vašem tabletnom računalu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti dijeljenje ili spremanje vaših podataka kalendara, neovisno o povjerljivosti ili osjetljivosti."</string>
@@ -337,15 +337,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Aplikaciji omogućuje dodavanje, uklanjanje i promjenu događaja koje možete izmijeniti na telefonu, uključujući one od vaših prijatelja ili suradnika. To aplikaciji može omogućiti slanje poruka koje izgledaju kao da dolaze od vlasnika kalendara ili izmjenu događaja bez znanja vlasnika."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pristup dodatnim naredbama davatelja lokacije"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Omogućuje aplikaciji pristup dodatnim naredbama davatelja usluga lokacije. To može omogućiti aplikaciji ometanje rada GPS-a ili drugih izvora lokacije."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"precizna lokacija (GPS i mreža)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"pristupati preciznoj lokaciji (na temelju GPS-a i mreža)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Aplikacija može dobiti vašu preciznu lokaciju pomoću globalnog pozicijskog sustava (GPS-a) ili mrežnih izvora lokacije kao što su bazne stanice i Wi-Fi. Te lokacijske usluge moraju biti uključene i dostupne vašem uređaju da bi ih aplikacija mogla upotrebljavati. Aplikacije mogu upotrebljavati tu mogućnost kako bi utvrdile vašu lokaciju i mogu dodatno trošiti bateriju."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"približna lokacija (mreža)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pristupati približnoj lokaciji (na temelju mreža)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Aplikacija može dobiti vašu približnu lokaciju. Tu lokaciju izvode lokacijske usluge pomoću mrežnih izvora lokacije kao što su bazne stanice i Wi-Fi. Te lokacijske usluge moraju biti uključene i dostupne vašem uređaju da bi ih aplikacija mogla upotrebljavati. Aplikacije mogu upotrebljavati tu mogućnost kako bi utvrdile vašu približnu lokaciju."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Aplikaciji omogućuje snimanje zvuka mikrofonom. Ta dozvola aplikaciji omogućuje snimanje zvuka u bilo kojem trenutku bez vašeg odobrenja."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikacija sa SIM-om"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"slati naredbe SIM-u"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Omogućuje aplikaciji slanje naredbi SIM-u. To je vrlo opasno."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimi fotografije i videozapise"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogućuje snimanje slika i videozapisa fotoaparatom. Ta dozvola aplikaciji omogućuje upotrebu fotoaparata u bilo kojem trenutku bez vašeg odobrenja."</string>
@@ -383,7 +383,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Aplikaciji omogućuje dobivanje popisa računa koje telefon poznaje. Uključeni mogu biti svi računi koje izrade aplikacije koje ste instalirali."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"prikaz mrežnih veza"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Aplikaciji omogućuje pregled informacija o mrežnim vezama, primjerice koje mreže postoje i koje su spojene."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"puni mrežni pristup"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"imati puni mrežni pristup"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Aplikaciji omogućuje stvaranje mrežnih utičnica i upotrebu prilagođenih mrežnih protokola. Preglednik i druge aplikacije pružaju sredstva za slanje podataka na internet, tako da ta dozvola nije potrebna za slanje podataka na internet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"promjena mrežne povezivosti"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Aplikaciji omogućuje promjenu stanja mrežnog povezivanja."</string>
@@ -403,7 +403,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth telefona i otkrivanje i uparivanje s udaljenim uređajima."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"uspostavljanje i prekidanje veze s WiMAX-om"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Aplikaciji omogućuje utvrđivanje omogućenosti WiMAX mreže te daje informaciju o tome je li spojena neka WiMAX mreža."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Promjena stanja WiMAX mreže"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"promjena stanja WiMAX mreže"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Aplikaciji omogućuje povezivanje tabletnog računala s WiMAX mrežama i prekidanje veze tabletnog računala s njima."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Aplikaciji omogućuje povezivanje i prekidanje veze televizora s WiMAX mrežama."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Aplikaciji omogućuje povezivanje telefona s WiMAX mrežama i prekidanje veze telefona s njima."</string>
@@ -486,7 +486,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Omogućuje aplikaciji izmjenu parametara kalibracije dodirnog zaslona. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"pristup DRM certifikatima"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Aplikaciji omogućuje pružanje i korištenje DRM certifikata. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Primanje statusa prijenosa Android Beama"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"primati status prijenosa Android Beama"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Omogućuje aplikaciji primanje podataka o trenutačnim prijenosima Android Beama"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"uklanjanje DRM certifikata"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Omogućuje aplikaciji uklanjanje DRM certifikata. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
@@ -1098,11 +1098,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatiranje…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nije umetnut"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nisu pronađene podudarne radnje."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Usmjeravanje medijskog izlaza"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"usmjeravati medijski izlaz"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogućuje usmjeravanje medijskog izlaza na druge vanjske uređaje."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Čitanje sesija instaliranja"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"čitati sesije instaliranja"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Omogućuje aplikaciji čitanje sesija instaliranja. Aplikacija može vidjeti pojedinosti o aktivnim instaliranjima paketa."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Zahtijevaj instaliranje paketa"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"zahtijevati instaliranje paketa"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Aplikaciji omogućuje zahtijevanje instaliranja paketa."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dodirnite dvaput za upravljanje zumiranjem"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget nije moguće dodati."</string>

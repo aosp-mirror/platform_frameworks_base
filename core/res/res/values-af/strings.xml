@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sluit persoonlike data soos kredietkaartnommers en wagwoorde in."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiveer of verander statusbalk"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbalk"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"wees die statusbalk"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Laat die program toe om die statusbalk te wees."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"vou statusbalk in of uit"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Laat die program toe om die statusbalk uit te vou of in te vou."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Laat die program toe om WAP-boodskappe te ontvang en te verwerk. Hierdie toestemming sluit ook in dat boodskappe wat na jou toestel gestuur is, gemonitor of uitgevee kan word, sonder dat jy dit gesien het."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"haal lopende programme op"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Laat die program toe om inligting oor die huidig- en onlangslopende take op te haal. Dit kan moontlik die program toelaat om inligting oor watter programme op die toestel gebruik word, te ontdek."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Bestuur profiel- en toesteleienaars"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"bestuur profiel- en toesteleienaars"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Laat programme toe om die profieleienaars en die toesteleienaar te stel."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"herrangskik lopende programme"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Laat die program toe om take na die voorgrond of agtergrond te skuif. Die program kan dit moontlik sonder jou insette doen."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Laat die program toe om jou tablet se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te verander. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te verander."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Laat die program toe om jou TV se oproeprekord te wysig, insluitend data oor inkomende en uitgaande oproepe. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te wysig."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Laat die program toe om jou foon se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te verander. Kwaadwillige programme kan dit gebruik om jou oproeprekord uit te vee of te verander."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"liggaamsensors (soos hartklopmonitors)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"verkry toegang tot liggaamsensors (soos hartklopmonitors)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Laat die program toe om toegang te verkry tot data van sensors af wat jou fisieke toestand, soos jou polsslag, monitor."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lees kalenderafsprake plus vertroulike inligting"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Laat die program toe om alle kalendergebeure wat op jou tablet gestoor is, insluitend dié van vriende en medewerkers, te lees. Dit kan moontlik die program toelaat om jou kalenderdata te deel of te stoor, ongeag van vertroulikheid of sensitiwiteit."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Laat die program toe om gebeure wat op jou foon aangepas kan word, by te voeg, te verwyder of te verander, insluitend dié van vriende en medewerkers. Dit kan moontlik die program toelaat om boodskappe wat lyk of dit van kalendereienaars af kom, te stuur, of om gebeure sonder die eienaar se kennis aan te pas."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Kry toegang tot ekstra liggingverskaffer-bevele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presiese ligging (GPS en netwerkgebaseer)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"verkry toegang tot presiese ligging (GPS- en netwerkgegrond)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Laat die program toe om jou presiese ligging te kry met behulp van die globaleposisioneringstelsel (GPS) of netwerkliggingbronne soos seltorings en Wi-Fi. Hierdie liggingdienste moet aangeskakel en beskikbaar wees aan jou toestel vir die program om dit te gebruik. Programme kan dit gebruik om te bepaal waar jy is en kan batterylewe opgebruik."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"benaderde ligging (netwerkgebaseer)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"verkry toegang tot benaderde ligging (netwerkgegrond)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Laat die program toe om jou benaderde ligging te kry. Hierdie ligging word verkry deur liggingdienste met gebruik van netwerkliggingbronne soos seltorings en Wi-Fi. Hierdie liggingdienste moet aangeskakel en beskikbaar wees aan jou toestel vir die program om dit te gebruik. Programme kan dit gebruik om te bepaal waar omtrent jy is."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"neem klank op"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Laat die program toe om klank met die mikrofoon op te neem. Hierdie toestemming laat die program toe om klank te eniger tyd, sonder jou bevestiging, op te neem."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-kommunikasie"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"stuur bevele na die SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Laat die program toe om bevele na die SIM te stuur. Dit is baie gevaarlik."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"neem foto\'s en video\'s"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Laat die program toe om foto\'s en video\'s met die kamera te neem. Hierdie toestemming laat die program toe om die kamera te eniger tyd sonder jou bevestiging te gebruik."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Laat die program toe om die lys van rekeninge wat aan die foon bekend is, te kry. Dit kan moontlik enige rekeninge wat geskep is deur programme wat jy geïnstalleer het, insluit."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"bekyk netwerkverbindings"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Laat die program toe om inligting oor netwerkverbindings, soos watter netwerke bestaan en gekoppel is, te sien."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"volle netwerktoegang"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"verkry volle netwerktoegang"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Laat die program toe om netwerksokke te skep en gepasmaakte netwerkprotokolle te gebruik. Die blaaier en ander programme verskaf reeds die middele waardeur data na die internet gestuur kan word, so hierdie toestemming word nie vereis om data na die internet te stuur nie."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"verander netwerkverbinding"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Laat die program toe om die status van netwerkkonnektiwiteit te verander."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Laat die program toe om die plaaslike Bluetooth-foon op te stel en te ontdek en met afgeleë toestelle saam te bind."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"koppel aan en ontkoppel van WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Laat die program toe om te bepaal of WiMAX geaktiveer is en of enige WiMAX-netwerke gekoppel is."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Verander WiMAX-status"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"verander WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Laat die program toe om die tablet aan WiMAX-netwerke te koppel en daarvan te ontkoppel."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Laat die program toe om die TV te koppel aan en die TV van WiMAX-netwerke af te ontkoppel."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Laat die program toe om die foon aan WiMAX-netwerke te koppel en daarvan te ontkoppel."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Laat die program toe om die kalibrasieparameters van die raakskerm te wysig. Dit behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"gaan in by DRM-sertifikate"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Laat \'n program toe om DRM-sertifikate op te stel en te gebruik. Behoort nooit vir normale programme nodig te wees nie."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Ontvang Android Straal-oordragstatus"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"ontvang Android Straal-oordragstatus"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Laat hierdie program toe om inligting oor huidige Android Straal-oordragte te ontvang."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"verwyder DRM-sertifikate"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Laat \'n program toe om DRM-sertifikate te verwyder. Behoort nooit vir gewone programme nodig te wees nie."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formateer tans …"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nie ingevoeg nie"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Geen passende aktiwiteite gevind nie."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Roeteer media-uitvoer"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"roeteer media-uitvoer"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Laat \'n program toe om media-uitvoere na ander eksterne toestelle te roeteer."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lees installasiesessies"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"lees installeersessies"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Laat \'n program toe om installasiesessies te lees. Dit laat dit toe om besonderhede van aktiewe pakketinstallasies te sien."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Versoek installeer-pakette"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"versoek installeerpakkette"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Laat \'n program toe om te versoek dat pakkette geïnstalleer word."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>

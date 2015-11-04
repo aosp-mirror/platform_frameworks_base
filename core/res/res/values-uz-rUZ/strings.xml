@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bunga kredit karta raqamlari va parollar kabi shaxsiy ma’lumotlar kiradi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"holat panelini o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ilova holat panelini o‘chirib qo‘yishi hamda tizim ikonkalarini qo‘shishi yoki olib tashlashi mumkin."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"holat paneli"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"holat qatorida ko‘rinishi"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Ilova holat qatorining o‘rnini egallashi mumkin."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"holat panelini yoyish/yig‘ish"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Ilova holat panelini yoyishi va yig‘ishi mumkin."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ilovaga WAP xabarlarni qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Ushbu huquq sizga ko‘rsatmasdan sizga yuborilgan xabarlarni kuzatish yoki o‘chirish xususiyatiga ham ega."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ishlab turgan ilovalar to‘g‘risida ma’lumot olish"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ilovaga hozirda va so‘nggi ishga tushirilgan vazifalar haqida to‘liq ma’lumot olishiga ruxsat beradi. Bu ilovaga qurilmadagi ishlatilayotgan ilovalar haqidagi ma’lumotlarga ega bo‘lishiga ruxsat berishi mumkin."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profil va qurilma egalarini boshqarish"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"profil va qurilma egalarini boshqarish"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Ilovaga profil egalari va qurilma egalarini aniqlash uchun ruxsat beradi."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ishlab turgan ilovalarni qayta tartiblash"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ilovalarga vazifalarni old va orqa fonga o‘tkazish uchun ruxsat beradi. Ilova buni sizning yordamingizsiz bajarishi mumkin."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ilovaga planshetingizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ilovaga televizoringizdagi qo‘ng‘iroqlar jurnali, kirish va chiqish qo‘ng‘rioqlari haqidagi ma’lumotlarni o‘zgartirish huquqini beradi. Zararli ilovalar undan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ilovaga telefoningizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"sezgichlar (m-n, yurak urishi)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"tana sezgichlari (m-n, yurak urishi sensori) ma’lumotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ilovaga sezgichlardan olingan jismoniy holatingiz haqidagi ma’lumotlarni, masalan, yurak urishini kuzatish uchun ruxsat beradi."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"taqvimdagi tadbirlarni maxfiy ma’lumotlari bilan birga o‘qish"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Ilovaga planshetingizda joylashgan va do‘stlaringiz yoki hamkasblaringiz tomonidan qo‘shilgan barcha taqvim tadbirlarini o‘qishga ruxsat beradi. Bu ilovaga maxfiyligi va muhimligidan qat’iy nazar taqvim ma’lumotlaringizni ulashish yoki saqlashga ruxsat berishi mumkin."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Ilovaga telefoningizda o‘zgartirishingiz mumkin bo‘lgan, shuningdek, do‘stlaringiz va hamkasblaringizning tadbirlarini qo‘shish, o‘chirish va o‘zgartirish uchun ruxsat beradi. Bu ilovaga go‘yoki taqvim egalari nomidan kelgan xabarlarni jo‘natishga yoki egasiga bildirmasdan tadbirlarni o‘zgartirishga ruxsat berishi mumkin."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"aniq joylashuv (GPS va tarmoqqa asoslanib)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"aniq joylashuv (GPS va tarmoqqa asoslanib) ma’lumotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ilovaga global joylashuvni aniqlash tizimi (GPS) yoki Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydalanib, aniq joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning joylashuvingizni aniqlaydi. Bu batareya quvvatini ko‘proq sarflaydi."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"yaqin manzil (tarmoq)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"taxminiy joylashuv (tarmoq asosida) ma’lumotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ilovaga sizning taxminiy joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydlanuvchi joylashuv xizmatlari orqali aniqlanadi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning taxminiy joylashuvingizni aniqlaydi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio sozlamalaringizni o‘zgartirish"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ilovalarga tovush va ovoz chiqarish uchun foydalaniladigan karnay kabi global audio sozlamalarini o‘zgartirish uchun ruxsat beradi."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ovoz yozib olish"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Ilovaga mikrofon yordamida audio yozish uchun ruxsat beradi. Bu huquq ilovaga ruxsatingizsiz audio fayllarni yozib olishga ruxsat beradi."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim orqali ulanish"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM-kartaga buyruqlar yuborish"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Dasturga SIM kartaga buyruqlar jo‘natishga ruxsat beradi. Bu juda ham xavfli."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"rasmga tushirish va videoga olish"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Ilovaga kameradan foydalanib rasm va videoga olishga ruxsat beradi. Bu ruxsat ilovaga sizdan tasdiqlashni so‘ramasdan kameradan foydalanishga imkon beradi."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Ilovaga telefondagi hisoblar ro‘yxatini olishga ruxsat beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kirishi mumkin."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"tarmoq ulanishlarini ko‘rish"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Ilovaga mavjud va ulangan tarmoqlar kabi tarmoqqa ulanishlar haqidagi ma’lumotni ko‘rish imkonini beradi."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"butun tarmoqqa ruxsat"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"to‘liq tarmoqdan foydalanish ruxsatiga ega"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Ilovaga tarmoq ulagichlarini yaratish va odatdagi tarmoq protokollaridan foydalanishga ruxsat beradi. Brauzer va boshqa ilovalar internetga ma’lumot jo‘natish uchun imkoniyat yaratadi. Natijada, internetga ma’lumot jo‘natish uchun bu ruxsat talab qilinmaydi."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"tarmoqqa ulanishni o‘zgartirish"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Ilova tarmoqqa ulanish holatini o‘zgartirishi mumkin."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ilova Bluetooth funksiyali mahalliy telefon sozlamalarini sozlashi hamda masofadan turib qurilmalarni aniqlash va ular bilan juftlashishni amalga oshirishi mumkin."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX’ga ulanish va uzish"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ilovaga har qanday ulangan WiMAX tarmoqlari haqida va yoqilgan WiMAX tarmoqlarini aniqlashga ruxsat beradi."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX holatini o‘zgartirish"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX holatini o‘zgartirish"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ilovaga planshetni WiMAX tarmoqlariga ulashga va ulardan uzishga ruxsat beradi."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Ilovaga televizorni WiMAX tarmoqlariga ulash va ulardan uzish huquqini beradi."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ilovaga telefonni WiMAX tarmoqlariga ulashga va ulardan uzishga ruxsat beradi."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ilova sensorli ekranning muvozanat ko‘rsatkichlarini o‘zgartirishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikatlariga kirish"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Ilova DRM sertifikatlarini sinxronlashi va ulardan foydalanishi mumkin. Ushbu ruxsatnoma faqat maxsus ilovalar uchun talab qilinadi."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam uzatish holatini olish"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam o‘tkazmasi holati haqidagi ma’lumotlarni olish"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ushbu ilovaga joriy Android Beam uzatishlari haqida ma\'lumotlarni olish ruxsati berilsin."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM sertifikatlarini o‘chirib tashlash"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ilovaga DRM sertifikatlarini o‘chirib tashlash uchun ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatlanmoqda…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Kiritilmagan"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Hech qanday mos faoliyat topilmadi."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Media chiqishni yo‘naltirish"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"media chiqishni yo‘naltirish"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ilovaga media chiqish ovozini boshqa tashqi qurilmalarga yo‘naltirish uchun ruxsat beradi."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"O‘rnatilgan seanslarni o‘qish"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"o‘rnatish seansi ma’lumotlarini o‘qish"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ilovaga o‘rnatilgan seanslarni o‘qish uchun ruxsat beradi. Bu unga faol paket o‘rnatmalari haqidagi ma’lumotlarni ko‘rish imkonini beradi."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Paketlarni o‘rnatish so‘rovini yuborish"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"paketlarni o‘rnatish so‘rovini yuborish"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Ilovaga paketlarni o‘rnatish so‘rovini yuborish imkonini beradi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Masshtabni o‘zgartirish uchun ikki marta bosing"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidjet qo‘shilmadi."</string>

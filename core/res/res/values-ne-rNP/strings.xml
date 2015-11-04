@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"स्थिति पट्टि"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"वस्तुस्थिति पट्टी हुन दिनुहोस्"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"अनुप्रयोगलाई स्थिति पट्टि हुन अनुमति दिन्छ।"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"स्थिति पट्टिलाई विस्तृत/सङ्कुचित गर्नुहोस्"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"अनुप्रयोगलाई स्थिति पट्टि विस्तार वा संकुचन गर्न अनुमति दिन्छ।"</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न अनुप्रयोगलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका सन्देशहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चलिरहेका अनुप्रयोगहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न अनुप्रयोगलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"प्रोफाइल र यन्त्र मालिकहरू व्यवस्थापन गर्नुहोस्"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाइल र यन्त्र मालिकहरूको व्यवस्थापन गराउनुहोस्"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"अनुप्रयोगहरूलाई प्रोफाइल र यन्त्र मालिकहरू सेट गर्न अनुमति दिनुहोस्।"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चलिरहेका अनुप्रयोगहरूलाई पुनःक्रम गराउनुहोस्"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"कामहरूलाई अग्रभाग र पृष्ठभूमिमा सार्न अनुप्रयोगलाई अनुमति दिन्छ। अनुप्रयोगले यो तपाईँको इनपुट बिना नै गर्न सक्छ।"</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"आगमन तथा बहर्गमन डेटासहित तपाईँको ट्याब्लेटको कल लगको परिमार्जन गर्न अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले यसलाई तपाईँको कल लग परिमार्जन गर्न वा मेटाउन प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"अनुप्रयोगहरूलाई अनुमति दिन्छ तपाईँको TV को कल लग, आगमन र बहिर्गमन कलका डेटा लगायत,  परिमार्जन गर्न। दुस्प्रभावी अनुप्रयोगहरूले यसलाई तपाईँको कल लग मेट्न वा परिमार्जन गर्न सक्छ।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"अनुप्रयोगलाई तपाईंको फोनको आउने र बाहिर जाने कलहरूको बारेको डेटा सहित कल लग परिमार्जन गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्दछ।"</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"शरीर सेन्सर (हृदयदर मोनिटर जस्तै)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"शरीरका सेन्सरहरूमा पहुँच गराउनुहोस् (जस्तै हृदय धड्कन निगरानीहरू)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"तपाईँको हृदय गति जस्तो सेंसर बाट डेटा पहुँचको लागि अनुप्रयोग अनुमति दिन्छ जसले तपाईँको भौतिक अवस्था अनुगमन गर्छ।"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"गोप्य जानकारी र पात्रो घटनाहरू पढ्नुहोस्"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"अनुप्रयोगलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका ती साथीहरू वा सहयोगीहरू सहितको पात्राका कार्यक्रमहरू पढ्न अनुमति दिन्छ। यसले गोपनीयता वा संवेदनशीलता बिना पनि अनुप्रयोगलाई तपाईंको पात्राका डेटा साझेदारी गर्न वा बचत गर्न अनुमति दिन्छ।"</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ती साथीहरू वा सहकर्मीहरूसहित तपाईँको फोनका घटनाहरू जसलाई थप्न, हटाउन र परिवर्तन गर्न  अनुप्रयोगलाई अनुमति दिन्छ। पात्रो मालिकबाट देखा परेका वा मालिकको ज्ञान बिना परिवर्तन भएका घटनाहरू सन्देश पठाउन यसले अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अनुप्रयोगलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो अनुप्रयोगलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"सटिक स्थान (GPS र नेटवर्क आधारित)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"सटीक स्थान पहुँच गराउनुहोस् (GPS तथा नेटवर्कमा आधारित)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"अनुप्रयोगले विश्वव्यापी स्थान प्रणाली (GPS) वा सेल टावरहरू र वाइफाइ जस्ता नेटवर्क स्थान स्रोतहरूको प्रयोग गरेर तपाईँको सही स्थान प्राप्त गर्न अनुमति दिन्छ। यी स्थान सेवाहरू खोल्नु पर्छ र अनुप्रयोगहरूका लागि प्रयोग गर्न तपाईँको उपकरणमा उपलब्ध हुनु पर्छ। अनुप्रयोगहरूले तपाईँ कहाँ हुनु हुन्छ भन्ने निर्धारण गर्न यसलाई प्रयोग गर्न सक्छ र यसले अतिरिक्त ब्याट्रि उर्जा खतप गर्न सक्छ।"</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"अनुमानित स्थान (नेटवर्क-आधारित)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित स्थान पहुँच गराउनुहोस् (नेटवर्कमा आधारित)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"अनुप्रयोगलाई तपाईँको अनुमानित स्थान प्राप्त गर्न अनुमति दिन्छ। यो स्थान सेल टावर र वाइ-फाइजस्ता नेटवर्क स्थान स्रोतहरूको प्रोग गरी स्थान सेवाहरूबाट उत्पन्न गरिएको हो। अनुप्रयोगले यी स्थान सेवाहरूको उपयोग गर्नको लागि यी सेवाहरू तपाईँको उपकरणमा चालु र उपलब्ध हुनु आवश्यक छ। अनुप्रयोगहरूले अनुमानित रूपमा तपाईँ कहाँ हुनुहुन्छ भन्ने निर्धारण गर्न यसको प्रयोग गर्न सक्छन्।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङ्हरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै आवाजको मात्रा र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"अनुप्रयोगलाई माइक्रोफोनको साथ अडियो रेकर्ड गर्न अनुमति दिन्छ। यस अनुमतिले तपाईंको पुष्टिकरण बिना कुनै पनि समयमा अडियो रेकर्ड गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim सञ्‍चार"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM मा आदेशहरू पठाउन दिनुहोस्"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM लाई आदेश पठाउन अनुप्रयोगलाई अनुमति दिन्छ। यो निकै खतरनाक हुन्छ।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"तस्बिरहरू र भिडियोहरू लिनुहोस्।"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"अनुप्रयोगलाई क्यामेरासँग तस्बिर र भिडियोहरू लिन अनुमति दिन्छ। यस अनुमतिले अनुप्रयोगलाई तपाईंको पुष्टिकरण बिना कुनै पनि समयमा क्यामेरा प्रयोग गर्न स्वीकृति दिन्छ।"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"फोनलाई थाहा भएका खाताहरूको सूची प्राप्त गर्न अनुप्रयोगलाई अनुमति दिन्छ। यसले तपाईँले स्थापना गर्नु भएका अनुप्रयोगहरूबाट सृजित कुनै खाताहरू समावेश हुन सक्छ।"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"नेटवर्क जडानहरू हेर्नहोस्"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"अनुप्रयोगलाई नेटवर्क जडानहरू जस्तै कुन नेटवर्कहरू अवस्थित हुन्छन् र जडित छन् जसले हेर्नलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"पूर्ण नेटवर्क पहुँच"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"पूर्ण नेटवर्क पहुँच प्राप्त छ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"नेटवर्क सकेटहरू सिर्जना गर्न र कस्टम नेटवर्क प्रोटोकल प्रयोग गर्न अनुप्रयोगलाई अनुमति दिन्छ। ब्राउजर र अन्य अनुप्रयोगहरूले इन्टरनेटमा डेटा पठाउने माध्यम प्रदान गर्छन्, त्यसैले इन्टरनेटमा डेटा पठाउन यो अनुमतिको आवश्यकता पर्दैन।"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"नेटवर्क जडान परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"अनुप्रयोगलाई नेटवर्क जडानको स्थिति परिवर्तन गर्न अनुमति दिन्छ।"</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"अनुप्रयोगलाई स्थानीय ब्लुटुथ फोन कन्फिगर गर्न र टाढाका उपकरणहरूसँग खोज गर्न र जोडी गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXसँग जोड्नुहोस् वा छुटाउनुहोस्"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"अनुप्रयोगलाई वाइम्याक्स सक्षम छ कि छैन र जडान भएको कुनै पनि वाइम्याक्स नेटवर्कहरूको बारेमा जानकारी निर्धारिण गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"वाइम्याक्स स्थिति परिवर्तन गर्नुहोस्"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"वाइम्याक्स अवस्था परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"अनुप्रयोगलाई वाइम्याक्स नेटवर्कहरूबाट ट्याब्लेट जडान गर्न र ट्याब्लेट विच्छेदन गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"अनुप्रयोगलाई अनुमति दिन्छ TV लाई  जडान गर्न र WiMAX सञ्जालबाट TV को जडान टुटाउन"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"वाइम्याक्स नेटवर्कहरूसँग फोन जोड्न र छुटाउन अनुप्रयोगलाई अनुमति दिन्छ।"</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"अनुप्रयोगलाई टच स्क्रीनको प्यारामिटरहरू क्यालिब्रेसन परिमार्जन गर्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै आवश्यक पर्दैन।"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्रको पहुँच"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM प्रमाणपत्रहरू प्रावधान र प्रयोग गर्ने निवेदनको अनुमति दिन्छ। साधारण अनुप्रयोगहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam स्थानान्तरण अवस्था प्राप्त गर्नुहोस्"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android Beam स्थानान्तरण अवस्था प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"यस आवेदनले वर्तमान Android Beam स्थानान्तरण बारेमा जानकारी प्राप्त गर्न अनुमति दिन्छ"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रहरू हटाउनुहोस्"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रहरू हटाउन अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
@@ -1097,11 +1097,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"फरम्याट गर्दै…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"सम्मिलित छैन"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कुनै मिल्ने गतिविधि पाइएन।"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"मिडिया परिणाम दिशानिर्देश गर्नुहोस्"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"मिडिया निकास दिशानिर्देश गराउनुहोस्"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"मिडिया परिणामलाई अन्य बाहिरी उपकरणहरूसँग लैजानको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्थापना सत्रहरू पढ्नुहोस्"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"स्थापना सत्रहरू पढ्नु दिनुहोस्"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"स्थापित सत्र पढ्न अनुप्रयोगलाई अनुमति दिनुहोस्। यसले सक्रिय प्याकेज प्रतिष्ठानहरू बारेमा विवरण हेर्ने अनुमति दिन्छ।"</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"स्थापना प्याकेजहरू अनुरोध गर्नुहोस्"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"स्थापना प्याकेजहरू अनुरोध गर्नुहोस्"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"प्याकेजहरूको स्थापना अनुरोध गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट थप गर्न सकिँदैन।"</string>

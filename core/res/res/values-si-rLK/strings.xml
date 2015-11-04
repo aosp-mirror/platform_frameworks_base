@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ණයවරපත් අංක සහ මුරපද වැනි පුද්ගලික දත්ත ඇතුළත් වේ."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"තත්ව තීරුව අබල කරන්න හෝ වෙනස් කරන්න"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"තත්ව තීරුව අක්‍රිය කිරීමට හෝ පද්ධති නිරූපක එකතු හෝ ඉවත් කිරීමට යෙදුමට අවසර දේ."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"තත්ව තීරුව"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"තත්ත්ව තීරුව බවට පත්වීම"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"තත්ව තීරුව වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"තත්ව තීරුව දිග හැරීම/හැකිලීම"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"තත්ව තීරුව දිග හැරීමට හෝ හැකිළීමට යෙදුමට අවසර දෙන්න."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"දැනට සහ මෑත ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු සොයා ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය කුමන යෙදුම් උපාංගයේ භාවිතා කරන්නේද යන තොරතුරු යෙදුම්වලට සොයා ගැනීමට ඉඩ දිය හැක."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"පැතිකඩ සහ උපාංග හිමිකරුවන් කළමනාකරණය කරන්න"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"පැතිකඩ සහ උපාංග හිමිකරුවන් කළමනාකරණය කිරීම"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"යෙදුම්වලට පැතිකඩ හිමියන් සහ උපාංග හිමිකරු සැකසීමට ඉඩ දෙයි."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ධාවනය වන යෙදුම් නැවත අනුපිළිවෙලට සැකසීම"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"පෙරබිමට හෝ පසුබිමට සිදුවීම් ගෙනයාමට යෙදුමට අවසර දෙන්න. ඔබගේ ආදානයකින් තොරව යෙදුම මෙය සිදුකරයි."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"සිරුර සංවේදකයන් (හෘද ස්පන්දන වේගය නිරීක්ෂණය කිරීම වැනි)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"දේහ සංවේදකවලට (හෘද ස්පන්දන වේග මොනිටර වැනි) පිවිසීම"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"දින දර්ශනයේ සිදුවීම් සහ රහසිගත තොරතුරු කියවීම"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ඔබගේ ටැබ්ලටය තුල ගබඩා  කර ඇති මිතුරන්ගේ සහ එක්ව ක්‍රියාකරන්නන්ගේ ද ඇතුළුව සියලුම දින දර්ශන සිද්ධි කියවීමට යෙදුමට අවසර දෙන්න. මෙය රහස්‍යභාවය හෝ සංවේදීතාවය නොසලකා ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට යෙදුමට අවසර දෙන්න."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ඔබගේ යහළුවන් හෝ සමකාලීනයන් ඇතුළත් ඔබගේ දුරකථනයේ ඔබට වෙනස් කළ හැකි සිදු වීම් එකතු කිරීමට, ඉවත් කිරීමට, වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙමගින් දින දර්ශන හිමිකරුවන්ගෙන් පැමිණෙන සේ පෙනෙන පණිවිඩ යැවීමට හෝ හිමිකරුගේ දැනුමකින් තොරව සිදුවීම් වෙනස් කිරීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"අමතර ස්ථාන සැපයුම්කරු විධාන වෙත ප්‍රවේශ වීම"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ස්ථානය සපයන අමතර අණ වලට ප්‍රවේශය කිරීමට යෙදුමට අවසර දෙන්න. GPS ක්‍රියාවන් හෝ වෙනත් ස්ථාන මූලාශ්‍ර සමඟ මැදිහත් වීමට මෙයින් යෙදුමට ඉඩ ලැබේ."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"නිවැරදි ස්ථානය (GPS සහ ජාලය පදනම් කරගත්)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"නිවැරදි ස්ථානයට (GPS සහ ජාලය පදනම් කරගත්) පිවිසීම"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ගෝලීය ස්ථානීය පද්ධතිය (GPS) හෝ සෙල් කුළුණු සහ Wi-Fi වැනි ජාල ස්ථානීය ප්‍රභව භාවිතයෙන් ඔබගේ නිවැරදි ස්ථානය ලබාගැනීමට යෙදුම අවසර දෙන්න. යෙදුම් වලට ස්ථානීය සේවා භාවිතා කිරීමට  ඒවා සක්‍රිය විය යුතු වේ. ඔබව සොයා ගැනීමට යෙදුම් මෙය භාවිතා කරන අතර අමතර බැටරි බලයක්ද පරිභෝජනය කරයි."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ආසන්නතම ස්ථානය (ජාලය-පාදක වූ)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ආසන්නතම ස්ථානයට (ජාලය-පාදක වූ) පිවිසීම"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ඔබගේ දළ ස්ථානය ලබාගැනීමට යෙදුමට අවසර දෙන්න. සන්නේවේදන කුළුණු සහ Wi-Fi ආදී ජාල ස්ථාන මූලාශ්‍ර භාවිත කරන ස්ථාන සේවා විසින් මෙම ස්ථානය ව්‍යුත්පන්න කර ඇත. යෙදුමට භාවිතය සඳහා මෙම ස්ථාන සේවා සක්‍රිය කළ යුතු අතර ඔබගේ උපාංගය සඳහා පැවතිය යුතුය. ඔබ සිටින තැන දළව හඳුනා ගැනීමට යෙදුම් වලට මෙය භාවිත කළ හැකිය."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ඔබගේ ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ශබ්දය ආදී ගෝලීය ශබ්ද සැකසීම් වෙනස් කිරීමට සහ ප්‍රතිදානය සඳහා භාවිත කරන්නේ කුමන නාදකය දැයි තේරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ශබ්ද පටිගත කරන්න"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"මයික්‍රොෆෝනය මඟින් ශබ්ද පටිගත කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය මඟින් යෙදුමට ඕනෑම වේලාවක ඔබගේ අනුදැනුමකින් තොරව ශබ්ද පටිගත කිරීමට ඉඩ ලබා දේ."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"සිම් සන්නිවේදනය"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM වෙත විධාන යැවීම"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM වෙත විධාන ගෙන යාමට යෙදුමට අවසර දෙයි. මෙය ඉතා භයානක වේ."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"පින්තූර සහ වීඩියෝ ගන්න"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"කැමරාවෙන් පින්තූර ගැනීමට සහ වීඩියෝ කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය මඟින් ඔබගේ අනුදැනුමකින් තොරව ඕනෑම වේලාවකදී කැමරාව භාවිතා කිරීමට යෙදුමට අවසර දෙන්න."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"දුරකථනය විසින් දන්නා ගිණුම් ලැයිස්තුවක් ලබාගැනීමට යෙදුමට අවසර දෙන්න. ඔබ ස්ථාපනය කොට ඇති යෙදුම් විසින් සාදා ඇති ගිණුම් මීට ඇතුළත් වේ."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ජාල සම්බන්ධතාවයන් බැලීම"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"කුමන ජාල පවතින්නේ ද සහ සම්බන්ධිත ද ආදී ජාල සබඳතා ගැන තොරතුරු බැලීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"සම්පූර්ණ ජාල ප්‍රවේශය"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"සම්පූර්ණ ජාල ප්‍රවේශය තබා ගැනීම"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"උපකරණයට ජාල කෙවනියන් සැදීමට සහ ජාල ප්‍රොටෝකෝල අභිරුචි භාවිතා කිරීමට උපකරණයට ඉඩ දෙන්න. අන්තර්ජාලයට දත්ත යැවීමට විධියන් බ්‍රව්සරය සහ අනෙකුත් යෙදුම් සපයයි, එනිසා මෙම අවසරය දත්ත අන්තර්ජාලයට යැවීමට අවශ්‍ය නොවේ."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ජාල සම්බන්ධතාව වෙනස් කිරීම"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ජාල සම්බන්ධතාවයේ තත්වය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"දුරකථනයේ පෙදෙසි බ්ලූටූත් වින්‍යාස කිරීමට, සහ දුරස්ථ උපාංග ගවේෂණයට සහ යුගල වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX වෙතට සම්බන්ධ කරන්න හෝ විසන්ධි කරන්න"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX සබල බව සහ සම්බන්ධිත ඕනෑම WiMAX ජාලයක තොරතුරු නිශ්චය කිරීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX තත්වය වෙනස් කරන්න"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX තත්වය වෙනස් කිරීම"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ටැබ්ලටය WiMAX ජාල වෙත සම්බන්ධ කිරීමට සහ විසන්ධි කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"WiMAX ජාල වෙතින් රූපවාහිනිය සම්බන්ධ කරන්න සහ රූපවාහිනිය විසන්ධි කරන්න යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX ජාලයන්ට දුරකථනය සම්බන්ධ කිරීමට සහ විසන්ධි කිරීමට යෙදුමට අවසර දෙන්න."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"යෙදුම් වලට ස්පර්ශ තිරයේ ක්‍රමාංකන පරාමිති වෙනස් කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM සහතික ප්‍රවේශය"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"යෙදුමකට DRM  සහතික වෙන් කර භාවිතා කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android බීම් හුවමාරු තත්ත්වය ලබාගන්න"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android කදම්බ හුවමාරු තත්ත්වය ලබා ගැනීම"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"දැනට තිබෙන Android බීම් හුවමාරු පිළිබඳ තොරතුරු ලබාගැනීමට මෙම යෙදුමට ඉඩ දෙන්න"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM සහතික ඉවත් කරන්න"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"යෙදුමකට DRM  සහතික ඉවත් කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
@@ -1093,11 +1093,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"ෆෝමැට් කරමින්…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ඇතුළු කර නැත"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ගැලපෙන ක්‍රියාකාරකම් හමු නොවුණි."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"මාධ්‍ය ප්‍රතිදානයේ මාර්ගගත කිරීම"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"මාධ්‍ය ප්‍රතිදානය මාර්ගගත කිරීම"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"වෙනත් බාහිර උපාංග වෙත මාධ්‍ය ප්‍රතිදානය යැවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ස්ථාපන සැසියන් කියවන්න"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"ස්ථාපන සැසි කියවීම"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ස්ථාපන සැසිය කියවීමට යෙදුමට ඉඩ දෙන්න. සක්‍රිය පැකේජ ස්ථාපනය පිළිබඳ විස්තර බැලීමට එයට මෙයින් ඉඩ දෙයි."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ස්ථාපන පැකේජ ඉල්ලීම"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ස්ථාපන පැකේජ ඉල්ලීම"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ස්ථාපන පැකේජ ඉල්ලීමට යෙදුමකට අවසර දීම."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"විශාලන පාලනය සඳහා දෙවරක් ස්පර්ශ කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"විජටය එකතු කිරීමට නොහැකි විය."</string>

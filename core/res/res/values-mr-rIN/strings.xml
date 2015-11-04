@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर आणि संकेतशब्‍द यासारखा वैयक्तिक डेटा समाविष्‍ट करते."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टीम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"स्टेटस बार"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"स्टेटस बार होऊ द्या"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"स्टेटस बार होण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"स्‍टेटस बार विस्तृत करा/संकुचित करा"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"स्टेटस बार विस्तृत करण्यासाठी किंवा संक्षिप्त करण्यासाठी अॅप ला अनुमती देते."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले संदेश आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अनुप्रयोग वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"प्रोफाईल मालक आणि डिव्हाइस मालक सेट करण्याची अॅप्सना अनुमती द्या."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चालणारे अॅप्स पुनर्क्रमित करा"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"समोर आणि पार्श्वभूमीवर कार्ये हलविण्यासाठी अॅप ला अनुमती देते. अॅप हे आपल्या इनपुटशिवाय करू शकतो."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टीव्हीचा कॉल लॉग सुधारित करण्यासाठी अॅपला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"(हृदय गती मॉनिटरसारखे) शरीर सेन्सर"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"शरीर सेन्सरमध्ये (हृदय गती मॉनिटरसारखे) प्रवेश करा"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"हृदय गती सारख्या, आपल्या शारीरिक स्थितीचे नियंत्रण करणार्‍या सेन्सरवरून डेटामध्ये प्रवेश करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"कॅलेंडर इव्हेंट तसेच गोपनीय माहिती वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"मित्र किंवा सहकर्मींसह, आपल्या टॅब्लेटवर संचयित केलेले सर्व कॅलेंडर इव्हेंट वाचण्यासाठी अॅप ला अनुमती देते. यामुळे गोपनीयता किंवा संवेदनशीलता याकडे दुर्लक्ष करून, आपला कॅलेंडर डेटा सामायिक किंवा जतन करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"मित्र किंवा सहकर्मी यांच्यासह, आपण आपल्या फोनवर सुधारित करू शकता असे इव्हेंट जोडण्यासाठी, काढण्यासाठी, बदलण्यासाठी अॅप ला अनुमती देते. हे कॅलेंडर मालकांकडून येत असल्याचे दिसणारे संदेश पाठविण्यासाठी किंवा मालकांच्या माहितीशिवाय इव्हेंट सुधारित करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्थान प्रदाता आदेशांवर प्रवेश करा"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अ‍ॅपला अतिरिक्त स्‍थान प्रदाता आदेशावर प्रवेश करण्‍याची अनुमती देते. हे कदाचित अ‍ॅपला GPS किंवा इतर स्‍थान स्त्रोत च्या ऑपरेशनमध्‍ये हस्तक्षेप करण्‍याची अनुमती देऊ शकते."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"अचूक स्थान (GPS आणि नेटवर्क-आधारित)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"अचूक स्थानामध्ये (GPS आणि नेटवर्क-आधारित) प्रवेश करा"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"सेल टॉवर आणि वाय-फाय सारखी समग्र स्थिती निर्धारण प्रणाली (GPS) किंवा नेटवर्क स्थान स्त्रोत वापरून आपले अचूक स्थान मिळवण्यासाठी अॅप ला अनुमती देते. अॅपला त्या वापरण्यासाठी या स्थान सेवा चालू असणे आणि आपल्या डिव्हाइसवर उपलब्ध असणे आवश्यक आहे. आपण कुठे आहात हे निर्धारित करण्यासाठी अॅप्स याचा वापर करू शकतात आणि अतिरिक्त बॅटरी उर्जा वापरली जाऊ शकते."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"अंदाजे स्थान (नेटवर्क-आधारित)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अंदाजे स्‍थानामध्ये (नेटवर्क-आधारित) प्रवेश करा"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"आपले अंदाजे स्थान देण्याची अॅप ला अनुमती देते. हे स्थान सेल टॉवर आणि वाय-फाय सारखे नेटवर्क स्थान स्त्रोत वापरून स्थान सेवांद्वारे मिळवले आहे. अॅपला त्या वापरण्यासाठी या स्थान सेवा चालू असणे आणि आपल्या डिव्हाइसवर उपलब्ध असणे आवश्यक आहे. अॅप्स हे आपण कुठे आहात याचा अंदाज लावण्यासाठी वापरू शकतात."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"आपल्या ऑडिओ सेटिंग्ज बदला"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"व्हॉल्यूम आणि आउटपुटसाठी कोणता स्पीकर वापरला आहे यासारख्या समग्र ऑडिओ सेटिंग्ज सुधारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडिओ रेकॉर्ड करा"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"मायक्रोफोनसह ऑडिओ रेकॉर्ड करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्या पुष्टिकरणाशिवाय कोणत्याही वेळी ऑडिओ रेकॉर्ड करण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"सिम संप्रेषण"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"सिम वर आदेश पाठवा"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"अ‍ॅप ला सिम वर आदेश पाठविण्‍याची अनुमती देते. हे खूप धोकादायक असते."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"चित्रे आणि व्हिडिओ घ्या"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"कॅमेर्‍यासह चित्रे आणि व्हिडिओ घेण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्या पुष्टीकरणाशिवाय कोणत्याही वेळी कॅमेरा वापरण्यासाठी अॅप ला परवानगी देते."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"फोनद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण स्थापित केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट करू शकतात."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"नेटवर्क कनेक्शन पहा"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"कोणती नेटवर्क अस्तित्वात आहेत आणि कनेक्ट केलेली आहेत यासारख्या नेटवर्क कनेक्शनविषयीची माहिती पाहण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"पूर्ण नेटवर्क प्रवेश"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"पूर्ण नेटवर्क प्रवेश आहे"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"नेटवर्क सॉकेट तयार करण्यासाठी आणि सानुकूल नेटवर्क प्रोटोकॉल वापरण्यासाठी अॅप ला अनुमती देते. ब्राउझर आणि अन्य अनुप्रयोग म्हणजे इंटरनेटवर डेटा पाठवण्याचा मार्ग, म्हणजे इंटरनेटवर डेटा पाठविण्यासाठी परवानगीची आवश्यकता नसते."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"नेटवर्क कनेक्टिव्हिटी बदला"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"नेटवर्क कनेक्टिव्हिटीची स्थिती बदलण्यासाठी अॅप ला अनुमती देते."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक ब्लूटुथ फोन कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX कनेक्ट करा आणि त्यावरून डिस्कनेक्ट करा"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या कोणत्याही WiMAX नेटवर्क विषयीची माहिती निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX स्थिती बदला"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX स्थिती बदला"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX नेटवर्कवर टॅब्लेट कनेक्ट करण्यास आणि त्यावरून टॅब्लेट डिस्कनेक्ट करण्यास अॅप ला अनुमती देते."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"WiMAX नेटवर्कवरून टीव्ही कनेक्ट करण्यासाठी आणि त्यावरून टीव्ही डिस्कनेक्ट करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX नेटवर्कवर फोन कनेक्ट करण्यास आणि त्यावरून फोन डिस्कनेक्ट करण्यास अॅप ला अनुमती देते."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"स्पर्श स्क्रीनची मापन प्राचले सुधारित करण्यासाठी अॅप ला अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यक नसते."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM प्रमाणपत्रांवर प्रवेश करा"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM प्रमाणपत्रांची तरतूद करण्यासाठी आणि वापरण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्सकरिता कधीही आवश्यकता नसते."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android बीम स्थानांतरण स्थिती प्राप्त करा"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android बीम स्थानांतरण स्थिती प्राप्त करा"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"वर्तमान Android बीम स्थानांतरणांविषयी माहिती प्राप्त करण्यासाठी या अनुप्रयोगास अनुमती देते"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रे काढा"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यकता नसते."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"फॉर्मेट करीत आहे..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"घातले नाही"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कोणतेही जुळणारे क्रियाकलाप आढळले नाहीत."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"मीडिया आउटपुट मार्गस्थ करा"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"मीडिया आउटपुट मार्गस्थ करा"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"अन्य बाह्य डिव्हाइसेसवरील रूट मीडिया आउटपुट वर अनुप्रयोगास अनुमती देते."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्‍थापना सत्र वाचा"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"स्‍थापना सत्र वाचा"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"अनुप्रयोगास स्‍थापना सत्र वाचण्‍याची अनुमती देते. हे सक्रिय पॅकेज स्‍थापनांविषयी तपशील पाहाण्‍याची यास अनुमती देते."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"पॅकेज स्थापित करण्यासाठी विनंती करा"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"पॅकेज स्थापित करण्यासाठी विनंती करा"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"पॅकेजच्या स्थापना करण्यासाठी अनुप्रयोगास अनुमती देते."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"झूम नियंत्रणासाठी दोनदा स्पर्श करा"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"विजेट जोडू शकलो नाही."</string>

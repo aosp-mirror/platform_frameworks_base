@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"รวมถึงข้อมูลส่วนบุคคล เช่น หมายเลขบัตรเครดิตและรหัสผ่าน"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"แถบสถานะ"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"เป็นแถบสถานะ"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"อนุญาตให้แอปพลิเคชันเป็นแถบสถานะ"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ขยาย/ยุบแถบสถานะ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"อนุญาตให้แอปพลิเคชันขยายหรือยุบแถบสถานะ"</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ WAP การอนุญาตนี้รวมถึงความสามารถในการตรวจสอบหรือลบข้อความที่ส่งมาให้คุณโดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"เรียกแอปพลิเคชันที่ทำงานอยู่"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"อนุญาตให้แอปพลิเคชันเรียกดูข้อมูลเกี่ยวกับงานที่ดำเนินการอยู่ในขณะนี้และเมื่อเร็วๆ นี้ ซึ่งอาจทำให้แอปพลิเคชันสามารถค้นข้อมูลได้ว่าอุปกรณ์นี้ใช้แอปพลิเคชันใดบ้าง"</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"จัดการเจ้าของโปรไฟล์และอุปกรณ์"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"จัดการเจ้าของโปรไฟล์และอุปกรณ์"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"อนุญาตให้แอปตั้งค่าเจ้าของโปรไฟล์และเจ้าของอุปกรณ์"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"จัดลำดับแอปพลิเคชันที่ทำงานอยู่ใหม่"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"อนุญาตให้แอปพลิเคชันย้ายงานไปยังส่วนหน้าและพื้นหลัง แอปพลิเคชันอาจดำเนินการโดยไม่รอคำสั่งจากคุณ"</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"อนุญาตให้แอปแก้ไขประวัติการโทรของทีวี รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขประวัติการโทรได้"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"เซ็นเซอร์ร่างกาย (เช่น วัดอัตราการเต้นของหัวใจ)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น ตัววัดอัตราการเต้นของหัวใจ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"อ่านกิจกรรมบนปฏิทินรวมถึงข้อมูลที่เป็นความลับ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในแท็บเล็ตของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"อนุญาตให้แอปพลิเคชันเพิ่ม ลบ เปลี่ยนกิจกรรมที่คุณสามารถเปลี่ยนแปลงในโทรศัพท์ได้ รวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย การอนุญาตนี้อาจทำให้แอปพลิเคชันสามารถส่งข้อความที่มาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยที่เจ้าของไม่ทราบ"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"อนุญาตให้แอปเข้าถึงคำสั่งของผู้ให้บริการตำแหน่งเพิ่มเติม ซึ่งอาจทำให้แอปสามารถแทรกแซงการทำงานของ GPS หรือต้นทางของตำแหน่งอื่นๆ ได้"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ตำแหน่งที่แม่นยำ (อิงตาม GPS และเครือข่าย)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"เข้าถึงตำแหน่งที่แม่นยำ (อิงจาก GPS และเครือข่าย)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"อนุญาตให้แอปพลิเคชันรับตำแหน่งที่แม่นยำของคุณโดยใช้ Global Positioning System (GPS) หรือต้นทางของตำแหน่งในเครือข่ายอย่างเช่น เสาสัญญาณมือถือ และ WiFi บริการตำแหน่งเหล่านี้จะต้องถูกเปิดใช้งานอยู่สำหรับอุปกรณ์ของคุณเพื่อให้แอปพลิเคชันสามารถใช้งานได้ แอปพลิเคชันสามารถใช้บริการตำแหน่งนี้เพื่อตัดสินว่าคุณอยู่ ณ จุดใด และอาจใช้พลังงานแบตเตอรี่มากกว่าปกติ"</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ตำแหน่งโดยประมาณ (อิงตามเครือข่าย)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"เข้าถึงตำแหน่งโดยประมาณ (อิงจากเครือข่าย)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"อนุญาตให้แอปพลิเคชันรับตำแหน่งโดยประมาณของคุณ บริการตำแหน่งจะดึงตำแหน่งขึ้นมาโดยใช้ต้นทางของตำแหน่งอย่างเช่น เสาสัญญาณมือถือ และ WiFi บริการตำแหน่งเหล่านี้จะต้องถูกเปิดใช้งานอยู่สำหรับอุปกรณ์ของคุณเพื่อให้แอปพลิเคชันสามารถใช้งานได้ แอปพลิเคชันสามารถใช้บริการตำแหน่งนี้เพื่อตัดสินอย่างคร่าวๆ ว่าคุณอยู่ ณ จุดใด"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"บันทึกเสียง"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"อนุญาตให้แอปพลิเคชันบันทึกเสียงด้วยไมโครโฟน การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกเสียงได้ทุกเมื่อโดยไม่ต้องรอการยืนยันจากคุณ"</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"การสื่อสารกับ SIM"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"ส่งคำสั่งไปยังซิม"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"อนุญาตให้แอปส่งคำสั่งไปยัง SIM ซึ่งอันตรายมาก"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"อนุญาตให้แอปพลิเคชันถ่ายภาพและวิดีโอด้วยกล้องถ่ายรูปนี้ การอนุญาตนี้จะทำให้แอปพลิเคชันสามารถใช้กล้องถ่ายรูปได้ทุกเมื่อโดยไม่ต้องรอการยืนยันจากคุณ"</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"อนุญาตให้แอปพลิเคชันรับรายการบัญชีที่โทรศัพท์รู้จัก ซึ่งอาจรวมถึงบัญชีใดๆ ก็ตามที่แอปพลิเคชันซึ่งคุณติดตั้งไว้ได้สร้างขึ้น"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ดูการเชื่อมต่อเครือข่าย"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับการเชื่อมต่อเครือข่าย เช่น มีเครือข่ายใดอยู่บ้าง และมีการเชื่อมต่อเครือข่ายใด"</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"การเข้าถึงเครือข่ายเต็มรูปแบบ"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"มีสิทธิ์เข้าถึงเครือข่ายเต็มรูปแบบ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"อนุญาตให้แอปพลิเคชันสร้างซ็อกเก็ตเครือข่ายและใช้โปรโตคอลเครือข่ายที่กำหนดเอง เบราว์เซอร์และแอปพลิเคชันอื่นๆ ให้วิธีการในการส่งข้อมูลไปยังอินเทอร์เน็ต จึงไม่จำเป็นต้องได้รับการอนุญาตนี้เพื่อที่จะส่งข้อมูลไปยังอินเทอร์เน็ต"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"เปลี่ยนการเชื่อมต่อเครือข่าย"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงสถานะการเชื่อมต่อของเครือข่าย"</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"อนุญาตให้แอปพลิเคชันกำหนดค่าโทรศัพท์บลูทูธในตัวเครื่อง ตลอดจนค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"เชื่อมต่อและเลิกเชื่อมต่อจาก WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"อนุญาตให้แอปพลิเคชันตรวจสอบว่า WiMAX เปิดใช้งานอยู่หรือไม่และข้อมูลเกี่ยวกับเครือข่าย WiMAX ใดๆ ที่เชื่อมต่ออยู่"</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"เปลี่ยนสถานะของ WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"เปลี่ยนสถานะของ WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อแท็บเล็ตกับเครือข่าย WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"อนุญาตให้แอปเชื่อมต่อทีวีและยกเลิกการเชื่อมต่อทีวีจากเครือข่าย WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อโทรศัพท์กับเครือข่าย WiMAX"</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"อนุญาตให้แอปสามารถปรับพารามิเตอร์การเทียบมาตรฐานของหน้าจอสัมผัส ไม่ควรใช้สำหรับแอปทั่วไป"</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"เข้าถึงใบรับรอง DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ช่วยให้แอปพลิเคชันสามารถจัดสรรและใช้ใบรับรอง DRM ได้ ไม่จำเป็นสำหรับแอปปกติทั่วไป"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"รับสถานะการโอน Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"รับสถานะการโอน Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"อนุญาตให้แอปพลิเคชันนี้รับข้อมูลเกี่ยวกับการโอน Android Beam ปัจจุบัน"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"นำใบรับรอง DRM ออก"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"อนุญาตให้แอปพลิเคชันนำใบรับรอง DRM ออก แอปทั่วไปไม่จำเป็นต้องใช้"</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"กำลังฟอร์แมต…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ไม่ได้ใส่ไว้"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ไม่พบกิจกรรมที่ตรงกัน"</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"กำหนดเส้นทางเอาต์พุตของสื่อ"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"กำหนดเส้นทางเอาต์พุตของสื่อ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"อนุญาตให้แอปพลิเคชันกำหนดเส้นทางเอาต์พุตของสื่อไปยังอุปกรณ์ภายนอกอื่นๆ"</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"อ่านเซสชันการติดตั้ง"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"อ่านเซสชันการติดตั้ง"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"อนุญาตให้แอปพลิเคชันอ่านเซสชันการติดตั้ง ซึ่งจะอนุญาตให้อ่านรายละเอียดเกี่ยวกับการติดตั้งแพ็กเกจที่ใช้งาน"</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ขอติดตั้งแพ็กเกจ"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ขอติดตั้งแพ็กเกจ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"อนุญาตให้แอปพลิเคชันขอการติดตั้งแพ็กเกจ"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>

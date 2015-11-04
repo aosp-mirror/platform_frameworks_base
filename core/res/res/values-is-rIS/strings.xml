@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Felur í sér persónuleg gögn á borð við kreditkortanúmer og aðgangsorð."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"slökkva á eða breyta stöðustiku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Leyfir forriti að slökkva á stöðustikunni eða bæta við og fjarlægja kerfistákn."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"stöðustika"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"vera stöðustikan"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Leyfir forriti að vera stöðustikan."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"stækka/minnka stöðustiku"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Leyfir forriti að stækka og minnka stöðustikuna."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leyfir forriti að taka á móti og vinna úr WAP-skilaboðum. Þessi heimild felur í sér möguleikann á að fylgjast með eða eyða skilaboðum sem þér eru send án þess að birta þér þau."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"sækja forrit í gangi"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leyfir forriti að sækja upplýsingar um opin forrit og forrit sem nýlega hafa verið opin. Þetta getur gert forritinu kleift að nálgast upplýsingar um forritin sem notuð eru í tækinu."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Stjórna eigendum sniða og tækis"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"stjórna eigendum sniða og tækja"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Leyfir forritum að stilla eigendur sniða og eiganda tækisins."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"endurraða forritum í gangi"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Leyfir forriti að færa verk á milli forgrunns og bakgrunns. Forritið getur gert þetta án inngrips frá þér."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Leyfir forriti að breyta símtalaskrá spjaldtölvunnar, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Leyfir forriti að breyta símtalaskrá sjónvarpsins, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Leyfir forriti að breyta símtalaskrá símans, þ. á m. gögnum um hringd og móttekin símtöl. Spilliforrit geta notað þetta til að eyða eða breyta símtalaskránni."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"líkamsskynjarar (s.s. hjartsláttarmælar)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"fá aðgang að líkamsskynjurum (s.s. hjartsláttarmælum)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Veitir forritinu aðgang að gögnum frá skynjurum sem fylgjast með líkamsstarfsemi þinni, svo sem hjartslætti."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lesa dagatalsviðburði og trúnaðarupplýsingar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Leyfir forriti að lesa alla dagatalsviðburði sem vistaðir eru í spjaldtölvunni, þ. á m. þá sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að deila dagatalsgögnunum þínum burtséð frá því hvort þau innihalda trúnaðargögn eða viðkvæmar upplýsingar."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Leyfir forriti að bæta við, fjarlægja og breyta viðburðum sem hægt er að breyta í símanum, þ. á m. viðburðum sem vinir eða samstarfsmenn eiga. Þetta getur gert forritinu kleift að senda skilaboð sem virðast koma frá eigendum viðburðarins eða breyta viðburðum án vitundar eigenda þeirra."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"aðgangur að viðbótarskipunum staðsetningarveitu"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Leyfir forriti að fá aðgang að fleiri skipunum staðsetningarveitu. Þetta getur gert forritinu kleift að hafa áhrif á virkni GPS og annars staðsetningarbúnaðar."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"nákvæm staðsetning (frá GPS og símakerfi)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"fá aðgang að nákvæmri staðsetningu (frá GPS og símkerfi)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Leyfir forriti að sjá nákvæma staðsetningu þína með hjálp GPS-kerfis eða staðsetningarbúnaðar sem byggir á netkerfum á borð við farsímasenda og Wi-Fi. Það verður að vera kveikt á slíkri staðsetningarþjónustu og hún þarf að vera aðgengileg tækinu til að forritið geti notað hana. Forrit geta notað þjónustuna til að áætla staðsetningu þína og kunna að ganga hraðar á rafhlöðuna."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"gróflega áætluð staðsetning (frá símakerfi)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"fá aðgang að áætlaðri staðsetningu (frá símkerfi)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Leyfir forriti að sjá gróflega áætlaða staðsetningu þína. Sú staðsetning er sótt í staðsetningarbúnað sem byggir á netkerfum á borð við farsímasenda og Wi-Fi. Það verður að vera kveikt á slíkri staðsetningarþjónustu og hún þarf að vera aðgengileg tækinu til að forritið geti notað hana. Forrit geta notað þjónustuna til að áætla staðsetningu þína gróflega."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"breyta hljóðstillingum"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Leyfir forriti að breyta altækum hljóðstillingum, s.s. hljóðstyrk og hvaða hátalari er notaður sem úttak."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"taka upp hljóð"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Leyfir forriti að taka upp hljóð með hljóðnemanum. Þessi heimild leyfir forritinu að taka upp hljóð hvenær sem er án þinnar heimildar."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-samskipti"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"senda skipanir til SIM-kortsins"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Leyfir forriti að senda SIM-kortinu skipanir. Þetta er mjög hættulegt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"taka myndir og myndskeið"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Leyfir forriti að taka myndir og myndskeið með myndavélinni. Þessi heimild leyfir forritinu að nota myndavélina hvenær sem er án þinnar heimildar."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Leyfir forriti að fá lista yfir reikninga sem síminn þekkir. Þar á meðal kunna að vera reikningar stofnaðir af forritum sem þú hefur sett upp."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"skoða nettengingar"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Leyfir forriti að skoða upplýsingar um nettengingar, svo sem hvaða net eru til og eru tengd."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"fullur netaðgangur"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"hafa fullan netaðgang"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Leyfir forriti að búa til nettengla og nota sérstilltar netsamskiptareglur. Vafrinn og önnur forrit geta sjálf sent gögn inn á internetið svo þessi heimild er ekki þörf til að senda gögn á internetið."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"breyta nettengingu"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Leyfir forriti að breyta stöðu nettengingar."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Leyfir forriti að stilla Bluetooth-símann og finna og parast við fjartengd tæki."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"tengjast og aftengja frá WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Leyfir forriti að greina hvort WiMAX er virkt og upplýsingar um tengd WiMAX-net."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Breyta stöðu WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"breyta stöðu WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Leyfir forriti að tengja og aftengja spjaldtölvuna við WiMAX-net."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Leyfir forriti að tengja sjónvarpið við WiMAX-net og aftengja frá þeim."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Leyfir forriti að tengja og aftengja símann við WiMAX-net."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Leyfir forriti að breyta kvörðunarbreytum snertiskjásins. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"aðgangur að DRM-vottorðum"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Leyfir forriti að úthluta og nota DRM-vottorð. Ætti aldrei að þurfa fyrir venjuleg forrit."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Fá flutningsstöðu Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"fá flutningsstöðu Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Leyfir þessu forriti að fá upplýsingar um flutning sem fram fer með Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"fjarlægja DRM-vottorð"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Leyfir forriti að fjarlægja DRM-vottorð. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Forsníður…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Ekki sett í"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Engar aðgerðir með samsvörun fundust."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Beina margmiðlunarúttaki"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"beina margmiðlunarúttaki"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Leyfir forriti að beina margmiðlunarúttaki til annarra ytri tækja."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lesa uppsetningarlotur"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"lesa uppsetningarlotur"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Leyfir forriti að lesa uppsetningarlotur. Þetta gerir því kleift að sjá upplýsingar um virkar pakkauppsetningar."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Fara fram á uppsetningu pakka"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"fara fram á uppsetningu pakka"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Leyfir forriti að fara fram á uppsetningu pakka."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Ýttu tvisvar til að fá upp aðdráttarstýringar"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Ekki tókst að bæta græju við."</string>

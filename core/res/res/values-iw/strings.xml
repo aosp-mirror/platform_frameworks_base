@@ -256,7 +256,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"שורת מצב"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"להיות שורת הסטטוס"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"מאפשר לאפליקציה להופיע בשורת המצב."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"הרחב/כווץ את שורת המצב"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"מאפשר לאפליקציה להרחיב או לכווץ את שורת המצב."</string>
@@ -284,7 +284,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏מאפשר לאפליקציה לקבל ולעבד הודעות WAP. אישור זה כולל את היכולת לעקוב אחר הודעות שנשלחו אליך ולמחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור אפליקציות פעילות"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"מאפשר לאפליקציה לאחזר מידע לגבי משימות הפועלות כרגע ושפעלו לאחרונה. ייתכן שהדבר יתיר לאפליקציה לגלות מידע לגבי האפליקציות שבהן נעשה שימוש במכשיר."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ניהול בעלים של פרופיל ומכשיר"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"ניהול בעלים של פרופיל ומכשיר"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"מאפשרת לאפליקציות להגדיר את הבעלים של הפרופיל ואת בעל המכשיר."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"סידור מחדש של אפליקציות פעילות"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"מאפשר לאפליקציה להעביר משימות לחזית ולרקע. האפליקציה עשוי לעשות זאת ללא התערבותך."</string>
@@ -326,7 +326,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"מאפשר לאפליקציה לשנות את יומן השיחות של הטאבלט, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"מאפשרת לאפליקציה לשנות את יומן השיחות של הטלוויזיה, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות להשתמש בהרשאה זו כדי למחוק או לשנות את יומן השיחות שלך."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"מאפשר לאפליקציה לשנות את יומן השיחות של הטלפון, כולל נתונים על שיחות נכנסות ויוצאות. אפליקציות זדוניות עלולות לעשות בכך שימוש כדי למחוק או לשנות את יומן השיחות שלך."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"חיישני גוף (כמו מוניטורים עבור קצב לב)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"גישה אל חיישני גוף (כמו מוניטורים לקצב לב)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"מאפשר לאפליקציה לגשת אל נתוני חיישנים העוקבים אחר מצבך הגופני, כמו קצב הלב."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"קריאת אירועי יומן וגם מידע סודי"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"מאפשר לאפליקציה לקרוא את כל אירועי היומן המאוחסנים בטאבלט, כולל אלה של חברים ועמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשתף או לשמור את נתוני היומן שלך, ללא התחשבות בסודיות או ברגישות."</string>
@@ -338,15 +338,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"מאפשר לאפליקציה להוסיף, להסיר ולשנות אירועים שאתה יכול לשנות בטלפון, כולל אלה של חברים או עמיתים לעבודה. הדבר עשוי להתיר לאפליקציה לשלוח הודעות הנראות כאילו שנשלחו מבעלי יומן או לשנות אירועים ללא ידיעת הבעלים."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"‏מיקום מדויק (מבוסס GPS ורשת)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏גישה אל מיקום מדויק (מבוסס GPS ורשת)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"‏מאפשר לאפליקציה לקבל את המיקום המדויק שלך באמצעות מערכת המיקום הגלובלית (GPS) או מקורות מיקום ברשת כגון אנטנות סלולריות ו-Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים ונגישים למכשיר שלך כדי שהאפליקציה תשתמש בהם. ייתכן שאפליקציות יעשו בכך שימוש כדי לקבוע היכן אתה נמצא ולגרום לצריכת סוללה מוגברת."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"מיקום משוער (מבוסס רשת)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"גישה אל מיקום משוער (מבוסס רשת)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"‏מאפשר לאפליקציה לקבל את מיקומך המשוער. מיקום זה נגזר על-פי שירותי מיקום העושים שימוש במקורות מיקום ברשת, כגון אנטנות סלולריות ו-Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים ונגישים למכשיר שלך כדי שהאפליקציה תשתמש בהם. ייתכן שאפליקציות יעשו בכך שימוש כדי לקבוע את מיקומך המשוער."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר לאפליקציה לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"מאפשר לאפליקציה להקליט אודיו באמצעות המיקרופון. אישור זה מתיר לאפליקציה להקליט אודיו בכל עת ללא אישורך."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"‏תקשורת SIM"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"‏שליחת פקודות אל ה-SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏מאפשרת ליישום לשלוח פקודות ל-SIM. זוהי הרשאה מסוכנת מאוד."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"מאפשר לאפליקציה לצלם תמונות וסרטונים באמצעות המצלמה. אישור זה מאפשר לאפליקציה להשתמש במצלמה בכל עת ללא אישורך."</string>
@@ -384,7 +384,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"מאפשר לאפליקציה לקבל רשימה של חשבונות המוכרים לטלפון. הדבר עשוי לכלול חשבונות שנוצרו על ידי אפליקציות שהתקנת."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"הצג חיבורי רשת"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"מאפשר לאפליקציה להציג מידע לגבי חיבורי רשת, למשל, אילו רשתות קיימות ומחוברות."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"גישת רשת מלאה"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"קבלת גישת רשת מלאה"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"‏מאפשר לאפליקציה ליצור Sockets ולהשתמש בפרוטוקולי רשת מותאמים אישית. הדפדפן, כמו אפליקציות  אחרות, מספק אמצעים לשליחת נתונים לאינטרנט, כך שאישור זה אינו נחוץ לשליחת נתונים לאינטרנט."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"שנה את קישוריות הרשת"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"מאפשר לאפליקציה לשנות את מצב הקישוריות של הרשת."</string>
@@ -404,7 +404,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏מאפשר לאפליקציה להגדיר את תצורתו של הטלפון המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏התחברות והתנתקות מ-WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"‏מאפשר לאפליקציה לדעת האם WiNMAX מופעל, כמו גם לקבל מידע האם רשתות WiNMAX כלשהן מחוברות."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"‏שנה את מצב WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏שנה את מצב WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏מאפשר לאפליקציה לחבר את הטאבלט לרשתות WiMAX ולהתנתק מהן."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏מאפשרת לאפליקציה לחבר את הטלוויזיה לרשתות WiMAX ולנתק את החיבור שלה מהן."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"‏מאפשר לאפליקציה לחבר את הטלפון לרשתות WiMAX ולהתנתק מהן."</string>
@@ -487,7 +487,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"מאפשרת לאפליקציה לשנות את פרמטרי הכיול של מסך המגע. לעולם לא אמורה להיות נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏גישה אל אישורי DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏מאפשרת לאפליקציה לנהל תצורה של אישורי DRM ולהשתמש בהם. לעולם לא אמורה להיות נחוצה עבור אפליקציה רגילה."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"‏קבלת סטטוס העברה של Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"‏קבלת סטטוס העברה של Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏מאפשר לאפליקציה הזו לקבל מידע על העברות Android Beam נוכחיות"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"‏הסרת אישורי DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏הרשאה זו מאפשרת לאפליקציה להסיר אישורי DRM. באפליקציות רגילות אף פעם לא אמור להיות בה צורך."</string>
@@ -1105,11 +1105,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"מפרמט…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"לא הוכנס"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"לא נמצאו פעילויות תואמות."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"ניתוב פלט מדיה"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"ניתוב פלט מדיה"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"מאפשר לאפליקציה לנתב פלט מדיה למכשירים חיצוניים אחרים."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"קריאת פעילות התקנה"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"קריאת פעילות התקנה"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"מאפשר לאפליקציה לקרוא הפעלות התקנה. הרשאה זו מאפשרת לה לראות פרטים על התקנות פעילות של חבילות."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"בקשה להתקנת חבילות"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"בקשה להתקנת חבילות"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"מתיר לאפליקציה לבקש התקנה של חבילות."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"גע פעמיים לבקרת מרחק מתצוגה"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"‏לא ניתן להוסיף widget."</string>

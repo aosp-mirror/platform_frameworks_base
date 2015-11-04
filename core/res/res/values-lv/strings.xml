@@ -255,7 +255,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ietver personas datus, piemēram, kredītkartes numurus un paroles."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"atspējot vai pārveidot statusa joslu"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ļauj lietotnei atspējot statusa joslu vai pievienot un noņemt sistēmas ikonas."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusa josla"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"Būt par statusa joslu"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Ļauj lietotnei būt par statusa joslu."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"izvērst/sakļaut statusa joslu"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Ļauj lietotnei izvērst vai sakļaut statusa joslu."</string>
@@ -283,7 +283,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Šī atļauja ietver iespēju pārraudzīt vai dzēst jums nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"izgūt izmantotās lietotnes"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ļauj lietotnei izgūt informāciju par pašreiz un nesen darbinātajiem uzdevumiem. Tādējādi lietotne var atklāt informāciju par ierīcē izmantotajām lietojumprogrammām."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profilu un ierīces īpašnieku pārvaldība"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"Pārvaldīt profilus un ierīces īpašniekus"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Atļaut lietotnēm iestatīt profilu īpašniekus un ierīces īpašnieku."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pārkārtot izmantotās lietotnes"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ļauj lietotnei pārvietot uzdevumus priekšplānā un fonā. Lietotne var to izdarīt bez jūsu apstiprinājuma."</string>
@@ -325,7 +325,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ļauj lietotnei pārveidot planšetdatora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu savu zvanu žurnālu."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ļauj lietotnei pārveidot televizora zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu zvanu žurnālu."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ļauj lietotnei pārveidot tālruņa zvanu žurnālu, tostarp ienākošo un izejošo zvanu datus. Ļaunprātīgas lietotnes var to izmantot, lai dzēstu vai pārveidotu savu zvanu žurnālu."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"ķermeņa sensori (piemēram, sirdsdarbības monitori)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"Piekļūt ķermeņa sensoriem (piemēram, sirdsdarbības monitoriem)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ļauj lietotnei piekļūt to sensoru datiem, kuri pārrauga jūsu fizisko stāvokli (piemēram, sirdsdarbības ātrumu)."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lasīt kalendāra pasākumus un konfidenciālu informāciju"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Ļauj lietotnei lasīt visus planšetdatorā saglabātos kalendāra notikumus, tostarp draugu vai kolēģu notikumus. Tas var ļaut lietotnei kopīgot vai saglabāt jūsu kalendāra datus, neraugoties uz to konfidencialitāti vai sensitivitāti."</string>
@@ -337,15 +337,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Ļauj lietotnei pievienot, noņemt, mainīt notikumus, kurus varat pārveidot tālrunī, tostarp draugu vai kolēģu notikumus. Tas var ļaut lietotnei sūtīt ziņojumus, norādot, ka tos sūta kalendāru īpašnieki, vai pārveidot notikumus bez īpašnieka atļaujas."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"piekļūt atrašanās vietas nodrošinātāja papildu komandām"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ļauj lietotnei piekļūt papildu atrašanās vietas noteikšanas nodrošinātāju komandām. Tas var ļaut lietotnei traucēt GPS vai citu atrašanās vietas noteikšanas avotu darbību."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"precīza atrašanās vieta (GPS un tīklā)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"Piekļūt precīzai atrašanās vietai (izmantojot GPS un tīklu)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ļauj lietotnei iegūt precīzu informāciju par jūsu atrašanās vietu, izmantojot globālo pozicionēšanas sistēmu (GPS) vai tīkla atrašanās vietas pakalpojumus, piemēram, mobilo sakaru torņus un Wi-Fi. Lai lietotne varētu izmantot šos atrašanās vietas pakalpojumus, ierīcē tiem ir jābūt ieslēgtiem un pieejamiem. Lietotnes var izmantot šo atļauju, lai noteiktu jūsu atrašanās vietu, un var patērēt papildu akumulatora enerģiju."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"aptuvena atrašanās vieta (tīklā)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"Piekļūt aptuvenai atrašanās vietai (izmantojot tīklu)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ļauj lietotnei iegūt informāciju par aptuvenu jūsu atrašanās vietu. Tā tiek noteikta atrašanās vietas pakalpojumos, izmantojot tīkla atrašanās vietas avotus, kā arī mobilo sakaru torņus un Wi-Fi. Lai lietotne varētu izmantot šos atrašanās vietas pakalpojumus, ierīcē tiem ir jābūt ieslēgtiem un pieejamiem. Lietotnes var izmantot šo atļauju, lai noteiktu aptuvenu jūsu atrašanās vietu."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"mainīt audio iestatījumus"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ļauj lietotnei mainīt globālos audio iestatījumus, piemēram, skaļumu un izejai izmantoto skaļruni."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ierakstīt audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Ļauj lietotnei ierakstīt audio, izmantojot mikrofonu. Šī atļauja ļauj lietotnei ierakstīt audio jebkurā brīdī bez jūsu apstiprinājuma."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM saziņa"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"Sūtīt komandas SIM kartei"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Ļauj lietotnei sūtīt komandas uz SIM karti. Tas ir ļoti bīstami!"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"uzņemt attēlus un videoklipus"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Ļauj lietotnei uzņemt attēlus un videoklipus ar kameru. Ar šo atļauju lietotne var jebkurā brīdī izmantot kameru bez jūsu apstiprinājuma."</string>
@@ -383,7 +383,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Ļauj lietotnei iegūt tālrunim zināmo kontu sarakstu. Tas var ietvert jebkādus kontus, ko izveidojušas instalētās lietojumprogrammas."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"skatīt tīkla savienojumus"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Ļauj lietotnei skatīt informāciju par tīkla savienojumiem, piemēram, par to, kādi tīkli pastāv un ar kuriem tīkliem ir izveidots savienojums."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"pilnīga piekļuve tīklam"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"Iegūt pilnu piekļuvi tīklam"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Ļauj lietotnei izveidot tīkla ligzdas un izmantot pielāgotus tīkla protokolus. Pārlūkprogramma un citas lietojumprogrammas nodrošina līdzekļus, kas nepieciešami, lai sūtītu datus internetā, tāpēc šī atļauja nav nepieciešama, lai sūtītu datus internetā."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"mainīt tīkla savienojamību"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Ļauj lietotnei mainīt tīkla savienojamības statusu."</string>
@@ -403,7 +403,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ļauj lietotnei konfigurēt vietējo Bluetooth tālruni, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX savienojuma izveide un pārtraukšana"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ļauj lietotnei noteikt, vai WiMAX ir iespējots, un sniedz informāciju par visiem WiMAX tīkliem, ar kuriem ir izveidots savienojums."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX statusa mainīšana"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX statusa mainīšana"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ļauj lietotnei izveidot un pārtraukt planšetdatora savienojumu ar WiMAX tīkliem."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Ļauj lietotnei pievienot televizoru WiMAX tīkliem un atvienot no tiem."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ļauj lietotnei izveidot un pārtraukt tālruņa savienojumu ar WiMAX tīkliem."</string>
@@ -486,7 +486,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ļauj lietotnei pārveidot skārienekrāna kalibrēšanas parametrus. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"Piekļuve digitālā satura tiesību pārvaldības sertifikātiem"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Ļauj lietojumprogrammai nodrošināt un izmantot digitālā satura tiesību pārvaldības sertifikātus. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Saņemt Android Beam pārsūtīšanas statusu"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"Saņemt Android Beam pārsūtīšanas statusu"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ļauj šai lietojumprogrammai saņemt informāciju par pašreizēju Android Beam pārsūtīšanu"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"noņemt DRM sertifikātus"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ļauj lietojumprogrammai noņemt DRM sertifikātus. Parastās lietotnēs tas nebūs nepieciešams."</string>
@@ -1098,11 +1098,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Notiek formatēšana…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nav ievietots"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nav atrasta neviena atbilstoša darbība."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Multivides datu izejas maršrutēšana"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"Maršrutēt multivides datu izeju"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ļauj lietojumprogrammai maršrutēt multivides datu izeju uz citām ārējām ierīcēm."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Instalēšanas sesiju lasīšana"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"Lasīt instalēšanas sesijas"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ļauj lietojumprogrammai lasīt instalēšanas sesijas. Tādējādi lietojumprogrammai ir pieejama informācija par aktīvajām pakotņu instalācijām."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Pieprasīt pakotņu instalēšanu"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"Pieprasīt pakotņu instalēšanu"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Ļauj lietojumprogrammai pieprasīt pakotņu instalēšanu."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pieskarieties divreiz, lai kontrolētu tālummaiņu."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nevarēja pievienot logrīku."</string>

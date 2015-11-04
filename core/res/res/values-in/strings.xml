@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"nonaktifkan atau ubah bilah status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Mengizinkan apl menonaktifkan bilah status atau menambah dan menghapus ikon sistem."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"bilah status"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"jadikan bilah status"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Mengizinkan apl menjadi bilah status."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"luaskan/ciutkan bilah status"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Mengizinkan apl memperluas atau menciutkan bilah status."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Memungkinkan aplikasi menerima dan memproses pesan WAP. Izin ini mencakup kemampuan untuk memantau atau menghapus pesan yang dikirim kepada Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"mengambil apl yang berjalan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Memungkinkan aplikasi mengambil informasi tentang tugas yang dijalankan saat ini dan baru-baru ini. Izin ini memungkinkan aplikasi menemukan informasi tentang aplikasi mana yang digunakan pada perangkat."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Mengelola pemilik profil dan perangkat"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"kelola pemilik profil dan perangkat"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Mengizinkan aplikasi menyetel pemilik profil dan pemilik perangkat"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"menyusun ulang apl yang berjalan"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Memungkinkan aplikasi memindah tugas ke latar depan dan latar belakang. Aplikasi dapat melakukannya tanpa masukan dari Anda."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Memungkinkan apl memodifikasi log panggilan tablet Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk menghapus atau memodifikasi log panggilan Anda."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Mengizinkan aplikasi untuk memodifikasi log panggilan TV, termasuk data tentang panggilan masuk dan keluar. Aplikasi berbahaya mungkin menggunakan ini untuk menghapus atau memodifikasi log panggilan."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Memungkinkan apl memodifikasi log panggilan ponsel Anda, termasuk data tentang panggilan masuk dan keluar. Apl berbahaya dapat menggunakan ini untuk menghapus atau memodifikasi log panggilan Anda."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"sensor tubuh (misal: monitor detak jantung)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"akses sensor tubuh (misalnya, monitor detak jantung)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Mengizinkan aplikasi untuk mengakses data dari sensor yang memantau kondisi fisik Anda, seperti denyut jantung."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"baca acara kalender serta informasi rahasia"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Memungkinkan aplikasi membaca semua acara kalender yang tersimpan di tablet Anda, termasuk milik teman atau rekan kerja. Izin ini memungkinkan aplikasi berbagi atau menyimpan data kalender Anda, terlepas dari kerahasiaan atau sensitivitas."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Memungkinkan aplikasi menambahkan, menghapus, mengubah acara yang dapat Anda ubah pada ponsel, termasuk acara teman atau rekan kerja. Izin ini memungkinkan aplikasi mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa sepengetahuan pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"lokasi akurat (berbasis jaringan dan GPS)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"akses lokasi akurat (berbasis jaringan dan GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Mengizinkan aplikasi memperoleh lokasi Anda yang akurat menggunakan Sistem Pemosisian Global (GPS) atau sumber lokasi jaringan, misalnya menara seluler dan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia untuk perangkat Anda agar aplikasi dapat menggunakannya. Aplikasi dapat menggunakan ini untuk menentukan perkiraan tempat Anda berada dan dapat menghabiskan daya baterai tambahan."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"perkiraan lokasi (berbasis jaringan)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"akses perkiraan lokasi (berbasis jaringan)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Mengizinkan aplikasi untuk mendapatkan perkiraan lokasi Anda. Lokasi ini diperoleh dengan layanan lokasi yang menggunakan sumber lokasi jaringan, misalnya menara seluler dan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia untuk perangkat Anda agar aplikasi dapat menggunakannya. Aplikasi dapat menggunakan ini untuk menentukan perkiraan tempat Anda berada."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekam audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Memungkinkan aplikasi merekam audio dengan mikrofon. Izin ini memungkinkan aplikasi merekam audio kapan saja tanpa konfirmasi Anda."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"komunikasi sim"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"kirimkan perintah ke SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Mengizinkan aplikasi mengirim perintah ke SIM. Ini sangat berbahaya."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Memungkinkan aplikasi mengambil gambar dan video dengan kamera. Izin ini memungkinkan aplikasi menggunakan kamera kapan saja tanpa konfirmasi Anda."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Memungkinkan aplikasi mendapatkan daftar akun yang dikenal oleh ponsel. Ini mungkin termasuk akun yang dibuat oleh aplikasi yang telah Anda pasang."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"lihat sambungan jaringan"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Memungkinkan aplikasi melihat informasi tentang sambungan jaringan, misalnya jaringan yang ada dan tersambung."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"akses jaringan penuh"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"dapatkan akses jaringan penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Memungkinkan aplikasi membuat soket jaringan dan menggunakan protokol jaringan khusus. Browser dan aplikasi lain menyediakan sarana untuk mengirim data ke internet sehingga izin ini tidak diperlukan untuk mengirim data ke internet."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ubah konektivitas jaringan"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Mengizinkan apl mengubah keadaan konektivitas jaringan."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"sambungkan dan putuskan dari WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Memungkinkan aplikasi menentukan apakah WiMAX diaktifkan dan informasi tentang jaringan WiMAX apa saja yang tersambung."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ubah status WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"Ganti status WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Memungkinkan aplikasi menyambungkan tablet ke dan memutus tablet dari jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Mengizinkan aplikasi untuk menghubungkan TV ke dan memutuskan hubungan TV dari jaringan WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Memungkinkan aplikasi menyambungkan ponsel ke dan memutus ponsel dari jaringan WiMAX."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Memungkinkan aplikasi mengubah parameter kalibrasi layar sentuh. Tidak diperlukan oleh aplikasi normal."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"mengakses sertifikat DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Memungkinkan aplikasi menyediakan dan menggunakan sertifikat DRM. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Menerima status transfer Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"terima status transfer Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Memungkinkan aplikasi ini menerima informasi tentang transfer Android Beam saat ini"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"membuang serifikat DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Memungkinkan aplikasi membuang sertifikat DRM. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Menformat..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Tidak dicolokkan"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Tidak ditemukan aktivitas yang sesuai."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Menentukan rute keluaran media"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"tentukan rute keluaran media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Memungkinkan aplikasi menentukan rute keluaran media ke perangkat eksternal lainnya."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Membaca sesi pemasangan"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"baca sesi pemasangan"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Memungkinkan aplikasi membaca sesi pemasangan. Tindakan ini memungkinkannya melihat detail tentang pemasangan paket aktif."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Minta pasang paket"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"minta pasang paket"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Mengizinkan aplikasi meminta pemasangan paket."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Sentuh dua kali untuk mengontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Tidak dapat menambahkan widget."</string>

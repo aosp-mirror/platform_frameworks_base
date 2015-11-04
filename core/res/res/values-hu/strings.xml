@@ -53,7 +53,7 @@
     <string name="serviceErased" msgid="1288584695297200972">"A törlés sikerült."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Helytelen jelszó."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI kész."</string>
-    <string name="badPin" msgid="9015277645546710014">"A megadott régi PIN kód helytelen."</string>
+    <string name="badPin" msgid="9015277645546710014">"A megadott régi PIN-kód helytelen."</string>
     <string name="badPuk" msgid="5487257647081132201">"A megadott PUK kód helytelen."</string>
     <string name="mismatchPin" msgid="609379054496863419">"A beírt PIN kódok nem egyeznek."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Írjon be egy 4-8 számjegyű PIN kódot."</string>
@@ -75,7 +75,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"Hívásvárakoztatás"</string>
     <string name="BaMmi" msgid="455193067926770581">"Hívásletiltás"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Jelszómódosítás"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"PIN kód módosítása"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"PIN-kód módosítása"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Szám hívása"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Hívószám korlátozva"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Háromutas hívás"</string>
@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Beleértve a személyes adatokat, például a hitelkártyaszámokat és jelszavakat."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"állapotsor kikapcsolása vagy módosítása"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lehetővé teszi az alkalmazás számára az állapotsor kikapcsolását, illetve rendszerikonok hozzáadását és eltávolítását."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"állapotsor"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"az állapotsor szerepének átvétele"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Lehetővé teszi az alkalmazás számára, hogy az állapotsoron legyen."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"állapotsáv részletes- és listanézete"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Lehetővé teszi az alkalmazás számára, hogy váltson az állapotsor részletes és listanézete között."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lehetővé teszi az alkalmazás számára, hogy WAP-üzeneteket fogadjon és dolgozzon fel. Ez azt is jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"futó alkalmazások lekérése"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lehetővé teszi az alkalmazás számára a jelenleg futó és nemrég befejezett feladatokkal kapcsolatos információk lekérését. Ezáltal az alkalmazás engedélyt kap az eszközön használt alkalmazásokkal kapcsolatos információk felderítésére."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profil- és eszköztulajdonosok kezelése"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"profil és eszköztulajdonosok kezelése"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Lehetővé teszi, hogy az alkalmazások beállítsák a profil- és az eszköztulajdonosokat."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"futó alkalmazások átrendezése"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Lehetővé teszi az alkalmazás számára, hogy feladatokat helyezzen át az előtérből a háttérbe és fordítva. Az alkalmazás ezt az Ön jóváhagyása nélkül is megteheti."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lehetővé teszi, hogy az alkalmazás módosítsa a táblagép híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Lehetővé teszi, hogy az alkalmazás módosítsa a tévé hívásnaplóját, így például a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt hívásnaplója törlésére vagy módosítására használhatják."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lehetővé teszi, hogy az alkalmazás módosítsa a telefon híváslistáját, beleértve a bejövő és kimenő hívások adatait is. A rosszindulatú alkalmazások ezt arra használhatják, hogy híváslistáját töröljék vagy módosítsák."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"testérzékelők (pl. pulzusmérő)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"hozzáférés a testérzékelőkhöz (például pulzusmérők)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Engedélyezi az alkalmazásnak, hogy hozzáférjen az Ön fizikai állapotát – például a pulzusszámát – figyelő érzékelők adataihoz."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"naptári események és bizalmas információk beolvasása"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Lehetővé teszi az alkalmazás számára a táblagépén tárolt összes naptári esemény beolvasását, beleértve az ismerősök vagy munkatársak eseményeit is. Az alkalmazás így megoszthatja vagy elmentheti az Ön naptáradatait azok titkos vagy bizalmas jellegétől függetlenül."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Lehetővé teszi az alkalmazás számára a telefonon módosítható események hozzáadását, törlését vagy módosítását, beleértve az ismerősök vagy munkatársak eseményeit is. Az engedéllyel rendelkező alkalmazás üzeneteket küldhet, amelyek úgy tűnhetnek, hogy a naptár tulajdonosától származnak, illetve módosíthatják az eseményeket a tulajdonosok tudta nélkül."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"további helyszolgáltatói parancsok elérése"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lehetővé teszi az alkalmazás számára további helyszolgáltatói parancsok elérését. Ezáltal az alkalmazás beavatkozhat a GPS vagy más helyforrások működésébe."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"pontos (GPS- és hálózatalapú) tartózkodási hely"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"hozzáférés a pontos (GPS- és hálózatalapú) helyadatokhoz"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Lehetővé teszi az alkalmazás számára a pontos tartózkodási helyének lekérését a GPS és a hálózati helyforrások, így például az adótornyok és a Wi-Fi hálózatok adatainak felhasználásával. A helyszolgáltatásokat be kell kapcsolni, és az adatoknak elérhetőknek kell lenniük az eszközén ahhoz, hogy az alkalmazás használhassa őket. Használatukkal az alkalmazások meghatározhatják az Ön tartózkodási helyét, és az akkumulátort is fokozottan fogyaszthatják."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"hozzávetőleges (hálózatalapú) tartózkodási hely"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"hozzáférés a hozzávetőleges (hálózatalapú) helyadatokhoz"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Lehetővé teszi az alkalmazás számára a körülbelüli tartózkodási helyének lekérését. A helymeghatározás a hálózati helyforrások, így például az adótornyok és a Wi-Fi hálózatok adatainak felhasználásával történik. A helyszolgáltatásokat be kell kapcsolni, és az adatoknak elérhetőknek kell lenniük az eszközén ahhoz, hogy az alkalmazás használhassa őket. Használatukkal az alkalmazások meghatározhatják az Ön hozzávetőleges tartózkodási helyét."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"hangbeállítások módosítása"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lehetővé teszi az alkalmazás számára az általános hangbeállítások, például a hangerő és a használni kívánt kimeneti hangszóró módosítását."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"hanganyag rögzítése"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Lehetővé teszi az alkalmazás számára a mikrofonnal való hangfelvételt.Az engedéllyel rendelkező alkalmazás az Ön jóváhagyása nélkül, bármikor rögzíthet hanganyagot."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"SIM-kommunikáció"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"parancsok küldése a SIM-kártyára"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Engedélyezi, hogy az alkalmazás parancsokat küldjön a SIM kártyára. Ez rendkívül veszélyes lehet."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotók és videók készítése"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Lehetővé teszi az alkalmazás számára, hogy a fényképezőgéppel fotókat és videókat készítsen. Az engedéllyel rendelkező alkalmazás bármikor, az Ön jóváhagyása nélkül használhatja a fényképezőgépet."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Lehetővé teszi az alkalmazás számára a telefon által ismert hálózatok listájának lekérését; beleértve a telepített alkalmazások által létrehozott bármely fiókot."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"hálózati kapcsolatok megtekintése"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen hálózati kapcsolatokra vonatkozó információkhoz, például melyek létező hálózatok, és melyek vannak csatlakoztatva."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"teljes hálózati hozzáférés"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"teljes hálózati hozzáférés"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Lehetővé teszi az alkalmazás számára hálózati szoftvercsatornák létrehozását, valamint egyéni hálózati protokollok használatát. A böngésző és egyéb alkalmazások lehetővé teszik adatok küldését az internetre, így ez az engedély nem szükséges az internetre való adatküldéshez."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"hálózati csatlakoztathatóság módosítása"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Lehetővé teszi az alkalmazás számára a hálózati csatlakoztathatóság állapotának módosítását."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lehetővé teszi az alkalmazás számára, hogy konfigurálja a helyi Bluetooth telefont, valamint hogy távoli eszközöket fedezzen fel és párosítson."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-kapcsolódás és a kapcsolat bontása"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Lehetővé teszi az alkalmazás számára, hogy ellenőrizze, a WiMax engedélyezve van-e, valamint hogy információt gyűjtsön a csatlakoztatott WiMax-hálózatokról."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-állapot módosítása"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-állapot módosítása"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Lehetővé teszi az alkalmazás számára, hogy a táblagépet csatlakoztassa WiMAX-hálózathoz vagy leválassza azt róla."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Lehetővé teszi az alkalmazás számára a tévé WiMAX-hálózatokhoz való csatlakoztatását, illetve az ilyen hálózatokról való leválasztását."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Lehetővé teszi az alkalmazás számára, hogy a telefont csatlakoztassa WiMAX-hálózathoz vagy leválassza azt róla."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lehetővé teszi, hogy az alkalmazás módosítsa az érintőképernyő kalibrációs paramétereit. A normál alkalmazásoknál erre elvileg soha nincs szükség."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-tanúsítványokhoz való hozzáférés"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Engedélyezi egy alkalmazás számára a DRM-tanúsítványokhoz való hozzáférést és azok használatát. Átlagos alkalmazásoknak erre nem lehet szükségük."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam-átviteli állapot fogadása"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"android Beam-átviteli állapot fogadása"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Lehetővé teszi az alkalmazás számára a folyamatban lévő Android Beam-átvitelekről szóló információk fogadását"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-tanúsítványok eltávolítása"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lehetővé teszi, hogy az alkalmazás eltávolítsa a DRM-tanúsítványokat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
@@ -643,11 +643,11 @@
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Írja be a PIN kódot"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Írja be a PUK kódot, majd az új PIN kódot"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kód"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Új PIN kód"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Új PIN-kód"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Érintsen jelszó megadásához"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"A feloldáshoz írja be a jelszót"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Feloldáshoz írja be a PIN kódot"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Helytelen PIN kód."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Helytelen PIN-kód."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"A feloldáshoz nyomja meg a Menü, majd a 0 gombot."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Segélyhívó szám"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Nincs szolgáltatás."</string>
@@ -985,7 +985,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Feladó:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Címzett:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Adja meg a szükséges PIN kódot:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kód:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kód:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"A táblagép ideiglenesen lecsatlakozik a Wi-Fi hálózatról, míg a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközhöz csatlakozik"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"A tévé ideiglenesen lekapcsolódik a Wi-Fi-hálózatról addig, amíg a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközhöz csatlakozik."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"A telefon ideiglenesen kilép a Wi-Fi hálózatról, míg a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközhöz csatlakozik."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formázás…"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Nincs behelyezve"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nincs megfelelő tevékenység."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Médiafájlok kimenetének irányítása"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"médiafájlok kimenetének irányítása"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lehetővé teszi az alkalmazás számára, hogy más külső eszközökre irányítsa a médiafájlok lejátszását."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Telepítési munkamenetek olvasása"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"telepítési munkamenetek olvasása"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Engedélyezi az alkalmazásnak a telepítési munkamenetek olvasását. Ezáltal részleteket kaphat az egyes csomagok éppen folyamatban lévő telepítéséről."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Telepítőcsomagok kérése"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"telepítőcsomagok kérése"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lehetővé teszi az alkalmazás számára csomagok telepítésének kérését."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Érintse meg kétszer a nagyítás beállításához"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nem sikerült hozzáadni a modult."</string>
@@ -1280,17 +1280,17 @@
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Elfelejtett minta"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Helytelen minta"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Helytelen jelszó"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"Helytelen PIN kód"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Helytelen PIN-kód"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Próbálkozzon újra <xliff:g id="NUMBER">%1$d</xliff:g> másodperc múlva."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Rajzolja le a mintát"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Adja meg a SIM kártya PIN kódját"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Adja meg a PIN kódot"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Írja be a jelszót"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"A SIM kártya le van tiltva. A folytatáshoz adja meg a PUK kódot. A részletekért vegye fel a kapcsolatot szolgáltatójával."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Kívánt PIN kód megadása"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Kívánt PIN kód megerősítése"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Kívánt PIN-kód megadása"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Kívánt PIN-kód megerősítése"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM kártya feloldása..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Helytelen PIN kód."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Helytelen PIN-kód."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4–8 számjegyű PIN kódot írjon be."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"A PUK kód 8 karakter hosszú kell, hogy legyen."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Adja meg újra a helyes PUK kódot. Az ismételt próbálkozással véglegesen letiltja a SIM kártyát."</string>
@@ -1417,15 +1417,15 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"A nyomtatási szolgáltatás nincs bekapcsolva"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"A(z) <xliff:g id="NAME">%s</xliff:g> szolgáltatás telepítve"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Koppintson az engedélyezéshez"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Rendszergazdai PIN kód megadása"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN kód megadása"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Rendszergazdai PIN-kód megadása"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN-kód megadása"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Helytelen"</string>
-    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Jelenlegi PIN kód"</string>
-    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Új PIN kód"</string>
-    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Új PIN kód megerősítése"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"PIN kód létrehozása a korlátozások módosításához"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Jelenlegi PIN-kód"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Új PIN-kód"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Új PIN-kód megerősítése"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"PIN-kód létrehozása a korlátozások módosításához"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"A PIN kódok nem egyeznek. Próbálja újra."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"A PIN kód túl rövid. Legalább 4 számjegyből kell állnia."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"A PIN-kód túl rövid. Legalább 4 számjegyből kell állnia."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other">Próbálja újra <xliff:g id="COUNT">%d</xliff:g> másodperc múlva</item>
       <item quantity="one">Próbálja újra 1 másodperc múlva</item>
@@ -1448,7 +1448,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Az alkalmazás rögzítve van: a rögzítés feloldása nem engedélyezett ezen az eszközön."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Képernyő rögzítve"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Képernyő rögzítése feloldva"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN kód kérése a rögzítés feloldásához"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kód kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Feloldási minta kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Jelszó kérése a rögzítés feloldásához"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"A rendszergazda telepítette"</string>

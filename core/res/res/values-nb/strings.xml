@@ -254,7 +254,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Dette omfatter personlige data, som kredittkortnumre og passord."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lar appen deaktivere statusfeltet eller legge til og fjerne systemikoner."</string>
-    <string name="permlab_statusBarService" msgid="7247281911387931485">"statusrad"</string>
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"vise appen i statusfeltet"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Gir appen tillatelse til å vises i statusfeltet."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"utvide/slå sammen statusfeltet"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Lar appen utvide eller skjule statuslinjen."</string>
@@ -282,7 +282,7 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lar appen motta og behandle WAP-meldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til deg uten at du har sett dem."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente apper som kjører"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lar appen hente informasjon om oppgaver som kjører og som nylig har kjørt. Dette kan tillate appen å oppdage informasjon om hvilke apper som brukes på enheten."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Administrer profiler og enhetseiere"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"administrere profiler og enhetseiere"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Lar apper angi profileierne og enhetseieren."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Endre rekkefølge på apper som kjører"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Lar appen flytte oppgaver til forgrunnen eller bakgrunnen. Appen kan gjøre dette uten instruksjoner fra deg."</string>
@@ -324,7 +324,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Lar appen endre nettbrettets samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å slette eller endre samtaleloggen din."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Gjør at appen kan endre TV-ens samtalelogg, herunder data om innkommende eller utgående samtaler. Skadelige apper kan bruke dette til å slette eller endre samtaleloggen."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Lar appen endre telefonens samtalelogg, inkludert data om innkommende og utgående anrop. Skadelige apper kan utnytte denne tillatelsen til å slette eller endre samtaleloggen din."</string>
-    <string name="permlab_bodySensors" msgid="4871091374767171066">"kroppssensorer (som pulsmålere)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"få tilgang til kroppssensorer (f.eks. pulsmålere)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Gir appen tilgang til data fra sensorer som overvåker den fysiske tilstanden din, for eksempel hjertefrekvensen din."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lese kalenderhendelser og konfidensiell informasjon"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Lar appen lese alle kalenderaktivitetene lagret på nettbrettet ditt, inkludert aktiviteter for venner eller kolleger. Dette kan gjøre at appen deler eller lagrer kalenderinformasjonen din uavhengig av konfidensialitet og sensitivitet."</string>
@@ -336,15 +336,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Lar appen legge til, fjerne og endre aktiviteter du kan redigere på telefonen din, inkludert aktiviteter for venner eller kolleger. Dette kan gjøre at appen sender meldinger som ser ut som om de kommer fra kalendereiere eller endre aktiviteter uten at eierne vet om det."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"bruke ekstra posisjonskommandoer"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Appen gis tillatelse til å bruke ekstra kommandoer fra posisjonsleverandører. Dette kan gi appen tillatelse til å påvirke bruken av GPS eller andre posisjonskilder."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presis posisjon (GPS- og nettverksbasert)"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"få tilgang til nøyaktig posisjon (GPS- og nettverksbasert)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Lar appen se den nøyaktige posisjonen din ved hjelp av GPS (Global Positioning System) eller posisjonstjenester for nettverk, som for eksempel basestasjoner og Wi-Fi. Disse posisjonstjenestene må være slått på og tilgjengelig for enheten din, for at appen skal kunne bruke dem. Apper kan bruke dette til å fastslå hvor du er, og funksjonen kan medføre økt batteribruk."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"omtrentlig posisjon (nettverksbasert)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få tilgang til omtrentlig posisjon (nettverksbasert)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Lar appen se den omtrentlige posisjonen din. Denne posisjonen hentes fra posisjonstjenester som benytter posisjonskilder som for eksempel basestasjoner og Wi-Fi. Disse posisjonstjenestene må være slått på og tilgjengelig for enheten din, for at appen skal kunne bruke dem. Apper kan bruke dette til å finne ut omtrent hvor du er."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Appen tillates å ta opp lyd med mikrofonen. Det betyr at appen kan ta opp lyd når som helst uten at du har bedt om det."</string>
-    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-kommunikasjon"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"sende kommandoer til SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lar appen sende kommandoer til SIM-kortet. Dette er veldig farlig."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder og videoer"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Appen tillates å ta bilder og filme med kameraet. Det betyr at appen kan bruke kameraet når som helst uten bekreftelse fra deg."</string>
@@ -382,7 +382,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Appen kan hente listen over kontoene telefonen kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"se nettverkstilkoblinger"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Appen kan se informasjon om nettverkstilkoblinger, slik som hvilke nettverk som finnes og er tilkoblet."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"full nettverkstilgang"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"få full nettverkstilgang"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Appen kan opprette nettverkskontakter og bruke tilpassede nettverksprotokoller. Nettleseren og andre apper gjør det mulig å sende data til Internett, så denne tillatelsen er ikke nødvendig for å kunne sende data til Internett."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"endre nettverkskonnektivitet"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Lar appen endre innstillingene for nettverkstilknytning."</string>
@@ -402,7 +402,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lar appen konfigurere den lokale Bluetooth-telefonen, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"koble til eller fra WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Lar appen avgjøre hvorvidt WiMAX er aktivert og finne informasjon om eventuelle tilkoblede WiMAX-nettverk."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Endre WiMAX-status"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"endre WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Lar appen koble nettbrettet til og fra WiMAX-nettverk."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Gjør at appen kobler TV-en til og fra WiMAX-nettverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Lar appen koble telefonen til og fra WiMAX-nettverk."</string>
@@ -485,7 +485,7 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lar appen endre kalibrasjonsparametrene for berøringsskjermen. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tilgang til DRM-sertifikater"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillater at en app klargjøre og bruke DRM-sertifikater. Denne tillatelsen bør aldri være nødvendig for vanlige apper."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Motta overføringsstatus for Android Beam"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"motta overføringsstatus for Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Lar appen motta informasjon om aktuelle Android Beam-overføringer"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"fjern sertifikater for digital rettighetsadministrasjon"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Gir en app tillatelse til å fjerne sertifikater for digital rettighetsadministrasjon. Skal ikke være nødvendig for vanlige apper."</string>
@@ -1091,11 +1091,11 @@
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatering …"</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"Ikke satt inn"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Finner ingen samsvarende aktiviteter."</string>
-    <string name="permlab_route_media_output" msgid="1642024455750414694">"Videresending av medieutdata"</string>
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"videresende medieutdata"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lar en app videresende medieutdata til andre eksterne enheter."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"lese installeringsøkter"</string>
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"lese installeringsøkter"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillater en app å lese installeringsøkter. Dette gjør det mulig for den å se detaljer om aktive pakkeinstallasjoner."</string>
-    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Be om installasjon av pakker"</string>
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"be om installasjon av pakker"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lar apper be om installasjon av pakker."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Trykk to ganger for zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kunne ikke legge til modulen."</string>
