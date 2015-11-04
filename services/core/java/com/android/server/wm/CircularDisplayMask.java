@@ -65,7 +65,7 @@ class CircularDisplayMask {
         SurfaceControl ctrl = null;
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                ctrl = new WindowStateAnimator.SurfaceTrace(session, "CircularDisplayMask",
+                ctrl = new WindowSurfaceController.SurfaceTrace(session, "CircularDisplayMask",
                         mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
                         SurfaceControl.HIDDEN);
             } else {

@@ -267,7 +267,8 @@ public class WindowAnimator {
             final int flags = win.mAttrs.flags;
             boolean canBeForceHidden = mPolicy.canBeForceHidden(win, win.mAttrs);
             boolean shouldBeForceHidden = shouldForceHide(win);
-            if (winAnimator.mSurfaceControl != null) {
+            if (winAnimator.mSurfaceController != null
+                    && winAnimator.mSurfaceController.hasSurface()) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
                 winAnimator.mWasAnimating = nowAnimating;
@@ -512,7 +513,7 @@ public class WindowAnimator {
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (winAnimator.mSurfaceControl == null) {
+            if (winAnimator.mSurfaceController == null) {
                 continue;
             }
 

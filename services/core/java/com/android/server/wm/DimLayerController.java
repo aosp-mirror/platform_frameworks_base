@@ -132,8 +132,8 @@ class DimLayerController {
                 + " dimLayerUser=" + dimLayerUser.toShortString()
                 + " newWinAnimator=" + newWinAnimator
                 + " state.animator=" + state.animator);
-        if (newWinAnimator.mSurfaceShown && (state.animator == null
-                || !state.animator.mSurfaceShown
+        if (newWinAnimator.getShown() && (state.animator == null
+                || !state.animator.getShown()
                 || state.animator.mAnimLayer <= newWinAnimator.mAnimLayer)) {
             state.animator = newWinAnimator;
             if (state.animator.mWin.mAppToken == null && !dimLayerUser.isFullscreen()) {

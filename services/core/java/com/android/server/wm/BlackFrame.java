@@ -45,7 +45,7 @@ public class BlackFrame {
             int h = b-t;
 
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                surface = new WindowStateAnimator.SurfaceTrace(session, "BlackSurface("
+                surface = new WindowSurfaceController.SurfaceTrace(session, "BlackSurface("
                         + l + ", " + t + ")",
                         w, h, PixelFormat.OPAQUE, SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             } else {

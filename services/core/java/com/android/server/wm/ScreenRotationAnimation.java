@@ -19,7 +19,7 @@ package com.android.server.wm;
 import java.io.PrintWriter;
 
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowStateAnimator.SurfaceTrace;
+import static com.android.server.wm.WindowSurfaceController.SurfaceTrace;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
 import android.content.Context;
 import android.graphics.Matrix;

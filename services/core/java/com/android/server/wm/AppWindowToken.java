@@ -189,7 +189,8 @@ class AppWindowToken extends WindowToken {
                         + win.isDrawnLw()
                         + ", isAnimating=" + win.mWinAnimator.isAnimating());
                 if (!win.isDrawnLw()) {
-                    Slog.v(WindowManagerService.TAG, "Not displayed: s=" + win.mWinAnimator.mSurfaceControl
+                    Slog.v(WindowManagerService.TAG, "Not displayed: s=" +
+                            win.mWinAnimator.mSurfaceController
                             + " pv=" + win.mPolicyVisibility
                             + " mDrawState=" + win.mWinAnimator.mDrawState
                             + " ah=" + win.mAttachedHidden
