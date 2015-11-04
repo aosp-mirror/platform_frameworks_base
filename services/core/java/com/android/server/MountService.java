@@ -2693,6 +2693,11 @@ class MountService extends IMountService.Stub
     }
 
     @Override
+    public boolean isPerUserEncryptionEnabled() {
+        return "file".equals(SystemProperties.get("ro.crypto.type", "none"));
+    }
+
+    @Override
     public int mkdirs(String callingPkg, String appPath) {
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         final UserEnvironment userEnv = new UserEnvironment(userId);

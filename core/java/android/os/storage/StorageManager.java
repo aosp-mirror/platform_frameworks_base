@@ -978,6 +978,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public boolean isPerUserEncryptionEnabled() {
+        try {
+            return mMountService.isPerUserEncryptionEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         final IMountService mountService = IMountService.Stub.asInterface(
                 ServiceManager.getService("mount"));

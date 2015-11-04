@@ -27,6 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -387,8 +388,8 @@ class LockSettingsStorage {
     }
 
     private int getUserParentOrSelfId(int userId) {
-        // Device supports File Based Encryption, and lock is applied per-user
-        if ("file".equals(SystemProperties.get("ro.crypto.type", "none"))) {
+        // Device supports per user encryption, so lock is applied to the given user.
+        if (mContext.getSystemService(StorageManager.class).isPerUserEncryptionEnabled()) {
             return userId;
         }
         // Device uses Block Based Encryption, and the parent user's lock is used for the whole

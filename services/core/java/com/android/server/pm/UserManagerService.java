@@ -404,7 +404,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getCredentialOwnerProfile(int userHandle) {
         checkManageUsersPermission("get the credential owner");
-        if (!"file".equals(SystemProperties.get("ro.crypto.type", "none"))) {
+        if (!mContext.getSystemService(StorageManager.class).isPerUserEncryptionEnabled()) {
             synchronized (mUsersLock) {
                 UserInfo profileParent = getProfileParentLU(userHandle);
                 if (profileParent != null) {
