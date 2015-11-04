@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"บันทึก"</string>
     <string name="menu_share" msgid="3075149983979628146">"แชร์"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ลบ"</string>
-    <string name="menu_select" msgid="8711270657353563424">"เลือก \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"เลือกทั้งหมด"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"เลือกทั้งหมด"</string>
     <string name="menu_copy" msgid="3612326052677229148">"คัดลอกไปยัง…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"แสดงที่จัดเก็บภายใน"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"แสดงการ์ด SD"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"ซ่อนการ์ด SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"แสดงขนาดไฟล์"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ซ่อนขนาดไฟล์"</string>
+    <string name="button_select" msgid="527196987259139214">"เลือก"</string>
     <string name="button_copy" msgid="8706475544635021302">"คัดลอก"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"เลือกไว้ <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"ตามชื่อ"</string>
     <string name="sort_date" msgid="586080032956151448">"ตามวันที่ที่ปรับเปลี่ยน"</string>
     <string name="sort_size" msgid="3350681319735474741">"ตามขนาด"</string>
@@ -60,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"แชร์ผ่าน"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"กำลังคัดลอกไฟล์"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"เหลือ <xliff:g id="DURATION">%s</xliff:g>"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="other">กำลังคัดลอก <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์</item>
-      <item quantity="one">กำลังคัดลอก <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"กำลังคัดลอก <xliff:g id="COUNT">%1$d</xliff:g> ไฟล์"</item>
+    <item quantity="other" msgid="5175026054495572228">"กำลังคัดลอก <xliff:g id="COUNT">%1$d</xliff:g> ไฟล์"</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"กำลังเตรียมการคัดลอก…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">ไม่สามารถคัดลอก <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์</item>
-      <item quantity="one">ไม่สามารถคัดลอก <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"คัดลอกไม่ได้ <xliff:g id="COUNT">%1$d</xliff:g> ไฟล์"</item>
+    <item quantity="other" msgid="7124097894673644954">"คัดลอกไม่ได้ <xliff:g id="COUNT">%1$d</xliff:g> ไฟล์"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"แตะเพื่อดูรายละเอียด"</string>
     <string name="retry" msgid="7564024179122207376">"ลองอีกครั้ง"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ไม่มีการคัดลอกไฟล์เหล่านี้: <xliff:g id="LIST">%1$s</xliff:g>"</string>

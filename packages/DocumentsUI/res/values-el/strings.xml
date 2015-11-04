@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Αποθήκευση"</string>
     <string name="menu_share" msgid="3075149983979628146">"Κοινή χρήση"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Διαγραφή"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Επιλογή \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Επιλογή όλων"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Επιλογή όλων"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Αντιγραφή σε…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Εμφ.εσωτ.χώρου αποθήκ."</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Εμφάνιση κάρτας SD"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Απόκρυψη κάρτας SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Εμφ. μεγέθους αρχείου"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Απόκρ. μεγέθους αρχείου"</string>
+    <string name="button_select" msgid="527196987259139214">"Επιλογή"</string>
     <string name="button_copy" msgid="8706475544635021302">"Αντιγραφή"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Επιλέχθηκαν <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Κατά όνομα"</string>
     <string name="sort_date" msgid="586080032956151448">"Κατά ημερομηνία τροποποίησης"</string>
     <string name="sort_size" msgid="3350681319735474741">"Κατά μέγεθος"</string>
@@ -60,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Κοινή χρήση μέσω"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Αντιγραφή αρχείων"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Απομένουν <xliff:g id="DURATION">%s</xliff:g>"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="other">Αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων.</item>
-      <item quantity="one">Αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"Αντιγραφή <xliff:g id="COUNT">%1$d</xliff:g> αρχείου."</item>
+    <item quantity="other" msgid="5175026054495572228">"Αντιγραφή <xliff:g id="COUNT">%1$d</xliff:g> αρχείων."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Προετοιμασία για αντιγραφή…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων</item>
-      <item quantity="one">Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT">%1$d</xliff:g> αρχείου"</item>
+    <item quantity="other" msgid="7124097894673644954">"Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT">%1$d</xliff:g> αρχείων"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Αγγίξτε για προβολή λεπτομερειών"</string>
     <string name="retry" msgid="7564024179122207376">"Επανάληψη"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Αυτά τα αρχεία δεν αντιγράφηκαν: <xliff:g id="LIST">%1$s</xliff:g>"</string>
