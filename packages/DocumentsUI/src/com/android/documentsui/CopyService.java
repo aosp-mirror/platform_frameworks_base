@@ -410,6 +410,7 @@ public class CopyService extends IntentService {
      *
      * @param srcInfo DocumentInfos for the documents to copy.
      * @param dstDirInfo The destination directory.
+     * @param mode The transfer mode (copy or move).
      * @throws RemoteException
      */
     private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo, int mode)
@@ -417,11 +418,37 @@ public class CopyService extends IntentService {
         if (DEBUG) Log.d(TAG, "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")" +
             " to " + dstDirInfo.displayName + " (" + dstDirInfo.derivedUri + ")");
 
+        // When copying within the same provider, try to use optimized copying and moving.
+        // If not supported, then fallback to byte-by-byte copy/move.
+        if (srcInfo.authority.equals(dstDirInfo.authority)) {
+            switch (mode) {
+                case TRANSFER_MODE_COPY:
+                    if ((srcInfo.flags & Document.FLAG_SUPPORTS_COPY) != 0) {
+                        if (DocumentsContract.copyDocument(mSrcClient, srcInfo.derivedUri,
+                                dstDirInfo.derivedUri) == null) {
+                            mFailedFiles.add(srcInfo);
+                        }
+                        return;
+                    }
+                    break;
+                case TRANSFER_MODE_MOVE:
+                    if ((srcInfo.flags & Document.FLAG_SUPPORTS_MOVE) != 0) {
+                        if (DocumentsContract.moveDocument(mSrcClient, srcInfo.derivedUri,
+                                dstDirInfo.derivedUri) == null) {
+                            mFailedFiles.add(srcInfo);
+                        }
+                        return;
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown transfer mode.");
+            }
+        }
+
         final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirInfo.derivedUri,
                 srcInfo.mimeType, srcInfo.displayName);
         if (dstUri == null) {
             // If this is a directory, the entire subdir will not be copied over.
-            Log.e(TAG, "Error while copying " + srcInfo.displayName);
             mFailedFiles.add(srcInfo);
             return;
         }
@@ -522,8 +549,6 @@ public class CopyService extends IntentService {
             try {
                 DocumentInfo info = DocumentInfo.fromUri(getContentResolver(), srcUri);
                 mFailedFiles.add(info);
-                Log.e(TAG, "Error while copying " + info.displayName + " (" + info.derivedUri + ")",
-                        copyError);
             } catch (FileNotFoundException ignore) {
                 // Generate a dummy DocumentInfo so an error still gets reflected in the UI for this
                 // file.
@@ -531,7 +556,6 @@ public class CopyService extends IntentService {
                 info.derivedUri = srcUri;
                 info.displayName = "Unknown [" + srcUri + "]";
                 mFailedFiles.add(info);
-                Log.e(TAG, "Error while copying " + srcUri, copyError);
             }
 
             if (dstFile != null) {
