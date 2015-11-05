@@ -70,6 +70,8 @@ import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IWindow;
 import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -1282,6 +1284,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mConfigHasChanged = false;
     }
 
+    private final class DeadWindowEventReceiver extends InputEventReceiver {
+        DeadWindowEventReceiver(InputChannel inputChannel) {
+            super(inputChannel, mService.mH.getLooper());
+        }
+        @Override
+        public void onInputEvent(InputEvent event) {
+            finishInputEvent(event, true);
+        }
+    }
+    /**
+     *  Dummy event receiver for windows that died visible.
+     */
+    private DeadWindowEventReceiver mDeadWindowEventReceiver;
+
     void openInputChannel(InputChannel outInputChannel) {
         if (mInputChannel != null) {
             throw new IllegalStateException("Window already has an input channel.");
@@ -1295,22 +1311,31 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mClientChannel.transferTo(outInputChannel);
             mClientChannel.dispose();
             mClientChannel = null;
+        } else {
+            // If the window died visible, we setup a dummy input channel, so that taps
+            // can still detected by input monitor channel, and we can relaunch the app.
+            // Create dummy event receiver that simply reports all events as handled.
+            mDeadWindowEventReceiver = new DeadWindowEventReceiver(mClientChannel);
         }
         mService.mInputManager.registerInputChannel(mInputChannel, mInputWindowHandle);
     }
 
     void disposeInputChannel() {
+        if (mDeadWindowEventReceiver != null) {
+            mDeadWindowEventReceiver.dispose();
+            mDeadWindowEventReceiver = null;
+        }
+
+        // unregister server channel first otherwise it complains about broken channel
+        if (mInputChannel != null) {
+            mService.mInputManager.unregisterInputChannel(mInputChannel);
+            mInputChannel.dispose();
+            mInputChannel = null;
+        }
         if (mClientChannel != null) {
             mClientChannel.dispose();
             mClientChannel = null;
         }
-        if (mInputChannel != null) {
-            mService.mInputManager.unregisterInputChannel(mInputChannel);
-
-            mInputChannel.dispose();
-            mInputChannel = null;
-        }
-
         mInputWindowHandle.inputChannel = null;
     }
 

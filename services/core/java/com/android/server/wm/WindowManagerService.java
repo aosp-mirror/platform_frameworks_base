@@ -7081,6 +7081,11 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG, "startPositioningLocked: Bad window " + win);
             return false;
         }
+        if (win.mInputChannel == null) {
+            Slog.wtf(TAG, "startPositioningLocked: " + win + " has no input channel, "
+                    + " probably being removed");
+            return false;
+        }
 
         final DisplayContent displayContent = win.getDisplayContent();
         if (displayContent == null) {
