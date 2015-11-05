@@ -13,28 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STRING_UTILS_H
-#define STRING_UTILS_H
 
-#include <string>
-#include <unordered_set>
 
-namespace android {
-namespace uirenderer {
+#include "DeviceInfo.h"
 
-class unordered_string_set : public std::unordered_set<std::string> {
-public:
-    bool has(const char* str) {
-        return find(std::string(str)) != end();
-    }
-};
+#include <gtest/gtest.h>
 
-class StringUtils {
-public:
-    static unordered_string_set split(const char* spacedList);
-};
+using namespace android;
+using namespace android::uirenderer;
 
-} /* namespace uirenderer */
-} /* namespace android */
-
-#endif /* GLUTILS_H */
+TEST(DeviceInfo, basic) {
+    const DeviceInfo* di = DeviceInfo::get();
+    EXPECT_EQ(nullptr, di) << "DeviceInfo was already initialized?";
+    DeviceInfo::initialize();
+    di = DeviceInfo::get();
+    ASSERT_NE(nullptr, di) << "DeviceInfo initialization failed";
+    EXPECT_EQ(2048, di->maxTextureSize()) << "Max texture size didn't match";
+}
