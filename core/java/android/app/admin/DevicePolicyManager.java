@@ -4142,6 +4142,10 @@ public class DevicePolicyManager {
      * <p>When account management is disabled for an account type, adding or removing an account
      * of that type will not be possible.
      *
+     * <p>From {@link android.os.Build.VERSION_CODES#N} the profile or device owner can still use
+     * {@link android.accounts.AccountManager} APIs to add or remove accounts when account
+     * management for a specific type is disabled.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param accountType For which account management is disabled or enabled.
      * @param disabled The boolean indicating that account management will be disabled (true) or

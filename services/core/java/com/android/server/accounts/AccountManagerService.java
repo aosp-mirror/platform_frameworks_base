@@ -37,7 +37,9 @@ import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -82,6 +84,7 @@ import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -830,7 +833,8 @@ public class AccountManagerService
             throw new SecurityException(msg);
         }
 
-        if (!canUserModifyAccounts(userId) || !canUserModifyAccountsForType(userId, account.type)) {
+        if (!canUserModifyAccounts(userId, callingUid) ||
+                !canUserModifyAccountsForType(userId, account.type, callingUid)) {
             return false;
         }
 
@@ -1259,7 +1263,7 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        if (!canUserModifyAccounts(userId)) {
+        if (!canUserModifyAccounts(userId, callingUid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User cannot modify accounts");
@@ -1267,7 +1271,7 @@ public class AccountManagerService
             }
             return;
         }
-        if (!canUserModifyAccountsForType(userId, account.type)) {
+        if (!canUserModifyAccountsForType(userId, account.type, callingUid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
                         "User cannot modify accounts of this type (policy).");
@@ -1321,9 +1325,6 @@ public class AccountManagerService
             throw new SecurityException(msg);
         }
         UserAccounts accounts = getUserAccountsForCaller();
-        if (!canUserModifyAccounts(userId) || !canUserModifyAccountsForType(userId, account.type)) {
-            return false;
-        }
         logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
         long identityToken = clearCallingIdentity();
         try {
@@ -2146,8 +2147,9 @@ public class AccountManagerService
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
 
         // Is user disallowed from modifying accounts?
-        int userId = Binder.getCallingUserHandle().getIdentifier();
-        if (!canUserModifyAccounts(userId)) {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+        if (!canUserModifyAccounts(userId, uid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -2156,7 +2158,7 @@ public class AccountManagerService
             showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED, userId);
             return;
         }
-        if (!canUserModifyAccountsForType(userId, accountType)) {
+        if (!canUserModifyAccountsForType(userId, accountType, uid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
                         "User cannot modify accounts of this type (policy).");
@@ -2168,7 +2170,6 @@ public class AccountManagerService
         }
 
         final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
@@ -2230,7 +2231,7 @@ public class AccountManagerService
         }
 
         // Is user disallowed from modifying accounts?
-        if (!canUserModifyAccounts(userId)) {
+        if (!canUserModifyAccounts(userId, callingUid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -2239,7 +2240,7 @@ public class AccountManagerService
             showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED, userId);
             return;
         }
-        if (!canUserModifyAccountsForType(userId, accountType)) {
+        if (!canUserModifyAccountsForType(userId, accountType, callingUid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
                         "User cannot modify accounts of this type (policy).");
@@ -2310,8 +2311,9 @@ public class AccountManagerService
             throw new IllegalArgumentException("accountType is null");
         }
 
-        int userId = Binder.getCallingUserHandle().getIdentifier();
-        if (!canUserModifyAccounts(userId)) {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+        if (!canUserModifyAccounts(userId, uid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_USER_RESTRICTED,
                         "User is not allowed to add an account!");
@@ -2320,7 +2322,7 @@ public class AccountManagerService
             showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED, userId);
             return;
         }
-        if (!canUserModifyAccountsForType(userId, accountType)) {
+        if (!canUserModifyAccountsForType(userId, accountType, uid)) {
             try {
                 response.onError(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
                         "User cannot modify accounts of this type (policy).");
@@ -2332,7 +2334,6 @@ public class AccountManagerService
         }
 
         final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
@@ -2497,8 +2498,9 @@ public class AccountManagerService
             throw new IllegalArgumentException("sessionBundle is empty");
         }
 
-        int userId = Binder.getCallingUserHandle().getIdentifier();
-        if (!canUserModifyAccounts(userId)) {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+        if (!canUserModifyAccounts(userId, uid)) {
             sendErrorResponse(response,
                     AccountManager.ERROR_CODE_USER_RESTRICTED,
                     "User is not allowed to add an account!");
@@ -2507,7 +2509,6 @@ public class AccountManagerService
         }
 
         final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
         final Bundle decryptedBundle;
         final String accountType;
         // First decrypt session bundle to get account type for checking permission.
@@ -2554,7 +2555,7 @@ public class AccountManagerService
             return;
         }
 
-        if (!canUserModifyAccountsForType(userId, accountType)) {
+        if (!canUserModifyAccountsForType(userId, accountType, uid)) {
             sendErrorResponse(
                     response,
                     AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
@@ -4319,7 +4320,11 @@ public class AccountManagerService
         }
     }
 
-    private boolean canUserModifyAccounts(int userId) {
+    private boolean canUserModifyAccounts(int userId, int callingUid) {
+        // the managing app can always modify accounts
+        if (isProfileOwner(callingUid)) {
+            return true;
+        }
         if (getUserManager().getUserRestrictions(new UserHandle(userId))
                 .getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS)) {
             return false;
@@ -4327,7 +4332,11 @@ public class AccountManagerService
         return true;
     }
 
-    private boolean canUserModifyAccountsForType(int userId, String accountType) {
+    private boolean canUserModifyAccountsForType(int userId, String accountType, int callingUid) {
+        // the managing app can always modify accounts
+        if (isProfileOwner(callingUid)) {
+            return true;
+        }
         DevicePolicyManager dpm = (DevicePolicyManager) mContext
                 .getSystemService(Context.DEVICE_POLICY_SERVICE);
         String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
@@ -4340,6 +4349,13 @@ public class AccountManagerService
             }
         }
         return true;
+    }
+
+    private boolean isProfileOwner(int uid) {
+        final DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        return (dpmi != null)
+                && dpmi.isActiveAdminWithPolicy(uid, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
     }
 
     @Override
