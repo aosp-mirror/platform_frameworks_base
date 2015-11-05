@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"సేవ్ చేయి"</string>
     <string name="menu_share" msgid="3075149983979628146">"భాగస్వామ్యం చేయి"</string>
     <string name="menu_delete" msgid="8138799623850614177">"తొలగించు"</string>
-    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\"ని ఎంచుకోండి"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"అన్నీ ఎంచుకోండి"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"అన్నీ ఎంచుకోండి"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ఇక్కడికి కాపీ చేయి…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"అంతర్గత నిల్వను చూపు"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD కార్డ్‌ను చూపు"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD కార్డ్‌ను దాచు"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ఫైల్ పరిమాణాన్ని చూపు"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ఫైల్ పరిమాణాన్ని దాచు"</string>
+    <string name="button_select" msgid="527196987259139214">"ఎంచుకోండి"</string>
     <string name="button_copy" msgid="8706475544635021302">"కాపీ చేయి"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ఎంచుకోబడ్డాయి"</string>
     <string name="sort_name" msgid="9183560467917256779">"పేరు ద్వారా"</string>
     <string name="sort_date" msgid="586080032956151448">"సవరించిన తేదీ ద్వారా"</string>
     <string name="sort_size" msgid="3350681319735474741">"పరిమాణం ద్వారా"</string>
@@ -49,7 +48,7 @@
     <string name="create_error" msgid="3735649141335444215">"ఫోల్డర్‌ను సృష్టించడంలో విఫలమైంది"</string>
     <string name="query_error" msgid="1222448261663503501">"పత్రాల కోసం ప్రశ్నించడంలో విఫలమైంది"</string>
     <string name="root_recent" msgid="4470053704320518133">"ఇటీవల"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ఉచితం"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ఖాళీ"</string>
     <string name="root_type_service" msgid="2178854894416775409">"నిల్వ పరికరాలు"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"సత్వరమార్గాలు"</string>
     <string name="root_type_device" msgid="7121342474653483538">"పరికరాలు"</string>
@@ -60,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"దీని ద్వారా భాగస్వామ్యం చేయండి"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ఫైల్‌లు కాపీ అవుతున్నాయి"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> మిగిలి ఉంది"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేస్తోంది.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేస్తోంది.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌ను కాపీ చేస్తోంది."</item>
+    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌లను కాపీ చేస్తోంది."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"కాపీ చేయడానికి సిద్ధం చేస్తోంది…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయలేకపోయింది</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయలేకపోయింది</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయలేకపోయింది"</item>
+    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయలేకపోయింది"</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"వివరాలను వీక్షించడానికి తాకండి"</string>
     <string name="retry" msgid="7564024179122207376">"మళ్లీ ప్రయత్నించు"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
