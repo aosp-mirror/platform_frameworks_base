@@ -373,6 +373,12 @@ class DisplayContent {
                      */
                     if (isFreeformed) {
                         mTmpRect.inset(-delta, -delta);
+                        // Intersect with display content rect. If we have system decor (status bar/
+                        // navigation bar), we want to exclude that from the tap detection.
+                        // Otherwise, if the app is partially placed under some system button (eg.
+                        // Recents, Home), pressing that button would cause a full series of
+                        // unwanted transfer focus/resume/pause, before we could go home.
+                        mTmpRect.intersect(mContentRect);
                     }
                     mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
                 }
