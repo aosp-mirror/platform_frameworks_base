@@ -1365,7 +1365,7 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_isPerUserEncryptionEnabled = IBinder.FIRST_CALL_TRANSACTION + 64;
 
-        static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 64;
+        static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 65;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
