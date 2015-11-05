@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -41,8 +41,11 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.documentsui.Events;
+import com.android.documentsui.R;
 import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
+import com.android.documentsui.R.drawable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -342,7 +345,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      *
      * @param position
      */
-    void toggleSelection(int position) {
+    public void toggleSelection(int position) {
         // Position may be special "no position" during certain
         // transitional phases. If so, skip handling of the event.
         if (position == RecyclerView.NO_POSITION) {
@@ -801,14 +804,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
             cancelProvisionalSelection();
         }
 
-        /** @hide */
-        @VisibleForTesting
-        void clear() {
+        public void clear() {
             mSavedSelection.clear();
             mTotalSelection.clear();
         }
 
-        /** @hide */
         @VisibleForTesting
         void copyFrom(Selection source) {
             mSavedSelection = source.mSavedSelection.clone();

@@ -3,7 +3,7 @@ package com.android.documentsui;
 import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
 
-class TestInputEvent implements Events.InputEvent {
+public class TestInputEvent implements Events.InputEvent {
 
     public boolean mouseEvent;
     public boolean primaryButtonPressed;

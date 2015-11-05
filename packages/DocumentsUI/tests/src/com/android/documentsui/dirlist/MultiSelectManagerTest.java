@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.dirlist;
 
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
@@ -22,7 +22,9 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.documentsui.MultiSelectManager.Selection;
+import com.android.documentsui.TestInputEvent;
+import com.android.documentsui.dirlist.MultiSelectManager;
+import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
 import org.mockito.Mockito;
 

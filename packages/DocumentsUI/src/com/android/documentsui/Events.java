@@ -25,33 +25,33 @@ import android.view.View;
 /**
  * Utility code for dealing with MotionEvents.
  */
-final class Events {
+public final class Events {
 
     /**
      * Returns true if event was triggered by a mouse.
      */
-    static boolean isMouseEvent(MotionEvent e) {
+    public static boolean isMouseEvent(MotionEvent e) {
         return isMouseType(e.getToolType(0));
     }
 
     /**
      * Returns true if event was triggered by a finger or stylus touch.
      */
-    static boolean isTouchEvent(MotionEvent e) {
+    public static boolean isTouchEvent(MotionEvent e) {
         return isTouchType(e.getToolType(0));
     }
 
     /**
      * Returns true if event was triggered by a mouse.
      */
-    static boolean isMouseType(int toolType) {
+    public static boolean isMouseType(int toolType) {
         return toolType == MotionEvent.TOOL_TYPE_MOUSE;
     }
 
     /**
      * Returns true if event was triggered by a finger or stylus touch.
      */
-    static boolean isTouchType(int toolType) {
+    public static boolean isTouchType(int toolType) {
         return toolType == MotionEvent.TOOL_TYPE_FINGER
                 || toolType == MotionEvent.TOOL_TYPE_STYLUS;
     }
@@ -59,28 +59,28 @@ final class Events {
     /**
      * Returns true if event was triggered by a finger or stylus touch.
      */
-    static boolean isActionDown(MotionEvent e) {
+    public static boolean isActionDown(MotionEvent e) {
         return e.getActionMasked() == MotionEvent.ACTION_DOWN;
     }
 
     /**
      * Returns true if event was triggered by a finger or stylus touch.
      */
-    static boolean isActionUp(MotionEvent e) {
+    public static boolean isActionUp(MotionEvent e) {
         return e.getActionMasked() == MotionEvent.ACTION_UP;
     }
 
     /**
      * Returns true if the shift is pressed.
      */
-    boolean isShiftPressed(MotionEvent e) {
+    public boolean isShiftPressed(MotionEvent e) {
         return hasShiftBit(e.getMetaState());
     }
 
     /**
      * Returns true if the "SHIFT" bit is set.
      */
-    static boolean hasShiftBit(int metaState) {
+    public static boolean hasShiftBit(int metaState) {
         return (metaState & KeyEvent.META_SHIFT_ON) != 0;
     }
 
@@ -88,7 +88,7 @@ final class Events {
      * A facade over MotionEvent primarily designed to permit for unit testing
      * of related code.
      */
-    interface InputEvent {
+    public interface InputEvent {
         boolean isMouseEvent();
         boolean isPrimaryButtonPressed();
         boolean isSecondaryButtonPressed();
@@ -109,7 +109,7 @@ final class Events {
         int getItemPosition();
     }
 
-    static final class MotionInputEvent implements InputEvent {
+    public static final class MotionInputEvent implements InputEvent {
         private final MotionEvent mEvent;
         private final RecyclerView mView;
         private final int mPosition;

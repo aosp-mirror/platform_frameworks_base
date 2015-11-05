@@ -105,7 +105,7 @@ public class MessageBar extends Fragment {
         return mView;
     }
 
-    void hide() {
+    public void hide() {
         // The container view is used to show/hide the error bar. If a container is not provided,
         // fall back to showing/hiding the error bar View, which also works, but does not provide
         // the same animated transition.
@@ -116,7 +116,7 @@ public class MessageBar extends Fragment {
         }
     }
 
-    void show() {
+    public void show() {
         // The container view is used to show/hide the error bar. If a container is not provided,
         // fall back to showing/hiding the error bar View, which also works, but does not provide
         // the same animated transition.

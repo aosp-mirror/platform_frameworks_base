@@ -17,11 +17,9 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.TAG;
-import static com.android.documentsui.State.MODE_UNKNOWN;
 import static com.android.documentsui.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.State.SORT_ORDER_SIZE;
-import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 
 import android.content.AsyncTaskLoader;
@@ -38,29 +36,13 @@ import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
 import com.android.documentsui.RecentsProvider.StateColumns;
+import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 
 import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
-
-class DirectoryResult implements AutoCloseable {
-    ContentProviderClient client;
-    Cursor cursor;
-    Exception exception;
-
-    int mode = MODE_UNKNOWN;
-    int sortOrder = SORT_ORDER_UNKNOWN;
-
-    @Override
-    public void close() {
-        IoUtils.closeQuietly(cursor);
-        ContentProviderClient.releaseQuietly(client);
-        cursor = null;
-        client = null;
-    }
-}
 
 public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 

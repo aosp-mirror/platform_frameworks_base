@@ -16,8 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.State.ACTION_MANAGE;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -41,6 +41,7 @@ import android.widget.Spinner;
 import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;

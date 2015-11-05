@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_CREATE;
@@ -88,11 +88,44 @@ import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.documentsui.BaseActivity;
+import com.android.documentsui.CopyService;
+import com.android.documentsui.DirectoryLoader;
+import com.android.documentsui.DirectoryResult;
+import com.android.documentsui.DocumentClipper;
+import com.android.documentsui.DocumentsActivity;
+import com.android.documentsui.DocumentsApplication;
+import com.android.documentsui.Events;
+import com.android.documentsui.IconUtils;
+import com.android.documentsui.Menus;
+import com.android.documentsui.MessageBar;
+import com.android.documentsui.MimePredicate;
+import com.android.documentsui.ProviderExecutor;
+import com.android.documentsui.R;
+import com.android.documentsui.RecentLoader;
+import com.android.documentsui.RecentsProvider;
+import com.android.documentsui.RootCursorWrapper;
+import com.android.documentsui.RootsCache;
+import com.android.documentsui.Shared;
+import com.android.documentsui.Snackbars;
+import com.android.documentsui.State;
+import com.android.documentsui.ThumbnailCache;
 import com.android.documentsui.BaseActivity.DocumentContext;
-import com.android.documentsui.MultiSelectManager.Selection;
+import com.android.documentsui.BaseActivity.DocumentsIntent;
 import com.android.documentsui.ProviderExecutor.Preemptable;
+import com.android.documentsui.R.animator;
+import com.android.documentsui.R.attr;
+import com.android.documentsui.R.bool;
+import com.android.documentsui.R.dimen;
+import com.android.documentsui.R.drawable;
+import com.android.documentsui.R.id;
+import com.android.documentsui.R.layout;
+import com.android.documentsui.R.menu;
+import com.android.documentsui.R.plurals;
+import com.android.documentsui.R.string;
 import com.android.documentsui.RecentsProvider.StateColumns;
-import com.android.documentsui.dirlist.FragmentTuner;
+import com.android.documentsui.dirlist.MultiSelectManager.Callback;
+import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
@@ -1391,7 +1424,7 @@ public class DirectoryFragment extends Fragment {
         return clipData;
     }
 
-    void copySelectedToClipboard() {
+    public void copySelectedToClipboard() {
         Selection sel = mSelectionManager.getSelection(new Selection());
         copySelectionToClipboard(sel);
     }
@@ -1410,7 +1443,7 @@ public class DirectoryFragment extends Fragment {
         }.execute(items);
     }
 
-    void pasteFromClipboard() {
+    public void pasteFromClipboard() {
         copyFromClipboard();
         getActivity().invalidateOptionsMenu();
     }
@@ -1440,7 +1473,7 @@ public class DirectoryFragment extends Fragment {
         return dest != null && dest.isDirectory() && dest.isCreateSupported();
     }
 
-    void selectAllFiles() {
+    public void selectAllFiles() {
         boolean changed = mSelectionManager.setItemsSelected(0, mModel.getItemCount(), true);
         if (changed) {
             updateDisplayState();
