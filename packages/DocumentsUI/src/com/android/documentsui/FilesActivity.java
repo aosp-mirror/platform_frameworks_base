@@ -122,7 +122,7 @@ public class FilesActivity extends BaseActivity {
             // Show a failure dialog if there was a failed operation.
             final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
             final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
-                    CopyService.TRANSFER_MODE_NONE);
+                    CopyService.TRANSFER_MODE_COPY);
             if (failure != 0) {
                 final ArrayList<DocumentInfo> failedSrcList =
                         intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);

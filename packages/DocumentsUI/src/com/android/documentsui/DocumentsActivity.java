@@ -176,7 +176,7 @@ public class DocumentsActivity extends BaseActivity {
             state.directoryCopy = intent.getBooleanExtra(
                     BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
             state.transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
-                    CopyService.TRANSFER_MODE_NONE);
+                    CopyService.TRANSFER_MODE_COPY);
         }
 
         return state;
