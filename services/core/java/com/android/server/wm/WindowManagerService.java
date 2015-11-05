@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -31,8 +32,6 @@ import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHA
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -46,6 +45,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
@@ -2537,11 +2538,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Configuration outConfig,
             Surface outSurface) {
-        boolean toBeDisplayed = false;
-        boolean inTouchMode;
+        int result = 0;
         boolean configChanged;
-        boolean surfaceChanged = false;
-        boolean dragResizing = false;
         boolean hasStatusBarPermission =
                 mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                         == PackageManager.PERMISSION_GRANTED;
@@ -2558,31 +2556,21 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.setRequestedSize(requestedWidth, requestedHeight);
             }
 
-            if (attrs != null) {
-                mPolicy.adjustWindowParamsLw(attrs);
-            }
-
-            // if they don't have the permission, mask out the status bar bits
-            int systemUiVisibility = 0;
-            if (attrs != null) {
-                systemUiVisibility = (attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility);
-                if ((systemUiVisibility & StatusBarManager.DISABLE_MASK) != 0) {
-                    if (!hasStatusBarPermission) {
-                        systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
-                    }
-                }
-            }
-
-            if (attrs != null && seq == win.mSeq) {
-                win.mSystemUiVisibility = systemUiVisibility;
-            }
-
-            winAnimator.mSurfaceDestroyDeferred =
-                    (flags&WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
-
             int attrChanges = 0;
             int flagChanges = 0;
             if (attrs != null) {
+                mPolicy.adjustWindowParamsLw(attrs);
+                // if they don't have the permission, mask out the status bar bits
+                if (seq == win.mSeq) {
+                    int systemUiVisibility = attrs.systemUiVisibility
+                            | attrs.subtreeSystemUiVisibility;
+                    if ((systemUiVisibility & DISABLE_MASK) != 0) {
+                        if (!hasStatusBarPermission) {
+                            systemUiVisibility &= ~DISABLE_MASK;
+                        }
+                    }
+                    win.mSystemUiVisibility = systemUiVisibility;
+                }
                 if (win.mAttrs.type != attrs.type) {
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
@@ -2597,30 +2585,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": viewVisibility=" + viewVisibility
                     + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
-
+            winAnimator.mSurfaceDestroyDeferred = (flags & RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
             win.mEnforceSizeCompat =
                     (win.mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
-
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 winAnimator.mAlpha = attrs.alpha;
             }
-
-            final boolean scaledWindow =
-                ((win.mAttrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0);
-
-            if (scaledWindow) {
-                // requested{Width|Height} Surface's physical size
-                // attrs.{width|height} Size on screen
-                win.mHScale = (attrs.width  != requestedWidth)  ?
-                        (attrs.width  / (float)requestedWidth) : 1.0f;
-                win.mVScale = (attrs.height != requestedHeight) ?
-                        (attrs.height / (float)requestedHeight) : 1.0f;
-            } else {
-                win.mHScale = win.mVScale = 1;
-            }
+            win.setWindowScale(requestedWidth, requestedHeight);
 
             boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
-
             final boolean isDefaultDisplay = win.isDefaultDisplay();
             boolean focusMayChange = isDefaultDisplay && (win.mViewVisibility != viewVisibility
                     || ((flagChanges & FLAG_NOT_FOCUSABLE) != 0)
@@ -2644,78 +2617,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || !win.mAppToken.clientHidden)) {
-                toBeDisplayed = !win.isVisibleLw();
-                if (win.mExiting) {
-                    winAnimator.cancelExitAnimationForNextAnimationLocked();
-                    win.mExiting = false;
-                }
-                if (win.mDestroying) {
-                    win.mDestroying = false;
-                    mDestroySurface.remove(win);
-                }
-                if (oldVisibility == View.GONE) {
-                    winAnimator.mEnterAnimationPending = true;
-                }
-                winAnimator.mEnteringAnimation = true;
-                if (toBeDisplayed) {
-                    if ((win.mAttrs.softInputMode & SOFT_INPUT_MASK_ADJUST)
-                            == SOFT_INPUT_ADJUST_RESIZE) {
-                        win.mLayoutNeeded = true;
-                    }
-                    if (win.isDrawnLw() && okToDisplay()) {
-                        winAnimator.applyEnterAnimationLocked();
-                    }
-                    if ((win.mAttrs.flags
-                            & WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON) != 0) {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG,
-                                "Relayout window turning screen on: " + win);
-                        win.mTurnOnScreen = true;
-                    }
-                    if (win.isConfigChanged()) {
-                        if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + win
-                                + " visible with new config: " + mCurConfiguration);
-                        outConfig.setTo(mCurConfiguration);
-                    }
-                }
-                if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
-                    // If the format can be changed in place yaay!
-                    // If not, fall back to a surface re-build
-                    if (!winAnimator.tryChangeFormatInPlaceLocked()) {
-                        winAnimator.destroySurfaceLocked();
-                        toBeDisplayed = true;
-                        surfaceChanged = true;
-                    }
-                }
-
-                // If we're starting a drag-resize, we'll be changing the surface size as well as
-                // notifying the client to render to with an offset from the surface's top-left.
-                if (win.isDragResizeChanged()) {
-                    win.setDragResizing();
-                    if (win.mHasSurface) {
-                        winAnimator.preserveSurfaceLocked();
-                        toBeDisplayed = true;
-                    }
-                }
-                dragResizing = win.isDragResizing();
-                if (win.isAnimatingWithSavedSurface()) {
-                    // If we're animating with a saved surface now, request client to report draw.
-                    // We still need to know when the real thing is drawn.
-                    toBeDisplayed = true;
-                }
+                result = relayoutVisibleWindow(outConfig, result, win, winAnimator, attrChanges,
+                        oldVisibility);
                 try {
-                    if (!win.mHasSurface) {
-                        surfaceChanged = true;
-                    }
-                    SurfaceControl surfaceControl = winAnimator.createSurfaceLocked();
-                    if (surfaceControl != null) {
-                        outSurface.copyFrom(surfaceControl);
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG,
-                                "  OUT SURFACE " + outSurface + ": copied");
-                    } else {
-                        // For some reason there isn't a surface.  Clear the
-                        // caller's object so they see the same state.
-                        outSurface.release();
-                    }
+                    result = createSurfaceControl(outSurface, result, win, winAnimator);
                 } catch (Exception e) {
                     mInputMonitor.updateInputWindowsLw(true /*force*/);
 
@@ -2725,27 +2630,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.restoreCallingIdentity(origId);
                     return 0;
                 }
-                if (toBeDisplayed) {
+                if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                     focusMayChange = isDefaultDisplay;
                 }
-                if (win.mAttrs.type == TYPE_INPUT_METHOD
-                        && mInputMethodWindow == null) {
+                if (win.mAttrs.type == TYPE_INPUT_METHOD && mInputMethodWindow == null) {
                     mInputMethodWindow = win;
                     imMayMove = true;
                 }
-                if (win.mAttrs.type == TYPE_BASE_APPLICATION
-                        && win.mAppToken != null
-                        && win.mAppToken.startingWindow != null) {
-                    // Special handling of starting window over the base
-                    // window of the app: propagate lock screen flags to it,
-                    // to provide the correct semantics while starting.
-                    final int mask =
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                        | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                        | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-                    WindowManager.LayoutParams sa = win.mAppToken.startingWindow.mAttrs;
-                    sa.flags = (sa.flags&~mask) | (win.mAttrs.flags&mask);
-                }
+                win.adjustStartingWindowFlags();
             } else {
                 winAnimator.mEnterAnimationPending = false;
                 winAnimator.mEnteringAnimation = false;
@@ -2759,41 +2651,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     // don't want to destroy the saved surface.
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
-                    if (!win.mExiting && !win.isAnimatingWithSavedSurface()) {
-                        surfaceChanged = true;
-                        // Try starting an animation; if there isn't one, we
-                        // can destroy the surface right away.
-                        int transit = WindowManagerPolicy.TRANSIT_EXIT;
-                        if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
-                            transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
-                        }
-                        if (win.isWinVisibleLw() &&
-                                winAnimator.applyAnimationLocked(transit, false)) {
-                            focusMayChange = isDefaultDisplay;
-                            win.mExiting = true;
-                        } else if (win.mWinAnimator.isAnimating()) {
-                            // Currently in a hide animation... turn this into
-                            // an exit.
-                            win.mExiting = true;
-                        } else if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
-                            // If the wallpaper is currently behind this
-                            // window, we need to change both of them inside
-                            // of a transaction to avoid artifacts.
-                            win.mExiting = true;
-                            win.mWinAnimator.mAnimating = true;
-                        } else {
-                            if (mInputMethodWindow == win) {
-                                mInputMethodWindow = null;
-                            }
-                            if (!win.shouldSaveSurface()) {
-                                winAnimator.destroySurfaceLocked();
-                            }
-                        }
-                        //TODO (multidisplay): Magnification is supported only for the default
-                        if (mAccessibilityController != null
-                                && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                            mAccessibilityController.onWindowTransitionLocked(win, transit);
-                        }
+                    final boolean notExitingOrAnimating =
+                            !win.mExiting && !win.isAnimatingWithSavedSurface();
+                    result |= notExitingOrAnimating
+                            ? RELAYOUT_RES_SURFACE_CHANGED : 0;
+                    if (notExitingOrAnimating) {
+                        focusMayChange = tryStartingAnimation(win, winAnimator, isDefaultDisplay,
+                                focusMayChange);
+
                     }
                 }
 
@@ -2812,6 +2677,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // updateFocusedWindowLocked() already assigned layers so we only need to
             // reassign them at this point if the IM window state gets shuffled
+            boolean toBeDisplayed = (result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0;
             if (imMayMove && (moveInputMethodWindowsIfNeededLocked(false) || toBeDisplayed)) {
                 // Little hack here -- we -should- be able to rely on the
                 // function to return true if the IME has moved and needs
@@ -2855,7 +2721,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (localLOGV || DEBUG_FOCUS) Slog.v(
                 TAG, "Relayout of " + win + ": focusMayChange=" + focusMayChange);
 
-            inTouchMode = mInTouchMode;
+            result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
 
             mInputMonitor.updateInputWindowsLw(true /*force*/);
 
@@ -2867,13 +2733,108 @@ public class WindowManagerService extends IWindowManager.Stub
         if (configChanged) {
             sendNewConfiguration();
         }
-
         Binder.restoreCallingIdentity(origId);
+        return result;
+    }
 
-        return (inTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0)
-                | (toBeDisplayed ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0)
-                | (surfaceChanged ? WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED : 0)
-                | (dragResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING : 0);
+    private boolean tryStartingAnimation(WindowState win, WindowStateAnimator winAnimator,
+            boolean isDefaultDisplay, boolean focusMayChange) {
+        // Try starting an animation; if there isn't one, we
+        // can destroy the surface right away.
+        int transit = WindowManagerPolicy.TRANSIT_EXIT;
+        if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
+            transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
+        }
+        if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
+            focusMayChange = isDefaultDisplay;
+            win.mExiting = true;
+        } else if (win.mWinAnimator.isAnimating()) {
+            // Currently in a hide animation... turn this into
+            // an exit.
+            win.mExiting = true;
+        } else if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
+            // If the wallpaper is currently behind this
+            // window, we need to change both of them inside
+            // of a transaction to avoid artifacts.
+            win.mExiting = true;
+            win.mWinAnimator.mAnimating = true;
+        } else {
+            if (mInputMethodWindow == win) {
+                mInputMethodWindow = null;
+            }
+            if (!win.shouldSaveSurface()) {
+                winAnimator.destroySurfaceLocked();
+            }
+        }
+        //TODO (multidisplay): Magnification is supported only for the default
+        if (mAccessibilityController != null
+                && win.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            mAccessibilityController.onWindowTransitionLocked(win, transit);
+        }
+        return focusMayChange;
+    }
+
+    private int createSurfaceControl(Surface outSurface, int result, WindowState win,
+            WindowStateAnimator winAnimator) {
+        if (!win.mHasSurface) {
+            result |= RELAYOUT_RES_SURFACE_CHANGED;
+        }
+        SurfaceControl surfaceControl = winAnimator.createSurfaceLocked();
+        if (surfaceControl != null) {
+            outSurface.copyFrom(surfaceControl);
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, "  OUT SURFACE " + outSurface + ": copied");
+        } else {
+            // For some reason there isn't a surface.  Clear the
+            // caller's object so they see the same state.
+            outSurface.release();
+        }
+        return result;
+    }
+
+    private int relayoutVisibleWindow(Configuration outConfig, int result, WindowState win,
+            WindowStateAnimator winAnimator, int attrChanges, int oldVisibility) {
+        result |= !win.isVisibleLw() ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0;
+        if (win.mExiting) {
+            winAnimator.cancelExitAnimationForNextAnimationLocked();
+            win.mExiting = false;
+        }
+        if (win.mDestroying) {
+            win.mDestroying = false;
+            mDestroySurface.remove(win);
+        }
+        if (oldVisibility == View.GONE) {
+            winAnimator.mEnterAnimationPending = true;
+        }
+        winAnimator.mEnteringAnimation = true;
+        if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
+            win.prepareWindowToDisplayDuringRelayout(outConfig);
+        }
+        if ((attrChanges& LayoutParams.FORMAT_CHANGED) != 0) {
+            // If the format can be changed in place yaay!
+            // If not, fall back to a surface re-build
+            if (!winAnimator.tryChangeFormatInPlaceLocked()) {
+                winAnimator.destroySurfaceLocked();
+                result |= RELAYOUT_RES_SURFACE_CHANGED
+                        | WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
+            }
+        }
+
+        // If we're starting a drag-resize, we'll be changing the surface size as well as
+        // notifying the client to render to with an offset from the surface's top-left.
+        if (win.isDragResizeChanged()) {
+            win.setDragResizing();
+            if (win.mHasSurface) {
+                winAnimator.preserveSurfaceLocked();
+                result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
+            }
+        }
+        result |= win.isDragResizing() ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING : 0;
+        if (win.isAnimatingWithSavedSurface()) {
+            // If we're animating with a saved surface now, request client to report draw.
+            // We still need to know when the real thing is drawn.
+            result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
+        }
+        return result;
     }
 
     public void performDeferredDestroyWindow(Session session, IWindow client) {
