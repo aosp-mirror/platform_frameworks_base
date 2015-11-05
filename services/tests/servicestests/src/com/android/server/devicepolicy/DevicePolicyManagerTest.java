@@ -27,6 +27,8 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -85,6 +87,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_UID);
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_UID);
         setUpPackageManagerForAdmin(admin3, DpmMockContext.CALLER_UID);
+        setUpPackageManagerForAdmin(adminNoPerm, DpmMockContext.CALLER_UID);
 
         setUpUserManager();
     }
@@ -334,6 +337,33 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             fail("Didn't throw");
         } catch (IllegalArgumentException expected) {
         }
+    }
+
+    /**
+     * Test for:
+     * {@link DevicePolicyManager#setActiveAdmin} when the admin isn't protected with
+     * BIND_DEVICE_ADMIN.
+     */
+    public void testSetActiveAdmin_permissionCheck() throws Exception {
+        // 1. Make sure the caller has proper permissions.
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        try {
+            dpm.setActiveAdmin(adminNoPerm, /* replace =*/ false);
+            fail();
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains(permission.BIND_DEVICE_ADMIN));
+        }
+        assertFalse(dpm.isAdminActive(adminNoPerm));
+
+        // Change the target API level to MNC.  Now it can be set as DA.
+        setUpPackageManagerForAdmin(adminNoPerm, DpmMockContext.CALLER_UID, null,
+                VERSION_CODES.M);
+        dpm.setActiveAdmin(adminNoPerm, /* replace =*/ false);
+        assertTrue(dpm.isAdminActive(adminNoPerm));
+
+        // TODO Test the "load from the file" case where DA will still be loaded even without
+        // BIND_DEVICE_ADMIN and target API is N.
     }
 
     /**

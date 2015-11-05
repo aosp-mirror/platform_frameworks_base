@@ -43,6 +43,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
     public ComponentName admin1;
     public ComponentName admin2;
     public ComponentName admin3;
+    public ComponentName adminNoPerm;
 
     @Override
     protected void setUp() throws Exception {
@@ -56,6 +57,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         admin1 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin1.class);
         admin2 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin2.class);
         admin3 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin3.class);
+        adminNoPerm = new ComponentName(mRealTestContext, DummyDeviceAdmins.AdminNoPerm.class);
     }
 
     @Override
@@ -67,11 +69,36 @@ public abstract class DpmTestBase extends AndroidTestCase {
     protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid)
             throws Exception {
         setUpPackageManagerForAdmin(admin, packageUid,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
+                /* enabledSetting =*/ null, /* appTargetSdk = */ null);
     }
 
     protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid,
             int enabledSetting) throws Exception {
+        setUpPackageManagerForAdmin(admin, packageUid, enabledSetting, /* appTargetSdk = */ null);
+    }
+
+    protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid,
+            Integer enabledSetting, Integer appTargetSdk) throws Exception {
+
+        // Set up getApplicationInfo().
+
+        final ApplicationInfo ai = DpmTestUtils.cloneParcelable(
+                mRealTestContext.getPackageManager().getApplicationInfo(
+                        admin.getPackageName(),
+                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
+
+        ai.enabledSetting = enabledSetting == null
+                ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+                : enabledSetting;
+        if (appTargetSdk != null) {
+            ai.targetSdkVersion = appTargetSdk;
+        }
+        ai.uid = packageUid;
+
+        doReturn(ai).when(mMockContext.ipackageManager).getApplicationInfo(
+                eq(admin.getPackageName()),
+                eq(PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS),
+                eq(UserHandle.getUserId(packageUid)));
 
         // Set up queryBroadcastReceivers().
 
@@ -88,27 +115,12 @@ public abstract class DpmTestBase extends AndroidTestCase {
         realResolveInfo.set(0, DpmTestUtils.cloneParcelable(realResolveInfo.get(0)));
 
         // We need to rewrite the UID in the activity info.
-        realResolveInfo.get(0).activityInfo.applicationInfo.uid = packageUid;
+        realResolveInfo.get(0).activityInfo.applicationInfo = ai;
 
         doReturn(realResolveInfo).when(mMockContext.packageManager).queryBroadcastReceivers(
                 MockUtils.checkIntentComponent(admin),
                 eq(PackageManager.GET_META_DATA
                         | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS),
-                eq(UserHandle.getUserId(packageUid)));
-
-        // Set up getApplicationInfo().
-
-        final ApplicationInfo ai = DpmTestUtils.cloneParcelable(
-                mRealTestContext.getPackageManager().getApplicationInfo(
-                        admin.getPackageName(),
-                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
-
-        ai.enabledSetting = enabledSetting;
-        ai.uid = packageUid;
-
-        doReturn(ai).when(mMockContext.ipackageManager).getApplicationInfo(
-                eq(admin.getPackageName()),
-                eq(PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS),
                 eq(UserHandle.getUserId(packageUid)));
 
         // Set up getPackageInfo().
@@ -118,7 +130,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
                         admin.getPackageName(), 0));
         assertTrue(pi.applicationInfo.flags != 0);
 
-        pi.applicationInfo.uid = packageUid;
+        pi.applicationInfo = ai;
 
         doReturn(pi).when(mMockContext.ipackageManager).getPackageInfo(
                 eq(admin.getPackageName()),

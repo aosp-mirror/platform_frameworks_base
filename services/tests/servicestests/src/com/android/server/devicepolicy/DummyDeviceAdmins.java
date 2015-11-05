@@ -24,4 +24,6 @@ public class DummyDeviceAdmins {
     }
     public static class Admin3 extends DeviceAdminReceiver {
     }
+    public static class AdminNoPerm extends DeviceAdminReceiver {
+    }
 }
