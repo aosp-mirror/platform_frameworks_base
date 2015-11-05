@@ -407,8 +407,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(UsageStatsService.class);
         mActivityManagerService.setUsageStatsManager(
                 LocalServices.getService(UsageStatsManagerInternal.class));
-        // Update after UsageStatsService is available, needed before performBootDexOpt.
-        mPackageManagerService.getUsageStatsIfNoPackageUsageInfo();
 
         // Tracks whether the updatable WebView is in a ready state and watches for update installs.
         mSystemServiceManager.startService(WebViewUpdateService.class);
@@ -612,11 +610,11 @@ public final class SystemServer {
         // as appropriate.
         mSystemServiceManager.startService(UiModeManagerService.class);
 
-        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "PerformBootDexOpt");
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "PerformFstrimIfNeeded");
         try {
-            mPackageManagerService.performBootDexOpt();
+            mPackageManagerService.performFstrimIfNeeded();
         } catch (Throwable e) {
-            reportWtf("performing boot dexopt", e);
+            reportWtf("performing fstrim", e);
         }
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 

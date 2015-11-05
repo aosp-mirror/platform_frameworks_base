@@ -429,8 +429,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     final Context mContext;
     final boolean mFactoryTest;
     final boolean mOnlyCore;
-    final boolean mLazyDexOpt;
-    final long mDexOptLRUThresholdInMills;
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
@@ -1856,7 +1854,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext = context;
         mFactoryTest = factoryTest;
         mOnlyCore = onlyCore;
-        mLazyDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
         mSettings = new Settings(mPackages);
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
@@ -1871,15 +1868,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
-
-        // TODO: add a property to control this?
-        long dexOptLRUThresholdInMinutes;
-        if (mLazyDexOpt) {
-            dexOptLRUThresholdInMinutes = 30; // only last 30 minutes of apps for eng builds.
-        } else {
-            dexOptLRUThresholdInMinutes = 7 * 24 * 60; // apps used in the 7 days for users.
-        }
-        mDexOptLRUThresholdInMills = dexOptLRUThresholdInMinutes * 60 * 1000;
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -1975,31 +1963,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             // scanning install directories.
             final int scanFlags = SCAN_NO_PATHS | SCAN_DEFER_DEX | SCAN_BOOTING | SCAN_INITIAL;
 
-            final ArraySet<String> alreadyDexOpted = new ArraySet<String>();
-
-            /**
-             * Add everything in the in the boot class path to the
-             * list of process files because dexopt will have been run
-             * if necessary during zygote startup.
-             */
             final String bootClassPath = System.getenv("BOOTCLASSPATH");
             final String systemServerClassPath = System.getenv("SYSTEMSERVERCLASSPATH");
 
-            if (bootClassPath != null) {
-                String[] bootClassPathElements = splitString(bootClassPath, ':');
-                for (String element : bootClassPathElements) {
-                    alreadyDexOpted.add(element);
-                }
-            } else {
+            if (bootClassPath == null) {
                 Slog.w(TAG, "No BOOTCLASSPATH found!");
             }
 
-            if (systemServerClassPath != null) {
-                String[] systemServerClassPathElements = splitString(systemServerClassPath, ':');
-                for (String element : systemServerClassPathElements) {
-                    alreadyDexOpted.add(element);
-                }
-            } else {
+            if (systemServerClassPath == null) {
                 Slog.w(TAG, "No SYSTEMSERVERCLASSPATH found!");
             }
 
@@ -2026,7 +1997,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         try {
                             int dexoptNeeded = DexFile.getDexOptNeeded(lib, null, dexCodeInstructionSet, false);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                                alreadyDexOpted.add(lib);
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
                                         dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/);
                             }
@@ -2041,52 +2011,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             File frameworkDir = new File(Environment.getRootDirectory(), "framework");
-
-            // Gross hack for now: we know this file doesn't contain any
-            // code, so don't dexopt it to avoid the resulting log spew.
-            alreadyDexOpted.add(frameworkDir.getPath() + "/framework-res.apk");
-
-            // Gross hack for now: we know this file is only part of
-            // the boot class path for art, so don't dexopt it to
-            // avoid the resulting log spew.
-            alreadyDexOpted.add(frameworkDir.getPath() + "/core-libart.jar");
-
-            /**
-             * There are a number of commands implemented in Java, which
-             * we currently need to do the dexopt on so that they can be
-             * run from a non-root shell.
-             */
-            String[] frameworkFiles = frameworkDir.list();
-            if (frameworkFiles != null) {
-                // TODO: We could compile these only for the most preferred ABI. We should
-                // first double check that the dex files for these commands are not referenced
-                // by other system apps.
-                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                    for (int i=0; i<frameworkFiles.length; i++) {
-                        File libPath = new File(frameworkDir, frameworkFiles[i]);
-                        String path = libPath.getPath();
-                        // Skip the file if we already did it.
-                        if (alreadyDexOpted.contains(path)) {
-                            continue;
-                        }
-                        // Skip the file if it is not a type we want to dexopt.
-                        if (!path.endsWith(".apk") && !path.endsWith(".jar")) {
-                            continue;
-                        }
-                        try {
-                            int dexoptNeeded = DexFile.getDexOptNeeded(path, null, dexCodeInstructionSet, false);
-                            if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                                mInstaller.dexopt(path, Process.SYSTEM_UID, dexCodeInstructionSet,
-                                        dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/);
-                            }
-                        } catch (FileNotFoundException e) {
-                            Slog.w(TAG, "Jar not found: " + path);
-                        } catch (IOException e) {
-                            Slog.w(TAG, "Exception reading jar: " + path, e);
-                        }
-                    }
-                }
-            }
 
             final VersionInfo ver = mSettings.getInternalVersion();
             mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
@@ -2306,7 +2230,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 adjustCpuAbisForSharedUserLPw(setting.packages, null /* scanned package */,
-                        false /* force dexopt */, false /* defer dexopt */,
                         false /* boot complete */);
             }
 
@@ -6111,8 +6034,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void performBootDexOpt() {
-        enforceSystemOrRoot("Only the system can request dexopt be performed");
+    public void performFstrimIfNeeded() {
+        enforceSystemOrRoot("Only the system can request fstrim");
 
         // Before everything else, see whether we need to fstrim.
         try {
@@ -6153,98 +6076,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         } catch (RemoteException e) {
             // Can't happen; MountService is local
         }
-
-        final ArraySet<PackageParser.Package> pkgs;
-        synchronized (mPackages) {
-            pkgs = mPackageDexOptimizer.clearDeferredDexOptPackages();
-        }
-
-        if (pkgs != null) {
-            // Sort apps by importance for dexopt ordering. Important apps are given more priority
-            // in case the device runs out of space.
-            ArrayList<PackageParser.Package> sortedPkgs = new ArrayList<PackageParser.Package>();
-            // Give priority to core apps.
-            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
-                PackageParser.Package pkg = it.next();
-                if (pkg.coreApp) {
-                    if (DEBUG_DEXOPT) {
-                        Log.i(TAG, "Adding core app " + sortedPkgs.size() + ": " + pkg.packageName);
-                    }
-                    sortedPkgs.add(pkg);
-                    it.remove();
-                }
-            }
-            // Give priority to system apps that listen for pre boot complete.
-            Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
-            ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-            for (Iterator<PackageParser.Package> it = pkgs.iterator(); it.hasNext();) {
-                PackageParser.Package pkg = it.next();
-                if (pkgNames.contains(pkg.packageName)) {
-                    if (DEBUG_DEXOPT) {
-                        Log.i(TAG, "Adding pre boot system app " + sortedPkgs.size() + ": " + pkg.packageName);
-                    }
-                    sortedPkgs.add(pkg);
-                    it.remove();
-                }
-            }
-            // Filter out packages that aren't recently used.
-            filterRecentlyUsedApps(pkgs);
-            // Add all remaining apps.
-            for (PackageParser.Package pkg : pkgs) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Adding app " + sortedPkgs.size() + ": " + pkg.packageName);
-                }
-                sortedPkgs.add(pkg);
-            }
-
-            // If we want to be lazy, filter everything that wasn't recently used.
-            if (mLazyDexOpt) {
-                filterRecentlyUsedApps(sortedPkgs);
-            }
-
-            int i = 0;
-            int total = sortedPkgs.size();
-            File dataDir = Environment.getDataDirectory();
-            long lowThreshold = StorageManager.from(mContext).getStorageLowBytes(dataDir);
-            if (lowThreshold == 0) {
-                throw new IllegalStateException("Invalid low memory threshold");
-            }
-            for (PackageParser.Package pkg : sortedPkgs) {
-                long usableSpace = dataDir.getUsableSpace();
-                if (usableSpace < lowThreshold) {
-                    Log.w(TAG, "Not running dexopt on remaining apps due to low memory: " + usableSpace);
-                    break;
-                }
-                performBootDexOpt(pkg, ++i, total);
-            }
-        }
-    }
-
-    private void filterRecentlyUsedApps(Collection<PackageParser.Package> pkgs) {
-        // Filter out packages that aren't recently used.
-        //
-        // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
-        // should do a full dexopt.
-        if (mLazyDexOpt || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
-            int total = pkgs.size();
-            int skipped = 0;
-            long now = System.currentTimeMillis();
-            for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
-                PackageParser.Package pkg = i.next();
-                long then = pkg.mLastPackageUsageTimeInMills;
-                if (then + mDexOptLRUThresholdInMills < now) {
-                    if (DEBUG_DEXOPT) {
-                        Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
-                              ((then == 0) ? "never" : new Date(then)));
-                    }
-                    i.remove();
-                    skipped++;
-                }
-            }
-            if (DEBUG_DEXOPT) {
-                Log.i(TAG, "Skipped optimizing " + skipped + " of " + total);
-            }
-        }
     }
 
     private ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
@@ -6263,54 +6094,36 @@ public class PackageManagerService extends IPackageManager.Stub {
         return pkgNames;
     }
 
-    private void performBootDexOpt(PackageParser.Package pkg, int curr, int total) {
-        if (DEBUG_DEXOPT) {
-            Log.i(TAG, "Optimizing app " + curr + " of " + total + ": " + pkg.packageName);
-        }
-        if (!isFirstBoot()) {
-            try {
-                ActivityManagerNative.getDefault().showBootMessage(
-                        mContext.getResources().getString(R.string.android_upgrading_apk,
-                                curr, total), true);
-            } catch (RemoteException e) {
+    @Override
+    public void notifyPackageUse(String packageName) {
+        synchronized (mPackages) {
+            PackageParser.Package p = mPackages.get(packageName);
+            if (p == null) {
+                return;
             }
-        }
-        PackageParser.Package p = pkg;
-        synchronized (mInstallLock) {
-            mPackageDexOptimizer.performDexOpt(p, null /* instruction sets */,
-                    false /* force dex */, false /* defer */, true /* include dependencies */,
-                    false /* boot complete */, false /*useJit*/);
+            p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
         }
     }
 
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        return performDexOptTraced(packageName, instructionSet, false);
+        return performDexOptTraced(packageName, instructionSet);
     }
 
-    public boolean performDexOpt(
-            String packageName, String instructionSet, boolean backgroundDexopt) {
-        return performDexOptTraced(packageName, instructionSet, backgroundDexopt);
+    public boolean performDexOpt(String packageName, String instructionSet) {
+        return performDexOptTraced(packageName, instructionSet);
     }
 
-    private boolean performDexOptTraced(
-            String packageName, String instructionSet, boolean backgroundDexopt) {
+    private boolean performDexOptTraced(String packageName, String instructionSet) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, instructionSet, backgroundDexopt);
+            return performDexOptInternal(packageName, instructionSet);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
-    private boolean performDexOptInternal(
-            String packageName, String instructionSet, boolean backgroundDexopt) {
-        boolean dexopt = mLazyDexOpt || backgroundDexopt;
-        boolean updateUsage = !backgroundDexopt;  // Don't update usage if this is just a backgroundDexopt
-        if (!dexopt && !updateUsage) {
-            // We aren't going to dexopt or update usage, so bail early.
-            return false;
-        }
+    private boolean performDexOptInternal(String packageName, String instructionSet) {
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
@@ -6318,14 +6131,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p == null) {
                 return false;
             }
-            if (updateUsage) {
-                p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
-            }
             mPackageUsage.write(false);
-            if (!dexopt) {
-                // We aren't going to dexopt, so bail early.
-                return false;
-            }
 
             targetInstructionSet = instructionSet != null ? instructionSet :
                     getPrimaryInstructionSet(p.applicationInfo);
@@ -6338,8 +6144,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        false /* forceDex */, false /* defer */, true /* inclDependencies */,
-                        true /* boot complete */, false /*useJit*/);
+                        true /* inclDependencies */);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6389,8 +6194,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
-                    true /*forceDex*/, false /* defer */, true /* inclDependencies */,
-                    true /* boot complete */, false /*useJit*/);
+                    true /* inclDependencies */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -7191,7 +6995,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     " secondary=" + pkg.applicationInfo.secondaryCpuAbi);
         }
 
-        if ((scanFlags&SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
+        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
             // We don't do this here during boot because we can do it all
             // at once after scanning all existing packages.
             //
@@ -7199,21 +7003,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
             adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages,
-                    pkg, forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, true /* boot complete */);
+                    pkg, true /* boot complete */);
         }
 
-        if ((scanFlags & SCAN_NO_DEX) == 0) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-            int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instruction sets */,
-                    forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, false /* inclDependencies */,
-                    (scanFlags & SCAN_BOOTING) == 0, false /*useJit*/);
-
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                throw new PackageManagerException(INSTALL_FAILED_DEXOPT, "scanPackageLI");
-            }
-        }
         if (mFactoryTest && pkg.requestedPermissions.contains(
                 android.Manifest.permission.FACTORY_TEST)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
@@ -7265,7 +7057,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     + name + " that is not declared on system image; skipping");
                         }
                     }
-                    if ((scanFlags&SCAN_BOOTING) == 0) {
+                    if ((scanFlags & SCAN_BOOTING) == 0) {
                         // If we are not booting, we need to update any applications
                         // that are clients of our shared library.  If we are booting,
                         // this will all be done once the scan is complete.
@@ -7273,30 +7065,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-        }
-
-        // We also need to dexopt any apps that are dependent on this library.  Note that
-        // if these fail, we should abort the install since installing the library will
-        // result in some apps being broken.
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-        try {
-            if (clientLibPkgs != null) {
-                if ((scanFlags & SCAN_NO_DEX) == 0) {
-                    for (int i = 0; i < clientLibPkgs.size(); i++) {
-                        PackageParser.Package clientPkg = clientLibPkgs.get(i);
-                        int result = mPackageDexOptimizer.performDexOpt(clientPkg,
-                                null /* instruction sets */, forceDex,
-                                (scanFlags & SCAN_DEFER_DEX) != 0, false,
-                                (scanFlags & SCAN_BOOTING) == 0, false /*useJit*/);
-                        if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                            throw new PackageManagerException(INSTALL_FAILED_DEXOPT,
-                                    "scanPackageLI failed to dexopt clientLibPkgs");
-                        }
-                    }
-                }
-            }
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
         // Request the ActivityManager to kill the process(only for existing packages)
@@ -7843,8 +7611,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * adds unnecessary complexity.
      */
     private void adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
-            PackageParser.Package scannedPackage, boolean forceDexOpt, boolean deferDexOpt,
-            boolean bootComplete) {
+            PackageParser.Package scannedPackage, boolean bootComplete) {
         String requiredInstructionSet = null;
         if (scannedPackage != null && scannedPackage.applicationInfo.primaryCpuAbi != null) {
             requiredInstructionSet = VMRuntime.getInstructionSet(
@@ -7906,22 +7673,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (ps.pkg != null && ps.pkg.applicationInfo != null) {
                         ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
                         Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
-
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-                        int result = mPackageDexOptimizer.performDexOpt(ps.pkg,
-                                null /* instruction sets */, forceDexOpt, deferDexOpt, true,
-                                bootComplete, false /*useJit*/);
-
-                        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                        if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                            ps.primaryCpuAbiString = null;
-                            ps.pkg.applicationInfo.primaryCpuAbi = null;
-                            return;
-                        } else {
-                            mInstaller.rmdex(ps.codePathString,
-                                    getDexCodeInstructionSet(getPreferredInstructionSet()));
-                        }
+                        mInstaller.rmdex(ps.codePathString,
+                                getDexCodeInstructionSet(getPreferredInstructionSet()));
                     }
                 }
             }
@@ -12691,19 +12444,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error deriving application ABI");
                 return;
             }
-
-            // Run dexopt before old package gets removed, to minimize time when app is unavailable
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-            int result = mPackageDexOptimizer
-                    .performDexOpt(pkg, null /* instruction sets */, false /* forceDex */,
-                            false /* defer */, false /* inclDependencies */,
-                            true /*bootComplete*/, quickInstall /*useJit*/);
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                res.setError(INSTALL_FAILED_DEXOPT, "Dexopt failed for " + pkg.codePath);
-                return;
-            }
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
@@ -16774,27 +16514,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ksh);
             }
             return false;
-        }
-    }
-
-    public void getUsageStatsIfNoPackageUsageInfo() {
-        if (!mPackageUsage.isHistoricalPackageUsageAvailable()) {
-            UsageStatsManager usm = (UsageStatsManager) mContext.getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usm == null) {
-                throw new IllegalStateException("UsageStatsManager must be initialized");
-            }
-            long now = System.currentTimeMillis();
-            Map<String, UsageStats> stats = usm.queryAndAggregateUsageStats(now - mDexOptLRUThresholdInMills, now);
-            for (Map.Entry<String, UsageStats> entry : stats.entrySet()) {
-                String packageName = entry.getKey();
-                PackageParser.Package pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    continue;
-                }
-                UsageStats usage = entry.getValue();
-                pkg.mLastPackageUsageTimeInMills = usage.getLastTimeUsed();
-                mPackageUsage.mIsHistoricalPackageUsageAvailable = true;
-            }
         }
     }
 

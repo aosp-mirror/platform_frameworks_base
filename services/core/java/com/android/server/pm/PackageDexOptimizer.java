@@ -55,7 +55,6 @@ final class PackageDexOptimizer {
     static final int DEX_OPT_FAILED = -1;
 
     private final PackageManagerService mPackageManagerService;
-    private ArraySet<PackageParser.Package> mDeferredDexOpt;
 
     private final PowerManager.WakeLock mDexoptWakeLock;
     private volatile boolean mSystemReady;
@@ -75,8 +74,7 @@ final class PackageDexOptimizer {
      * {@link PackageManagerService#mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] instructionSets,
-            boolean forceDex, boolean defer, boolean inclDependencies,
-            boolean bootComplete, boolean useJit) {
+            boolean inclDependencies) {
         ArraySet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
             done = new ArraySet<String>();
@@ -91,8 +89,7 @@ final class PackageDexOptimizer {
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, forceDex, defer, bootComplete,
-                        useJit, done);
+                return performDexOptLI(pkg, instructionSets, done);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -102,7 +99,6 @@ final class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            boolean forceDex, boolean defer, boolean bootComplete, boolean useJit,
             ArraySet<String> done) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
@@ -110,12 +106,10 @@ final class PackageDexOptimizer {
         if (done != null) {
             done.add(pkg.packageName);
             if (pkg.usesLibraries != null) {
-                performDexOptLibsLI(pkg.usesLibraries, instructionSets, forceDex, defer,
-                        bootComplete, useJit, done);
+                performDexOptLibsLI(pkg.usesLibraries, instructionSets, done);
             }
             if (pkg.usesOptionalLibraries != null) {
-                performDexOptLibsLI(pkg.usesOptionalLibraries, instructionSets, forceDex, defer,
-                        bootComplete, useJit, done);
+                performDexOptLibsLI(pkg.usesOptionalLibraries, instructionSets, done);
             }
         }
 
@@ -134,30 +128,18 @@ final class PackageDexOptimizer {
         // 3.) we are skipping an unneeded dexopt
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            if (!forceDex && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
+            if (pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
                 continue;
             }
 
             for (String path : paths) {
                 final int dexoptNeeded;
-                if (forceDex) {
-                    dexoptNeeded = DexFile.DEX2OAT_NEEDED;
-                } else {
-                    try {
-                        dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
-                                dexCodeInstructionSet, defer);
-                    } catch (IOException ioe) {
-                        Slog.w(TAG, "IOException reading apk: " + path, ioe);
-                        return DEX_OPT_FAILED;
-                    }
-                }
-
-                if (!forceDex && defer && dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                    // We're deciding to defer a needed dexopt. Don't bother dexopting for other
-                    // paths and instruction sets. We'll deal with them all together when we process
-                    // our list of deferred dexopts.
-                    addPackageForDeferredDexopt(pkg);
-                    return DEX_OPT_DEFERRED;
+                try {
+                    dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
+                            dexCodeInstructionSet, /* defer */false);
+                } catch (IOException ioe) {
+                    Slog.w(TAG, "IOException reading apk: " + path, ioe);
+                    return DEX_OPT_FAILED;
                 }
 
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
@@ -177,20 +159,17 @@ final class PackageDexOptimizer {
                     Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                             + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                             + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                            + " oatDir = " + oatDir + " bootComplete=" + bootComplete
-                            + " useJit=" + useJit);
+                            + " oatDir = " + oatDir);
                     final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                     final int dexFlags =
                             (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
                             | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                             | (debuggable ? DEXOPT_DEBUGGABLE : 0)
-                            | (bootComplete ? DEXOPT_BOOTCOMPLETE : 0)
-                            | (useJit ? DEXOPT_USEJIT : 0);
+                            | DEXOPT_BOOTCOMPLETE;
                     final int ret = mPackageManagerService.mInstaller.dexopt(path, sharedGid,
                             pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir, dexFlags);
 
-                    // Dex2oat might fail due to compiler / verifier errors. We soldier on
-                    // regardless, and attempt to interpret the app as a safety net.
+                    // Dex2oat might fail due to compiler / verifier errors.
                     if (ret == 0) {
                         performedDexOpt = true;
                     }
@@ -243,32 +222,14 @@ final class PackageDexOptimizer {
     }
 
     private void performDexOptLibsLI(ArrayList<String> libs, String[] instructionSets,
-            boolean forceDex, boolean defer, boolean bootComplete, boolean useJit,
             ArraySet<String> done) {
         for (String libName : libs) {
             PackageParser.Package libPkg = mPackageManagerService.findSharedNonSystemLibrary(
                     libName);
             if (libPkg != null && !done.contains(libName)) {
-                performDexOptLI(libPkg, instructionSets, forceDex, defer, bootComplete, useJit, done);
+                performDexOptLI(libPkg, instructionSets, done);
             }
         }
-    }
-
-    /**
-     * Clears set of deferred dexopt packages.
-     * @return content of dexopt set if it was not empty
-     */
-    public ArraySet<PackageParser.Package> clearDeferredDexOptPackages() {
-        ArraySet<PackageParser.Package> result = mDeferredDexOpt;
-        mDeferredDexOpt = null;
-        return result;
-    }
-
-    public void addPackageForDeferredDexopt(PackageParser.Package pkg) {
-        if (mDeferredDexOpt == null) {
-            mDeferredDexOpt = new ArraySet<>();
-        }
-        mDeferredDexOpt.add(pkg);
     }
 
     void systemReady() {
