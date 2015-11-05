@@ -2612,11 +2612,10 @@ class MountService extends IMountService.Stub
                     + event.getMessage();
                 Slog.e(TAG,  error);
                 // ext4enc:TODO is this the right exception?
-                throw new RuntimeException(error);
+                throw new NativeDaemonConnectorException(error);
             }
         } catch (NativeDaemonConnectorException e) {
-            Slog.e(TAG, "createnewuserdir threw exception", e);
-            throw new RuntimeException("createnewuserdir threw exception", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -2641,11 +2640,10 @@ class MountService extends IMountService.Stub
                     + event.getMessage();
                 Slog.e(TAG,  error);
                 // ext4enc:TODO is this the right exception?
-                throw new RuntimeException(error);
+                throw new NativeDaemonConnectorException(error);
             }
         } catch (NativeDaemonConnectorException e) {
-            Slog.e(TAG, "deleteuserkey threw exception", e);
-            throw new RuntimeException("deleteuserkey threw exception", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
