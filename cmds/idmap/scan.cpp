@@ -4,7 +4,7 @@
 
 #include "idmap.h"
 
-#include <UniquePtr.h>
+#include <memory>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/StreamingZipInflater.h>
 #include <androidfw/ZipFileRO.h>
@@ -120,7 +120,7 @@ namespace {
 
     int parse_apk(const char *path, const char *target_package_name)
     {
-        UniquePtr<ZipFileRO> zip(ZipFileRO::open(path));
+        std::unique_ptr<ZipFileRO> zip(ZipFileRO::open(path));
         if (zip.get() == NULL) {
             ALOGW("%s: failed to open zip %s\n", __FUNCTION__, path);
             return -1;
