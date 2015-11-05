@@ -437,11 +437,16 @@ class WindowStateAnimator {
             mWin.mChildWindows.get(i).mWinAnimator.finishExit();
         }
 
-        if (mEnteringAnimation && mWin.mAppToken == null) {
-            try {
-                mEnteringAnimation = false;
-                mWin.mClient.dispatchWindowShown();
-            } catch (RemoteException e) {
+        if (mEnteringAnimation) {
+            mEnteringAnimation = false;
+            mService.requestTraversal();
+            // System windows don't have an activity and an app token as a result, but need a way
+            // to be informed about their entrance animation end.
+            if (mWin.mAppToken == null) {
+                try {
+                    mWin.mClient.dispatchWindowShown();
+                } catch (RemoteException e) {
+                }
             }
         }
 

@@ -2532,6 +2532,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return R.anim.dock_right_enter;
                 }
             }
+        } else if (win.getAttrs().type == TYPE_DOCK_DIVIDER) {
+            if (transit == TRANSIT_ENTER) {
+                return R.anim.fade_in;
+            } else if (transit == TRANSIT_EXIT) {
+                return R.anim.fade_out;
+            }
         }
 
         if (transit == TRANSIT_PREVIEW_DONE) {

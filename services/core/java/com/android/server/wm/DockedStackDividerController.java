@@ -122,10 +122,10 @@ public class DockedStackDividerController implements View.OnTouchListener, DimLa
         if (forceUpdate && mView != null) {
             removeDivider();
         }
-        TaskStack stack = mDisplayContent.getDockedStackLocked();
-        if (stack != null && mView == null) {
+        TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        if (stack != null && stack.hasWindowWithFinalVisibility() && mView == null) {
             addDivider(configuration);
-        } else if (stack == null && mView != null) {
+        } else if ((stack == null || !stack.isVisibleLocked()) && mView != null) {
             removeDivider();
         }
     }
