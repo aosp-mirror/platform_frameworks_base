@@ -6676,6 +6676,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return false;
             }
             return true;
+        } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_USER.equals(action)) {
+            if (hasUserSetupCompleted(callingUserId)) {
+                return false;
+            }
+            return true;
         }
         throw new IllegalArgumentException("Unknown provisioning action " + action);
     }
