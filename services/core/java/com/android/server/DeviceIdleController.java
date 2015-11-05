@@ -100,7 +100,7 @@ public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
     private static final String TAG = "DeviceIdleController";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;  // STOPSHIP
 
     private static final boolean COMPRESS_TIME = false;
 
@@ -555,10 +555,8 @@ public class DeviceIdleController extends SystemService
 
                 INACTIVE_TIMEOUT = mParser.getLong(KEY_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? 30 * 60 * 1000L : 3 * 60 * 1000L);
-                SENSING_TIMEOUT = mParser.getLong(KEY_SENSING_TIMEOUT,
-                        !DEBUG ? 4 * 60 * 1000L : 60 * 1000L);
-                LOCATING_TIMEOUT = mParser.getLong(KEY_LOCATING_TIMEOUT,
-                        !DEBUG ? 30 * 1000L : 15 * 1000L);
+                SENSING_TIMEOUT = mParser.getLong(KEY_SENSING_TIMEOUT, 4 * 60 * 1000L);
+                LOCATING_TIMEOUT = mParser.getLong(KEY_LOCATING_TIMEOUT, 30 * 1000L);
                 LOCATION_ACCURACY = mParser.getFloat(KEY_LOCATION_ACCURACY, 20);
                 MOTION_INACTIVE_TIMEOUT = mParser.getLong(KEY_MOTION_INACTIVE_TIMEOUT,
                         !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
