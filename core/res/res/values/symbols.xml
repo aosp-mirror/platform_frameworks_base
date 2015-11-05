@@ -1450,6 +1450,8 @@
   <java-symbol type="anim" name="dock_left_exit" />
   <java-symbol type="anim" name="dock_right_enter" />
   <java-symbol type="anim" name="dock_right_exit" />
+  <java-symbol type="anim" name="fade_in" />
+  <java-symbol type="anim" name="fade_out" />
   <java-symbol type="anim" name="voice_activity_close_exit" />
   <java-symbol type="anim" name="voice_activity_close_enter" />
   <java-symbol type="anim" name="voice_activity_open_exit" />

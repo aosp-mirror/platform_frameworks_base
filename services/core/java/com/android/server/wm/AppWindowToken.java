@@ -274,11 +274,11 @@ class AppWindowToken extends WindowToken {
             // If we're animating with a saved surface, we're already visible.
             // Return true so that the alpha doesn't get cleared.
             if (!win.mAppFreezing
-                    && (win.mViewVisibility == View.VISIBLE
-                    || mAnimatingWithSavedSurface
-                    || (win.mWinAnimator.isAnimating() &&
-                            !service.mAppTransition.isTransitionSet()))
-                    && !win.mDestroying && win.isDrawnLw()) {
+                    && (win.mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface
+                            || (win.mWinAnimator.isAnimating()
+                                    && !service.mAppTransition.isTransitionSet()))
+                    && !win.mDestroying
+                    && win.isDrawnLw()) {
                 return true;
             }
         }
