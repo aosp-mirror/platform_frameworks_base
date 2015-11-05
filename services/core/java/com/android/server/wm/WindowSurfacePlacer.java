@@ -772,7 +772,7 @@ class WindowSurfacePlacer {
                                     + ", isAnimating=" + winAnimator.isAnimating());
                             if (!w.isDrawnLw()) {
                                 Slog.v(TAG, "Not displayed: s="
-                                        + winAnimator.mSurfaceControl
+                                        + winAnimator.mSurfaceController
                                         + " pv=" + w.mPolicyVisibility
                                         + " mDrawState=" + winAnimator.drawStateToString()
                                         + " ah=" + w.mAttachedHidden

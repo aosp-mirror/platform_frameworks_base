@@ -54,7 +54,7 @@ class EmulatorDisplayOverlay {
         SurfaceControl ctrl = null;
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                ctrl = new WindowStateAnimator.SurfaceTrace(session, "EmulatorDisplayOverlay",
+                ctrl = new WindowSurfaceController.SurfaceTrace(session, "EmulatorDisplayOverlay",
                         mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
                         SurfaceControl.HIDDEN);
             } else {

@@ -1816,7 +1816,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
             if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
                 Slog.i(TAG, "Sending new config to window " + this + ": "
-                        + mWinAnimator.mSurfaceW + "x" + mWinAnimator.mSurfaceH + " / config="
+                        + " / config="
                         + mService.mCurConfiguration + " overrideConfig=" + overrideConfig);
             }
             setConfiguration(mService.mCurConfiguration, overrideConfig);

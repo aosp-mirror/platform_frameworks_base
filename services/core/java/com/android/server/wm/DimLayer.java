@@ -82,7 +82,7 @@ public class DimLayer {
         SurfaceControl.openTransaction();
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                mDimSurface = new WindowStateAnimator.SurfaceTrace(service.mFxSession,
+                mDimSurface = new WindowSurfaceController.SurfaceTrace(service.mFxSession,
                     "DimSurface",
                     16, 16, PixelFormat.OPAQUE,
                     SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
