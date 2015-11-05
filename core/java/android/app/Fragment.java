@@ -1410,7 +1410,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Called to do initial creation of a fragment.  This is called after
      * {@link #onAttach(Activity)} and before
-     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}, but is not called if the fragment
+     * instance is retained across Activity re-creation (see {@link #setRetainInstance(boolean)}).
      *
      * <p>Note that this can be called while the fragment's activity is
      * still in the process of being created.  As such, you can not rely
@@ -1649,8 +1650,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Called when the fragment is no longer attached to its activity.  This
-     * is called after {@link #onDestroy()}.
+     * Called when the fragment is no longer attached to its activity.  This is called after
+     * {@link #onDestroy()}, except in the cases where the fragment instance is retained across
+     * Activity re-creation (see {@link #setRetainInstance(boolean)}), in which case it is called
+     * after {@link #onStop()}.
      */
     public void onDetach() {
         mCalled = true;
