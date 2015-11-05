@@ -231,6 +231,7 @@ public class Editor {
     boolean mCreatedWithASelection;
 
     boolean mDoubleTap = false;
+    boolean mTripleClick = false;
 
     private Runnable mInsertionActionModeRunnable;
 
@@ -770,20 +771,12 @@ public class Editor {
         return retOffset;
     }
 
-    /**
-     * Adjusts selection to the word under last touch offset. Return true if the operation was
-     * successfully performed.
-     */
-    private boolean selectCurrentWord() {
-        if (!mTextView.canSelectText()) {
-            return false;
-        }
-
+    private boolean needsToSelectAllToSelectWordOrParagraph() {
         if (mTextView.hasPasswordTransformationMethod()) {
             // Always select all on a password field.
             // Cut/copy menu entries are not available for passwords, but being able to select all
             // is however useful to delete or paste to replace the entire content.
-            return mTextView.selectAllText();
+            return true;
         }
 
         int inputType = mTextView.getInputType();
@@ -798,6 +791,21 @@ public class Editor {
                 variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
                 variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
                 variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adjusts selection to the word under last touch offset. Return true if the operation was
+     * successfully performed.
+     */
+    private boolean selectCurrentWord() {
+        if (!mTextView.canSelectText()) {
+            return false;
+        }
+
+        if (needsToSelectAllToSelectWordOrParagraph()) {
             return mTextView.selectAllText();
         }
 
@@ -838,6 +846,63 @@ public class Editor {
 
         Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
         return selectionEnd > selectionStart;
+    }
+
+    /**
+     * Adjusts selection to the paragraph under last touch offset. Return true if the operation was
+     * successfully performed.
+     */
+    private boolean selectCurrentParagraph() {
+        if (!mTextView.canSelectText()) {
+            return false;
+        }
+
+        if (needsToSelectAllToSelectWordOrParagraph()) {
+            return mTextView.selectAllText();
+        }
+
+        long lastTouchOffsets = getLastTouchOffsets();
+        final int minLastTouchOffset = TextUtils.unpackRangeStartFromLong(lastTouchOffsets);
+        final int maxLastTouchOffset = TextUtils.unpackRangeEndFromLong(lastTouchOffsets);
+
+        final long paragraphsRange = getParagraphsRange(minLastTouchOffset, maxLastTouchOffset);
+        final int start = TextUtils.unpackRangeStartFromLong(paragraphsRange);
+        final int end = TextUtils.unpackRangeEndFromLong(paragraphsRange);
+        if (start < end) {
+            Selection.setSelection((Spannable) mTextView.getText(), start, end);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get the minimum range of paragraphs that contains startOffset and endOffset.
+     */
+    private long getParagraphsRange(int startOffset, int endOffset) {
+        final Layout layout = mTextView.getLayout();
+        if (layout == null) {
+            return TextUtils.packRangeInLong(-1, -1);
+        }
+        final CharSequence text = mTextView.getText();
+        int minLine = layout.getLineForOffset(startOffset);
+        // Search paragraph start.
+        while (minLine > 0) {
+            final int prevLineEndOffset = layout.getLineEnd(minLine - 1);
+            if (text.charAt(prevLineEndOffset - 1) == '\n') {
+                break;
+            }
+            minLine--;
+        }
+        int maxLine = layout.getLineForOffset(endOffset);
+        // Search paragraph end.
+        while (maxLine < layout.getLineCount() - 1) {
+            final int lineEndOffset = layout.getLineEnd(maxLine);
+            if (text.charAt(lineEndOffset - 1) == '\n') {
+                break;
+            }
+            maxLine++;
+        }
+        return TextUtils.packRangeInLong(layout.getLineStart(minLine), layout.getLineEnd(maxLine));
     }
 
     void onLocaleChanged() {
@@ -3911,13 +3976,13 @@ public class Editor {
 
             // Cancel the single tap delayed runnable.
             if (mInsertionActionModeRunnable != null
-                    && (mDoubleTap || isCursorInsideEasyCorrectionSpan())) {
+                    && (mDoubleTap || mTripleClick || isCursorInsideEasyCorrectionSpan())) {
                 mTextView.removeCallbacks(mInsertionActionModeRunnable);
             }
 
             // Prepare and schedule the single tap runnable to run exactly after the double tap
             // timeout has passed.
-            if (!mDoubleTap && !isCursorInsideEasyCorrectionSpan()
+            if (!mDoubleTap && !mTripleClick && !isCursorInsideEasyCorrectionSpan()
                     && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
                 if (mTextActionMode == null) {
                     if (mInsertionActionModeRunnable == null) {
@@ -4485,6 +4550,8 @@ public class Editor {
         private static final int DRAG_ACCELERATOR_MODE_CHARACTER = 1;
         // Word based selection by dragging. Enabled after long pressing or double tapping.
         private static final int DRAG_ACCELERATOR_MODE_WORD = 2;
+        // Paragraph based selection by dragging. Enabled after mouse triple click.
+        private static final int DRAG_ACCELERATOR_MODE_PARAGRAPH = 3;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -4569,7 +4636,7 @@ public class Editor {
 
                         // Double tap detection
                         if (mGestureStayedInTapRegion) {
-                            if (mDoubleTap) {
+                            if (mDoubleTap || mTripleClick) {
                                 final float deltaX = eventX - mDownPositionX;
                                 final float deltaY = eventY - mDownPositionY;
                                 final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
@@ -4581,7 +4648,11 @@ public class Editor {
                                         distanceSquared < doubleTapSlop * doubleTapSlop;
 
                                 if (stayedInArea && (isMouse || isPositionOnText(eventX, eventY))) {
-                                    selectCurrentWordAndStartDrag();
+                                    if (mDoubleTap) {
+                                        selectCurrentWordAndStartDrag();
+                                    } else if (mTripleClick) {
+                                        selectCurrentParagraphAndStartDrag();
+                                    }
                                     mDiscardNextActionUp = true;
                                 }
                             }
@@ -4690,8 +4761,30 @@ public class Editor {
                     case DRAG_ACCELERATOR_MODE_WORD:
                         updateWordBasedSelection(event);
                         break;
+                    case DRAG_ACCELERATOR_MODE_PARAGRAPH:
+                        updateParagraphBasedSelection(event);
+                        break;
                 }
             }
+        }
+
+        /**
+         * If the TextView allows text selection, selects the current paragraph and starts a drag.
+         *
+         * @return true if the drag was started.
+         */
+        private boolean selectCurrentParagraphAndStartDrag() {
+            if (mInsertionActionModeRunnable != null) {
+                mTextView.removeCallbacks(mInsertionActionModeRunnable);
+            }
+            if (mTextActionMode != null) {
+                mTextActionMode.finish();
+            }
+            if (!selectCurrentParagraph()) {
+                return false;
+            }
+            enterDrag(SelectionModifierCursorController.DRAG_ACCELERATOR_MODE_PARAGRAPH);
+            return true;
         }
 
         private void updateCharacterBasedSelection(MotionEvent event) {
@@ -4754,6 +4847,18 @@ public class Editor {
             Selection.setSelection((Spannable) mTextView.getText(),
                     startOffset, offset);
         }
+
+        private void updateParagraphBasedSelection(MotionEvent event) {
+            final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
+
+            final int start = Math.min(offset, mStartOffset);
+            final int end = Math.max(offset, mStartOffset);
+            final long paragraphsRange = getParagraphsRange(start, end);
+            final int selectionStart = TextUtils.unpackRangeStartFromLong(paragraphsRange);
+            final int selectionEnd = TextUtils.unpackRangeEndFromLong(paragraphsRange);
+            Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
+        }
+
         /**
          * @param event
          */

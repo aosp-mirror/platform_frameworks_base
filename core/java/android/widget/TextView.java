@@ -17,7 +17,6 @@
 package android.widget;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-
 import android.R;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -115,6 +114,7 @@ import android.view.Choreographer;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -8408,12 +8408,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int action = event.getActionMasked();
 
         if (mEditor != null && action == MotionEvent.ACTION_DOWN) {
-            // Detect double tap and inform the Editor.
-            if (mFirstTouch && (SystemClock.uptimeMillis() - mLastTouchUpTime) <=
-                    ViewConfiguration.getDoubleTapTimeout()) {
-                mEditor.mDoubleTap = true;
-                mFirstTouch = false;
+            final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
+            // Detect double tap and triple click and inform the Editor.
+            if ((mFirstTouch || (mEditor.mDoubleTap && isMouse))
+                        && (SystemClock.uptimeMillis() - mLastTouchUpTime) <=
+                                ViewConfiguration.getDoubleTapTimeout()) {
+                if (mFirstTouch) {
+                    mEditor.mTripleClick = false;
+                    mEditor.mDoubleTap = true;
+                    mFirstTouch = false;
+                } else {
+                    mEditor.mTripleClick = true;
+                    mEditor.mDoubleTap = false;
+                    mFirstTouch = false;
+                }
             } else {
+                mEditor.mTripleClick = false;
                 mEditor.mDoubleTap = false;
                 mFirstTouch = true;
             }
