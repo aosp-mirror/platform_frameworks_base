@@ -35,8 +35,8 @@ namespace uirenderer {
 #endif
 
 
-void Extensions::load() {
-    auto extensions = StringUtils::split((const char*) glGetString(GL_EXTENSIONS));
+Extensions::Extensions() {
+    StringCollection extensions((const char*) glGetString(GL_EXTENSIONS));
     mHasNPot = extensions.has("GL_OES_texture_npot");
     mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
     mHasDiscardFramebuffer = extensions.has("GL_EXT_discard_framebuffer");
