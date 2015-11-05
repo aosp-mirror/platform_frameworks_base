@@ -273,7 +273,7 @@ LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunre
 
 # -Wno-c++11-extensions: Clang warns about Skia using the C++11 override keyword, but this project
 #                        is not being compiled with that level. Remove once this has changed.
-LOCAL_CFLAGS += -Wno-c++11-extensions
+LOCAL_CLANG_CFLAGS += -Wno-c++11-extensions
 
 # b/22414716: thread_local (android/graphics/Paint.cpp) and Clang don't like each other at the
 #             moment.
