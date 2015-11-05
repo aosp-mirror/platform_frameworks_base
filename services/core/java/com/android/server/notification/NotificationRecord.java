@@ -83,6 +83,8 @@ public final class NotificationRecord {
     private String mGlobalSortKey;
     private int mPackageVisibility;
 
+    private int mSuppressedVisualEffects = 0;
+
     @VisibleForTesting
     public NotificationRecord(StatusBarNotification sbn, int score)
     {
@@ -199,6 +201,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mCreationTimeMs=" + mCreationTimeMs);
         pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
+        pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
     }
 
 
@@ -272,6 +275,14 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public void setSuppressedVisualEffects(int effects) {
+        mSuppressedVisualEffects = effects;
+    }
+
+    public int getSuppressedVisualEffects() {
+        return mSuppressedVisualEffects;
     }
 
     public boolean isCategory(String category) {

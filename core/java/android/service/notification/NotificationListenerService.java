@@ -108,6 +108,11 @@ public abstract class NotificationListenerService extends Service {
      * This does not change the interruption filter, only the effects. **/
     public static final int HINT_HOST_DISABLE_EFFECTS = 1;
 
+    public static final int SUPPRESSED_EFFECT_LIGHTS =
+            NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+    public static final int SUPPRESSED_EFFECT_PEEK =
+            NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+
     /**
      * The full trim of the StatusBarNotification including all its features.
      *
@@ -822,6 +827,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mIsAmbient;
         private boolean mMatchesInterruptionFilter;
         private int mVisibilityOverride;
+        private int mSuppressedVisualEffects;
 
         public Ranking() {}
 
@@ -861,6 +867,14 @@ public abstract class NotificationListenerService extends Service {
             return mVisibilityOverride;
         }
 
+        /**
+         * Returns the type(s) of visual effects that should be suppressed for this notification.
+         * See {@link #SUPPRESSED_EFFECT_LIGHTS}, {@link #SUPPRESSED_EFFECT_PEEK}}.
+         */
+        public int getSuppressedVisualEffects() {
+            return mSuppressedVisualEffects;
+        }
+
 
         /**
          * Returns whether the notification matches the user's interruption
@@ -874,12 +888,14 @@ public abstract class NotificationListenerService extends Service {
         }
 
         private void populate(String key, int rank, boolean isAmbient,
-                boolean matchesInterruptionFilter, int visibilityOverride) {
+                boolean matchesInterruptionFilter, int visibilityOverride,
+                int suppressedVisualEffects) {
             mKey = key;
             mRank = rank;
             mIsAmbient = isAmbient;
             mMatchesInterruptionFilter = matchesInterruptionFilter;
             mVisibilityOverride = visibilityOverride;
+            mSuppressedVisualEffects = suppressedVisualEffects;
         }
     }
 
@@ -896,6 +912,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String,Integer> mRanks;
         private ArraySet<Object> mIntercepted;
         private ArrayMap<String, Integer> mVisibilityOverrides;
+        private ArrayMap<String, Integer> mSuppressedVisualEffects;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -921,7 +938,7 @@ public abstract class NotificationListenerService extends Service {
         public boolean getRanking(String key, Ranking outRanking) {
             int rank = getRank(key);
             outRanking.populate(key, rank, isAmbient(key), !isIntercepted(key),
-                    getVisibilityOverride(key));
+                    getVisibilityOverride(key), getSuppressedVisualEffects(key));
             return rank >= 0;
         }
 
@@ -959,11 +976,24 @@ public abstract class NotificationListenerService extends Service {
                     buildVisibilityOverridesLocked();
                 }
             }
-            Integer overide = mVisibilityOverrides.get(key);
-            if (overide == null) {
+            Integer override = mVisibilityOverrides.get(key);
+            if (override == null) {
                 return Ranking.VISIBILITY_NO_OVERRIDE;
             }
-            return overide.intValue();
+            return override.intValue();
+        }
+
+        private int getSuppressedVisualEffects(String key) {
+            synchronized (this) {
+                if (mSuppressedVisualEffects == null) {
+                    buildSuppressedVisualEffectsLocked();
+                }
+            }
+            Integer suppressed = mSuppressedVisualEffects.get(key);
+            if (suppressed == null) {
+                return 0;
+            }
+            return suppressed.intValue();
         }
 
         // Locked by 'this'
@@ -989,6 +1019,15 @@ public abstract class NotificationListenerService extends Service {
             mVisibilityOverrides = new ArrayMap<>(visibilityBundle.size());
             for (String key: visibilityBundle.keySet()) {
                mVisibilityOverrides.put(key, visibilityBundle.getInt(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildSuppressedVisualEffectsLocked() {
+            Bundle suppressedBundle = mRankingUpdate.getSuppressedVisualEffects();
+            mSuppressedVisualEffects = new ArrayMap<>(suppressedBundle.size());
+            for (String key: suppressedBundle.keySet()) {
+                mSuppressedVisualEffects.put(key, suppressedBundle.getInt(key));
             }
         }
 

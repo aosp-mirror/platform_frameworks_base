@@ -610,15 +610,39 @@ public class NotificationManager
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
         public final int priorityMessageSenders;
 
+        public static final int SUPPRESSED_EFFECTS_UNSET = -1;
+        public static final int SUPPRESSED_EFFECT_LIGHTS = 1 << 0;
+        public static final int SUPPRESSED_EFFECT_PEEK = 1 << 1;
+
+        private static final int[] ALL_SUPPRESSED_EFFECTS = {
+                SUPPRESSED_EFFECT_LIGHTS,
+                SUPPRESSED_EFFECT_PEEK,
+        };
+
+        /**
+         * Visual effects to suppress for a notification that is filtered by Do Not Disturb mode.
+         * Bitmask of SUPPRESSED_EFFECT_* constants.
+         */
+        public final int suppressedVisualEffects;
+
+
+        @Deprecated
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders) {
+            this(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                    SUPPRESSED_EFFECTS_UNSET);
+        }
+
+        public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
+                int suppressedVisualEffects) {
             this.priorityCategories = priorityCategories;
             this.priorityCallSenders = priorityCallSenders;
             this.priorityMessageSenders = priorityMessageSenders;
+            this.suppressedVisualEffects = suppressedVisualEffects;
         }
 
         /** @hide */
         public Policy(Parcel source) {
-            this(source.readInt(), source.readInt(), source.readInt());
+            this(source.readInt(), source.readInt(), source.readInt(), source.readInt());
         }
 
         @Override
@@ -626,6 +650,7 @@ public class NotificationManager
             dest.writeInt(priorityCategories);
             dest.writeInt(priorityCallSenders);
             dest.writeInt(priorityMessageSenders);
+            dest.writeInt(suppressedVisualEffects);
         }
 
         @Override
@@ -635,7 +660,8 @@ public class NotificationManager
 
         @Override
         public int hashCode() {
-            return Objects.hash(priorityCategories, priorityCallSenders, priorityMessageSenders);
+            return Objects.hash(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                    suppressedVisualEffects);
         }
 
         @Override
@@ -645,7 +671,8 @@ public class NotificationManager
             final Policy other = (Policy) o;
             return other.priorityCategories == priorityCategories
                     && other.priorityCallSenders == priorityCallSenders
-                    && other.priorityMessageSenders == priorityMessageSenders;
+                    && other.priorityMessageSenders == priorityMessageSenders
+                    && other.suppressedVisualEffects == suppressedVisualEffects;
         }
 
         @Override
@@ -654,7 +681,27 @@ public class NotificationManager
                     + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
                     + ",priorityCallSenders=" + prioritySendersToString(priorityCallSenders)
                     + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
+                    + ",suppressedVisualEffects="
+                    + suppressedEffectsToString(suppressedVisualEffects)
                     + "]";
+        }
+
+        public static String suppressedEffectsToString(int effects) {
+            if (effects <= 0) return "";
+            final StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < ALL_SUPPRESSED_EFFECTS.length; i++) {
+                final int effect = ALL_SUPPRESSED_EFFECTS[i];
+                if ((effects & effect) != 0) {
+                    if (sb.length() > 0) sb.append(',');
+                    sb.append(effectToString(effect));
+                }
+                effects &= ~effect;
+            }
+            if (effects != 0) {
+                if (sb.length() > 0) sb.append(',');
+                sb.append("UNKNOWN_").append(effects);
+            }
+            return sb.toString();
         }
 
         public static String priorityCategoriesToString(int priorityCategories) {
@@ -673,6 +720,15 @@ public class NotificationManager
                 sb.append("PRIORITY_CATEGORY_UNKNOWN_").append(priorityCategories);
             }
             return sb.toString();
+        }
+
+        private static String effectToString(int effect) {
+            switch (effect) {
+                case SUPPRESSED_EFFECT_LIGHTS: return "SUPPRESSED_EFFECT_LIGHTS";
+                case SUPPRESSED_EFFECT_PEEK: return "SUPPRESSED_EFFECT_PEEK";
+                case SUPPRESSED_EFFECTS_UNSET: return "SUPPRESSED_EFFECTS_UNSET";
+                default: return "UNKNOWN_" + effect;
+            }
         }
 
         private static String priorityCategoryToString(int priorityCategory) {

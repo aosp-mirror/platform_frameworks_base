@@ -470,7 +470,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                         processForRemoteInput(sbn.getNotification());
                         String key = sbn.getKey();
                         boolean isUpdate = mNotificationData.get(key) != null;
-
                         // In case we don't allow child notifications, we ignore children of
                         // notifications that have a summary, since we're not going to show them
                         // anyway. This is true also when the summary is canceled,
@@ -2023,6 +2022,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         Notification n = notification.getNotification();
+        mNotificationData.updateRanking(ranking);
 
         boolean applyInPlace = !entry.cacheContentViews(mContext, notification.getNotification());
         boolean shouldInterrupt = shouldInterrupt(entry, notification);
@@ -2077,7 +2077,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             inflateViews(entry, mStackScroller);
         }
         updateHeadsUp(key, entry, shouldInterrupt, alertAgain);
-        mNotificationData.updateRanking(ranking);
         updateNotifications();
 
         // Update the veto button accordingly (and as a result, whether this row is
@@ -2167,7 +2166,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean accessibilityForcesLaunch = isFullscreen
                 && mAccessibilityManager.isTouchExplorationEnabled();
         boolean justLaunchedFullScreenIntent = entry.hasJustLaunchedFullScreenIntent();
-
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
                 && !accessibilityForcesLaunch
@@ -2175,7 +2173,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && mPowerManager.isScreenOn()
                 && (!mStatusBarKeyguardViewManager.isShowing()
                         || mStatusBarKeyguardViewManager.isOccluded())
-                && !mStatusBarKeyguardViewManager.isInputRestricted();
+                && !mStatusBarKeyguardViewManager.isInputRestricted()
+                && !mNotificationData.shouldSuppressPeek(sbn.getKey());
         try {
             interrupt = interrupt && !mDreamManager.isDreaming();
         } catch (RemoteException e) {

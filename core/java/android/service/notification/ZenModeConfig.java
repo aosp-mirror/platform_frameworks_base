@@ -77,6 +77,8 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_REMINDERS = true;
     private static final boolean DEFAULT_ALLOW_EVENTS = true;
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = false;
+    private static final boolean DEFAULT_ALLOW_PEEK = true;
+    private static final boolean DEFAULT_ALLOW_LIGHTS = true;
 
     private static final int XML_VERSION = 2;
     private static final String ZEN_TAG = "zen";
@@ -91,6 +93,8 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_MESSAGES_FROM = "messagesFrom";
     private static final String ALLOW_ATT_REMINDERS = "reminders";
     private static final String ALLOW_ATT_EVENTS = "events";
+    private static final String ALLOW_ATT_PEEK = "peek";
+    private static final String ALLOW_ATT_LIGHTS = "lights";
 
     private static final String CONDITION_TAG = "condition";
     private static final String CONDITION_ATT_COMPONENT = "component";
@@ -122,6 +126,8 @@ public class ZenModeConfig implements Parcelable {
     public int allowCallsFrom = DEFAULT_SOURCE;
     public int allowMessagesFrom = DEFAULT_SOURCE;
     public int user = UserHandle.USER_SYSTEM;
+    public boolean allowPeek = DEFAULT_ALLOW_PEEK;
+    public boolean allowLights = DEFAULT_ALLOW_LIGHTS;
 
     public ZenRule manualRule;
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
@@ -148,6 +154,8 @@ public class ZenModeConfig implements Parcelable {
                 automaticRules.put(ids[i], rules[i]);
             }
         }
+        allowPeek = source.readInt() == 1;
+        allowLights = source.readInt() == 1;
     }
 
     @Override
@@ -175,22 +183,26 @@ public class ZenModeConfig implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(allowPeek ? 1 : 0);
+        dest.writeInt(allowLights ? 1 : 0);
     }
 
     @Override
     public String toString() {
         return new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
-            .append("user=").append(user)
-            .append(",allowCalls=").append(allowCalls)
-            .append(",allowRepeatCallers=").append(allowRepeatCallers)
-            .append(",allowMessages=").append(allowMessages)
-            .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
-            .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
-            .append(",allowReminders=").append(allowReminders)
-            .append(",allowEvents=").append(allowEvents)
-            .append(",automaticRules=").append(automaticRules)
-            .append(",manualRule=").append(manualRule)
-            .append(']').toString();
+                .append("user=").append(user)
+                .append(",allowCalls=").append(allowCalls)
+                .append(",allowRepeatCallers=").append(allowRepeatCallers)
+                .append(",allowMessages=").append(allowMessages)
+                .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
+                .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
+                .append(",allowReminders=").append(allowReminders)
+                .append(",allowEvents=").append(allowEvents)
+                .append(",allowPeek=").append(allowPeek)
+                .append(",allowLights=").append(allowLights)
+                .append(",automaticRules=").append(automaticRules)
+                .append(",manualRule=").append(manualRule)
+                .append(']').toString();
     }
 
     private Diff diff(ZenModeConfig to) {
@@ -221,6 +233,12 @@ public class ZenModeConfig implements Parcelable {
         }
         if (allowEvents != to.allowEvents) {
             d.addLine("allowEvents", allowEvents, to.allowEvents);
+        }
+        if (allowPeek != to.allowPeek) {
+            d.addLine("allowPeek", allowPeek, to.allowPeek);
+        }
+        if (allowLights != to.allowLights) {
+            d.addLine("allowLights", allowLights, to.allowLights);
         }
         final ArraySet<String> allRules = new ArraySet<>();
         addKeys(allRules, automaticRules);
@@ -319,6 +337,8 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowMessagesFrom == allowMessagesFrom
                 && other.allowReminders == allowReminders
                 && other.allowEvents == allowEvents
+                && other.allowPeek == allowPeek
+                && other.allowLights == allowLights
                 && other.user == user
                 && Objects.equals(other.automaticRules, automaticRules)
                 && Objects.equals(other.manualRule, manualRule);
@@ -327,7 +347,8 @@ public class ZenModeConfig implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowCallsFrom,
-                allowMessagesFrom, allowReminders, allowEvents, user, automaticRules, manualRule);
+                allowMessagesFrom, allowReminders, allowEvents, allowPeek, allowLights,
+                user, automaticRules, manualRule);
     }
 
     private static String toDayList(int[] days) {
@@ -412,6 +433,8 @@ public class ZenModeConfig implements Parcelable {
                         rt.allowCallsFrom = DEFAULT_SOURCE;
                         rt.allowMessagesFrom = DEFAULT_SOURCE;
                     }
+                    rt.allowPeek = safeBoolean(parser, ALLOW_ATT_PEEK, DEFAULT_ALLOW_PEEK);
+                    rt.allowLights = safeBoolean(parser, ALLOW_ATT_LIGHTS, DEFAULT_ALLOW_LIGHTS);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
                 } else if (AUTOMATIC_TAG.equals(tag)) {
@@ -440,6 +463,8 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
         out.attribute(null, ALLOW_ATT_CALLS_FROM, Integer.toString(allowCallsFrom));
         out.attribute(null, ALLOW_ATT_MESSAGES_FROM, Integer.toString(allowMessagesFrom));
+        out.attribute(null, ALLOW_ATT_PEEK, Boolean.toString(allowPeek));
+        out.attribute(null, ALLOW_ATT_LIGHTS, Boolean.toString(allowLights));
         out.endTag(null, ALLOW_TAG);
 
         if (manualRule != null) {
@@ -611,9 +636,17 @@ public class ZenModeConfig implements Parcelable {
         if (allowRepeatCallers) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
         }
+        int suppressedVisualEffects = 0;
+        if (!allowPeek) {
+            suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_PEEK;
+        }
+        if (!allowLights) {
+            suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
+        }
         priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
         priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
-        return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders);
+        return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                suppressedVisualEffects);
     }
 
     private static int sourceToPrioritySenders(int source, int def) {
@@ -645,6 +678,10 @@ public class ZenModeConfig implements Parcelable {
         allowCallsFrom = prioritySendersToSource(policy.priorityCallSenders, allowCallsFrom);
         allowMessagesFrom = prioritySendersToSource(policy.priorityMessageSenders,
                 allowMessagesFrom);
+        if (policy.suppressedVisualEffects != Policy.SUPPRESSED_EFFECTS_UNSET) {
+            allowPeek = (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_PEEK) == 0;
+            allowLights = (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_LIGHTS) == 0;
+        }
     }
 
     public static Condition toTimeCondition(Context context, int minutesFromNow, int userHandle) {

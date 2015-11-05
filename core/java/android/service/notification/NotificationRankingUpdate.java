@@ -28,13 +28,15 @@ public class NotificationRankingUpdate implements Parcelable {
     private final String[] mInterceptedKeys;
     private final int mFirstAmbientIndex;
     private final Bundle mVisibilityOverrides;
+    private final Bundle mSuppressedVisualEffects;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
-            Bundle visibilityOverrides, int firstAmbientIndex) {
+            Bundle visibilityOverrides, int firstAmbientIndex, Bundle suppressedVisualEffects) {
         mKeys = keys;
         mFirstAmbientIndex = firstAmbientIndex;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
+        mSuppressedVisualEffects = suppressedVisualEffects;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -42,6 +44,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mFirstAmbientIndex = in.readInt();
         mInterceptedKeys = in.readStringArray();
         mVisibilityOverrides = in.readBundle();
+        mSuppressedVisualEffects = in.readBundle();
     }
 
     @Override
@@ -55,6 +58,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeInt(mFirstAmbientIndex);
         out.writeStringArray(mInterceptedKeys);
         out.writeBundle(mVisibilityOverrides);
+        out.writeBundle(mSuppressedVisualEffects);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -82,5 +86,9 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getVisibilityOverrides() {
         return mVisibilityOverrides;
+    }
+
+    public Bundle getSuppressedVisualEffects() {
+        return mSuppressedVisualEffects;
     }
 }
