@@ -270,11 +270,7 @@ class DimLayerController {
     }
 
     void removeDimLayerUser(DimLayer.DimLayerUser dimLayerUser) {
-        DimLayerState state = mState.get(dimLayerUser);
-        if (state != null) {
-            state.dimLayer.destroySurface();
-            mState.remove(dimLayerUser);
-        }
+        mState.remove(dimLayerUser);
     }
 
     void applyDimBehind(DimLayer.DimLayerUser dimLayerUser, WindowStateAnimator animator) {
