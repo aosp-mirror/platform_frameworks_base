@@ -138,6 +138,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         @Override
         public void onInputAdded(String inputId) {
             TvInputInfo tvInfo = mService.getTvInputManager().getTvInputInfo(inputId);
+            if (tvInfo == null) return;
             HdmiDeviceInfo info = tvInfo.getHdmiDeviceInfo();
             if (info == null) return;
             addTvInput(inputId, info.getId());
