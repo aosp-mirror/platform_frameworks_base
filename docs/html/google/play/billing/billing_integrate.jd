@@ -222,9 +222,11 @@ ServiceConnection mServiceConn = new ServiceConnection() {
 public void onCreate(Bundle savedInstanceState) {
   super.onCreate(savedInstanceState);
   setContentView(R.layout.activity_main);
-  Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+  Intent serviceIntent =
+      new Intent("com.android.vending.billing.InAppBillingService.BIND");
   serviceIntent.setPackage("com.android.vending");
   bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+}
 </pre>
 
 <p>
@@ -509,7 +511,11 @@ Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
   products that are owned by the user has been sent to your app.
 </p>
 
-<p>For more information about the data returned by {@code getPurchases}, see <a href="{@docRoot}google/play/billing/billing_reference.html#getPurchases">In-app Billing Reference</a>. The following example shows how you can retrieve this data from the response.</p>
+<p>For more information about the data returned by {@code getPurchases}, see
+  <a href="{@docRoot}google/play/billing/billing_reference.html#getPurchases">
+  In-app Billing Reference</a>. The following example shows how you can
+  retrieve this data from the response.
+</p>
 
 <pre>
 int response = ownedItems.getInt("RESPONSE_CODE");
@@ -656,4 +662,5 @@ to a secure remote server then we recommend that you perform the signature
 verification on that server.</p>
 
 <p>For more information about best practices for security and design, see <a
-href="{@docRoot}google/play/billing/billing_best_practices.html">Security and Design</a>.</p>
+href="{@docRoot}google/play/billing/billing_best_practices.html">Security and
+Design</a>.</p>

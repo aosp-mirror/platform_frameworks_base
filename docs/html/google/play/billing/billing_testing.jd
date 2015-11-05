@@ -30,7 +30,7 @@ implementation:</p>
 <li>Static billing responses from Google Play, for testing in early development</p>
 </ul>
 
-<p>To test in-app billing, you need to publish your app to an <a 
+<p>To test in-app billing, you need to publish your app to an <a
 href="https://support.google.com/googleplay/android-developer/answer/3131213">alpha
 or beta channel in Google Play.</a></p>
 
@@ -42,7 +42,7 @@ must match the version currently uploaded to the alpha or beta channel on Google
 purchases in your alpha or beta channel app, each tester
 needs to <a href="https://support.google.com/googleplay/android-developer/answer/3131213">opt-in
 to your app’s alpha or beta test</a>. On your test’s opt-in URL, your
-testers will get an explanation of what it means to be a tester and a link to opt-in.</p> 
+testers will get an explanation of what it means to be a tester and a link to opt-in.</p>
 
 <p>You can test on any Android-powered hardware device running Android 1.6 or higher.
 The most current version of the Google Play application must be installed on the device.
@@ -54,12 +54,12 @@ Devices</a>.</p>
 
 <p>When your In-app Billing implementation is ready, you can test purchasing of your in-app SKUs in two ways:</p>
 
-<ul> <li><strong>Test purchases</strong>, which let your selected license-test
+<ul>
+<li><strong>Test purchases</strong>, which let your selected license-test
 users purchase your in-app products without any resulting charges to the user.
 Test purchases can be used in alpha/beta releases only. </li>
 <li><strong>Real purchases</strong>, which let regular users make real purchases
 of your in-app products with actual charges to the user’s payment instruments.</li>
-  
 </ul>
 
 <p>In either case, you need to publish your app to Google Play's
@@ -201,8 +201,8 @@ can make test purchases. </p>
 
 <p>We recommend that you first test your In-app Billing implementation using static responses from
 Google Play. This enables you to verify that your application is handling the primary Google
-Play responses correctly and that your application is able to verify signatures correctly. You can do this
-even if the app hasn't been published yet.</p>
+Play responses correctly and that your application is able to verify signatures correctly. You can
+do this even if the app hasn't been published yet.</p>
 
 <p>To test your implementation with static responses, you make an In-app Billing request using a
 special item that has a reserved product ID. Each reserved product ID returns a specific static
@@ -250,9 +250,11 @@ href="#draft_apps">Draft Apps are No Longer Supported</a>.
     billing service. Refunds must be initiated by you (the merchant). After you process a refund
     request through your Google payments merchant account, a refund message is sent to your application by
     Google Play. This occurs only when Google Play gets notification from Google payments that
-    a refund has been made. For more information about refunds, see <a href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
-IN_APP_NOTIFY messages</a> and <a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">In-app Billing
-Pricing</a>.</p>
+    a refund has been made. For more information about refunds, see <a
+    href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">Handling
+    IN_APP_NOTIFY messages</a> and <a
+    href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485"
+    >In-app Billing Pricing</a>.</p>
   </li>
   <li><strong>android.test.item_unavailable</strong>
     <p>When you make an In-app Billing request with this product ID, Google Play responds as
