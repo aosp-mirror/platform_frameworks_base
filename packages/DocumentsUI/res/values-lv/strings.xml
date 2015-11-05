@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Saglabāt"</string>
     <string name="menu_share" msgid="3075149983979628146">"Kopīgot"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Dzēst"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Atlasīt “<xliff:g id="DIRECTORY">^1</xliff:g>”"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Atlasīt visus"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Atlasīt visus"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopēt…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Rādīt iekšējo atmiņu"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Rādīt SD karti"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Paslēpt SD karti"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Rādīt failu lielumu"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Paslēpt failu lielumu"</string>
+    <string name="button_select" msgid="527196987259139214">"Atlasīt"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopēt"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Atlasīts: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Pēc nosaukuma"</string>
     <string name="sort_date" msgid="586080032956151448">"Pēc pārveidošanas datuma"</string>
     <string name="sort_size" msgid="3350681319735474741">"Pēc lieluma"</string>
@@ -60,17 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Kopīgot, izmantojot"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Notiek failu kopēšana"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Atlikušais laiks: <xliff:g id="DURATION">%s</xliff:g>"</string>
-    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="zero">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> failu kopēšana.</item>
-      <item quantity="one">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> faila kopēšana.</item>
-      <item quantity="other">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> failu kopēšana.</item>
-    </plurals>
+  <plurals name="copy_begin">
+    <item quantity="one" msgid="7775181564278455087">"Notiek <xliff:g id="COUNT">%1$d</xliff:g> faila kopēšana."</item>
+    <item quantity="other" msgid="5175026054495572228">"Notiek <xliff:g id="COUNT">%1$d</xliff:g> failu kopēšana."</item>
+  </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Gatavošanās kopēšanai…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="zero">Nevarēja nokopēt <xliff:g id="COUNT_1">%1$d</xliff:g> failus</item>
-      <item quantity="one">Nevarēja nokopēt <xliff:g id="COUNT_1">%1$d</xliff:g> failu</item>
-      <item quantity="other">Nevarēja nokopēt <xliff:g id="COUNT_1">%1$d</xliff:g> failus</item>
-    </plurals>
+  <plurals name="copy_error_notification_title">
+    <item quantity="one" msgid="2515407675631145507">"Nevarēja nokopēt <xliff:g id="COUNT">%1$d</xliff:g> failu."</item>
+    <item quantity="other" msgid="7124097894673644954">"Nevarēja nokopēt <xliff:g id="COUNT">%1$d</xliff:g> failus."</item>
+  </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Pieskarieties, lai skatītu informāciju"</string>
     <string name="retry" msgid="7564024179122207376">"Mēģināt vēlreiz"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Netika nokopēti šādi faili: <xliff:g id="LIST">%1$s</xliff:g>"</string>
