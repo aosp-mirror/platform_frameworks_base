@@ -3785,12 +3785,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             PermissionsState permissionsState = sb.getPermissionsState();
 
-            // Only the package manager can change flags for system component permissions.
-            final int flags = permissionsState.getPermissionFlags(bp.name, userId);
-            if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-                return;
-            }
-
             boolean hadState = permissionsState.getRuntimePermissionState(name, userId) != null;
 
             if (permissionsState.updatePermissionFlags(bp, userId, flagMask, flagValues)) {
