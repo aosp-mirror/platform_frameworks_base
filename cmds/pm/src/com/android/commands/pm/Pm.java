@@ -764,8 +764,7 @@ public final class Pm {
             String optionData = nextOptionData();
             if (optionData == null || !isNumber(optionData)) {
                 System.err.println("Error: no USER_ID specified");
-                showUsage();
-                return 1;
+                return showUsage();
             } else {
                 userId = Integer.parseInt(optionData);
             }
@@ -868,8 +867,7 @@ public final class Pm {
                 }
             } else {
                 System.err.println("Error: unknown option: " + opt);
-                showUsage();
-                return 1;
+                return showUsage();
             }
         }
 
@@ -877,16 +875,14 @@ public final class Pm {
         final String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified.");
-            showUsage();
-            return 1;
+            return showUsage();
         }
 
         // State to apply; {always|ask|never|undefined}, required
         final String modeString = nextArg();
         if (modeString == null) {
             System.err.println("Error: no app link state specified.");
-            showUsage();
-            return 1;
+            return showUsage();
         }
 
         final int newMode;
@@ -955,8 +951,7 @@ public final class Pm {
                 }
             } else {
                 System.err.println("Error: unknown option: " + opt);
-                showUsage();
-                return 1;
+                return showUsage();
             }
         }
 
@@ -964,8 +959,7 @@ public final class Pm {
         final String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified.");
-            showUsage();
-            return 1;
+            return showUsage();
         }
 
         try {
@@ -1370,8 +1364,7 @@ public final class Pm {
                 String optionData = nextOptionData();
                 if (optionData == null || !isNumber(optionData)) {
                     System.err.println("Error: no USER_ID specified");
-                    showUsage();
-                    return 1;
+                    return showUsage();
                 } else {
                     userId = Integer.parseInt(optionData);
                 }
@@ -1379,8 +1372,7 @@ public final class Pm {
                 flags |= UserInfo.FLAG_MANAGED_PROFILE;
             } else {
                 System.err.println("Error: unknown option " + opt);
-                showUsage();
-                return 1;
+                return showUsage();
             }
         }
         String arg = nextArg();
@@ -1557,8 +1549,7 @@ public final class Pm {
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
 
         if (userId == UserHandle.USER_ALL) {
@@ -1626,8 +1617,7 @@ public final class Pm {
             String optionData = nextOptionData();
             if (optionData == null || !isNumber(optionData)) {
                 System.err.println("Error: no USER_ID specified");
-                showUsage();
-                return 1;
+                return showUsage();
             } else {
                 userId = Integer.parseInt(optionData);
             }
@@ -1636,8 +1626,7 @@ public final class Pm {
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
 
         ClearDataObserver obs = new ClearDataObserver();
@@ -1698,8 +1687,7 @@ public final class Pm {
             String optionData = nextOptionData();
             if (optionData == null || !isNumber(optionData)) {
                 System.err.println("Error: no USER_ID specified");
-                showUsage();
-                return 1;
+                return showUsage();
             } else {
                 userId = Integer.parseInt(optionData);
             }
@@ -1708,8 +1696,7 @@ public final class Pm {
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package or component specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
         ComponentName cn = ComponentName.unflattenFromString(pkg);
         if (cn == null) {
@@ -1747,8 +1734,7 @@ public final class Pm {
             String optionData = nextOptionData();
             if (optionData == null || !isNumber(optionData)) {
                 System.err.println("Error: no USER_ID specified");
-                showUsage();
-                return 1;
+                return showUsage();
             } else {
                 userId = Integer.parseInt(optionData);
             }
@@ -1757,8 +1743,7 @@ public final class Pm {
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package or component specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
         try {
             mPm.setApplicationHiddenSettingAsUser(pkg, state, userId);
@@ -1785,14 +1770,12 @@ public final class Pm {
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
         String perm = nextArg();
         if (perm == null) {
             System.err.println("Error: no permission specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
 
         try {
@@ -1808,8 +1791,7 @@ public final class Pm {
             return 1;
         } catch (IllegalArgumentException e) {
             System.err.println("Bad argument: " + e.toString());
-            showUsage();
-            return 1;
+            return showUsage();
         } catch (SecurityException e) {
             System.err.println("Operation not allowed: " + e.toString());
             return 1;
@@ -1826,8 +1808,7 @@ public final class Pm {
             return 1;
         } catch (IllegalArgumentException e) {
             System.err.println("Bad argument: " + e.toString());
-            showUsage();
-            return 1;
+            return showUsage();
         } catch (SecurityException e) {
             System.err.println("Operation not allowed: " + e.toString());
             return 1;
@@ -1838,14 +1819,12 @@ public final class Pm {
         final String permission = nextArg();
         if (permission == null) {
             System.err.println("Error: no permission specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
         final String enforcedRaw = nextArg();
         if (enforcedRaw == null) {
             System.err.println("Error: no enforcement specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
         final boolean enforced = Boolean.parseBoolean(enforcedRaw);
         try {
@@ -1857,8 +1836,7 @@ public final class Pm {
             return 1;
         } catch (IllegalArgumentException e) {
             System.err.println("Bad argument: " + e.toString());
-            showUsage();
-            return 1;
+            return showUsage();
         } catch (SecurityException e) {
             System.err.println("Operation not allowed: " + e.toString());
             return 1;
@@ -1884,8 +1862,7 @@ public final class Pm {
         String size = nextArg();
         if (size == null) {
             System.err.println("Error: no size specified");
-            showUsage();
-            return 1;
+            return showUsage();
         }
         int len = size.length();
         long multiplier = 1;
@@ -1899,8 +1876,7 @@ public final class Pm {
                 multiplier = 1024L*1024L*1024L;
             } else {
                 System.err.println("Invalid suffix: " + c);
-                showUsage();
-                return 1;
+                return showUsage();
             }
             size = size.substring(0, len-1);
         }
@@ -1909,8 +1885,7 @@ public final class Pm {
             sizeVal = Long.parseLong(size) * multiplier;
         } catch (NumberFormatException e) {
             System.err.println("Error: expected number at: " + size);
-            showUsage();
-            return 1;
+            return showUsage();
         }
         String volumeUuid = nextArg();
         if ("internal".equals(volumeUuid)) {
@@ -1934,8 +1909,7 @@ public final class Pm {
             return 1;
         } catch (IllegalArgumentException e) {
             System.err.println("Bad argument: " + e.toString());
-            showUsage();
-            return 1;
+            return showUsage();
         } catch (SecurityException e) {
             System.err.println("Operation not allowed: " + e.toString());
             return 1;
