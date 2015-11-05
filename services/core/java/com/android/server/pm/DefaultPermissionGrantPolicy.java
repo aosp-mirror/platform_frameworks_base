@@ -842,8 +842,8 @@ final class DefaultPermissionGrantPolicy {
 
                     mService.grantRuntimePermission(pkg.packageName, permission, userId);
                     if (DEBUG) {
-                        Log.i(TAG, "Granted " + permission + " to default handler "
-                                + pkg.packageName);
+                        Log.i(TAG, "Granted " + (systemFixed ? "fixed " : "not fixed ")
+                                + permission + " to default handler " + pkg.packageName);
                     }
 
                     int newFlags = PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
@@ -853,6 +853,19 @@ final class DefaultPermissionGrantPolicy {
 
                     mService.updatePermissionFlags(permission, pkg.packageName,
                             newFlags, newFlags, userId);
+                }
+
+                // If a component gets a permission for being the default handler A
+                // and also default handler B, we grant the weaker grant form.
+                if ((flags & PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0
+                        && (flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
+                        && !systemFixed) {
+                    if (DEBUG) {
+                        Log.i(TAG, "Granted not fixed " + permission + " to default handler "
+                                + pkg.packageName);
+                    }
+                    mService.updatePermissionFlags(permission, pkg.packageName,
+                            PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, 0, userId);
                 }
             }
         }
