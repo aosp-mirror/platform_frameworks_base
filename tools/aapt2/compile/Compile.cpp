@@ -132,8 +132,15 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
 
         // Parse the values file from XML.
         XmlPullParser xmlParser(fin);
+
+        ResourceParserOptions parserOptions;
+        parserOptions.product = options.product;
+
+        // If the filename includes donottranslate, then the default translatable is false.
+        parserOptions.translatable = pathData.name.find(u"donottranslate") == std::string::npos;
+
         ResourceParser resParser(context->getDiagnostics(), &table, pathData.source,
-                                 pathData.config, ResourceParserOptions{ options.product });
+                                 pathData.config, parserOptions);
         if (!resParser.parse(&xmlParser)) {
             return false;
         }

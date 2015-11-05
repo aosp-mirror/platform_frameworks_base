@@ -52,8 +52,10 @@ struct ResourceParserTest : public ::testing::Test {
                                          Maybe<std::u16string> product = {}) {
         std::stringstream input(kXmlPreamble);
         input << "<resources>\n" << str << "\n</resources>" << std::endl;
+        ResourceParserOptions parserOptions;
+        parserOptions.product = product;
         ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, {},
-                              ResourceParserOptions{ product });
+                              parserOptions);
         XmlPullParser xmlParser(input);
         if (parser.parse(&xmlParser)) {
             return ::testing::AssertionSuccess();
@@ -78,6 +80,14 @@ TEST_F(ResourceParserTest, ParseEscapedString) {
     String* str = test::getValue<String>(&mTable, u"@string/foo");
     ASSERT_NE(nullptr, str);
     EXPECT_EQ(std::u16string(u"?123"), *str->value);
+}
+
+TEST_F(ResourceParserTest, ParseFormattedString) {
+    std::string input = "<string name=\"foo\">%d %s</string>";
+    ASSERT_FALSE(testParse(input));
+
+    input = "<string name=\"foo\">%1$d %2$s</string>";
+    ASSERT_TRUE(testParse(input));
 }
 
 TEST_F(ResourceParserTest, IgnoreXliffTags) {
@@ -321,6 +331,11 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
                         "  </attr>\n"
                         "</declare-styleable>";
     ASSERT_TRUE(testParse(input));
+
+    Maybe<ResourceTable::SearchResult> result =
+            mTable.findResource(test::parseNameOrDie(u"@styleable/foo"));
+    AAPT_ASSERT_TRUE(result);
+    EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbolStatus.state);
 
     Attribute* attr = test::getValue<Attribute>(&mTable, u"@attr/bar");
     ASSERT_NE(attr, nullptr);

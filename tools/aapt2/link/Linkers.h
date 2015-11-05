@@ -38,26 +38,61 @@ struct AutoVersioner : public IResourceTableConsumer {
     bool consume(IAaptContext* context, ResourceTable* table) override;
 };
 
-struct PrivateAttributeMover : public IResourceTableConsumer {
-    bool consume(IAaptContext* context, ResourceTable* table) override;
-};
-
 struct XmlAutoVersioner : public IXmlResourceConsumer {
     bool consume(IAaptContext* context, XmlResource* resource) override;
 };
 
+/**
+ * If any attribute resource values are defined as public, this consumer will move all private
+ * attribute resource values to a private ^private-attr type, avoiding backwards compatibility
+ * issues with new apps running on old platforms.
+ *
+ * The Android platform ignores resource attributes it doesn't recognize, so an app developer can
+ * use new attributes in their layout XML files without worrying about versioning. This assumption
+ * actually breaks on older platforms. OEMs may add private attributes that are used internally.
+ * AAPT originally assigned all private attributes IDs immediately proceeding the public attributes'
+ * IDs.
+ *
+ * This means that on a newer Android platform, an ID previously assigned to a private attribute
+ * may end up assigned to a public attribute.
+ *
+ * App developers assume using the newer attribute is safe on older platforms because it will
+ * be ignored. Instead, the platform thinks the new attribute is an older, private attribute and
+ * will interpret it as such. This leads to unintended styling and exceptions thrown due to
+ * unexpected types.
+ *
+ * By moving the private attributes to a completely different type, this ID conflict will never
+ * occur.
+ */
+struct PrivateAttributeMover : public IResourceTableConsumer {
+    bool consume(IAaptContext* context, ResourceTable* table) override;
+};
+
+/**
+ * Resolves all references to resources in the ResourceTable and assigns them IDs.
+ * The ResourceTable must already have IDs assigned to each resource.
+ * Once the ResourceTable is processed by this linker, it is ready to be flattened.
+ */
 struct ReferenceLinker : public IResourceTableConsumer {
     bool consume(IAaptContext* context, ResourceTable* table) override;
 };
 
-class XmlReferenceLinker : IXmlResourceConsumer {
+/**
+ * Resolves attributes in the XmlResource and compiles string values to resource values.
+ * Once an XmlResource is processed by this linker, it is ready to be flattened.
+ */
+class XmlReferenceLinker : public IXmlResourceConsumer {
 private:
     std::set<int> mSdkLevelsFound;
 
 public:
     bool consume(IAaptContext* context, XmlResource* resource) override;
 
-    const std::set<int>& getSdkLevels() const {
+    /**
+     * Once the XmlResource has been consumed, this returns the various SDK levels in which
+     * framework attributes used within the XML document were defined.
+     */
+    inline const std::set<int>& getSdkLevels() const {
         return mSdkLevelsFound;
     }
 };

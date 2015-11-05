@@ -40,6 +40,11 @@ struct ResourceParserOptions {
      * that don't match before we compile them.
      */
     Maybe<std::u16string> product;
+
+    /**
+     * Whether the default setting for this parser is to allow translation.
+     */
+    bool translatable = true;
 };
 
 /*

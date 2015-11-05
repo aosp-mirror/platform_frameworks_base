@@ -446,11 +446,11 @@ bool ResourceParser::parseString(XmlPullParser* parser, ParsedResource* outResou
         }
     }
 
-    bool untranslateable = false;
-    if (Maybe<StringPiece16> untranslateableAttr = findAttribute(parser, u"untranslateable")) {
-        if (!ResourceUtils::tryParseBool(untranslateableAttr.value(), &untranslateable)) {
+    bool translateable = mOptions.translatable;
+    if (Maybe<StringPiece16> translateableAttr = findAttribute(parser, u"translatable")) {
+        if (!ResourceUtils::tryParseBool(translateableAttr.value(), &translateable)) {
             mDiag->error(DiagMessage(source)
-                         << "invalid value for 'untranslateable'. Must be a boolean");
+                         << "invalid value for 'translatable'. Must be a boolean");
             return false;
         }
     }
@@ -461,10 +461,10 @@ bool ResourceParser::parseString(XmlPullParser* parser, ParsedResource* outResou
         return false;
     }
 
-    if (formatted || untranslateable) {
+    if (formatted && translateable) {
         if (String* stringValue = valueCast<String>(outResource->value.get())) {
             if (!util::verifyJavaStringFormat(*stringValue->value)) {
-                mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                mDiag->error(DiagMessage(source)
                              << "multiple substitutions specified in non-positional format; "
                                 "did you mean to add the formatted=\"false\" attribute?");
                 return false;
@@ -972,6 +972,9 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
 bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
+
+    // Declare-styleable is always public, because it technically only exists in R.java.
+    outResource->symbolState = SymbolState::kPublic;
 
     std::u16string comment;
     bool error = false;
