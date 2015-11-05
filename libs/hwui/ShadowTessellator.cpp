@@ -80,6 +80,11 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     ALOGD("light center %f %f %f",
             adjustedLightCenter.x, adjustedLightCenter.y, adjustedLightCenter.z);
 #endif
+    if (isnan(adjustedLightCenter.x)
+            || isnan(adjustedLightCenter.y)
+            || isnan(adjustedLightCenter.z)) {
+        return;
+    }
 
     // light position (because it's in local space) needs to compensate for receiver transform
     // TODO: should apply to light orientation, not just position
