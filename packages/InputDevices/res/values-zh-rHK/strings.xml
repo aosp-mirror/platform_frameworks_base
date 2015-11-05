@@ -8,6 +8,7 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"英文 (美國)，國際樣式"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"英文 (美國)，Colemak 樣式"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"英文 (美國)，Dvorak 樣式"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"英文 (美國)，Workman 樣式"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"德文"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"法文"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"法文 (加拿大)"</string>
