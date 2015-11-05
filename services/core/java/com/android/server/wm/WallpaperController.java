@@ -470,13 +470,13 @@ class WallpaperController {
     }
 
     private void findWallpaperTarget(WindowList windows, FindWallpaperTargetResult result) {
-
         final WindowAnimator winAnimator = mService.mAnimator;
         result.reset();
         WindowState w = null;
         int windowDetachedI = -1;
         boolean resetTopWallpaper = false;
         boolean inFreeformSpace = false;
+        boolean replacing = false;
         for (int i = windows.size() - 1; i >= 0; i--) {
             w = windows.get(i);
             if ((w.mAttrs.type == TYPE_WALLPAPER)) {
@@ -504,12 +504,13 @@ class WallpaperController {
                 inFreeformSpace = stack != null && stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
             }
 
+            replacing = replacing || (w.mAppToken != null && w.mAppToken.mWillReplaceWindow);
+
             // If the app is executing an animation because the keyguard is going away,
             // keep the wallpaper during the animation so it doesn't flicker out.
             final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
                     || (w.mAppToken != null && w.mWinAnimator.mKeyguardGoingAwayAnimation);
-            if (hasWallpaper && w.isOnScreen()
-                    && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
+            if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: #" + i + "=" + w);
                 result.setWallpaperTarget(w, i);
                 if (w == mWallpaperTarget && w.mWinAnimator.isAnimating()) {
@@ -530,9 +531,12 @@ class WallpaperController {
                     "Found animating detached wallpaper activity: #" + windowDetachedI + "=" + w);
             result.setWallpaperTarget(w, windowDetachedI);
         }
-        if (result.wallpaperTarget == null && inFreeformSpace) {
+        if (result.wallpaperTarget == null
+                && (inFreeformSpace || (replacing && mWallpaperTarget != null))) {
             // In freeform mode we set the wallpaper as its own target, so we don't need an
-            // additional window to make it visible.
+            // additional window to make it visible. When we are replacing a window and there was
+            // wallpaper before replacement, we want to keep the window until the new windows fully
+            // appear and can determine the visibility, to avoid flickering.
             result.setWallpaperTarget(result.topWallpaper, result.topWallpaperIndex);
         }
     }
