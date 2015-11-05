@@ -42,6 +42,7 @@ public final class Sm {
         } catch (Exception e) {
             if (e instanceof IllegalArgumentException) {
                 showUsage();
+                System.exit(1);
             }
             Log.e(TAG, "Error", e);
             System.err.println("Error: " + e);
