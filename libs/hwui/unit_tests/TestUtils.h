@@ -17,12 +17,19 @@
 #define TEST_UTILS_H
 
 #include <DeviceInfo.h>
+#include <DisplayList.h>
 #include <Matrix.h>
 #include <Rect.h>
 #include <RenderNode.h>
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 #include <Snapshot.h>
+
+#if HWUI_NEW_OPS
+#include <RecordedOp.h>
+#else
+#include <DisplayListOp.h>
+#endif
 
 #include <memory>
 
@@ -117,9 +124,8 @@ public:
         return node;
     }
 
-    static void syncNodePropertiesAndDisplayList(sp<RenderNode>& node) {
-        node->syncProperties();
-        node->syncDisplayList();
+    static void syncHierarchyPropertiesAndDisplayList(sp<RenderNode>& node) {
+        syncHierarchyPropertiesAndDisplayListImpl(node.get());
     }
 
     typedef std::function<void(renderthread::RenderThread& thread)> RtCallback;
@@ -147,6 +153,18 @@ public:
         TestTask task(rtCallback);
         renderthread::RenderThread::getInstance().queueAndWait(&task);
     }
+private:
+    static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
+        node->syncProperties();
+        node->syncDisplayList();
+        auto displayList = node->getDisplayList();
+        if (displayList) {
+            for (auto&& childOp : displayList->getChildren()) {
+                syncHierarchyPropertiesAndDisplayListImpl(childOp->renderNode);
+            }
+        }
+    }
+
 }; // class TestUtils
 
 } /* namespace uirenderer */

@@ -25,7 +25,7 @@ namespace uirenderer {
 
 static void playbackOps(const DisplayList& displayList,
         std::function<void(const RecordedOp&)> opReceiver) {
-    for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
+    for (auto& chunk : displayList.getChunks()) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             RecordedOp* op = displayList.getOps()[opIndex];
             opReceiver(*op);
@@ -222,6 +222,27 @@ TEST(RecordingCanvas, saveLayerRotateClipped) {
         }
     });
     EXPECT_EQ(3, count);
+}
+
+TEST(RecordingCanvas, testReorderBarrier) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+        canvas.insertReorderBarrier(true);
+        canvas.insertReorderBarrier(false);
+        canvas.insertReorderBarrier(false);
+        canvas.insertReorderBarrier(true);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+        canvas.insertReorderBarrier(false);
+    });
+
+    auto chunks = dl->getChunks();
+    EXPECT_EQ(0u, chunks[0].beginOpIndex);
+    EXPECT_EQ(1u, chunks[0].endOpIndex);
+    EXPECT_FALSE(chunks[0].reorderChildren);
+
+    EXPECT_EQ(1u, chunks[1].beginOpIndex);
+    EXPECT_EQ(2u, chunks[1].endOpIndex);
+    EXPECT_TRUE(chunks[1].reorderChildren);
 }
 
 } // namespace uirenderer

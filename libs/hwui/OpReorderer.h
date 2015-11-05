@@ -182,6 +182,10 @@ public:
     virtual GLuint getTargetFbo() const override { return 0; }
 
 private:
+    enum class ChildrenSelectMode {
+        Negative,
+        Positive
+    };
     void saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
             const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
     void restoreForLayer();
@@ -195,7 +199,14 @@ private:
     // should always be surrounded by a save/restore pair
     void deferNodePropsAndOps(RenderNode& node);
 
+    void deferShadow(const RenderNodeOp& casterOp);
+
     void deferImpl(const DisplayList& displayList);
+
+    template <typename V>
+    void defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes);
+
+    void deferRenderNodeOp(const RenderNodeOp& op);
 
     void replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers);
 

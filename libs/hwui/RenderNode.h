@@ -201,7 +201,6 @@ public:
                 || properties().getScaleY() == 0;
     }
 
-    // Only call if RenderNode has DisplayList...
     const DisplayList* getDisplayList() const {
         return mDisplayList;
     }

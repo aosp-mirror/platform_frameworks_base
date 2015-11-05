@@ -16,12 +16,14 @@
 
 #include "OpReorderer.h"
 
-#include "utils/PaintUtils.h"
-#include "RenderNode.h"
 #include "LayerUpdateQueue.h"
+#include "RenderNode.h"
+#include "utils/FatVector.h"
+#include "utils/PaintUtils.h"
 
-#include "SkCanvas.h"
-#include "utils/Trace.h"
+#include <SkCanvas.h>
+#include <utils/Trace.h>
+#include <utils/TypeHelpers.h>
 
 namespace android {
 namespace uirenderer {
@@ -375,6 +377,93 @@ void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
     }
 }
 
+typedef key_value_pair_t<float, const RenderNodeOp*> ZRenderNodeOpPair;
+
+template <typename V>
+static void buildZSortedChildList(V* zTranslatedNodes,
+        const DisplayList& displayList, const DisplayList::Chunk& chunk) {
+    if (chunk.beginChildIndex == chunk.endChildIndex) return;
+
+    for (size_t i = chunk.beginChildIndex; i < chunk.endChildIndex; i++) {
+        RenderNodeOp* childOp = displayList.getChildren()[i];
+        RenderNode* child = childOp->renderNode;
+        float childZ = child->properties().getZ();
+
+        if (!MathUtils::isZero(childZ) && chunk.reorderChildren) {
+            zTranslatedNodes->push_back(ZRenderNodeOpPair(childZ, childOp));
+            childOp->skipInOrderDraw = true;
+        } else if (!child->properties().getProjectBackwards()) {
+            // regular, in order drawing DisplayList
+            childOp->skipInOrderDraw = false;
+        }
+    }
+
+    // Z sort any 3d children (stable-ness makes z compare fall back to standard drawing order)
+    std::stable_sort(zTranslatedNodes->begin(), zTranslatedNodes->end());
+}
+
+template <typename V>
+static size_t findNonNegativeIndex(const V& zTranslatedNodes) {
+    for (size_t i = 0; i < zTranslatedNodes.size(); i++) {
+        if (zTranslatedNodes[i].key >= 0.0f) return i;
+    }
+    return zTranslatedNodes.size();
+}
+
+template <typename V>
+void OpReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes) {
+    const int size = zTranslatedNodes.size();
+    if (size == 0
+            || (mode == ChildrenSelectMode::Negative&& zTranslatedNodes[0].key > 0.0f)
+            || (mode == ChildrenSelectMode::Positive && zTranslatedNodes[size - 1].key < 0.0f)) {
+        // no 3d children to draw
+        return;
+    }
+
+    /**
+     * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
+     * with very similar Z heights to draw together.
+     *
+     * This way, if Views A & B have the same Z height and are both casting shadows, the shadows are
+     * underneath both, and neither's shadow is drawn on top of the other.
+     */
+    const size_t nonNegativeIndex = findNonNegativeIndex(zTranslatedNodes);
+    size_t drawIndex, shadowIndex, endIndex;
+    if (mode == ChildrenSelectMode::Negative) {
+        drawIndex = 0;
+        endIndex = nonNegativeIndex;
+        shadowIndex = endIndex; // draw no shadows
+    } else {
+        drawIndex = nonNegativeIndex;
+        endIndex = size;
+        shadowIndex = drawIndex; // potentially draw shadow for each pos Z child
+    }
+
+    float lastCasterZ = 0.0f;
+    while (shadowIndex < endIndex || drawIndex < endIndex) {
+        if (shadowIndex < endIndex) {
+            const RenderNodeOp* casterNodeOp = zTranslatedNodes[shadowIndex].value;
+            const float casterZ = zTranslatedNodes[shadowIndex].key;
+            // attempt to render the shadow if the caster about to be drawn is its caster,
+            // OR if its caster's Z value is similar to the previous potential caster
+            if (shadowIndex == drawIndex || casterZ - lastCasterZ < 0.1f) {
+                deferShadow(*casterNodeOp);
+
+                lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
+                shadowIndex++;
+                continue;
+            }
+        }
+
+        const RenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
+        deferRenderNodeOp(*childOp);
+        drawIndex++;
+    }
+}
+
+void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
+    // TODO
+}
 /**
  * Used to define a list of lambdas referencing private OpReorderer::onXXXXOp() methods.
  *
@@ -388,17 +477,20 @@ void OpReorderer::deferImpl(const DisplayList& displayList) {
         MAP_OPS(OP_RECEIVER)
     };
     for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
+        FatVector<ZRenderNodeOpPair, 16> zTranslatedNodes;
+        buildZSortedChildList(&zTranslatedNodes, displayList, chunk);
+
+        defer3dChildren(ChildrenSelectMode::Negative, zTranslatedNodes);
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             const RecordedOp* op = displayList.getOps()[opIndex];
             receivers[op->opId](*this, *op);
         }
+        defer3dChildren(ChildrenSelectMode::Positive, zTranslatedNodes);
     }
 }
 
-void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
-    if (op.renderNode->nothingToDraw()) {
-        return;
-    }
+void OpReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
+    if (op.renderNode->nothingToDraw()) return;
     int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
 
     // apply state from RecordedOp
@@ -410,6 +502,12 @@ void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
     deferNodePropsAndOps(*op.renderNode);
 
     mCanvasState.restoreToCount(count);
+}
+
+void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
+    if (!op.skipInOrderDraw) {
+        deferRenderNodeOp(op);
+    }
 }
 
 static batchid_t tessellatedBatchId(const SkPaint& paint) {
