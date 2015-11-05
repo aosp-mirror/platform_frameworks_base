@@ -572,9 +572,18 @@ final class TaskRecord {
         return null;
     }
 
+    void setFrontOfTask() {
+        setFrontOfTask(null);
+    }
+
     /** Call after activity movement or finish to make sure that frontOfTask is set correctly */
-    final void setFrontOfTask() {
-        boolean foundFront = false;
+    void setFrontOfTask(ActivityRecord newTop) {
+        // If a top candidate is suggested by the caller, go ahead and use it and mark all others
+        // as not front. This is needed in situations where the current front activity in the
+        // task isn't finished yet and we want to set the front to the activity moved to the front
+        // of the task.
+        boolean foundFront = newTop != null ? true : false;
+
         final int numActivities = mActivities.size();
         for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
@@ -591,6 +600,9 @@ final class TaskRecord {
             // activity, make the bottom activity front.
             mActivities.get(0).frontOfTask = true;
         }
+        if (newTop != null) {
+            newTop.frontOfTask = true;
+        }
     }
 
     /**
@@ -605,7 +617,7 @@ final class TaskRecord {
         mActivities.add(newTop);
         updateEffectiveIntent();
 
-        setFrontOfTask();
+        setFrontOfTask(newTop);
     }
 
     void addActivityAtBottom(ActivityRecord r) {
