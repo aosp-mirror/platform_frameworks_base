@@ -230,8 +230,14 @@ public class Editor {
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     boolean mCreatedWithASelection;
 
-    boolean mDoubleTap = false;
-    boolean mTripleClick = false;
+    // Indicates the current tap state (first tap, double tap, or triple click).
+    private int mTapState = TAP_STATE_INITIAL;
+    private long mLastTouchUpTime = 0;
+    private static final int TAP_STATE_INITIAL = 0;
+    private static final int TAP_STATE_FIRST_TAP = 1;
+    private static final int TAP_STATE_DOUBLE_TAP = 2;
+    // Only for mouse input.
+    private static final int TAP_STATE_TRIPLE_CLICK = 3;
 
     private Runnable mInsertionActionModeRunnable;
 
@@ -1285,7 +1291,31 @@ public class Editor {
         }
     }
 
+    private void updateTapState(MotionEvent event) {
+        final int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
+            // Detect double tap and triple click.
+            if (((mTapState == TAP_STATE_FIRST_TAP)
+                    || ((mTapState == TAP_STATE_DOUBLE_TAP) && isMouse))
+                        && (SystemClock.uptimeMillis() - mLastTouchUpTime) <=
+                                ViewConfiguration.getDoubleTapTimeout()) {
+                if (mTapState == TAP_STATE_FIRST_TAP) {
+                    mTapState = TAP_STATE_DOUBLE_TAP;
+                } else {
+                    mTapState = TAP_STATE_TRIPLE_CLICK;
+                }
+            } else {
+                mTapState = TAP_STATE_FIRST_TAP;
+            }
+        }
+        if (action == MotionEvent.ACTION_UP) {
+            mLastTouchUpTime = SystemClock.uptimeMillis();
+        }
+    }
+
     void onTouchEvent(MotionEvent event) {
+        updateTapState(event);
         updateFloatingToolbarVisibility(event);
 
         if (hasSelectionController()) {
@@ -3976,13 +4006,16 @@ public class Editor {
 
             // Cancel the single tap delayed runnable.
             if (mInsertionActionModeRunnable != null
-                    && (mDoubleTap || mTripleClick || isCursorInsideEasyCorrectionSpan())) {
+                    && ((mTapState == TAP_STATE_DOUBLE_TAP)
+                            || (mTapState == TAP_STATE_TRIPLE_CLICK)
+                            || isCursorInsideEasyCorrectionSpan())) {
                 mTextView.removeCallbacks(mInsertionActionModeRunnable);
             }
 
             // Prepare and schedule the single tap runnable to run exactly after the double tap
             // timeout has passed.
-            if (!mDoubleTap && !mTripleClick && !isCursorInsideEasyCorrectionSpan()
+            if ((mTapState != TAP_STATE_DOUBLE_TAP) && (mTapState != TAP_STATE_TRIPLE_CLICK)
+                    && !isCursorInsideEasyCorrectionSpan()
                     && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
                 if (mTextActionMode == null) {
                     if (mInsertionActionModeRunnable == null) {
@@ -4636,7 +4669,8 @@ public class Editor {
 
                         // Double tap detection
                         if (mGestureStayedInTapRegion) {
-                            if (mDoubleTap || mTripleClick) {
+                            if (mTapState == TAP_STATE_DOUBLE_TAP
+                                    || mTapState == TAP_STATE_TRIPLE_CLICK) {
                                 final float deltaX = eventX - mDownPositionX;
                                 final float deltaY = eventY - mDownPositionY;
                                 final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
@@ -4648,9 +4682,9 @@ public class Editor {
                                         distanceSquared < doubleTapSlop * doubleTapSlop;
 
                                 if (stayedInArea && (isMouse || isPositionOnText(eventX, eventY))) {
-                                    if (mDoubleTap) {
+                                    if (mTapState == TAP_STATE_DOUBLE_TAP) {
                                         selectCurrentWordAndStartDrag();
-                                    } else if (mTripleClick) {
+                                    } else if (mTapState == TAP_STATE_TRIPLE_CLICK) {
                                         selectCurrentParagraphAndStartDrag();
                                     }
                                     mDiscardNextActionUp = true;

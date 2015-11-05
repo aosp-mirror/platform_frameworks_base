@@ -618,9 +618,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final Paint mHighlightPaint;
     private boolean mHighlightPathBogus = true;
 
-    private boolean mFirstTouch = false;
-    private long mLastTouchUpTime = 0;
-
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
     int mCursorDrawableRes;
@@ -8406,33 +8403,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
-
-        if (mEditor != null && action == MotionEvent.ACTION_DOWN) {
-            final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
-            // Detect double tap and triple click and inform the Editor.
-            if ((mFirstTouch || (mEditor.mDoubleTap && isMouse))
-                        && (SystemClock.uptimeMillis() - mLastTouchUpTime) <=
-                                ViewConfiguration.getDoubleTapTimeout()) {
-                if (mFirstTouch) {
-                    mEditor.mTripleClick = false;
-                    mEditor.mDoubleTap = true;
-                    mFirstTouch = false;
-                } else {
-                    mEditor.mTripleClick = true;
-                    mEditor.mDoubleTap = false;
-                    mFirstTouch = false;
-                }
-            } else {
-                mEditor.mTripleClick = false;
-                mEditor.mDoubleTap = false;
-                mFirstTouch = true;
-            }
-        }
-
-        if (action == MotionEvent.ACTION_UP) {
-            mLastTouchUpTime = SystemClock.uptimeMillis();
-        }
-
         if (mEditor != null) {
             mEditor.onTouchEvent(event);
 
