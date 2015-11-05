@@ -2597,6 +2597,24 @@ class MountService extends IMountService.Stub
         }
     }
 
+    /**
+     * Is userdata convertible to file based encryption?
+     * @return non zero for convertible
+     */
+    @Override
+    public boolean isConvertibleToFBE() throws RemoteException {
+
+        waitForReady();
+
+        final NativeDaemonEvent event;
+        try {
+            event = mCryptConnector.execute("cryptfs", "isConvertibleToFBE");
+            return Integer.parseInt(event.getMessage()) != 0;
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
     @Override
     public String getPassword() throws RemoteException {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE,
