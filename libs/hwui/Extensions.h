@@ -19,6 +19,9 @@
 
 #include <cutils/compiler.h>
 
+#include <string>
+#include <unordered_set>
+
 namespace android {
 namespace uirenderer {
 
@@ -26,9 +29,9 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class ANDROID_API Extensions {
+class Extensions {
 public:
-    Extensions();
+    void load();
 
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }

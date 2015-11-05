@@ -13,28 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STRING_UTILS_H
-#define STRING_UTILS_H
+#include <DeviceInfo.h>
 
-#include <string>
-#include <unordered_set>
+#include "Extensions.h"
+
+#include <GLES2/gl2.h>
+
+#include <thread>
+#include <mutex>
 
 namespace android {
 namespace uirenderer {
 
-class unordered_string_set : public std::unordered_set<std::string> {
-public:
-    bool has(const char* str) {
-        return find(std::string(str)) != end();
-    }
-};
+static DeviceInfo* sDeviceInfo = nullptr;
+static std::once_flag sInitializedFlag;
 
-class StringUtils {
-public:
-    static unordered_string_set split(const char* spacedList);
-};
+const DeviceInfo* DeviceInfo::get() {
+    return sDeviceInfo;
+}
+
+void DeviceInfo::initialize() {
+    std::call_once(sInitializedFlag, []() {
+        sDeviceInfo = new DeviceInfo();
+        sDeviceInfo->load();
+    });
+}
+
+void DeviceInfo::load() {
+    mExtensions.load();
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+}
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* GLUTILS_H */
