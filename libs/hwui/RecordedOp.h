@@ -93,6 +93,7 @@ struct RenderNodeOp : RecordedOp {
             : SUPER_PAINTLESS(RenderNodeOp)
             , renderNode(renderNode) {}
     RenderNode * renderNode; // not const, since drawing modifies it (somehow...)
+    bool skipInOrderDraw = false;
 };
 
 struct BitmapOp : RecordedOp {

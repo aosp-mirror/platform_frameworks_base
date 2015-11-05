@@ -1398,6 +1398,7 @@ class DrawRenderNodeOp : public DrawBoundedOp {
     friend class RenderNode; // grant RenderNode access to info of child
     friend class DisplayList; // grant DisplayList access to info of child
     friend class DisplayListCanvas;
+    friend class TestUtils;
 public:
     DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent, bool clipIsSimple)
             : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)

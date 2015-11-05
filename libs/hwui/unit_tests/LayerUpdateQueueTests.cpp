@@ -32,7 +32,7 @@ TEST(LayerUpdateQueue, construct) {
 // sync node properties, so properties() reflects correct width and height
 static sp<RenderNode> createSyncedNode(uint32_t width, uint32_t height) {
     sp<RenderNode> node = TestUtils::createNode(0, 0, width, height);
-    TestUtils::syncNodePropertiesAndDisplayList(node);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     return node;
 }
 

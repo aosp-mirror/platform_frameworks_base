@@ -39,6 +39,11 @@ class OpReceiver;
 struct RecordedOp;
 
 class RecordingCanvas: public Canvas, public CanvasStateClient {
+    enum class DeferredBarrierType {
+        None,
+        InOrder,
+        OutOfOrder,
+    };
 public:
     RecordingCanvas(size_t width, size_t height);
     virtual ~RecordingCanvas();
@@ -49,7 +54,10 @@ public:
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE
 // ----------------------------------------------------------------------------
-    void insertReorderBarrier(bool enableReorder) {}
+    void insertReorderBarrier(bool enableReorder) {
+        mDeferredBarrierType = enableReorder
+                ? DeferredBarrierType::OutOfOrder : DeferredBarrierType::InOrder;
+    }
     void drawRenderNode(RenderNode* renderNode);
 
 // ----------------------------------------------------------------------------
@@ -176,11 +184,6 @@ public:
     virtual bool drawTextAbsolutePos() const override { return false; }
 
 private:
-    enum DeferredBarrierType {
-        kBarrier_None,
-        kBarrier_InOrder,
-        kBarrier_OutOfOrder,
-    };
 
     void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     void drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint);
@@ -290,7 +293,7 @@ private:
     CanvasState mState;
     std::unique_ptr<SkiaCanvasProxy> mSkiaCanvasProxy;
     ResourceCache& mResourceCache;
-    DeferredBarrierType mDeferredBarrierType = kBarrier_None;
+    DeferredBarrierType mDeferredBarrierType = DeferredBarrierType::None;
     DisplayList* mDisplayList = nullptr;
     bool mHighContrastText = false;
     SkAutoTUnref<SkDrawFilter> mDrawFilter;

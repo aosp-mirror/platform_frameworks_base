@@ -198,8 +198,7 @@ TEST(OpReorderer, renderNode) {
         canvas.restore();
     });
 
-    TestUtils::syncNodePropertiesAndDisplayList(child);
-    TestUtils::syncNodePropertiesAndDisplayList(parent);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
 
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(parent.get());
@@ -225,7 +224,7 @@ TEST(OpReorderer, clipped) {
         SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
     });
-    TestUtils::syncNodePropertiesAndDisplayList(node);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(node.get());
 
@@ -409,7 +408,7 @@ TEST(OpReorderer, hwLayerSimple) {
     OffscreenBuffer** bufferHandle = node->getLayerHandle();
     *bufferHandle = (OffscreenBuffer*) 0x0124;
 
-    TestUtils::syncNodePropertiesAndDisplayList(node);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
 
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(node.get());
@@ -483,7 +482,8 @@ public:
     }
 };
 TEST(OpReorderer, hwLayerComplex) {
-    sp<RenderNode> child = TestUtils::createNode<RecordingCanvas>(50, 50, 150, 150, [](RecordingCanvas& canvas) {
+    auto child = TestUtils::createNode<RecordingCanvas>(50, 50, 150, 150,
+            [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
@@ -493,7 +493,8 @@ TEST(OpReorderer, hwLayerComplex) {
     *(child->getLayerHandle()) = (OffscreenBuffer*) 0x4567;
 
     RenderNode* childPtr = child.get();
-    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [childPtr](RecordingCanvas& canvas) {
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+            [childPtr](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
@@ -506,8 +507,7 @@ TEST(OpReorderer, hwLayerComplex) {
     parent->setPropertyFieldsDirty(RenderNode::GENERIC);
     *(parent->getLayerHandle()) = (OffscreenBuffer*) 0x0123;
 
-    TestUtils::syncNodePropertiesAndDisplayList(child);
-    TestUtils::syncNodePropertiesAndDisplayList(parent);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
 
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(parent.get());
@@ -526,6 +526,55 @@ TEST(OpReorderer, hwLayerComplex) {
     *(child->getLayerHandle()) = nullptr;
     *(parent->getLayerHandle()) = nullptr;
 }
+
+
+class ZReorderTestRenderer : public TestRendererBase {
+public:
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        int expectedOrder = SkColorGetB(op.paint->getColor()); // extract order from blue channel
+        EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+    }
+};
+static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) {
+    SkPaint paint;
+    paint.setColor(SkColorSetARGB(256, 0, 0, expectedDrawOrder)); // order put in blue channel
+    canvas->drawRect(0, 0, 100, 100, paint);
+}
+static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, float z) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [expectedDrawOrder](RecordingCanvas& canvas) {
+        drawOrderedRect(&canvas, expectedDrawOrder);
+    });
+    node->mutateStagingProperties().setTranslationZ(z);
+    node->setPropertyFieldsDirty(RenderNode::TRANSLATION_Z);
+    canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
+}
+TEST(OpReorderer, zReorder) {
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RecordingCanvas& canvas) {
+        drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
+        drawOrderedRect(&canvas, 1);
+        canvas.insertReorderBarrier(true);
+        drawOrderedNode(&canvas, 6, 2.0f);
+        drawOrderedRect(&canvas, 3);
+        drawOrderedNode(&canvas, 4, 0.0f);
+        drawOrderedRect(&canvas, 5);
+        drawOrderedNode(&canvas, 2, -2.0f);
+        drawOrderedNode(&canvas, 7, 2.0f);
+        canvas.insertReorderBarrier(false);
+        drawOrderedRect(&canvas, 8);
+        drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
+    });
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
+
+    std::vector< sp<RenderNode> > nodes;
+    nodes.push_back(parent.get());
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100, nodes);
+
+    ZReorderTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(10, renderer.getIndex());
+};
 
 
 class PropertyTestRenderer : public TestRendererBase {
@@ -548,7 +597,7 @@ static void testProperty(
         canvas.drawRect(0, 0, 100, 100, paint);
     });
     node->setPropertyFieldsDirty(propSetupCallback(node->mutateStagingProperties()));
-    TestUtils::syncNodePropertiesAndDisplayList(node);
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
 
     std::vector< sp<RenderNode> > nodes;
     nodes.push_back(node.get());
@@ -642,5 +691,6 @@ TEST(OpReorderer, renderPropTransform) {
                 << "Op draw matrix must match expected combination of transformation properties";
     });
 }
+
 } // namespace uirenderer
 } // namespace android

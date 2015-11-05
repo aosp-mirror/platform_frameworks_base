@@ -40,7 +40,7 @@ void RecordingCanvas::reset(int width, int height) {
 
     mState.initializeSaveStack(width, height, 0, 0, width, height, Vector3());
 
-    mDeferredBarrierType = kBarrier_InOrder;
+    mDeferredBarrierType = DeferredBarrierType::InOrder;
     mState.setDirtyClip(false);
     mRestoreSaveCount = -1;
 }
@@ -432,17 +432,17 @@ size_t RecordingCanvas::addOp(RecordedOp* op) {
     // TODO: validate if "addDrawOp" quickrejection logic is useful before adding
     int insertIndex = mDisplayList->ops.size();
     mDisplayList->ops.push_back(op);
-    if (mDeferredBarrierType != kBarrier_None) {
+    if (mDeferredBarrierType != DeferredBarrierType::None) {
         // op is first in new chunk
         mDisplayList->chunks.emplace_back();
         DisplayList::Chunk& newChunk = mDisplayList->chunks.back();
         newChunk.beginOpIndex = insertIndex;
         newChunk.endOpIndex = insertIndex + 1;
-        newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
+        newChunk.reorderChildren = (mDeferredBarrierType == DeferredBarrierType::OutOfOrder);
 
         int nextChildIndex = mDisplayList->children.size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
-        mDeferredBarrierType = kBarrier_None;
+        mDeferredBarrierType = DeferredBarrierType::None;
     } else {
         // standard case - append to existing chunk
         mDisplayList->chunks.back().endOpIndex = insertIndex + 1;
