@@ -270,7 +270,14 @@ class DimLayerController {
     }
 
     void removeDimLayerUser(DimLayer.DimLayerUser dimLayerUser) {
-        mState.remove(dimLayerUser);
+        DimLayerState state = mState.get(dimLayerUser);
+        if (state != null) {
+            // Destroy the surface, unless it's the shared fullscreen dim.
+            if (state.dimLayer != mSharedFullScreenDimLayer) {
+                state.dimLayer.destroySurface();
+            }
+            mState.remove(dimLayerUser);
+        }
     }
 
     void applyDimBehind(DimLayer.DimLayerUser dimLayerUser, WindowStateAnimator animator) {
