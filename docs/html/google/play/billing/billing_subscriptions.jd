@@ -21,8 +21,10 @@ meta.tags="monetization, inappbilling, subscriptions"
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#Subs">Implementing Subscriptions (V3)</a></li>
-    <li><a href="https://developers.google.com/android-publisher/">Google Play Developer API</a></li>
+    <li><a href="{@docRoot}google/play/billing/billing_integrate.html#Subs">Implementing
+    Subscriptions (V3)</a></li>
+    <li><a href="https://developers.google.com/android-publisher/">Google Play
+    Developer API</a></li>
   </ol>
 </div>
 </div>
@@ -109,11 +111,12 @@ content.</li>
 <p>In general the same basic policies and terms apply to subscriptions as to
 standard in-app products, however there are some differences. For complete
 information about the current policies and terms, please read the <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en
-&answer=140504">policies document</a>.</p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">
+policies document</a>.</p>
 
 <p>To learn about the minimum system requirements for
-subscriptions, see the <a href="{@docRoot}google/play/billing/versions.html#Subs">Version Notes</a>.</p>
+subscriptions, see the <a href="{@docRoot}google/play/billing/versions.html#Subs">
+Version Notes</a>.</p>
 
 <h2 id="administering">Configuring Subscription Items</h2>
 
@@ -310,7 +313,8 @@ date to 15 August 2015 14:00:00 UTC.</p>
 try your subscription content before buying it. The trial period runs for the
 period of time that you set and then automatically converts to a full
 subscription managed according to the subscription's billing interval and
-price. Free trials are supported for monthly and annual subscriptions only, and are not supported for seasonal subscriptions.</p>
+price. Free trials are supported for monthly and annual subscriptions only, and
+are not supported for seasonal subscriptions.</p>
 
 <p>To take advantage of a free trial, a user must "purchase" the full
 subscription through the standard In-app Billing flow, providing a valid form of
@@ -396,7 +400,8 @@ and revoke</a> API to revoke each subscriber's subscription (one by one) and
 refund their subscription payments.
 Removing content that any subscriber is entitled to access
 will result in penalties. Please see the <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">policies document</a> for more information. </p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">
+policies document</a> for more information. </p>
 
 <h3 id="uninstall">App uninstallation</h3>
 
@@ -441,8 +446,8 @@ Billing to handle the transaction and may not provide links to a purchase flow
 outside of the app and Google Play (such as to a web site).</p>
 
 <p>For complete details about terms and policies, see the <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">policies
-document</a>.</p>
+href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=140504">
+policies document</a>.</p>
 
 <h3 id="orderId">Subscription order numbers</h3>
 
@@ -451,7 +456,8 @@ payments provides a base Merchant Order Number for all recurrences of the
 subscription and denotes
 each recurring transaction by appending an integer as follows: </p>
 
-<p><span style="color:#777"><code style="color:#777">GPA.1234-5678-9012-34567</code> (base order number)</span><br />
+<p><span style="color:#777"><code style="color:#777">GPA.1234-5678-9012-34567</code>
+(base order number)</span><br />
 <code>GPA.1234-5678-9012-34567..0</code> (first recurrence orderID)<br />
 <code>GPA.1234-5678-9012-34567..1</code> (second recurrence orderID)<br />
 <code>GPA.1234-5678-9012-34567..2</code> (third recurrence orderID)<br />

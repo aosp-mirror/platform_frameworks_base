@@ -68,14 +68,17 @@ Wallet merchant account.</p>
 provides a sample application that demonstrates how to sell standard in-app
 products and subscriptions from inside an app.</p>
 
-<p>To get started, read the documents below or take the <a href="{@docRoot}training/in-app-billing/index.html">Selling
-    In-app Products</a> training class.</p>
+<p>To get started, read the documents below or take the
+<a href="{@docRoot}training/in-app-billing/index.html">Selling In-app
+Products</a> training class.</p>
 
 <dl>
-  <dt><strong><a href="{@docRoot}google/play/billing/billing_overview.html">Overview</a></strong></dt>
+  <dt><strong><a href="{@docRoot}google/play/billing/billing_overview.html">
+      Overview</a></strong></dt>
     <dd>Read this document for a description of the underlying concepts in In-app Billing.</dd>
   <dt><strong><a href="{@docRoot}google/play/billing/api.html">Version 3 API</a></strong></dt>
-    <dd>Read the documents in this section for an overview of the latest version of In-app Billing, as well as implementation details and API reference.</dd>
+    <dd>Read the documents in this section for an overview of the latest version of In-app Billing,
+      as well as implementation details and API reference.</dd>
   <dt><strong><a href="{@docRoot}google/play/billing/billing_best_practices.html">Security
   and Design</a></strong></dt>
     <dd>Review these best practices to help ensure that your In-app Billing implementation is
