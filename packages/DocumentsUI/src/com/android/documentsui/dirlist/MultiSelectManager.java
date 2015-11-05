@@ -45,7 +45,6 @@ import com.android.documentsui.Events;
 import com.android.documentsui.R;
 import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
-import com.android.documentsui.R.drawable;
 
 import java.util.ArrayList;
 import java.util.Collections;
