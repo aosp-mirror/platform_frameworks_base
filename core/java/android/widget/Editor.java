@@ -3779,30 +3779,6 @@ public class Editor {
             }
         }
 
-        public void showAtLocation(int offset) {
-            // TODO - investigate if there's a better way to show the handles
-            // after the drag accelerator has occured.
-            int[] tmpCords = new int[2];
-            mTextView.getLocationInWindow(tmpCords);
-
-            Layout layout = mTextView.getLayout();
-            int posX = tmpCords[0];
-            int posY = tmpCords[1];
-
-            final int line = layout.getLineForOffset(offset);
-
-            int startX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f
-                    - mHotspotX - getHorizontalOffset() + getCursorOffset());
-            int startY = layout.getLineBottom(line);
-
-            // Take TextView's padding and scroll into account.
-            startX += mTextView.viewportToContentHorizontalOffset();
-            startY += mTextView.viewportToContentVerticalOffset();
-
-            mContainer.showAtLocation(mTextView, Gravity.NO_GRAVITY,
-                    startX + posX, startY + posY);
-        }
-
         @Override
         protected void onDraw(Canvas c) {
             final int drawWidth = mDrawable.getIntrinsicWidth();
@@ -4696,8 +4672,6 @@ public class Editor {
                                 startOffset, endOffset);
                     }
                     if (startOffset != endOffset) {
-                        mStartHandle.showAtLocation(startOffset);
-                        mEndHandle.showAtLocation(endOffset);
                         startSelectionActionMode();
                     }
 
