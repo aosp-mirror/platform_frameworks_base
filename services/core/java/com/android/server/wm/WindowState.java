@@ -1429,9 +1429,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         mWinAnimator + ": " + mPolicyVisibilityAfterAnim);
             }
             mPolicyVisibility = mPolicyVisibilityAfterAnim;
-            if (mDisplayContent != null) {
-                mDisplayContent.layoutNeeded = true;
-            }
+            setDisplayLayoutNeeded();
             if (!mPolicyVisibility) {
                 if (mService.mCurrentFocus == this) {
                     if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,

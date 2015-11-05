@@ -149,11 +149,11 @@ class WallpaperController {
     }
 
     void updateWallpaperVisibility() {
-        final boolean visible = isWallpaperVisible(mWallpaperTarget);
         final DisplayContent displayContent = mWallpaperTarget.getDisplayContent();
         if (displayContent == null) {
             return;
         }
+        final boolean visible = isWallpaperVisible(mWallpaperTarget);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
@@ -205,7 +205,7 @@ class WallpaperController {
                 final WindowState wallpaper = token.windows.get(j);
                 final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
                 if (!winAnimator.mLastHidden || wasDeferred) {
-                    winAnimator.hide();
+                    winAnimator.hide("hideWallpapers");
                     dispatchWallpaperVisibility(wallpaper, false);
                     final DisplayContent displayContent = wallpaper.getDisplayContent();
                     if (displayContent != null) {

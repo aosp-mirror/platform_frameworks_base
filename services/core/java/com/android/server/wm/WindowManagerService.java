@@ -1519,7 +1519,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(multidisplay): IMEs are only supported on the default display.
             getDefaultWindowListLocked().add(pos, win);
             mWindowsChanged = true;
-            moveInputMethodDialogsLocked(pos+1);
+            moveInputMethodDialogsLocked(pos + 1);
             return;
         }
         win.mTargetAppToken = null;
@@ -2079,7 +2079,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // happen, let's just simply add a window.
             return;
         }
-        Rect frame = replacedWindow.mFrame;
+        // We use the visible frame, because we want the animation to morph the window from what
+        // was visible to the user to the final destination of the new window.
+        Rect frame = replacedWindow.mVisibleFrame;
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         mOpeningApps.add(atoken);
@@ -8527,8 +8529,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             boolean layerChanged = false;
             int oldLayer = w.mLayer;
-            if (w.mBaseLayer == curBaseLayer || w.mIsImWindow
-                    || (i > 0 && w.mIsWallpaper)) {
+            if (w.mBaseLayer == curBaseLayer || w.mIsImWindow || (i > 0 && w.mIsWallpaper)) {
                 curLayer += WINDOW_LAYER_MULTIPLIER;
                 w.mLayer = curLayer;
             } else {
