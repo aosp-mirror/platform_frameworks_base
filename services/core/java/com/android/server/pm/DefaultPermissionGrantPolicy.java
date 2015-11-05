@@ -585,7 +585,6 @@ final class DefaultPermissionGrantPolicy {
         }
     }
 
-
     private void grantDefaultPermissionsToDefaultSystemSmsAppLPr(
             PackageParser.Package smsPackage, int userId) {
         if (doesPackageSupportRuntimePermissions(smsPackage)) {
@@ -594,7 +593,6 @@ final class DefaultPermissionGrantPolicy {
             grantRuntimePermissionsLPw(smsPackage, SMS_PERMISSIONS, userId);
         }
     }
-
 
     public void grantDefaultPermissionsToDefaultSmsAppLPr(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default sms app for user:" + userId);
@@ -673,29 +671,18 @@ final class DefaultPermissionGrantPolicy {
 
     private PackageParser.Package getDefaultSystemHandlerActivityPackageLPr(
             Intent intent, int userId) {
-        List<ResolveInfo> handlers = mService.mActivities.queryIntent(intent,
-                intent.resolveType(mService.mContext.getContentResolver()),
-                PackageManager.GET_DISABLED_COMPONENTS, userId);
-        if (handlers == null) {
+        ResolveInfo handler = mService.resolveIntent(intent,
+                intent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+        if (handler == null) {
             return null;
         }
-        final int handlerCount = handlers.size();
-        for (int i = 0; i < handlerCount; i++) {
-            ResolveInfo handler = handlers.get(i);
-            PackageParser.Package handlerPackage = getSystemPackageLPr(
-                    handler.activityInfo.packageName);
-            if (handlerPackage != null) {
-                return handlerPackage;
-            }
-        }
-        return null;
+        return getSystemPackageLPr(handler.activityInfo.packageName);
     }
 
     private PackageParser.Package getDefaultSystemHandlerServicePackageLPr(
             Intent intent, int userId) {
         List<ResolveInfo> handlers = mService.queryIntentServices(intent,
-                intent.resolveType(mService.mContext.getContentResolver()),
-                PackageManager.GET_DISABLED_COMPONENTS, userId);
+                intent.resolveType(mService.mContext.getContentResolver()), 0, userId);
         if (handlers == null) {
             return null;
         }
@@ -721,10 +708,9 @@ final class DefaultPermissionGrantPolicy {
         for (String syncAdapterPackageName : syncAdapterPackageNames) {
             homeIntent.setPackage(syncAdapterPackageName);
 
-            List<ResolveInfo> homeActivities = mService.mActivities.queryIntent(homeIntent,
-                    homeIntent.resolveType(mService.mContext.getContentResolver()),
-                    PackageManager.GET_DISABLED_COMPONENTS, userId);
-            if (!homeActivities.isEmpty()) {
+            ResolveInfo homeActivity = mService.resolveIntent(homeIntent,
+                    homeIntent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+            if (homeActivity != null) {
                 continue;
             }
 
