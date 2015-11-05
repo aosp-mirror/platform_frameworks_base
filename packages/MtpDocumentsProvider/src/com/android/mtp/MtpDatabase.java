@@ -23,9 +23,11 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.mtp.MtpObjectInfo;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Root;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -52,7 +54,21 @@ class MtpDatabase {
     private static final int VERSION = 1;
     private static final String NAME = "mtp";
 
+    /**
+     * Table representing documents including root documents.
+     */
     private static final String TABLE_DOCUMENTS = "Documents";
+
+    /**
+     * Table containing additional information only available for root documents.
+     * The table uses same primary keys with corresponding documents.
+     */
+    private static final String TABLE_ROOT_EXTRA = "RootExtra";
+
+    /**
+     * View to join Documents and RootExtra tables to provide roots information.
+     */
+    private static final String VIEW_ROOTS = "Roots";
 
     static final String COLUMN_DEVICE_ID = "device_id";
     static final String COLUMN_STORAGE_ID = "storage_id";
@@ -80,8 +96,8 @@ class MtpDatabase {
      */
     static final int ROW_STATE_MAPPING = 2;
 
-    private static final String SELECTION_DOCUMENT_ID =
-            DocumentsContract.Document.COLUMN_DOCUMENT_ID + " = ?";
+    private static final String SELECTION_DOCUMENT_ID = Document.COLUMN_DOCUMENT_ID + " = ?";
+    private static final String SELECTION_ROOT_ID = Root.COLUMN_ROOT_ID + " = ?";
     private static final String SELECTION_ROOT_DOCUMENTS =
             COLUMN_DEVICE_ID + " = ? AND " + COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
     private static final String SELECTION_CHILD_DOCUMENTS = COLUMN_PARENT_DOCUMENT_ID + " = ?";
@@ -91,20 +107,56 @@ class MtpDatabase {
     private static class OpenHelper extends SQLiteOpenHelper {
         private static final String QUERY_CREATE_DOCUMENTS =
                 "CREATE TABLE " + TABLE_DOCUMENTS + " (" +
-                DocumentsContract.Document.COLUMN_DOCUMENT_ID +
+                Document.COLUMN_DOCUMENT_ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 COLUMN_DEVICE_ID + " INTEGER NOT NULL," +
                 COLUMN_STORAGE_ID + " INTEGER," +
                 COLUMN_OBJECT_HANDLE + " INTEGER," +
                 COLUMN_PARENT_DOCUMENT_ID + " INTEGER," +
                 COLUMN_ROW_STATE + " INTEGER NOT NULL," +
-                DocumentsContract.Document.COLUMN_MIME_TYPE + " TEXT," +
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
-                DocumentsContract.Document.COLUMN_SUMMARY + " TEXT," +
-                DocumentsContract.Document.COLUMN_LAST_MODIFIED + " INTEGER," +
-                DocumentsContract.Document.COLUMN_ICON + " INTEGER," +
-                DocumentsContract.Document.COLUMN_FLAGS + " INTEGER NOT NULL," +
-                DocumentsContract.Document.COLUMN_SIZE + " INTEGER NOT NULL);";
+                Document.COLUMN_MIME_TYPE + " TEXT," +
+                Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
+                Document.COLUMN_SUMMARY + " TEXT," +
+                Document.COLUMN_LAST_MODIFIED + " INTEGER," +
+                Document.COLUMN_ICON + " INTEGER," +
+                Document.COLUMN_FLAGS + " INTEGER NOT NULL," +
+                Document.COLUMN_SIZE + " INTEGER NOT NULL);";
+
+        private static final String QUERY_CREATE_ROOT_EXTRA =
+                "CREATE TABLE " + TABLE_ROOT_EXTRA + " (" +
+                Root.COLUMN_ROOT_ID + " INTEGER PRIMARY KEY," +
+                Root.COLUMN_FLAGS + " INTEGER NOT NULL," +
+                Root.COLUMN_AVAILABLE_BYTES + " INTEGER NOT NULL," +
+                Root.COLUMN_CAPACITY_BYTES + " INTEGER NOT NULL," +
+                Root.COLUMN_MIME_TYPES + " TEXT NOT NULL);";
+
+        /**
+         * Creates a view to join Documents table and RootExtra table on their primary keys to
+         * provide DocumentContract.Root equivalent information.
+         */
+        private static final String QUERY_CREATE_VIEW_ROOTS =
+                "CREATE VIEW " + VIEW_ROOTS + " AS SELECT " +
+                        TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID + " AS " +
+                                Root.COLUMN_ROOT_ID + "," +
+                        TABLE_ROOT_EXTRA + "." + Root.COLUMN_FLAGS + "," +
+                        TABLE_DOCUMENTS + "." + Document.COLUMN_ICON + " AS " +
+                                Root.COLUMN_ICON + "," +
+                        TABLE_DOCUMENTS + "." + Document.COLUMN_DISPLAY_NAME + " AS " +
+                                Root.COLUMN_TITLE + "," +
+                        TABLE_DOCUMENTS + "." + Document.COLUMN_SUMMARY + " AS " +
+                                Root.COLUMN_SUMMARY + "," +
+                        TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID + " AS " +
+                        Root.COLUMN_DOCUMENT_ID + "," +
+                        TABLE_ROOT_EXTRA + "." + Root.COLUMN_AVAILABLE_BYTES + "," +
+                        TABLE_ROOT_EXTRA + "." + Root.COLUMN_CAPACITY_BYTES + "," +
+                        TABLE_ROOT_EXTRA + "." + Root.COLUMN_MIME_TYPES + "," +
+                        TABLE_DOCUMENTS + "." + COLUMN_ROW_STATE +
+                " FROM " + TABLE_DOCUMENTS + " INNER JOIN " + TABLE_ROOT_EXTRA +
+                " ON " +
+                        COLUMN_PARENT_DOCUMENT_ID + " IS NULL AND " +
+                        TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID +
+                        "=" +
+                        TABLE_ROOT_EXTRA + "." + Root.COLUMN_ROOT_ID;
 
         public OpenHelper(Context context) {
             super(context, NAME, null, VERSION);
@@ -113,6 +165,8 @@ class MtpDatabase {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(QUERY_CREATE_DOCUMENTS);
+            db.execSQL(QUERY_CREATE_ROOT_EXTRA);
+            db.execSQL(QUERY_CREATE_VIEW_ROOTS);
         }
 
         @Override
@@ -121,12 +175,12 @@ class MtpDatabase {
         }
     }
 
-    private final SQLiteDatabase database;
+    private final SQLiteDatabase mDatabase;
 
     @VisibleForTesting
     MtpDatabase(Context context) {
         final OpenHelper helper = new OpenHelper(context);
-        database = helper.getWritableDatabase();
+        mDatabase = helper.getWritableDatabase();
     }
 
     @VisibleForTesting
@@ -135,8 +189,20 @@ class MtpDatabase {
     }
 
     @VisibleForTesting
+    Cursor queryRoots(String[] columnNames) {
+        return mDatabase.query(
+                VIEW_ROOTS,
+                columnNames,
+                COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(ROW_STATE_MAPPED, ROW_STATE_UNMAPPED),
+                null,
+                null,
+                null);
+    }
+
+    @VisibleForTesting
     Cursor queryRootDocuments(String[] columnNames) {
-        return database.query(
+        return mDatabase.query(
                 TABLE_DOCUMENTS,
                 columnNames,
                 COLUMN_ROW_STATE + " IN (?, ?)",
@@ -148,7 +214,7 @@ class MtpDatabase {
 
     @VisibleForTesting
     Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
-        return database.query(
+        return mDatabase.query(
                 TABLE_DOCUMENTS,
                 columnNames,
                 COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_PARENT_DOCUMENT_ID + " = ?",
@@ -160,15 +226,35 @@ class MtpDatabase {
 
     @VisibleForTesting
     void putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
-        final ContentValues[] valuesList = new ContentValues[roots.length];
-        for (int i = 0; i < roots.length; i++) {
-            if (roots[i].mDeviceId != deviceId) {
-                throw new IllegalArgumentException();
+        mDatabase.beginTransaction();
+        try {
+            final ContentValues[] valuesList = new ContentValues[roots.length];
+            for (int i = 0; i < roots.length; i++) {
+                if (roots[i].mDeviceId != deviceId) {
+                    throw new IllegalArgumentException();
+                }
+                valuesList[i] = new ContentValues();
+                getRootDocumentValues(valuesList[i], resources, roots[i]);
             }
-            valuesList[i] = new ContentValues();
-            getRootDocumentValues(valuesList[i], resources, roots[i]);
+            final long[] documentIds =
+                    putDocuments(valuesList, SELECTION_ROOT_DOCUMENTS, Integer.toString(deviceId));
+            final ContentValues values = new ContentValues();
+            int i = 0;
+            for (final MtpRoot root : roots) {
+                // Use the same value for the root ID and the corresponding document ID.
+                values.put(Root.COLUMN_ROOT_ID, documentIds[i++]);
+                values.put(Root.COLUMN_FLAGS,
+                        Root.FLAG_SUPPORTS_IS_CHILD |
+                        Root.FLAG_SUPPORTS_CREATE);
+                values.put(Root.COLUMN_AVAILABLE_BYTES, root.mFreeSpace);
+                values.put(Root.COLUMN_CAPACITY_BYTES, root.mMaxCapacity);
+                values.put(Root.COLUMN_MIME_TYPES, "");
+                mDatabase.insert(TABLE_ROOT_EXTRA, null, values);
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
         }
-        putDocuments(valuesList, SELECTION_ROOT_DOCUMENTS, Integer.toString(deviceId));
     }
 
     @VisibleForTesting
@@ -188,18 +274,17 @@ class MtpDatabase {
      */
     @VisibleForTesting
     void clearMapping() {
-        database.beginTransaction();
+        mDatabase.beginTransaction();
         try {
-            database.delete(
-                    TABLE_DOCUMENTS, COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_MAPPING));
+            deleteDocumentsAndRoots(COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_MAPPING));
             final ContentValues values = new ContentValues();
             values.putNull(COLUMN_OBJECT_HANDLE);
             values.putNull(COLUMN_STORAGE_ID);
             values.put(COLUMN_ROW_STATE, ROW_STATE_UNMAPPED);
-            database.update(TABLE_DOCUMENTS, values, null, null);
-            database.setTransactionSuccessful();
+            mDatabase.update(TABLE_DOCUMENTS, values, null, null);
+            mDatabase.setTransactionSuccessful();
         } finally {
-            database.endTransaction();
+            mDatabase.endTransaction();
         }
     }
 
@@ -221,29 +306,35 @@ class MtpDatabase {
      * @param valuesList Values that are stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param arg Argument for selection SQL.
+     * @return List of Document ID inserted to the table.
      */
-    private void putDocuments(ContentValues[] valuesList, String selection, String arg) {
-        database.beginTransaction();
+    private long[] putDocuments(ContentValues[] valuesList, String selection, String arg) {
+        mDatabase.beginTransaction();
         try {
+            final long[] documentIds = new long[valuesList.length];
+            int i = 0;
             for (final ContentValues values : valuesList) {
                 final String displayName =
-                        values.getAsString(DocumentsContract.Document.COLUMN_DISPLAY_NAME);
+                        values.getAsString(Document.COLUMN_DISPLAY_NAME);
                 final long numUnmapped = DatabaseUtils.queryNumEntries(
-                        database,
+                        mDatabase,
                         TABLE_DOCUMENTS,
                         selection + " AND " +
                         COLUMN_ROW_STATE + " = ? AND " +
-                        DocumentsContract.Document.COLUMN_DISPLAY_NAME + " = ?",
+                        Document.COLUMN_DISPLAY_NAME + " = ?",
                         strings(arg, ROW_STATE_UNMAPPED, displayName));
                 if (numUnmapped != 0) {
                     values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPING);
                 }
-                database.insert(TABLE_DOCUMENTS, null, values);
+                // Document ID is a primary integer key of the table. So the returned row IDs should
+                // be same with the document ID.
+                documentIds[i++] = mDatabase.insert(TABLE_DOCUMENTS, null, values);
             }
 
-            database.setTransactionSuccessful();
+            mDatabase.setTransactionSuccessful();
+            return documentIds;
         } finally {
-            database.endTransaction();
+            mDatabase.endTransaction();
         }
     }
 
@@ -256,13 +347,13 @@ class MtpDatabase {
      * @param arg Argument for selection SQL.
      */
     private void resolveDocuments(String selection, String arg) {
-        database.beginTransaction();
+        mDatabase.beginTransaction();
         try {
             // Get 1-to-1 mapping of unmapped document and mapping document.
             final String unmappedIdQuery = createStateFilter(
-                    ROW_STATE_UNMAPPED, DocumentsContract.Document.COLUMN_DOCUMENT_ID);
+                    ROW_STATE_UNMAPPED, Document.COLUMN_DOCUMENT_ID);
             final String mappingIdQuery = createStateFilter(
-                    ROW_STATE_MAPPING, DocumentsContract.Document.COLUMN_DOCUMENT_ID);
+                    ROW_STATE_MAPPING, Document.COLUMN_DOCUMENT_ID);
             // SQL should be like:
             // SELECT group_concat(CASE WHEN raw_state = 1 THEN document_id ELSE NULL END),
             //        group_concat(CASE WHEN raw_state = 2 THEN document_id ELSE NULL END)
@@ -270,7 +361,7 @@ class MtpDatabase {
             // GROUP BY display_name
             // HAVING count(CASE WHEN raw_state = 1 THEN document_id ELSE NULL END) = 1 AND
             //        count(CASE WHEN raw_state = 2 THEN document_id ELSE NULL END) = 1
-            final Cursor mergingCursor = database.query(
+            final Cursor mergingCursor = mDatabase.query(
                     TABLE_DOCUMENTS,
                     new String[] {
                             "group_concat(" + unmappedIdQuery + ")",
@@ -278,7 +369,7 @@ class MtpDatabase {
                     },
                     selection,
                     strings(arg),
-                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                    Document.COLUMN_DISPLAY_NAME,
                     "count(" + unmappedIdQuery + ") = 1 AND count(" + mappingIdQuery + ") = 1",
                     null);
 
@@ -288,39 +379,40 @@ class MtpDatabase {
                 final String mappingId = mergingCursor.getString(1);
 
                 // Obtain the new values including the latest object handle from mapping row.
-                final Cursor mappingCursor = database.query(
+                getFirstRow(
                         TABLE_DOCUMENTS,
-                        null,
                         SELECTION_DOCUMENT_ID,
                         new String[] { mappingId },
-                        null,
-                        null,
-                        null);
-                mappingCursor.moveToNext();
-                values.clear();
-                DatabaseUtils.cursorRowToContentValues(mappingCursor, values);
-                mappingCursor.close();
-                values.remove(DocumentsContract.Document.COLUMN_DOCUMENT_ID);
-
-                // Set the new values into unmapped documents and get it back to 'normal' state.
+                        values);
+                values.remove(Document.COLUMN_DOCUMENT_ID);
                 values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
-                database.update(
+                mDatabase.update(
                         TABLE_DOCUMENTS,
                         values,
                         SELECTION_DOCUMENT_ID,
                         new String[] { unmappedId });
 
+                getFirstRow(
+                        TABLE_ROOT_EXTRA,
+                        SELECTION_ROOT_ID,
+                        new String[] { mappingId },
+                        values);
+                if (values.size() > 0) {
+                    values.remove(Root.COLUMN_ROOT_ID);
+                    mDatabase.update(
+                            TABLE_ROOT_EXTRA,
+                            values,
+                            SELECTION_ROOT_ID,
+                            new String[] { unmappedId });
+                }
+
                 // Delete 'mapping' row.
-                database.delete(
-                        TABLE_DOCUMENTS,
-                        SELECTION_DOCUMENT_ID,
-                        new String[] { mappingId });
+                deleteDocumentsAndRoots(SELECTION_DOCUMENT_ID, new String[] { mappingId });
             }
             mergingCursor.close();
 
             // Delete all unmapped rows that cannot be mapped.
-            database.delete(
-                    TABLE_DOCUMENTS,
+            deleteDocumentsAndRoots(
                     COLUMN_ROW_STATE + " = ? AND " + selection,
                     strings(ROW_STATE_UNMAPPED, arg));
 
@@ -329,14 +421,14 @@ class MtpDatabase {
             // valid with new document ID.
             values.clear();
             values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
-            database.update(
+            mDatabase.update(
                     TABLE_DOCUMENTS,
                     values,
                     COLUMN_ROW_STATE + " = ? AND " + selection,
                     strings(ROW_STATE_MAPPING, arg));
-            database.setTransactionSuccessful();
+            mDatabase.setTransactionSuccessful();
         } finally {
-            database.endTransaction();
+            mDatabase.endTransaction();
         }
     }
 
@@ -354,7 +446,7 @@ class MtpDatabase {
         values.putNull(COLUMN_OBJECT_HANDLE);
         values.putNull(COLUMN_PARENT_DOCUMENT_ID);
         values.put(COLUMN_ROW_STATE, ROW_STATE_MAPPED);
-        values.put(Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR);
+        values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
         values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
         values.putNull(Document.COLUMN_SUMMARY);
         values.putNull(Document.COLUMN_LAST_MODIFIED);
@@ -377,14 +469,14 @@ class MtpDatabase {
         final String mimeType = CursorHelper.formatTypeToMimeType(info.getFormat());
         int flag = 0;
         if (info.getProtectionStatus() == 0) {
-            flag |= DocumentsContract.Document.FLAG_SUPPORTS_DELETE |
-                    DocumentsContract.Document.FLAG_SUPPORTS_WRITE;
-            if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-                flag |= DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE;
+            flag |= Document.FLAG_SUPPORTS_DELETE |
+                    Document.FLAG_SUPPORTS_WRITE;
+            if (mimeType == Document.MIME_TYPE_DIR) {
+                flag |= Document.FLAG_DIR_SUPPORTS_CREATE;
             }
         }
         if (info.getThumbCompressedSize() > 0) {
-            flag |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
+            flag |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
         values.put(COLUMN_DEVICE_ID, deviceId);
         values.put(COLUMN_STORAGE_ID, info.getStorageId());
@@ -400,6 +492,51 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_ICON);
         values.put(Document.COLUMN_FLAGS, flag);
         values.put(Document.COLUMN_SIZE, info.getCompressedSize());
+    }
+
+    /**
+     * Obtains values of the first row for the query.
+     * @param values ContentValues that the values are stored to.
+     * @param table Target table.
+     * @param selection Query to select rows.
+     * @param args Argument for query.
+     */
+    private void getFirstRow(String table, String selection, String[] args, ContentValues values) {
+        values.clear();
+        final Cursor cursor = mDatabase.query(table, null, selection, args, null, null, null, "1");
+        if (cursor.getCount() == 0) {
+            return;
+        }
+        cursor.moveToNext();
+        DatabaseUtils.cursorRowToContentValues(cursor, values);
+        cursor.close();
+    }
+
+    /**
+     * Deletes a document, and its root information if the document is a root document.
+     * @param selection Query to select documents.
+     * @param args Arguments for selection.
+     */
+    private void deleteDocumentsAndRoots(String selection, String[] args) {
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.delete(
+                    TABLE_ROOT_EXTRA,
+                    Root.COLUMN_ROOT_ID + " IN (" + SQLiteQueryBuilder.buildQueryString(
+                            false,
+                            TABLE_DOCUMENTS,
+                            new String[] { Document.COLUMN_DOCUMENT_ID },
+                            selection,
+                            null,
+                            null,
+                            null,
+                            null) + ")",
+                    args);
+            mDatabase.delete(TABLE_DOCUMENTS, selection, args);
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
     }
 
     /**
