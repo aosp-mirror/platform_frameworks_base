@@ -946,7 +946,7 @@ int register_android_hardware_Radio(JNIEnv *env)
                                                                  "(I[B)I");
     gRadioMetadataMethods.putClockFromNative = GetMethodIDOrDie(env, metadataClass,
                                                                 "putClockFromNative",
-                                                                "(III)I");
+                                                                "(IJI)I");
 
 
     RegisterMethodsOrDie(env, kRadioManagerClassPathName, gMethods, NELEM(gMethods));
