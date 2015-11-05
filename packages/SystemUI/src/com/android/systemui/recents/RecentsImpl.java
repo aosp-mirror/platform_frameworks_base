@@ -272,7 +272,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
             if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
-                if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+                RecentsConfiguration config = Recents.getConfiguration();
+                RecentsActivityLaunchState launchState = config.getLaunchState();
+                if (Constants.DebugFlags.App.EnableFastToggleRecents &&
+                        !launchState.launchedWithAltTab) {
                     // Notify recents to move onto the next task
                     EventBus.getDefault().post(new IterateRecentsEvent());
                 } else {
@@ -677,7 +680,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
             boolean isTopTaskHome) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
 
         // Update the header bar if necessary
@@ -717,6 +719,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
             if (!Constants.DebugFlags.App.DisableSearchBar && hasRecentTasks) {
+                SystemServicesProxy ssp = Recents.getSystemServices();
                 String homeActivityPackage = ssp.getHomeActivityPackageName();
                 String searchWidgetPackage = Prefs.getString(mContext,
                         Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);

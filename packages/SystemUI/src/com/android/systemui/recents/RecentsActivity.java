@@ -283,8 +283,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
     boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we currently have filtered stacks, then unfilter those first
@@ -292,13 +290,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mRecentsView.unfilterFilteredStacks()) return true;
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask()) return true;
-            // If we launched from Home, then return to Home
-            if (launchState.launchedFromHome) {
-                dismissRecentsToHome(true);
-                return true;
-            }
-            // Otherwise, try and return to the Task that Recents was launched from
-            if (mRecentsView.launchPreviousTask()) return true;
             // If none of the other cases apply, then just go Home
             dismissRecentsToHome(true);
             return true;

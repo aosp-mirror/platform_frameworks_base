@@ -70,4 +70,41 @@ public class RecentsActivityLaunchState {
         RecentsConfiguration config = Recents.getConfiguration();
         return !launchedWithNoRecentTasks && !config.hasTransposedNavBar;
     }
+
+    /**
+     * Returns the task to focus given the current launch state.
+     */
+    public int getInitialFocusTaskIndex(int numTasks) {
+        if (Constants.DebugFlags.App.EnableFastToggleRecents && !launchedWithAltTab) {
+            // If we are fast toggling, then focus the next task depending on when you are on home
+            // or coming in from another app
+            if (launchedFromHome) {
+                return numTasks - 1;
+            } else {
+                return numTasks - 2;
+            }
+        }
+
+        if (launchedWithAltTab && launchedFromAppWithThumbnail) {
+            // If alt-tabbing from another app, focus the next task
+            return numTasks - 2;
+        } else if ((launchedWithAltTab && launchedFromHome) ||
+                (!launchedWithAltTab && launchedFromAppWithThumbnail)) {
+            // If alt-tabbing from home, or launching from an app normally, focus that task
+            return numTasks - 1;
+        } else {
+            // Otherwise, we are launching recents from home normally, focus no tasks so that we
+            // know to return home
+            return -1;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "RecentsActivityLaunchState altTab: " + launchedWithAltTab +
+                ", noTasks: " + launchedWithNoRecentTasks +
+                ", fromHome: " + launchedFromHome +
+                ", fromSearchHome: " + launchedFromSearchHome +
+                ", reuse: " + launchedReuseTaskStackViews;
+    }
 }

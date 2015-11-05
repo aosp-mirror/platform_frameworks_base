@@ -220,30 +220,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return false;
     }
 
-    /** Launches the task that Recents was launched from, if possible */
-    public boolean launchPreviousTask() {
-        if (mTaskStackView != null) {
-            TaskStack stack = mTaskStackView.getStack();
-            ArrayList<Task> tasks = stack.getTasks();
-
-            // Find the launch task in the stack
-            // TODO: replace this with an event from RecentsActivity
-            if (!tasks.isEmpty()) {
-                int taskCount = tasks.size();
-                for (int j = 0; j < taskCount; j++) {
-                    if (tasks.get(j).isLaunchTarget) {
-                        Task task = tasks.get(j);
-                        TaskView tv = mTaskStackView.getChildViewForTask(task);
-                        onTaskViewClicked(mTaskStackView, tv, stack, task, false, false, null,
-                                INVALID_STACK_ID);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     /** Requests all task stacks to start their enter-recents animation */
     public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
         // We have to increment/decrement the post animation trigger in case there are no children
