@@ -1781,72 +1781,72 @@
     <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
          drawing the unlock pattern -->
     <string name="lockscreen_too_many_failed_attempts_dialog_message">
-        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
 
     <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
          entering the password -->
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message">
-        You have incorrectly typed your password <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly typed your password <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
 
     <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
          entering the PIN -->
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message">
-        You have incorrectly typed your PIN <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly typed your PIN <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet">
-        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your tablet using your Google signin.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv">
-        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your TV using your Google signin.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="lockscreen_failed_attempts_almost_glogin" product="default">
-        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your phone using your Google signin.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where the device will be wiped. -->
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet">
-       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the tablet will be reset to factory default and all user data will be lost.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where the device will be wiped. -->
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the TV <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the TV will be reset to factory default and all user data will be lost.
     </string>
 
     <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where the device will be wiped. -->
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default">
-       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the phone will be reset to factory default and all user data will be lost.
     </string>
 
@@ -1981,12 +1981,6 @@
     <string name="granularity_label_link">link</string>
     <!-- Label for granularity to traverse the content on an AccessibilityNodeInfo by line. Only spoken to the user. [CHAR LIMIT=NONE] -->
     <string name="granularity_label_line">line</string>
-
-    <!-- A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm"). -->
-    <string name="hour_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="pm">%P</xliff:g>"</string>
-
-    <!-- A format string for 12-hour time of day, just the hour, not the minute, with capital "AM" or "PM" (example: "3PM"). -->
-    <string name="hour_cap_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="PM">%p</xliff:g>"</string>
 
     <!-- Title of the alert when something went wrong in the factory test. -->
     <string name="factorytest_failed">Factory test failed</string>
@@ -3532,34 +3526,34 @@
     <string name="kg_login_checking_password">Checking account\u2026</string>
     <!-- Message shown in dialog when max number of attempts are reached for PIN screen of keyguard -->
     <string name="kg_too_many_failed_pin_attempts_dialog_message">
-        You have incorrectly typed your PIN <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly typed your PIN <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when max number of attempts are reached for password screen of keyguard -->
     <string name="kg_too_many_failed_password_attempts_dialog_message">
-        You have incorrectly typed your password <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly typed your password <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message">
-        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet">
-       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the tablet will be reset to factory default and all user data will be lost.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="tv">
-       You have incorrectly attempted to unlock the TV <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the TV <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the TV will be reset to factory default and all user data will be lost.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
     <string name="kg_failed_attempts_almost_at_wipe" product="default">
-       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the phone will be reset to factory default and all user data will be lost.
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped -->
@@ -3580,26 +3574,26 @@
     <!-- Message shown in dialog when user is almost at the limit where they will be
     locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="kg_failed_attempts_almost_at_login" product="tablet">
-       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your tablet using an email account.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when user is almost at the limit where they will be
     locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="kg_failed_attempts_almost_at_login" product="tv">
-       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your TV using an email account.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when user is almost at the limit where they will be
     locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="kg_failed_attempts_almost_at_login" product="default">
-       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your phone using an email account.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
     <!-- Sequence of characters used to separate message strings in keyguard. Typically just em-dash
          with spaces on either side. [CHAR LIMIT=3] -->
