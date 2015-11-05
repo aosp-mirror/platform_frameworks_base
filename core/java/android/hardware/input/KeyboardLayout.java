@@ -19,6 +19,8 @@ package android.hardware.input;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Locale;
+
 /**
  * Describes a keyboard layout.
  *
@@ -30,6 +32,9 @@ public final class KeyboardLayout implements Parcelable,
     private final String mLabel;
     private final String mCollection;
     private final int mPriority;
+    private final Locale[] mLocales;
+    private final int mVendorId;
+    private final int mProductId;
 
     public static final Parcelable.Creator<KeyboardLayout> CREATOR =
             new Parcelable.Creator<KeyboardLayout>() {
@@ -41,11 +46,19 @@ public final class KeyboardLayout implements Parcelable,
         }
     };
 
-    public KeyboardLayout(String descriptor, String label, String collection, int priority) {
+    public KeyboardLayout(String descriptor, String label, String collection, int priority,
+            Locale[] locales, int vid, int pid) {
         mDescriptor = descriptor;
         mLabel = label;
         mCollection = collection;
         mPriority = priority;
+        if (locales != null) {
+            mLocales = locales;
+        } else {
+            mLocales = new Locale[0];
+        }
+        mVendorId = vid;
+        mProductId = pid;
     }
 
     private KeyboardLayout(Parcel source) {
@@ -53,6 +66,13 @@ public final class KeyboardLayout implements Parcelable,
         mLabel = source.readString();
         mCollection = source.readString();
         mPriority = source.readInt();
+        int N = source.readInt();
+        mLocales = new Locale[N];
+        for (int i = 0; i < N; i++) {
+            mLocales[i] = Locale.forLanguageTag(source.readString());
+        }
+        mVendorId = source.readInt();
+        mProductId = source.readInt();
     }
 
     /**
@@ -83,6 +103,33 @@ public final class KeyboardLayout implements Parcelable,
         return mCollection;
     }
 
+    /**
+     * Gets the locales that this keyboard layout is intended for.
+     * This may be empty if a locale has not been assigned to this keyboard layout.
+     * @return The keyboard layout's intended locale.
+     */
+    public Locale[] getLocales() {
+        return mLocales;
+    }
+
+    /**
+     * Gets the vendor ID of the hardware device this keyboard layout is intended for.
+     * Returns -1 if this is not specific to any piece of hardware.
+     * @return The hardware vendor ID of the keyboard layout's intended device.
+     */
+    public int getVendorId() {
+        return mVendorId;
+    }
+
+    /**
+     * Gets the product ID of the hardware device this keyboard layout is intended for.
+     * Returns -1 if this is not specific to any piece of hardware.
+     * @return The hardware product ID of the keyboard layout's intended device.
+     */
+    public int getProductId() {
+        return mProductId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -94,6 +141,16 @@ public final class KeyboardLayout implements Parcelable,
         dest.writeString(mLabel);
         dest.writeString(mCollection);
         dest.writeInt(mPriority);
+        if (mLocales != null) {
+            dest.writeInt(mLocales.length);
+            for (Locale l : mLocales) {
+                dest.writeString(l.toLanguageTag());
+            }
+        } else {
+            dest.writeInt(0);
+        }
+        dest.writeInt(mVendorId);
+        dest.writeInt(mProductId);
     }
 
     @Override

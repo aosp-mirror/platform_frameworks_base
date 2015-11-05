@@ -471,6 +471,29 @@ public final class InputManager {
     }
 
     /**
+     * Gets information about all supported keyboard layouts appropriate
+     * for a specific input device.
+     * <p>
+     * The input manager consults the built-in keyboard layouts as well
+     * as all keyboard layouts advertised by applications using a
+     * {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
+     * </p>
+     *
+     * @return A list of all supported keyboard layouts for a specific
+     * input device.
+     *
+     * @hide
+     */
+    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+        try {
+            return mIm.getKeyboardLayoutsForInputDevice(identifier);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not get list of keyboard layouts for input device.", ex);
+            return new KeyboardLayout[0];
+        }
+    }
+
+    /**
      * Gets the keyboard layout with the specified descriptor.
      *
      * @param keyboardLayoutDescriptor The keyboard layout descriptor, as returned by
@@ -548,13 +571,13 @@ public final class InputManager {
      * @return The keyboard layout descriptors.
      * @hide
      */
-    public String[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+    public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
         if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
 
         try {
-            return mIm.getKeyboardLayoutsForInputDevice(identifier);
+            return mIm.getEnabledKeyboardLayoutsForInputDevice(identifier);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not get keyboard layouts for input device.", ex);
             return ArrayUtils.emptyArray(String.class);
