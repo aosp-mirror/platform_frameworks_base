@@ -1,6 +1,6 @@
 #include "idmap.h"
 
-#include <UniquePtr.h>
+#include <memory>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/ZipFileRO.h>
@@ -15,7 +15,7 @@ using namespace android;
 namespace {
     int get_zip_entry_crc(const char *zip_path, const char *entry_name, uint32_t *crc)
     {
-        UniquePtr<ZipFileRO> zip(ZipFileRO::open(zip_path));
+        std::unique_ptr<ZipFileRO> zip(ZipFileRO::open(zip_path));
         if (zip.get() == NULL) {
             return -1;
         }
