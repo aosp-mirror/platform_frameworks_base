@@ -15983,13 +15983,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
 
         final int moveId = mNextMoveId.getAndIncrement();
-        try {
-            movePackageInternal(packageName, volumeUuid, moveId);
-        } catch (PackageManagerException e) {
-            Slog.w(TAG, "Failed to move " + packageName, e);
-            mMoveCallbacks.notifyStatusChanged(moveId,
-                    PackageManager.MOVE_FAILED_INTERNAL_ERROR);
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    movePackageInternal(packageName, volumeUuid, moveId);
+                } catch (PackageManagerException e) {
+                    Slog.w(TAG, "Failed to move " + packageName, e);
+                    mMoveCallbacks.notifyStatusChanged(moveId,
+                            PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+                }
+            }
+        });
         return moveId;
     }
 
