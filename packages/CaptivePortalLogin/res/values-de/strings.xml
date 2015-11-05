@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Dieses Netzwerk im Istzustand verwenden"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Dieses Netzwerk nicht verwenden"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Im Netzwerk anmelden"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Im Netzwerk, zu dem Sie eine Verbindung herstellen möchten, liegen Sicherheitsprobleme vor."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Beispiel: Die Log-in-Seite gehört möglicherweise nicht zur angezeigten Organisation."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Trotzdem in einem Browser fortfahren"</string>
 </resources>

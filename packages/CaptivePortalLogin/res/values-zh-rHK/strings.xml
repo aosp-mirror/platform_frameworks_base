@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"依照現況使用這個網絡"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"不要使用這個網絡"</string>
     <string name="action_bar_label" msgid="917235635415966620">"登入網絡"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"您正在嘗試加入的網絡有安全性問題。"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"例如，登入頁面並不屬於所顯示的機構。"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"透過瀏覽器繼續"</string>
 </resources>
