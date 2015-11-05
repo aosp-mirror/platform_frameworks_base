@@ -108,6 +108,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     static final boolean BOUNDS_FOR_TOUCH = true;
 
+    static final int DRAG_RESIZE_MODE_FREEFORM = 0;
+    static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
+
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -145,6 +148,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     boolean mDragResizing;
+    int mResizeMode;
 
     RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -1916,6 +1920,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDragResizing != computeDragResizing();
     }
 
+    int getResizeMode() {
+        return mResizeMode;
+    }
+
     private boolean computeDragResizing() {
         final Task task = getTask();
         if (task == null) {
@@ -1930,6 +1938,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void setDragResizing() {
         mDragResizing = computeDragResizing();
+        mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
+                ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
+                : DRAG_RESIZE_MODE_FREEFORM;
     }
 
     boolean isDragResizing() {

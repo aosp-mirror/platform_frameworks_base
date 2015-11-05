@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS
 import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
+import static com.android.server.wm.WindowState.*;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 
@@ -1062,7 +1063,7 @@ class WindowStateAnimator {
 
         final boolean fullscreen = w.isFullscreen(displayInfo.appWidth, displayInfo.appHeight);
         final boolean isFreeformResizing =
-                w.isDragResizing() && !mService.isDockedStackResizingLocked();
+                w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
         final Rect clipRect = mTmpClipRect;
         if (isFreeformResizing) {
             // When we're doing a drag-resizing, the surface is set up to cover full screen.
@@ -1154,7 +1155,7 @@ class WindowStateAnimator {
             final DisplayInfo displayInfo = w.getDisplayInfo();
 
             // In freeform resize mode, put surface at 0/0.
-            if (w.isDragResizing() && !mService.isDockedStackResizingLocked()) {
+            if (w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM) {
                 left = 0;
                 top = 0;
             }
