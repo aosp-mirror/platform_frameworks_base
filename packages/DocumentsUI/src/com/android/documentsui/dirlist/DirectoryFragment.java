@@ -948,10 +948,6 @@ public class DirectoryFragment extends Fragment {
 
         public DocumentHolder(View view) {
             super(view);
-            // Setting this using android:focusable in the item layouts doesn't work for list items.
-            // So we set it here.  Note that touch mode focus is a separate issue - see
-            // View.setFocusableInTouchMode and View.isInTouchMode for more info.
-            view.setFocusable(true);
             view.setOnKeyListener(this);
         }
 
