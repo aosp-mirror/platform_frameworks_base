@@ -51,6 +51,7 @@ import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /* A task view */
@@ -708,6 +709,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
     public void onTaskDataLoaded() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsConfiguration config = Recents.getConfiguration();
         if (mThumbnailView != null && mHeaderView != null) {
             // Bind each of the views to the new task data
@@ -715,7 +717,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
             mActionButtonView.setOnClickListener(this);
-            setOnLongClickListener(config.hasDockedTasks ? null : this);
+
+            // Only enable long-click if we have a freeform workspace to drag to/from, or if we
+            // aren't already docked
+            if (ssp.hasFreeformWorkspaceSupport() || !config.hasDockedTasks) {
+                setOnLongClickListener(this);
+            } else {
+                setOnLongClickListener(null);
+            }
         }
         mTaskDataLoaded = true;
     }
@@ -759,14 +768,20 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Start listening for drag events
             setClipViewInStack(false);
 
-            final int width = (int) (getScaleX() * getWidth());
-            final int height = (int) (getScaleY() * getHeight());
+            final float finalScale = getScaleX() * 1.05f;
+            final int width = getWidth();
+            final int height = getHeight();
             Bitmap dragBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(dragBitmap);
-            c.scale(getScaleX(), getScaleY());
             mThumbnailView.draw(c);
             mHeaderView.draw(c);
             c.setBitmap(null);
+
+            // The downTouchPos is relative to the currently transformed TaskView, but we will be
+            // dragging a copy of the full task view, which makes it easier for us to animate them
+            // when the user drops
+            mDownTouchPos.x += ((1f - getScaleX()) * width) / 2;
+            mDownTouchPos.y += ((1f - getScaleY()) * height) / 2;
 
             // Initiate the drag
             final DragView dragView = new DragView(getContext(), dragBitmap, mDownTouchPos);
@@ -776,6 +791,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     outline.setRect(0, 0, width, height);
                 }
             });
+            dragView.setScaleX(getScaleX());
+            dragView.setScaleY(getScaleY());
             dragView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View v) {
@@ -785,8 +802,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     dragView.setElevation(getElevation());
                     dragView.setTranslationZ(getTranslationZ());
                     dragView.animate()
-                            .scaleX(1.05f)
-                            .scaleY(1.05f)
+                            .scaleX(finalScale)
+                            .scaleY(finalScale)
                             .setDuration(175)
                             .setInterpolator(mFastOutSlowInInterpolator)
                             .start();
@@ -807,18 +824,19 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /**** Events ****/
 
     public final void onBusEvent(DragEndEvent event) {
-        event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                // If docked state == null:
-                // Animate the drag view back from where it is, to the view location, then after it returns,
-                // update the clip state
-                setClipViewInStack(true);
+        if (!(event.dropTarget instanceof TaskStack.DockState)) {
+            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    // Show this task view
+                    setVisibility(View.VISIBLE);
 
-                // Show this task view
-                setVisibility(View.VISIBLE);
-            }
-        });
+                    // Animate the drag view back from where it is, to the view location, then after
+                    // it returns, update the clip state
+                    setClipViewInStack(true);
+                }
+            });
+        }
         EventBus.getDefault().unregister(this);
     }
 }

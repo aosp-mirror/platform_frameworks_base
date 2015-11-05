@@ -17,29 +17,20 @@
 package com.android.systemui.recents.events.ui.dragndrop;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.views.DragView;
-import com.android.systemui.recents.views.DropTarget;
-import com.android.systemui.recents.views.TaskView;
+import com.android.systemui.recents.views.RecentsViewTouchHandler;
 
 /**
- * This event is sent whenever a drag ends.
+ * This event is sent by the drag manager when it requires drop targets to register themselves for
+ * the current drag gesture.
  */
-public class DragEndEvent extends EventBus.Event {
+public class DragStartInitializeDropTargetsEvent extends EventBus.Event {
 
     public final Task task;
-    public final TaskView taskView;
-    public final DragView dragView;
-    public final DropTarget dropTarget;
-    public final ReferenceCountedTrigger postAnimationTrigger;
+    public final RecentsViewTouchHandler handler;
 
-    public DragEndEvent(Task task, TaskView taskView, DragView dragView, DropTarget dropTarget,
-            ReferenceCountedTrigger postAnimationTrigger) {
+    public DragStartInitializeDropTargetsEvent(Task task, RecentsViewTouchHandler handler) {
         this.task = task;
-        this.taskView = taskView;
-        this.dragView = dragView;
-        this.dropTarget = dropTarget;
-        this.postAnimationTrigger = postAnimationTrigger;
+        this.handler = handler;
     }
 }

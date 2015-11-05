@@ -549,7 +549,7 @@ public class EventBus extends BroadcastReceiver {
                 InvocationTargetException|
                 InstantiationException|
                 IllegalAccessException e) {
-            Log.e(TAG, "Failed to create InterprocessEvent", e);
+            Log.e(TAG, "Failed to create InterprocessEvent", e.getCause());
         }
     }
 
@@ -746,9 +746,9 @@ public class EventBus extends BroadcastReceiver {
                 Log.e(TAG, "Failed to deliver event to null subscriber");
             }
         } catch (IllegalAccessException e) {
-            Log.e(TAG, "Failed to invoke method", e);
+            Log.e(TAG, "Failed to invoke method", e.getCause());
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e.getCause());
+            Log.e(TAG, "Failed to invoke method", e.getCause());
         }
     }
 

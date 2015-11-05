@@ -22,12 +22,15 @@ import android.view.MotionEvent;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.ui.dragndrop.DragDockStateChangedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropTargetsEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+
+import java.util.ArrayList;
 
 
 /**
@@ -52,7 +55,10 @@ class DockRegion {
 /**
  * Handles touch events for a RecentsView.
  */
-class RecentsViewTouchHandler {
+public class RecentsViewTouchHandler {
+
+    private static final String TAG = "RecentsViewTouchHandler";
+    private static final boolean DEBUG = false;
 
     private RecentsView mRv;
 
@@ -62,10 +68,19 @@ class RecentsViewTouchHandler {
 
     private Point mDownPos = new Point();
     private boolean mDragging;
-    private TaskStack.DockState mLastDockState = TaskStack.DockState.NONE;
+
+    private DropTarget mLastDropTarget;
+    private ArrayList<DropTarget> mDropTargets = new ArrayList<>();
 
     public RecentsViewTouchHandler(RecentsView rv) {
         mRv = rv;
+    }
+
+    /**
+     * Registers a new drop target for the current drag only.
+     */
+    public void registerDropTargetForCurrentDrag(DropTarget target) {
+        mDropTargets.add(target);
     }
 
     /**
@@ -101,11 +116,24 @@ class RecentsViewTouchHandler {
         mDragTask = event.task;
         mTaskView = event.taskView;
         mDragView = event.dragView;
+        mDropTargets.clear();
 
         float x = mDownPos.x - mDragView.getTopLeftOffset().x;
         float y = mDownPos.y - mDragView.getTopLeftOffset().y;
         mDragView.setTranslationX(x);
         mDragView.setTranslationY(y);
+
+        RecentsConfiguration config = Recents.getConfiguration();
+        if (!config.hasDockedTasks) {
+            // Add the dock state drop targets (these take priority)
+            TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
+            for (TaskStack.DockState dockState : dockStates) {
+                registerDropTargetForCurrentDrag(dockState);
+            }
+        }
+
+        // Request other drop targets to register themselves
+        EventBus.getDefault().send(new DragStartInitializeDropTargetsEvent(event.task, this));
     }
 
     public final void onBusEvent(DragEndEvent event) {
@@ -113,7 +141,7 @@ class RecentsViewTouchHandler {
         mDragTask = null;
         mTaskView = null;
         mDragView = null;
-        mLastDockState = TaskStack.DockState.NONE;
+        mLastDropTarget = null;
     }
 
     /**
@@ -121,8 +149,6 @@ class RecentsViewTouchHandler {
      * @param ev
      */
     private void handleTouchEvent(MotionEvent ev) {
-        boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_LANDSCAPE;
         int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -137,20 +163,17 @@ class RecentsViewTouchHandler {
                     float x = evX - mDragView.getTopLeftOffset().x;
                     float y = evY - mDragView.getTopLeftOffset().y;
 
-                    // Update the dock state
-                    TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
-                    TaskStack.DockState foundDockState = TaskStack.DockState.NONE;
-                    for (int i = dockStates.length - 1; i >= 0; i--) {
-                        TaskStack.DockState state = dockStates[i];
-                        if (state.touchAreaContainsPoint(width, height, evX, evY)) {
-                            foundDockState = state;
+                    DropTarget currentDropTarget = null;
+                    for (DropTarget target : mDropTargets) {
+                        if (target.acceptsDrop((int) evX, (int) evY, width, height)) {
+                            currentDropTarget = target;
                             break;
                         }
                     }
-                    if (mLastDockState != foundDockState) {
-                        mLastDockState = foundDockState;
-                        EventBus.getDefault().send(new DragDockStateChangedEvent(mDragTask,
-                                foundDockState));
+                    if (mLastDropTarget != currentDropTarget) {
+                        mLastDropTarget = currentDropTarget;
+                        EventBus.getDefault().send(new DragDropTargetChangedEvent(mDragTask,
+                                currentDropTarget));
                     }
 
                     mDragView.setTranslationX(x);
@@ -165,7 +188,7 @@ class RecentsViewTouchHandler {
                             mRv.getContext(), null, null, null);
                     postAnimationTrigger.increment();
                     EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView, mDragView,
-                            mLastDockState, postAnimationTrigger));
+                            mLastDropTarget, postAnimationTrigger));
                     postAnimationTrigger.decrement();
                     break;
                 }

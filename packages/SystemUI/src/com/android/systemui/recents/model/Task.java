@@ -22,6 +22,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
 import java.util.Objects;
@@ -165,7 +167,9 @@ public class Task {
         this.group = group;
     }
 
-    /** Updates the stack id of this task. */
+    /**
+     * Updates the stack id of this task.
+     */
     public void setStackId(int stackId) {
         key.stackId = stackId;
         if (mCb != null) {
@@ -173,10 +177,12 @@ public class Task {
         }
     }
 
+    /**
+     * Returns whether this task is on the freeform task stack.
+     */
     public boolean isFreeformTask() {
-        // Temporarily disable:
-        return false;
-        // return SystemServicesProxy.isFreeformStack(key.stackId);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        return ssp.hasFreeformWorkspaceSupport() && ssp.isFreeformStack(key.stackId);
     }
 
     /** Notifies the callback listeners that this task has been loaded */
@@ -210,7 +216,7 @@ public class Task {
         if (group != null) {
             groupAffiliation = Integer.toString(group.affiliation);
         }
-        return "Task (" + groupAffiliation + "): " + key.getComponent().getPackageName() +
+        return "Task (" + groupAffiliation + "): " + key +
                 " [" + super.toString() + "]";
     }
 }

@@ -111,6 +111,11 @@ public class FreeformWorkspaceLayoutAlgorithm {
             Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
             transformOut.visible = true;
             transformOut.p = 0;
+
+            if (DEBUG) {
+                Log.d(TAG, "getTransform: " + task.key + ", " + transformOut);
+            }
+
             return transformOut;
         }
         return null;
