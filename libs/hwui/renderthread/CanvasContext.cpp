@@ -44,6 +44,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include <cstdlib>
+
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
 
