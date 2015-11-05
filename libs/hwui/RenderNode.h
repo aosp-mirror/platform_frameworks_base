@@ -171,11 +171,11 @@ public:
         return mStagingProperties;
     }
 
-    uint32_t getWidth() {
+    int getWidth() const {
         return properties().getWidth();
     }
 
-    uint32_t getHeight() {
+    int getHeight() const {
         return properties().getHeight();
     }
 
@@ -188,7 +188,7 @@ public:
     AnimatorManager& animators() { return mAnimatorManager; }
 
     // Returns false if the properties dictate the subtree contained in this RenderNode won't render
-    bool applyViewProperties(CanvasState& canvasState) const;
+    bool applyViewProperties(CanvasState& canvasState, LinearAllocator& allocator) const;
 
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false) const;
 

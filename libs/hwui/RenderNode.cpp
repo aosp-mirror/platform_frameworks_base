@@ -282,9 +282,11 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
             damageSelf(info);
             transformUpdateNeeded = true;
 #if HWUI_NEW_OPS
-    } else if (mLayer->viewportWidth != getWidth() || mLayer->viewportHeight != getHeight()) {
-        // TODO: allow it to grow larger
-        if (getWidth() > mLayer->texture.width || getHeight() > mLayer->texture.height) {
+    } else if (mLayer->viewportWidth != (uint32_t) getWidth()
+            || mLayer->viewportHeight != (uint32_t)getHeight()) {
+        // TODO: allow node's layer to grow larger
+        if ((uint32_t)getWidth() > mLayer->texture.width
+                || (uint32_t)getHeight() > mLayer->texture.height) {
 #else
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
@@ -304,7 +306,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         if (info.errorHandler) {
             std::ostringstream err;
             err << "Unable to create layer for " << getName();
-            const uint32_t  maxTextureSize = Caches::getInstance().maxTextureSize;
+            const int maxTextureSize = Caches::getInstance().maxTextureSize;
             if (getWidth() > maxTextureSize || getHeight() > maxTextureSize) {
                 err << ", size " << getWidth() << "x" << getHeight()
                         << " exceeds max size " << maxTextureSize;
@@ -518,7 +520,7 @@ void RenderNode::decParentRefCount() {
     }
 }
 
-bool RenderNode::applyViewProperties(CanvasState& canvasState) const {
+bool RenderNode::applyViewProperties(CanvasState& canvasState, LinearAllocator& allocator) const {
     const Outline& outline = properties().getOutline();
     if (properties().getAlpha() <= 0
             || (outline.getShouldClip() && outline.isEmpty())
@@ -541,6 +543,48 @@ bool RenderNode::applyViewProperties(CanvasState& canvasState) const {
         } else {
             canvasState.concatMatrix(*properties().getTransformMatrix());
         }
+    }
+
+    const bool isLayer = properties().effectiveLayerType() != LayerType::None;
+    int clipFlags = properties().getClippingFlags();
+    if (properties().getAlpha() < 1) {
+        if (isLayer) {
+            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+        }
+        if (CC_LIKELY(isLayer || !properties().getHasOverlappingRendering())) {
+            // simply scale rendering content's alpha
+            canvasState.scaleAlpha(properties().getAlpha());
+        } else {
+            // savelayer needed to create an offscreen buffer
+            Rect layerBounds(0, 0, getWidth(), getHeight());
+            if (clipFlags) {
+                properties().getClippingRectForFlags(clipFlags, &layerBounds);
+                clipFlags = 0; // all clipping done by savelayer
+            }
+            LOG_ALWAYS_FATAL("TODO: savelayer");
+        }
+
+        if (CC_UNLIKELY(ATRACE_ENABLED() && properties().promotedToLayer())) {
+            // pretend alpha always causes savelayer to warn about
+            // performance problem affecting old versions
+            ATRACE_FORMAT("%s alpha caused saveLayer %dx%d", getName(), getWidth(), getHeight());
+        }
+    }
+    if (clipFlags) {
+        Rect clipRect;
+        properties().getClippingRectForFlags(clipFlags, &clipRect);
+        canvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
+                SkRegion::kIntersect_Op);
+    }
+
+    // TODO: support nesting round rect clips
+    if (mProperties.getRevealClip().willClip()) {
+        Rect bounds;
+        mProperties.getRevealClip().getBounds(&bounds);
+        canvasState.setClippingRoundRect(allocator,
+                bounds, mProperties.getRevealClip().getRadius());
+    } else if (mProperties.getOutline().willClip()) {
+        canvasState.setClippingOutline(allocator, &(mProperties.getOutline()));
     }
     return !canvasState.quickRejectConservative(
             0, 0, properties().getWidth(), properties().getHeight());

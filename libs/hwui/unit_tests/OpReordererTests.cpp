@@ -527,5 +527,120 @@ TEST(OpReorderer, hwLayerComplex) {
     *(parent->getLayerHandle()) = nullptr;
 }
 
+
+class PropertyTestRenderer : public TestRendererBase {
+public:
+    PropertyTestRenderer(std::function<void(const RectOp&, const BakedOpState&)> callback)
+            : mCallback(callback) {}
+    void onRectOp(const RectOp& op, const BakedOpState& state) override {
+        EXPECT_EQ(mIndex++, 0);
+        mCallback(op, state);
+    }
+    std::function<void(const RectOp&, const BakedOpState&)> mCallback;
+};
+
+static void testProperty(
+        std::function<int(RenderProperties&)> propSetupCallback,
+        std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+    node->setPropertyFieldsDirty(propSetupCallback(node->mutateStagingProperties()));
+    TestUtils::syncNodePropertiesAndDisplayList(node);
+
+    std::vector< sp<RenderNode> > nodes;
+    nodes.push_back(node.get());
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue,
+            SkRect::MakeWH(100, 100), 200, 200, nodes);
+
+    PropertyTestRenderer renderer(opValidateCallback);
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex()) << "Should have seen one op";
+}
+
+TEST(OpReorderer, renderPropOverlappingRenderingAlpha) {
+    testProperty([](RenderProperties& properties) {
+        properties.setAlpha(0.5f);
+        properties.setHasOverlappingRendering(false);
+        return RenderNode::ALPHA | RenderNode::GENERIC;
+    }, [](const RectOp& op, const BakedOpState& state) {
+        EXPECT_EQ(0.5f, state.alpha) << "Alpha should be applied directly to op";
+    });
+}
+
+TEST(OpReorderer, renderPropClipping) {
+    testProperty([](RenderProperties& properties) {
+        properties.setClipToBounds(true);
+        properties.setClipBounds(Rect(10, 20, 300, 400));
+        return RenderNode::GENERIC;
+    }, [](const RectOp& op, const BakedOpState& state) {
+        EXPECT_EQ(Rect(10, 20, 100, 100), state.computedState.clippedBounds)
+                << "Clip rect should be intersection of node bounds and clip bounds";
+    });
+}
+
+TEST(OpReorderer, renderPropRevealClip) {
+    testProperty([](RenderProperties& properties) {
+        properties.mutableRevealClip().set(true, 50, 50, 25);
+        return RenderNode::GENERIC;
+    }, [](const RectOp& op, const BakedOpState& state) {
+        ASSERT_NE(nullptr, state.roundRectClipState);
+        EXPECT_TRUE(state.roundRectClipState->highPriority);
+        EXPECT_EQ(25, state.roundRectClipState->radius);
+        EXPECT_EQ(Rect(50, 50, 50, 50), state.roundRectClipState->innerRect);
+    });
+}
+
+TEST(OpReorderer, renderPropOutlineClip) {
+    testProperty([](RenderProperties& properties) {
+        properties.mutableOutline().setShouldClip(true);
+        properties.mutableOutline().setRoundRect(10, 20, 30, 40, 5.0f, 0.5f);
+        return RenderNode::GENERIC;
+    }, [](const RectOp& op, const BakedOpState& state) {
+        ASSERT_NE(nullptr, state.roundRectClipState);
+        EXPECT_FALSE(state.roundRectClipState->highPriority);
+        EXPECT_EQ(5, state.roundRectClipState->radius);
+        EXPECT_EQ(Rect(15, 25, 25, 35), state.roundRectClipState->innerRect);
+    });
+}
+
+TEST(OpReorderer, renderPropTransform) {
+    testProperty([](RenderProperties& properties) {
+        properties.setLeftTopRightBottom(10, 10, 110, 110);
+
+        SkMatrix staticMatrix = SkMatrix::MakeScale(1.2f, 1.2f);
+        properties.setStaticMatrix(&staticMatrix);
+
+        // ignored, since static overrides animation
+        SkMatrix animationMatrix = SkMatrix::MakeTrans(15, 15);
+        properties.setAnimationMatrix(&animationMatrix);
+
+        properties.setTranslationX(10);
+        properties.setTranslationY(20);
+        properties.setScaleX(0.5f);
+        properties.setScaleY(0.7f);
+        return RenderNode::GENERIC
+                | RenderNode::TRANSLATION_X | RenderNode::TRANSLATION_Y
+                | RenderNode::SCALE_X | RenderNode::SCALE_Y;
+    }, [](const RectOp& op, const BakedOpState& state) {
+        Matrix4 matrix;
+        matrix.loadTranslate(10, 10, 0); // left, top
+        matrix.scale(1.2f, 1.2f, 1); // static matrix
+        // ignore animation matrix, since static overrides it
+
+        // translation xy
+        matrix.translate(10, 20);
+
+        // scale xy (from default pivot - center)
+        matrix.translate(50, 50);
+        matrix.scale(0.5f, 0.7f, 1);
+        matrix.translate(-50, -50);
+        EXPECT_MATRIX_APPROX_EQ(matrix, state.computedState.transform)
+                << "Op draw matrix must match expected combination of transformation properties";
+    });
+}
 } // namespace uirenderer
 } // namespace android
