@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.media.IAudioService;
 import android.os.Bundle;
@@ -205,6 +206,7 @@ public class DpmMockContext extends MockContext {
     public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
     public final UserManagerInternal userManagerInternal;
+    public final PackageManagerInternal packageManagerInternal;
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
@@ -237,6 +239,7 @@ public class DpmMockContext extends MockContext {
         userManager = mock(UserManager.class);
         userManagerInternal = mock(UserManagerInternal.class);
         userManagerForMock = mock(UserManagerForMock.class);
+        packageManagerInternal = mock(PackageManagerInternal.class);
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
         notificationManager = mock(NotificationManager.class);

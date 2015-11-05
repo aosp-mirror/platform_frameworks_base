@@ -617,6 +617,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final DefaultPermissionGrantPolicy mDefaultPermissionPolicy =
             new DefaultPermissionGrantPolicy(this);
 
+    // List of packages names to keep cached, even if they are uninstalled for all users
+    private List<String> mKeepUninstalledPackages;
+
     private static class IFVerificationParams {
         PackageParser.Package pkg;
         boolean replacing;
@@ -13015,7 +13018,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean deleteAllUsers = (flags & PackageManager.DELETE_ALL_USERS) != 0;
         final int[] users = deleteAllUsers ? sUserManager.getUserIds() : new int[]{ userId };
         if (UserHandle.getUserId(uid) != userId || (deleteAllUsers && users.length > 1)) {
-            mContext.enforceCallingPermission(
+            mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "deletePackage for user " + userId);
         }
@@ -13088,6 +13091,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    private boolean shouldKeepUninstalledPackageLPr(String packageName) {
+        return mKeepUninstalledPackages != null && mKeepUninstalledPackages.contains(packageName);
     }
 
     /**
@@ -13512,7 +13519,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false, // blockUninstall
                         ps.readUserState(userId).domainVerificationStatus, 0);
                 if (!isSystemApp(ps)) {
-                    if (ps.isAnyInstalled(sUserManager.getUserIds())) {
+                    // Do not uninstall the APK if an app should be cached
+                    boolean keepUninstalledPackage = shouldKeepUninstalledPackageLPr(packageName);
+                    if (ps.isAnyInstalled(sUserManager.getUserIds()) || keepUninstalledPackage) {
                         // Other user still have this package installed, so all
                         // we need to do is clear this user's data and save that
                         // it is uninstalled.
@@ -16686,15 +16695,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_CLEAN_APKS) {
                 Slog.i(TAG, "Checking package " + packageName);
             }
-            boolean keep = false;
-            for (int i = 0; i < users.length; i++) {
-                if (users[i] != userHandle && ps.getInstalled(users[i])) {
-                    keep = true;
-                    if (DEBUG_CLEAN_APKS) {
-                        Slog.i(TAG, "  Keeping package " + packageName + " for user "
-                                + users[i]);
+            boolean keep = shouldKeepUninstalledPackageLPr(packageName);
+            if (keep) {
+                if (DEBUG_CLEAN_APKS) {
+                    Slog.i(TAG, "  Keeping package " + packageName + " - requested by DO");
+                }
+            } else {
+                for (int i = 0; i < users.length; i++) {
+                    if (users[i] != userHandle && ps.getInstalled(users[i])) {
+                        keep = true;
+                        if (DEBUG_CLEAN_APKS) {
+                            Slog.i(TAG, "  Keeping package " + packageName + " for user "
+                                    + users[i]);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
             if (!keep) {
@@ -16893,6 +16908,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ksh);
             }
             return false;
+        }
+    }
+
+    private void deletePackageIfUnusedLPr(final String packageName) {
+        PackageSetting ps = mSettings.mPackages.get(packageName);
+        if (ps == null) {
+            return;
+        }
+        if (!ps.isAnyInstalled(sUserManager.getUserIds())) {
+            // TODO Implement atomic delete if package is unused
+            // It is currently possible that the package will be deleted even if it is installed
+            // after this method returns.
+            mHandler.post(new Runnable() {
+                public void run() {
+                    deletePackageX(packageName, 0, PackageManager.DELETE_ALL_USERS);
+                }
+            });
         }
     }
 
@@ -17131,6 +17163,34 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mPackages) {
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManagerLPr(
                         packageName, userId);
+            }
+        }
+
+        @Override
+        public void setKeepUninstalledPackages(final List<String> packageList) {
+            Preconditions.checkNotNull(packageList);
+            List<String> removedFromList = null;
+            synchronized (mPackages) {
+                if (mKeepUninstalledPackages != null) {
+                    final int packagesCount = mKeepUninstalledPackages.size();
+                    for (int i = 0; i < packagesCount; i++) {
+                        String oldPackage = mKeepUninstalledPackages.get(i);
+                        if (packageList != null && packageList.contains(oldPackage)) {
+                            continue;
+                        }
+                        if (removedFromList == null) {
+                            removedFromList = new ArrayList<>();
+                        }
+                        removedFromList.add(oldPackage);
+                    }
+                }
+                mKeepUninstalledPackages = new ArrayList<>(packageList);
+                if (removedFromList != null) {
+                    final int removedCount = removedFromList.size();
+                    for (int i = 0; i < removedCount; i++) {
+                        deletePackageIfUnusedLPr(removedFromList.get(i));
+                    }
+                }
             }
         }
     }

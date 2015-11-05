@@ -20,8 +20,8 @@ import com.android.internal.widget.LockPatternUtils;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
-import android.content.Context;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.media.IAudioService;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
@@ -110,6 +110,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         UserManagerInternal getUserManagerInternal() {
             return context.userManagerInternal;
+        }
+
+        @Override
+        PackageManagerInternal getPackageManagerInternal() {
+            return context.packageManagerInternal;
         }
 
         @Override
