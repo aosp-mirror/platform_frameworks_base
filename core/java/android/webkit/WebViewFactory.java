@@ -248,7 +248,7 @@ public final class WebViewFactory {
             Context webViewContext = initialApplication.createPackageContext(
                     sPackageInfo.packageName,
                     Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-            initialApplication.getAssets().addAssetPath(
+            initialApplication.getAssets().addAssetPathAsSharedLibrary(
                     webViewContext.getApplicationInfo().sourceDir);
             ClassLoader clazzLoader = webViewContext.getClassLoader();
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
