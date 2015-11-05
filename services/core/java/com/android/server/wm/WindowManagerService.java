@@ -698,7 +698,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (DEBUG_DRAG) Slog.d(TAG, "Button no longer pressed; dropping at "
                                     + newX + "," + newY);
                             synchronized (mWindowMap) {
-                                endDrag = completeDrop(newX, newY);
+                                endDrag = completeDropLw(newX, newY);
                             }
                         } else {
                             synchronized (mWindowMap) {
@@ -712,7 +712,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_DRAG) Slog.d(TAG, "Got UP on move channel; dropping at "
                                 + newX + "," + newY);
                         synchronized (mWindowMap) {
-                            endDrag = completeDrop(newX, newY);
+                            endDrag = completeDropLw(newX, newY);
                         }
                     } break;
 
@@ -742,11 +742,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean completeDrop(float x, float y) {
+    private boolean completeDropLw(float x, float y) {
         WindowState dropTargetWin = mDragState.getDropTargetWinLw(x, y);
 
+        mDragState.mCurrentX = x;
+        mDragState.mCurrentY = y;
+
         DropPermissionHolder dropPermissionHolder = null;
-        if ((mDragState.mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
+        if (dropTargetWin != null &&
+                (mDragState.mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
                 (mDragState.mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
             dropPermissionHolder = new DropPermissionHolder(
                     mDragState.mData,
@@ -7020,6 +7024,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " asbinder=" + window.asBinder());
         }
 
+        final int callerPid = Binder.getCallingPid();
         final int callerUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         IBinder token = null;
@@ -7045,6 +7050,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
                         mDragState = new DragState(this, token, surface, flags, winBinder);
+                        mDragState.mPid = callerPid;
                         mDragState.mUid = callerUid;
                         token = mDragState.mToken = new Binder();
 
