@@ -303,6 +303,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         if (mTmpRect.equals(mLastResizeRect)) {
             return;
         }
+
+        // Make sure shadows are updated
+        mBackground.invalidate();
+
         mLastResizeRect.set(mTmpRect);
         mWindowManagerProxy.resizeDockedStack(mTmpRect);
     }
