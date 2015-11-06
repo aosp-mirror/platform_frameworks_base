@@ -62,22 +62,21 @@ public class UserCertificateSource implements CertificateSource {
             }
             final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
             final File userCaDir = new File(configDir, "cacerts-added");
-            if (!userCaDir.isDirectory()) {
-                throw new AssertionError(userCaDir + " is not a directory");
-            }
-
             Set<X509Certificate> userCerts = new ArraySet<X509Certificate>();
-            for (String caFile : userCaDir.list()) {
-                InputStream is = null;
-                try {
-                    is = new BufferedInputStream(
-                            new FileInputStream(new File(userCaDir, caFile)));
-                    userCerts.add((X509Certificate) certFactory.generateCertificate(is));
-                } catch (CertificateException | IOException e) {
-                    // Don't rethrow to be consistent with conscrypt's cert loading code.
-                    continue;
-                } finally {
-                    IoUtils.closeQuietly(is);
+            // If the user hasn't added any certificates the directory may not exist.
+            if (userCaDir.isDirectory()) {
+                for (String caFile : userCaDir.list()) {
+                    InputStream is = null;
+                    try {
+                        is = new BufferedInputStream(
+                                new FileInputStream(new File(userCaDir, caFile)));
+                        userCerts.add((X509Certificate) certFactory.generateCertificate(is));
+                    } catch (CertificateException | IOException e) {
+                        // Don't rethrow to be consistent with conscrypt's cert loading code.
+                        continue;
+                    } finally {
+                        IoUtils.closeQuietly(is);
+                    }
                 }
             }
             mUserCerts = userCerts;
