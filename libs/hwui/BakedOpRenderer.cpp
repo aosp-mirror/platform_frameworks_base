@@ -19,6 +19,7 @@
 #include "Caches.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
+#include "VertexBuffer.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/GLUtils.h"
@@ -45,7 +46,7 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
     caches.textureState().bindTexture(GL_TEXTURE_2D, texture.id);
 
     texture.setWrap(GL_CLAMP_TO_EDGE, false, false, GL_TEXTURE_2D);
-    // not setting filter on texture, since it's set when drawing, based on transform
+    // not setting filter on texture, since it's set when rendering, based on transform
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0,
@@ -55,7 +56,7 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
 void OffscreenBuffer::updateMeshFromRegion() {
     // avoid T-junctions as they cause artifacts in between the resultant
     // geometry when complex transforms occur.
-    // TODO: generate the safeRegion only if necessary based on drawing transform
+    // TODO: generate the safeRegion only if necessary based on rendering transform
     Region safeRegion = Region::createTJunctionFreeRegion(region);
 
     size_t count;
@@ -108,15 +109,15 @@ void BakedOpRenderer::destroyOffscreenBuffer(OffscreenBuffer* offscreenBuffer) {
     delete offscreenBuffer;
 }
 
-OffscreenBuffer* BakedOpRenderer::createLayer(uint32_t width, uint32_t height) {
-    LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
-
+OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t height) {
     OffscreenBuffer* buffer = createOffscreenBuffer(mRenderState, width, height);
-    startLayer(buffer);
+    startRepaintLayer(buffer);
     return buffer;
 }
 
-void BakedOpRenderer::startLayer(OffscreenBuffer* offscreenBuffer) {
+void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer) {
+    LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
+
     mRenderTarget.offscreenBuffer = offscreenBuffer;
 
     // create and bind framebuffer
@@ -259,6 +260,71 @@ void BakedOpDispatcher::onRectOp(BakedOpRenderer& renderer, const RectOp& op, co
             .setModelViewMapUnitToRect(op.unmappedBounds)
             .build();
     renderer.renderGlop(state, glop);
+}
+
+namespace VertexBufferRenderFlags {
+    enum {
+        Offset = 0x1,
+        ShadowInterp = 0x2,
+    };
+}
+
+static void renderVertexBuffer(BakedOpRenderer& renderer, const BakedOpState& state,
+        const VertexBuffer& vertexBuffer, float translateX, float translateY,
+        SkPaint& paint, int vertexBufferRenderFlags) {
+    if (CC_LIKELY(vertexBuffer.getVertexCount())) {
+        bool shadowInterp = vertexBufferRenderFlags & VertexBufferRenderFlags::ShadowInterp;
+        const int transformFlags = TransformFlags::OffsetByFudgeFactor;
+        Glop glop;
+        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+                .setRoundRectClipState(state.roundRectClipState)
+                .setMeshVertexBuffer(vertexBuffer, shadowInterp)
+                .setFillPaint(paint, state.alpha)
+                .setTransform(state.computedState.transform, transformFlags)
+                .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
+                .build();
+        renderer.renderGlop(state, glop);
+    }
+}
+
+static void renderShadow(BakedOpRenderer& renderer, const BakedOpState& state, float casterAlpha,
+        const VertexBuffer* ambientShadowVertexBuffer, const VertexBuffer* spotShadowVertexBuffer) {
+    SkPaint paint;
+    paint.setAntiAlias(true); // want to use AlphaVertex
+
+    // The caller has made sure casterAlpha > 0.
+    uint8_t ambientShadowAlpha = 128u; //TODO: mAmbientShadowAlpha;
+    if (CC_UNLIKELY(Properties::overrideAmbientShadowStrength >= 0)) {
+        ambientShadowAlpha = Properties::overrideAmbientShadowStrength;
+    }
+    if (ambientShadowVertexBuffer && ambientShadowAlpha > 0) {
+        paint.setAlpha((uint8_t)(casterAlpha * ambientShadowAlpha));
+        renderVertexBuffer(renderer, state, *ambientShadowVertexBuffer, 0, 0,
+                paint, VertexBufferRenderFlags::ShadowInterp);
+    }
+
+    uint8_t spotShadowAlpha = 128u; //TODO: mSpotShadowAlpha;
+    if (CC_UNLIKELY(Properties::overrideSpotShadowStrength >= 0)) {
+        spotShadowAlpha = Properties::overrideSpotShadowStrength;
+    }
+    if (spotShadowVertexBuffer && spotShadowAlpha > 0) {
+        paint.setAlpha((uint8_t)(casterAlpha * spotShadowAlpha));
+        renderVertexBuffer(renderer, state, *spotShadowVertexBuffer, 0, 0,
+                paint, VertexBufferRenderFlags::ShadowInterp);
+    }
+}
+
+void BakedOpDispatcher::onShadowOp(BakedOpRenderer& renderer, const ShadowOp& op, const BakedOpState& state) {
+    TessellationCache::vertexBuffer_pair_t buffers;
+    Vector3 lightCenter = { 300, 300, 300 }; // TODO!
+    float lightRadius = 150; // TODO!
+
+    renderer.caches().tessellationCache.getShadowBuffers(&state.computedState.transform,
+            op.localClipRect, op.casterAlpha >= 1.0f, op.casterPath,
+            &op.shadowMatrixXY, &op.shadowMatrixZ, lightCenter, lightRadius,
+            buffers);
+
+    renderShadow(renderer, state, op.casterAlpha, buffers.first, buffers.second);
 }
 
 void BakedOpDispatcher::onSimpleRectsOp(BakedOpRenderer& renderer, const SimpleRectsOp& op, const BakedOpState& state) {

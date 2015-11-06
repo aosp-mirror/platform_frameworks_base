@@ -81,8 +81,8 @@ public:
 
     void startFrame(uint32_t width, uint32_t height);
     void endFrame();
-    OffscreenBuffer* createLayer(uint32_t width, uint32_t height);
-    void startLayer(OffscreenBuffer* offscreenBuffer);
+    OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height);
+    void startRepaintLayer(OffscreenBuffer* offscreenBuffer);
     void endLayer();
 
     Texture* getTexture(const SkBitmap* bitmap);

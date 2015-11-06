@@ -22,6 +22,7 @@
 #include "utils/PaintUtils.h"
 
 #include <SkCanvas.h>
+#include <SkPathOps.h>
 #include <utils/Trace.h>
 #include <utils/TypeHelpers.h>
 
@@ -312,7 +313,7 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
     mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
-        mLayerStack.push_back(0);
+    mLayerStack.push_back(0);
 
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
@@ -347,7 +348,6 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
 OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList)
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
-
     mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
     mLayerStack.push_back(0);
 
@@ -462,8 +462,60 @@ void OpReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedN
 }
 
 void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
-    // TODO
+    auto& node = *casterNodeOp.renderNode;
+    auto& properties = node.properties();
+
+    if (properties.getAlpha() <= 0.0f
+            || properties.getOutline().getAlpha() <= 0.0f
+            || !properties.getOutline().getPath()
+            || properties.getScaleX() == 0
+            || properties.getScaleY() == 0) {
+        // no shadow to draw
+        return;
+    }
+
+    const SkPath* casterOutlinePath = properties.getOutline().getPath();
+    const SkPath* revealClipPath = properties.getRevealClip().getPath();
+    if (revealClipPath && revealClipPath->isEmpty()) return;
+
+    float casterAlpha = properties.getAlpha() * properties.getOutline().getAlpha();
+
+    // holds temporary SkPath to store the result of intersections
+    SkPath* frameAllocatedPath = nullptr;
+    const SkPath* casterPath = casterOutlinePath;
+
+    // intersect the shadow-casting path with the reveal, if present
+    if (revealClipPath) {
+        frameAllocatedPath = createFrameAllocatedPath();
+
+        Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, frameAllocatedPath);
+        casterPath = frameAllocatedPath;
+    }
+
+    // intersect the shadow-casting path with the clipBounds, if present
+    if (properties.getClippingFlags() & CLIP_TO_CLIP_BOUNDS) {
+        if (!frameAllocatedPath) {
+            frameAllocatedPath = createFrameAllocatedPath();
+        }
+        Rect clipBounds;
+        properties.getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
+        SkPath clipBoundsPath;
+        clipBoundsPath.addRect(clipBounds.left, clipBounds.top,
+                clipBounds.right, clipBounds.bottom);
+
+        Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, frameAllocatedPath);
+        casterPath = frameAllocatedPath;
+    }
+
+    ShadowOp* shadowOp = new (mAllocator) ShadowOp(casterNodeOp, casterAlpha, casterPath,
+            mCanvasState.getLocalClipBounds());
+    BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
+            mAllocator, *mCanvasState.currentSnapshot(), shadowOp);
+    if (CC_LIKELY(bakedOpState)) {
+        currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
+    }
 }
+
 /**
  * Used to define a list of lambdas referencing private OpReorderer::onXXXXOp() methods.
  *
@@ -590,6 +642,10 @@ void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
 }
 
 void OpReorderer::onLayerOp(const LayerOp& op) {
+    LOG_ALWAYS_FATAL("unsupported");
+}
+
+void OpReorderer::onShadowOp(const ShadowOp& op) {
     LOG_ALWAYS_FATAL("unsupported");
 }
 
