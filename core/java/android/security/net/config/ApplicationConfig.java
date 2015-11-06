@@ -48,7 +48,7 @@ public final class ApplicationConfig {
      */
     public boolean hasPerDomainConfigs() {
         ensureInitialized();
-        return mConfigs == null || !mConfigs.isEmpty();
+        return mConfigs != null && !mConfigs.isEmpty();
     }
 
     /**
