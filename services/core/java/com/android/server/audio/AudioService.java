@@ -76,6 +76,7 @@ import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -88,6 +89,8 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
+import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -397,6 +400,12 @@ public class AudioService extends IAudioService.Stub {
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
+    /** Interface for UserManagerService. */
+    private final UserManagerInternal mUserManagerInternal;
+
+    private final UserRestrictionsListener mUserRestrictionsListener =
+            new AudioServiceUserRestrictionsListener();
+
     // Devices currently connected
     // Use makeDeviceListKey() to make a unique key for this list.
     private class DeviceListSpec {
@@ -598,6 +607,8 @@ public class AudioService extends IAudioService.Stub {
 
         mPlatformType = AudioSystem.getPlatformType(context);
 
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
 
@@ -694,6 +705,8 @@ public class AudioService extends IAudioService.Stub {
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
 
         LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
+
+        mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
     }
 
     public void systemReady() {
@@ -1039,17 +1052,32 @@ public class AudioService extends IAudioService.Stub {
                 System.MUTE_STREAMS_AFFECTED, AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED,
                 UserHandle.USER_CURRENT);
 
-        boolean masterMute = System.getIntForUser(cr, System.VOLUME_MASTER_MUTE,
-                0, UserHandle.USER_CURRENT) == 1;
+        final int currentUser = getCurrentUserId();
+
+        // In addition to checking the system setting, also check the current user restriction.
+        // Because of the delay before persisting VOLUME_MASTER_MUTE, there's a window where
+        // DISALLOW_ADJUST_VOLUME will be ignored when it's set right before switching users.
+        boolean masterMute = (System.getIntForUser(cr, System.VOLUME_MASTER_MUTE,
+                0, UserHandle.USER_CURRENT) == 1)
+                || mUserManagerInternal.getUserRestriction(
+                    currentUser, UserManager.DISALLOW_ADJUST_VOLUME);
         if (mUseFixedVolume) {
             masterMute = false;
             AudioSystem.setMasterVolume(1.0f);
+        }
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Master mute %s, user=%d", masterMute, currentUser));
         }
         AudioSystem.setMasterMute(masterMute);
         broadcastMasterMuteStatus(masterMute);
 
         boolean microphoneMute =
-                System.getIntForUser(cr, System.MICROPHONE_MUTE, 0, UserHandle.USER_CURRENT) == 1;
+                (System.getIntForUser(cr, System.MICROPHONE_MUTE, 0, UserHandle.USER_CURRENT) == 1)
+                || mUserManagerInternal.getUserRestriction(
+                        currentUser, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Mic mute %s, user=%d", microphoneMute, currentUser));
+        }
         AudioSystem.muteMicrophone(microphoneMute);
 
         // Each stream will read its own persisted settings
@@ -1767,6 +1795,16 @@ public class AudioService extends IAudioService.Stub {
                 != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        setMasterMuteInternalNoCallerCheck(mute, flags, userId);
+    }
+
+    private void setMasterMuteInternalNoCallerCheck(boolean mute, int flags, int userId) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Master mute %s, %d, user=%d", mute, flags, userId));
+        }
+        if (mUseFixedVolume) {
+            return; // If using fixed volume, we don't mute.
+        }
         if (getCurrentUserId() == userId) {
             if (mute != AudioSystem.getMasterMute()) {
                 setSystemAudioMute(mute);
@@ -1841,7 +1879,8 @@ public class AudioService extends IAudioService.Stub {
         return mStreamVolumeAlias[AudioSystem.STREAM_SYSTEM];
     }
 
-    /** @see AudioManager#setMicrophoneMute(boolean, int) */
+    /** @see AudioManager#setMicrophoneMute(boolean) */
+    @Override
     public void setMicrophoneMute(boolean on, String callingPackage, int userId) {
         // If we are being called by the system check for user we are going to change
         // so we handle user restrictions correctly.
@@ -1863,7 +1902,13 @@ public class AudioService extends IAudioService.Stub {
                 != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        setMicrophoneMuteNoCallerCheck(on, userId);
+    }
 
+    private void setMicrophoneMuteNoCallerCheck(boolean on, int userId) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Mic mute %s, user=%d", on, userId));
+        }
         // If mute is for current user actually mute, else just persist the setting
         // which will be loaded on user switch.
         if (getCurrentUserId() == userId) {
@@ -5115,6 +5160,35 @@ public class AudioService extends IAudioService.Stub {
             }
         }
     } // end class AudioServiceBroadcastReceiver
+
+    private class AudioServiceUserRestrictionsListener implements UserRestrictionsListener {
+
+        @Override
+        public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
+                Bundle prevRestrictions) {
+            // Update mic mute state.
+            {
+                final boolean wasRestricted =
+                        prevRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE);
+                final boolean isRestricted =
+                        newRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE);
+                if (wasRestricted != isRestricted) {
+                    setMicrophoneMuteNoCallerCheck(isRestricted, userId);
+                }
+            }
+
+            // Update speaker mute state.
+            {
+                final boolean wasRestricted =
+                        prevRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME);
+                final boolean isRestricted =
+                        newRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME);
+                if (wasRestricted != isRestricted) {
+                    setMasterMuteInternalNoCallerCheck(isRestricted, /* flags =*/ 0, userId);
+                }
+            }
+        }
+    } // end class AudioServiceUserRestrictionsListener
 
     private void killBackgroundUserProcessesWithRecordAudioPermission(UserInfo oldUser) {
         PackageManager pm = mContext.getPackageManager();
