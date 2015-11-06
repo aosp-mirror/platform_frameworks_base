@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.model.Task;
 
 import java.util.ArrayList;
@@ -113,7 +112,7 @@ public class TaskStackViewFilterAlgorithm {
                     tv.prepareTaskTransformForFilterTaskHidden(fromTransform);
                     tv.updateViewPropertiesToTaskTransform(fromTransform, 0);
 
-                    toTransform.startDelay = offset * Constants.Values.TaskStackView.FilterStartDelay;
+                    toTransform.startDelay = offset * 25;
                     childViewTransformsOut.put(tv, toTransform);
 
                     // Use the movement of the new views to calculate the duration of the animation
@@ -166,7 +165,7 @@ public class TaskStackViewFilterAlgorithm {
                         (int) tv.getTranslationY()));
             }
 
-            toTransform.startDelay = offset * Constants.Values.TaskStackView.FilterStartDelay;
+            toTransform.startDelay = offset * 25;
             childViewTransformsOut.put(tv, toTransform);
             offset++;
         }

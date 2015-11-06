@@ -19,6 +19,7 @@ package com.android.systemui.recents.misc;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -27,6 +28,8 @@ import java.util.ArrayList;
  * decremented.  Not thread safe as it's not currently needed.
  */
 public class ReferenceCountedTrigger {
+
+    private static final String TAG = "ReferenceCountedTrigger";
 
     Context mContext;
     int mCount;
@@ -94,8 +97,7 @@ public class ReferenceCountedTrigger {
             if (mErrorRunnable != null) {
                 mErrorRunnable.run();
             } else {
-                new Throwable("Invalid ref count").printStackTrace();
-                Console.logError(mContext, "Invalid ref count");
+                Log.e(TAG, "Invalid ref count");
             }
         }
     }

@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -80,7 +81,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     boolean mTaskDataLoaded;
     boolean mIsFocused;
     boolean mIsFocusAnimated;
-    boolean mFocusAnimationsEnabled;
     boolean mClipViewInStack;
     AnimateableViewBounds mViewBounds;
 
@@ -642,6 +642,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         setDim(getDimFromTaskProgress());
     }
 
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (Constants.DebugFlags.App.EnableFastToggleRecents && mIsFocused) {
+            Paint tmpPaint = new Paint();
+            Rect tmpRect = new Rect();
+            tmpRect.set(0, 0, getWidth(), getHeight());
+            tmpPaint.setColor(0xFFFF0000);
+            tmpPaint.setStrokeWidth(35);
+            tmpPaint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(tmpRect, tmpPaint);
+        }
+    }
+
     /**** View focus state ****/
 
     /**
@@ -671,6 +686,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             if (isAccessibilityFocused() && ssp.isTouchExplorationEnabled()) {
                 clearAccessibilityFocus();
             }
+        }
+        if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+            invalidate();
         }
     }
 

@@ -34,7 +34,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -228,6 +227,42 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return mImmutableTaskViews;
     }
 
+    /**
+     * Returns the front most task view.
+     *
+     * @param stackTasksOnly if set, will return the front most task view in the stack (by default
+     *                       the front most task view will be freeform since they are placed above
+     *                       stack tasks)
+     */
+    private TaskView getFrontMostTaskView(boolean stackTasksOnly) {
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
+            Task task = tv.getTask();
+            if (stackTasksOnly && task.isFreeformTask()) {
+                continue;
+            }
+            return tv;
+        }
+        return null;
+    }
+
+    /**
+     * Finds the child view given a specific {@param task}.
+     */
+    public TaskView getChildViewForTask(Task t) {
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = 0; i < taskViewCount; i++) {
+            TaskView tv = taskViews.get(i);
+            if (tv.getTask() == t) {
+                return tv;
+            }
+        }
+        return null;
+    }
+
     /** Resets this TaskStackView for reuse. */
     void reset() {
         // Reset the focused task
@@ -286,19 +321,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             invalidate();
             mStackViewsClipDirty = true;
         }
-    }
-
-    /** Finds the child view given a specific task. */
-    public TaskView getChildViewForTask(Task t) {
-        List<TaskView> taskViews = getTaskViews();
-        int taskViewCount = taskViews.size();
-        for (int i = 0; i < taskViewCount; i++) {
-            TaskView tv = taskViews.get(i);
-            if (tv.getTask() == t) {
-                return tv;
-            }
-        }
-        return null;
     }
 
     /** Returns the stack algorithm for this task stack. */
@@ -635,13 +657,49 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Sets the focused task relative to the currently focused task.
      *
+     * @param stackTasksOnly if set, will ensure that the traversal only goes along stack tasks, and
+     *                       if the currently focused task is not a stack task, will set the focus
+     *                       to the first visible stack task
      * @param animated determines whether to actually draw the highlight along with the change in
      *                            focus.
      */
-    public void setRelativeFocusedTask(boolean forward, boolean animated) {
-        // Find the next index to focus
-        int newIndex = mFocusedTaskIndex + (forward ? -1 : 1);
-        setFocusedTask(newIndex, true, animated);
+    public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated) {
+        int newIndex = -1;
+        if (mFocusedTaskIndex != -1) {
+            if (stackTasksOnly) {
+                List<Task> tasks =  mStack.getTasks();
+                newIndex = mFocusedTaskIndex;
+                Task task = tasks.get(mFocusedTaskIndex);
+                if (task.isFreeformTask()) {
+                    // Try and focus the front most stack task
+                    TaskView tv = getFrontMostTaskView(stackTasksOnly);
+                    if (tv != null) {
+                        newIndex = mStack.indexOfTask(tv.getTask());
+                    }
+                } else {
+                    // Try the next task if it is a stack task
+                    int tmpNewIndex = mFocusedTaskIndex + (forward ? -1 : 1);
+                    if (0 <= tmpNewIndex && tmpNewIndex < tasks.size()) {
+                        Task t = tasks.get(tmpNewIndex);
+                        if (!t.isFreeformTask()) {
+                            newIndex = tmpNewIndex;
+                        }
+                    }
+                }
+            } else {
+                // No restrictions, lets just move to the new task
+                newIndex = mFocusedTaskIndex + (forward ? -1 : 1);
+            }
+        } else {
+            // We don't have a focused task, so focus the first visible task view
+            TaskView tv = getFrontMostTaskView(stackTasksOnly);
+            if (tv != null) {
+                newIndex = mStack.indexOfTask(tv.getTask());
+            }
+        }
+        if (newIndex != -1) {
+            setFocusedTask(newIndex, true, animated);
+        }
     }
 
     /**
@@ -703,11 +761,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                setRelativeFocusedTask(true, false /* animated */);
+                setRelativeFocusedTask(true, false /* stackTasksOnly */, false /* animated */);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                setRelativeFocusedTask(false, false /* animated */);
+                setRelativeFocusedTask(false, false /* stackTasksOnly */, false /* animated */);
                 return true;
             }
         }
@@ -1324,11 +1382,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(FocusNextTaskViewEvent event) {
-        setRelativeFocusedTask(true, true);
+        setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */);
     }
 
     public final void onBusEvent(FocusPreviousTaskViewEvent event) {
-        setRelativeFocusedTask(false, true);
+        setRelativeFocusedTask(false, false /* stackTasksOnly */, true /* animated */);
     }
 
     public final void onBusEvent(DismissFocusedTaskViewEvent event) {

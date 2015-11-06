@@ -31,6 +31,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
@@ -147,6 +148,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     private boolean handleTouchEvent(MotionEvent ev) {
         // Short circuit if we have no children
         if (mSv.getTaskViews().size() == 0) {
+            return false;
+        }
+        // Short circuit while we are alt-tabbing
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        if (launchState.launchedWithAltTab) {
             return false;
         }
 
@@ -305,9 +311,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // Find the front most task and scroll the next task to the front
                     float vScroll = ev.getAxisValue(MotionEvent.AXIS_VSCROLL);
                     if (vScroll > 0) {
-                        mSv.setRelativeFocusedTask(true, false /* animated */);
+                        mSv.setRelativeFocusedTask(true, true /* stackTasksOnly */,
+                                false /* animated */);
                     } else {
-                        mSv.setRelativeFocusedTask(false, false /* animated */);
+                        mSv.setRelativeFocusedTask(false, true /* stackTasksOnly */,
+                                false /* animated */);
                     }
                     return true;
             }

@@ -31,7 +31,6 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 
 /**

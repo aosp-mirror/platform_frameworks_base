@@ -57,14 +57,4 @@ public class Constants {
             public static final int SystemServicesProxyMockTaskCount = 100;
         }
     }
-
-    public static class Values {
-        public static class App {
-            public static int AppWidgetHostId = 1024;
-        }
-
-        public static class TaskStackView {
-            public static final int FilterStartDelay = 25;
-        }
-    }
 }

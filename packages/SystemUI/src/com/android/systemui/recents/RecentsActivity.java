@@ -32,19 +32,19 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
-import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -57,7 +57,6 @@ import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -137,8 +136,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             try {
                 startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
             } catch (Exception e) {
-                Console.logError(RecentsActivity.this,
-                        getString(R.string.recents_launch_error_message, "Home"));
+                Log.e(TAG, getString(R.string.recents_launch_error_message, "Home"), e);
             }
         }
     }
@@ -345,7 +343,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Initialize the widget host (the host id is static and does not change)
         if (!Constants.DebugFlags.App.DisableSearchBar) {
-            mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
+            mAppWidgetHost = new RecentsAppWidgetHost(this, RecentsAppWidgetHost.HOST_ID);
         }
         mPackageMonitor = new RecentsPackageMonitor();
         mPackageMonitor.register(this);
@@ -357,6 +355,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        mRecentsView.getViewTreeObserver().addOnEnterAnimationCompleteListener(new ViewTreeObserver.OnEnterAnimationCompleteListener() {
+            @Override
+            public void onEnterAnimationComplete() {
+                System.out.println("ENTER ANIMATION COMPLETE");
+            }
+        });
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
 
@@ -573,10 +577,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
-
-    @Override
-    public void onTaskViewClicked() {
-    }
 
     @Override
     public void onTaskLaunchFailed() {

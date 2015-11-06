@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
@@ -32,24 +30,23 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
-import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
-import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
@@ -57,13 +54,15 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
+import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
+
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 
 /**
  * An implementation of the Recents component for the current user.  For secondary users, this can
@@ -164,7 +163,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     public RecentsImpl(Context context) {
         mContext = context;
         mHandler = new Handler();
-        mAppWidgetHost = new RecentsAppWidgetHost(mContext, Constants.Values.App.AppWidgetHostId);
+        mAppWidgetHost = new RecentsAppWidgetHost(mContext, RecentsAppWidgetHost.HOST_ID);
         Resources res = mContext.getResources();
         LayoutInflater inflater = LayoutInflater.from(mContext);
 
@@ -249,7 +248,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
                 startRecentsActivity(topTask, isTopTaskHome.value);
             }
         } catch (ActivityNotFoundException e) {
-            Console.logRawError("Failed to launch RecentAppsIntent", e);
+            Log.e(TAG, "Failed to launch RecentsActivity", e);
         }
     }
 
@@ -305,7 +304,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
                 mLastToggleTime = SystemClock.elapsedRealtime();
             }
         } catch (ActivityNotFoundException e) {
-            Console.logRawError("Failed to launch RecentAppsIntent", e);
+            Log.e(TAG, "Failed to launch RecentsActivity", e);
         }
     }
 

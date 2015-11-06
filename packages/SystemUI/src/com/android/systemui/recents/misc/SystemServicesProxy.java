@@ -124,7 +124,7 @@ public class SystemServicesProxy {
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mHasFreeformWorkspaceSupport = false && mPm.hasSystemFeature(
+        mHasFreeformWorkspaceSupport = true || mPm.hasSystemFeature(
                 PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
 
         // Get the dummy thumbnail width/heights
@@ -775,8 +775,7 @@ public class SystemServicesProxy {
                         taskId, INVALID_STACK_ID, options == null ? null : options.toBundle());
                 return true;
             } catch (Exception e) {
-                Console.logError(context,
-                        context.getString(R.string.recents_launch_error_message, taskName));
+                Log.e(TAG, context.getString(R.string.recents_launch_error_message, taskName), e);
             }
         }
         return false;

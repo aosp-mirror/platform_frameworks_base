@@ -26,6 +26,8 @@ import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEven
 /** Our special app widget host for the Search widget */
 public class RecentsAppWidgetHost extends AppWidgetHost {
 
+    public static final int HOST_ID = 1024;
+
     boolean mIsListening;
 
     public RecentsAppWidgetHost(Context context, int hostId) {

@@ -19,7 +19,6 @@ package com.android.systemui.recents;
 /**
  * The launch state of the RecentsActivity.
  *
- * TODO: We will be refactoring this out RecentsConfiguration.
  * Current Constraints:
  *  - needed in onStart() before onNewIntent()
  *  - needs to be reset when Recents is hidden

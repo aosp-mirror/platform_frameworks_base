@@ -64,8 +64,8 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
@@ -82,7 +82,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
-        public void onTaskViewClicked();
         public void onTaskLaunchFailed();
         public void onAllTaskViewsDismissed();
     }
@@ -575,10 +574,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
             final TaskStack stack, final Task task, final boolean lockToTask,
             final boolean boundsValid, final Rect bounds, int destinationStack) {
-        // Notify any callbacks of the launching of a new task
-        if (mCb != null) {
-            mCb.onTaskViewClicked();
-        }
 
         // Upfront the processing of the thumbnail
         TaskViewTransform transform = new TaskViewTransform();

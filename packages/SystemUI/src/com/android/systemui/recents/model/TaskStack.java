@@ -17,14 +17,12 @@
 package com.android.systemui.recents.model;
 
 import android.animation.ObjectAnimator;
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
-import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
