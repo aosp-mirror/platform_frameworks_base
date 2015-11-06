@@ -157,10 +157,10 @@ public class SurfaceView extends View {
     long mLastLockTime = 0;
 
     boolean mVisible = false;
-    int mWindowSpaceLeft = -1;
-    int mWindowSpaceTop = -1;
-    int mWindowSpaceWidth = -1;
-    int mWindowSpaceHeight = -1;
+    int mLeft = -1;
+    int mTop = -1;
+    int mWidth = -1;
+    int mHeight = -1;
     int mFormat = -1;
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
@@ -445,33 +445,32 @@ public class SurfaceView extends View {
         getLocationInWindow(mLocation);
         final boolean creating = mWindow == null;
         final boolean formatChanged = mFormat != mRequestedFormat;
-        final boolean sizeChanged = mWindowSpaceWidth != myWidth || mWindowSpaceHeight != myHeight;
+        final boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
         final boolean visibleChanged = mVisible != mRequestedVisible;
-        final boolean layoutSizeChanged = getWidth() != mLayout.width
-                || getHeight() != mLayout.height;
-        final boolean positionChanged = mWindowSpaceLeft != mLocation[0] || mWindowSpaceTop != mLocation[1];
+        final boolean layoutSizeChanged = getWidth() != mLayout.width || getHeight() != mLayout.height;
+        final boolean positionChanged = mLeft != mLocation[0] || mTop != mLocation[1];
 
         if (force || creating || formatChanged || sizeChanged || visibleChanged
-            || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded) {
+            || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded || layoutSizeChanged) {
             if (DEBUG) Log.i(TAG, "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
                     + " visible=" + visibleChanged
-                    + " left=" + (mWindowSpaceLeft != mLocation[0])
-                    + " top=" + (mWindowSpaceTop != mLocation[1]));
+                    + " left=" + (mLeft != mLocation[0])
+                    + " top=" + (mTop != mLocation[1]));
 
             try {
                 final boolean visible = mVisible = mRequestedVisible;
-                mWindowSpaceLeft = mLocation[0];
-                mWindowSpaceTop = mLocation[1];
-                mWindowSpaceWidth = myWidth;
-                mWindowSpaceHeight = myHeight;
+                mLeft = mLocation[0];
+                mTop = mLocation[1];
+                mWidth = myWidth;
+                mHeight = myHeight;
                 mFormat = mRequestedFormat;
 
                 // Scaling/Translate window's layout here because mLayout is not used elsewhere.
 
                 // Places the window relative
-                mLayout.x = mWindowSpaceLeft;
-                mLayout.y = mWindowSpaceTop;
+                mLayout.x = mLeft;
+                mLayout.y = mTop;
                 mLayout.width = getWidth();
                 mLayout.height = getHeight();
                 if (mTranslator != null) {
@@ -486,14 +485,6 @@ public class SurfaceView extends View {
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                               ;
-                if (!creating && !force && !mUpdateWindowNeeded) {
-                    mLayout.privateFlags |=
-                            WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY;
-                } else {
-                    mLayout.privateFlags &=
-                            ~WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY;
-                }
-
                 if (!getContext().getResources().getCompatibilityInfo().supportsScreen()) {
                     mLayout.privateFlags |=
                             WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
@@ -525,7 +516,7 @@ public class SurfaceView extends View {
                     if (DEBUG) Log.i(TAG, "Cur surface: " + mSurface);
 
                     relayoutResult = mSession.relayout(
-                        mWindow, mWindow.mSeq, mLayout, mWindowSpaceWidth, mWindowSpaceHeight,
+                        mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
                             visible ? VISIBLE : GONE,
                             WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY,
                             mWinFrame, mOverscanInsets, mContentInsets,
@@ -630,19 +621,11 @@ public class SurfaceView extends View {
                 TAG, "Layout: x=" + mLayout.x + " y=" + mLayout.y +
                 " w=" + mLayout.width + " h=" + mLayout.height +
                 ", frame=" + mSurfaceFrame);
-        } else if (positionChanged || layoutSizeChanged) { // Only the position has changed
-            mWindowSpaceLeft = mLocation[0];
-            mWindowSpaceTop = mLocation[1];
-            // For our size changed check, we keep mLayout.width and mLayout.height
-            // in view local space.
-            mLocation[0] = mLayout.width = getWidth();
-            mLocation[1] = mLayout.height = getHeight();
-
-            transformFromViewToWindowSpace(mLocation);
-
+        } else if (positionChanged) { // Only the position has changed
+            mLeft = mLocation[0];
+            mTop = mLocation[1];
             try {
-                mSession.repositionChild(mWindow, mWindowSpaceLeft, mWindowSpaceTop,
-                        mLocation[0], mLocation[1],
+                mSession.repositionChild(mWindow, mLeft, mTop,
                         viewRoot != null ? viewRoot.getNextFrameNumber() : -1,
                         mWinFrame);
             } catch (RemoteException ex) {
