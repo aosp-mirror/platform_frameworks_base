@@ -47,6 +47,7 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
@@ -74,7 +75,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     private final static String TAG = "RecentsImpl";
     private final static boolean DEBUG = false;
 
-    private final static int sMinToggleDelay = 350;
+    // The minimum amount of time between each recents button press that we will handle
+    private final static int MIN_TOGGLE_DELAY_MS = 350;
+    // The duration within which the user releasing the alt tab (from when they pressed alt tab)
+    // that the fast alt-tab animation will run.  If the user's alt-tab takes longer than this
+    // duration, then we will toggle recents after this duration.
+    private final static int FAST_ALT_TAB_DELAY_MS = 225;
 
     public final static String RECENTS_PACKAGE = "com.android.systemui";
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
@@ -155,6 +161,14 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     // Variables to keep track of if we need to start recents after binding
     boolean mTriggeredFromAltTab;
     long mLastToggleTime;
+    DozeTrigger mFastAltTabTrigger = new DozeTrigger(FAST_ALT_TAB_DELAY_MS, new Runnable() {
+        @Override
+        public void run() {
+            // When this fires, then the user has not released alt-tab for at least
+            // FAST_ALT_TAB_DELAY_MS milliseconds
+            showRecents(mTriggeredFromAltTab);
+        }
+    });
 
     Bitmap mThumbnailTransitionBitmapCache;
     Task mThumbnailTransitionBitmapCacheKey;
@@ -238,6 +252,29 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     @Override
     public void showRecents(boolean triggeredFromAltTab) {
         mTriggeredFromAltTab = triggeredFromAltTab;
+        if (mFastAltTabTrigger.hasTriggered()) {
+            // We are calling this from the doze trigger, so just fall through to show Recents
+            mFastAltTabTrigger.resetTrigger();
+        } else if (mFastAltTabTrigger.isDozing()) {
+            // We are dozing but haven't yet triggered, ignore this if this is not another alt-tab,
+            // otherwise, this is an additional tab (alt-tab*), which means that we should trigger
+            // immediately (fall through and disable the pending trigger)
+            // TODO: This is tricky, we need to handle the tab key, but Recents has not yet started
+            //       so we may actually additional signal to handle multiple quick tab cases.  The
+            //       severity of this is inversely proportional to the FAST_ALT_TAB_DELAY_MS
+            //       duration though
+            if (!triggeredFromAltTab) {
+                return;
+            }
+            mFastAltTabTrigger.stopDozing();
+        } else {
+            // Otherwise, the doze trigger is not running, and if this is an alt tab, we should
+            // start the trigger and then wait for the hide (or for it to elapse)
+            if (triggeredFromAltTab) {
+                mFastAltTabTrigger.startDozing();
+                return;
+            }
+        }
 
         try {
             // Check if the top task is in the home stack, and start the recents activity
@@ -255,6 +292,17 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mBootCompleted) {
+            if (triggeredFromAltTab && mFastAltTabTrigger.isDozing()) {
+                // The user has released alt-tab before the trigger has run, so just show the next
+                // task immediately
+                showNextTask();
+
+                // Cancel the fast alt-tab trigger
+                mFastAltTabTrigger.stopDozing();
+                mFastAltTabTrigger.resetTrigger();
+                return;
+            }
+
             // Defer to the activity to handle hiding recents, if it handles it, then it must still
             // be visible
             EventBus.getDefault().post(new HideRecentsEvent(triggeredFromAltTab,
@@ -264,6 +312,11 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
 
     @Override
     public void toggleRecents() {
+        // Skip this toggle if we are already waiting to trigger recents via alt-tab
+        if (mFastAltTabTrigger.isDozing()) {
+            return;
+        }
+
         mTriggeredFromAltTab = false;
 
         try {
@@ -282,7 +335,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
                     // better than showing a janky screenshot).
                     // NOTE: Ideally, the screenshot mechanism would take the window transform into
                     // account
-                    if ((SystemClock.elapsedRealtime() - mLastToggleTime) < sMinToggleDelay) {
+                    if ((SystemClock.elapsedRealtime() - mLastToggleTime) < MIN_TOGGLE_DELAY_MS) {
                         return;
                     }
 
@@ -295,7 +348,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
                 // better than showing a janky screenshot).
                 // NOTE: Ideally, the screenshot mechanism would take the window transform into
                 // account
-                if ((SystemClock.elapsedRealtime() - mLastToggleTime) < sMinToggleDelay) {
+                if ((SystemClock.elapsedRealtime() - mLastToggleTime) < MIN_TOGGLE_DELAY_MS) {
                     return;
                 }
 
@@ -334,10 +387,58 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         // Do nothing
     }
 
-    public void showRelativeAffiliatedTask(boolean showNextTask) {
-        // Return early if there is no focused stack
+    /**
+     * Transitions to the next recent task in the stack.
+     */
+    public void showNextTask() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        int focusedStackId = ssp.getFocusedStack();
+        RecentsTaskLoader loader = Recents.getTaskLoader();
+        RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
+        loader.preloadTasks(plan, true /* isTopTaskHome */);
+        TaskStack focusedStack = plan.getTaskStack();
+
+        // Return early if there are no tasks in the focused stack
+        if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
+
+        ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
+        // Return early if there is no running task
+        if (runningTask == null) return;
+        // Return early if the running task is in the home stack (optimization)
+        if (SystemServicesProxy.isHomeStack(runningTask.stackId)) return;
+
+        // Find the task in the recents list
+        ArrayList<Task> tasks = focusedStack.getTasks();
+        Task toTask = null;
+        ActivityOptions launchOpts = null;
+        int taskCount = tasks.size();
+        for (int i = taskCount - 1; i >= 1; i--) {
+            Task task = tasks.get(i);
+            if (task.key.id == runningTask.id) {
+                toTask = tasks.get(i - 1);
+                launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                        R.anim.recents_launch_prev_affiliated_task_target,
+                        R.anim.recents_launch_prev_affiliated_task_source);
+                break;
+            }
+        }
+
+        // Return early if there is no next task
+        if (toTask == null) {
+            ssp.startInPlaceAnimationOnFrontMostApplication(
+                    ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                            R.anim.recents_launch_prev_affiliated_task_bounce));
+            return;
+        }
+
+        // Launch the task
+        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.activityLabel, launchOpts);
+    }
+
+    /**
+     * Transitions to the next affiliated task.
+     */
+    public void showRelativeAffiliatedTask(boolean showNextTask) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);

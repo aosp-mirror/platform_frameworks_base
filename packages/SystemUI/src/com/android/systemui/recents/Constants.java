@@ -21,6 +21,7 @@ package com.android.systemui.recents;
  */
 public class Constants {
 
+    // TODO: Move into RecentsMetrics
     public static class Metrics {
         // DO NOT MODIFY THE ORDER OF THESE METRICS
         public static final int DismissSourceKeyboard = 0;
@@ -28,6 +29,7 @@ public class Constants {
         public static final int DismissSourceHeaderButton = 2;
     }
 
+    // TODO: Move into RecentsDebugFlags
     public static class DebugFlags {
 
         public static class App {
@@ -37,7 +39,7 @@ public class Constants {
             public static final boolean EnableTaskFiltering = false;
             // Enables dismiss-all
             public static final boolean EnableDismissAll = false;
-            // Enables fast-toggling
+            // Enables fast-toggling by just tapping on the recents button
             public static final boolean EnableFastToggleRecents = false;
             // Enables the thumbnail alpha on the front-most task
             public static final boolean EnableThumbnailAlphaOnFrontmost = false;

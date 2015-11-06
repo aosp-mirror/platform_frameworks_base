@@ -29,44 +29,53 @@ public class DozeTrigger {
     boolean mIsDozing;
     boolean mHasTriggered;
     int mDozeDurationMilliseconds;
-    Runnable mSleepRunnable;
+    Runnable mOnSleepRunnable;
 
     // Sleep-runnable
     Runnable mDozeRunnable = new Runnable() {
         @Override
         public void run() {
-            mSleepRunnable.run();
             mIsDozing = false;
             mHasTriggered = true;
+            mOnSleepRunnable.run();
         }
     };
 
-    public DozeTrigger(int dozeDurationMilliseconds, Runnable sleepRunnable) {
+    public DozeTrigger(int dozeDurationMilliseconds, Runnable onSleepRunnable) {
         mHandler = new Handler();
         mDozeDurationMilliseconds = dozeDurationMilliseconds;
-        mSleepRunnable = sleepRunnable;
+        mOnSleepRunnable = onSleepRunnable;
     }
 
-    /** Starts dozing. This also resets the trigger flag. */
+    /**
+     * Starts dozing and queues the onSleepRunnable to be called. This also resets the trigger flag.
+     */
     public void startDozing() {
         forcePoke();
         mHasTriggered = false;
     }
 
-    /** Stops dozing. */
+    /**
+     * Stops dozing and prevents the onSleepRunnable from being called.
+     */
     public void stopDozing() {
         mHandler.removeCallbacks(mDozeRunnable);
         mIsDozing = false;
     }
 
-    /** Poke this dozer to wake it up for a little bit, if it is dozing. */
+    /**
+     * Poke this dozer to wake it up if it is dozing, delaying the onSleepRunnable from being
+     * called for a for the doze duration.
+     */
     public void poke() {
         if (mIsDozing) {
             forcePoke();
         }
     }
 
-    /** Poke this dozer to wake it up for a little bit. */
+    /**
+     * Poke this dozer to wake it up even if it is not currently dozing.
+     */
     void forcePoke() {
         mHandler.removeCallbacks(mDozeRunnable);
         mHandler.postDelayed(mDozeRunnable, mDozeDurationMilliseconds);
