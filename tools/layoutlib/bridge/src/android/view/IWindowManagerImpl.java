@@ -535,6 +535,10 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void cancelTaskThumbnailTransition(int taskId) {
+    }
+
+    @Override
     public void endProlongedAnimations() {
     }
 }

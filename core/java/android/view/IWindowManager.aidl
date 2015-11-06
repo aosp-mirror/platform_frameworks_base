@@ -219,6 +219,11 @@ interface IWindowManager
      */
     void cancelTaskWindowTransition(int taskId);
 
+    /**
+     * Cancels the thumbnail transitions for the given task.
+     */
+    void cancelTaskThumbnailTransition(int taskId);
+
     // These can only be called with the SET_ORIENTATION permission.
     /**
      * Update the current screen rotation based on the current state of

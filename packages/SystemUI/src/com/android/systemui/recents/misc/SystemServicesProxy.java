@@ -363,6 +363,19 @@ public class SystemServicesProxy {
         }
     }
 
+    /**
+     * Cancels the current thumbnail transtion to/from Recents for the given task id.
+     */
+    public void cancelThumbnailTransition(int taskId) {
+        if (mWm == null) return;
+
+        try {
+            WindowManagerGlobal.getWindowManagerService().cancelTaskThumbnailTransition(taskId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
     /** Returns the top task thumbnail for the given task id */
     public Bitmap getTaskThumbnail(int taskId) {
         if (mAm == null) return null;

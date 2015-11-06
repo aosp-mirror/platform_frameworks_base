@@ -4690,6 +4690,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void cancelTaskThumbnailTransition(int taskId) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task != null) {
+                task.cancelTaskThumbnailTransition();
+            }
+        }
+    }
+
     public void addTask(int taskId, int stackId, boolean toTop) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG, "addTask: adding taskId=" + taskId

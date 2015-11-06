@@ -51,6 +51,7 @@ import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
@@ -105,6 +106,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     Interpolator mFastOutSlowInInterpolator;
 
     Rect mSystemInsets = new Rect();
+
 
     @GuardedBy("this")
     List<AppTransitionAnimationSpec> mAppTransitionAnimationSpecs;
@@ -244,6 +246,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.startExitToHomeAnimation(ctx);
         }
         ctx.postAnimationTrigger.decrement();
+
+        // If we are going home, cancel the previous task's window transition
+        EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
 
         // Notify of the exit animation
         EventBus.getDefault().send(new DismissRecentsToHomeAnimationStarted());
@@ -554,20 +559,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return new AppTransitionAnimationSpec(taskId, b, rect);
     }
 
-    /**
-     * Cancels any running window transitions for the launched task (the task animating into
-     * Recents).
-     */
-    private void cancelLaunchedTaskWindowTransition(final Task task) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        if (launchState.launchedToTaskId != -1 &&
-                launchState.launchedToTaskId != task.key.id) {
-            ssp.cancelWindowTransition(launchState.launchedToTaskId);
-        }
-    }
-
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override
@@ -605,7 +596,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 public void onAnimationStarted() {
                     // If we are launching into another task, cancel the previous task's
                     // window transition
-                    cancelLaunchedTaskWindowTransition(task);
+                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
 
                     if (lockToTask) {
                         // Request screen pinning after the animation runs

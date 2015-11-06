@@ -41,6 +41,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
+import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
@@ -355,12 +356,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mRecentsView.getViewTreeObserver().addOnEnterAnimationCompleteListener(new ViewTreeObserver.OnEnterAnimationCompleteListener() {
-            @Override
-            public void onEnterAnimationComplete() {
-                System.out.println("ENTER ANIMATION COMPLETE");
-            }
-        });
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
 
@@ -515,12 +510,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
                     // As we iterate to the next/previous task, cancel any current/lagging window
                     // transition animations
-                    RecentsConfiguration config = Recents.getConfiguration();
-                    RecentsActivityLaunchState launchState = config.getLaunchState();
-                    if (launchState.launchedToTaskId != -1) {
-                        SystemServicesProxy ssp = Recents.getSystemServices();
-                        ssp.cancelWindowTransition(launchState.launchedToTaskId);
-                    }
+                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
 
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
@@ -655,6 +645,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
         mRecentsView.setStackViewVisibility(View.VISIBLE);
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+    }
+
+    public final void onBusEvent(CancelEnterRecentsWindowAnimationEvent event) {
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        int launchToTaskId = launchState.launchedToTaskId;
+        if (launchToTaskId != -1 &&
+                (event.launchTask == null || launchToTaskId != event.launchTask.key.id)) {
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            ssp.cancelWindowTransition(launchState.launchedToTaskId);
+            ssp.cancelThumbnailTransition(getTaskId());
+        }
     }
 
     public final void onBusEvent(AppWidgetProviderChangedEvent event) {
