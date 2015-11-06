@@ -30,6 +30,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
+import android.util.MutableBoolean;
 import android.util.Printer;
 
 import java.text.SimpleDateFormat;
@@ -156,7 +157,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             long connectionPtr, long statementPtr);
     private static native long nativeExecuteForCursorWindow(
             long connectionPtr, long statementPtr, long windowPtr,
-            int startPos, int requiredPos, boolean countAllRows);
+            int startPos, int requiredPos, boolean countAllRows, MutableBoolean exhausted);
     private static native int nativeGetDbLookaside(long connectionPtr);
     private static native void nativeCancel(long connectionPtr);
     private static native void nativeResetCancel(long connectionPtr, boolean cancelable);
@@ -865,6 +866,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * so that it does.  Must be greater than or equal to <code>startPos</code>.
      * @param countAllRows True to count all rows that the query would return
      * regagless of whether they fit in the window.
+     * @param exhausted will be set to true if the full result set was consumed - never set to false
      * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @param cont Continuation cookie: lets us keep statements alive; may speed up future fills.
      * @return the number of rows that have been seen in this query so far. Might not be all rows
@@ -876,15 +878,16 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      */
     public int executeForCursorWindow(String sql, Object[] bindArgs,
             CursorWindow window, int startPos, int requiredPos, boolean countAllRows,
-            CancellationSignal cancellationSignal, SQLiteContinuation cont) {
+            MutableBoolean exhausted, CancellationSignal cancellationSignal,
+            SQLiteContinuation cont) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
-        if (window == null) {
-            throw new IllegalArgumentException("window must not be null.");
+        if (exhausted == null) {
+            throw new IllegalArgumentException("exhausted must not be null.");
         }
 
-        window.acquireReference();
+        if (window != null) window.acquireReference();
         try {
             int actualPos = -1;
             int countedRows = -1;
@@ -893,7 +896,13 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             final int cookie = mRecentOperations.beginOperation("executeForCursorWindow",
                     sql, bindArgs);
             try {
-                final PreparedStatement statement = acquirePreparedStatement(sql, requiredPos, cont);
+                final PreparedStatement statement;
+                if (window == null) {
+                    // don't care if the statement has already been stepped, just want the count
+                    statement = acquirePreparedStatement(sql, Integer.MAX_VALUE, cont);
+                } else {
+                    statement = acquirePreparedStatement(sql, requiredPos, cont);
+                }
                 boolean shouldReset = countAllRows; // might as well, if we're consuming everything
                 try {
                     throwIfStatementForbidden(statement);
@@ -911,15 +920,18 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                         // For a continuation, we may be past startPos. Don't worry, it'll be fine.
                         final int skip = Math.max(0, startPos - statementPos);
                         final int req = requiredPos - statementPos;
+                        final long winPtr = window == null ? 0 : window.mWindowPtr;
                         final long result = nativeExecuteForCursorWindow(
-                                mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
-                                skip, req, countAllRows);
+                                mConnectionPtr, statement.mStatementPtr, winPtr,
+                                skip, req, countAllRows, exhausted);
                         actualPos = statementPos + (int)(result >> 32);
                         countedRows = (int)result;
-                        filledRows = window.getNumRows();
-                        window.setStartPosition(actualPos);
-                        if (filledRows == countedRows) {
-                            // everything fit in the window; we've exhausted the result set
+                        if (window != null) {
+                            filledRows = window.getNumRows();
+                            window.setStartPosition(actualPos);
+                        }
+                        if (exhausted.value) {
+                            // we've exhausted the result set, no use keeping the query state around
                             shouldReset = true;
                         }
                         seenRows = statementPos + countedRows;
@@ -947,7 +959,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 }
             }
         } finally {
-            window.releaseReference();
+            if (window != null) window.releaseReference();
         }
     }
 
@@ -1289,8 +1301,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // We ignore the first row in the database list because it corresponds to
         // the main database which we have already described.
         CursorWindow window = new CursorWindow("collectDbStats");
+        MutableBoolean exh = new MutableBoolean(false);
         try {
-            executeForCursorWindow("PRAGMA database_list;", null, window, 0, 0, false, null, null);
+            executeForCursorWindow("PRAGMA database_list;", null, window, 0, 0, false, exh, null, null);
             for (int i = 1; i < window.getNumRows(); i++) {
                 String name = window.getString(i, 1);
                 String path = window.getString(i, 2);
