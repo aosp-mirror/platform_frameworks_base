@@ -292,7 +292,7 @@ public class ActivityInfo extends ComponentInfo
     /**
      * @hide Bit in {@link #flags}: If set, this activity may be launched into an
      * owned ActivityContainer such as that within an ActivityView. If not set and
-     * this activity is launched into such a container a SecurityExcception will be
+     * this activity is launched into such a container a SecurityException will be
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
      */
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
