@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
@@ -140,6 +141,15 @@ interface IWindowManager
     void overridePendingAppTransitionMultiThumb(in AppTransitionAnimationSpec[] specs,
             IRemoteCallback startedCallback, IRemoteCallback finishedCallback, boolean scaleUp);
     void overridePendingAppTransitionInPlace(String packageName, int anim);
+
+    /**
+     * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
+     * used for recents, where generating the thumbnails of the specs takes a non-trivial amount of
+     * time, so we want to move that off the critical path for starting the new activity.
+     */
+    void overridePendingAppTransitionMultiThumbFuture(
+            IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
+            boolean scaleUp);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
@@ -317,4 +327,16 @@ interface IWindowManager
      * @return The frame statistics or null if the window does not exist.
      */
     WindowContentFrameStats getWindowContentFrameStats(IBinder token);
+
+    /**
+     * @return the dock side the current docked stack is at; must be one of the
+     *         WindowManagerGlobal.DOCKED_* values
+     */
+    int getDockedStackSide();
+
+    /**
+     * Sets whether we are currently in a drag resize operation where we are changing the docked
+     * stack size.
+     */
+    void setDockedStackResizing(boolean resizing);
 }

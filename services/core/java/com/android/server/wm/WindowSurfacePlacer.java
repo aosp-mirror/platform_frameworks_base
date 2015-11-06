@@ -993,8 +993,7 @@ class WindowSurfacePlacer {
         }
 
         mService.mPolicy.finishLayoutLw();
-        mService.mH.obtainMessage(UPDATE_DOCKED_STACK_DIVIDER,
-                DOCK_DIVIDER_NO_FORCE_UPDATE, UNUSED, displayContent).sendToTarget();
+        mService.mH.sendEmptyMessage(UPDATE_DOCKED_STACK_DIVIDER);
     }
 
     /**
@@ -1258,6 +1257,12 @@ class WindowSurfacePlacer {
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;
                 }
+            }
+
+            // We also need to wait for the specs to be fetched, if needed.
+            if (mService.mAppTransition.isFetchingAppTransitionsSpecs()) {
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "isFetchingAppTransitionSpecs=true");
+                return false;
             }
 
             // If the wallpaper is visible, we need to check it's ready too.

@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS
 import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
+import static com.android.server.wm.WindowState.*;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 
@@ -1061,8 +1062,10 @@ class WindowStateAnimator {
         }
 
         final boolean fullscreen = w.isFullscreen(displayInfo.appWidth, displayInfo.appHeight);
+        final boolean isFreeformResizing =
+                w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
         final Rect clipRect = mTmpClipRect;
-        if (w.isDragResizing()) {
+        if (isFreeformResizing) {
             // When we're doing a drag-resizing, the surface is set up to cover full screen.
             // Set the clip rect to be the same size so that we don't get any scaling.
             clipRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
@@ -1091,7 +1094,7 @@ class WindowStateAnimator {
         // animation for docked window, otherwise the animating window will be suddenly cut off.
 
         if (!(mAnimator.mAnimating && w.inDockedWorkspace())) {
-            adjustCropToStackBounds(w, clipRect);
+            adjustCropToStackBounds(w, clipRect, isFreeformResizing);
         }
 
         w.transformFromScreenToSurfaceSpace(clipRect);
@@ -1102,7 +1105,7 @@ class WindowStateAnimator {
         }
     }
 
-    private void adjustCropToStackBounds(WindowState w, Rect clipRect) {
+    private void adjustCropToStackBounds(WindowState w, Rect clipRect, boolean isFreeformResizing) {
         final AppWindowToken appToken = w.mAppToken;
         final Task task = w.getTask();
         // We don't apply the the stack bounds to the window that is being replaced, because it was
@@ -1115,10 +1118,9 @@ class WindowStateAnimator {
             // When we resize we use the big surface approach, which means we can't trust the
             // window frame bounds anymore. Instead, the window will be placed at 0, 0, but to avoid
             // hardcoding it, we use surface coordinates.
-            final boolean isResizing = w.isDragResizing();
-            final int frameX = isResizing ? (int) mSurfaceController.getX() :
+            final int frameX = isFreeformResizing ? (int) mSurfaceController.getX() :
                     w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
-            final int frameY = isResizing ? (int) mSurfaceController.getY() :
+            final int frameY = isFreeformResizing ? (int) mSurfaceController.getY() :
                     w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
             // We need to do some acrobatics with surface position, because their clip region is
             // relative to the inside of the surface, but the stack bounds aren't.
@@ -1151,9 +1153,13 @@ class WindowStateAnimator {
             // so that we don't need to reallocate during the process. This also prevents
             // buffer drops due to size mismatch.
             final DisplayInfo displayInfo = w.getDisplayInfo();
-            if (displayInfo != null && w.isDragResizing()) {
+
+            // In freeform resize mode, put surface at 0/0.
+            if (w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM) {
                 left = 0;
                 top = 0;
+            }
+            if (displayInfo != null && w.isDragResizing()) {
                 width = displayInfo.logicalWidth;
                 height = displayInfo.logicalHeight;
             } else {

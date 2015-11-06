@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.app.ActivityOptions;
+import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -30,6 +31,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,6 +40,8 @@ import android.view.WindowManagerGlobal;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
@@ -81,7 +85,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void onTaskViewClicked();
         public void onTaskLaunchFailed();
         public void onAllTaskViewsDismissed();
-        public void runAfterPause(Runnable r);
     }
 
     LayoutInflater mInflater;
@@ -103,6 +106,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     Interpolator mFastOutSlowInInterpolator;
 
     Rect mSystemInsets = new Rect();
+
+    @GuardedBy("this")
+    List<AppTransitionAnimationSpec> mAppTransitionAnimationSpecs;
 
     public RecentsView(Context context) {
         super(context);
@@ -412,56 +418,37 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
-    private void postDrawHeaderThumbnailTransitionRunnable(final TaskStackView view,
-            final TaskView clickedView, final int offsetX, final int offsetY,
-            final float stackScroll,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener,
-            final int destinationStack) {
-        Runnable r = new Runnable() {
+    private IAppTransitionAnimationSpecsFuture getAppTransitionFuture(final TaskStackView stackView,
+            final TaskView clickedTask, final int offsetX, final int offsetY,
+            final float stackScroll, final int destinationStack) {
+        return new IAppTransitionAnimationSpecsFuture.Stub() {
             @Override
-            public void run() {
-                overrideDrawHeaderThumbnailTransition(view, clickedView, offsetX, offsetY,
-                        stackScroll, animStartedListener, destinationStack);
-
-            }
-        };
-
-        mCb.runAfterPause(r);
-    }
-
-    private void overrideDrawHeaderThumbnailTransition(TaskStackView stackView,
-            TaskView clickedTask, int offsetX, int offsetY, float stackScroll,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener,
-            int destinationStack) {
-        List<AppTransitionAnimationSpec> specs = getAppTransitionAnimationSpecs(stackView,
-                clickedTask, offsetX, offsetY, stackScroll, destinationStack);
-        if (specs == null) {
-            return;
-        }
-
-        IRemoteCallback.Stub callback = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) throws RemoteException {
+            public AppTransitionAnimationSpec[] get() throws RemoteException {
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        if (animStartedListener != null) {
-                            animStartedListener.onAnimationStarted();
+                        synchronized (RecentsView.this) {
+                            mAppTransitionAnimationSpecs = getAppTransitionAnimationSpecs(stackView,
+                                    clickedTask, offsetX, offsetY, stackScroll, destinationStack);
+                            RecentsView.this.notifyAll();
                         }
                     }
                 });
+                synchronized (RecentsView.this) {
+                    while (mAppTransitionAnimationSpecs == null) {
+                        try {
+                            RecentsView.this.wait();
+                        } catch (InterruptedException e) {}
+                    }
+                    if (mAppTransitionAnimationSpecs == null) {
+                        return null;
+                    }
+                    AppTransitionAnimationSpec[] specs
+                            = new AppTransitionAnimationSpec[mAppTransitionAnimationSpecs.size()];
+                    return mAppTransitionAnimationSpecs.toArray(specs);
+                }
             }
         };
-
-        AppTransitionAnimationSpec[] specsArray =
-                new AppTransitionAnimationSpec[specs.size()];
-        try {
-            WindowManagerGlobal.getWindowManagerService().overridePendingAppTransitionMultiThumb(
-                    specs.toArray(specsArray), callback, null, true /* scaleUp */);
-
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error overriding app transition", e);
-        }
     }
 
     private List<AppTransitionAnimationSpec> getAppTransitionAnimationSpecs(TaskStackView stackView,
@@ -613,8 +600,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Compute the thumbnail to scale up from
         final SystemServicesProxy ssp = Recents.getSystemServices();
         boolean screenPinningRequested = false;
-        ActivityOptions opts = null;
+        ActivityOptions opts = ActivityOptions.makeBasic();
         ActivityOptions.OnAnimationStartedListener animStartedListener = null;
+        final IAppTransitionAnimationSpecsFuture transitionFuture;
         if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
                 task.thumbnail.getHeight() > 0) {
             animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
@@ -636,21 +624,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 }
             };
-            postDrawHeaderThumbnailTransitionRunnable(stackView, tv, offsetX, offsetY, stackScroll,
-                    animStartedListener, destinationStack);
-            opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
-                    Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
-                    offsetX, offsetY, (int) transform.rect.width(), (int) transform.rect.height(),
-                    sourceView.getHandler(), animStartedListener);
+            transitionFuture = getAppTransitionFuture(stackView, tv, offsetX, offsetY, stackScroll,
+                    destinationStack);
             screenPinningRequested = true;
         } else {
-            opts = ActivityOptions.makeBasic();
+            transitionFuture = null;
         }
         if (boundsValid) {
             opts.setBounds(bounds.isEmpty() ? null : bounds);
         }
         final ActivityOptions launchOpts = opts;
         final boolean finalScreenPinningRequested = screenPinningRequested;
+        final OnAnimationStartedListener finalAnimStartedListener = animStartedListener;
         final Runnable launchRunnable = new Runnable() {
             @Override
             public void run() {
@@ -676,6 +661,28 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
                         // Keep track of failed launches
                         MetricsLogger.count(getContext(), "overview_task_launch_failed", 1);
+                    }
+                }
+                if (transitionFuture != null) {
+                    IRemoteCallback.Stub callback = new IRemoteCallback.Stub() {
+                        @Override
+                        public void sendResult(Bundle data) throws RemoteException {
+                            post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (finalAnimStartedListener != null) {
+                                        finalAnimStartedListener.onAnimationStarted();
+                                    }
+                                }
+                            });
+                        }
+                    };
+                    try {
+                        WindowManagerGlobal.getWindowManagerService()
+                                .overridePendingAppTransitionMultiThumbFuture(transitionFuture,
+                                        callback, true /* scaleUp */);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Failed to override transition: " + e);
                     }
                 }
             }

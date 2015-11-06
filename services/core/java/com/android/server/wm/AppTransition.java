@@ -49,9 +49,11 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -71,6 +73,8 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 // State management of app transitions.  When we are preparing for a
 // transition, mNextAppTransition will be the kind of transition to
@@ -168,6 +172,8 @@ public class AppTransition implements Dump {
     // Keyed by task id.
     private final SparseArray<AppTransitionAnimationSpec> mNextAppTransitionAnimationsSpecs
             = new SparseArray<>();
+    private IAppTransitionAnimationSpecsFuture mNextAppTransitionAnimationsSpecsFuture;
+    private boolean mNextAppTransitionAnimationsSpecsPending;
     private AppTransitionAnimationSpec mDefaultNextAppTransitionAnimationSpec;
 
     private Rect mNextAppTransitionInsets = new Rect();
@@ -200,10 +206,16 @@ public class AppTransition implements Dump {
     private int mCurrentUserId = 0;
 
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
+    private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
+    private final Object mServiceLock;
+    private final WindowSurfacePlacer mWindowSurfacePlacer;
 
-    AppTransition(Context context, Handler h) {
+    AppTransition(Context context, Handler h, Object serviceLock,
+            WindowSurfacePlacer windowSurfacePlacer) {
         mContext = context;
         mH = h;
+        mServiceLock = serviceLock;
+        mWindowSurfacePlacer = windowSurfacePlacer;
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -262,6 +274,7 @@ public class AppTransition implements Dump {
 
     void setReady() {
         mAppTransitionState = APP_STATE_READY;
+        fetchAppTransitionSpecsFromFuture();
     }
 
     boolean isRunning() {
@@ -294,6 +307,14 @@ public class AppTransition implements Dump {
     /** Returns whether the next thumbnail transition is scaling up. */
     boolean isNextThumbnailTransitionScaleUp() {
         return mNextAppTransitionScaleUp;
+    }
+
+    /**
+     * @return true if and only if we are currently fetching app transition specs from the future
+     *         passed into {@link #overridePendingAppTransitionMultiThumbFuture}
+     */
+    boolean isFetchingAppTransitionsSpecs() {
+        return mNextAppTransitionAnimationsSpecsPending;
     }
 
     private boolean prepare() {
@@ -1408,6 +1429,24 @@ public class AppTransition implements Dump {
         }
     }
 
+    void overridePendingAppTransitionMultiThumbFuture(
+            IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
+            boolean scaleUp) {
+        if (isTransitionSet()) {
+            mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
+                    : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
+            mNextAppTransitionPackage = null;
+            mDefaultNextAppTransitionAnimationSpec = null;
+            mNextAppTransitionAnimationsSpecs.clear();
+            mNextAppTransitionAnimationsSpecsFuture = specsFuture;
+            mNextAppTransitionScaleUp = scaleUp;
+            postAnimationCallback();
+            mNextAppTransitionCallback = callback;
+        } else {
+            postAnimationCallback();
+        }
+    }
+
     void overrideInPlaceAppTransition(String packageName, int anim) {
         if (isTransitionSet()) {
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE;
@@ -1416,6 +1455,35 @@ public class AppTransition implements Dump {
             mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
+        }
+    }
+
+    /**
+     * If a future is set for the app transition specs, fetch it in another thread.
+     */
+    private void fetchAppTransitionSpecsFromFuture() {
+        if (mNextAppTransitionAnimationsSpecsFuture != null) {
+            mNextAppTransitionAnimationsSpecsPending = true;
+            final IAppTransitionAnimationSpecsFuture future
+                    = mNextAppTransitionAnimationsSpecsFuture;
+            mNextAppTransitionAnimationsSpecsFuture = null;
+            mDefaultExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    AppTransitionAnimationSpec[] specs = null;
+                    try {
+                        specs = future.get();
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to fetch app transition specs: " + e);
+                    }
+                    synchronized (mServiceLock) {
+                        mNextAppTransitionAnimationsSpecsPending = false;
+                        overridePendingAppTransitionMultiThumb(specs, mNextAppTransitionCallback,
+                                null /* finishedCallback */, mNextAppTransitionScaleUp);
+                        mWindowSurfacePlacer.requestTraversal();
+                    }
+                }
+            });
         }
     }
 

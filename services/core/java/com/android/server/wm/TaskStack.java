@@ -16,16 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
-import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
-import static com.android.server.wm.WindowManagerService.TAG;
-
-import android.annotation.IntDef;
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -39,9 +29,19 @@ import android.view.Surface;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
+import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
+import static com.android.server.wm.WindowManagerService.TAG;
 
 public class TaskStack implements DimLayer.DimLayerUser {
 
@@ -85,21 +85,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
-
-    static final int DOCKED_INVALID = -1;
-    static final int DOCKED_LEFT = 1;
-    static final int DOCKED_TOP = 2;
-    static final int DOCKED_RIGHT = 3;
-    static final int DOCKED_BOTTOM = 4;
-
-    @IntDef({
-            DOCKED_INVALID,
-            DOCKED_LEFT,
-            DOCKED_TOP,
-            DOCKED_RIGHT,
-            DOCKED_BOTTOM})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface DockSide {}
 
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
@@ -401,7 +386,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
                     == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(mTmpRect, bounds, mStackId, mTmpRect2,
-                    mDisplayContent.mDividerControllerLocked.getWidth(),
+                    mDisplayContent.mDividerControllerLocked.getContentWidth(),
                     dockedOnTopOrLeft);
         }
 
@@ -435,7 +420,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
             return;
         }
 
-        @DockSide
         final int dockedSide = dockedStack.getDockSide();
         if (dockedSide == DOCKED_INVALID) {
             // Not sure how you got here...Only thing we can do is return current bounds.
@@ -446,9 +430,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
         mDisplayContent.getLogicalDisplayRect(mTmpRect);
         dockedStack.getRawBounds(mTmpRect2);
-        final boolean dockedOnTopOrLeft = dockedSide == DOCKED_TOP || dockedSide == DOCKED_LEFT;
+        final boolean dockedOnTopOrLeft = dockedSide == DOCKED_TOP
+                || dockedSide == DOCKED_LEFT;
         getStackDockedModeBounds(mTmpRect, outBounds, mStackId, mTmpRect2,
-                mDisplayContent.mDividerControllerLocked.getWidth(), dockedOnTopOrLeft);
+                mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
 
     }
 
@@ -519,7 +504,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
                     == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(bounds, bounds, FULLSCREEN_WORKSPACE_STACK_ID, dockedBounds,
-                    mDisplayContent.mDividerControllerLocked.getWidth(), dockedOnTopOrLeft);
+                    mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
         }
 
         final int count = mService.mStackIdToStack.size();
@@ -660,7 +645,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
     /**
      * For docked workspace provides information which side of the screen was the dock anchored.
      */
-    @DockSide
     int getDockSide() {
         if (mStackId != DOCKED_STACK_ID) {
             return DOCKED_INVALID;

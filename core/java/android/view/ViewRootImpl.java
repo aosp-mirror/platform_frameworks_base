@@ -287,6 +287,7 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingStableInsets = new Rect();
     final Rect mPendingContentInsets = new Rect();
     final Rect mPendingOutsets = new Rect();
+    final Rect mPendingBackDropFrame = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -1553,6 +1554,10 @@ public final class ViewRootImpl implements ViewParent,
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
         windowShouldResize |= mDragResizing;
 
+        // If the backdrop frame doesn't equal to a frame, we are starting a resize operation, so
+        // force it to be resized.
+        windowShouldResize |= !mPendingBackDropFrame.equals(mWinFrame);
+
         // Determine whether to compute insets.
         // If there are no inset listeners remaining then we may still need to compute
         // insets in case the old insets were non-empty and must be reset.
@@ -1733,7 +1738,7 @@ public final class ViewRootImpl implements ViewParent,
                         & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING) != 0;
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
-                        startDragResizing(frame);
+                        startDragResizing(mPendingBackDropFrame);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -3269,6 +3274,7 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingStableInsets.set((Rect) args.arg6);
                     mPendingVisibleInsets.set((Rect) args.arg3);
                     mPendingOutsets.set((Rect) args.arg7);
+                    mPendingBackDropFrame.set((Rect) args.arg8);
 
                     args.recycle();
 
@@ -3293,6 +3299,8 @@ public final class ViewRootImpl implements ViewParent,
                     mWinFrame.right = l + w;
                     mWinFrame.top = t;
                     mWinFrame.bottom = t + h;
+
+                    mPendingBackDropFrame.set(mWinFrame);
 
                     if (mView != null) {
                         forceLayout(mView);
@@ -5647,7 +5655,7 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig) {
+            Configuration newConfig, Rect backDropFrame) {
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -5658,7 +5666,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mDragResizing) {
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowSizeIsChanging(frame);
+                    mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame);
                 }
             }
         }
@@ -5679,6 +5687,7 @@ public final class ViewRootImpl implements ViewParent,
         args.arg5 = sameProcessCall ? new Rect(overscanInsets) : overscanInsets;
         args.arg6 = sameProcessCall ? new Rect(stableInsets) : stableInsets;
         args.arg7 = sameProcessCall ? new Rect(outsets) : outsets;
+        args.arg8 = sameProcessCall ? new Rect(backDropFrame) : backDropFrame;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -6677,11 +6686,11 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                Configuration newConfig) {
+                Configuration newConfig, Rect backDropFrame) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
-                        visibleInsets, stableInsets, outsets, reportDraw, newConfig);
+                        visibleInsets, stableInsets, outsets, reportDraw, newConfig, backDropFrame);
             }
         }
 

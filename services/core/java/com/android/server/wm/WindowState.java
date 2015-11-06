@@ -108,6 +108,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     static final boolean BOUNDS_FOR_TOUCH = true;
 
+    static final int DRAG_RESIZE_MODE_FREEFORM = 0;
+    static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
+
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -145,6 +148,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     boolean mDragResizing;
+    int mResizeMode;
 
     RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -725,7 +729,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleFrame.set(mContentFrame);
             mStableFrame.set(mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            mDisplayContent.mDividerControllerLocked.positionDockedStackedDivider(mFrame);
+            mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
             mContentFrame.set(mFrame);
         } else {
             mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
@@ -1836,15 +1840,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     @Override
                     public void run() {
                         try {
-                            mClient.resized(frame, overscanInsets, contentInsets,
-                                    visibleInsets, stableInsets, outsets, reportDraw, newConfig);
+                            dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
+                                    stableInsets, outsets, reportDraw, newConfig);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
                         }
                     }
                 });
             } else {
-                mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
+                dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
                         outsets, reportDraw, newConfig);
             }
 
@@ -1871,6 +1875,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mService.mWindowPlacerLocked.requestTraversal();
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
+            Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
+            Configuration newConfig) throws RemoteException {
+        DisplayInfo displayInfo = getDisplayInfo();
+        mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        boolean resizing = computeDragResizing();
+        mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
+                outsets, reportDraw, newConfig, inFreeformWorkspace() || !resizing
+                         ? frame : mTmpRect);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
@@ -1905,6 +1920,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDragResizing != computeDragResizing();
     }
 
+    int getResizeMode() {
+        return mResizeMode;
+    }
+
     private boolean computeDragResizing() {
         final Task task = getTask();
         if (task == null) {
@@ -1919,6 +1938,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void setDragResizing() {
         mDragResizing = computeDragResizing();
+        mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
+                ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
+                : DRAG_RESIZE_MODE_FREEFORM;
     }
 
     boolean isDragResizing() {

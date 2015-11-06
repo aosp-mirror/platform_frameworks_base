@@ -143,4 +143,7 @@
 
     <color name="fab_ripple">#1fffffff</color><!-- 12% white -->
     <color name="fab_shape">#ff009688</color><!-- Teal 500 -->
+
+    <color name="docked_divider_background">#ff000000</color>
+    <color name="docked_divider_handle">#ffffff</color>
 </resources>

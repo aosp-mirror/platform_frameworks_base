@@ -769,7 +769,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case RESIZE_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int stackId = data.readInt();
-            Rect r = Rect.CREATOR.createFromParcel(data);
+            final boolean hasRect = data.readInt() != 0;
+            Rect r = null;
+            if (hasRect) {
+                r = Rect.CREATOR.createFromParcel(data);
+            }
             final boolean allowResizeInDockedMode = data.readInt() == 1;
             resizeStack(stackId, r, allowResizeInDockedMode);
             reply.writeNoException();
@@ -3590,7 +3594,12 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(stackId);
-        r.writeToParcel(data, 0);
+        if (r != null) {
+            data.writeInt(1);
+            r.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         data.writeInt(allowResizeInDockedMode ? 1 : 0);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
         reply.readException();

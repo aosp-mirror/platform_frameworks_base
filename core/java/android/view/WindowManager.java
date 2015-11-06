@@ -50,6 +50,18 @@ import android.util.Log;
  * @see android.content.Context#WINDOW_SERVICE
  */
 public interface WindowManager extends ViewManager {
+
+    /** @hide */
+    int DOCKED_INVALID = -1;
+    /** @hide */
+    int DOCKED_LEFT = 1;
+    /** @hide */
+    int DOCKED_TOP = 2;
+    /** @hide */
+    int DOCKED_RIGHT = 3;
+    /** @hide */
+    int DOCKED_BOTTOM = 4;
+
     /**
      * Exception that is thrown when trying to add view whose
      * {@link LayoutParams} {@link LayoutParams#token}
