@@ -124,7 +124,7 @@ public class SystemServicesProxy {
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mHasFreeformWorkspaceSupport = true || mPm.hasSystemFeature(
+        mHasFreeformWorkspaceSupport = false && mPm.hasSystemFeature(
                 PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
 
         // Get the dummy thumbnail width/heights
