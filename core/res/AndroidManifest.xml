@@ -1831,6 +1831,12 @@
     <permission android:name="android.permission.STATUS_BAR_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to bind to third party quick settings tiles.
+         <p>Should only be requested by the System, should be required by
+         QSTileService declarations.-->
+    <permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to force a BACK operation on whatever is the
          top activity.
          <p>Not for use by third-party applications.

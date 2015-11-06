@@ -166,7 +166,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         state.contentDescription = mContext.getString(
                 R.string.accessibility_quick_settings_wifi,
                 signalContentDescription);
-        String wifiName = state.label;
+        CharSequence wifiName = state.label;
         if (state.connected) {
             wifiName = r.getString(R.string.accessibility_wifi_name, state.label);
         }

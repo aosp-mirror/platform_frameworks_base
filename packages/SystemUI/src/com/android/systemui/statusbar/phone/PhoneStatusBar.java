@@ -927,7 +927,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
             mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
             mHeader.setQSPanel(mQSPanel);
-            qsh.setCallback(new QSTileHost.Callback() {
+            qsh.addCallback(new QSTileHost.Callback() {
                 @Override
                 public void onTilesChanged() {
                     mQSPanel.setTiles(qsh.getTiles());

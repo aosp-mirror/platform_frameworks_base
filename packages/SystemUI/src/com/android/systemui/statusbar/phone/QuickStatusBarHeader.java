@@ -192,7 +192,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 host.getBatteryController());
         mHeaderQsPanel.setHost(myHost);
         mHeaderQsPanel.setTiles(myHost.getTiles());
-        myHost.setCallback(new QSTile.Host.Callback() {
+        myHost.addCallback(new QSTile.Host.Callback() {
             @Override
             public void onTilesChanged() {
                 mHeaderQsPanel.setTiles(myHost.getTiles());

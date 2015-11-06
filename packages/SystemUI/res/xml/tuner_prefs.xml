@@ -21,10 +21,6 @@
     <PreferenceScreen
         android:title="@string/quick_settings">
 
-        <Preference
-            android:key="qs_tuner"
-            android:title="@string/qs_rearrange" />
-
         <PreferenceCategory
             android:title="@string/experimental">
 

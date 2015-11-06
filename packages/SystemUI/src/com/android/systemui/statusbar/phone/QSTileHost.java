@@ -17,18 +17,56 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
+import android.os.RemoteException;
+import android.service.quicksettings.IQSService;
+import android.service.quicksettings.Tile;
 import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.tiles.*;
-import com.android.systemui.statusbar.policy.*;
+import com.android.systemui.qs.tiles.AirplaneModeTile;
+import com.android.systemui.qs.tiles.BatteryTile;
+import com.android.systemui.qs.tiles.BluetoothTile;
+import com.android.systemui.qs.tiles.CastTile;
+import com.android.systemui.qs.tiles.CellularTile;
+import com.android.systemui.qs.tiles.ColorInversionTile;
+import com.android.systemui.qs.tiles.CustomTile;
+import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.HotspotTile;
+import com.android.systemui.qs.tiles.IntentTile;
+import com.android.systemui.qs.tiles.LocationTile;
+import com.android.systemui.qs.tiles.QAirplaneTile;
+import com.android.systemui.qs.tiles.QBluetoothTile;
+import com.android.systemui.qs.tiles.QFlashlightTile;
+import com.android.systemui.qs.tiles.QLockTile;
+import com.android.systemui.qs.tiles.QRotationLockTile;
+import com.android.systemui.qs.tiles.QWifiTile;
+import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.qs.tiles.UserTile;
+import com.android.systemui.qs.tiles.WifiTile;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.systemui.statusbar.policy.SecurityController;
+import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -40,7 +78,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Platform implementation of the quick settings tile host **/
-public class QSTileHost implements QSTile.Host, Tunable {
+public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tunable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -65,7 +103,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final SecurityController mSecurity;
     private final BatteryController mBattery;
 
-    private Callback mCallback;
+    private final List<Callback> mCallbacks = new ArrayList<>();
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
@@ -107,8 +145,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     @Override
-    public void setCallback(Callback callback) {
-        mCallback = callback;
+    public void addCallback(Callback callback) {
+        mCallbacks.add(callback);
     }
 
     @Override
@@ -209,14 +247,14 @@ public class QSTileHost implements QSTile.Host, Tunable {
     public SecurityController getSecurityController() {
         return mSecurity;
     }
-    
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (!TILES_SETTING.equals(key)) {
             return;
         }
         if (DEBUG) Log.d(TAG, "Recreating tiles");
-        final List<String> tileSpecs = loadTileSpecs(newValue);
+        final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
         if (tileSpecs.equals(mTileSpecs)) return;
         for (Map.Entry<String, QSTile<?>> tile : mTiles.entrySet()) {
             if (!tileSpecs.contains(tile.getKey())) {
@@ -227,11 +265,15 @@ public class QSTileHost implements QSTile.Host, Tunable {
         final LinkedHashMap<String, QSTile<?>> newTiles = new LinkedHashMap<>();
         for (String tileSpec : tileSpecs) {
             if (mTiles.containsKey(tileSpec)) {
-                newTiles.put(tileSpec, mTiles.get(tileSpec));
+                QSTile<?> tile = mTiles.get(tileSpec);
+                if (DEBUG) Log.d(TAG, "Adding " + tile);
+                newTiles.put(tileSpec, tile);
             } else {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
-                    newTiles.put(tileSpec, createTile(tileSpec));
+                    QSTile<?> tile = createTile(tileSpec);
+                    tile.setTileSpec(tileSpec);
+                    newTiles.put(tileSpec, tile);
                 } catch (Throwable t) {
                     Log.w(TAG, "Error creating tile for spec: " + tileSpec, t);
                 }
@@ -241,9 +283,44 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mTileSpecs.addAll(tileSpecs);
         mTiles.clear();
         mTiles.putAll(newTiles);
-        if (mCallback != null) {
-            mCallback.onTilesChanged();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onTilesChanged();
         }
+    }
+
+    @Override
+    public void updateQsTile(Tile tile) throws RemoteException {
+        verifyCaller(tile.getComponentName().getPackageName());
+        CustomTile customTile = getTileForComponent(tile.getComponentName());
+        if (customTile != null) {
+            Log.d("TileService", "Got tile update for " + tile.getComponentName());
+            customTile.updateState(tile);
+            customTile.refreshState();
+        }
+    }
+
+    private void verifyCaller(String packageName) {
+        try {
+            int uid = mContext.getPackageManager().getPackageUid(packageName,
+                    Binder.getCallingUserHandle().getIdentifier());
+            if (Binder.getCallingUid() != uid) {
+                throw new SecurityException("Component outside caller's uid");
+            }
+        } catch (NameNotFoundException e) {
+            throw new SecurityException(e);
+        }
+    }
+
+    private CustomTile getTileForComponent(ComponentName component) {
+        // TODO: Build map for easier lookup.
+        for (QSTile<?> qsTile : mTiles.values()) {
+            if (qsTile instanceof CustomTile) {
+                if (((CustomTile) qsTile).getComponent().equals(component)) {
+                    return (CustomTile) qsTile;
+                }
+            }
+        }
+        return null;
     }
 
     public QSTile<?> createTile(String tileSpec) {
@@ -276,8 +353,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }
 
-    protected List<String> loadTileSpecs(String tileList) {
-        final Resources res = mContext.getResources();
+    public static List<String> loadTileSpecs(Context context, String tileList) {
+        final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
         if (tileList == null) {
             tileList = res.getString(R.string.quick_settings_tiles);

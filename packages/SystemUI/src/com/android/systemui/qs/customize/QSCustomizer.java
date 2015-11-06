@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.DragEvent;
@@ -71,11 +72,11 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private CustomQSPanel mQsPanel;
 
     private boolean isShown;
-    private CustomQSTileHost mHost;
     private DropButton mInfoButton;
     private DropButton mRemoveButton;
     private FloatingActionButton mFab;
     private SystemUIDialog mDialog;
+    private QSTileHost mHost;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
@@ -85,11 +86,11 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     public void setHost(QSTileHost host) {
-        mHost = new CustomQSTileHost(mContext, host);
-        mHost.setCallback(this);
+        mHost = host;
+        mHost.addCallback(this);
         mQsPanel.setTiles(mHost.getTiles());
         mQsPanel.setHost(mHost);
-        mHost.setSavedTiles();
+        mQsPanel.setSavedTiles();
     }
 
     @Override
@@ -129,7 +130,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void show(int x, int y) {
         isShown = true;
-        mHost.setSavedTiles();
+        mQsPanel.setSavedTiles();
         mPhoneStatusBar.getStatusBarWindow().addView(this);
         mQsPanel.setListening(true);
         mClipper.animateCircularClip(x, y, true, this);
@@ -150,7 +151,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         for (String tile : QSPagingSwitch.QS_PAGE_TILES.split(",")) {
             tiles.add(tile);
         }
-        mHost.setTiles(tiles);
+        mQsPanel.setTiles(tiles);
     }
 
     private void setDragging(boolean dragging) {
@@ -158,7 +159,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private void save() {
-        mHost.saveCurrentTiles();
+        Log.d("CustomQSPanel", "Save!");
+        mQsPanel.saveCurrentTiles();
         // TODO: At save button.
         hide(0, 0);
     }
@@ -167,6 +169,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case MENU_SAVE:
+                Log.d("CustomQSPanel", "Save...");
                 save();
                 break;
             case MENU_RESET:
@@ -179,7 +182,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     @Override
     public void onTileSelected(String spec) {
         if (mDialog != null) {
-            mHost.addTile(spec);
+            mQsPanel.addTile(spec);
             mDialog.dismiss();
         }
     }
@@ -203,9 +206,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void onDrop(View v, ClipData data) {
         if (v == mRemoveButton) {
-            mHost.remove(mQsPanel.getSpec(data));
+            mQsPanel.remove(mQsPanel.getSpec(data));
         } else if (v == mInfoButton) {
-            mHost.unstashTiles();
+            mQsPanel.unstashTiles();
             SystemUIDialog dialog = new SystemUIDialog(mContext);
             dialog.setTitle(mQsPanel.getSpec(data));
             dialog.setPositiveButton(R.string.ok, null);
@@ -220,7 +223,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                     android.R.style.Theme_Material_Dialog);
             View view = LayoutInflater.from(mContext).inflate(R.layout.qs_add_tiles_list, null);
             ListView listView = (ListView) view.findViewById(android.R.id.list);
-            TileAdapter adapter = new TileAdapter(mContext, mHost.getTiles(), mHost);
+            TileAdapter adapter = new TileAdapter(mContext, mQsPanel.getTiles(), mHost);
             adapter.setListener(this);
             listView.setDivider(null);
             listView.setDividerHeight(0);
