@@ -16,7 +16,6 @@
 
 #include <androidfw/ResourceTypes.h>
 
-#include "data/basic/R.h"
 #include "data/appaslib/R.h"
 
 #include <gtest/gtest.h>
@@ -25,29 +24,45 @@ using namespace android;
 
 namespace {
 
-#include "data/basic/basic_arsc.h"
+#include "data/appaslib/appaslib_arsc.h"
+#include "data/appaslib/appaslib_lib_arsc.h"
 
+// This tests the app resources loaded as app.
 TEST(AppAsLibTest, loadedAsApp) {
   ResTable table;
-  ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+  ASSERT_EQ(NO_ERROR, table.add(appaslib_arsc, appaslib_arsc_len));
 
   Res_value val;
-  ssize_t block = table.getResource(base::R::integer::number2, &val);
+  ssize_t block = table.getResource(appaslib::R::app::integer::number1, &val);
   ASSERT_GE(block, 0);
   ASSERT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
-  ASSERT_EQ(base::R::array::integerArray1, val.data);
+  ASSERT_EQ(appaslib::R::app::array::integerArray1, val.data);
 }
 
+// This tests the app resources loaded as shared-lib.
 TEST(AppAsLibTest, loadedAsSharedLib) {
   ResTable table;
   // Load as shared library.
-  ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len, NULL, 0, -1, false, true));
+  ASSERT_EQ(NO_ERROR, table.add(appaslib_arsc, appaslib_arsc_len, NULL, 0, -1, false, true));
 
   Res_value val;
-  ssize_t block = table.getResource(appaslib::R::integer::number2, &val);
+  ssize_t block = table.getResource(appaslib::R::lib::integer::number1, &val);
   ASSERT_GE(block, 0);
   ASSERT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
-  ASSERT_EQ(appaslib::R::array::integerArray1, val.data);
+  ASSERT_EQ(appaslib::R::lib::array::integerArray1, val.data);
+}
+
+// This tests the shared-lib loaded with appAsLib as true.
+TEST(AppAsLibTest, loadedSharedLib) {
+  ResTable table;
+  // Load shared library with appAsLib as true.
+  ASSERT_EQ(NO_ERROR, table.add(appaslib_lib_arsc, appaslib_lib_arsc_len, NULL, 0, -1, false, true));
+
+  Res_value val;
+  ssize_t block = table.getResource(appaslib::R::lib::integer::number1, &val);
+  ASSERT_GE(block, 0);
+  ASSERT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
+  ASSERT_EQ(appaslib::R::lib::array::integerArray1, val.data);
 }
 
 }

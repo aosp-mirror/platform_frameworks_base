@@ -19,19 +19,33 @@
 
 namespace appaslib {
 namespace R {
-
+namespace lib {
 namespace integer {
     enum {
-        number2     = 0x02040001,   // default
+        number1     = 0x02020000,   // default
     };
 }
 
 namespace array {
     enum {
-        integerArray1 = 0x02060000,   // default
+        integerArray1 = 0x02030000,   // default
+    };
+}
+} // namespace lib
+
+namespace app {
+namespace integer {
+    enum {
+        number1     = 0x7f020000,     // default
     };
 }
 
+namespace array {
+    enum {
+        integerArray1 = 0x7f030000,   // default
+    };
+}
+} // namespace app
 } // namespace R
 } // namespace appaslib
 
