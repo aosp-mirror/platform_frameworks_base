@@ -14,132 +14,110 @@
      limitations under the License.
 -->
 
-<com.android.documentsui.GridItem xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/grid_item_height"
+    android:layout_height="wrap_content"
     android:layout_margin="@dimen/grid_item_margin"
     android:background="@color/item_doc_grid_background"
     android:focusable="true">
 
-    <ImageView
-        android:id="@+id/icon_thumb"
+    <!-- Main item thumbnail.  Comprised of two overlapping images, the
+         visibility of which is controlled by code in
+         DirectoryFragment.java. -->
+    <FrameLayout
+        android:id="@+id/thumbnail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:contentDescription="@null" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp">
+      
+        <com.android.documentsui.GridItemThumbnail
+            android:id="@+id/icon_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null" />
+  
         <ImageView
             android:id="@+id/icon_mime"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:scaleType="centerInside"
             android:contentDescription="@null" />
+        
+    </FrameLayout>
+  
+    <!-- Item nameplate.  Has a mime-type icon and some text fields (title,
+         size, mod-time, etc). -->
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/thumbnail"
+        android:layout_toEndOf="@android:id/icon1"
+        android:singleLine="true"
+        android:ellipsize="middle"
+        android:textAlignment="viewStart"
+        android:paddingEnd="12dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        android:textColor="@*android:color/primary_text_default_material_light" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/item_doc_grid_protect_background"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+    <TextView
+        android:id="@+id/size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@android:id/title"
+        android:layout_toEndOf="@android:id/icon1"
+        android:paddingEnd="4dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textAlignment="viewStart"
+        android:textAppearance="@android:style/TextAppearance.Material.Caption"
+        android:textColor="@*android:color/primary_text_default_material_light" />
 
-            <LinearLayout
-                android:id="@+id/line1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
-                <TextView
-                    android:id="@android:id/title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    android:ellipsize="middle"
-                    android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-                    android:textColor="@*android:color/primary_text_default_material_dark" />
-
-                <ImageView
-                    android:id="@android:id/icon1"
-                    android:layout_width="@dimen/root_icon_size"
-                    android:layout_height="@dimen/root_icon_size"
-                    android:layout_marginStart="8dp"
-                    android:scaleType="centerInside"
-                    android:contentDescription="@null" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/line2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
-                <TextView
-                    android:id="@+id/date"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textColor="@*android:color/primary_text_default_material_dark" />
-
-                <TextView
-                    android:id="@+id/size"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:layout_marginStart="8dp"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textColor="@*android:color/primary_text_default_material_dark" />
-
-                <ImageView
-                    android:id="@android:id/icon2"
-                    android:layout_width="@dimen/root_icon_size"
-                    android:layout_height="@dimen/root_icon_size"
-                    android:layout_marginStart="8dp"
-                    android:scaleType="centerInside"
-                    android:contentDescription="@null"
-                    android:visibility="gone" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@android:id/title"
+        android:layout_toEndOf="@id/size"
+        android:paddingEnd="12dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textAlignment="viewStart"
+        android:textAppearance="@android:style/TextAppearance.Material.Caption"
+        android:textColor="@*android:color/primary_text_default_material_light" />
+    
     <ImageView
+        android:id="@android:id/icon1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_below="@id/thumbnail"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@id/size"
+        android:layout_alignTop="@android:id/title"
+        android:scaleType="centerInside"
+        android:contentDescription="@null"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp"/>
+
+    <!-- Use an explicit spacer so we can align things to it. -->
+    <Space
+        android:id="@+id/bottomPadding"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/item_doc_grid_overlay"
+        android:layout_height="8dp"
+        android:layout_below="@id/size" />
+
+    <!-- An overlay that draws the item border when it is focused. -->
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/bottomPadding"
+        android:layout_alignTop="@id/thumbnail"
+        android:layout_alignLeft="@id/thumbnail"
+        android:layout_alignRight="@id/thumbnail"
         android:contentDescription="@null"
         android:background="@drawable/item_doc_grid_border"
         android:duplicateParentState="true" />
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/item_doc_grid_overlay_icon"
-        android:scaleType="center"
-        android:contentDescription="@null"
-        android:duplicateParentState="true" />
-
-</com.android.documentsui.GridItem>
+</RelativeLayout>

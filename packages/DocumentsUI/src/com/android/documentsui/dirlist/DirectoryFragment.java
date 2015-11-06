@@ -1091,14 +1091,12 @@ public class DirectoryFragment extends Fragment {
 
             holder.setSelected(isSelected(position));
 
-            final View line1 = itemView.findViewById(R.id.line1);
             final View line2 = itemView.findViewById(R.id.line2);
 
             final ImageView iconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
             final ImageView iconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
             final TextView title = (TextView) itemView.findViewById(android.R.id.title);
             final ImageView icon1 = (ImageView) itemView.findViewById(android.R.id.icon1);
-            final ImageView icon2 = (ImageView) itemView.findViewById(android.R.id.icon2);
             final TextView summary = (TextView) itemView.findViewById(android.R.id.summary);
             final TextView date = (TextView) itemView.findViewById(R.id.date);
             final TextView size = (TextView) itemView.findViewById(R.id.size);
@@ -1151,13 +1149,14 @@ public class DirectoryFragment extends Fragment {
                         getDocumentIcon(mContext, docAuthority, docId, docMimeType, docIcon, state));
             }
 
-            boolean hasLine1 = false;
             boolean hasLine2 = false;
 
             final boolean hideTitle = (state.derivedMode == MODE_GRID) && mHideGridTitles;
             if (!hideTitle) {
                 title.setText(docDisplayName);
-                hasLine1 = true;
+                title.setVisibility(View.VISIBLE);
+            } else {
+                title.setVisibility(View.GONE);
             }
 
             Drawable iconDrawable = null;
@@ -1165,11 +1164,7 @@ public class DirectoryFragment extends Fragment {
                 // We've already had to enumerate roots before any results can
                 // be shown, so this will never block.
                 final RootInfo root = roots.getRootBlocking(docAuthority, docRootId);
-                if (state.derivedMode == MODE_GRID) {
-                    iconDrawable = root.loadGridIcon(mContext);
-                } else {
-                    iconDrawable = root.loadIcon(mContext);
-                }
+                iconDrawable = root.loadIcon(mContext);
 
                 if (summary != null) {
                     final boolean alwaysShowSummary = getResources()
@@ -1211,16 +1206,10 @@ public class DirectoryFragment extends Fragment {
             }
 
             if (icon1 != null) icon1.setVisibility(View.GONE);
-            if (icon2 != null) icon2.setVisibility(View.GONE);
 
             if (iconDrawable != null) {
-                if (hasLine1) {
-                    icon1.setVisibility(View.VISIBLE);
-                    icon1.setImageDrawable(iconDrawable);
-                } else {
-                    icon2.setVisibility(View.VISIBLE);
-                    icon2.setImageDrawable(iconDrawable);
-                }
+                icon1.setVisibility(View.VISIBLE);
+                icon1.setImageDrawable(iconDrawable);
             }
 
             if (docLastModified == -1) {
@@ -1242,9 +1231,6 @@ public class DirectoryFragment extends Fragment {
                 size.setVisibility(View.GONE);
             }
 
-            if (line1 != null) {
-                line1.setVisibility(hasLine1 ? View.VISIBLE : View.GONE);
-            }
             if (line2 != null) {
                 line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
             }
@@ -1254,7 +1240,6 @@ public class DirectoryFragment extends Fragment {
             iconMime.setAlpha(iconAlpha);
             iconThumb.setAlpha(iconAlpha);
             if (icon1 != null) icon1.setAlpha(iconAlpha);
-            if (icon2 != null) icon2.setAlpha(iconAlpha);
 
             if (DEBUG_ENABLE_DND) {
                 setupDragAndDropOnDocumentView(itemView, cursor);

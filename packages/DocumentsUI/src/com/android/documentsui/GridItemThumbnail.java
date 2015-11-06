@@ -18,22 +18,21 @@ package com.android.documentsui;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 /**
- * A FrameLayout subclass used by DirectoryFragment. Ensures that the resulting grid item is always
- * square.
+ * Ensures that grid thumbnails are always square.
  */
-public class GridItem extends FrameLayout {
-    public GridItem(Context context) {
+public class GridItemThumbnail extends ImageView {
+    public GridItemThumbnail(Context context) {
         super(context);
     }
 
-    public GridItem(Context context, AttributeSet attrs) {
+    public GridItemThumbnail(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public GridItem(Context context, AttributeSet attrs, int defStyle) {
+    public GridItemThumbnail(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

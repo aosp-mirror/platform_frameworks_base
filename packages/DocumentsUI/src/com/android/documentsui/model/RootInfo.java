@@ -249,15 +249,6 @@ public class RootInfo implements Durable, Parcelable {
         }
     }
 
-    public Drawable loadGridIcon(Context context) {
-        if (derivedIcon != 0) {
-            return IconUtils.applyTintAttr(context, derivedIcon,
-                    android.R.attr.textColorPrimaryInverse);
-        } else {
-            return IconUtils.loadPackageIcon(context, authority, icon);
-        }
-    }
-
     public Drawable loadToolbarIcon(Context context) {
         if (derivedIcon != 0) {
             return IconUtils.applyTintAttr(context, derivedIcon,
