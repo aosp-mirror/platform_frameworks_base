@@ -121,16 +121,19 @@ class Owners {
                 if (!legacy.delete()) {
                     Slog.e(TAG, "Failed to remove the legacy setting file");
                 }
-                return;
-            }
+            } else {
+                // No legacy file, read from the new format files.
+                new DeviceOwnerReadWriter().readFromFileLocked();
 
-            // No legacy file, read from the new format files.
-            new DeviceOwnerReadWriter().readFromFileLocked();
-
-            final List<UserInfo> users = mUserManager.getUsers();
-            for (UserInfo ui : users) {
-                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
+                final List<UserInfo> users = mUserManager.getUsers();
+                for (UserInfo ui : users) {
+                    new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
+                }
             }
+        }
+        if (hasDeviceOwner() && hasProfileOwner(getDeviceOwnerUserId())) {
+            Slog.w(TAG, String.format("User %d has both DO and PO, which is not supported",
+                    getDeviceOwnerUserId()));
         }
     }
 
@@ -216,6 +219,10 @@ class Owners {
 
     boolean hasDeviceOwner() {
         return mDeviceOwner != null;
+    }
+
+    boolean hasProfileOwner(int userId) {
+        return getProfileOwnerComponent(userId) != null;
     }
 
     /**

@@ -490,6 +490,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
 
+        // Try to set a profile owner on the same user, which should fail.
+        setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin2, /* refreshing= */ true, UserHandle.USER_SYSTEM);
+        try {
+            dpm.setProfileOwner(admin2, "owner-name", UserHandle.USER_SYSTEM);
+            fail("IllegalStateException not thrown");
+        } catch (IllegalStateException expected) {
+            assertTrue("Message was: " + expected.getMessage(),
+                    expected.getMessage().contains("already has a device owner"));
+        }
+
         // TODO Test getDeviceOwnerName() too.  To do so, we need to change
         // DPMS.getApplicationLabel() because Context.createPackageContextAsUser() is not mockable.
     }
@@ -509,6 +520,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             dpm.setDeviceOwner(new ComponentName("a.b.c", ".def"));
             fail("Didn't throw IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
+            assertTrue("Message was: " + expected.getMessage(),
+                    expected.getMessage().contains("Invalid component"));
         }
     }
 
@@ -597,6 +610,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetProfileOwner() throws Exception {
         setAsProfileOwner(admin1);
+
+        // Try setting DO on the same user, which should fail.
+        setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_UID);
+        dpm.setActiveAdmin(admin2, /* refreshing= */ true, DpmMockContext.CALLER_USER_HANDLE);
+        try {
+            dpm.setDeviceOwner(admin2, "owner-name", DpmMockContext.CALLER_USER_HANDLE);
+            fail("IllegalStateException not thrown");
+        } catch (IllegalStateException expected) {
+            assertTrue("Message was: " + expected.getMessage(),
+                    expected.getMessage().contains("already has a profile owner"));
+        }
     }
 
     public void testSetProfileOwner_failures() throws Exception {
