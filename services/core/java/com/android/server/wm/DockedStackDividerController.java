@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.content.Context;
 import android.graphics.Rect;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
@@ -65,8 +66,8 @@ public class DockedStackDividerController {
 
     void reevaluateVisibility() {
         if (mWindow == null) return;
-        boolean visible = mDisplayContent.getDockedStackLocked() != null;
-        if (visible) {
+        TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        if (stack != null && stack.isVisibleLocked()) {
             mWindow.showLw(true /* doAnimation */);
         } else {
             mWindow.hideLw(true /* doAnimation */);

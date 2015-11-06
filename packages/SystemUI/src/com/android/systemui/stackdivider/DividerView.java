@@ -44,6 +44,9 @@ import com.android.systemui.R;
 import com.android.systemui.stackdivider.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
+
 /**
  * Docked stack divider.
  */
@@ -111,6 +114,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 android.R.interpolator.fast_out_slow_in);
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.3f);
         updateDisplayInfo();
+        boolean landscape = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+        mHandle.setPointerShape(
+                landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW);
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
