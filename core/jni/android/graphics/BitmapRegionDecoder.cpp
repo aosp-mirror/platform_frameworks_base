@@ -39,14 +39,14 @@
 
 using namespace android;
 
-class SkBitmapRegionDecoder {
+class BitmapRegionDecoder {
 public:
-    SkBitmapRegionDecoder(SkImageDecoder* decoder, int width, int height) {
+    BitmapRegionDecoder(SkImageDecoder* decoder, int width, int height) {
         fDecoder = decoder;
         fWidth = width;
         fHeight = height;
     }
-    ~SkBitmapRegionDecoder() {
+    ~BitmapRegionDecoder() {
         delete fDecoder;
     }
 
@@ -91,7 +91,7 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream
         return nullObjectReturn("decoder->buildTileIndex returned false");
     }
 
-    SkBitmapRegionDecoder *bm = new SkBitmapRegionDecoder(decoder, width, height);
+    BitmapRegionDecoder *bm = new BitmapRegionDecoder(decoder, width, height);
     return GraphicsJNI::createBitmapRegionDecoder(env, bm);
 }
 
@@ -166,7 +166,7 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
  */
 static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
                                 jint start_x, jint start_y, jint width, jint height, jobject options) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    BitmapRegionDecoder *brd = reinterpret_cast<BitmapRegionDecoder*>(brdHandle);
     jobject tileBitmap = NULL;
     SkImageDecoder *decoder = brd->getDecoder();
     int sampleSize = 1;
@@ -245,17 +245,17 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    BitmapRegionDecoder *brd = reinterpret_cast<BitmapRegionDecoder*>(brdHandle);
     return static_cast<jint>(brd->getHeight());
 }
 
 static jint nativeGetWidth(JNIEnv* env, jobject, jlong brdHandle) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    BitmapRegionDecoder *brd = reinterpret_cast<BitmapRegionDecoder*>(brdHandle);
     return static_cast<jint>(brd->getWidth());
 }
 
 static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    BitmapRegionDecoder *brd = reinterpret_cast<BitmapRegionDecoder*>(brdHandle);
     delete brd;
 }
 

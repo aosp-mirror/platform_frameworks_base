@@ -439,7 +439,7 @@ int GraphicsJNI::getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
     return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
 }
 
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
+jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, BitmapRegionDecoder* bitmap)
 {
     SkASSERT(bitmap != NULL);
 

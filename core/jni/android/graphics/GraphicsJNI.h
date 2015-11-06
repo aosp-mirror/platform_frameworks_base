@@ -12,7 +12,7 @@
 #include <Canvas.h>
 #include <jni.h>
 
-class SkBitmapRegionDecoder;
+class BitmapRegionDecoder;
 class SkCanvas;
 
 namespace android {
@@ -90,7 +90,7 @@ public:
 
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
-    static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
+    static jobject createBitmapRegionDecoder(JNIEnv* env, BitmapRegionDecoder* bitmap);
 
     static android::Bitmap* allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable);
