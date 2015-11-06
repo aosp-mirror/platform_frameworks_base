@@ -44,7 +44,10 @@ RawString::RawString(const StringPool::Ref& ref) : value(ref) {
 }
 
 RawString* RawString::clone(StringPool* newPool) const {
-    return new RawString(newPool->makeRef(*value));
+    RawString* rs = new RawString(newPool->makeRef(*value));
+    rs->mComment = mComment;
+    rs->mSource = mSource;
+    return rs;
 }
 
 bool RawString::flatten(android::Res_value* outValue) const {
@@ -77,6 +80,8 @@ bool Reference::flatten(android::Res_value* outValue) const {
 
 Reference* Reference::clone(StringPool* /*newPool*/) const {
     Reference* ref = new Reference();
+    ref->mComment = mComment;
+    ref->mSource = mSource;
     ref->referenceType = referenceType;
     ref->name = name;
     ref->id = id;
@@ -111,7 +116,10 @@ bool Id::flatten(android::Res_value* out) const {
 }
 
 Id* Id::clone(StringPool* /*newPool*/) const {
-    return new Id();
+    Id* id = new Id();
+    id->mComment = mComment;
+    id->mSource = mSource;
+    return id;
 }
 
 void Id::print(std::ostream* out) const {
@@ -133,7 +141,10 @@ bool String::flatten(android::Res_value* outValue) const {
 }
 
 String* String::clone(StringPool* newPool) const {
-    return new String(newPool->makeRef(*value));
+    String* str = new String(newPool->makeRef(*value));
+    str->mComment = mComment;
+    str->mSource = mSource;
+    return str;
 }
 
 void String::print(std::ostream* out) const {
@@ -154,7 +165,10 @@ bool StyledString::flatten(android::Res_value* outValue) const {
 }
 
 StyledString* StyledString::clone(StringPool* newPool) const {
-    return new StyledString(newPool->makeRef(value));
+    StyledString* str = new StyledString(newPool->makeRef(value));
+    str->mComment = mComment;
+    str->mSource = mSource;
+    return str;
 }
 
 void StyledString::print(std::ostream* out) const {
@@ -175,7 +189,10 @@ bool FileReference::flatten(android::Res_value* outValue) const {
 }
 
 FileReference* FileReference::clone(StringPool* newPool) const {
-    return new FileReference(newPool->makeRef(*path));
+    FileReference* fr = new FileReference(newPool->makeRef(*path));
+    fr->mComment = mComment;
+    fr->mSource = mSource;
+    return fr;
 }
 
 void FileReference::print(std::ostream* out) const {
@@ -197,7 +214,10 @@ bool BinaryPrimitive::flatten(android::Res_value* outValue) const {
 }
 
 BinaryPrimitive* BinaryPrimitive::clone(StringPool* /*newPool*/) const {
-    return new BinaryPrimitive(value);
+    BinaryPrimitive* bp = new BinaryPrimitive(value);
+    bp->mComment = mComment;
+    bp->mSource = mSource;
+    return bp;
 }
 
 void BinaryPrimitive::print(std::ostream* out) const {
@@ -236,6 +256,8 @@ bool Attribute::isWeak() const {
 
 Attribute* Attribute::clone(StringPool* /*newPool*/) const {
     Attribute* attr = new Attribute(weak);
+    attr->mComment = mComment;
+    attr->mSource = mSource;
     attr->typeMask = typeMask;
     std::copy(symbols.begin(), symbols.end(), std::back_inserter(attr->symbols));
     return attr;
@@ -358,6 +380,8 @@ Style* Style::clone(StringPool* newPool) const {
     Style* style = new Style();
     style->parent = parent;
     style->parentInferred = parentInferred;
+    style->mComment = mComment;
+    style->mSource = mSource;
     for (auto& entry : entries) {
         style->entries.push_back(Entry{
                 entry.key,
@@ -390,6 +414,8 @@ static ::std::ostream& operator<<(::std::ostream& out, const Style::Entry& value
 
 Array* Array::clone(StringPool* newPool) const {
     Array* array = new Array();
+    array->mComment = mComment;
+    array->mSource = mSource;
     for (auto& item : items) {
         array->items.emplace_back(std::unique_ptr<Item>(item->clone(newPool)));
     }
@@ -404,6 +430,8 @@ void Array::print(std::ostream* out) const {
 
 Plural* Plural::clone(StringPool* newPool) const {
     Plural* p = new Plural();
+    p->mComment = mComment;
+    p->mSource = mSource;
     const size_t count = values.size();
     for (size_t i = 0; i < count; i++) {
         if (values[i]) {
@@ -423,6 +451,8 @@ static ::std::ostream& operator<<(::std::ostream& out, const std::unique_ptr<Ite
 
 Styleable* Styleable::clone(StringPool* /*newPool*/) const {
     Styleable* styleable = new Styleable();
+    styleable->mComment = mComment;
+    styleable->mSource = mSource;
     std::copy(entries.begin(), entries.end(), std::back_inserter(styleable->entries));
     return styleable;
 }

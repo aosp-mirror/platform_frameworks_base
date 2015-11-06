@@ -27,6 +27,9 @@
 
 namespace aapt {
 
+class AnnotationProcessor;
+class ClassDefinitionWriter;
+
 struct JavaClassGeneratorOptions {
     /*
      * Specifies whether to use the 'final' modifier
@@ -40,9 +43,6 @@ struct JavaClassGeneratorOptions {
         kPublic,
     };
 
-    /*
-     *
-     */
     SymbolTypes types = SymbolTypes::kAll;
 };
 
@@ -69,15 +69,16 @@ public:
     const std::string& getError() const;
 
 private:
-    bool generateType(const StringPiece16& packageNameToGenerate,
-                      const ResourceTablePackage* package,
-                      const ResourceTableType* type,
-                      std::ostream* out);
+    bool writeEntriesForClass(ClassDefinitionWriter* outClassDef,
+                              const StringPiece16& packageNameToGenerate,
+                              const ResourceTablePackage* package,
+                              const ResourceTableType* type);
 
-    void generateStyleable(const StringPiece16& packageNameToGenerate,
-                           const std::u16string& entryName,
-                           const Styleable* styleable,
-                           std::ostream* out);
+    void writeStyleableEntryForClass(ClassDefinitionWriter* outClassDef,
+                                     AnnotationProcessor* processor,
+                                     const StringPiece16& packageNameToGenerate,
+                                     const std::u16string& entryName,
+                                     const Styleable* styleable);
 
     bool skipSymbol(SymbolState state);
 

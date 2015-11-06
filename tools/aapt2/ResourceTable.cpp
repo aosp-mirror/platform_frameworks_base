@@ -284,7 +284,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
     }
 
     const auto endIter = entry->values.end();
-    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThan);
+    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThanConfig);
     if (iter == endIter || iter->config != config) {
         // This resource did not exist before, add it.
         entry->values.insert(iter, ResourceConfigValue{ config, std::move(value) });

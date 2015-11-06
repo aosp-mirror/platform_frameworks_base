@@ -122,7 +122,7 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
 
             for (ResourceConfigValue& srcValue : srcEntry->values) {
                 auto iter = std::lower_bound(dstEntry->values.begin(), dstEntry->values.end(),
-                                             srcValue.config, cmp::lessThan);
+                                             srcValue.config, cmp::lessThanConfig);
 
                 if (iter != dstEntry->values.end() && iter->config == srcValue.config) {
                     const int collisionResult = ResourceTable::resolveValueCollision(

@@ -56,13 +56,13 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
     std::string output = out.str();
 
     EXPECT_NE(std::string::npos,
-              output.find("public static final int hey_man = 0x01020000;"));
+              output.find("public static final int hey_man=0x01020000;"));
 
     EXPECT_NE(std::string::npos,
-              output.find("public static final int[] hey_dude = {"));
+              output.find("public static final int[] hey_dude={"));
 
     EXPECT_NE(std::string::npos,
-              output.find("public static final int hey_dude_cool_attr = 0;"));
+              output.find("public static final int hey_dude_cool_attr=0;"));
 }
 
 TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
@@ -78,7 +78,7 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
 
     std::string output = out.str();
     EXPECT_NE(std::string::npos, output.find("package com.android.internal;"));
-    EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
+    EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
     EXPECT_EQ(std::string::npos, output.find("two"));
     EXPECT_EQ(std::string::npos, output.find("com_foo$two"));
 }
@@ -86,6 +86,7 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
 TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId(u"android", 0x01)
+            .addSimple(u"@android:attr/two", ResourceId(0x01010001))
             .addSimple(u"@android:^attr-private/one", ResourceId(0x01010000))
             .build();
 
@@ -116,7 +117,7 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
         std::stringstream out;
         ASSERT_TRUE(generator.generate(u"android", &out));
         std::string output = out.str();
-        EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
         EXPECT_EQ(std::string::npos, output.find("two"));
         EXPECT_EQ(std::string::npos, output.find("three"));
     }
@@ -127,8 +128,8 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
         std::stringstream out;
         ASSERT_TRUE(generator.generate(u"android", &out));
         std::string output = out.str();
-        EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
-        EXPECT_NE(std::string::npos, output.find("public static final int two = 0x01020001;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int two=0x01020001;"));
         EXPECT_EQ(std::string::npos, output.find("three"));
     }
 
@@ -138,9 +139,9 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
         std::stringstream out;
         ASSERT_TRUE(generator.generate(u"android", &out));
         std::string output = out.str();
-        EXPECT_NE(std::string::npos, output.find("public static final int one = 0x01020000;"));
-        EXPECT_NE(std::string::npos, output.find("public static final int two = 0x01020001;"));
-        EXPECT_NE(std::string::npos, output.find("public static final int three = 0x01020002;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int two=0x01020001;"));
+        EXPECT_NE(std::string::npos, output.find("public static final int three=0x01020002;"));
     }
 }
 
@@ -194,8 +195,8 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
     EXPECT_TRUE(generator.generate(u"android", &out));
 
     std::string output = out.str();
-    EXPECT_NE(std::string::npos, output.find("int foo_bar ="));
-    EXPECT_NE(std::string::npos, output.find("int foo_com_lib_bar ="));
+    EXPECT_NE(std::string::npos, output.find("int foo_bar="));
+    EXPECT_NE(std::string::npos, output.find("int foo_com_lib_bar="));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
@@ -218,7 +219,7 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
      * @deprecated
      */
     @Deprecated
-    public static final int foo = 0x01010000;)EOF"));
+    public static final int foo=0x01010000;)EOF"));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {

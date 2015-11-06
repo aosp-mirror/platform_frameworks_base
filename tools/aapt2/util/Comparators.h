@@ -17,11 +17,18 @@
 #ifndef AAPT_UTIL_COMPARATORS_H
 #define AAPT_UTIL_COMPARATORS_H
 
+#include "ConfigDescription.h"
+#include "ResourceTable.h"
+
 namespace aapt {
 namespace cmp {
 
-inline bool lessThan(const ResourceConfigValue& a, const ConfigDescription& b) {
+inline bool lessThanConfig(const ResourceConfigValue& a, const ConfigDescription& b) {
     return a.config < b;
+}
+
+inline bool lessThanType(const std::unique_ptr<ResourceTableType>& a, ResourceType b) {
+    return a->type < b;
 }
 
 } // namespace cmp

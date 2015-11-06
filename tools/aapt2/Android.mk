@@ -80,6 +80,7 @@ testSources := \
 	util/StringPiece_test.cpp \
 	util/Util_test.cpp \
 	ConfigDescription_test.cpp \
+	java/AnnotationProcessor_test.cpp \
 	java/JavaClassGenerator_test.cpp \
 	java/ManifestClassGenerator_test.cpp \
 	Locale_test.cpp \
