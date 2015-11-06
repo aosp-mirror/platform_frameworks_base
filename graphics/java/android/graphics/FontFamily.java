@@ -18,6 +18,8 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 
+import java.util.List;
+
 /**
  * A family of typefaces with different styles.
  *
@@ -62,8 +64,9 @@ public class FontFamily {
         return nAddFont(mNativePtr, path, ttcIndex);
     }
 
-    public boolean addFontWeightStyle(String path, int ttcIndex, int weight, boolean style) {
-        return nAddFontWeightStyle(mNativePtr, path, ttcIndex, weight, style);
+    public boolean addFontWeightStyle(String path, int ttcIndex, List<FontListParser.Axis> axes,
+            int weight, boolean style) {
+        return nAddFontWeightStyle(mNativePtr, path, ttcIndex, axes, weight, style);
     }
 
     public boolean addFontFromAsset(AssetManager mgr, String path) {
@@ -74,7 +77,8 @@ public class FontFamily {
     private static native void nUnrefFamily(long nativePtr);
     private static native boolean nAddFont(long nativeFamily, String path, int ttcIndex);
     private static native boolean nAddFontWeightStyle(long nativeFamily, String path,
-            int ttcIndex, int weight, boolean isItalic);
+            int ttcIndex, List<FontListParser.Axis> listOfAxis,
+            int weight, boolean isItalic);
     private static native boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr,
             String path);
 }

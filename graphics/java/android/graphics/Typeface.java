@@ -17,7 +17,6 @@
 package android.graphics;
 
 import android.content.res.AssetManager;
-import android.graphics.FontListParser.Family;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
@@ -262,7 +261,8 @@ public class Typeface {
     private static FontFamily makeFamilyFromParsed(FontListParser.Family family) {
         FontFamily fontFamily = new FontFamily(family.lang, family.variant);
         for (FontListParser.Font font : family.fonts) {
-            fontFamily.addFontWeightStyle(font.fontName, font.ttcIndex, font.weight, font.isItalic);
+            fontFamily.addFontWeightStyle(font.fontName, font.ttcIndex, font.axes,
+                    font.weight, font.isItalic);
         }
         return fontFamily;
     }
@@ -284,7 +284,7 @@ public class Typeface {
             // Note that the default typeface is always present in the fallback list;
             // this is an enhancement from pre-Minikin behavior.
             for (int i = 0; i < fontConfig.families.size(); i++) {
-                Family f = fontConfig.families.get(i);
+                FontListParser.Family f = fontConfig.families.get(i);
                 if (i == 0 || f.name == null) {
                     familyList.add(makeFamilyFromParsed(f));
                 }
@@ -295,7 +295,7 @@ public class Typeface {
             Map<String, Typeface> systemFonts = new HashMap<String, Typeface>();
             for (int i = 0; i < fontConfig.families.size(); i++) {
                 Typeface typeface;
-                Family f = fontConfig.families.get(i);
+                FontListParser.Family f = fontConfig.families.get(i);
                 if (f.name != null) {
                     if (i == 0) {
                         // The first entry is the default typeface; no sense in
@@ -324,11 +324,11 @@ public class Typeface {
             Log.w(TAG, "Didn't create default family (most likely, non-Minikin build)", e);
             // TODO: normal in non-Minikin case, remove or make error when Minikin-only
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "Error opening " + configFilename);
+            Log.e(TAG, "Error opening " + configFilename, e);
         } catch (IOException e) {
-            Log.e(TAG, "Error reading " + configFilename);
+            Log.e(TAG, "Error reading " + configFilename, e);
         } catch (XmlPullParserException e) {
-            Log.e(TAG, "XML parse exception for " + configFilename);
+            Log.e(TAG, "XML parse exception for " + configFilename, e);
         }
     }
 
