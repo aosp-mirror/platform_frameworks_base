@@ -364,6 +364,10 @@ class WindowSurfaceController {
         return mSurfaceShown;
     }
 
+    void setShown(boolean surfaceShown) {
+        mSurfaceShown = surfaceShown;
+    }
+
     float getX() {
         return mSurfaceX;
     }

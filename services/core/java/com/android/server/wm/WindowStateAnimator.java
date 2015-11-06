@@ -102,7 +102,7 @@ class WindowStateAnimator {
      */
     boolean mSurfaceResized;
     WindowSurfaceController mSurfaceController;
-    WindowSurfaceController mPendingDestroySurface;
+    private WindowSurfaceController mPendingDestroySurface;
 
     /**
      * Set if the client has asked that the destroy of its surface be delayed
@@ -110,7 +110,7 @@ class WindowStateAnimator {
      */
     boolean mSurfaceDestroyDeferred;
 
-    boolean mDestroyPreservedSurfaceUponRedraw;
+    private boolean mDestroyPreservedSurfaceUponRedraw;
     float mShownAlpha = 0;
     float mAlpha = 0;
     float mLastAlpha = 0;
@@ -654,7 +654,7 @@ class WindowStateAnimator {
                         attrs.getTitle().toString(),
                         width, height, format, flags, this);
 
-                w.mHasSurface = true;
+                w.setHasSurface(true);
 
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                     Slog.i(TAG, "  CREATE SURFACE "
@@ -666,13 +666,13 @@ class WindowStateAnimator {
                             + " / " + this);
                 }
             } catch (OutOfResourcesException e) {
-                w.mHasSurface = false;
+                w.setHasSurface(false);
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
                 mDrawState = NO_SURFACE;
                 return null;
             } catch (Exception e) {
-                w.mHasSurface = false;
+                w.setHasSurface(false);
                 Slog.e(TAG, "Exception creating surface", e);
                 mDrawState = NO_SURFACE;
                 return null;
@@ -759,7 +759,14 @@ class WindowStateAnimator {
                     + ": " + e.toString());
             }
 
-            mWin.mHasSurface = false;
+            // Whether the surface was preserved (and copied to mPendingDestroySurface) or not, it
+            // needs to be cleared to match the WindowState.mHasSurface state. It is also necessary
+            // so it can be recreated successfully in mPendingDestroySurface case.
+            mWin.setHasSurface(false);
+            if (mSurfaceController != null) {
+                mSurfaceController.setShown(false);
+            }
+            mSurfaceController = null;
             mDrawState = NO_SURFACE;
         }
     }
