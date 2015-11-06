@@ -1291,6 +1291,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mConfigHasChanged = false;
     }
 
+    void setHasSurface(boolean hasSurface) {
+        mHasSurface = hasSurface;
+    }
+
     private final class DeadWindowEventReceiver extends InputEventReceiver {
         DeadWindowEventReceiver(InputChannel inputChannel) {
             super(inputChannel, mService.mH.getLooper());

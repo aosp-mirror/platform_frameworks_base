@@ -8859,7 +8859,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + " pid=" + ws.mSession.mPid
                                     + " uid=" + ws.mSession.mUid);
                             wsa.destroySurface();
-                            ws.mHasSurface = false;
+                            ws.setHasSurface(false);
                             mForceRemoves.add(ws);
                             leakedSurface = true;
                         } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
@@ -8869,7 +8869,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + " saved=" + ws.mAppToken.mHasSavedSurface);
                             if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
                             wsa.destroySurface();
-                            ws.mHasSurface = false;
+                            ws.setHasSurface(false);
                             ws.mAppToken.mHasSavedSurface = false;
                             leakedSurface = true;
                         }
@@ -8916,7 +8916,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) logSurface(winAnimator.mWin,
                             "RECOVER DESTROY", null);
                     surfaceController.destroyInTransaction();
-                    winAnimator.mWin.mHasSurface = false;
+                    winAnimator.mWin.setHasSurface(false);
                     scheduleRemoveStartingWindowLocked(winAnimator.mWin.mAppToken);
                 }
 
