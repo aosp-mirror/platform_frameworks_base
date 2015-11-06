@@ -3637,6 +3637,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile or device owner to get user restrictions set with
+     * {@link #addUserRestriction(ComponentName, String)}.
+     * <p>
+     * The target user may have more restrictions set by the system or other device owner / profile
+     * owner.  To get all the user restrictions currently set, use
+     * {@link UserManager#getUserRestrictions()}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public Bundle getUserRestrictions(@NonNull ComponentName admin) {
+        Bundle ret = null;
+        if (mService != null) {
+            try {
+                ret = mService.getUserRestrictions(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return ret == null ? new Bundle() : ret;
+    }
+
+    /**
      * Called by profile or device owners to hide or unhide packages. When a package is hidden it
      * is unavailable for use, but the data and actual package file remain.
      *
