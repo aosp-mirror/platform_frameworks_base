@@ -724,6 +724,27 @@ public abstract class Context {
     public abstract File getFilesDir();
 
     /**
+     * Return the filesystem directory for storing device-encrypted private app
+     * data. Files stored in this location are typically encrypted with a key
+     * tied to the physical device, and they can be accessed whenever the device
+     * has booted successfully, both <em>before and after</em> the user has
+     * entered their credentials (such as a lock pattern or PIN).
+     */
+    public abstract File getDeviceEncryptedFilesDir();
+
+    /**
+     * Return the filesystem directory for storing credential-encrypted private
+     * app data. Files stored in this location are typically encrypted with a
+     * key tied to user credentials, and they can be accessed
+     * <em>only after</em> the user has entered their credentials (such as a
+     * lock pattern or PIN).
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract File getCredentialEncryptedFilesDir();
+
+    /**
      * Returns the absolute path to the directory on the filesystem similar to
      * {@link #getFilesDir()}. The difference is that files placed under this
      * directory will be excluded from automatic backup to remote storage. See

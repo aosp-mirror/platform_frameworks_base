@@ -20032,17 +20032,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mUserController.unregisterUserSwitchObserver(observer);
     }
 
-    private int applyUserId(int uid, int userId) {
-        return UserHandle.getUid(userId, uid);
-    }
-
     ApplicationInfo getAppInfoForUser(ApplicationInfo info, int userId) {
         if (info == null) return null;
         ApplicationInfo newInfo = new ApplicationInfo(info);
-        newInfo.uid = applyUserId(info.uid, userId);
-        newInfo.dataDir = Environment
-                .getDataUserPackageDirectory(info.volumeUuid, userId, info.packageName)
-                .getAbsolutePath();
+        newInfo.initForUser(userId);
         return newInfo;
     }
 

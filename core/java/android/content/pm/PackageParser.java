@@ -4875,9 +4875,7 @@ public class PackageParser {
 
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = new ApplicationInfo(p.applicationInfo);
-        ai.uid = UserHandle.getUid(userId, ai.uid);
-        ai.dataDir = Environment.getDataUserPackageDirectory(ai.volumeUuid, userId, ai.packageName)
-                .getAbsolutePath();
+        ai.initForUser(userId);
         if ((flags & PackageManager.GET_META_DATA) != 0) {
             ai.metaData = p.mAppMetaData;
         }
@@ -4902,9 +4900,7 @@ public class PackageParser {
         // This is only used to return the ResolverActivity; we will just always
         // make a copy.
         ai = new ApplicationInfo(ai);
-        ai.uid = UserHandle.getUid(userId, ai.uid);
-        ai.dataDir = Environment.getDataUserPackageDirectory(ai.volumeUuid, userId, ai.packageName)
-                .getAbsolutePath();
+        ai.initForUser(userId);
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {

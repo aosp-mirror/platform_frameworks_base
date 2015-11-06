@@ -204,6 +204,18 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public File getDeviceEncryptedFilesDir() {
+        return mBase.getDeviceEncryptedFilesDir();
+    }
+
+    /** {@hide} */
+    @SystemApi
+    @Override
+    public File getCredentialEncryptedFilesDir() {
+        return mBase.getCredentialEncryptedFilesDir();
+    }
+
+    @Override
     public File getNoBackupFilesDir() {
         return mBase.getNoBackupFilesDir();
     }

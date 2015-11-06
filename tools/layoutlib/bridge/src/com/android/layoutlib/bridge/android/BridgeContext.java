@@ -1371,6 +1371,18 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getDeviceEncryptedFilesDir() {
+        // pass
+        return null;
+    }
+
+    @Override
+    public File getCredentialEncryptedFilesDir() {
+        // pass
+        return null;
+    }
+
+    @Override
     public File getNoBackupFilesDir() {
         // pass
         return null;

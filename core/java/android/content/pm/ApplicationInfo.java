@@ -19,8 +19,10 @@ package android.content.pm;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Printer;
 
@@ -459,6 +461,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_HAS_DOMAIN_URLS = 1<<4;
 
     /**
+     * When set, default data storage directory for given app is pointed at
+     * device-encrypted location.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_DEVICE_ENCRYPTED = 1 << 5;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */
@@ -549,10 +559,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String[] sharedLibraryFiles;
     
     /**
-     * Full path to a directory assigned to the package for its persistent
-     * data.
+     * Full path to a directory assigned to the package for its persistent data.
      */
     public String dataDir;
+
+    /** {@hide} */
+    public String deviceEncryptedDataDir;
+    /** {@hide} */
+    public String credentialEncryptedDataDir;
 
     /**
      * Full path to the directory where native JNI libraries are stored.
@@ -690,6 +704,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             pw.println(prefix + "seinfo=" + seinfo);
         }
         pw.println(prefix + "dataDir=" + dataDir);
+        pw.println(prefix + "deviceEncryptedDataDir=" + deviceEncryptedDataDir);
+        pw.println(prefix + "credentialEncryptedDataDir=" + credentialEncryptedDataDir);
         if (sharedLibraryFiles != null) {
             pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
         }
@@ -776,6 +792,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seinfo = orig.seinfo;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
+        deviceEncryptedDataDir = orig.deviceEncryptedDataDir;
+        credentialEncryptedDataDir = orig.credentialEncryptedDataDir;
         uid = orig.uid;
         targetSdkVersion = orig.targetSdkVersion;
         versionCode = orig.versionCode;
@@ -788,7 +806,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         backupAgentName = orig.backupAgentName;
         fullBackupContent = orig.fullBackupContent;
     }
-
 
     public String toString() {
         return "ApplicationInfo{"
@@ -829,6 +846,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(seinfo);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
+        dest.writeString(deviceEncryptedDataDir);
+        dest.writeString(credentialEncryptedDataDir);
         dest.writeInt(uid);
         dest.writeInt(targetSdkVersion);
         dest.writeInt(versionCode);
@@ -881,6 +900,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seinfo = source.readString();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();
+        deviceEncryptedDataDir = source.readString();
+        credentialEncryptedDataDir = source.readString();
         uid = source.readInt();
         targetSdkVersion = source.readInt();
         versionCode = source.readInt();
@@ -925,7 +946,30 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
                 FLAG_SUPPORTS_SCREEN_DENSITIES | FLAG_SUPPORTS_XLARGE_SCREENS);
     }
-    
+
+    /** {@hide} */
+    public void initForUser(int userId) {
+        uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
+
+        if ("android".equals(packageName)) {
+            dataDir = Environment.getDataSystemDirectory().getAbsolutePath();
+            return;
+        }
+
+        deviceEncryptedDataDir = Environment
+                .getDataUserDeviceEncryptedPackageDirectory(volumeUuid, userId, packageName)
+                .getAbsolutePath();
+        credentialEncryptedDataDir = Environment
+                .getDataUserCredentialEncryptedPackageDirectory(volumeUuid, userId, packageName)
+                .getAbsolutePath();
+
+        if ((privateFlags & PRIVATE_FLAG_DEVICE_ENCRYPTED) != 0) {
+            dataDir = deviceEncryptedDataDir;
+        } else {
+            dataDir = credentialEncryptedDataDir;
+        }
+    }
+
     /**
      * @hide
      */

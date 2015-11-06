@@ -35,6 +35,7 @@ public class Environment {
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
     private static final String ENV_ANDROID_DATA = "ANDROID_DATA";
     private static final String ENV_ANDROID_STORAGE = "ANDROID_STORAGE";
+    private static final String ENV_DOWNLOAD_CACHE = "DOWNLOAD_CACHE";
     private static final String ENV_OEM_ROOT = "OEM_ROOT";
     private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
 
@@ -53,10 +54,9 @@ public class Environment {
     private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
     private static final File DIR_ANDROID_DATA = getDirectory(ENV_ANDROID_DATA, "/data");
     private static final File DIR_ANDROID_STORAGE = getDirectory(ENV_ANDROID_STORAGE, "/storage");
+    private static final File DIR_DOWNLOAD_CACHE = getDirectory(ENV_DOWNLOAD_CACHE, "/cache");
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
-
-    private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
 
     private static UserEnvironment sCurrentUser;
     private static boolean sUserRequired;
@@ -164,34 +164,16 @@ public class Environment {
         return DIR_VENDOR_ROOT;
     }
 
-    /**
-     * Gets the system directory available for secure storage.
-     * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure/system).
-     * Otherwise, it returns the unencrypted /data/system directory.
-     * @return File object representing the secure storage system directory.
-     * @hide
-     */
+    /** {@hide} */
+    @Deprecated
     public static File getSystemSecureDirectory() {
-        if (isEncryptedFilesystemEnabled()) {
-            return new File(SECURE_DATA_DIRECTORY, "system");
-        } else {
-            return new File(DATA_DIRECTORY, "system");
-        }
+        return getDataSystemDirectory();
     }
 
-    /**
-     * Gets the data directory for secure storage.
-     * If Encrypted File system is enabled, it returns an encrypted directory (/data/secure).
-     * Otherwise, it returns the unencrypted /data directory.
-     * @return File object representing the data directory for secure storage.
-     * @hide
-     */
+    /** {@hide} */
+    @Deprecated
     public static File getSecureDataDirectory() {
-        if (isEncryptedFilesystemEnabled()) {
-            return SECURE_DATA_DIRECTORY;
-        } else {
-            return DATA_DIRECTORY;
-        }
+        return getDataDirectory();
     }
 
     /**
@@ -202,7 +184,7 @@ public class Environment {
      * @hide
      */
     public static File getUserSystemDirectory(int userId) {
-        return new File(new File(getSystemSecureDirectory(), "users"), Integer.toString(userId));
+        return new File(new File(getDataSystemDirectory(), "users"), Integer.toString(userId));
     }
 
     /**
@@ -217,40 +199,34 @@ public class Environment {
     }
 
     /**
-     * Returns whether the Encrypted File System feature is enabled on the device or not.
-     * @return <code>true</code> if Encrypted File System feature is enabled, <code>false</code>
-     * if disabled.
-     * @hide
-     */
-    public static boolean isEncryptedFilesystemEnabled() {
-        return SystemProperties.getBoolean(SYSTEM_PROPERTY_EFS_ENABLED, false);
-    }
-
-    private static final File DATA_DIRECTORY
-            = getDirectory("ANDROID_DATA", "/data");
-
-    /**
-     * @hide
-     */
-    private static final File SECURE_DATA_DIRECTORY
-            = getDirectory("ANDROID_SECURE_DATA", "/data/secure");
-
-    private static final File DOWNLOAD_CACHE_DIRECTORY = getDirectory("DOWNLOAD_CACHE", "/cache");
-
-    /**
      * Return the user data directory.
      */
     public static File getDataDirectory() {
-        return DATA_DIRECTORY;
+        return DIR_ANDROID_DATA;
     }
 
     /** {@hide} */
     public static File getDataDirectory(String volumeUuid) {
         if (TextUtils.isEmpty(volumeUuid)) {
-            return new File("/data");
+            return DIR_ANDROID_DATA;
         } else {
             return new File("/mnt/expand/" + volumeUuid);
         }
+    }
+
+    /** {@hide} */
+    public static File getDataSystemDirectory() {
+        return new File(getDataDirectory(), "system");
+    }
+
+    /** {@hide} */
+    public static File getDataSystemCredentialEncryptedDirectory() {
+        return new File(getDataDirectory(), "system_ce");
+    }
+
+    /** {@hide} */
+    public static File getDataSystemCredentialEncryptedDirectory(int userId) {
+        return new File(getDataSystemCredentialEncryptedDirectory(), String.valueOf(userId));
     }
 
     /** {@hide} */
@@ -259,20 +235,57 @@ public class Environment {
     }
 
     /** {@hide} */
+    @Deprecated
     public static File getDataUserDirectory(String volumeUuid) {
+        return getDataUserCredentialEncryptedDirectory(volumeUuid);
+    }
+
+    /** {@hide} */
+    @Deprecated
+    public static File getDataUserDirectory(String volumeUuid, int userId) {
+        return getDataUserCredentialEncryptedDirectory(volumeUuid, userId);
+    }
+
+    /** {@hide} */
+    @Deprecated
+    public static File getDataUserPackageDirectory(String volumeUuid, int userId,
+            String packageName) {
+        return getDataUserCredentialEncryptedPackageDirectory(volumeUuid, userId, packageName);
+    }
+
+    /** {@hide} */
+    public static File getDataUserCredentialEncryptedDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "user");
     }
 
     /** {@hide} */
-    public static File getDataUserDirectory(String volumeUuid, int userId) {
-        return new File(getDataUserDirectory(volumeUuid), String.valueOf(userId));
+    public static File getDataUserCredentialEncryptedDirectory(String volumeUuid, int userId) {
+        return new File(getDataUserCredentialEncryptedDirectory(volumeUuid),
+                String.valueOf(userId));
     }
 
     /** {@hide} */
-    public static File getDataUserPackageDirectory(String volumeUuid, int userId,
+    public static File getDataUserCredentialEncryptedPackageDirectory(String volumeUuid, int userId,
             String packageName) {
         // TODO: keep consistent with installd
-        return new File(getDataUserDirectory(volumeUuid, userId), packageName);
+        return new File(getDataUserCredentialEncryptedDirectory(volumeUuid, userId), packageName);
+    }
+
+    /** {@hide} */
+    public static File getDataUserDeviceEncryptedDirectory(String volumeUuid) {
+        return new File(getDataDirectory(volumeUuid), "user_de");
+    }
+
+    /** {@hide} */
+    public static File getDataUserDeviceEncryptedDirectory(String volumeUuid, int userId) {
+        return new File(getDataUserDeviceEncryptedDirectory(volumeUuid), String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataUserDeviceEncryptedPackageDirectory(String volumeUuid, int userId,
+            String packageName) {
+        // TODO: keep consistent with installd
+        return new File(getDataUserDeviceEncryptedDirectory(volumeUuid, userId), packageName);
     }
 
     /**
@@ -539,7 +552,7 @@ public class Environment {
      * Return the download/cache content directory.
      */
     public static File getDownloadCacheDirectory() {
-        return DOWNLOAD_CACHE_DIRECTORY;
+        return DIR_DOWNLOAD_CACHE;
     }
 
     /**
