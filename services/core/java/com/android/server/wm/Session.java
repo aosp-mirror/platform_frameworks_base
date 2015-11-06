@@ -188,10 +188,9 @@ final class Session extends IWindowSession.Stub
     }
 
     @Override
-    public void repositionChild(IWindow window, int left, int top, int right, int bottom,
-             long deferTransactionUntilFrame, Rect outFrame) {
-        mService.repositionChild(this, window, left, top, right, bottom,
-                deferTransactionUntilFrame, outFrame);
+    public void repositionChild(IWindow window, int x, int y, long deferTransactionUntilFrame,
+             Rect outFrame) {
+        mService.repositionChild(this, window, x, y, deferTransactionUntilFrame, outFrame);
     }
 
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,

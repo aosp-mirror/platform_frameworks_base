@@ -2485,8 +2485,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void repositionChild(Session session, IWindow client,
-            int top, int left, int right, int bottom,
-            long deferTransactionUntilFrame, Rect outFrame) {
+            int x, int y, long deferTransactionUntilFrame, Rect outFrame) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "repositionChild");
         long origId = Binder.clearCallingIdentity();
 
@@ -2502,10 +2501,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "attached to a parent win=" + win);
                 }
 
-                win.mFrame.left = left;
-                win.mFrame.top = top;
-                win.mFrame.right = right;
-                win.mFrame.bottom = bottom;
+                win.mFrame.left = x;
+                win.mFrame.top = y;
 
                 win.mWinAnimator.computeShownFrameLocked();
 
@@ -2578,15 +2575,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
                 }
-
-                // Odd choice but less odd than embedding in copyFrom()
-                if ((attrs.flags & WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY) != 0) {
-                    attrs.x = win.mAttrs.x;
-                    attrs.y = win.mAttrs.y;
-                    attrs.width = win.mAttrs.width;
-                    attrs.height = win.mAttrs.height;
-                }
-
                 flagChanges = win.mAttrs.flags ^= attrs.flags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
                 if ((attrChanges & (WindowManager.LayoutParams.LAYOUT_CHANGED
