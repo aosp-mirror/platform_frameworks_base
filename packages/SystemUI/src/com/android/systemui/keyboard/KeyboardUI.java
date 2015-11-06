@@ -70,17 +70,19 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
     // time for us to receive the signal that it's starting.
     private static final long BLUETOOTH_START_DELAY_MILLIS = 10 * 1000;
 
+    // We will be scanning up to 30 seconds, after which we'll stop.
+    private static final long BLUETOOTH_SCAN_TIMEOUT_MILLIS = 30 * 1000;
+
     private static final int STATE_NOT_ENABLED = -1;
     private static final int STATE_UNKNOWN = 0;
     private static final int STATE_WAITING_FOR_BOOT_COMPLETED = 1;
     private static final int STATE_WAITING_FOR_TABLET_MODE_EXIT = 2;
     private static final int STATE_WAITING_FOR_DEVICE_DISCOVERY = 3;
     private static final int STATE_WAITING_FOR_BLUETOOTH = 4;
-    private static final int STATE_WAITING_FOR_STATE_PAIRED = 5;
-    private static final int STATE_PAIRING = 6;
-    private static final int STATE_PAIRED = 7;
-    private static final int STATE_USER_CANCELLED = 8;
-    private static final int STATE_DEVICE_NOT_FOUND = 9;
+    private static final int STATE_PAIRING = 5;
+    private static final int STATE_PAIRED = 6;
+    private static final int STATE_USER_CANCELLED = 7;
+    private static final int STATE_DEVICE_NOT_FOUND = 8;
 
     private static final int MSG_INIT = 0;
     private static final int MSG_ON_BOOT_COMPLETED = 1;
@@ -92,6 +94,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
     private static final int MSG_ON_BLE_SCAN_FAILED = 7;
     private static final int MSG_SHOW_BLUETOOTH_DIALOG = 8;
     private static final int MSG_DISMISS_BLUETOOTH_DIALOG = 9;
+    private static final int MSG_BLE_ABORT_SCAN = 10;
 
     private volatile KeyboardHandler mHandler;
     private volatile KeyboardUIHandler mUIHandler;
@@ -107,6 +110,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
     private long mBootCompletedTime;
 
     private int mInTabletMode = InputManager.SWITCH_STATE_UNKNOWN;
+    private int mScanAttempt = 0;
     private ScanCallback mScanCallback;
     private BluetoothDialog mDialog;
 
@@ -328,12 +332,28 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
             .build();
         mScanCallback = new KeyboardScanCallback();
         scanner.startScan(Arrays.asList(filter), settings, mScanCallback);
+
+        Message abortMsg = mHandler.obtainMessage(MSG_BLE_ABORT_SCAN, ++mScanAttempt, 0);
+        mHandler.sendMessageDelayed(abortMsg, BLUETOOTH_SCAN_TIMEOUT_MILLIS);
     }
 
     private void stopScanning() {
         if (mScanCallback != null) {
             mLocalBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
             mScanCallback = null;
+        }
+    }
+
+    // Should only be called on the handler thread
+    private void bleAbortScanInternal(int scanAttempt) {
+        if (mState == STATE_WAITING_FOR_DEVICE_DISCOVERY && scanAttempt == mScanAttempt) {
+            if (DEBUG) {
+                Slog.d(TAG, "Bluetooth scan timed out");
+            }
+            stopScanning();
+            // FIXME: should we also try shutting off bluetooth if we enabled
+            // it in the first place?
+            mState = STATE_DEVICE_NOT_FOUND;
         }
     }
 
@@ -425,6 +445,12 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
                     } else {
                         mState = STATE_USER_CANCELLED;
                     }
+                    break;
+                }
+                case MSG_BLE_ABORT_SCAN: {
+                    int scanAttempt = msg.arg1;
+                    bleAbortScanInternal(scanAttempt);
+                    break;
                 }
                 case MSG_ON_BLUETOOTH_STATE_CHANGED: {
                     int bluetoothState = msg.arg1;
@@ -555,8 +581,6 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
                 return "STATE_WAITING_FOR_DEVICE_DISCOVERY";
             case STATE_WAITING_FOR_BLUETOOTH:
                 return "STATE_WAITING_FOR_BLUETOOTH";
-            case STATE_WAITING_FOR_STATE_PAIRED:
-                return "STATE_WAITING_FOR_STATE_PAIRED";
             case STATE_PAIRING:
                 return "STATE_PAIRING";
             case STATE_PAIRED:
