@@ -27,7 +27,6 @@ import android.content.ClipDescription;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
@@ -52,6 +51,7 @@ class DragState {
     SurfaceControl mSurfaceControl;
     int mFlags;
     IBinder mLocalWin;
+    int mPid;
     int mUid;
     ClipData mData;
     ClipDescription mDataDescription;
@@ -270,8 +270,15 @@ class DragState {
             Slog.d(WindowManagerService.TAG, "broadcasting DRAG_ENDED");
         }
         for (WindowState ws : mNotifiedWindows) {
+            float x = 0;
+            float y = 0;
+            if (!mDragResult && (ws.mSession.mPid == mPid)) {
+                // Report unconsumed drop location back to the app that started the drag.
+                x = mCurrentX;
+                y = mCurrentY;
+            }
             DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                    0, 0, null, null, null, null, mDragResult);
+                    x, y, null, null, null, null, mDragResult);
             try {
                 ws.mClient.dispatchDragEvent(evt);
             } catch (RemoteException e) {
