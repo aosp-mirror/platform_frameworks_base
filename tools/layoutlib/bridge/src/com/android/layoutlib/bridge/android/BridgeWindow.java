@@ -48,7 +48,7 @@ public final class BridgeWindow implements IWindow {
 
     @Override
     public void resized(Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5, Rect rect6,
-            boolean b, Configuration configuration) throws RemoteException {
+            boolean b, Configuration configuration, Rect rect7) throws RemoteException {
         // pass for now.
     }
 

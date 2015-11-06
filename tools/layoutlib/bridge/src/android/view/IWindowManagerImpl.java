@@ -241,6 +241,13 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void overridePendingAppTransitionMultiThumbFuture(
+            IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
+            boolean scaleUp) throws RemoteException {
+
+    }
+
+    @Override
     public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
             IRemoteCallback callback0, IRemoteCallback callback1, boolean scaleUp) {
         // TODO Auto-generated method stub
@@ -512,6 +519,15 @@ public class IWindowManagerImpl implements IWindowManager {
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public int getDockedStackSide() throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public void setDockedStackResizing(boolean resizing) throws RemoteException {
     }
 
     @Override
