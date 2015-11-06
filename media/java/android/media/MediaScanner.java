@@ -17,6 +17,7 @@
 package android.media;
 
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.provider.MediaStore.Files.FileColumns;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.sax.Element;
 import android.sax.ElementListener;
 import android.sax.RootElement;
@@ -328,8 +330,6 @@ public class MediaScanner implements AutoCloseable {
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
     private int mOriginalCount;
-    /** Whether the database had any entries in it before the scan started */
-    private boolean mWasEmptyPriorToScan = false;
     /** Whether the scanner has set a default sound for the ringer ringtone. */
     private boolean mDefaultRingtoneSet;
     /** Whether the scanner has set a default sound for the notification ringtone. */
@@ -562,12 +562,29 @@ public class MediaScanner implements AutoCloseable {
                 FileEntry entry = beginFile(path, mimeType, lastModified,
                         fileSize, isDirectory, noMedia);
 
+                if (entry == null) {
+                    return null;
+                }
+
                 // if this file was just inserted via mtp, set the rowid to zero
                 // (even though it already exists in the database), to trigger
                 // the correct code path for updating its entry
                 if (mMtpObjectHandle != 0) {
                     entry.mRowId = 0;
                 }
+
+                if (entry.mPath != null &&
+                        ((!mDefaultNotificationSet &&
+                                doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename))
+                        || (!mDefaultRingtoneSet &&
+                                doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename))
+                        || (!mDefaultAlarmSet &&
+                                doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)))) {
+                    Log.w(TAG, "forcing rescan of " + entry.mPath +
+                            "since ringtone setting didn't finish");
+                    scanAlways = true;
+                }
+
                 // rescan for metadata if file was modified since last scan
                 if (entry != null && (entry.mLastModifiedChanged || scanAlways)) {
                     if (noMedia) {
@@ -947,6 +964,26 @@ public class MediaScanner implements AutoCloseable {
             }
             Uri result = null;
             boolean needToSetSettings = false;
+            // Setting a flag in order not to use bulk insert for the file related with
+            // notifications, ringtones, and alarms, because the rowId of the inserted file is
+            // needed.
+            if (notifications && !mDefaultNotificationSet) {
+                if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
+                    needToSetSettings = true;
+                }
+            } else if (ringtones && !mDefaultRingtoneSet) {
+                if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
+                    needToSetSettings = true;
+                }
+            } else if (alarms && !mDefaultAlarmSet) {
+                if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
+                    needToSetSettings = true;
+                }
+            }
+
             if (rowId == 0) {
                 if (mMtpObjectHandle != 0) {
                     values.put(MediaStore.MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, mMtpObjectHandle);
@@ -958,28 +995,6 @@ public class MediaScanner implements AutoCloseable {
                     }
                     values.put(Files.FileColumns.FORMAT, format);
                 }
-                // Setting a flag in order not to use bulk insert for the file related with
-                // notifications, ringtones, and alarms, because the rowId of the inserted file is
-                // needed.
-                if (mWasEmptyPriorToScan) {
-                    if (notifications && !mDefaultNotificationSet) {
-                        if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
-                                doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
-                            needToSetSettings = true;
-                        }
-                    } else if (ringtones && !mDefaultRingtoneSet) {
-                        if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
-                                doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
-                            needToSetSettings = true;
-                        }
-                    } else if (alarms && !mDefaultAlarmSet) {
-                        if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
-                                doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
-                            needToSetSettings = true;
-                        }
-                    }
-                }
-
                 // New file, insert it.
                 // Directories need to be inserted before the files they contain, so they
                 // get priority when bulk inserting.
@@ -1049,14 +1064,18 @@ public class MediaScanner implements AutoCloseable {
 
         private void setSettingIfNotSet(String settingName, Uri uri, long rowId) {
 
-            String existingSettingValue = Settings.System.getString(mContext.getContentResolver(),
-                    settingName);
+            if(wasSettingAlreadySet(settingName)) {
+                return;
+            }
 
+            ContentResolver cr = mContext.getContentResolver();
+            String existingSettingValue = Settings.System.getString(cr, settingName);
             if (TextUtils.isEmpty(existingSettingValue)) {
                 // Set the setting to the given URI
-                Settings.System.putString(mContext.getContentResolver(), settingName,
+                Settings.System.putString(cr, settingName,
                         ContentUris.withAppendedId(uri, rowId).toString());
             }
+            Settings.System.putInt(cr, settingSetIndicatorName(settingName), 1);
         }
 
         private int getFileTypeFromDrm(String path) {
@@ -1083,6 +1102,20 @@ public class MediaScanner implements AutoCloseable {
 
     }; // end of anonymous MediaScannerClient instance
 
+    private String settingSetIndicatorName(String base) {
+        return base + "_set";
+    }
+
+    private boolean wasSettingAlreadySet(String name) {
+        ContentResolver cr = mContext.getContentResolver();
+        String indicatorName = settingSetIndicatorName(name);
+        try {
+            return Settings.System.getInt(cr, indicatorName) != 0;
+        } catch (SettingNotFoundException e) {
+            return false;
+        }
+    }
+
     private void prescan(String filePath, boolean prescanFiles) throws RemoteException {
         Cursor c = null;
         String where = null;
@@ -1099,6 +1132,10 @@ public class MediaScanner implements AutoCloseable {
             where = MediaStore.Files.FileColumns._ID + ">?";
             selectionArgs = new String[] { "" };
         }
+
+        mDefaultRingtoneSet = wasSettingAlreadySet(Settings.System.RINGTONE);
+        mDefaultNotificationSet = wasSettingAlreadySet(Settings.System.NOTIFICATION_SOUND);
+        mDefaultAlarmSet = wasSettingAlreadySet(Settings.System.ALARM_ALERT);
 
         // Tell the provider to not delete the file.
         // If the file is truly gone the delete is unnecessary, and we want to avoid
@@ -1117,7 +1154,6 @@ public class MediaScanner implements AutoCloseable {
                 // with CursorWindow positioning.
                 long lastId = Long.MIN_VALUE;
                 Uri limitUri = mFilesUri.buildUpon().appendQueryParameter("limit", "1000").build();
-                mWasEmptyPriorToScan = true;
 
                 while (true) {
                     selectionArgs[0] = "" + lastId;
@@ -1136,7 +1172,6 @@ public class MediaScanner implements AutoCloseable {
                     if (num == 0) {
                         break;
                     }
-                    mWasEmptyPriorToScan = false;
                     while (c.moveToNext()) {
                         long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
                         String path = c.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
@@ -1284,7 +1319,7 @@ public class MediaScanner implements AutoCloseable {
         }
     }
 
-    private void postscan(String[] directories) throws RemoteException {
+    private void postscan(final String[] directories) throws RemoteException {
 
         // handle playlists last, after we know what media files are on the storage.
         if (mProcessPlaylists) {
