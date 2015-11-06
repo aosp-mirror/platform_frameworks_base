@@ -36,18 +36,23 @@ import libcore.io.IoUtils;
  * @hide
  */
 public class UserCertificateSource implements CertificateSource {
-    private static Set<X509Certificate> sUserCerts = null;
-    private static final Object sLock = new Object();
+    private static final UserCertificateSource INSTANCE = new UserCertificateSource();
+    private Set<X509Certificate> mUserCerts = null;
+    private final Object mLock = new Object();
 
-    public UserCertificateSource() {
+    private UserCertificateSource() {
+    }
+
+    public static UserCertificateSource getInstance() {
+        return INSTANCE;
     }
 
     @Override
     public Set<X509Certificate> getCertificates() {
         // TODO: loading all of these is wasteful, we should instead use a keystore style API.
-        synchronized (sLock) {
-            if (sUserCerts != null) {
-                return sUserCerts;
+        synchronized (mLock) {
+            if (mUserCerts != null) {
+                return mUserCerts;
             }
             CertificateFactory certFactory;
             try {
@@ -75,14 +80,14 @@ public class UserCertificateSource implements CertificateSource {
                     IoUtils.closeQuietly(is);
                 }
             }
-            sUserCerts = userCerts;
-            return sUserCerts;
+            mUserCerts = userCerts;
+            return mUserCerts;
         }
     }
 
     public void onCertificateStorageChange() {
-        synchronized (sLock) {
-            sUserCerts = null;
+        synchronized (mLock) {
+            mUserCerts = null;
         }
     }
 }
