@@ -17,10 +17,13 @@
 package android.security.net.config;
 
 import android.util.ArraySet;
+import java.util.Collections;
 import java.util.Set;
 
 /** @hide */
 public final class PinSet {
+    public static final PinSet EMPTY_PINSET =
+            new PinSet(Collections.<Pin>emptySet(), Long.MAX_VALUE);
     public final long expirationTime;
     public final Set<Pin> pins;
 
