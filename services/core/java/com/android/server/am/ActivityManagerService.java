@@ -17444,14 +17444,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new IllegalArgumentException("Removing home stack is not allowed.");
         }
         synchronized (this) {
+            long origId = Binder.clearCallingIdentity();
             ActivityStack stack = mStackSupervisor.getStack(stackId);
             if (stack != null) {
                 ArrayList<TaskRecord> tasks = stack.getAllTasks();
                 for (int i = tasks.size() - 1; i >= 0; i--) {
-                    removeTaskByIdLocked(tasks.get(i).taskId, true /* killProcess */,
+                    removeTaskByIdLocked(tasks.get(i).taskId, false /* killProcess */,
                             !REMOVE_FROM_RECENTS);
                 }
             }
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
