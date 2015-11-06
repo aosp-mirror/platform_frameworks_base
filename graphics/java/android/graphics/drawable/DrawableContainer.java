@@ -656,7 +656,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         int mChangingConfigurations;
         int mChildrenChangingConfigurations;
 
-        SparseArray<ConstantStateFuture> mDrawableFutures;
+        SparseArray<ConstantState> mDrawableFutures;
         Drawable[] mDrawables;
         int mNumChildren;
 
@@ -757,7 +757,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mDrawables = new Drawable[origDr.length];
                 mNumChildren = orig.mNumChildren;
 
-                final SparseArray<ConstantStateFuture> origDf = orig.mDrawableFutures;
+                final SparseArray<ConstantState> origDf = orig.mDrawableFutures;
                 if (origDf != null) {
                     mDrawableFutures = origDf.clone();
                 } else {
@@ -770,8 +770,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 final int N = mNumChildren;
                 for (int i = 0; i < N; i++) {
                     if (origDr[i] != null) {
-                        if (origDr[i].getConstantState() != null) {
-                            mDrawableFutures.put(i, new ConstantStateFuture(origDr[i]));
+                        final ConstantState cs = origDr[i].getConstantState();
+                        if (cs != null) {
+                            mDrawableFutures.put(i, cs);
                         } else {
                             mDrawables[i] = origDr[i];
                         }
@@ -815,16 +816,26 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return mDrawables.length;
         }
 
-        private final void createAllFutures() {
+        private void createAllFutures() {
             if (mDrawableFutures != null) {
                 final int futureCount = mDrawableFutures.size();
                 for (int keyIndex = 0; keyIndex < futureCount; keyIndex++) {
                     final int index = mDrawableFutures.keyAt(keyIndex);
-                    mDrawables[index] = mDrawableFutures.valueAt(keyIndex).get(this);
+                    final ConstantState cs = mDrawableFutures.valueAt(keyIndex);
+                    mDrawables[index] = prepareDrawable(cs.newDrawable(mSourceRes));
                 }
 
                 mDrawableFutures = null;
             }
+        }
+
+        private Drawable prepareDrawable(Drawable child) {
+            child.setLayoutDirection(mLayoutDirection);
+            child.setCallback(mOwner);
+            if (mMutated) {
+                child = child.mutate();
+            }
+            return child;
         }
 
         public final int getChildCount() {
@@ -851,7 +862,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             if (mDrawableFutures != null) {
                 final int keyIndex = mDrawableFutures.indexOfKey(index);
                 if (keyIndex >= 0) {
-                    final Drawable prepared = mDrawableFutures.valueAt(keyIndex).get(this);
+                    final ConstantState cs = mDrawableFutures.valueAt(keyIndex);
+                    final Drawable prepared = prepareDrawable(cs.newDrawable(mSourceRes));
                     mDrawables[index] = prepared;
                     mDrawableFutures.removeAt(keyIndex);
                     if (mDrawableFutures.size() == 0) {
@@ -938,7 +950,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                         return true;
                     }
                 } else {
-                    final ConstantStateFuture future = mDrawableFutures.get(i);
+                    final ConstantState future = mDrawableFutures.get(i);
                     if (future != null && future.canApplyTheme()) {
                         return true;
                     }
@@ -1172,49 +1184,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 }
             }
             return pixelCount;
-        }
-
-        /**
-         * Class capable of cloning a Drawable from another Drawable's
-         * ConstantState.
-         */
-        private static class ConstantStateFuture {
-            private final ConstantState mConstantState;
-
-            private ConstantStateFuture(Drawable source) {
-                mConstantState = source.getConstantState();
-            }
-
-            /**
-             * Obtains and prepares the Drawable represented by this future.
-             *
-             * @param state the container into which this future will be placed
-             * @return a prepared Drawable
-             */
-            public Drawable get(DrawableContainerState state) {
-                final Drawable result;
-                if (state.mSourceRes == null) {
-                    result = mConstantState.newDrawable();
-                } else {
-                    result = mConstantState.newDrawable(state.mSourceRes);
-                }
-                result.setLayoutDirection(state.mLayoutDirection);
-                result.setCallback(state.mOwner);
-
-                if (state.mMutated) {
-                    result.mutate();
-                }
-
-                return result;
-            }
-
-            /**
-             * Whether the constant state wrapped by this future can apply a
-             * theme.
-             */
-            public boolean canApplyTheme() {
-                return mConstantState.canApplyTheme();
-            }
         }
     }
 
