@@ -71,7 +71,7 @@ public final class WindowManagerGlobal {
 
     /**
      * The window is being resized by dragging one of the window corners,
-     * in this case the surface would be fullsreen-sized. The client should
+     * in this case the surface would be fullscreen-sized. The client should
      * render to the actual frame location (instead of (0,curScrollY)).
      */
     public static final int RELAYOUT_RES_DRAG_RESIZING = 0x8;

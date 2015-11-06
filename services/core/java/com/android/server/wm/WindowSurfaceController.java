@@ -95,9 +95,8 @@ class WindowSurfaceController {
         }
     }
 
-    void hideInTransaction() {
-        if (SHOW_TRANSACTIONS) logSurface(
-                "HIDE (performLayout)", null);
+    void hideInTransaction(String reason) {
+        if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
         if (mSurfaceControl != null) {
             mSurfaceShown = false;
             try {
@@ -157,7 +156,7 @@ class WindowSurfaceController {
                 mSurfaceControl.setWindowCrop(clipRect);
                 mHiddenForCrop = false;
             } else {
-                hideInTransaction();
+                hideInTransaction("setCrop");
                 mHiddenForCrop = true;
             }
         } catch (RuntimeException e) {

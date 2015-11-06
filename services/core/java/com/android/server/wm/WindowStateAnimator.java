@@ -460,9 +460,7 @@ class WindowStateAnimator {
         if (mSurfaceController != null && mSurfaceController.hasSurface()) {
             mService.mDestroySurface.add(mWin);
             mWin.mDestroying = true;
-            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(
-                mWin, "HIDE (finishExit)", null);
-            hide();
+            hide("finishExit");
         }
         mWin.mExiting = false;
         if (mWin.mRemoveOnExit) {
@@ -472,11 +470,11 @@ class WindowStateAnimator {
         mWallpaperControllerLocked.hideWallpapers(mWin);
     }
 
-    void hide() {
+    void hide(String reason) {
         if (!mLastHidden) {
             //dump();
             mLastHidden = true;
-            mSurfaceController.hideInTransaction();
+            mSurfaceController.hideInTransaction(reason);
         }
     }
 
@@ -537,8 +535,8 @@ class WindowStateAnimator {
         if (mDestroyPreservedSurfaceUponRedraw) {
             return;
         }
-        mSurfaceController.setLayer(WINDOW_FREEZE_LAYER);
-
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", null);
+        mSurfaceController.setLayer(mAnimLayer + 1);
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
         destroySurfaceLocked();
@@ -1194,9 +1192,9 @@ class WindowStateAnimator {
         mSurfaceController.setPositionInTransaction(left, top, recoveringMemory);
         mSurfaceResized = mSurfaceController.setSizeInTransaction(width, height,
                 mDsDx * w.mHScale, mDtDx * w.mVScale,
-                mDsDy * w.mHScale, mDtDy * w.mVScale, 
+                mDsDy * w.mHScale, mDtDy * w.mVScale,
                 recoveringMemory);
-        
+
         if (mSurfaceResized) {
             mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
@@ -1226,9 +1224,9 @@ class WindowStateAnimator {
 
         if (mIsWallpaper && !mWin.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
-            hide();
+            hide("prepareSurfaceLocked");
         } else if (w.mAttachedHidden || !w.isOnScreen()) {
-            hide();
+            hide("prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
             // If we are waiting for this window to handle an
@@ -1260,7 +1258,6 @@ class WindowStateAnimator {
             mLastDtDy = mDtDy;
             w.mLastHScale = w.mHScale;
             w.mLastVScale = w.mVScale;
-
             if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                     "controller=" + mSurfaceController +
                     "alpha=" + mShownAlpha + " layer=" + mAnimLayer
