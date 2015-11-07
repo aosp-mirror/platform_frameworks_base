@@ -718,7 +718,7 @@ public class UserManager {
     public boolean isUserRunning(UserHandle user) {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(
-                    user.getIdentifier(), false);
+                    user.getIdentifier(), 0);
         } catch (RemoteException e) {
             return false;
         }
@@ -733,8 +733,9 @@ public class UserManager {
      */
     public boolean isUserRunningOrStopping(UserHandle user) {
         try {
+            // TODO: reconcile stopped vs stopping?
             return ActivityManagerNative.getDefault().isUserRunning(
-                    user.getIdentifier(), true);
+                    user.getIdentifier(), ActivityManager.FLAG_OR_STOPPED);
         } catch (RemoteException e) {
             return false;
         }

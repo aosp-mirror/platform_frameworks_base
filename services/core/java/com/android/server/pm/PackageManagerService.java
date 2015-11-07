@@ -3053,15 +3053,40 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    /**
+     * Augment the given flags depending on current user running state. This is
+     * purposefully done before acquiring {@link #mPackages} lock.
+     */
+    private int augmentFlagsForUser(int flags, int userId) {
+        final IActivityManager am = ActivityManagerNative.getDefault();
+        if (am == null) {
+            // We must be early in boot, so the best we can do is assume the
+            // user is fully running.
+            return flags;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (am.isUserRunning(userId, ActivityManager.FLAG_WITH_AMNESIA)) {
+                flags |= PackageManager.FLAG_USER_RUNNING_WITH_AMNESIA;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return flags;
+    }
+
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get activity info");
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
             if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
-            if (a != null && mSettings.isEnabledLPr(a.info, flags, userId)) {
+            if (a != null && mSettings.isEnabledAndVisibleLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateActivityInfo(a, flags, ps.readUserState(userId),
@@ -3100,12 +3125,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get receiver info");
         synchronized (mPackages) {
             PackageParser.Activity a = mReceivers.mActivities.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getReceiverInfo " + component + ": " + a);
-            if (a != null && mSettings.isEnabledLPr(a.info, flags, userId)) {
+            if (a != null && mSettings.isEnabledAndVisibleLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateActivityInfo(a, flags, ps.readUserState(userId),
@@ -3118,12 +3144,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get service info");
         synchronized (mPackages) {
             PackageParser.Service s = mServices.mServices.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getServiceInfo " + component + ": " + s);
-            if (s != null && mSettings.isEnabledLPr(s.info, flags, userId)) {
+            if (s != null && mSettings.isEnabledAndVisibleLPr(s.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateServiceInfo(s, flags, ps.readUserState(userId),
@@ -3136,12 +3163,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ProviderInfo getProviderInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get provider info");
         synchronized (mPackages) {
             PackageParser.Provider p = mProviders.mProviders.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getProviderInfo " + component + ": " + p);
-            if (p != null && mSettings.isEnabledLPr(p.info, flags, userId)) {
+            if (p != null && mSettings.isEnabledAndVisibleLPr(p.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateProviderInfo(p, flags, ps.readUserState(userId),
@@ -4233,6 +4261,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "resolve intent");
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
         return chooseBestActivity(intent, resolvedType, flags, query, userId);
@@ -4374,10 +4403,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    // TODO: handle preferred activities missing while user has amnesia
     ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         // writer
         synchronized (mPackages) {
             if (intent.getSelector() != null) {
@@ -4576,6 +4607,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "query intent activities");
         ComponentName comp = intent.getComponent();
         if (comp == null) {
@@ -5041,6 +5073,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false,
                 false, "query intent activity options");
         final String resultsAction = intent.getAction();
@@ -5213,6 +5246,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentReceivers(Intent intent, String resolvedType, int flags,
             int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        flags = augmentFlagsForUser(flags, userId);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -5248,8 +5282,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
-        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
+        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
         if (query != null) {
             if (query.size() >= 1) {
                 // If there is more than one service with the same priority,
@@ -5264,6 +5299,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentServices(Intent intent, String resolvedType, int flags,
             int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        flags = augmentFlagsForUser(flags, userId);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -5301,6 +5337,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentContentProviders(
             Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
+        flags = augmentFlagsForUser(flags, userId);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -5417,6 +5454,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
             String[] permissions, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
@@ -5444,6 +5482,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
@@ -5510,6 +5549,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
         // reader
         synchronized (mPackages) {
             final PackageParser.Provider provider = mProvidersByAuthority.get(name);
@@ -5517,7 +5557,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ? mSettings.mPackages.get(provider.owner.packageName)
                     : null;
             return ps != null
-                    && mSettings.isEnabledLPr(provider.info, flags, userId)
+                    && mSettings.isEnabledAndVisibleLPr(provider.info, flags, userId)
                     && (!mSafeMode || (provider.info.applicationInfo.flags
                             &ApplicationInfo.FLAG_SYSTEM) != 0)
                     ? PackageParser.generateProviderInfo(provider, flags,
@@ -5558,12 +5598,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ParceledListSlice<ProviderInfo> queryContentProviders(String processName,
             int uid, int flags) {
+        final int userId = processName != null ? UserHandle.getUserId(uid)
+                : UserHandle.getCallingUserId();
+        if (!sUserManager.exists(userId)) return null;
+        flags = augmentFlagsForUser(flags, userId);
+
         ArrayList<ProviderInfo> finalList = null;
         // reader
         synchronized (mPackages) {
             final Iterator<PackageParser.Provider> i = mProviders.mProviders.values().iterator();
-            final int userId = processName != null ?
-                    UserHandle.getUserId(uid) : UserHandle.getCallingUserId();
             while (i.hasNext()) {
                 final PackageParser.Provider p = i.next();
                 PackageSetting ps = mSettings.mPackages.get(p.owner.packageName);
@@ -5571,7 +5614,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && (processName == null
                                 || (p.info.processName.equals(processName)
                                         && UserHandle.isSameApp(p.info.applicationInfo.uid, uid)))
-                        && mSettings.isEnabledLPr(p.info, flags, userId)
+                        && mSettings.isEnabledAndVisibleLPr(p.info, flags, userId)
                         && (!mSafeMode
                                 || (p.info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
                     if (finalList == null) {
@@ -8975,7 +9018,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         protected ResolveInfo newResult(PackageParser.ActivityIntentInfo info,
                 int match, int userId) {
             if (!sUserManager.exists(userId)) return null;
-            if (!mSettings.isEnabledLPr(info.activity.info, mFlags, userId)) {
+            if (!mSettings.isEnabledAndVisibleLPr(info.activity.info, mFlags, userId)) {
                 return null;
             }
             final PackageParser.Activity activity = info.activity;
@@ -9199,7 +9242,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int match, int userId) {
             if (!sUserManager.exists(userId)) return null;
             final PackageParser.ServiceIntentInfo info = (PackageParser.ServiceIntentInfo)filter;
-            if (!mSettings.isEnabledLPr(info.service.info, mFlags, userId)) {
+            if (!mSettings.isEnabledAndVisibleLPr(info.service.info, mFlags, userId)) {
                 return null;
             }
             final PackageParser.Service service = info.service;
@@ -9422,7 +9465,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!sUserManager.exists(userId))
                 return null;
             final PackageParser.ProviderIntentInfo info = filter;
-            if (!mSettings.isEnabledLPr(info.provider.info, mFlags, userId)) {
+            if (!mSettings.isEnabledAndVisibleLPr(info.provider.info, mFlags, userId)) {
                 return null;
             }
             final PackageParser.Provider provider = info.provider;
@@ -9761,7 +9804,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             IActivityManager am = ActivityManagerNative.getDefault();
             final boolean isSystem =
                     isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
-            if (isSystem && am.isUserRunning(userId, false)) {
+            if (isSystem && am.isUserRunning(userId, 0)) {
                 // The just-installed/enabled app is bundled on the system, so presumed
                 // to be able to run automatically without needing an explicit launch.
                 // Send it a BOOT_COMPLETED if it would ordinarily have gotten one.

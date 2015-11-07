@@ -2632,6 +2632,11 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
         }
 
+        if (sa.getBoolean(R.styleable.AndroidManifestApplication_forceDeviceEncrypted, false)
+                && (flags & PARSE_IS_SYSTEM) != 0) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED;
+        }
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);
@@ -3229,6 +3234,9 @@ public class PackageParser {
 
             a.info.lockTaskLaunchMode =
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
+
+            a.info.encryptionAware = sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_encryptionAware, false);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
@@ -3243,6 +3251,9 @@ public class PackageParser {
                     setExported = true;
                 }
             }
+
+            a.info.encryptionAware = sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_encryptionAware, false);
         }
 
         sa.recycle();
@@ -3643,6 +3654,9 @@ public class PackageParser {
             }
         }
 
+        p.info.encryptionAware = sa.getBoolean(
+                R.styleable.AndroidManifestProvider_encryptionAware, false);
+
         sa.recycle();
 
         if ((owner.applicationInfo.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
@@ -3922,6 +3936,9 @@ public class PackageParser {
                 setExported = true;
             }
         }
+
+        s.info.encryptionAware = sa.getBoolean(
+                R.styleable.AndroidManifestService_encryptionAware, false);
 
         sa.recycle();
 

@@ -1984,8 +1984,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case IS_USER_RUNNING_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int userid = data.readInt();
-            boolean orStopping = data.readInt() != 0;
-            boolean result = isUserRunning(userid, orStopping);
+            int _flags = data.readInt();
+            boolean result = isUserRunning(userid, _flags);
             reply.writeNoException();
             reply.writeInt(result ? 1 : 0);
             return true;
@@ -5265,12 +5265,12 @@ class ActivityManagerProxy implements IActivityManager
         return userInfo;
     }
 
-    public boolean isUserRunning(int userid, boolean orStopping) throws RemoteException {
+    public boolean isUserRunning(int userid, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(userid);
-        data.writeInt(orStopping ? 1 : 0);
+        data.writeInt(flags);
         mRemote.transact(IS_USER_RUNNING_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean result = reply.readInt() != 0;

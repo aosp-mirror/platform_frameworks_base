@@ -947,13 +947,17 @@ final class UserController {
         return mStartedUserArray;
     }
 
-    boolean isUserRunningLocked(int userId, boolean orStopped) {
+    boolean isUserRunningLocked(int userId, int flags) {
         UserState state = getStartedUserStateLocked(userId);
         if (state == null) {
             return false;
         }
-        if (orStopped) {
+        if ((flags & ActivityManager.FLAG_OR_STOPPED) != 0) {
             return true;
+        }
+        if ((flags & ActivityManager.FLAG_WITH_AMNESIA) != 0) {
+            // TODO: add in amnesia lifecycle
+            return false;
         }
         return state.mState != UserState.STATE_STOPPING
                 && state.mState != UserState.STATE_SHUTDOWN;

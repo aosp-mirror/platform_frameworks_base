@@ -2283,7 +2283,7 @@ public class UserManagerService extends IUserManager.Stub {
         } else {
             pw.println("Users:");
             for (int i = 0; i < users.size(); i++) {
-                String running = am.isUserRunning(users.get(i).id, false) ? " running" : "";
+                String running = am.isUserRunning(users.get(i).id, 0) ? " running" : "";
                 pw.println("\t" + users.get(i).toString() + running);
             }
             return 0;
