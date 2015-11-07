@@ -1,5 +1,5 @@
 page.title=Essentials for a Successful App
-meta.tags="landing, quality"
+meta.tags="guidelines, quality"
 page.tags="guidelines", "tablet", "quality"
 section.landing=true
 nonavpage=true
@@ -12,21 +12,23 @@ nonavpage=true
   process of monitoring feedback and making improvement after launch.
 </p>
 
-<h2 id="guidelines">Quality Guidelines</h2>
+<section class="dac-section dac-small" id="latest-games"><div class="wrap">
+<h2 id="guidelines" class="norule">Quality Guidelines</h2>
 
 <div class="resource-widget resource-flow-layout landing col-16"
   data-query="collection:distribute/essentials/guidelines"
   data-cardSizes="6x6"
   data-maxResults="9">
-</div>
+</div></div></section>
 
-<h2 id="tools">Tools &amp; Resources</h2>
+<section class="dac-section dac-small" id="latest-games"><div class="wrap">
+<h2 id="tools" class="norule">Tools &amp; Resources</h2>
 
 <div class="resource-widget resource-flow-layout landing col-16"
   data-query="collection:distribute/essentials/tools"
   data-cardSizes="6x6"
   data-maxResults="9">
-</div>
+</div></div></section>
 
 <!-- <h2>Related resources</h2>
 

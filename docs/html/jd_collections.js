@@ -204,12 +204,12 @@ var RESOURCE_COLLECTIONS = {
   "distribute/landing/more": {
     "title": "",
     "resources": [
-    "distribute/users/promote-with-ads.html",
-    "distribute/monetize/ads.html",
-    "distribute/analyze/index.html",
-    "distribute/engage/deep-linking.html",
-    "distribute/engage/easy-signin.html",
-    "https://cloud.google.com/docs/"
+      "distribute/users/promote-with-ads.html",
+      "distribute/monetize/ads.html",
+      "distribute/analyze/index.html",
+      "distribute/engage/deep-linking.html",
+      "distribute/engage/easy-signin.html",
+      "https://cloud.google.com/docs/"
     ]
   },
   "distribute/edu/videos/stories": {
@@ -371,7 +371,6 @@ var RESOURCE_COLLECTIONS = {
       "distribute/analyze/build-better-apps.html",
       "distribute/engage/gcm.html",
       "distribute/engage/beta.html"
-
     ]
   },
   "distribute/monetize": {
@@ -493,14 +492,14 @@ var RESOURCE_COLLECTIONS = {
   "distribute/tools/promote": {
     "resources": [
       "distribute/tools/promote/device-art.html",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html"
     ]
   },
   "distribute/tools/promote/zhcn": {
     "resources": [
       "intl/zh-cn/distribute/tools/promote/device-art.html",
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/linking.html"
     ]
   },
@@ -708,7 +707,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/users/buildbuzz": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html",
       "distribute/tools/promote/device-art.html",
       "https://plus.google.com/+GooglePlay"
@@ -940,7 +939,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/tools/launch-checklist.html",
       "https://play.google.com/apps/publish/",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html"
     ]
   },
@@ -949,7 +948,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "intl/zh-cn/distribute/tools/launch-checklist.html",
       "https://play.google.com/apps/publish/?hl=zh-Hans",
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/device-art.html"
     ]
   },
@@ -1024,7 +1023,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/tools/localization-checklist.html",
       "https://support.google.com/googleplay/android-developer/table/3541286",
       "distribute/stories/localization.html",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html",
       "https://www.youtube.com/watch?v=SkHHPf3EdzE"
     ]
@@ -1154,14 +1153,14 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/localizationchecklist/preplaunch": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html"
     ]
   },
   "distribute/toolsreference/localizationchecklist/preplaunch/zhcn": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/device-art.html"
     ]
   },
@@ -1273,7 +1272,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/launchchecklist/badges": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html"
     ]
   },
@@ -1294,9 +1293,6 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/optimizing-your-app.html"
     ]
   },
-
-
-
   "distribute/toolsreference/launchchecklist/understanding/zhcn": {
     "title": "",
     "resources": [
@@ -1386,7 +1382,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/launchchecklist/badges/zhcn": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/linking.html"
     ]
   },
@@ -1596,7 +1592,7 @@ var RESOURCE_COLLECTIONS = {
   "overview/zhcn/3": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
 
       "intl/zh-cn/distribute/tools/promote/device-art.html",
       "intl/zh-cn/distribute/tools/promote/linking.html",
@@ -1644,7 +1640,7 @@ var RESOURCE_COLLECTIONS = {
   "overview/3": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html",
       "distribute/tools/promote/linking.html",
       "distribute/tools/promote/brand.html",
@@ -1739,9 +1735,8 @@ var RESOURCE_COLLECTIONS = {
     ]
   },
   "marshmallow/landing/more": {
-  "title": "",
-  "resources": [
-      "about/versions/marshmallow/android-6.0-changes.html",
+    "title": "",
+    "resources": [
       "training/permissions/requesting.html",
       "training/backup/autosyncapi.html",
       "training/monitoring-device-state/doze-standby.html",

@@ -1,6 +1,7 @@
 page.title=Build VR with Google Cardboard
 page.metaDescription=Build apps and games with VR, for a viewer anyone can buy.
-page.tags=vr, carboard, games
+page.tags=vr, cardboard, games
+page.image=images/cards/card-cardboard_2x.png
 @jd:body
 
 <p>

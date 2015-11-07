@@ -13,15 +13,14 @@ excludeFromSuggestions=true
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-
+        <!--
         <iframe width="448" height="252"
             src="//www.youtube.com/embed/Z98hXV9GmzY?autohide=1&amp;showinfo=0"
             frameborder="0" allowfullscreen=""
             style="float: right;"></iframe>
-        <!--
+        -->
         <img class="dac-hero-image" src="{@docRoot}images/develop/hero_image_studio5_2x.png"
           srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x" />
-        -->
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Get Started with Android Studio</h1>
@@ -60,15 +59,16 @@ excludeFromSuggestions=true
   </a>
 </div>
 
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+<section class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
-       data-query="collection:develop/landing/latest"
-       data-sortOrder="-timestamp"
-       data-cardSizes="6x6"
-       data-maxResults="12"
-       data-initial-results="3"></div>
+    data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
+    data-query="collection:develop/landing/latest"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
 </div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
@@ -81,6 +81,7 @@ excludeFromSuggestions=true
        data-cardSizes="6x6"
        data-maxResults="15"
        data-initial-results="3"
+       data-items-per-page="6"
        data-sortOrder="random"></div>
 </div></section>
 
@@ -152,5 +153,6 @@ excludeFromSuggestions=true
        data-sortOrder="random"
        data-cardSizes="6x6"
        data-initial-results="6"
+       data-items-per-page="24"
        data-maxResults="24"></div>
 </div></section>

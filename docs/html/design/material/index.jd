@@ -1,8 +1,8 @@
 page.title=Material Design for Android
 page.tags=Material,design
-page.type=design
 page.image=images/cards/design-material-for-android_2x.jpg
-
+footer.hide=true
+forcelocalnav=true
 @jd:body
 
 <!-- developer docs box -->

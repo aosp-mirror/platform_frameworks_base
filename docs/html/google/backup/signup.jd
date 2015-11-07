@@ -208,7 +208,7 @@ with the Android Backup Service Terms of Service</label>
 <input id="pname" type="text" name="pname" size="47" value="" onkeyup="onFormInput()"
 onfocus="boxFocusChanged(this,true)" onblur="boxFocusChanged(this,false)"/>
 </p>
-<p><a href="" class="button disabled" id="registerButton" 
+<p><a href="" class="dac-button dac-raised dac-primary disabled ndk" id="registerButton" 
 onclick="onRegister(); return false;" >Register with Android Backup Service</a></p>
 </div>
 

@@ -1,8 +1,11 @@
 page.title=Downloads
-page.tags=Icons,stencils,color swatches
+page.tags="icons","stencils","colors,"swatches"
+meta.tags="downloads, design, tools"
+section.landing=true
+footer.hide=true
+nonavpage=true
+forcelocalnav=true
 @jd:body
-
-
 <p>For icons, sticker sheets, and other downloadable resources, visit the
 <a href="http://www.google.com/design">Design site</a> or use the links below. </p>
 

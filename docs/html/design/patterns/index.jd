@@ -1,0 +1,29 @@
+page.title=Pure Android
+footer.hide=1
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 0;
+  top: 402px;
+  width: 220px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    <span itemprop="description">Build visually compelling apps that look great on any
+    device.</span>
+    <br><br>
+    <a href="{@docRoot}design/style/devices-displays.html" class="landing-page-link">Devices and Displays</a>
+  </div>
+
+  <a href="{@docRoot}design/style/devices-displays.html">
+    <img src="{@docRoot}design/media/design_elements_landing.png">
+  </a>
+</div>

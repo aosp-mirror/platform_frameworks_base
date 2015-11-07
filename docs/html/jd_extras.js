@@ -3173,17 +3173,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"Video"
   },
   {
-    "tags": [
-      "android",
-      "developerstory",
-      "googleplay",
-      "featured"
-    ],
-    "title": "Android Developer Story: Jelly Button Games — Growing globally through data driven development",
-    "type": "youtube",
-    "url": "https://www.youtube.com/watch?v=Pd49vTkvu0U"
-  },
-  {
     "title":"Scale with Google Cloud Platform",
     "titleFriendly":"",
     "summary":"Build, test, and deploy applications on Google's highly-scalable and reliable infrastructure for your web, mobile and backend solutions.",

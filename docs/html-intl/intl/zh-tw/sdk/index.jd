@@ -1,6 +1,7 @@
 page.title=下載 Android Studio 和 SDK 工具
 page.tags=sdk, android studio
 page.template=sdk
+page.image=images/cards/android-studio_2x.png
 header.hide=1
 page.metaDescription=下載官方 Android IDE 和開發人員工具以建置適用於 Android 手機、平板電腦、穿戴式裝置、電視等裝置的應用程式。
 

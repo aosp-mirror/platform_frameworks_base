@@ -1,5 +1,5 @@
 page.title=Download Android Studio and SDK Tools
-page.tags=sdk, android studio
+page.tags="sdk, android studio,tools"
 page.template=sdk
 page.image=images/cards/android-studio_2x.png
 header.hide=1
@@ -257,7 +257,7 @@ This is the Android Software Development Kit License Agreement
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
-<p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+<p><a href="" class="dac-button dac-raised dac-primary disabled ndk" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
 </div>
 
 
@@ -278,7 +278,7 @@ width="760" alt="" />
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
-<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
+<h1 class="studio-logo" style="margin:0 0 35px !important;padding:0 !important">Android Studio</h1>
 
 <p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
 width: 400px;text-align: center;">The official Android IDE</p>

@@ -5,6 +5,16 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 @jd:body
 
+<script>
+  $(document).ready(function() {
+    if (useUpdatedTemplates) {
+      $("#useUpdatedTemplates").css("display","block");
+    } else {
+      $("#useOldTemplates").css("display","block");
+    }
+  })
+</script>
+
 <!-- <div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
 </div> -->
 <section class="dac-hero-carousel">
@@ -39,9 +49,37 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 </a>
 </article></section>
 
-<div class="actions-bar dac-expand dac-invert">
+<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
     <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <ul class="dac-actions">
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}sdk/index.html">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Get the SDK
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}samples/index.html">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Browse sample code
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}distribute/stories/index.html">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Watch stories
+        </a>
+      </li>
+    </ul>
+  </div><!-- end .wrap -->
+</div><!-- end .dac-actions -->
+
+<div id="useOldTemplates" style="display:none" class="actions-bar dac-expand dac-invert">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button="" href="#build-apps">
       <i class="dac-sprite dac-arrow-down-gray"></i>
     </a>
     <div class="actions">
@@ -53,17 +91,15 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Browse Samples
       </a></div>
-      <div><a href="https://www.youtube.com/user/androiddevelopers">
+      <div><a href="{@docRoot}distribute/stories/index.html">
         <span class="dac-sprite dac-auto-chevron-large"></span>
-        Watch Videos
+        Watch Stories
       </a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
-</div><!-- end .actions-bar -->
+</div>
 
-
-
-<section class="dac-section dac-section-light" id="build-apps"><div class="wrap">
+<section class="dac-section dac-light" id="build-apps"><div class="wrap">
   <h1 class="dac-section-title">Build Beautiful Apps</h1>
   <div class="dac-section-subtitle">
     Resources to get you started with designing and developing for Android.

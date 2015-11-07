@@ -27,10 +27,10 @@ Classes are organized into several groups you can see at the top-level of the le
   </div>
 </div>
 
-<div style="clear:left"></div>
-</div>
+<div style="clear:left" id="classes"></div>
 
-  <div><h2 class="norule">Online video courses</h2>
+<section class="dac-section dac-small" id="latest-games"><div class="wrap">
+  <h2 class="norule">Online video courses</h2>
   <p>If you prefer to learn through interactive video training,
     check out these free courses.</p>
   <div class="resource-widget resource-flow-layout col-16"
@@ -38,5 +38,7 @@ Classes are organized into several groups you can see at the top-level of the le
        data-sortOrder="random"
        data-cardSizes="6x6"
        data-maxResults="24"
+       data-items-per-page="24"
        data-initial-results="6"></div>
-</div>
+  </div>
+</section>
