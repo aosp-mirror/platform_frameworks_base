@@ -31,7 +31,7 @@ bool shouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDes
                                      const int sdkVersionToGenerate) {
     assert(sdkVersionToGenerate > config.sdkVersion);
     const auto endIter = entry->values.end();
-    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThan);
+    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThanConfig);
 
     // The source config came from this list, so it should be here.
     assert(iter != entry->values.end());
@@ -124,7 +124,7 @@ bool AutoVersioner::consume(IAaptContext* context, ResourceTable* table) {
                                 auto iter = std::lower_bound(entry->values.begin(),
                                                              entry->values.end(),
                                                              newConfig,
-                                                             cmp::lessThan);
+                                                             cmp::lessThanConfig);
 
                                 entry->values.insert(
                                         iter,

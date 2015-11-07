@@ -19,6 +19,7 @@
 
 #include "util/StringPiece.h"
 
+#include <sstream>
 #include <string>
 
 namespace aapt {
@@ -54,13 +55,6 @@ namespace aapt {
 class AnnotationProcessor {
 public:
     /**
-     * Creates an AnnotationProcessor with a given prefix for each line generated.
-     * This is usually a set of spaces for indentation.
-     */
-    AnnotationProcessor(const StringPiece& prefix) : mPrefix(prefix.toString()) {
-    }
-
-    /**
      * Adds more comments. Since resources can have various values with different configurations,
      * we need to collect all the comments.
      */
@@ -68,23 +62,20 @@ public:
     void appendComment(const StringPiece& comment);
 
     /**
-     * Finishes the comment and moves it to the caller. Subsequent calls to buildComment() have
-     * undefined results.
+     * Writes the comments and annotations to the stream, with the given prefix before each line.
      */
-    std::string buildComment();
-
-    /**
-     * Finishes the annotation and moves it to the caller. Subsequent calls to buildAnnotations()
-     * have undefined results.
-     */
-    std::string buildAnnotations();
+    void writeToStream(std::ostream* out, const StringPiece& prefix);
 
 private:
-    std::string mPrefix;
-    std::string mComment;
-    std::string mAnnotations;
-    bool mDeprecated = false;
-    bool mSystemApi = false;
+    enum : uint32_t {
+        kDeprecated = 0x01,
+        kSystemApi = 0x02,
+    };
+
+    std::stringstream mComment;
+    std::stringstream mAnnotations;
+    bool mHasComments = false;
+    uint32_t mAnnotationBitMask = 0;
 
     void appendCommentLine(const std::string& line);
 };

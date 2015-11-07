@@ -21,7 +21,9 @@
 #include "ValueVisitor.h"
 
 #include "java/AnnotationProcessor.h"
+#include "java/ClassDefinitionWriter.h"
 #include "java/JavaClassGenerator.h"
+#include "util/Comparators.h"
 #include "util/StringPiece.h"
 
 #include <algorithm>
@@ -31,9 +33,6 @@
 #include <tuple>
 
 namespace aapt {
-
-// The number of attributes to emit per line in a Styleable array.
-constexpr size_t kAttribsPerLine = 4;
 
 JavaClassGenerator::JavaClassGenerator(ResourceTable* table, JavaClassGeneratorOptions options) :
         mTable(table), mOptions(options) {
@@ -92,12 +91,11 @@ bool JavaClassGenerator::skipSymbol(SymbolState state) {
     return true;
 }
 
-void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGenerate,
-                                           const std::u16string& entryName,
-                                           const Styleable* styleable,
-                                           std::ostream* out) {
-    const StringPiece finalModifier = mOptions.useFinal ? " final" : "";
-
+void JavaClassGenerator::writeStyleableEntryForClass(ClassDefinitionWriter* outClassDef,
+                                                     AnnotationProcessor* processor,
+                                                     const StringPiece16& packageNameToGenerate,
+                                                     const std::u16string& entryName,
+                                                     const Styleable* styleable) {
     // This must be sorted by resource ID.
     std::vector<std::pair<ResourceId, ResourceNameRef>> sortedAttributes;
     sortedAttributes.reserve(styleable->entries.size());
@@ -110,36 +108,31 @@ void JavaClassGenerator::generateStyleable(const StringPiece16& packageNameToGen
     }
     std::sort(sortedAttributes.begin(), sortedAttributes.end());
 
+    auto accessorFunc = [](const std::pair<ResourceId, ResourceNameRef>& a) -> ResourceId {
+        return a.first;
+    };
+
     // First we emit the array containing the IDs of each attribute.
-    *out << "    "
-         << "public static final int[] " << transform(entryName) << " = {";
-
-    const size_t attrCount = sortedAttributes.size();
-    for (size_t i = 0; i < attrCount; i++) {
-        if (i % kAttribsPerLine == 0) {
-            *out << "\n      ";
-        }
-
-        *out << sortedAttributes[i].first;
-        if (i != attrCount - 1) {
-            *out << ", ";
-        }
-    }
-    *out << "\n    };\n";
+    outClassDef->addArrayMember(transform(entryName), processor,
+                                sortedAttributes.begin(),
+                                sortedAttributes.end(),
+                                accessorFunc);
 
     // Now we emit the indices into the array.
+    size_t attrCount = sortedAttributes.size();
     for (size_t i = 0; i < attrCount; i++) {
-        *out << "    "
-             << "public static" << finalModifier
-             << " int " << transform(entryName);
+        std::stringstream name;
+        name << transform(entryName);
 
         // We may reference IDs from other packages, so prefix the entry name with
         // the package.
         const ResourceNameRef& itemName = sortedAttributes[i].second;
         if (!itemName.package.empty() && packageNameToGenerate != itemName.package) {
-            *out << "_" << transform(itemName.package);
+            name << "_" << transform(itemName.package);
         }
-        *out << "_" << transform(itemName.entry) << " = " << i << ";\n";
+        name << "_" << transform(itemName.entry);
+
+        outClassDef->addIntMember(name.str(), nullptr, i);
     }
 }
 
@@ -155,8 +148,8 @@ static void addAttributeFormatDoc(AnnotationProcessor* processor, Attribute* att
 
     if (typeMask & android::ResTable_map::TYPE_STRING) {
         processor->appendComment(
-                "<p>May be a string value, using '\\;' to escape characters such as\n"
-                "'\\n' or '\\uxxxx' for a unicode character;");
+                "<p>May be a string value, using '\\\\;' to escape characters such as\n"
+                "'\\\\n' or '\\\\uxxxx' for a unicode character;");
     }
 
     if (typeMask & android::ResTable_map::TYPE_INTEGER) {
@@ -222,14 +215,10 @@ static void addAttributeFormatDoc(AnnotationProcessor* processor, Attribute* att
     }
 }
 
-bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate,
-                                      const ResourceTablePackage* package,
-                                      const ResourceTableType* type,
-                                      std::ostream* out) {
-    const StringPiece finalModifier = mOptions.useFinal ? " final" : "";
-
-    std::u16string unmangledPackage;
-    std::u16string unmangledName;
+bool JavaClassGenerator::writeEntriesForClass(ClassDefinitionWriter* outClassDef,
+                                              const StringPiece16& packageNameToGenerate,
+                                              const ResourceTablePackage* package,
+                                              const ResourceTableType* type) {
     for (const auto& entry : type->entries) {
         if (skipSymbol(entry->symbolStatus.state)) {
             continue;
@@ -238,7 +227,8 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
         ResourceId id(package->id.value(), type->id.value(), entry->id.value());
         assert(id.isValid());
 
-        unmangledName = entry->name;
+        std::u16string unmangledPackage;
+        std::u16string unmangledName = entry->name;
         if (NameMangler::unmangle(&unmangledName, &unmangledPackage)) {
             // The entry name was mangled, and we successfully unmangled it.
             // Check that we want to emit this symbol.
@@ -246,12 +236,10 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
                 // Skip the entry if it doesn't belong to the package we're writing.
                 continue;
             }
-        } else {
-            if (packageNameToGenerate != package->name) {
-                // We are processing a mangled package name,
-                // but this is a non-mangled resource.
-                continue;
-            }
+        } else if (packageNameToGenerate != package->name) {
+            // We are processing a mangled package name,
+            // but this is a non-mangled resource.
+            continue;
         }
 
         if (!isValidSymbol(unmangledName)) {
@@ -262,39 +250,33 @@ bool JavaClassGenerator::generateType(const StringPiece16& packageNameToGenerate
             return false;
         }
 
+        // Build the comments and annotations for this entry.
+
+        AnnotationProcessor processor;
+        if (entry->symbolStatus.state != SymbolState::kUndefined) {
+            processor.appendComment(entry->symbolStatus.comment);
+        }
+
+        for (const auto& configValue : entry->values) {
+            processor.appendComment(configValue.value->getComment());
+        }
+
+        // If this is an Attribute, append the format Javadoc.
+        if (!entry->values.empty()) {
+            if (Attribute* attr = valueCast<Attribute>(entry->values.front().value.get())) {
+                // We list out the available values for the given attribute.
+                addAttributeFormatDoc(&processor, attr);
+            }
+        }
+
         if (type->type == ResourceType::kStyleable) {
             assert(!entry->values.empty());
-            generateStyleable(packageNameToGenerate, unmangledName, static_cast<const Styleable*>(
-                    entry->values.front().value.get()), out);
+            const Styleable* styleable = static_cast<const Styleable*>(
+                    entry->values.front().value.get());
+            writeStyleableEntryForClass(outClassDef, &processor, packageNameToGenerate,
+                                        unmangledName, styleable);
         } else {
-            AnnotationProcessor processor("    ");
-            if (entry->symbolStatus.state != SymbolState::kUndefined) {
-                processor.appendComment(entry->symbolStatus.comment);
-            }
-
-            for (const auto& configValue : entry->values) {
-                processor.appendComment(configValue.value->getComment());
-            }
-
-            if (!entry->values.empty()) {
-                if (Attribute* attr = valueCast<Attribute>(entry->values.front().value.get())) {
-                    // We list out the available values for the given attribute.
-                    addAttributeFormatDoc(&processor, attr);
-                }
-            }
-
-            std::string comment = processor.buildComment();
-            if (!comment.empty()) {
-                *out << comment << "\n";
-            }
-
-            std::string annotations = processor.buildAnnotations();
-            if (!annotations.empty()) {
-                *out << annotations << "\n";
-            }
-
-            *out << "    " << "public static" << finalModifier
-                 << " int " << transform(unmangledName) << " = " << id << ";\n";
+            outClassDef->addResourceMember(transform(unmangledName), &processor, id);
         }
     }
     return true;
@@ -312,17 +294,42 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
 
     for (const auto& package : mTable->packages) {
         for (const auto& type : package->types) {
-            StringPiece16 typeStr;
             if (type->type == ResourceType::kAttrPrivate) {
-                typeStr = toString(ResourceType::kAttr);
-            } else {
-                typeStr = toString(type->type);
+                continue;
             }
-            *out << "  public static final class " << typeStr << " {\n";
-            if (!generateType(packageNameToGenerate, package.get(), type.get(), out)) {
+
+            ClassDefinitionWriterOptions classOptions;
+            classOptions.useFinalQualifier = mOptions.useFinal;
+            classOptions.forceCreationIfEmpty =
+                    (mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic);
+            ClassDefinitionWriter classDef(toString(type->type), classOptions);
+            bool result = writeEntriesForClass(&classDef, packageNameToGenerate,
+                                               package.get(), type.get());
+            if (!result) {
                 return false;
             }
-            *out << "  }\n";
+
+            if (type->type == ResourceType::kAttr) {
+                // Also include private attributes in this same class.
+                auto iter = std::lower_bound(package->types.begin(), package->types.end(),
+                                             ResourceType::kAttrPrivate, cmp::lessThanType);
+                if (iter != package->types.end() && (*iter)->type == ResourceType::kAttrPrivate) {
+                    result = writeEntriesForClass(&classDef, packageNameToGenerate,
+                                                  package.get(), iter->get());
+                    if (!result) {
+                        return false;
+                    }
+                }
+            }
+
+            AnnotationProcessor processor;
+            if (type->type == ResourceType::kStyleable &&
+                    mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic) {
+                // When generating a public R class, we don't want Styleable to be part of the API.
+                // It is only emitted for documentation purposes.
+                processor.appendComment("@doconly");
+            }
+            classDef.writeToStream(out, "  ", &processor);
         }
     }
 

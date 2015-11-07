@@ -18,6 +18,7 @@
 #include "XmlDom.h"
 
 #include "java/AnnotationProcessor.h"
+#include "java/ClassDefinitionWriter.h"
 #include "java/ManifestClassGenerator.h"
 #include "util/Maybe.h"
 
@@ -58,8 +59,8 @@ static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Sour
     return result;
 }
 
-static bool writeSymbol(IDiagnostics* diag, const Source& source, xml::Element* el,
-                        std::ostream* out) {
+static bool writeSymbol(IDiagnostics* diag, ClassDefinitionWriter* outClassDef, const Source& source,
+                        xml::Element* el) {
     xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name");
     if (!attr) {
         diag->error(DiagMessage(source) << "<" << el->name << "> must define 'android:name'");
@@ -72,18 +73,9 @@ static bool writeSymbol(IDiagnostics* diag, const Source& source, xml::Element* 
         return false;
     }
 
-    *out << "\n";
-
-    if (!util::trimWhitespace(el->comment).empty()) {
-        AnnotationProcessor processor("    ");
-        processor.appendComment(el->comment);
-        *out << processor.buildComment() << "\n";
-        std::string annotations = processor.buildAnnotations();
-        if (!annotations.empty()) {
-            *out << annotations << "\n";
-        }
-    }
-    *out << "    public static final String " << result.value() << "=\"" << attr->value << "\";\n";
+    AnnotationProcessor processor;
+    processor.appendComment(el->comment);
+    outClassDef->addStringMember(result.value(), &processor, attr->value);
     return true;
 }
 
@@ -100,29 +92,32 @@ bool ManifestClassGenerator::generate(IDiagnostics* diag, const StringPiece16& p
     }
 
     *out << "package " << package << ";\n\n"
-         << "public class Manifest {\n";
+         << "public final class Manifest {\n";
 
     bool error = false;
     std::vector<xml::Element*> children = el->getChildElements();
 
+    ClassDefinitionWriterOptions classOptions;
+    classOptions.useFinalQualifier = true;
+    classOptions.forceCreationIfEmpty = false;
 
     // First write out permissions.
-    *out << "  public static class permission {\n";
+    ClassDefinitionWriter classDef("permission", classOptions);
     for (xml::Element* childEl : children) {
         if (childEl->namespaceUri.empty() && childEl->name == u"permission") {
-            error |= !writeSymbol(diag, res->file.source, childEl, out);
+            error |= !writeSymbol(diag, &classDef, res->file.source, childEl);
         }
     }
-    *out << "  }\n";
+    classDef.writeToStream(out, "  ");
 
     // Next write out permission groups.
-    *out << "  public static class permission_group {\n";
+    classDef = ClassDefinitionWriter("permission_group", classOptions);
     for (xml::Element* childEl : children) {
         if (childEl->namespaceUri.empty() && childEl->name == u"permission-group") {
-            error |= !writeSymbol(diag, res->file.source, childEl, out);
+            error |= !writeSymbol(diag, &classDef, res->file.source, childEl);
         }
     }
-    *out << "  }\n";
+    classDef.writeToStream(out, "  ");
 
     *out << "}\n";
     return !error;

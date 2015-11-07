@@ -39,8 +39,9 @@ TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
 
     std::string actual = out.str();
 
-    const size_t permissionClassPos = actual.find("public static class permission {");
-    const size_t permissionGroupClassPos = actual.find("public static class permission_group {");
+    const size_t permissionClassPos = actual.find("public static final class permission {");
+    const size_t permissionGroupClassPos =
+            actual.find("public static final class permission_group {");
     ASSERT_NE(std::string::npos, permissionClassPos);
     ASSERT_NE(std::string::npos, permissionGroupClassPos);
 
@@ -113,7 +114,7 @@ R"EOF(    /**
      * @hide
      * @SystemApi
      */
-    @android.annotations.SystemApi
+    @android.annotation.SystemApi
     public static final String SECRET="android.permission.SECRET";)EOF"));
 }
 

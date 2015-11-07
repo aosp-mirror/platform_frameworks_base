@@ -973,7 +973,7 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
 
-    // Declare-styleable is always public, because it technically only exists in R.java.
+    // Declare-styleable is kPrivate by default, because it technically only exists in R.java.
     outResource->symbolState = SymbolState::kPublic;
 
     std::u16string comment;

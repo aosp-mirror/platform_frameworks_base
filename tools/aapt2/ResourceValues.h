@@ -91,7 +91,7 @@ struct Value {
      */
     virtual void print(std::ostream* out) const = 0;
 
-private:
+protected:
     Source mSource;
     std::u16string mComment;
 };

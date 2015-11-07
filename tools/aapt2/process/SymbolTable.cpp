@@ -55,7 +55,7 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
     if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
         const ConfigDescription kDefaultConfig;
         auto iter = std::lower_bound(sr.entry->values.begin(), sr.entry->values.end(),
-                                     kDefaultConfig, cmp::lessThan);
+                                     kDefaultConfig, cmp::lessThanConfig);
 
         if (iter != sr.entry->values.end() && iter->config == kDefaultConfig) {
             // This resource has an Attribute.

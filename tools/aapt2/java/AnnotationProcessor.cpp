@@ -25,33 +25,20 @@ void AnnotationProcessor::appendCommentLine(const std::string& comment) {
     static const std::string sDeprecated = "@deprecated";
     static const std::string sSystemApi = "@SystemApi";
 
-    if (comment.find(sDeprecated) != std::string::npos && !mDeprecated) {
-        mDeprecated = true;
-        if (!mAnnotations.empty()) {
-            mAnnotations += "\n";
-        }
-        mAnnotations += mPrefix;
-        mAnnotations += "@Deprecated";
+    if (comment.find(sDeprecated) != std::string::npos) {
+        mAnnotationBitMask |= kDeprecated;
     }
 
-    if (comment.find(sSystemApi) != std::string::npos && !mSystemApi) {
-        mSystemApi = true;
-        if (!mAnnotations.empty()) {
-            mAnnotations += "\n";
-        }
-        mAnnotations += mPrefix;
-        mAnnotations += "@android.annotations.SystemApi";
+    if (comment.find(sSystemApi) != std::string::npos) {
+        mAnnotationBitMask |= kSystemApi;
     }
 
-    if (mComment.empty()) {
-        mComment += mPrefix;
-        mComment += "/**";
+    if (!mHasComments) {
+        mHasComments = true;
+        mComment << "/**";
     }
 
-    mComment += "\n";
-    mComment += mPrefix;
-    mComment += " * ";
-    mComment += std::move(comment);
+    mComment << "\n" << " * " << std::move(comment);
 }
 
 void AnnotationProcessor::appendComment(const StringPiece16& comment) {
@@ -73,17 +60,22 @@ void AnnotationProcessor::appendComment(const StringPiece& comment) {
     }
 }
 
-std::string AnnotationProcessor::buildComment() {
-    if (!mComment.empty()) {
-        mComment += "\n";
-        mComment += mPrefix;
-        mComment += " */";
+void AnnotationProcessor::writeToStream(std::ostream* out, const StringPiece& prefix) {
+    if (mHasComments) {
+        std::string result = mComment.str();
+        for (StringPiece line : util::tokenize<char>(result, '\n')) {
+           *out << prefix << line << "\n";
+        }
+        *out << prefix << " */" << "\n";
     }
-    return std::move(mComment);
-}
 
-std::string AnnotationProcessor::buildAnnotations() {
-    return std::move(mAnnotations);
+    if (mAnnotationBitMask & kDeprecated) {
+        *out << prefix << "@Deprecated\n";
+    }
+
+    if (mAnnotationBitMask & kSystemApi) {
+        *out << prefix << "@android.annotation.SystemApi\n";
+    }
 }
 
 } // namespace aapt
