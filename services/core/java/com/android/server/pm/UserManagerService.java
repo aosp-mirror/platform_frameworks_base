@@ -97,8 +97,7 @@ import libcore.io.IoUtils;
  *
  * Method naming convention:
  * <ul>
- * <li> Methods suffixed with "LILP" should be called within {@link #mInstallLock} and
- * {@link #mPackagesLock} locks obtained in the respective order.
+ * <li> Methods suffixed with "LP" should be called within the {@link #mPackagesLock} lock.
  * <li> Methods suffixed with "LR" should be called within the {@link #mRestrictionsLock} lock.
  * <li> Methods suffixed with "LU" should be called within the {@link #mUsersLock} lock.
  * </ul>
@@ -164,7 +163,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final Context mContext;
     private final PackageManagerService mPm;
-    private final Object mInstallLock;
     private final Object mPackagesLock;
     // Short-term lock for internal state, when interaction/sync with PM is not required
     private final Object mUsersLock = new Object();
@@ -215,6 +213,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mRestrictionsLock")
     private final SparseArray<Bundle> mAppliedUserRestrictions = new SparseArray<>();
 
+    @GuardedBy("mGuestRestrictions")
     private final Bundle mGuestRestrictions = new Bundle();
 
     /**
@@ -226,6 +225,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mUsersLock")
     private int[] mUserIds;
+    @GuardedBy("mPackagesLock")
     private int mNextSerialNumber;
     private int mUserVersion = 0;
 
@@ -245,11 +245,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    /**
-     * Available for testing purposes.
-     */
-    UserManagerService(File dataDir, File baseUserPath) {
-        this(null, null, new Object(), new Object(), dataDir, baseUserPath);
+    @VisibleForTesting
+    UserManagerService(File dataDir) {
+        this(null, null, new Object(), dataDir);
     }
 
     /**
@@ -257,67 +255,52 @@ public class UserManagerService extends IUserManager.Stub {
      * associated with the package manager, and the given lock is the
      * package manager's own lock.
      */
-    UserManagerService(Context context, PackageManagerService pm,
-            Object installLock, Object packagesLock) {
-        this(context, pm, installLock, packagesLock,
-                Environment.getDataDirectory(),
-                new File(Environment.getDataDirectory(), "user"));
+    UserManagerService(Context context, PackageManagerService pm, Object packagesLock) {
+        this(context, pm, packagesLock, Environment.getDataDirectory());
     }
 
-    /**
-     * Available for testing purposes.
-     */
     private UserManagerService(Context context, PackageManagerService pm,
-            Object installLock, Object packagesLock,
-            File dataDir, File baseUserPath) {
+            Object packagesLock, File dataDir) {
         mContext = context;
         mPm = pm;
-        mInstallLock = installLock;
         mPackagesLock = packagesLock;
         mHandler = new MainHandler();
-        synchronized (mInstallLock) {
-            synchronized (mPackagesLock) {
-                mUsersDir = new File(dataDir, USER_INFO_DIR);
-                mUsersDir.mkdirs();
-                // Make zeroth user directory, for services to migrate their files to that location
-                File userZeroDir = new File(mUsersDir, String.valueOf(UserHandle.USER_SYSTEM));
-                userZeroDir.mkdirs();
-                FileUtils.setPermissions(mUsersDir.toString(),
-                        FileUtils.S_IRWXU|FileUtils.S_IRWXG
-                        |FileUtils.S_IROTH|FileUtils.S_IXOTH,
-                        -1, -1);
-                mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
-                initDefaultGuestRestrictions();
-                readUserListLILP();
-                sInstance = this;
-            }
+        synchronized (mPackagesLock) {
+            mUsersDir = new File(dataDir, USER_INFO_DIR);
+            mUsersDir.mkdirs();
+            // Make zeroth user directory, for services to migrate their files to that location
+            File userZeroDir = new File(mUsersDir, String.valueOf(UserHandle.USER_SYSTEM));
+            userZeroDir.mkdirs();
+            FileUtils.setPermissions(mUsersDir.toString(),
+                    FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IROTH | FileUtils.S_IXOTH,
+                    -1, -1);
+            mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
+            initDefaultGuestRestrictions();
+            readUserListLP();
+            sInstance = this;
         }
         mLocalService = new LocalService();
         LocalServices.addService(UserManagerInternal.class, mLocalService);
     }
 
     void systemReady() {
-        synchronized (mInstallLock) {
-            synchronized (mPackagesLock) {
-                synchronized (mUsersLock) {
-                    // Prune out any partially created/partially removed users.
-                    ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
-                    final int userSize = mUsers.size();
-                    for (int i = 0; i < userSize; i++) {
-                        UserInfo ui = mUsers.valueAt(i);
-                        if ((ui.partial || ui.guestToRemove) && i != 0) {
-                            partials.add(ui);
-                        }
-                    }
-                    final int partialsSize = partials.size();
-                    for (int i = 0; i < partialsSize; i++) {
-                        UserInfo ui = partials.get(i);
-                        Slog.w(LOG_TAG, "Removing partially created user " + ui.id
-                                + " (name=" + ui.name + ")");
-                        removeUserStateLILP(ui.id);
-                    }
+        // Prune out any partially created/partially removed users.
+        ArrayList<UserInfo> partials = new ArrayList<>();
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                UserInfo ui = mUsers.valueAt(i);
+                if ((ui.partial || ui.guestToRemove) && i != 0) {
+                    partials.add(ui);
                 }
             }
+        }
+        final int partialsSize = partials.size();
+        for (int i = 0; i < partialsSize; i++) {
+            UserInfo ui = partials.get(i);
+            Slog.w(LOG_TAG, "Removing partially created user " + ui.id
+                    + " (name=" + ui.name + ")");
+            removeUserState(ui.id);
         }
         onUserForeground(UserHandle.USER_SYSTEM);
         mAppOpsService = IAppOpsService.Stub.asInterface(
@@ -627,16 +610,21 @@ public class UserManagerService extends IUserManager.Stub {
 
     public void makeInitialized(int userId) {
         checkManageUsersPermission("makeInitialized");
-        synchronized (mPackagesLock) {
-            UserInfo info = getUserInfoNoChecks(userId);
+        boolean scheduleWriteUser = false;
+        UserInfo info;
+        synchronized (mUsersLock) {
+            info = mUsers.get(userId);
             if (info == null || info.partial) {
                 Slog.w(LOG_TAG, "makeInitialized: unknown user #" + userId);
-                // TODO Check if we should return here instead of a null check below
+                return;
             }
-            if (info != null && (info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
+            if ((info.flags & UserInfo.FLAG_INITIALIZED) == 0) {
                 info.flags |= UserInfo.FLAG_INITIALIZED;
-                scheduleWriteUser(info);
+                scheduleWriteUser = true;
             }
+        }
+        if (scheduleWriteUser) {
+            scheduleWriteUser(info);
         }
     }
 
@@ -645,17 +633,18 @@ public class UserManagerService extends IUserManager.Stub {
      * restrictions.
      */
     private void initDefaultGuestRestrictions() {
-        if (mGuestRestrictions.isEmpty()) {
-            mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
-            mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+        synchronized (mGuestRestrictions) {
+            if (mGuestRestrictions.isEmpty()) {
+                mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
+                mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+            }
         }
     }
 
     @Override
     public Bundle getDefaultGuestRestrictions() {
         checkManageUsersPermission("getDefaultGuestRestrictions");
-        // TODO Switch to mGuestRestrictions for locking
-        synchronized (mPackagesLock) {
+        synchronized (mGuestRestrictions) {
             return new Bundle(mGuestRestrictions);
         }
     }
@@ -663,12 +652,12 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setDefaultGuestRestrictions(Bundle restrictions) {
         checkManageUsersPermission("setDefaultGuestRestrictions");
-        synchronized (mInstallLock) {
-            synchronized (mPackagesLock) {
-                mGuestRestrictions.clear();
-                mGuestRestrictions.putAll(restrictions);
-                writeUserListLILP();
-            }
+        synchronized (mGuestRestrictions) {
+            mGuestRestrictions.clear();
+            mGuestRestrictions.putAll(restrictions);
+        }
+        synchronized (mPackagesLock) {
+            writeUserListLP();
         }
     }
 
@@ -775,7 +764,7 @@ public class UserManagerService extends IUserManager.Stub {
             Preconditions.checkState(mCachedEffectiveUserRestrictions.get(userId)
                     != newRestrictions);
             mBaseUserRestrictions.put(userId, newRestrictions);
-            scheduleWriteUser(mUsers.get(userId));
+            scheduleWriteUser(getUserInfoNoChecks(userId));
         }
 
         final Bundle effective = computeEffectiveUserRestrictionsLR(userId);
@@ -996,9 +985,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void readUserListLILP() {
+    private void readUserListLP() {
         if (!mUserListFile.exists()) {
-            fallbackToSingleUserLILP();
+            fallbackToSingleUserLP();
             return;
         }
         FileInputStream fis = null;
@@ -1015,7 +1004,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             if (type != XmlPullParser.START_TAG) {
                 Slog.e(LOG_TAG, "Unable to read user list");
-                fallbackToSingleUserLILP();
+                fallbackToSingleUserLP();
                 return;
             }
 
@@ -1036,7 +1025,7 @@ public class UserManagerService extends IUserManager.Stub {
                     final String name = parser.getName();
                     if (name.equals(TAG_USER)) {
                         String id = parser.getAttributeValue(null, ATTR_ID);
-                        UserInfo user = readUserLILP(Integer.parseInt(id));
+                        UserInfo user = readUserLP(Integer.parseInt(id));
 
                         if (user != null) {
                             synchronized (mUsersLock) {
@@ -1051,8 +1040,10 @@ public class UserManagerService extends IUserManager.Stub {
                                 && type != XmlPullParser.END_TAG) {
                             if (type == XmlPullParser.START_TAG) {
                                 if (parser.getName().equals(TAG_RESTRICTIONS)) {
-                                    UserRestrictionsUtils
-                                            .readRestrictions(parser, mGuestRestrictions);
+                                    synchronized (mGuestRestrictions) {
+                                        UserRestrictionsUtils
+                                                .readRestrictions(parser, mGuestRestrictions);
+                                    }
                                 }
                                 break;
                             }
@@ -1061,25 +1052,18 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             updateUserIds();
-            upgradeIfNecessaryLILP();
-        } catch (IOException ioe) {
-            fallbackToSingleUserLILP();
-        } catch (XmlPullParserException pe) {
-            fallbackToSingleUserLILP();
+            upgradeIfNecessaryLP();
+        } catch (IOException | XmlPullParserException e) {
+            fallbackToSingleUserLP();
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                }
-            }
+            IoUtils.closeQuietly(fis);
         }
     }
 
     /**
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
      */
-    private void upgradeIfNecessaryLILP() {
+    private void upgradeIfNecessaryLP() {
         int userVersion = mUserVersion;
         if (userVersion < 1) {
             // Assign a proper name for the owner, if not initialized correctly before
@@ -1132,11 +1116,11 @@ public class UserManagerService extends IUserManager.Stub {
                     + USER_VERSION);
         } else {
             mUserVersion = userVersion;
-            writeUserListLILP();
+            writeUserListLP();
         }
     }
 
-    private void fallbackToSingleUserLILP() {
+    private void fallbackToSingleUserLP() {
         int flags = UserInfo.FLAG_INITIALIZED;
         // In split system user mode, the admin and primary flags are assigned to the first human
         // user.
@@ -1161,7 +1145,7 @@ public class UserManagerService extends IUserManager.Stub {
         updateUserIds();
         initDefaultGuestRestrictions();
 
-        writeUserListLILP();
+        writeUserListLP();
         writeUserLP(system);
     }
 
@@ -1247,8 +1231,7 @@ public class UserManagerService extends IUserManager.Stub {
      *   <user id="2"></user>
      * </users>
      */
-    private void writeUserListLILP() {
-        // TODO Investigate removing a dependency on mInstallLock
+    private void writeUserListLP() {
         FileOutputStream fos = null;
         AtomicFile userListFile = new AtomicFile(mUserListFile);
         try {
@@ -1266,8 +1249,10 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_USER_VERSION, Integer.toString(mUserVersion));
 
             serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
-            UserRestrictionsUtils
-                    .writeRestrictions(serializer, mGuestRestrictions, TAG_RESTRICTIONS);
+            synchronized (mGuestRestrictions) {
+                UserRestrictionsUtils
+                        .writeRestrictions(serializer, mGuestRestrictions, TAG_RESTRICTIONS);
+            }
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
@@ -1293,7 +1278,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private UserInfo readUserLILP(int id) {
+    private UserInfo readUserLP(int id) {
         int flags = 0;
         int serialNumber = id;
         String name = null;
@@ -1468,8 +1453,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private UserInfo createUserInternal(String name, int flags, int parentId) {
-        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
-                UserManager.DISALLOW_ADD_USER, false)) {
+        if (hasUserRestriction(UserManager.DISALLOW_ADD_USER, UserHandle.getCallingUserId())) {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
         }
@@ -1480,120 +1464,114 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
         final long ident = Binder.clearCallingIdentity();
-        UserInfo userInfo = null;
+        UserInfo userInfo;
         final int userId;
         try {
-            synchronized (mInstallLock) {
-                synchronized (mPackagesLock) {
-                    UserInfo parent = null;
-                    if (parentId != UserHandle.USER_NULL) {
-                        synchronized (mUsersLock) {
-                            parent = getUserInfoLU(parentId);
-                        }
-                        if (parent == null) return null;
+            synchronized (mPackagesLock) {
+                UserInfo parent = null;
+                if (parentId != UserHandle.USER_NULL) {
+                    synchronized (mUsersLock) {
+                        parent = getUserInfoLU(parentId);
                     }
-                    if (isManagedProfile && !canAddMoreManagedProfiles(parentId, false)) {
-                        Log.e(LOG_TAG, "Cannot add more managed profiles for user " + parentId);
+                    if (parent == null) return null;
+                }
+                if (isManagedProfile && !canAddMoreManagedProfiles(parentId, false)) {
+                    Log.e(LOG_TAG, "Cannot add more managed profiles for user " + parentId);
+                    return null;
+                }
+                if (!isGuest && !isManagedProfile && isUserLimitReached()) {
+                    // If we're not adding a guest user or a managed profile and the limit has
+                    // been reached, cannot add a user.
+                    return null;
+                }
+                // If we're adding a guest and there already exists one, bail.
+                if (isGuest && findCurrentGuestUser() != null) {
+                    return null;
+                }
+                // In legacy mode, restricted profile's parent can only be the owner user
+                if (isRestricted && !UserManager.isSplitSystemUser()
+                        && (parentId != UserHandle.USER_SYSTEM)) {
+                    Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
+                    return null;
+                }
+                if (isRestricted && UserManager.isSplitSystemUser()) {
+                    if (parent == null) {
+                        Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be "
+                                + "specified");
                         return null;
                     }
-                    if (!isGuest && !isManagedProfile && isUserLimitReached()) {
-                        // If we're not adding a guest user or a managed profile and the limit has
-                        // been reached, cannot add a user.
+                    if (!parent.canHaveProfile()) {
+                        Log.w(LOG_TAG, "Cannot add restricted profile - profiles cannot be "
+                                + "created for the specified parent user id " + parentId);
                         return null;
                     }
-                    // If we're adding a guest and there already exists one, bail.
-                    if (isGuest && findCurrentGuestUser() != null) {
-                        return null;
+                }
+                // In split system user mode, we assign the first human user the primary flag.
+                // And if there is no device owner, we also assign the admin flag to primary user.
+                if (UserManager.isSplitSystemUser()
+                        && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
+                    flags |= UserInfo.FLAG_PRIMARY;
+                    DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+                            mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                    if (devicePolicyManager == null
+                            || devicePolicyManager.getDeviceOwner() == null) {
+                        flags |= UserInfo.FLAG_ADMIN;
                     }
-                    // In legacy mode, restricted profile's parent can only be the owner user
-                    if (isRestricted && !UserManager.isSplitSystemUser()
-                            && (parentId != UserHandle.USER_SYSTEM)) {
-                        Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
-                        return null;
-                    }
-                    if (isRestricted && UserManager.isSplitSystemUser()) {
-                        if (parent == null) {
-                            Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be "
-                                    + "specified");
-                            return null;
-                        }
-                        if (!parent.canHaveProfile()) {
-                            Log.w(LOG_TAG, "Cannot add restricted profile - profiles cannot be "
-                                    + "created for the specified parent user id " + parentId);
-                            return null;
-                        }
-                    }
-                    // In split system user mode, we assign the first human user the primary flag.
-                    // And if there is no device owner, we also assign the admin flag to primary
-                    // user.
-                    if (UserManager.isSplitSystemUser()
-                            && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
-                        flags |= UserInfo.FLAG_PRIMARY;
-                        DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
-                                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                        if (devicePolicyManager == null
-                                || devicePolicyManager.getDeviceOwner() == null) {
-                            flags |= UserInfo.FLAG_ADMIN;
-                        }
-                    }
-                    userId = getNextAvailableId();
-                    userInfo = new UserInfo(userId, name, null, flags);
-                    userInfo.serialNumber = mNextSerialNumber++;
-                    long now = System.currentTimeMillis();
-                    userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
-                    userInfo.partial = true;
-                    Environment.getUserSystemDirectory(userInfo.id).mkdirs();
+                }
+                userId = getNextAvailableId();
+                userInfo = new UserInfo(userId, name, null, flags);
+                userInfo.serialNumber = mNextSerialNumber++;
+                long now = System.currentTimeMillis();
+                userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
+                userInfo.partial = true;
+                Environment.getUserSystemDirectory(userInfo.id).mkdirs();
+                synchronized (mUsersLock) {
                     mUsers.put(userId, userInfo);
-                    writeUserListLILP();
-                    if (parent != null) {
-                        if (isManagedProfile) {
-                            if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                                parent.profileGroupId = parent.id;
-                                scheduleWriteUser(parent);
-                            }
-                            userInfo.profileGroupId = parent.profileGroupId;
-                        } else if (isRestricted) {
-                            if (!parent.canHaveProfile()) {
-                                Log.w(LOG_TAG, "Cannot add restricted profile - parent user must be owner");
-                            }
-                            if (parent.restrictedProfileParentId == UserInfo.NO_PROFILE_GROUP_ID) {
-                                parent.restrictedProfileParentId = parent.id;
-                                scheduleWriteUser(parent);
-                            }
-                            userInfo.restrictedProfileParentId = parent.restrictedProfileParentId;
+                }
+                writeUserListLP();
+                if (parent != null) {
+                    if (isManagedProfile) {
+                        if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
+                            parent.profileGroupId = parent.id;
+                            writeUserLP(parent);
                         }
-                    }
-
-                    final StorageManager storage = mContext.getSystemService(StorageManager.class);
-                    storage.createUserKey(userId, userInfo.serialNumber);
-                    for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                        final String volumeUuid = vol.getFsUuid();
-                        try {
-                            final File userDir = Environment.getDataUserDirectory(volumeUuid,
-                                    userId);
-                            storage.prepareUserStorage(volumeUuid, userId, userInfo.serialNumber);
-                            enforceSerialNumber(userDir, userInfo.serialNumber);
-                        } catch (IOException e) {
-                            Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);
+                        userInfo.profileGroupId = parent.profileGroupId;
+                    } else if (isRestricted) {
+                        if (parent.restrictedProfileParentId == UserInfo.NO_PROFILE_GROUP_ID) {
+                            parent.restrictedProfileParentId = parent.id;
+                            writeUserLP(parent);
                         }
-                    }
-                    mPm.createNewUserLILPw(userId);
-                    userInfo.partial = false;
-                    scheduleWriteUser(userInfo);
-                    updateUserIds();
-                    Bundle restrictions = new Bundle();
-                    synchronized (mRestrictionsLock) {
-                        mBaseUserRestrictions.append(userId, restrictions);
+                        userInfo.restrictedProfileParentId = parent.restrictedProfileParentId;
                     }
                 }
             }
-            mPm.newUserCreated(userId);
-            if (userInfo != null) {
-                Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
-                addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
-                mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
-                        android.Manifest.permission.MANAGE_USERS);
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            storage.createUserKey(userId, userInfo.serialNumber);
+            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                final String volumeUuid = vol.getFsUuid();
+                try {
+                    final File userDir = Environment.getDataUserDirectory(volumeUuid, userId);
+                    storage.prepareUserStorage(volumeUuid, userId, userInfo.serialNumber);
+                    enforceSerialNumber(userDir, userInfo.serialNumber);
+                } catch (IOException e) {
+                    Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);
+                }
             }
+            mPm.createNewUser(userId);
+            userInfo.partial = false;
+            synchronized (mPackagesLock) {
+                writeUserLP(userInfo);
+            }
+            updateUserIds();
+            Bundle restrictions = new Bundle();
+            synchronized (mRestrictionsLock) {
+                mBaseUserRestrictions.append(userId, restrictions);
+            }
+            mPm.newUserCreated(userId);
+            Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
+            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
+                    android.Manifest.permission.MANAGE_USERS);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1782,11 +1760,7 @@ public class UserManagerService extends IUserManager.Stub {
                                     // Clean up any ActivityManager state
                                     LocalServices.getService(ActivityManagerInternal.class)
                                             .onUserRemoved(userHandle);
-                                    synchronized (mInstallLock) {
-                                        synchronized (mPackagesLock) {
-                                            removeUserStateLILP(userHandle);
-                                        }
-                                    }
+                                    removeUserState(userHandle);
                                 }
                             }.start();
                         }
@@ -1798,10 +1772,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void removeUserStateLILP(final int userHandle) {
+    private void removeUserState(final int userHandle) {
         mContext.getSystemService(StorageManager.class).destroyUserKey(userHandle);
         // Cleanup package manager settings
-        mPm.cleanUpUserLILPw(this, userHandle);
+        mPm.cleanUpUser(this, userHandle);
 
         // Remove this user from the list
         synchronized (mUsersLock) {
@@ -1811,7 +1785,9 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
         userFile.delete();
         // Update the user list
-        writeUserListLILP();
+        synchronized (mPackagesLock) {
+            writeUserListLP();
+        }
         updateUserIds();
         removeDirectoryRecursive(Environment.getUserSystemDirectory(userHandle));
     }
@@ -2146,17 +2122,15 @@ public class UserManagerService extends IUserManager.Stub {
      * @param userId the user that was just foregrounded
      */
     public void onUserForeground(int userId) {
-        synchronized (mPackagesLock) {
-            UserInfo user = getUserInfoNoChecks(userId);
-            long now = System.currentTimeMillis();
-            if (user == null || user.partial) {
-                Slog.w(LOG_TAG, "userForeground: unknown user #" + userId);
-                return;
-            }
-            if (now > EPOCH_PLUS_30_YEARS) {
-                user.lastLoggedInTime = now;
-                scheduleWriteUser(user);
-            }
+        UserInfo user = getUserInfoNoChecks(userId);
+        if (user == null || user.partial) {
+            Slog.w(LOG_TAG, "userForeground: unknown user #" + userId);
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (now > EPOCH_PLUS_30_YEARS) {
+            user.lastLoggedInTime = now;
+            scheduleWriteUser(user);
         }
     }
 
@@ -2164,7 +2138,6 @@ public class UserManagerService extends IUserManager.Stub {
      * Returns the next available user id, filling in any holes in the ids.
      * TODO: May not be a good idea to recycle ids, in case it results in confusion
      * for data and battery stats collection, or unexpected cross-talk.
-     * @return
      */
     private int getNextAvailableId() {
         synchronized (mUsersLock) {
@@ -2348,7 +2321,9 @@ public class UserManagerService extends IUserManager.Stub {
             }
             pw.println();
             pw.println("Guest restrictions:");
-            UserRestrictionsUtils.dumpRestrictions(pw, "  ", mGuestRestrictions);
+            synchronized (mGuestRestrictions) {
+                UserRestrictionsUtils.dumpRestrictions(pw, "  ", mGuestRestrictions);
+            }
         }
     }
 
