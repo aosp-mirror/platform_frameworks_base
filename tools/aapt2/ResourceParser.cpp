@@ -49,6 +49,13 @@ static Maybe<StringPiece16> findNonEmptyAttribute(XmlPullParser* parser,
     return {};
 }
 
+/**
+ * Returns true if the element is <skip> or <eat-comment> and can be safely ignored.
+ */
+static bool shouldIgnoreElement(const StringPiece16& ns, const StringPiece16& name) {
+    return ns.empty() && (name == u"skip" || name == u"eat-comment");
+}
+
 ResourceParser::ResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
                                const ConfigDescription& config,
                                const ResourceParserOptions& options) :
@@ -205,16 +212,14 @@ static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& c
         }
     }
 
-    if (!res->value) {
-        return true;
-    }
+    if (res->value) {
+        // Attach the comment, source and config to the value.
+        res->value->setComment(std::move(res->comment));
+        res->value->setSource(std::move(res->source));
 
-    // Attach the comment, source and config to the value.
-    res->value->setComment(std::move(res->comment));
-    res->value->setSource(std::move(res->source));
-
-    if (!table->addResource(res->name, res->id, config, std::move(res->value), diag)) {
-        return false;
+        if (!table->addResource(res->name, res->id, config, std::move(res->value), diag)) {
+            return false;
+        }
     }
 
     bool error = false;
@@ -259,17 +264,6 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
             continue;
         }
 
-        Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name");
-        if (!maybeName) {
-            mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                         << "<" << elementName << "> tag must have a 'name' attribute");
-            error = true;
-            continue;
-        }
-
-        // Check if we should skip this product.
-        const bool stripResource = shouldStripResource(parser, mOptions.product);
-
         if (elementName == u"item") {
             // Items simply have their type encoded in the type attribute.
             if (Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type")) {
@@ -283,9 +277,21 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
         }
 
         ParsedResource parsedResource;
-        parsedResource.name.entry = maybeName.value().toString();
         parsedResource.source = mSource.withLine(parser->getLineNumber());
         parsedResource.comment = std::move(comment);
+
+        if (Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name")) {
+            parsedResource.name.entry = maybeName.value().toString();
+
+        } else if (elementName != u"public-group") {
+            mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                         << "<" << elementName << "> tag must have a 'name' attribute");
+            error = true;
+            continue;
+        }
+
+        // Check if we should skip this product.
+        const bool stripResource = shouldStripResource(parser, mOptions.product);
 
         bool result = true;
         if (elementName == u"id") {
@@ -337,6 +343,8 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
             result = parsePublic(parser, &parsedResource);
         } else if (elementName == u"java-symbol" || elementName == u"symbol") {
             result = parseSymbol(parser, &parsedResource);
+        } else if (elementName == u"public-group") {
+            result = parsePublicGroup(parser, &parsedResource);
         } else {
             mDiag->warn(DiagMessage(mSource.withLine(parser->getLineNumber()))
                         << "unknown resource type '" << elementName << "'");
@@ -559,6 +567,92 @@ bool ResourceParser::parsePublic(XmlPullParser* parser, ParsedResource* outResou
     return true;
 }
 
+bool ResourceParser::parsePublicGroup(XmlPullParser* parser, ParsedResource* outResource) {
+    const Source source = mSource.withLine(parser->getLineNumber());
+
+    Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type");
+    if (!maybeType) {
+        mDiag->error(DiagMessage(source) << "<public-group> must have a 'type' attribute");
+        return false;
+    }
+
+    const ResourceType* parsedType = parseResourceType(maybeType.value());
+    if (!parsedType) {
+        mDiag->error(DiagMessage(source) << "invalid resource type '" << maybeType.value()
+                     << "' in <public-group>");
+        return false;
+    }
+
+    Maybe<StringPiece16> maybeId = findNonEmptyAttribute(parser, u"first-id");
+    if (!maybeId) {
+        mDiag->error(DiagMessage(source) << "<public-group> must have a 'first-id' attribute");
+        return false;
+    }
+
+    android::Res_value val;
+    bool result = android::ResTable::stringToInt(maybeId.value().data(),
+                                                 maybeId.value().size(), &val);
+    ResourceId nextId(val.data);
+    if (!result || !nextId.isValid()) {
+        mDiag->error(DiagMessage(source) << "invalid resource ID '" << maybeId.value()
+                     << "' in <public-group>");
+        return false;
+    }
+
+    std::u16string comment;
+    bool error = false;
+    const size_t depth = parser->getDepth();
+    while (XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() == XmlPullParser::Event::kComment) {
+            comment = util::trimWhitespace(parser->getComment()).toString();
+            continue;
+        } else if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+            // Skip text.
+            continue;
+        }
+
+        const Source itemSource = mSource.withLine(parser->getLineNumber());
+        const std::u16string& elementNamespace = parser->getElementNamespace();
+        const std::u16string& elementName = parser->getElementName();
+        if (elementNamespace.empty() && elementName == u"public") {
+            Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name");
+            if (!maybeName) {
+                mDiag->error(DiagMessage(itemSource) << "<public> must have a 'name' attribute");
+                error = true;
+                continue;
+            }
+
+            if (findNonEmptyAttribute(parser, u"id")) {
+                mDiag->error(DiagMessage(itemSource) << "'id' is ignored within <public-group>");
+                error = true;
+                continue;
+            }
+
+            if (findNonEmptyAttribute(parser, u"type")) {
+                mDiag->error(DiagMessage(itemSource) << "'type' is ignored within <public-group>");
+                error = true;
+                continue;
+            }
+
+            ParsedResource childResource;
+            childResource.name.type = *parsedType;
+            childResource.name.entry = maybeName.value().toString();
+            childResource.id = nextId;
+            childResource.comment = std::move(comment);
+            childResource.source = itemSource;
+            childResource.symbolState = SymbolState::kPublic;
+            outResource->childResources.push_back(std::move(childResource));
+
+            nextId.id += 1;
+
+        } else if (!shouldIgnoreElement(elementNamespace, elementName)) {
+            mDiag->error(DiagMessage(itemSource) << ":" << elementName << ">");
+            error = true;
+        }
+    }
+    return !error;
+}
+
 bool ResourceParser::parseSymbol(XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
@@ -608,12 +702,7 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
     return mask;
 }
 
-/**
- * Returns true if the element is <skip> or <eat-comment> and can be safely ignored.
- */
-static bool shouldIgnoreElement(const StringPiece16& ns, const StringPiece16& name) {
-    return ns.empty() && (name == u"skip" || name == u"eat-comment");
-}
+
 
 bool ResourceParser::parseAttr(XmlPullParser* parser, ParsedResource* outResource) {
     outResource->source = mSource.withLine(parser->getLineNumber());
