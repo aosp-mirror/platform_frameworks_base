@@ -50,49 +50,6 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         return data;
     }
 
-    private void assertConnectionFails(SSLContext context, String host, int port)
-            throws Exception {
-        try {
-            Socket s = context.getSocketFactory().createSocket(host, port);
-            s.getInputStream();
-            fail("Expected connection to " + host + ":" + port + " to fail.");
-        } catch (SSLHandshakeException expected) {
-        }
-    }
-
-    private void assertConnectionSucceeds(SSLContext context, String host, int port)
-            throws Exception {
-        Socket s = context.getSocketFactory().createSocket(host, port);
-        s.getInputStream();
-    }
-
-    private void assertUrlConnectionFails(SSLContext context, String host, int port)
-            throws Exception {
-        URL url = new URL("https://" + host + ":" + port);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setSSLSocketFactory(context.getSocketFactory());
-        try {
-            connection.getInputStream();
-            fail("Connection to " + host + ":" + port + " expected to fail");
-        } catch (SSLHandshakeException expected) {
-            // ignored.
-        }
-    }
-
-    private void assertUrlConnectionSucceeds(SSLContext context, String host, int port)
-            throws Exception {
-        URL url = new URL("https://" + host + ":" + port);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setSSLSocketFactory(context.getSocketFactory());
-        connection.getInputStream();
-    }
-
-    private SSLContext getSSLContext(ConfigSource source) throws Exception {
-        ApplicationConfig config = new ApplicationConfig(source);
-        SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, new TrustManager[] {config.getTrustManager()}, null);
-        return context;
-    }
 
 
     /**
@@ -115,8 +72,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
                 = new ArraySet<Pair<Domain, NetworkSecurityConfig>>();
         ConfigSource testSource =
                 new TestConfigSource(domainMap, getEmptyConfig());
-        SSLContext context = getSSLContext(testSource);
-        assertConnectionFails(context, "android.com", 443);
+        SSLContext context = TestUtils.getSSLContext(testSource);
+        TestUtils.assertConnectionFails(context, "android.com", 443);
     }
 
     public void testEmptyPerNetworkSecurityConfig() throws Exception {
@@ -125,9 +82,9 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", true), getEmptyConfig()));
         NetworkSecurityConfig defaultConfig = getSystemStoreConfig();
-        SSLContext context = getSSLContext(new TestConfigSource(domainMap, defaultConfig));
-        assertConnectionFails(context, "android.com", 443);
-        assertConnectionSucceeds(context, "google.com", 443);
+        SSLContext context = TestUtils.getSSLContext(new TestConfigSource(domainMap, defaultConfig));
+        TestUtils.assertConnectionFails(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "google.com", 443);
     }
 
     public void testBadPin() throws Exception {
@@ -143,9 +100,9 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", true), domain));
         SSLContext context
-                = getSSLContext(new TestConfigSource(domainMap, getSystemStoreConfig()));
-        assertConnectionFails(context, "android.com", 443);
-        assertConnectionSucceeds(context, "google.com", 443);
+                = TestUtils.getSSLContext(new TestConfigSource(domainMap, getSystemStoreConfig()));
+        TestUtils.assertConnectionFails(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "google.com", 443);
     }
 
     public void testGoodPin() throws Exception {
@@ -161,9 +118,9 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", true), domain));
         SSLContext context
-                = getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
-        assertConnectionSucceeds(context, "android.com", 443);
-        assertConnectionSucceeds(context, "developer.android.com", 443);
+                = TestUtils.getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
     }
 
     public void testOverridePins() throws Exception {
@@ -180,8 +137,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", true), domain));
         SSLContext context
-                = getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
-        assertConnectionSucceeds(context, "android.com", 443);
+                = TestUtils.getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
     }
 
     public void testMostSpecificNetworkSecurityConfig() throws Exception {
@@ -192,9 +149,9 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("developer.android.com", false), getSystemStoreConfig()));
         SSLContext context
-                = getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
-        assertConnectionFails(context, "android.com", 443);
-        assertConnectionSucceeds(context, "developer.android.com", 443);
+                = TestUtils.getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
+        TestUtils.assertConnectionFails(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
     }
 
     public void testSubdomainIncluded() throws Exception {
@@ -204,14 +161,14 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", true), getSystemStoreConfig()));
         SSLContext context
-                = getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
-        assertConnectionSucceeds(context, "developer.android.com", 443);
+                = TestUtils.getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
         // Now try without including subdomains.
         domainMap = new ArraySet<Pair<Domain, NetworkSecurityConfig>>();
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", false), getSystemStoreConfig()));
-        context = getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
-        assertConnectionFails(context, "developer.android.com", 443);
+        context = TestUtils.getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
+        TestUtils.assertConnectionFails(context, "developer.android.com", 443);
     }
 
     public void testConfigBuilderUsesParents() throws Exception {
@@ -246,9 +203,9 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         domainMap.add(new Pair<Domain, NetworkSecurityConfig>(
                 new Domain("android.com", true), domain));
         SSLContext context
-                = getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
-        assertUrlConnectionSucceeds(context, "android.com", 443);
-        assertUrlConnectionSucceeds(context, "developer.android.com", 443);
-        assertUrlConnectionFails(context, "google.com", 443);
+                = TestUtils.getSSLContext(new TestConfigSource(domainMap, getEmptyConfig()));
+        TestUtils.assertUrlConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertUrlConnectionSucceeds(context, "developer.android.com", 443);
+        TestUtils.assertUrlConnectionFails(context, "google.com", 443);
     }
 }

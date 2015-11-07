@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <base-config>
+    <trust-anchors>
+    </trust-anchors>
+  </base-config>
+  <domain-config>
+    <domain>android.com</domain>
+    <trust-anchors>
+      <certificates src="system" />
+      <certificates src="user" />
+    </trust-anchors>
+  </domain-config>
+  <domain-config>
+    <domain>google.com</domain>
+    <trust-anchors>
+      <certificates src="system" />
+      <certificates src="user" />
+    </trust-anchors>
+  </domain-config>
+</network-security-config>
