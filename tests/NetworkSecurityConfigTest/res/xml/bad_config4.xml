@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <base-config>
+    <!-- domains are not allowed in base-config -->
+    <domain>android.com</domain>
+  </base-config>
+</network-security-config>
