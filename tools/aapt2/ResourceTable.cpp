@@ -190,22 +190,32 @@ static constexpr const char16_t* kValidNameMangledChars = u"._-$";
 
 bool ResourceTable::addResource(const ResourceNameRef& name, const ConfigDescription& config,
                                 std::unique_ptr<Value> value, IDiagnostics* diag) {
-    return addResourceImpl(name, {}, config, std::move(value), kValidNameChars, diag);
+    return addResourceImpl(name, {}, config, std::move(value), kValidNameChars,
+                           resolveValueCollision, diag);
 }
 
 bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId resId,
                                 const ConfigDescription& config, std::unique_ptr<Value> value,
                                 IDiagnostics* diag) {
-    return addResourceImpl(name, resId, config, std::move(value), kValidNameChars, diag);
+    return addResourceImpl(name, resId, config, std::move(value), kValidNameChars,
+                           resolveValueCollision, diag);
 }
 
 bool ResourceTable::addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
                                      const Source& source, const StringPiece16& path,
                                      IDiagnostics* diag) {
+    return addFileReference(name, config, source, path, resolveValueCollision, diag);
+}
+
+bool ResourceTable::addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
+                                     const Source& source, const StringPiece16& path,
+                                     std::function<int(Value*,Value*)> conflictResolver,
+                                     IDiagnostics* diag) {
     std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
             stringPool.makeRef(path));
     fileRef->setSource(source);
-    return addResourceImpl(name, ResourceId{}, config, std::move(fileRef), kValidNameChars, diag);
+    return addResourceImpl(name, ResourceId{}, config, std::move(fileRef), kValidNameChars,
+                           conflictResolver, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
@@ -213,7 +223,7 @@ bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
     return addResourceImpl(name, ResourceId{}, config, std::move(value), kValidNameMangledChars,
-                           diag);
+                           resolveValueCollision, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
@@ -221,12 +231,17 @@ bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                                             const ConfigDescription& config,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-    return addResourceImpl(name, id, config, std::move(value), kValidNameMangledChars, diag);
+    return addResourceImpl(name, id, config, std::move(value), kValidNameMangledChars,
+                           resolveValueCollision, diag);
 }
 
-bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
-                                    const ConfigDescription& config, std::unique_ptr<Value> value,
-                                    const char16_t* validChars, IDiagnostics* diag) {
+bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
+                                    const ResourceId resId,
+                                    const ConfigDescription& config,
+                                    std::unique_ptr<Value> value,
+                                    const char16_t* validChars,
+                                    std::function<int(Value*,Value*)> conflictResolver,
+                                    IDiagnostics* diag) {
     assert(value && "value can't be nullptr");
     assert(diag && "diagnostics can't be nullptr");
 
@@ -289,7 +304,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
         // This resource did not exist before, add it.
         entry->values.insert(iter, ResourceConfigValue{ config, std::move(value) });
     } else {
-        int collisionResult = resolveValueCollision(iter->value.get(), value.get());
+        int collisionResult = conflictResolver(iter->value.get(), value.get());
         if (collisionResult > 0) {
             // Take the incoming value.
             iter->value = std::move(value);

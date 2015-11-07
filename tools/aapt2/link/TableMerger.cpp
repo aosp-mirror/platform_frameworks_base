@@ -37,7 +37,7 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* outTable) :
 /**
  * This will merge packages with the same package name (or no package name).
  */
-bool TableMerger::merge(const Source& src, ResourceTable* table) {
+bool TableMerger::merge(const Source& src, ResourceTable* table, bool overrideExisting) {
     const uint8_t desiredPackageId = mContext->getPackageId();
 
     bool error = false;
@@ -55,7 +55,7 @@ bool TableMerger::merge(const Source& src, ResourceTable* table) {
             // mangled, then looked up at resolution time.
             // Also, when linking, we convert references with no package name to use
             // the compilation package name.
-            if (!doMerge(src, table, package.get(), false)) {
+            if (!doMerge(src, table, package.get(), false, overrideExisting)) {
                 error = true;
             }
         }
@@ -79,7 +79,7 @@ bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& package
 
         bool mangle = packageName != mContext->getCompilationPackage();
         mMergedPackages.insert(package->name);
-        if (!doMerge(src, table, package.get(), mangle)) {
+        if (!doMerge(src, table, package.get(), mangle, false)) {
             error = true;
         }
     }
@@ -87,7 +87,8 @@ bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& package
 }
 
 bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
-                          ResourceTablePackage* srcPackage, const bool manglePackage) {
+                          ResourceTablePackage* srcPackage, const bool manglePackage,
+                          const bool overrideExisting) {
     bool error = false;
 
     for (auto& srcType : srcPackage->types) {
@@ -149,7 +150,7 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                 if (iter != dstEntry->values.end() && iter->config == srcValue.config) {
                     const int collisionResult = ResourceTable::resolveValueCollision(
                             iter->value.get(), srcValue.value.get());
-                    if (collisionResult == 0) {
+                    if (collisionResult == 0 && !overrideExisting) {
                         // Error!
                         ResourceNameRef resourceName(srcPackage->name,
                                                      srcType->type,
