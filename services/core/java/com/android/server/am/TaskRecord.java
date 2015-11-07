@@ -319,7 +319,7 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeable = resizeable || mService.mForceResizableActivites;
         mPrivileged = privileged;
-        ActivityInfo info = mActivities.get(0).info;
+        ActivityInfo info = (mActivities.size() > 0) ? mActivities.get(0).info : null;
         mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
     }
 
