@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="android.security.tests"
+          package="android.security.net.config"
           android:sharedUserId="android.uid.system">
 
     <application>
@@ -23,7 +23,7 @@
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="android.security.tests"
+        android:targetPackage="android.security.net.config"
         android:label="ANSC Tests">
     </instrumentation>
 </manifest>
