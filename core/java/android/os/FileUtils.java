@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -645,5 +646,9 @@ public class FileUtils {
         } else {
             return EMPTY;
         }
+    }
+
+    public static @Nullable File newFileOrNull(@Nullable String path) {
+        return (path != null) ? new File(path) : null;
     }
 }

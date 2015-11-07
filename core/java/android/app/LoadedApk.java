@@ -31,6 +31,7 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -93,6 +94,8 @@ public final class LoadedApk {
     private final String mDataDir;
     private final String mLibDir;
     private final File mDataDirFile;
+    private final File mDeviceEncryptedDataDirFile;
+    private final File mCredentialEncryptedDataDirFile;
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
@@ -139,7 +142,9 @@ public final class LoadedApk {
         mOverlayDirs = aInfo.resourceDirs;
         mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
-        mDataDirFile = mDataDir != null ? new File(mDataDir) : null;
+        mDataDirFile = FileUtils.newFileOrNull(mDataDir);
+        mDeviceEncryptedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceEncryptedDataDir);
+        mCredentialEncryptedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialEncryptedDataDir);
         mLibDir = aInfo.nativeLibraryDir;
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
@@ -192,6 +197,8 @@ public final class LoadedApk {
         mSharedLibraries = null;
         mDataDir = null;
         mDataDirFile = null;
+        mDeviceEncryptedDataDirFile = null;
+        mCredentialEncryptedDataDirFile = null;
         mLibDir = null;
         mBaseClassLoader = null;
         mSecurityViolation = false;
@@ -537,6 +544,14 @@ public final class LoadedApk {
 
     public File getDataDirFile() {
         return mDataDirFile;
+    }
+
+    public File getDeviceEncryptedDataDirFile() {
+        return mDeviceEncryptedDataDirFile;
+    }
+
+    public File getCredentialEncryptedDataDirFile() {
+        return mCredentialEncryptedDataDirFile;
     }
 
     public AssetManager getAssets(ActivityThread mainThread) {

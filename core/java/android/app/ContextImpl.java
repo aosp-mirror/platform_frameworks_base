@@ -443,6 +443,22 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public File getDeviceEncryptedFilesDir() {
+        if (mPackageInfo != null) {
+            return mPackageInfo.getDeviceEncryptedDataDirFile();
+        }
+        throw new RuntimeException("Not supported in system context");
+    }
+
+    @Override
+    public File getCredentialEncryptedFilesDir() {
+        if (mPackageInfo != null) {
+            return mPackageInfo.getCredentialEncryptedDataDirFile();
+        }
+        throw new RuntimeException("Not supported in system context");
+    }
+
+    @Override
     public File getNoBackupFilesDir() {
         synchronized (mSync) {
             if (mNoBackupFilesDir == null) {

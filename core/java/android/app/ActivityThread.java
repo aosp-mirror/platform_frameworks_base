@@ -4834,13 +4834,7 @@ public final class ActivityThread {
         // Continue loading instrumentation.
         if (ii != null) {
             final ApplicationInfo instrApp = new ApplicationInfo();
-            instrApp.packageName = ii.packageName;
-            instrApp.sourceDir = ii.sourceDir;
-            instrApp.publicSourceDir = ii.publicSourceDir;
-            instrApp.splitSourceDirs = ii.splitSourceDirs;
-            instrApp.splitPublicSourceDirs = ii.splitPublicSourceDirs;
-            instrApp.dataDir = ii.dataDir;
-            instrApp.nativeLibraryDir = ii.nativeLibraryDir;
+            ii.copyTo(instrApp);
 
             final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
                     appContext.getClassLoader(), false, true, false);

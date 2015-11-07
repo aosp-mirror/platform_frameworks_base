@@ -2951,9 +2951,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
                 pkg.applicationInfo.privateFlags = ps.pkgPrivateFlags;
-                pkg.applicationInfo.dataDir = Environment
-                        .getDataUserPackageDirectory(ps.volumeUuid, userId, packageName)
-                        .getAbsolutePath();
+                pkg.applicationInfo.uid = ps.appId;
+                pkg.applicationInfo.initForUser(userId);
                 pkg.applicationInfo.primaryCpuAbi = ps.primaryCpuAbiString;
                 pkg.applicationInfo.secondaryCpuAbi = ps.secondaryCpuAbiString;
             }
@@ -6944,17 +6943,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.processName,
                 pkg.applicationInfo.uid);
 
-        File dataPath;
-        if (mPlatformPackage == pkg) {
-            // The system package is special.
-            dataPath = new File(Environment.getDataDirectory(), "system");
-
-            pkg.applicationInfo.dataDir = dataPath.getPath();
-
-        } else {
+        if (pkg != mPlatformPackage) {
             // This is a normal package, need to make its data directory.
-            dataPath = Environment.getDataUserPackageDirectory(pkg.volumeUuid,
-                    UserHandle.USER_SYSTEM, pkg.packageName);
+            final File dataPath = Environment.getDataUserCredentialEncryptedPackageDirectory(
+                    pkg.volumeUuid, UserHandle.USER_SYSTEM, pkg.packageName);
 
             boolean uidError = false;
             if (dataPath.exists()) {
@@ -7043,7 +7035,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 }
-                pkg.applicationInfo.dataDir = dataPath.getPath();
+
                 if (mShouldRestoreconData) {
                     Slog.i(TAG, "SELinux relabeling of " + pkg.packageName + " issued.");
                     mInstaller.restoreconData(pkg.volumeUuid, pkg.packageName,
@@ -7062,14 +7054,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
                             "Unable to create data dirs [errorCode=" + ret + "]");
                 }
-
-                if (dataPath.exists()) {
-                    pkg.applicationInfo.dataDir = dataPath.getPath();
-                } else {
-                    Slog.w(TAG, "Unable to create data directory: " + dataPath);
-                    pkg.applicationInfo.dataDir = null;
-                }
             }
+
+            // Get all of our default paths setup
+            pkg.applicationInfo.initForUser(UserHandle.USER_SYSTEM);
 
             pkgSetting.uidError = uidError;
         }
@@ -7624,6 +7612,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.splitSourceDirs = pkg.applicationInfo.splitSourceDirs;
                 a.info.splitPublicSourceDirs = pkg.applicationInfo.splitPublicSourceDirs;
                 a.info.dataDir = pkg.applicationInfo.dataDir;
+                a.info.deviceEncryptedDataDir = pkg.applicationInfo.deviceEncryptedDataDir;
+                a.info.credentialEncryptedDataDir = pkg.applicationInfo.credentialEncryptedDataDir;
 
                 // TODO: Update instrumentation.nativeLibraryDir as well ? Does it
                 // need other information about the application, like the ABI and what not ?

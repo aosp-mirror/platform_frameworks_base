@@ -177,6 +177,18 @@ public class MockContext extends Context {
     }
 
     @Override
+    public File getDeviceEncryptedFilesDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @SystemApi
+    @Override
+    public File getCredentialEncryptedFilesDir() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public File getNoBackupFilesDir() {
         throw new UnsupportedOperationException();
     }
