@@ -83,6 +83,7 @@ private:
     bool parseColor(XmlPullParser* parser, ParsedResource* outResource);
     bool parsePrimitive(XmlPullParser* parser, ParsedResource* outResource);
     bool parsePublic(XmlPullParser* parser, ParsedResource* outResource);
+    bool parsePublicGroup(XmlPullParser* parser, ParsedResource* outResource);
     bool parseSymbol(XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttr(XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttrImpl(XmlPullParser* parser, ParsedResource* outResource, bool weak);

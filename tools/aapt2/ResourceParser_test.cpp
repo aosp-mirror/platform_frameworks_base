@@ -489,4 +489,36 @@ TEST_F(ResourceParserTest, FailWhenProductFilterStripsOutAllVersionsOfResource) 
     ASSERT_FALSE(testParse(input, std::u16string(u"phone")));
 }
 
+TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
+    std::string input = R"EOF(
+    <public-group type="attr" first-id="0x01010040">
+      <public name="foo" />
+      <public name="bar" />
+    </public-group>)EOF";
+    ASSERT_TRUE(testParse(input));
+
+    Maybe<ResourceTable::SearchResult> result = mTable.findResource(
+            test::parseNameOrDie(u"@attr/foo"));
+    AAPT_ASSERT_TRUE(result);
+
+    AAPT_ASSERT_TRUE(result.value().package->id);
+    AAPT_ASSERT_TRUE(result.value().type->id);
+    AAPT_ASSERT_TRUE(result.value().entry->id);
+    ResourceId actualId(result.value().package->id.value(),
+                        result.value().type->id.value(),
+                        result.value().entry->id.value());
+    EXPECT_EQ(ResourceId(0x01010040), actualId);
+
+    result = mTable.findResource(test::parseNameOrDie(u"@attr/bar"));
+    AAPT_ASSERT_TRUE(result);
+
+    AAPT_ASSERT_TRUE(result.value().package->id);
+    AAPT_ASSERT_TRUE(result.value().type->id);
+    AAPT_ASSERT_TRUE(result.value().entry->id);
+    actualId = ResourceId(result.value().package->id.value(),
+                          result.value().type->id.value(),
+                          result.value().entry->id.value());
+    EXPECT_EQ(ResourceId(0x01010041), actualId);
+}
+
 } // namespace aapt
