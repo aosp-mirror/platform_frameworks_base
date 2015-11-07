@@ -233,7 +233,7 @@ public final class NetworkSecurityConfig {
 
         public NetworkSecurityConfig build() {
             boolean cleartextPermitted = getEffectiveCleartextTrafficPermitted();
-            boolean hstsEnforced = getEffectiveCleartextTrafficPermitted();
+            boolean hstsEnforced = getEffectiveHstsEnforced();
             PinSet pinSet = getEffectivePinSet();
             List<CertificatesEntryRef> entryRefs = getEffectiveCertificatesEntryRefs();
             return new NetworkSecurityConfig(cleartextPermitted, hstsEnforced, pinSet, entryRefs);
