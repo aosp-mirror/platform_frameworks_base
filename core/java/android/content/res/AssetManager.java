@@ -686,13 +686,6 @@ public final class AssetManager implements AutoCloseable {
     public native final boolean isUpToDate();
 
     /**
-     * Change the locale being used by this asset manager.  Not for use by
-     * applications.
-     * {@hide}
-     */
-    public native final void setLocale(String locale);
-
-    /**
      * Get the locales that this asset manager contains data for.
      *
      * <p>On SDK 21 (Android 5.0: Lollipop) and above, Locale strings are valid

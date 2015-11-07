@@ -578,22 +578,6 @@ static jboolean android_content_AssetManager_isUpToDate(JNIEnv* env, jobject cla
     return am->isUpToDate() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void android_content_AssetManager_setLocale(JNIEnv* env, jobject clazz,
-                                                jstring locale)
-{
-    ScopedUtfChars locale8(env, locale);
-    if (locale8.c_str() == NULL) {
-        return;
-    }
-
-    AssetManager* am = assetManagerForJavaObject(env, clazz);
-    if (am == NULL) {
-        return;
-    }
-
-    am->setLocale(locale8.c_str());
-}
-
 static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject clazz)
 {
     Vector<String8> locales;
@@ -2168,8 +2152,6 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_isUpToDate },
 
     // Resources.
-    { "setLocale",      "(Ljava/lang/String;)V",
-        (void*) android_content_AssetManager_setLocale },
     { "getLocales",      "()[Ljava/lang/String;",
         (void*) android_content_AssetManager_getLocales },
     { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
