@@ -476,10 +476,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Fire!
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
 
-        // Verify internal calls.
-        verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
-                eq(admin1.getPackageName()));
-
         // TODO We should check if the caller has called clearCallerIdentity().
         verify(mContext.ibackupManager, times(1)).setBackupServiceActive(
                 eq(UserHandle.USER_SYSTEM), eq(false));
@@ -546,10 +542,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
 
-        // Verify internal calls.
-        verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
-                eq(admin1.getPackageName()));
-
         assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
 
         // Set up other mocks.
@@ -583,10 +575,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
-
-        // Verify internal calls.
-        verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
-                eq(admin1.getPackageName()));
 
         assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
 
