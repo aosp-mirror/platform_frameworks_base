@@ -245,6 +245,35 @@ public class XmlConfigTests extends AndroidTestCase {
         TestUtils.assertUrlConnectionSucceeds(context, "android.com", 443);
     }
 
+    public void testNestedDomainConfigs() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.nested_domains);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        assertTrue(appConfig.hasPerDomainConfigs());
+        NetworkSecurityConfig parent = appConfig.getConfigForHostname("android.com");
+        NetworkSecurityConfig child = appConfig.getConfigForHostname("developer.android.com");
+        MoreAsserts.assertNotEqual(parent, child);
+        MoreAsserts.assertEmpty(parent.getPins().pins);
+        MoreAsserts.assertNotEmpty(child.getPins().pins);
+        // Check that the child inherited the cleartext value and anchors.
+        assertFalse(child.isCleartextTrafficPermitted());
+        MoreAsserts.assertNotEmpty(child.getTrustAnchors());
+        // Test connections.
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
+    }
+
+    public void testNestedDomainConfigsOverride() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.nested_domains_override);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        assertTrue(appConfig.hasPerDomainConfigs());
+        NetworkSecurityConfig parent = appConfig.getConfigForHostname("android.com");
+        NetworkSecurityConfig child = appConfig.getConfigForHostname("developer.android.com");
+        MoreAsserts.assertNotEqual(parent, child);
+        assertTrue(parent.isCleartextTrafficPermitted());
+        assertFalse(child.isCleartextTrafficPermitted());
+    }
+
     private void testBadConfig(int configId) throws Exception {
         try {
             XmlConfigSource source = new XmlConfigSource(getContext(), configId);
