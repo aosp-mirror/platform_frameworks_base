@@ -5659,7 +5659,8 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_LAYOUT) Log.v(TAG, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
-                + " reportDraw=" + reportDraw);
+                + " reportDraw=" + reportDraw
+                + " backDropFrame=" + backDropFrame);
 
         // Tell all listeners that we are resizing the window so that the chrome can get
         // updated as fast as possible on a separate thread,
