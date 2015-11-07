@@ -635,7 +635,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (info != null && (info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                 info.flags |= UserInfo.FLAG_INITIALIZED;
-                scheduleWriteUserLP(info);
+                scheduleWriteUser(info);
             }
         }
     }
@@ -775,6 +775,7 @@ public class UserManagerService extends IUserManager.Stub {
             Preconditions.checkState(mCachedEffectiveUserRestrictions.get(userId)
                     != newRestrictions);
             mBaseUserRestrictions.put(userId, newRestrictions);
+            scheduleWriteUser(mUsers.get(userId));
         }
 
         final Bundle effective = computeEffectiveUserRestrictionsLR(userId);
@@ -1082,7 +1083,7 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo user = getUserInfoNoChecks(UserHandle.USER_SYSTEM);
             if ("Primary".equals(user.name)) {
                 user.name = mContext.getResources().getString(com.android.internal.R.string.owner_name);
-                scheduleWriteUserLP(user);
+                scheduleWriteUser(user);
             }
             userVersion = 1;
         }
@@ -1092,7 +1093,7 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo user = getUserInfoNoChecks(UserHandle.USER_SYSTEM);
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == 0) {
                 user.flags |= UserInfo.FLAG_INITIALIZED;
-                scheduleWriteUserLP(user);
+                scheduleWriteUser(user);
             }
             userVersion = 2;
         }
@@ -1116,7 +1117,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (!splitSystemUser && user.isRestricted()
                             && (user.restrictedProfileParentId == UserInfo.NO_PROFILE_GROUP_ID)) {
                         user.restrictedProfileParentId = UserHandle.USER_SYSTEM;
-                        scheduleWriteUserLP(user);
+                        scheduleWriteUser(user);
                     }
                 }
             }
@@ -1161,7 +1162,9 @@ public class UserManagerService extends IUserManager.Stub {
         writeUserLP(system);
     }
 
-    private void scheduleWriteUserLP(UserInfo userInfo) {
+    private void scheduleWriteUser(UserInfo userInfo) {
+        // No need to wrap it within a lock -- worst case, we'll just post the same message
+        // twice.
         if (!mHandler.hasMessages(WRITE_USER_MSG, userInfo)) {
             Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userInfo);
             mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
@@ -1543,7 +1546,7 @@ public class UserManagerService extends IUserManager.Stub {
                         if (isManagedProfile) {
                             if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
                                 parent.profileGroupId = parent.id;
-                                scheduleWriteUserLP(parent);
+                                scheduleWriteUser(parent);
                             }
                             userInfo.profileGroupId = parent.profileGroupId;
                         } else if (isRestricted) {
@@ -1552,7 +1555,7 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                             if (parent.restrictedProfileParentId == UserInfo.NO_PROFILE_GROUP_ID) {
                                 parent.restrictedProfileParentId = parent.id;
-                                scheduleWriteUserLP(parent);
+                                scheduleWriteUser(parent);
                             }
                             userInfo.restrictedProfileParentId = parent.restrictedProfileParentId;
                         }
@@ -1571,7 +1574,7 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                     mPm.createNewUserLILPw(userId);
                     userInfo.partial = false;
-                    scheduleWriteUserLP(userInfo);
+                    scheduleWriteUser(userInfo);
                     updateUserIds();
                     Bundle restrictions = new Bundle();
                     synchronized (mRestrictionsLock) {
@@ -2148,7 +2151,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (now > EPOCH_PLUS_30_YEARS) {
                 user.lastLoggedInTime = now;
-                scheduleWriteUserLP(user);
+                scheduleWriteUser(user);
             }
         }
     }
