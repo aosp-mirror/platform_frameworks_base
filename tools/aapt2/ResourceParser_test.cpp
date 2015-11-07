@@ -521,4 +521,12 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
     EXPECT_EQ(ResourceId(0x01010041), actualId);
 }
 
+TEST_F(ResourceParserTest, ExternalTypesShouldOnlyBeReferences) {
+    std::string input = R"EOF(<item type="layout" name="foo">@layout/bar</item>)EOF";
+    ASSERT_TRUE(testParse(input));
+
+    input = R"EOF(<item type="layout" name="bar">"this is a string"</item>)EOF";
+    ASSERT_FALSE(testParse(input));
+}
+
 } // namespace aapt

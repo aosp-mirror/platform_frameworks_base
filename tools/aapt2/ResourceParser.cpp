@@ -346,8 +346,21 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
         } else if (elementName == u"public-group") {
             result = parsePublicGroup(parser, &parsedResource);
         } else {
-            mDiag->warn(DiagMessage(mSource.withLine(parser->getLineNumber()))
-                        << "unknown resource type '" << elementName << "'");
+            // Try parsing the elementName (or type) as a resource. These shall only be
+            // resources like 'layout' or 'xml' and they can only be references.
+            if (const ResourceType* type = parseResourceType(elementName)) {
+                parsedResource.name.type = *type;
+                parsedResource.value = parseXml(parser, android::ResTable_map::TYPE_REFERENCE,
+                                                false);
+                if (!parsedResource.value) {
+                    mDiag->error(DiagMessage(parsedResource.source) << "invalid value for type '"
+                                 << *type << "'. Expected a reference");
+                    result = false;
+                }
+            } else {
+                mDiag->warn(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                            << "unknown resource type '" << elementName << "'");
+            }
         }
 
         if (result) {
