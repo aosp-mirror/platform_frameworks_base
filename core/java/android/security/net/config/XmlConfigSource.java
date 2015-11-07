@@ -186,15 +186,21 @@ public class XmlConfigSource implements ConfigSource {
         return anchors;
     }
 
-    private Pair<NetworkSecurityConfig.Builder, Set<Domain>> parseConfigEntry(
-            XmlResourceParser parser, Set<String> seenDomains, boolean baseConfig)
+    private List<Pair<NetworkSecurityConfig.Builder, Set<Domain>>> parseConfigEntry(
+            XmlResourceParser parser, Set<String> seenDomains,
+            NetworkSecurityConfig.Builder parentBuilder, boolean baseConfig)
             throws IOException, XmlPullParserException, ParserException {
+        List<Pair<NetworkSecurityConfig.Builder, Set<Domain>>> builders = new ArrayList<>();
         NetworkSecurityConfig.Builder builder = new NetworkSecurityConfig.Builder();
+        builder.setParent(parentBuilder);
         Set<Domain> domains = new ArraySet<>();
         boolean seenPinSet = false;
         boolean seenTrustAnchors = false;
         String configName = parser.getName();
         int outerDepth = parser.getDepth();
+        // Add this builder now so that this builder occurs before any of its children. This
+        // makes the final build pass easier.
+        builders.add(new Pair<>(builder, domains));
         // Parse config attributes. Only set values that are present, config inheritence will
         // handle the rest.
         for (int i = 0; i < parser.getAttributeCount(); i++) {
@@ -212,7 +218,6 @@ public class XmlConfigSource implements ConfigSource {
         // Parse the config elements.
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             String tagName = parser.getName();
-            // TODO: Support nested domain-config entries.
             if ("domain".equals(tagName)) {
                 if (baseConfig) {
                     throw new ParserException(parser, "domain element not allowed in base-config");
@@ -236,6 +241,12 @@ public class XmlConfigSource implements ConfigSource {
                 }
                 builder.setPinSet(parsePinSet(parser));
                 seenPinSet = true;
+            } else if ("domain-config".equals(tagName)) {
+                if (baseConfig) {
+                    throw new ParserException(parser,
+                            "Nested domain-config not allowed in base-config");
+                }
+                builders.addAll(parseConfigEntry(parser, seenDomains, builder, false));
             } else {
                 XmlUtils.skipCurrentTag(parser);
             }
@@ -243,7 +254,7 @@ public class XmlConfigSource implements ConfigSource {
         if (!baseConfig && domains.isEmpty()) {
             throw new ParserException(parser, "No domain elements in domain-config");
         }
-        return new Pair<>(builder, domains);
+        return builders;
     }
 
     private void parseNetworkSecurityConfig(XmlResourceParser parser)
@@ -263,9 +274,9 @@ public class XmlConfigSource implements ConfigSource {
                     throw new ParserException(parser, "Only one base-config allowed");
                 }
                 seenBaseConfig = true;
-                baseConfigBuilder = parseConfigEntry(parser, seenDomains, true).first;
+                baseConfigBuilder = parseConfigEntry(parser, seenDomains, null, true).get(0).first;
             } else if ("domain-config".equals(parser.getName())) {
-                builders.add(parseConfigEntry(parser, seenDomains, false));
+                builders.addAll(parseConfigEntry(parser, seenDomains, baseConfigBuilder, false));
             } else {
                 XmlUtils.skipCurrentTag(parser);
             }
@@ -286,8 +297,15 @@ public class XmlConfigSource implements ConfigSource {
         for (Pair<NetworkSecurityConfig.Builder, Set<Domain>> entry : builders) {
             NetworkSecurityConfig.Builder builder = entry.first;
             Set<Domain> domains = entry.second;
-            // Use the base-config for inheriting any unset values in the domain-config entry.
-            builder.setParent(baseConfigBuilder);
+            // Set the parent of configs that do not have a parent to the base-config. This can
+            // happen if the base-config comes after a domain-config in the file.
+            // Note that this is safe with regards to children because of the order that
+            // parseConfigEntry returns builders, the parent is always before the children. The
+            // children builders will not have build called until _after_ their parents have their
+            // parent set so everything is consistent.
+            if (builder.getParent() == null) {
+                builder.setParent(baseConfigBuilder);
+            }
             NetworkSecurityConfig config = builder.build();
             for (Domain domain : domains) {
                 configs.add(new Pair<>(domain, config));
