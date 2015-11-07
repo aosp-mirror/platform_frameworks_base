@@ -30,6 +30,26 @@ public final class Pin {
         this.digest = digest;
         mHashCode = Arrays.hashCode(digest) ^ digestAlgorithm.hashCode();
     }
+
+    /**
+     * @hide
+     */
+    public static boolean isSupportedDigestAlgorithm(String algorithm) {
+        // Currently only SHA-256 is supported. SHA-512 if/once Chromium networking stack
+        // supports it.
+        return "SHA-256".equalsIgnoreCase(algorithm);
+    }
+
+    /**
+     * @hide
+     */
+    public static int getDigestLength(String algorithm) {
+        if ("SHA-256".equalsIgnoreCase(algorithm)) {
+            return 32;
+        }
+        throw new IllegalArgumentException("Unsupported digest algorithm: " + algorithm);
+    }
+
     @Override
     public int hashCode() {
         return mHashCode;

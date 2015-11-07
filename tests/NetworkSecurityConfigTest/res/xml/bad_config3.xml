@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <domain-config>
+    <domain>android.com</domain>
+  </domain-config>
+  <domain-config>
+    <!-- Same domain name used in two configs -->
+    <domain>android.com</domain>
+  </domain-config>
+</network-security-config>
