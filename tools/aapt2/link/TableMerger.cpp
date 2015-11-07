@@ -34,6 +34,9 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* outTable) :
     assert(mMasterPackage && "package name or ID already taken");
 }
 
+/**
+ * This will merge packages with the same package name (or no package name).
+ */
 bool TableMerger::merge(const Source& src, ResourceTable* table) {
     const uint8_t desiredPackageId = mContext->getPackageId();
 
@@ -46,18 +49,37 @@ bool TableMerger::merge(const Source& src, ResourceTable* table) {
             continue;
         }
 
-        bool manglePackage = false;
-        if (!package->name.empty() && mContext->getCompilationPackage() != package->name) {
-            manglePackage = true;
-            mMergedPackages.insert(package->name);
+        if (package->name.empty() || mContext->getCompilationPackage() == package->name) {
+            // Merge here. Once the entries are merged and mangled, any references to
+            // them are still valid. This is because un-mangled references are
+            // mangled, then looked up at resolution time.
+            // Also, when linking, we convert references with no package name to use
+            // the compilation package name.
+            if (!doMerge(src, table, package.get(), false)) {
+                error = true;
+            }
+        }
+    }
+    return !error;
+}
+
+/**
+ * This will merge and mangle resources from a static library.
+ */
+bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& packageName,
+                                 ResourceTable* table) {
+    bool error = false;
+    for (auto& package : table->packages) {
+        // Warn of packages with an unrelated ID.
+        if (packageName != package->name) {
+            mContext->getDiagnostics()->warn(DiagMessage(src)
+                                             << "ignoring package " << package->name);
+            continue;
         }
 
-        // Merge here. Once the entries are merged and mangled, any references to
-        // them are still valid. This is because un-mangled references are
-        // mangled, then looked up at resolution time.
-        // Also, when linking, we convert references with no package name to use
-        // the compilation package name.
-        if (!doMerge(src, table, package.get(), manglePackage)) {
+        bool mangle = packageName != mContext->getCompilationPackage();
+        mMergedPackages.insert(package->name);
+        if (!doMerge(src, table, package.get(), mangle)) {
             error = true;
         }
     }
