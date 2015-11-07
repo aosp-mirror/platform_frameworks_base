@@ -60,7 +60,15 @@ public:
         return mMergedPackages;
     }
 
+    /**
+     * Merges resources from the same or empty package. This is for local sources.
+     */
     bool merge(const Source& src, ResourceTable* table);
+
+    /**
+     * Merges resources from the given package, mangling the name. This is for static libraries.
+     */
+    bool mergeAndMangle(const Source& src, const StringPiece16& package, ResourceTable* table);
 
 private:
     IAaptContext* mContext;

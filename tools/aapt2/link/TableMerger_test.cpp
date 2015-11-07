@@ -60,7 +60,7 @@ TEST_F(TableMergerTest, SimpleMerge) {
     TableMerger merger(mContext.get(), &finalTable);
 
     ASSERT_TRUE(merger.merge({}, tableA.get()));
-    ASSERT_TRUE(merger.merge({}, tableB.get()));
+    ASSERT_TRUE(merger.mergeAndMangle({}, u"com.app.b", tableB.get()));
 
     EXPECT_TRUE(merger.getMergedPackages().count(u"com.app.b") != 0);
 
@@ -90,7 +90,7 @@ TEST_F(TableMergerTest, MergeFileReferences) {
     TableMerger merger(mContext.get(), &finalTable);
 
     ASSERT_TRUE(merger.merge({}, tableA.get()));
-    ASSERT_TRUE(merger.merge({}, tableB.get()));
+    ASSERT_TRUE(merger.mergeAndMangle({}, u"com.app.b", tableB.get()));
 
     FileReference* f = test::getValue<FileReference>(&finalTable, u"@com.app.a:xml/file");
     ASSERT_NE(f, nullptr);

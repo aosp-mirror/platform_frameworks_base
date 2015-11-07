@@ -148,10 +148,14 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         fin.close();
     }
 
-    ResourceTablePackage* pkg = table.createPackage(context->getCompilationPackage());
-    if (!pkg->id) {
-        // If no package ID was set while parsing (public identifiers), auto assign an ID.
-        pkg->id = context->getPackageId();
+    // Ensure we have the compilation package at least.
+    table.createPackage(context->getCompilationPackage());
+
+    for (auto& pkg : table.packages) {
+        if (!pkg->id) {
+            // If no package ID was set while parsing (public identifiers), auto assign an ID.
+            pkg->id = context->getPackageId();
+        }
     }
 
     // Assign IDs to prepare the table for flattening.

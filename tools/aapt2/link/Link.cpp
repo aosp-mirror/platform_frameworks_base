@@ -49,6 +49,7 @@ struct LinkOptions {
     std::string manifestPath;
     std::vector<std::string> includePaths;
     Maybe<std::string> generateJavaClassPath;
+    std::vector<std::string> extraJavaPackages;
     Maybe<std::string> generateProguardRulesPath;
     bool noAutoVersion = false;
     bool staticLib = false;
@@ -695,6 +696,9 @@ struct LinkCommand {
                 options.useFinal = false;
             }
 
+            StringPiece16 actualPackage = mContext.getCompilationPackage();
+            StringPiece16 outputPackage = mContext.getCompilationPackage();
+
             if (mOptions.privateSymbols) {
                 // If we defined a private symbols package, we only emit Public symbols
                 // to the original package, and private and public symbols to the private package.
@@ -706,16 +710,16 @@ struct LinkCommand {
                 }
 
                 options.types = JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate;
-                if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage(),
-                                   mOptions.privateSymbols.value(), options)) {
-                    return 1;
-                }
+                outputPackage = mOptions.privateSymbols.value();
+            }
 
-            } else {
-                // Emit Everything.
+            if (!writeJavaFile(&mergedTable, actualPackage, outputPackage, options)) {
+                return 1;
+            }
 
-                if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage(),
-                                   mContext.getCompilationPackage(), options)) {
+            for (std::string& extraPackage : mOptions.extraJavaPackages) {
+                if (!writeJavaFile(&mergedTable, actualPackage, util::utf8ToUtf16(extraPackage),
+                                   options)) {
                     return 1;
                 }
             }
@@ -770,6 +774,8 @@ int link(const std::vector<StringPiece>& args) {
                           "private symbols.\n"
                           "If not specified, public and private symbols will use the application's "
                           "package name", &privateSymbolsPackage)
+            .optionalFlagList("--extra-packages", "Generate the same R.java but with different "
+                              "package names", &options.extraJavaPackages)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
