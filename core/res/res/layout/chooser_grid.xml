@@ -31,7 +31,7 @@
             android:layout_alwaysShow="true"
             android:elevation="8dp"
             android:paddingStart="16dp"
-            android:background="@color/white" >
+            android:background="@color/resolver_list_bg" >
         <TextView android:id="@+id/profile_button"
                   android:layout_width="wrap_content"
                   android:layout_height="48dp"
@@ -74,7 +74,7 @@
             android:id="@+id/resolver_list"
             android:clipToPadding="false"
             android:scrollbarStyle="outsideOverlay"
-            android:background="@color/white"
+            android:background="@color/resolver_list_bg"
             android:elevation="8dp"
             android:listSelector="@color/transparent"
             android:divider="@null"
@@ -85,7 +85,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_alwaysShow="true"
-              android:background="@color/white"
+              android:background="@color/resolver_list_bg"
               android:text="@string/noApplications"
               android:padding="32dp"
               android:gravity="center"
