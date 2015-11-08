@@ -2952,6 +2952,11 @@ public class ActivityManager {
         }
     }
 
+    /** {@hide} */
+    public static final int FLAG_OR_STOPPED = 1 << 0;
+    /** {@hide} */
+    public static final int FLAG_WITH_AMNESIA = 1 << 1;
+
     /**
      * Return whether the given user is actively running.  This means that
      * the user is in the "started" state, not "stopped" -- it is currently
@@ -2963,7 +2968,7 @@ public class ActivityManager {
      */
     public boolean isUserRunning(int userid) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userid, false);
+            return ActivityManagerNative.getDefault().isUserRunning(userid, 0);
         } catch (RemoteException e) {
             return false;
         }

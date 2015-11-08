@@ -63,7 +63,14 @@ public class ComponentInfo extends PackageItemInfo {
      * &lt;provider&gt; tag.
      */
     public boolean exported = false;
-    
+
+    /**
+     * Indicate if this component is aware of encryption lifecycle, and can be
+     * safely run before the user has entered their credentials (such as a lock
+     * pattern or PIN).
+     */
+    public boolean encryptionAware = false;
+
     public ComponentInfo() {
     }
 
@@ -74,6 +81,7 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = orig.descriptionRes;
         enabled = orig.enabled;
         exported = orig.exported;
+        encryptionAware = orig.encryptionAware;
     }
 
     @Override public CharSequence loadLabel(PackageManager pm) {
@@ -143,7 +151,7 @@ public class ComponentInfo extends PackageItemInfo {
     protected void dumpFront(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "enabled=" + enabled + " exported=" + exported
-                + " processName=" + processName);
+                + " encryptionAware=" + encryptionAware + " processName=" + processName);
         if (descriptionRes != 0) {
             pw.println(prefix + "description=" + descriptionRes);
         }
@@ -171,6 +179,7 @@ public class ComponentInfo extends PackageItemInfo {
         dest.writeInt(descriptionRes);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(exported ? 1 : 0);
+        dest.writeInt(encryptionAware ? 1 : 0);
     }
     
     protected ComponentInfo(Parcel source) {
@@ -183,6 +192,7 @@ public class ComponentInfo extends PackageItemInfo {
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);
         exported = (source.readInt() != 0);
+        encryptionAware = (source.readInt() != 0);
     }
     
     /**

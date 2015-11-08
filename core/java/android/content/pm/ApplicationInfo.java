@@ -466,7 +466,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    public static final int PRIVATE_FLAG_DEVICE_ENCRYPTED = 1 << 5;
+    public static final int PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED = 1 << 5;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
@@ -963,7 +963,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 .getDataUserCredentialEncryptedPackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
 
-        if ((privateFlags & PRIVATE_FLAG_DEVICE_ENCRYPTED) != 0) {
+        if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0) {
             dataDir = deviceEncryptedDataDir;
         } else {
             dataDir = credentialEncryptedDataDir;

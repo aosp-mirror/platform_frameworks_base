@@ -571,6 +571,11 @@
          single integer, with higher numbers considered to be better. -->
     <attr name="priority" format="integer" />
 
+    <!-- Indicate if this component is aware of encryption lifecycle, and can be
+         safely run before the user has entered their credentials (such as a lock
+         pattern or PIN). -->
+    <attr name="encryptionAware" format="boolean" />
+
     <!-- Specify how an activity should be launched.  See the
          <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
          Stack</a> document for important information on how these options impact
@@ -1277,6 +1282,7 @@
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
         <attr name="extractNativeLibs" />
+        <attr name="forceDeviceEncrypted" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
@@ -1652,6 +1658,7 @@
         <attr name="enabled" />
         <attr name="exported" />
         <attr name="singleUser" />
+        <attr name="encryptionAware" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -1735,6 +1742,7 @@
              with it is through the Service API (binding and starting). -->
         <attr name="isolatedProcess" format="boolean" />
         <attr name="singleUser" />
+        <attr name="encryptionAware" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
@@ -1770,6 +1778,7 @@
         <attr name="enabled" />
         <attr name="exported" />
         <attr name="singleUser" />
+        <attr name="encryptionAware" />
     </declare-styleable>
 
     <!-- The <code>activity</code> tag declares an
@@ -1842,6 +1851,7 @@
         <attr name="supportsPictureInPicture" />
         <attr name="lockTaskMode" />
         <attr name="showForAllUsers" />
+        <attr name="encryptionAware" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

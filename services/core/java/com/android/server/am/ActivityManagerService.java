@@ -5328,7 +5328,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.w(TAG, "Failed trying to unstop package "
                                 + packageName + ": " + e);
                     }
-                    if (mUserController.isUserRunningLocked(user, false)) {
+                    if (mUserController.isUserRunningLocked(user, 0)) {
                         forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
                     }
                 }
@@ -9812,7 +9812,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 // Make sure that the user who owns this provider is running.  If not,
                 // we don't want to allow it to run.
-                if (!mUserController.isUserRunningLocked(userId, false)) {
+                if (!mUserController.isUserRunningLocked(userId, 0)) {
                     Slog.w(TAG, "Unable to launch app "
                             + cpi.applicationInfo.packageName + "/"
                             + cpi.applicationInfo.uid + " for provider "
@@ -16640,7 +16640,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // If not, we will just skip it. Make an exception for shutdown broadcasts
         // and upgrade steps.
 
-        if (userId != UserHandle.USER_ALL && !mUserController.isUserRunningLocked(userId, false)) {
+        if (userId != UserHandle.USER_ALL && !mUserController.isUserRunningLocked(userId, 0)) {
             if ((callingUid != Process.SYSTEM_UID
                     || (intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0)
                     && !Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
@@ -19991,7 +19991,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean isUserRunning(int userId, boolean orStopped) {
+    public boolean isUserRunning(int userId, int flags) {
         if (checkCallingPermission(INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: isUserRunning() from pid="
@@ -20002,7 +20002,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         synchronized (this) {
-            return mUserController.isUserRunningLocked(userId, orStopped);
+            return mUserController.isUserRunningLocked(userId, flags);
         }
     }
 

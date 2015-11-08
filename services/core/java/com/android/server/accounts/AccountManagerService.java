@@ -980,7 +980,7 @@ public class AccountManagerService
             if (user.isRestricted() && (parentUserId == user.restrictedProfileParentId)) {
                 addSharedAccountAsUser(account, user.id);
                 try {
-                    if (ActivityManagerNative.getDefault().isUserRunning(user.id, false)) {
+                    if (ActivityManagerNative.getDefault().isUserRunning(user.id, 0)) {
                         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
                                 MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
                     }

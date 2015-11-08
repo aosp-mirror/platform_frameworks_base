@@ -2334,7 +2334,7 @@ public final class ActiveServices {
                         sr.userId, sr.crashCount, sr.shortName, app.pid);
                 bringDownServiceLocked(sr);
             } else if (!allowRestart
-                    || !mAm.mUserController.isUserRunningLocked(sr.userId, false)) {
+                    || !mAm.mUserController.isUserRunningLocked(sr.userId, 0)) {
                 bringDownServiceLocked(sr);
             } else {
                 boolean canceled = scheduleServiceRestartLocked(sr, true);

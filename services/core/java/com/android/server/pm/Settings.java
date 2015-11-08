@@ -2248,7 +2248,8 @@ final class Settings {
 
             StringBuilder sb = new StringBuilder();
             for (final PackageSetting pkg : mPackages.values()) {
-                if (pkg.pkg == null || pkg.pkg.applicationInfo == null) {
+                if (pkg.pkg == null || pkg.pkg.applicationInfo == null
+                        || pkg.pkg.applicationInfo.dataDir == null) {
                     Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
                     continue;
                 }
@@ -3750,8 +3751,13 @@ final class Settings {
     private String compToString(ArraySet<String> cmp) {
         return cmp != null ? Arrays.toString(cmp.toArray()) : "[]";
     }
- 
-    boolean isEnabledLPr(ComponentInfo componentInfo, int flags, int userId) {
+
+    boolean isEnabledAndVisibleLPr(ComponentInfo componentInfo, int flags, int userId) {
+        return isEnabledLPr(componentInfo, flags, userId)
+                && isVisibleLPr(componentInfo, flags);
+    }
+
+    private boolean isEnabledLPr(ComponentInfo componentInfo, int flags, int userId) {
         if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
             return true;
         }
@@ -3790,6 +3796,17 @@ final class Settings {
             return false;
         }
         return componentInfo.enabled;
+    }
+
+    private boolean isVisibleLPr(ComponentInfo componentInfo, int flags) {
+        if ((flags & PackageManager.GET_ENCRYPTION_UNAWARE_COMPONENTS) != 0) {
+            return true;
+        }
+        if ((flags & PackageManager.FLAG_USER_RUNNING_WITH_AMNESIA) != 0) {
+            // When running with amnesia, we can only run encryption-aware apps
+            return componentInfo.encryptionAware;
+        }
+        return true;
     }
 
     String getInstallerPackageNameLPr(String packageName) {

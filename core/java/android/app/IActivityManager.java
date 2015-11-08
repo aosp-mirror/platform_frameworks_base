@@ -392,7 +392,7 @@ public interface IActivityManager extends IInterface {
     public boolean startUserInBackground(int userid) throws RemoteException;
     public int stopUser(int userid, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
-    public boolean isUserRunning(int userid, boolean orStopping) throws RemoteException;
+    public boolean isUserRunning(int userid, int flags) throws RemoteException;
     public int[] getRunningUserIds() throws RemoteException;
 
     public boolean removeTask(int taskId) throws RemoteException;
