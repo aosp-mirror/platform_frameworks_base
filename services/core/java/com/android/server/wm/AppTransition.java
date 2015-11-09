@@ -295,6 +295,9 @@ public class AppTransition implements Dump {
 
     Bitmap getAppTransitionThumbnailHeader(int taskId) {
         AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(taskId);
+        if (spec == null) {
+            spec = mDefaultNextAppTransitionAnimationSpec;
+        }
         return spec != null ? spec.bitmap : null;
     }
 
@@ -545,6 +548,9 @@ public class AppTransition implements Dump {
 
     void getNextAppTransitionStartRect(int taskId, Rect rect) {
         AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(taskId);
+        if (spec == null) {
+            spec = mDefaultNextAppTransitionAnimationSpec;
+        }
         if (spec == null || spec.rect == null) {
             Slog.wtf(TAG, "Starting rect for task: " + taskId + " requested, but not available",
                     new Throwable());
@@ -554,9 +560,10 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void putDefaultNextAppTransitionCoordinates(int left, int top, int width, int height) {
+    private void putDefaultNextAppTransitionCoordinates(int left, int top, int width, int height,
+            Bitmap bitmap) {
         mDefaultNextAppTransitionAnimationSpec = new AppTransitionAnimationSpec(-1 /* taskId */,
-                null /* bitmap */, new Rect(left, top, left + width, top + height));
+                bitmap, new Rect(left, top, left + width, top + height));
     }
 
     private Animation createClipRevealAnimationLocked(int transit, boolean enter, Rect appFrame) {
@@ -1346,7 +1353,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionPackage = null;
             mNextAppTransitionAnimationsSpecs.clear();
             putDefaultNextAppTransitionCoordinates(startX, startY, startX + startWidth,
-                    startY + startHeight);
+                    startY + startHeight, null);
             postAnimationCallback();
             mNextAppTransitionCallback = null;
             mAnimationFinishedCallback = null;
@@ -1357,7 +1364,7 @@ public class AppTransition implements Dump {
                                                 int startWidth, int startHeight) {
         if (isTransitionSet()) {
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CLIP_REVEAL;
-            putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight);
+            putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
             postAnimationCallback();
             mNextAppTransitionCallback = null;
             mAnimationFinishedCallback = null;
@@ -1372,7 +1379,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionPackage = null;
             mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
-            putDefaultNextAppTransitionCoordinates(startX, startY, 0 ,0);
+            putDefaultNextAppTransitionCoordinates(startX, startY, 0, 0, srcThumb);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
             mAnimationFinishedCallback = null;
@@ -1389,7 +1396,8 @@ public class AppTransition implements Dump {
             mNextAppTransitionPackage = null;
             mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
-            putDefaultNextAppTransitionCoordinates(startX, startY, targetWidth, targetHeight);
+            putDefaultNextAppTransitionCoordinates(startX, startY, targetWidth, targetHeight,
+                    srcThumb);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
             mAnimationFinishedCallback = null;
@@ -1417,7 +1425,7 @@ public class AppTransition implements Dump {
                         // be set.
                         Rect rect = spec.rect;
                         putDefaultNextAppTransitionCoordinates(rect.left, rect.top, rect.width(),
-                                rect.height());
+                                rect.height(), null);
                     }
                 }
             }
