@@ -62,8 +62,8 @@
     <string name="needPuk2" msgid="4526033371987193070">"SIM kartani blokdan chiqarish uchun PUK2 raqamini kiriting."</string>
     <string name="enablePin" msgid="209412020907207950">"Ishlamadi, SIM/RUIM qulfni yoqish."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Yana <xliff:g id="NUMBER_1">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM-karta qulflanadi.</item>
-      <item quantity="one">Yana <xliff:g id="NUMBER_0">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM-karta qulflanadi.</item>
+      <item quantity="other">Yana <xliff:g id="NUMBER_1">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM karta qulflanadi.</item>
+      <item quantity="one">Yana <xliff:g id="NUMBER_0">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM karta qulflanadi.</item>
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -661,14 +661,14 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Qaytadan urining"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Qaytadan urining"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Yuzni tanitib qulfni ochishga urinish miqdoridan oshib ketdi"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM-karta yo‘q"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planshetingizga SIM-karta yo‘q."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Televizorda SIM-karta yo‘q."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefoningizga SIM-karta yo‘q."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM karta yo‘q"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planshetingizga SIM karta yo‘q."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Televizorda SIM karta yo‘q."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefoningizga SIM karta yo‘q."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM kartani soling."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-karta solinmagan yoki uni o‘qib bo‘lmaydi. SIM-kartani soling."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Foydalanib bo‘lmaydigan SIM-karta."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kartangiz butunlay bloklab qo‘yilgan.\n Yangi SIM-karta olish uchun aloqa operatoringiz bilan bog‘laning."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta solinmagan yoki uni o‘qib bo‘lmaydi. SIM kartani soling."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Foydalanib bo‘lmaydigan SIM karta."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kartangiz butunlay bloklab qo‘yilgan.\n Yangi SIM karta olish uchun aloqa operatoringiz bilan bog‘laning."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Avvalgi musiqa"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Keyingi musiqa"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"To‘xtatib turish"</string>
@@ -678,10 +678,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Oldinga o‘tkazish"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Faqat favqulodda qo‘ng‘iroqlar"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Tarmoq qulflangan"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-karta PUK kod bilan qulflangan."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM karta PUK kod bilan qulflangan."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Foydalanuvchi qo‘llanmasiga qarang yoki Abonentlarni qo‘llab-quvvatlash markaziga murojaat qiling."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-karta qulflangan."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-karta qulfdan chiqarilmoqda…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM karta qulflangan."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM karta qulfdan chiqarilmoqda…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Siz parolni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Siz PIN-kodni <xliff:g id="NUMBER_0">%d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng qayta urining."</string>
@@ -1003,10 +1003,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Siz buni keyinroq sozlamalar &gt; ilovalar menusidan o‘zgartirishingiz mumkin"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Doimo ruxsat berilsin"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Hech qachon ruxsat berilmasin"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"SIM-karta olib tashlandi"</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM karta olib tashlandi"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"Mobil tarmoqqa ulanish uchun faol SIM kartani joylang va qurilmani o‘chirib yoqing."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tayyor"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"SIM-karta qo‘shildi"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM karta qo‘shildi"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Mobil tarmoqqa ulanish uchun qurilmangizni o‘chirib yoqing."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"O‘chirib-yoqish"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Vaqtni o‘rnatish"</string>
@@ -1209,8 +1209,8 @@
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Ichki xotira"</string>
-    <string name="storage_sd_card" msgid="3282948861378286745">"SD-karta"</string>
-    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD-kartasi"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD karta"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD kartasi"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB xotira"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB xotira qurilmasi"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB xotira"</string>
@@ -1286,10 +1286,10 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM kartaning PIN kodini kiriting"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN kodni tering"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Parol kiriting"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-karta hozir o‘chirilgan. Davom etish uchun PUK kodni kiriting. To‘liqroq ma’lumot olish uchun tarmoq operatori bilan bog‘laning."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM karta hozir o‘chirilgan. Davom etish uchun PUK kodni kiriting. To‘liqroq ma’lumot olish uchun tarmoq operatori bilan bog‘laning."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"So‘ralgan PIN kodni kiriting"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"So‘ralgan PIN kodni tasdiqlang"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-karta qulfi ochilmoqda…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM karta qulfi ochilmoqda…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Xato PIN kodi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kod 8 ta raqam bo‘lishi shart."</string>
