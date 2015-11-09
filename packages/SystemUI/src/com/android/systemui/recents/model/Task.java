@@ -103,7 +103,6 @@ public class Task {
     public int colorPrimary;
     public boolean useLightOnPrimaryColor;
     public Bitmap thumbnail;
-    public boolean isActive;
     public boolean lockToThisTask;
     public boolean lockToTaskEnabled;
     public Bitmap icon;
@@ -116,7 +115,7 @@ public class Task {
         // Do nothing
     }
 
-    public Task(TaskKey key, boolean isActive, int taskAffiliation, int taskAffiliationColor,
+    public Task(TaskKey key, int taskAffiliation, int taskAffiliationColor,
                 String activityTitle, String contentDescription, Drawable activityIcon,
                 int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
                 String iconFilename, Rect bounds) {
@@ -131,7 +130,6 @@ public class Task {
         this.colorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
-        this.isActive = isActive;
         this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
         this.lockToTaskEnabled = lockToTaskEnabled;
         this.icon = icon;
@@ -149,7 +147,6 @@ public class Task {
         this.activityIcon = o.activityIcon;
         this.colorPrimary = o.colorPrimary;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
-        this.isActive = o.isActive;
         this.lockToThisTask = o.lockToThisTask;
         this.lockToTaskEnabled = o.lockToTaskEnabled;
     }

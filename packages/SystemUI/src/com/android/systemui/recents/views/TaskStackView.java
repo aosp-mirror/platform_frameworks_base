@@ -79,7 +79,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
         public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
-                boolean lockToTask, boolean boundsValid, Rect bounds, int destinationStack);
+                boolean lockToTask, Rect bounds, int destinationStack);
         public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks);
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
@@ -1346,8 +1346,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.stopDozing();
 
         if (mCb != null) {
-            mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask, false, null,
-                    INVALID_STACK_ID);
+            mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask, null, INVALID_STACK_ID);
         }
     }
 

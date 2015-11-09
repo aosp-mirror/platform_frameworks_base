@@ -130,10 +130,9 @@ public class RecentsTaskLoadPlan {
                     ? t.taskDescription.getIconFilename() : null;
 
             // Add the task to the stack
-            Task task = new Task(taskKey, (t.id != INVALID_TASK_ID), t.affiliatedTaskId,
-                    t.affiliatedTaskColor, activityLabel, contentDescription, activityIcon,
-                    activityColor, (i == (taskCount - 1)), config.lockToAppEnabled, icon,
-                    iconFilename, t.bounds);
+            Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel,
+                    contentDescription, activityIcon, activityColor, (i == (taskCount - 1)),
+                    config.lockToAppEnabled, icon, iconFilename, t.bounds);
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
             if (DEBUG) {
                 Log.d(TAG, activityLabel + " bounds: " + t.bounds);

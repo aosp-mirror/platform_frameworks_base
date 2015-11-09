@@ -28,7 +28,7 @@ public final class ForegroundThread extends HandlerThread {
     private static Handler sHandler;
 
     private ForegroundThread() {
-        super("recents.fg", android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        super("recents.fg");
     }
 
     private static void ensureThreadLocked() {

@@ -503,12 +503,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         MetricsLogger.count(mContext, "overview_affiliated_task_launch", 1);
 
         // Launch the task
-        if (toTask.isActive) {
-            // Bring an active task to the foreground
-            ssp.moveTaskToFront(toTask.key.id, launchOpts);
-        } else {
-            ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.activityLabel, launchOpts);
-        }
+        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.activityLabel, launchOpts);
     }
 
     public void showNextAffiliatedTask() {

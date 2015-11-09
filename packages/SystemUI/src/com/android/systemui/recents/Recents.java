@@ -386,8 +386,8 @@ public class Recents extends SystemUI
      * Handle screen pinning request.
      */
     public final void onBusEvent(final ScreenPinningRequestEvent event) {
-        int processUser = event.systemServicesProxy.getProcessUser();
-        if (event.systemServicesProxy.isSystemUser(processUser)) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (sSystemServicesProxy.isSystemUser(processUser)) {
             mImpl.onStartScreenPinning(event.applicationContext);
         } else {
             postToSystemUser(new Runnable() {

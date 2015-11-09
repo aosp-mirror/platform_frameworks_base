@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.component;
+package com.android.systemui.recents.events.activity;
 
-import android.content.Context;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 
 /**
- * This is sent when we want to start screen pinning.
+ * This is sent when we fail to launch a task.
  */
-public class ScreenPinningRequestEvent extends EventBus.Event {
-
-    public final Context applicationContext;
-
-    public ScreenPinningRequestEvent(Context context) {
-        this.applicationContext = context.getApplicationContext();
-    }
+public class LaunchTaskFailedEvent extends EventBus.Event {
+    // Simple event
 }
