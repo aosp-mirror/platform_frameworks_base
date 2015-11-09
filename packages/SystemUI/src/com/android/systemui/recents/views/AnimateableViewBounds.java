@@ -36,7 +36,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     public AnimateableViewBounds(TaskView source, int cornerRadius) {
         mSourceView = source;
         mCornerRadius = cornerRadius;
-        setClipBottom(getClipBottom());
+        setClipBottom(getClipBottom(), false /* force */);
     }
 
     @Override
@@ -57,8 +57,8 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     }
 
     /** Sets the bottom clip. */
-    public void setClipBottom(int bottom) {
-        if (bottom != mClipRect.bottom) {
+    public void setClipBottom(int bottom, boolean force) {
+        if (bottom != mClipRect.bottom || force) {
             mClipRect.bottom = bottom;
             mSourceView.invalidateOutline();
             updateClipBounds();

@@ -538,7 +538,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Updates the clip for each of the task views from back to front.
      */
-    void clipTaskViews() {
+    void clipTaskViews(boolean forceUpdate) {
         // Update the clip on each task child
         List<TaskView> taskViews = getTaskViews();
         TaskView tmpTv = null;
@@ -575,7 +575,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     }
                 }
             }
-            tv.getViewBounds().setClipBottom(clipBottom);
+            tv.getViewBounds().setClipBottom(clipBottom, forceUpdate);
         }
         mStackViewsClipDirty = false;
     }
@@ -792,7 +792,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller.computeScroll();
         // Synchronize the views
         synchronizeStackViewsWithModel();
-        clipTaskViews();
+        clipTaskViews(false /* forceUpdate */);
         // Notify accessibility
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
     }
@@ -895,6 +895,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
             onFirstLayout();
+        }
+
+        if (changed) {
+            requestSynchronizeStackViewsWithModel();
+            synchronizeStackViewsWithModel();
+            clipTaskViews(true /* forceUpdate */);
         }
     }
 
