@@ -132,4 +132,7 @@
     <item msgid="5194774745031751806">"Hiperrrápida"</item>
     <item msgid="9085102246155045744">"La más rápida"</item>
   </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"Seleccionar perfil"</string>
+    <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
+    <string name="category_work" msgid="8699184680584175622">"Trabajo"</string>
 </resources>

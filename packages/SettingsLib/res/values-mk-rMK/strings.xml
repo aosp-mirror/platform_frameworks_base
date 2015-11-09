@@ -116,19 +116,23 @@
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> е целосно поддржан"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> бара мрежно поврзување"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> не е поддржано"</string>
-    <!-- no translation found for tts_status_checking (5339150797940483592) -->
-    <skip />
+    <string name="tts_status_checking" msgid="5339150797940483592">"Се проверува..."</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"Подесувања на <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Стартувај подесувања на софтвер"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Претпочитан софтвер"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Општо"</string>
-    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
-    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
-    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
-    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
-    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
-    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
-    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
-    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
-    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Многу бавно"</item>
+    <item msgid="4795095314303559268">"Бавно"</item>
+    <item msgid="8903157781070679765">"Нормално"</item>
+    <item msgid="164347302621392996">"Брзо"</item>
+    <item msgid="5794028588101562009">"Побрзо"</item>
+    <item msgid="7163942783888652942">"Многу брзо"</item>
+    <item msgid="7831712693748700507">"Рапидно"</item>
+    <item msgid="5194774745031751806">"Многу рапидно"</item>
+    <item msgid="9085102246155045744">"Најбрзо"</item>
+  </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"Изберете профил"</string>
+    <string name="category_personal" msgid="1299663247844969448">"Лични"</string>
+    <string name="category_work" msgid="8699184680584175622">"Работа"</string>
 </resources>
