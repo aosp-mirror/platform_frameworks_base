@@ -198,17 +198,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public boolean launchFocusedTask() {
         if (mTaskStackView != null) {
             TaskStack stack = mTaskStackView.getStack();
-            // Iterate the stack views and try and find the focused task
-            List<TaskView> taskViews = mTaskStackView.getTaskViews();
-            int taskViewCount = taskViews.size();
-            for (int j = 0; j < taskViewCount; j++) {
-                TaskView tv = taskViews.get(j);
-                Task task = tv.getTask();
-                if (tv.isFocusedTask()) {
-                    onTaskViewClicked(mTaskStackView, tv, stack, task, false, false, null,
-                            INVALID_STACK_ID);
-                    return true;
-                }
+            Task task = mTaskStackView.getFocusedTask();
+            if (task != null) {
+                TaskView taskView = mTaskStackView.getChildViewForTask(task);
+                onTaskViewClicked(mTaskStackView, taskView, stack, task, false, false, null,
+                        INVALID_STACK_ID);
+                return true;
             }
         }
         return false;

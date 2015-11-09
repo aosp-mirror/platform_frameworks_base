@@ -116,6 +116,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     List<TaskView> mImmutableTaskViews = new ArrayList<>();
     LayoutInflater mInflater;
     boolean mLayersDisabled;
+    boolean mTouchExplorationEnabled;
 
     Interpolator mFastOutSlowInInterpolator;
 
@@ -183,6 +184,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     protected void onAttachedToWindow() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
         super.onAttachedToWindow();
     }
@@ -425,7 +428,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         visibleStackRange[1] <= taskIndex && taskIndex <= visibleStackRange[0]) {
                     mTmpTaskViewMap.put(task, tv);
                 } else {
-                    if (tv.isFocusedTask()) {
+                    if (mTouchExplorationEnabled && tv.isFocusedTask()) {
                         wasLastFocusedTaskAnimated = tv.isFocusAnimated();
                         lastFocusedTaskIndex = taskIndex;
                         resetFocusedTask();
@@ -714,6 +717,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         mFocusedTaskIndex = -1;
+    }
+
+    /**
+     * Returns the focused task.
+     */
+    Task getFocusedTask() {
+        if (mFocusedTaskIndex != -1) {
+            return mStack.getTasks().get(mFocusedTaskIndex);
+        }
+        return null;
     }
 
     @Override
