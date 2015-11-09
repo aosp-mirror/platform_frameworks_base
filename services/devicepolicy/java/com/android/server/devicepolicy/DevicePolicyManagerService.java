@@ -6728,24 +6728,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return true;
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE.equals(action)) {
-            if (getProfileOwner(callingUserId) != null) {
-                return false;
-            }
-            if (mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
-                return false;
-            }
-            if (callingUserId != UserHandle.USER_SYSTEM) {
-                // Device owner provisioning can only be initiated from system user.
-                return false;
-            }
-            return true;
+            return isDeviceOwnerProvisioningAllowed(callingUserId);
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_USER.equals(action)) {
+            if (!UserManager.isSplitSystemUser()) {
+                // ACTION_PROVISION_MANAGED_USER only supported on split-user systems.
+                return false;
+            }
             if (hasUserSetupCompleted(callingUserId)) {
                 return false;
             }
             return true;
+        } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE.equals(action)) {
+            if (!UserManager.isSplitSystemUser()) {
+                // ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE only supported on split-user systems.
+                return false;
+            }
+            return isDeviceOwnerProvisioningAllowed(callingUserId);
         }
         throw new IllegalArgumentException("Unknown provisioning action " + action);
+    }
+
+    private boolean isDeviceOwnerProvisioningAllowed(int callingUserId) {
+        if (getProfileOwner(callingUserId) != null) {
+            return false;
+        }
+        if (mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
+            return false;
+        }
+        if (callingUserId != UserHandle.USER_SYSTEM) {
+            // Device owner provisioning can only be initiated from system user.
+            return false;
+        }
+        return true;
     }
 
     /**

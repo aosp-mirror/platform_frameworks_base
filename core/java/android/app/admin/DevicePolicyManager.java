@@ -122,7 +122,10 @@ public class DevicePolicyManager {
      * Provisioning adds a managed profile and sets the MDM as the profile owner who has full
      * control over the profile.
      *
-     * In version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this intent must contain the
+     * <p>It is possible to check if provisioning is allowed or not by querying the method
+     * {@link #isProvisioningAllowed(String)}.
+     *
+     * <p>In version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this intent must contain the
      * extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
      * As of {@link android.os.Build.VERSION_CODES#M}, it should contain the extra
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, although specifying only
@@ -157,9 +160,8 @@ public class DevicePolicyManager {
      * been completed. Use {@link #isProvisioningAllowed(String)} to check if provisioning is
      * allowed.
      *
-     * This intent should contain the extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME},
-     * although specifying only {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is also
-     * supported.
+     * <p>This intent should contain the extra
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}.
      *
      * <p> If provisioning fails, the device returns to its previous state.
      *
@@ -185,10 +187,10 @@ public class DevicePolicyManager {
      * employee or client.
      *
      * <p> An intent with this action can be sent only on an unprovisioned device.
-     * It is possible to check if the device is provisioned or not by looking at
-     * {@link android.provider.Settings.Global#DEVICE_PROVISIONED}
+     * It is possible to check if provisioning is allowed or not by querying the method
+     * {@link #isProvisioningAllowed(String)}.
      *
-     * The intent contains the following extras:
+     * <p>The intent contains the following extras:
      * <ul>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
@@ -210,6 +212,53 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_DEVICE
         = "android.app.action.PROVISION_MANAGED_DEVICE";
+
+    /**
+     * Activity action: Starts the provisioning flow which sets up a managed device.
+     * Must be started with {@link android.app.Activity#startActivityForResult(Intent, int)}.
+     *
+     * <p>NOTE: This is only supported on split system user devices, and puts the device into a
+     * management state that is distinct from that reached by
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE} - specifically the device owner runs on the system
+     * user, and only has control over device-wide policies, not individual users and their data.
+     * The primary benefit is that multiple non-system users are supported when provisioning using
+     * this form of device management.
+     *
+     * <p> During device owner provisioning a device admin app is set as the owner of the device.
+     * A device owner has full control over the device. The device owner can not be modified by the
+     * user.
+     *
+     * <p> A typical use case would be a device that is owned by a company, but used by either an
+     * employee or client.
+     *
+     * <p> An intent with this action can be sent only on an unprovisioned device.
+     * It is possible to check if provisioning is allowed or not by querying the method
+     * {@link #isProvisioningAllowed(String)}.
+     *
+     * <p>The intent contains the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * </ul>
+     *
+     * <p> When device owner provisioning has completed, an intent of the type
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
+     * device owner.
+     *
+     * <p> If provisioning fails, the device is factory reset.
+     *
+     * <p>A result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part
+     * of the provisioning flow was successful, although this doesn't guarantee the full flow will
+     * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
+     * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE
+        = "android.app.action.PROVISION_MANAGED_SHAREABLE_DEVICE";
 
     /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
