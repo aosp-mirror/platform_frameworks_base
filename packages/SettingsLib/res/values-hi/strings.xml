@@ -132,4 +132,7 @@
     <item msgid="5194774745031751806">"अत्यधिक तीव्र"</item>
     <item msgid="9085102246155045744">"सबसे तेज़"</item>
   </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"प्रोफ़ाइल चुनें"</string>
+    <string name="category_personal" msgid="1299663247844969448">"व्यक्तिगत"</string>
+    <string name="category_work" msgid="8699184680584175622">"कार्यालय"</string>
 </resources>

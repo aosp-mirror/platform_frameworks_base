@@ -132,4 +132,7 @@
     <item msgid="5194774745031751806">"極快"</item>
     <item msgid="9085102246155045744">"最快"</item>
   </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"選擇設定檔"</string>
+    <string name="category_personal" msgid="1299663247844969448">"個人"</string>
+    <string name="category_work" msgid="8699184680584175622">"公司"</string>
 </resources>

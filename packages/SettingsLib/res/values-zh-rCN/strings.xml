@@ -116,19 +116,23 @@
     <string name="tts_status_ok" msgid="1309762510278029765">"完全支持<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"只有在连接到网络的情况下，才支持<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"不支持<xliff:g id="LOCALE">%1$s</xliff:g>"</string>
-    <!-- no translation found for tts_status_checking (5339150797940483592) -->
-    <skip />
+    <string name="tts_status_checking" msgid="5339150797940483592">"正在检查…"</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"“<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>”的设置"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"进行引擎设置"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"首选引擎"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"常规"</string>
-    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
-    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
-    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
-    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
-    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
-    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
-    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
-    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
-    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"很慢"</item>
+    <item msgid="4795095314303559268">"慢"</item>
+    <item msgid="8903157781070679765">"正常"</item>
+    <item msgid="164347302621392996">"快"</item>
+    <item msgid="5794028588101562009">"较快"</item>
+    <item msgid="7163942783888652942">"非常快"</item>
+    <item msgid="7831712693748700507">"迅速"</item>
+    <item msgid="5194774745031751806">"很迅速"</item>
+    <item msgid="9085102246155045744">"最快"</item>
+  </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"选择个人资料"</string>
+    <string name="category_personal" msgid="1299663247844969448">"个人"</string>
+    <string name="category_work" msgid="8699184680584175622">"工作"</string>
 </resources>

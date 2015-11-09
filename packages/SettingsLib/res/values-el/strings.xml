@@ -116,19 +116,23 @@
     <string name="tts_status_ok" msgid="1309762510278029765">"Τα <xliff:g id="LOCALE">%1$s</xliff:g> υποστηρίζονται πλήρως"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"Τα <xliff:g id="LOCALE">%1$s</xliff:g> απαιτούν σύνδεση δικτύου"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"Δεν υποστηρίζονται τα <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
-    <!-- no translation found for tts_status_checking (5339150797940483592) -->
-    <skip />
+    <string name="tts_status_checking" msgid="5339150797940483592">"Έλεγχος…"</string>
     <string name="tts_engine_settings_title" msgid="3499112142425680334">"Ρυθμίσεις για: <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Εκκίνηση ρυθμίσεων μηχανής"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Προτεινόμενη μηχανή"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Γενικά"</string>
-    <!-- no translation found for tts_rate_entries:0 (6695494874362656215) -->
-    <!-- no translation found for tts_rate_entries:1 (4795095314303559268) -->
-    <!-- no translation found for tts_rate_entries:2 (8903157781070679765) -->
-    <!-- no translation found for tts_rate_entries:3 (164347302621392996) -->
-    <!-- no translation found for tts_rate_entries:4 (5794028588101562009) -->
-    <!-- no translation found for tts_rate_entries:5 (7163942783888652942) -->
-    <!-- no translation found for tts_rate_entries:6 (7831712693748700507) -->
-    <!-- no translation found for tts_rate_entries:7 (5194774745031751806) -->
-    <!-- no translation found for tts_rate_entries:8 (9085102246155045744) -->
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Πολύ αργή"</item>
+    <item msgid="4795095314303559268">"Αργή"</item>
+    <item msgid="8903157781070679765">"Κανονική"</item>
+    <item msgid="164347302621392996">"Γρήγορη"</item>
+    <item msgid="5794028588101562009">"Πιο γρήγορη"</item>
+    <item msgid="7163942783888652942">"Πολύ γρήγορη"</item>
+    <item msgid="7831712693748700507">"Ταχεία"</item>
+    <item msgid="5194774745031751806">"Εξαιρετικά ταχεία"</item>
+    <item msgid="9085102246155045744">"Ταχύτατη"</item>
+  </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"Επιλογή προφίλ"</string>
+    <string name="category_personal" msgid="1299663247844969448">"Προσωπικό"</string>
+    <string name="category_work" msgid="8699184680584175622">"Εργασία"</string>
 </resources>

@@ -132,4 +132,7 @@
     <item msgid="5194774745031751806">"Esheshisa kakhulu"</item>
     <item msgid="9085102246155045744">"Esheshisa kakhulukhulu"</item>
   </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"Khetha iphrofayela"</string>
+    <string name="category_personal" msgid="1299663247844969448">"Okomuntu siqu"</string>
+    <string name="category_work" msgid="8699184680584175622">"Umsebenzi"</string>
 </resources>
