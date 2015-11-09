@@ -79,6 +79,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private static final boolean DEBUG = false;
 
     private static final boolean ADD_HEADER_BITMAP = true;
+
+    /**
+     * Special value for {@link #mAppTransitionAnimationSpecs}: Indicate that we are currently
+     * waiting for the specs to be retrieved.
+     */
+    private static final List<AppTransitionAnimationSpec> SPECS_WAITING = new ArrayList<>();
+
     private int mStackViewVisibility = View.VISIBLE;
 
     /** The RecentsView callbacks */
@@ -109,7 +116,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
 
     @GuardedBy("this")
-    List<AppTransitionAnimationSpec> mAppTransitionAnimationSpecs;
+    List<AppTransitionAnimationSpec> mAppTransitionAnimationSpecs = SPECS_WAITING;
 
     public RecentsView(Context context) {
         super(context);
@@ -439,7 +446,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 });
                 synchronized (RecentsView.this) {
-                    while (mAppTransitionAnimationSpecs == null) {
+                    while (mAppTransitionAnimationSpecs == SPECS_WAITING) {
                         try {
                             RecentsView.this.wait();
                         } catch (InterruptedException e) {}
@@ -449,7 +456,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                     AppTransitionAnimationSpec[] specs
                             = new AppTransitionAnimationSpec[mAppTransitionAnimationSpecs.size()];
-                    return mAppTransitionAnimationSpecs.toArray(specs);
+                    mAppTransitionAnimationSpecs.toArray(specs);
+                    mAppTransitionAnimationSpecs = SPECS_WAITING;
+                    return specs;
                 }
             }
         };
