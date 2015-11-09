@@ -2404,7 +2404,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private PhoneWindow mWindow;
 
-        public DecorView(Context context, int featureId) {
+        private DecorView(Context context, int featureId, PhoneWindow window) {
             super(context);
             mFeatureId = featureId;
 
@@ -2415,6 +2415,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mBarEnterExitDuration = context.getResources().getInteger(
                     R.integer.dock_enter_exit_duration);
+
+            setWindow(window);
         }
 
         public void setBackgroundFallback(int resId) {
@@ -3868,22 +3870,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 context.setTheme(mTheme);
             }
         }
-        return new DecorView(context, featureId);
-    }
-
-    protected void setFeatureFromAttrs(int featureId, TypedArray attrs,
-            int drawableAttr, int alphaAttr) {
-        Drawable d = attrs.getDrawable(drawableAttr);
-        if (d != null) {
-            requestFeature(featureId);
-            setFeatureDefaultDrawable(featureId, d);
-        }
-        if ((getFeatures() & (1 << featureId)) != 0) {
-            int alpha = attrs.getInt(alphaAttr, -1);
-            if (alpha >= 0) {
-                setFeatureDrawableAlpha(featureId, alpha);
-            }
-        }
+        return new DecorView(context, featureId, this);
     }
 
     protected ViewGroup generateLayout(DecorView decor) {
@@ -4268,7 +4255,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mForceDecorInstall = false;
         if (mDecor == null) {
             mDecor = generateDecor(-1);
-            mDecor.setWindow(this);
             mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
             mDecor.setIsRootNamespace(true);
             if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {
