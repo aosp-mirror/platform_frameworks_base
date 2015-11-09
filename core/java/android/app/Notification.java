@@ -2599,6 +2599,12 @@ public class Notification implements Parcelable
             mN.ledARGB = argb;
             mN.ledOnMS = onMs;
             mN.ledOffMS = offMs;
+            if (onMs != 0 || offMs != 0) {
+                mN.flags |= FLAG_SHOW_LIGHTS;
+            }
+            if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
+                mN.flags |= FLAG_SHOW_LIGHTS;
+            }
             return this;
         }
 
@@ -2951,6 +2957,7 @@ public class Notification implements Parcelable
          */
         public Builder setColor(@ColorInt int argb) {
             mN.color = argb;
+            sanitizeColor();
             return this;
         }
 
@@ -3419,11 +3426,10 @@ public class Notification implements Parcelable
             }
         }
 
-        private int sanitizeColor() {
+        private void sanitizeColor() {
             if (mN.color != COLOR_DEFAULT) {
                 mN.color |= 0xFF000000; // no alpha for custom colors
             }
-            return mN.color;
         }
 
         private int resolveColor() {
