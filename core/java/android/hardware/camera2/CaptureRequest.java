@@ -556,6 +556,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * Set a capture request field to a value. The field definitions can be
          * found in {@link CaptureRequest}.
          *
+         * <p>Setting a field to {@code null} will remove that field from the capture request.
+         * Unless the field is optional, removing it will likely produce an error from the camera
+         * device when the request is submitted.</p>
+         *
          * @param key The metadata field to write.
          * @param value The value to set the field to, which must be of a matching
          * type to the key.
