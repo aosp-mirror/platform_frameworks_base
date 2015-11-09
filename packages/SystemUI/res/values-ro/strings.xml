@@ -151,7 +151,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mod Avion."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Niciun card SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Se schimbă rețeaua operatorului."</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> procente."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> la sută."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Setări de sistem."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificări."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ștergeți notificarea."</string>
@@ -403,8 +403,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Refuzați"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Atingeți pentru a reveni la setarea inițială."</string>
-    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Acum folosiți profilul de serviciu"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afișați procentajul bateriei încorporat"</string>

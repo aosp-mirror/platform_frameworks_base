@@ -402,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"প্রত্যাখ্যান করুন"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> হল ভলিউম ডায়লগ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"আসলটি পুনঃস্থাপন করতে স্পর্শ করুন৷"</string>
-    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"আপনি আপনার কাজের প্রোফাইল ব্যবহার করছেন"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"সিস্টেম UI টিউনার"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"এম্বেড করা ব্যাটারির শতকরা হার দেখায়"</string>

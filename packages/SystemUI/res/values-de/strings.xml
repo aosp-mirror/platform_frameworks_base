@@ -150,9 +150,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugmodus"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Keine SIM-Karte"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netzwerk des Mobilfunkanbieters wird gewechselt"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Akku bei <xliff:g id="NUMBER">%d</xliff:g> Prozent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemeinstellungen"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Benachrichtigungen"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Benachrichtigung löschen"</string>
@@ -404,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ablehnen"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> regelt die Lautstärke."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Zum Wiederherstellen des Originals hier tippen"</string>
-    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="2705151242008937028">"u."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Sie verwenden Ihr Arbeitsprofil."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Eingebettete Akku-Prozentzahl anzeigen"</string>
