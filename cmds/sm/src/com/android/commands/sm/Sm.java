@@ -86,6 +86,8 @@ public final class Sm {
             runBenchmark();
         } else if ("forget".equals(op)) {
             runForget();
+        } else if ("set-emulate-fbe".equals(op)) {
+            runSetEmulateFbe();
         } else {
             throw new IllegalArgumentException();
         }
@@ -135,6 +137,12 @@ public final class Sm {
         final boolean forceAdoptable = Boolean.parseBoolean(nextArg());
         mSm.setDebugFlags(forceAdoptable ? StorageManager.DEBUG_FORCE_ADOPTABLE : 0,
                 StorageManager.DEBUG_FORCE_ADOPTABLE);
+    }
+
+    public void runSetEmulateFbe() throws RemoteException {
+        final boolean emulateFbe = Boolean.parseBoolean(nextArg());
+        mSm.setDebugFlags(emulateFbe ? StorageManager.DEBUG_EMULATE_FBE : 0,
+                StorageManager.DEBUG_EMULATE_FBE);
     }
 
     public void runPartition() throws RemoteException {
@@ -204,6 +212,8 @@ public final class Sm {
         System.err.println("       sm benchmark VOLUME");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");
+        System.err.println("");
+        System.err.println("       sm set-emulate-fbe [true|false]");
         System.err.println("");
         return 1;
     }

@@ -1683,6 +1683,10 @@
     <permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS"
         android:protectionLevel="system|signature" />
 
+    <!-- @hide -->
+    <permission android:name="android.permission.STORAGE_INTERNAL"
+        android:protectionLevel="signature" />
+
     <!-- Allows access to ASEC non-destructive API calls
          @hide  -->
     <permission android:name="android.permission.ASEC_ACCESS"
@@ -2702,7 +2706,9 @@
                  android:killAfterRestore="false"
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true"
-                 android:theme="@style/Theme.Material.DayNight.DarkActionBar">
+                 android:theme="@style/Theme.Material.DayNight.DarkActionBar"
+                 android:forceDeviceEncrypted="true"
+                 android:encryptionAware="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.DeviceDefault.Resolver"
                 android:finishOnCloseSystemDialogs="true"

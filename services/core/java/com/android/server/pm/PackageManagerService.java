@@ -2981,23 +2981,25 @@ public class PackageManagerService extends IPackageManager.Stub {
      * purposefully done before acquiring {@link #mPackages} lock.
      */
     private int augmentFlagsForUser(int flags, int userId) {
-        // TODO: bring back once locking fixed
-//        final IActivityManager am = ActivityManagerNative.getDefault();
-//        if (am == null) {
-//            // We must be early in boot, so the best we can do is assume the
-//            // user is fully running.
-//            return flags;
-//        }
-//        final long token = Binder.clearCallingIdentity();
-//        try {
-//            if (am.isUserRunning(userId, ActivityManager.FLAG_WITH_AMNESIA)) {
-//                flags |= PackageManager.FLAG_USER_RUNNING_WITH_AMNESIA;
-//            }
-//        } catch (RemoteException e) {
-//            throw e.rethrowAsRuntimeException();
-//        } finally {
-//            Binder.restoreCallingIdentity(token);
-//        }
+        if (SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false)) {
+            final IMountService mount = IMountService.Stub
+                    .asInterface(ServiceManager.getService(Context.STORAGE_SERVICE));
+            if (mount == null) {
+                // We must be early in boot, so the best we can do is assume the
+                // user is fully running.
+                return flags;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!mount.isUserKeyUnlocked(userId)) {
+                    flags |= PackageManager.FLAG_USER_RUNNING_WITH_AMNESIA;
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
         return flags;
     }
 
@@ -15918,13 +15920,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        final StorageManager sm = mContext.getSystemService(StorageManager.class);
         final UserManager um = mContext.getSystemService(UserManager.class);
         for (UserInfo user : um.getUsers()) {
             final File userDir = Environment.getDataUserDirectory(volumeUuid, user.id);
             if (userDir.exists()) continue;
 
             try {
-                UserManagerService.prepareUserDirectory(mContext, volumeUuid, user.id);
+                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber);
                 UserManagerService.enforceSerialNumber(userDir, user.serialNumber);
             } catch (IOException e) {
                 Log.wtf(TAG, "Failed to create user directory on " + volumeUuid, e);

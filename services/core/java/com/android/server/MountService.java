@@ -96,6 +96,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
@@ -119,6 +120,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -284,6 +286,8 @@ class MountService extends IMountService.Stub
 
     @GuardedBy("mLock")
     private int[] mStartedUsers = EmptyArray.INT;
+    @GuardedBy("mLock")
+    private int[] mUnlockedUsers = EmptyArray.INT;
 
     /** Map from disk ID to disk */
     @GuardedBy("mLock")
@@ -399,6 +403,17 @@ class MountService extends IMountService.Stub
                 mDiskScanLatches.put(diskId, latch);
             }
             return latch;
+        }
+    }
+
+    private static String escapeNull(String arg) {
+        if (TextUtils.isEmpty(arg)) {
+            return "!";
+        } else {
+            if (arg.indexOf('\0') != -1 || arg.indexOf(' ') != -1) {
+                throw new IllegalArgumentException(arg);
+            }
+            return arg;
         }
     }
 
@@ -1892,6 +1907,9 @@ class MountService extends IMountService.Stub
             if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
                 mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
             }
+            if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
+                // TODO: persist through vold and reboot
+            }
 
             writeSettingsLocked();
             mHandler.obtainMessage(H_RESET).sendToTarget();
@@ -2654,65 +2672,99 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public void createNewUserDir(int userHandle, String path) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only SYSTEM_UID can create user directories");
-        }
-
+    public void createUserKey(int userId, int serialNumber) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "Creating new user dir");
-        }
-
         try {
-            NativeDaemonEvent event = mCryptConnector.execute(
-                "cryptfs", "createnewuserdir", userHandle, path);
-            if (!"0".equals(event.getMessage())) {
-                String error = "createnewuserdir sent unexpected message: "
-                    + event.getMessage();
-                Slog.e(TAG,  error);
-                // ext4enc:TODO is this the right exception?
-                throw new RuntimeException(error);
-            }
+            mCryptConnector.execute("cryptfs", "create_user_key", userId, serialNumber);
         } catch (NativeDaemonConnectorException e) {
-            Slog.e(TAG, "createnewuserdir threw exception", e);
-            throw new RuntimeException("createnewuserdir threw exception", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
-    // ext4enc:TODO duplication between this and createNewUserDir is nasty
     @Override
-    public void deleteUserKey(int userHandle) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only SYSTEM_UID can delete user keys");
-        }
-
+    public void destroyUserKey(int userId) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "Deleting user key");
+        try {
+            mCryptConnector.execute("cryptfs", "destroy_user_key", userId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void unlockUserKey(int userId, int serialNumber, byte[] token) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+        waitForReady();
+
+        final String encodedToken;
+        if (ArrayUtils.isEmpty(token)) {
+            encodedToken = "!";
+        } else {
+            encodedToken = HexDump.toHexString(token);
         }
 
         try {
-            NativeDaemonEvent event = mCryptConnector.execute(
-                "cryptfs", "deleteuserkey", userHandle);
-            if (!"0".equals(event.getMessage())) {
-                String error = "deleteuserkey sent unexpected message: "
-                    + event.getMessage();
-                Slog.e(TAG,  error);
-                // ext4enc:TODO is this the right exception?
-                throw new RuntimeException(error);
-            }
+            mCryptConnector.execute("cryptfs", "unlock_user_key", userId, serialNumber,
+                    new SensitiveArg(encodedToken));
         } catch (NativeDaemonConnectorException e) {
-            Slog.e(TAG, "deleteuserkey threw exception", e);
-            throw new RuntimeException("deleteuserkey threw exception", e);
+            throw e.rethrowAsParcelableException();
+        }
+
+        synchronized (mLock) {
+            mUnlockedUsers = ArrayUtils.appendInt(mUnlockedUsers, userId);
+        }
+    }
+
+    @Override
+    public void lockUserKey(int userId) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+        waitForReady();
+
+        try {
+            mCryptConnector.execute("cryptfs", "lock_user_key", userId);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+
+        synchronized (mLock) {
+            mUnlockedUsers = ArrayUtils.removeInt(mUnlockedUsers, userId);
+        }
+    }
+
+    @Override
+    public boolean isUserKeyUnlocked(int userId) {
+        if (SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false)) {
+            synchronized (mLock) {
+                return ArrayUtils.contains(mUnlockedUsers, userId);
+            }
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+        waitForReady();
+
+        try {
+            mCryptConnector.execute("cryptfs", "prepare_user_storage", escapeNull(volumeUuid),
+                    userId, serialNumber);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
         }
     }
 
     @Override
     public boolean isPerUserEncryptionEnabled() {
-        return "file".equals(SystemProperties.get("ro.crypto.type", "none"));
+        // TODO: switch this over to a single property; currently using two to
+        // handle the emulated case
+        return "file".equals(SystemProperties.get("ro.crypto.type", "none"))
+                || SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false);
     }
 
     @Override
@@ -3449,6 +3501,9 @@ class MountService extends IMountService.Stub
             pw.println();
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
             pw.println("Force adoptable: " + mForceAdoptable);
+            pw.println();
+            pw.println("Started users: " + Arrays.toString(mStartedUsers));
+            pw.println("Unlocked users: " + Arrays.toString(mUnlockedUsers));
         }
 
         synchronized (mObbMounts) {

@@ -499,6 +499,7 @@ package android {
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
     field public static final int enabled = 16842766; // 0x101000e
+    field public static final int encryptionAware = 16844038; // 0x1010506
     field public static final int end = 16843996; // 0x10104dc
     field public static final int endColor = 16843166; // 0x101019e
     field public static final deprecated int endYear = 16843133; // 0x101017d
@@ -559,6 +560,7 @@ package android {
     field public static final int fontFamily = 16843692; // 0x10103ac
     field public static final int fontFeatureSettings = 16843959; // 0x10104b7
     field public static final int footerDividersEnabled = 16843311; // 0x101022f
+    field public static final int forceDeviceEncrypted = 16844037; // 0x1010505
     field public static final int foreground = 16843017; // 0x1010109
     field public static final int foregroundGravity = 16843264; // 0x1010200
     field public static final int foregroundTint = 16843885; // 0x101046d

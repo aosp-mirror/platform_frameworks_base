@@ -76,7 +76,11 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_HAS_ADOPTABLE = "vold.has_adoptable";
     /** {@hide} */
+    public static final String PROP_HAS_FBE = "vold.has_fbe";
+    /** {@hide} */
     public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
+    /** {@hide} */
+    public static final String PROP_EMULATE_FBE = "vold.emulate_fbe";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -85,6 +89,8 @@ public class StorageManager {
 
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
+    /** {@hide} */
+    public static final int DEBUG_EMULATE_FBE = 1 << 1;
 
     /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 0;
@@ -960,18 +966,54 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void createNewUserDir(int userHandle, File path) {
+    public void createUserKey(int userId, int serialNumber) {
         try {
-            mMountService.createNewUserDir(userHandle, path.getAbsolutePath());
+            mMountService.createUserKey(userId, serialNumber);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /** {@hide} */
-    public void deleteUserKey(int userHandle) {
+    public void destroyUserKey(int userId) {
         try {
-            mMountService.deleteUserKey(userHandle);
+            mMountService.destroyUserKey(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void unlockUserKey(int userId, int serialNumber, byte[] token) {
+        try {
+            mMountService.unlockUserKey(userId, serialNumber, token);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void lockUserKey(int userId) {
+        try {
+            mMountService.lockUserKey(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber) {
+        try {
+            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public boolean isUserKeyUnlocked(int userId) {
+        try {
+            return mMountService.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
