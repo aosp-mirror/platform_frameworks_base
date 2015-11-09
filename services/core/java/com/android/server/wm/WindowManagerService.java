@@ -57,7 +57,6 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -226,6 +225,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
+    static final boolean SHOW_VERBOSE_TRANSACTIONS = false && SHOW_TRANSACTIONS;
     static final boolean HIDE_STACK_CRAWLS = true;
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
@@ -5627,7 +5627,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+            if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION showStrictModeViolation");
             SurfaceControl.openTransaction();
             try {
@@ -5639,7 +5639,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStrictModeFlash.setVisibility(on);
             } finally {
                 SurfaceControl.closeTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION showStrictModeViolation");
             }
         }
@@ -10116,6 +10116,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Marking app token " + appWindowToken
                     + " as replacing window.");
             appWindowToken.mWillReplaceWindow = true;
+            appWindowToken.mHasReplacedWindow = false;
             appWindowToken.mAnimateReplacingWindow = animate;
         }
     }

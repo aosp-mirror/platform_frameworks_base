@@ -1287,6 +1287,7 @@ class WindowStateAnimator {
 
             if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
                 if (showSurfaceRobustlyLocked()) {
+                    mAnimator.requestRemovalOfReplacedWindows(w);
                     mLastHidden = false;
                     if (mIsWallpaper) {
                         mWallpaperControllerLocked.dispatchWallpaperVisibility(w, true);
@@ -1472,12 +1473,8 @@ class WindowStateAnimator {
                 }
                 mWin.mAppToken.updateReportedVisibilityLocked();
             }
-
-            mWin.maybeRemoveReplacedWindow();
-
             return true;
         }
-
         return false;
     }
 
