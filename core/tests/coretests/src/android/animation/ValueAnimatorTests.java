@@ -811,6 +811,65 @@ public class ValueAnimatorTests extends ActivityInstrumentationTestCase2<BasicAn
     }
 
     @SmallTest
+    public void testEndBeforeStart() throws Throwable {
+        // This test calls two animators that are not yet started. One animator has completed a
+        // previous run but hasn't started since then, the other one has never run. When end() is
+        // called on these two animators, we expected their animation listeners to receive both
+        // onAnimationStarted(Animator) and onAnimationEnded(Animator) callbacks, in that sequence.
+
+        a1.setStartDelay(20);
+
+        // First start a1's first run.
+        final MyListener normalEndingListener = new MyListener();
+        a1.addListener(normalEndingListener);
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(a1.isStarted());
+                assertFalse(normalEndingListener.startCalled);
+                assertFalse(normalEndingListener.endCalled);
+                // Start normally
+                a1.start();
+            }
+        });
+
+        Thread.sleep(a1.getTotalDuration() + POLL_INTERVAL);
+
+        // a1 should have finished by now.
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Call end() on both a1 and a2 without calling start()
+                final MyListener l1 = new MyListener();
+                a1.addListener(l1);
+                final MyListener l2 = new MyListener();
+                a2.addListener(l2);
+
+                assertFalse(a1.isStarted());
+                assertFalse(l1.startCalled);
+                assertFalse(l1.endCalled);
+                assertFalse(a2.isStarted());
+                assertFalse(l2.startCalled);
+                assertFalse(l1.endCalled);
+
+                a1.end();
+                a2.end();
+
+                // Check that both animators' listeners have received the animation callbacks.
+                assertTrue(l1.startCalled);
+                assertTrue(l1.endCalled);
+                assertFalse(a1.isStarted());
+                assertTrue(l1.endTime >= l1.startTime);
+
+                assertTrue(l2.startCalled);
+                assertTrue(l2.endCalled);
+                assertFalse(a2.isStarted());
+                assertTrue(l2.endTime >= l1.startTime);
+            }
+        });
+    }
+
+    @SmallTest
     public void testZeroDuration() throws Throwable {
         // Run two animators with zero duration, with one running forward and the other one
         // backward. Check that the animations start and finish with the correct end fractions.
