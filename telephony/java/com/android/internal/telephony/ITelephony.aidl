@@ -21,9 +21,10 @@ import android.os.Bundle;
 import android.telecom.PhoneAccount;
 import android.telephony.CellInfo;
 import android.telephony.IccOpenLogicalChannelResponse;
+import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.RadioAccessFamily;
-import android.telephony.ModemActivityInfo;
+import android.telephony.ServiceState;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
 import java.util.List;
@@ -1005,4 +1006,12 @@ interface ITelephony {
      * Return the modem activity info.
      */
     ModemActivityInfo getModemActivityInfo();
+
+    /**
+     * Get the service state on specified subscription
+     * @param subId Subscription id
+     * @param callingPackage The package making the call
+     * @return Service state on specified subscription.
+     */
+    ServiceState getServiceStateForSubscriber(int subId, String callingPackage);
 }
