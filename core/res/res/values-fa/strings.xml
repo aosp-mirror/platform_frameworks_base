@@ -783,7 +783,7 @@
     <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم یک هشدار"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"افزودن پست صوتی"</string>
-    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق دریافت پست صوتی شما اضافه کند."</string>
+    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق ورودی پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="save_password_message" msgid="767344687139195790">"می‌خواهید مرورگر این گذرواژه را به خاطر داشته باشد؟"</string>
