@@ -133,6 +133,9 @@ class AppWindowToken extends WindowToken {
     // If not null, the window that will be used to replace the old one. This is being set when
     // the window is added and unset when this window reports its first draw.
     WindowState mReplacingWindow;
+    // Whether the new window has replaced the old one, so the old one can be removed without
+    // blinking.
+    boolean mHasReplacedWindow;
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {

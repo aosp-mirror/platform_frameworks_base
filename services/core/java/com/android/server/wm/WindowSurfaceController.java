@@ -23,7 +23,6 @@ import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerService.HIDE_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -57,7 +56,6 @@ class WindowSurfaceController {
     private float mSurfaceAlpha = 0;
 
     private int mSurfaceLayer = 0;
-    private int mSurfaceFormat;
 
     // Surface flinger doesn't support crop rectangles where width or height is non-positive.
     // However, we need to somehow handle the situation where the cropping would completely hide
@@ -72,7 +70,6 @@ class WindowSurfaceController {
 
         mSurfaceW = w;
         mSurfaceH = h;
-        mSurfaceFormat = format;
 
         title = name;
 
@@ -387,6 +384,11 @@ class WindowSurfaceController {
         pw.print(","); pw.print(mSurfaceY);
         pw.print(") "); pw.print(mSurfaceW);
         pw.print(" x "); pw.println(mSurfaceH);
+    }
+
+    @Override
+    public String toString() {
+        return mSurfaceControl.toString();
     }
 
     static class SurfaceTrace extends SurfaceControl {

@@ -1190,9 +1190,13 @@ class WindowSurfacePlacer {
                 int layer = -1;
                 for (int j = 0; j < wtoken.windows.size(); j++) {
                     final WindowState win = wtoken.windows.get(j);
-                    // Clearing the mExiting flag before entering animation. It will be set
-                    // to true if app window is removed, or window relayout to invisible.
-                    win.mExiting = false;
+                    // Clearing the mExiting flag before entering animation. It will be set to true
+                    // if app window is removed, or window relayout to invisible. We don't want to
+                    // clear it out for windows that get replaced, because the animation depends on
+                    // the flag to remove the replaced window.
+                    if (win.mAppToken == null || !win.mAppToken.mWillReplaceWindow) {
+                        win.mExiting = false;
+                    }
                     if (win.mWinAnimator.mAnimLayer > layer) {
                         layer = win.mWinAnimator.mAnimLayer;
                     }
@@ -1232,9 +1236,7 @@ class WindowSurfacePlacer {
                 true /*updateInputWindows*/);
         mService.mFocusMayChange = false;
         mService.notifyActivityDrawnForKeyguard();
-        return FINISH_LAYOUT_REDO_LAYOUT
-                | FINISH_LAYOUT_REDO_CONFIG;
-
+        return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
     }
 
     private boolean transitionGoodToGo(int appsCount) {

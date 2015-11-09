@@ -1374,14 +1374,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void maybeRemoveReplacedWindow() {
         AppWindowToken token = mAppToken;
-        if (token != null && token.mWillReplaceWindow && token.mReplacingWindow == this) {
+        if (token != null && token.mWillReplaceWindow && token.mReplacingWindow == this
+                && token.mHasReplacedWindow) {
             if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replacing window: " + this);
             token.mWillReplaceWindow = false;
             token.mAnimateReplacingWindow = false;
             token.mReplacingRemoveRequested = false;
             token.mReplacingWindow = null;
+            token.mHasReplacedWindow = false;
             for (int i = token.allAppWindows.size() - 1; i >= 0; i--) {
-                WindowState win = token.allAppWindows.get(i);
+                final WindowState win = token.allAppWindows.get(i);
                 if (win.mExiting) {
                     mService.removeWindowInnerLocked(win);
                 }
