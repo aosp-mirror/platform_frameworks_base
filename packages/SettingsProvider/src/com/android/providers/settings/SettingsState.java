@@ -392,12 +392,9 @@ final class SettingsState {
             if (DEBUG_PERSISTENCE) {
                 Slog.i(LOG_TAG, "[PERSIST END]");
             }
-
-            // Any error while writing is fatal.
         } catch (Throwable t) {
             Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
             destination.failWrite(out);
-            throw new IllegalStateException("Failed to write settings, restoring backup", t);
         } finally {
             IoUtils.closeQuietly(out);
         }
