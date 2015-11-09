@@ -1,68 +1,28 @@
-/*
- * Copyright (C) 2015 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.android.server.pm;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
-import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageInstaller.SessionParams;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.net.Uri;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.text.TextUtils;
 
-import com.android.internal.util.SizedInputStream;
-
-import libcore.io.IoUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
 
 class PackageManagerShellCommand extends ShellCommand {
     final IPackageManager mInterface;
@@ -82,21 +42,8 @@ class PackageManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch(cmd) {
-                case "install":
-                    return runInstall();
-                case "install-abandon":
-                case "install-destroy":
-                    return runInstallAbandon();
-                case "install-commit":
-                    return runInstallCommit();
-                case "install-create":
-                    return runInstallCreate();
-                case "install-write":
-                    return runInstallWrite();
                 case "list":
                     return runList();
-                case "uninstall":
-                    return runUninstall();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -104,65 +51,6 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
-    }
-
-    private int runInstall() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        final InstallParams params = makeInstallParams();
-        final int sessionId = doCreateSession(params.sessionParams,
-                params.installerPackageName, params.userId);
-
-        final String inPath = getNextArg();
-        if (inPath == null && params.sessionParams.sizeBytes == 0) {
-            pw.println("Error: must either specify a package size or an APK file");
-            return 1;
-        }
-        if (doWriteSession(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk") != 0) {
-            return 1;
-        }
-        if (doCommitSession(sessionId) != 0) {
-            return 1;
-        }
-        return 0;
-    }
-
-    private int runInstallAbandon() throws RemoteException {
-        final int sessionId = Integer.parseInt(getNextArg());
-        return doAbandonSession(sessionId);
-    }
-
-    private int runInstallCommit() throws RemoteException {
-        final int sessionId = Integer.parseInt(getNextArg());
-        return doCommitSession(sessionId);
-    }
-
-    private int runInstallCreate() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        final InstallParams installParams = makeInstallParams();
-        final int sessionId = doCreateSession(installParams.sessionParams,
-                installParams.installerPackageName, installParams.userId);
-
-        // NOTE: adb depends on parsing this string
-        pw.println("Success: created install session [" + sessionId + "]");
-        return 0;
-    }
-
-    private int runInstallWrite() throws RemoteException {
-        long sizeBytes = -1;
-
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            if (opt.equals("-S")) {
-                sizeBytes = Long.parseLong(getNextArg());
-            } else {
-                throw new IllegalArgumentException("Unknown option: " + opt);
-            }
-        }
-
-        final int sessionId = Integer.parseInt(getNextArg());
-        final String splitName = getNextArg();
-        final String path = getNextArg();
-        return doWriteSession(sessionId, path, sizeBytes, splitName);
     }
 
     private int runList() throws RemoteException {
@@ -475,279 +363,6 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runUninstall() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        int flags = 0;
-        int userId = UserHandle.USER_ALL;
-
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            switch (opt) {
-                case "-k":
-                    flags |= PackageManager.DELETE_KEEP_DATA;
-                    break;
-                case "--user":
-                    userId = Integer.parseInt(getNextArg());
-                    break;
-                default:
-                    pw.println("Error: Unknown option: " + opt);
-                    return 1;
-            }
-        }
-
-        String packageName = getNextArg();
-        if (packageName == null) {
-            pw.println("Error: package name not specified");
-            return 1;
-        }
-
-        userId = translateUserId(userId, "runUninstall");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-            flags |= PackageManager.DELETE_ALL_USERS;
-        } else {
-            final PackageInfo info = mInterface.getPackageInfo(packageName, 0, userId);
-            if (info == null) {
-                pw.println("Failure - not installed for " + userId);
-                return 1;
-            }
-            final boolean isSystem =
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            // If we are being asked to delete a system app for just one
-            // user set flag so it disables rather than reverting to system
-            // version of the app.
-            if (isSystem) {
-                flags |= PackageManager.DELETE_SYSTEM_APP;
-            }
-        }
-
-        final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        mInterface.getPackageInstaller().uninstall(packageName, null /*callerPackageName*/, flags,
-                receiver.getIntentSender(), userId);
-
-        final Intent result = receiver.getResult();
-        final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                PackageInstaller.STATUS_FAILURE);
-        if (status == PackageInstaller.STATUS_SUCCESS) {
-            pw.println("Success");
-            return 0;
-        } else {
-            pw.println("Failure ["
-                    + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
-            return 1;
-        }
-    }
-
-    private static class InstallParams {
-        SessionParams sessionParams;
-        String installerPackageName;
-        int userId = UserHandle.USER_ALL;
-    }
-
-    private InstallParams makeInstallParams() {
-        final SessionParams sessionParams = new SessionParams(SessionParams.MODE_FULL_INSTALL);
-        final InstallParams params = new InstallParams();
-        params.sessionParams = sessionParams;
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            switch (opt) {
-                case "-l":
-                    sessionParams.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
-                    break;
-                case "-r":
-                    sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
-                    break;
-                case "-i":
-                    params.installerPackageName = getNextArg();
-                    if (params.installerPackageName == null) {
-                        throw new IllegalArgumentException("Missing installer package");
-                    }
-                    break;
-                case "-t":
-                    sessionParams.installFlags |= PackageManager.INSTALL_ALLOW_TEST;
-                    break;
-                case "-s":
-                    sessionParams.installFlags |= PackageManager.INSTALL_EXTERNAL;
-                    break;
-                case "-f":
-                    sessionParams.installFlags |= PackageManager.INSTALL_INTERNAL;
-                    break;
-                case "-d":
-                    sessionParams.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
-                    break;
-                case "-g":
-                    sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
-                    break;
-                case "--originating-uri":
-                    sessionParams.originatingUri = Uri.parse(getNextArg());
-                    break;
-                case "--referrer":
-                    sessionParams.referrerUri = Uri.parse(getNextArg());
-                    break;
-                case "-p":
-                    sessionParams.mode = SessionParams.MODE_INHERIT_EXISTING;
-                    sessionParams.appPackageName = getNextArg();
-                    if (sessionParams.appPackageName == null) {
-                        throw new IllegalArgumentException("Missing inherit package name");
-                    }
-                    break;
-                case "-S":
-                    sessionParams.setSize(Long.parseLong(getNextArg()));
-                    break;
-                case "--abi":
-                    sessionParams.abiOverride = checkAbiArgument(getNextArg());
-                    break;
-                case "--user":
-                    params.userId = Integer.parseInt(getNextArg());
-                    break;
-                case "--install-location":
-                    sessionParams.installLocation = Integer.parseInt(getNextArg());
-                    break;
-                case "--force-uuid":
-                    sessionParams.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
-                    sessionParams.volumeUuid = getNextArg();
-                    if ("internal".equals(sessionParams.volumeUuid)) {
-                        sessionParams.volumeUuid = null;
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown option " + opt);
-            }
-        }
-        return params;
-    }
-
-    private static String checkAbiArgument(String abi) {
-        if (TextUtils.isEmpty(abi)) {
-            throw new IllegalArgumentException("Missing ABI argument");
-        }
-
-        if ("-".equals(abi)) {
-            return abi;
-        }
-
-        final String[] supportedAbis = Build.SUPPORTED_ABIS;
-        for (String supportedAbi : supportedAbis) {
-            if (supportedAbi.equals(abi)) {
-                return abi;
-            }
-        }
-
-        throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
-    }
-
-    private int translateUserId(int userId, String logContext) {
-        return ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, true, true, logContext, "pm command");
-    }
-
-    private int doCreateSession(SessionParams params, String installerPackageName, int userId)
-            throws RemoteException {
-        userId = translateUserId(userId, "runInstallCreate");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
-        }
-
-        final int sessionId = mInterface.getPackageInstaller()
-                .createSession(params, installerPackageName, userId);
-        return sessionId;
-    }
-
-    private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName)
-            throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        if ("-".equals(inPath)) {
-            inPath = null;
-        } else if (inPath != null) {
-            final File file = new File(inPath);
-            if (file.isFile()) {
-                sizeBytes = file.length();
-            }
-        }
-
-        final SessionInfo info = mInterface.getPackageInstaller().getSessionInfo(sessionId);
-
-        PackageInstaller.Session session = null;
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            session = new PackageInstaller.Session(
-                    mInterface.getPackageInstaller().openSession(sessionId));
-
-            if (inPath != null) {
-                in = new FileInputStream(inPath);
-            } else {
-                in = new SizedInputStream(getInputStream(), sizeBytes);
-            }
-            out = session.openWrite(splitName, 0, sizeBytes);
-
-            int total = 0;
-            byte[] buffer = new byte[65536];
-            int c;
-            while ((c = in.read(buffer)) != -1) {
-                total += c;
-                out.write(buffer, 0, c);
-
-                if (info.sizeBytes > 0) {
-                    final float fraction = ((float) c / (float) info.sizeBytes);
-                    session.addProgress(fraction);
-                }
-            }
-            session.fsync(out);
-
-            pw.println("Success: streamed " + total + " bytes");
-            return 0;
-        } catch (IOException e) {
-            pw.println("Error: failed to write; " + e.getMessage());
-            return 1;
-        } finally {
-            IoUtils.closeQuietly(out);
-            IoUtils.closeQuietly(in);
-            IoUtils.closeQuietly(session);
-        }
-    }
-
-    private int doCommitSession(int sessionId) throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        PackageInstaller.Session session = null;
-        try {
-            session = new PackageInstaller.Session(
-                    mInterface.getPackageInstaller().openSession(sessionId));
-
-            final LocalIntentReceiver receiver = new LocalIntentReceiver();
-            session.commit(receiver.getIntentSender());
-
-            final Intent result = receiver.getResult();
-            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_FAILURE);
-            if (status == PackageInstaller.STATUS_SUCCESS) {
-                pw.println("Success");
-            } else {
-                pw.println("Failure ["
-                        + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
-                pw.println("Failure details: " + result.getExtras());
-            }
-            return status;
-        } finally {
-            IoUtils.closeQuietly(session);
-        }
-    }
-
-    private int doAbandonSession(int sessionId) throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        PackageInstaller.Session session = null;
-        try {
-            session = new PackageInstaller.Session(
-                    mInterface.getPackageInstaller().openSession(sessionId));
-            session.abandon();
-            pw.println("Success");
-            return 0;
-        } finally {
-            IoUtils.closeQuietly(session);
-        }
-    }
-
     private void doListPermissions(ArrayList<String> groupList, boolean groups, boolean labels,
             boolean summary, int startProtectionLevel, int endProtectionLevel)
                     throws RemoteException {
@@ -909,35 +524,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
         pw.println("");
-    }
-
-    private static class LocalIntentReceiver {
-        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
-
-        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
-            @Override
-            public int send(int code, Intent intent, String resolvedType,
-                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
-                try {
-                    mResult.offer(intent, 5, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return 0;
-            }
-        };
-
-        public IntentSender getIntentSender() {
-            return new IntentSender((IIntentSender) mLocalSender);
-        }
-
-        public Intent getResult() {
-            try {
-                return mResult.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }
 

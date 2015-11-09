@@ -28,13 +28,24 @@ import android.app.ActivityManagerNative;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.pm.VerificationParams;
+import android.net.Uri;
+import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -45,13 +56,26 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import libcore.io.IoUtils;
+
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.SizedInputStream;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 
 public final class Pm {
     private static final String TAG = "Pm";
@@ -82,7 +106,7 @@ public final class Pm {
         System.exit(exitCode);
     }
 
-    public int run(String[] args) throws RemoteException {
+    public int run(String[] args) throws IOException, RemoteException {
         boolean validCommand = false;
         if (args.length < 1) {
             return showUsage();
@@ -118,19 +142,19 @@ public final class Pm {
         }
 
         if ("install-create".equals(op)) {
-            return runInstall();
+            return runInstallCreate();
         }
 
         if ("install-write".equals(op)) {
-            return runInstall();
+            return runInstallWrite();
         }
 
         if ("install-commit".equals(op)) {
-            return runInstall();
+            return runInstallCommit();
         }
 
         if ("install-abandon".equals(op) || "install-destroy".equals(op)) {
-            return runInstall();
+            return runInstallAbandon();
         }
 
         if ("set-installer".equals(op)) {
@@ -275,10 +299,6 @@ public final class Pm {
         return -1;
     }
 
-    private int runInstall() {
-        return runShellCommand("package", mArgs);
-    }
-
     /**
      * Execute the list sub-command.
      *
@@ -294,10 +314,6 @@ public final class Pm {
         if ("users".equals(type)) {
             return runShellCommand("user", new String[] { "list" });
         }
-        return runShellCommand("package", mArgs);
-    }
-
-    private int runUninstall() {
         return runShellCommand("package", mArgs);
     }
 
@@ -352,6 +368,49 @@ public final class Pm {
                 notifyAll();
             }
         }
+    }
+
+    /**
+     * Converts a failure code into a string by using reflection to find a matching constant
+     * in PackageManager.
+     */
+    private String installFailureToString(LocalPackageInstallObserver obs) {
+        final int result = obs.result;
+        Field[] fields = PackageManager.class.getFields();
+        for (Field f: fields) {
+            if (f.getType() == int.class) {
+                int modifiers = f.getModifiers();
+                // only look at public final static fields.
+                if (((modifiers & Modifier.FINAL) != 0) &&
+                        ((modifiers & Modifier.PUBLIC) != 0) &&
+                        ((modifiers & Modifier.STATIC) != 0)) {
+                    String fieldName = f.getName();
+                    if (fieldName.startsWith("INSTALL_FAILED_") ||
+                            fieldName.startsWith("INSTALL_PARSE_FAILED_")) {
+                        // get the int value and compare it to result.
+                        try {
+                            if (result == f.getInt(null)) {
+                                StringBuilder sb = new StringBuilder(64);
+                                sb.append(fieldName);
+                                if (obs.extraPermission != null) {
+                                    sb.append(" perm=");
+                                    sb.append(obs.extraPermission);
+                                }
+                                if (obs.extraPackage != null) {
+                                    sb.append(" pkg=" + obs.extraPackage);
+                                }
+                                return sb.toString();
+                            }
+                        } catch (IllegalAccessException e) {
+                            // this shouldn't happen since we only look for public static fields.
+                        }
+                    }
+                }
+            }
+        }
+
+        // couldn't find a matching constant? return the value
+        return Integer.toString(result);
     }
 
     // pm set-app-link [--user USER_ID] PACKAGE {always|ask|always-ask|never|undefined}
@@ -543,6 +602,316 @@ public final class Pm {
         }
     }
 
+    private int runInstall() {
+        int installFlags = 0;
+        int userId = UserHandle.USER_ALL;
+        String installerPackageName = null;
+
+        String opt;
+
+        String originatingUriString = null;
+        String referrer = null;
+        String abi = null;
+
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-l")) {
+                installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+            } else if (opt.equals("-r")) {
+                installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+            } else if (opt.equals("-i")) {
+                installerPackageName = nextOptionData();
+                if (installerPackageName == null) {
+                    System.err.println("Error: no value specified for -i");
+                    return 1;
+                }
+            } else if (opt.equals("-t")) {
+                installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+            } else if (opt.equals("-s")) {
+                // Override if -s option is specified.
+                installFlags |= PackageManager.INSTALL_EXTERNAL;
+            } else if (opt.equals("-f")) {
+                // Override if -s option is specified.
+                installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else if (opt.equals("-d")) {
+                installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-g")) {
+                installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+            } else if (opt.equals("--originating-uri")) {
+                originatingUriString = nextOptionData();
+                if (originatingUriString == null) {
+                    System.err.println("Error: must supply argument for --originating-uri");
+                    return 1;
+                }
+            } else if (opt.equals("--referrer")) {
+                referrer = nextOptionData();
+                if (referrer == null) {
+                    System.err.println("Error: must supply argument for --referrer");
+                    return 1;
+                }
+            } else if (opt.equals("--abi")) {
+                abi = checkAbiArgument(nextOptionData());
+            } else if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+
+        userId = translateUserId(userId, "runInstall");
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+            installFlags |= PackageManager.INSTALL_ALL_USERS;
+        }
+
+        final Uri verificationURI;
+        final Uri originatingURI;
+        final Uri referrerURI;
+
+        if (originatingUriString != null) {
+            originatingURI = Uri.parse(originatingUriString);
+        } else {
+            originatingURI = null;
+        }
+
+        if (referrer != null) {
+            referrerURI = Uri.parse(referrer);
+        } else {
+            referrerURI = null;
+        }
+
+        // Populate apkURI, must be present
+        final String apkFilePath = nextArg();
+        System.err.println("\tpkg: " + apkFilePath);
+        if (apkFilePath == null) {
+            System.err.println("Error: no package specified");
+            return 1;
+        }
+
+        // Populate verificationURI, optionally present
+        final String verificationFilePath = nextArg();
+        if (verificationFilePath != null) {
+            System.err.println("\tver: " + verificationFilePath);
+            verificationURI = Uri.fromFile(new File(verificationFilePath));
+        } else {
+            verificationURI = null;
+        }
+
+        LocalPackageInstallObserver obs = new LocalPackageInstallObserver();
+        try {
+            VerificationParams verificationParams = new VerificationParams(verificationURI,
+                    originatingURI, referrerURI, VerificationParams.NO_UID, null);
+
+            mPm.installPackageAsUser(apkFilePath, obs.getBinder(), installFlags,
+                    installerPackageName, verificationParams, abi, userId);
+
+            synchronized (obs) {
+                while (!obs.finished) {
+                    try {
+                        obs.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+                if (obs.result == PackageManager.INSTALL_SUCCEEDED) {
+                    System.out.println("Success");
+                    return 0;
+                } else {
+                    System.err.println("Failure ["
+                            + installFailureToString(obs)
+                            + "]");
+                    return 1;
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        }
+    }
+
+    /**
+     * @param userId The user id to be translated.
+     * @param logContext Optional human readable text to provide some context in error log.
+     * @return Translated concrete user id.  This will include USER_ALL.
+     */
+    private int translateUserId(int userId, String logContext) {
+        return ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, true, true, logContext, "pm command");
+    }
+
+    private int runInstallCreate() throws RemoteException {
+        int userId = UserHandle.USER_ALL;
+        String installerPackageName = null;
+
+        final SessionParams params = new SessionParams(SessionParams.MODE_FULL_INSTALL);
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("-l")) {
+                params.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+            } else if (opt.equals("-r")) {
+                params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+            } else if (opt.equals("-i")) {
+                installerPackageName = nextArg();
+                if (installerPackageName == null) {
+                    throw new IllegalArgumentException("Missing installer package");
+                }
+            } else if (opt.equals("-t")) {
+                params.installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+            } else if (opt.equals("-s")) {
+                params.installFlags |= PackageManager.INSTALL_EXTERNAL;
+            } else if (opt.equals("-f")) {
+                params.installFlags |= PackageManager.INSTALL_INTERNAL;
+            } else if (opt.equals("-d")) {
+                params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-g")) {
+                params.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+            } else if (opt.equals("--originating-uri")) {
+                params.originatingUri = Uri.parse(nextOptionData());
+            } else if (opt.equals("--referrer")) {
+                params.referrerUri = Uri.parse(nextOptionData());
+            } else if (opt.equals("-p")) {
+                params.mode = SessionParams.MODE_INHERIT_EXISTING;
+                params.appPackageName = nextOptionData();
+                if (params.appPackageName == null) {
+                    throw new IllegalArgumentException("Missing inherit package name");
+                }
+            } else if (opt.equals("-S")) {
+                params.setSize(Long.parseLong(nextOptionData()));
+            } else if (opt.equals("--abi")) {
+                params.abiOverride = checkAbiArgument(nextOptionData());
+            } else if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+            } else if (opt.equals("--install-location")) {
+                params.installLocation = Integer.parseInt(nextOptionData());
+            } else if (opt.equals("--force-uuid")) {
+                params.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
+                params.volumeUuid = nextOptionData();
+                if ("internal".equals(params.volumeUuid)) {
+                    params.volumeUuid = null;
+                }
+            } else {
+                throw new IllegalArgumentException("Unknown option " + opt);
+            }
+        }
+
+        userId = translateUserId(userId, "runInstallCreate");
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
+        }
+
+        final int sessionId = mInstaller.createSession(params, installerPackageName, userId);
+
+        // NOTE: adb depends on parsing this string
+        System.out.println("Success: created install session [" + sessionId + "]");
+        return 0;
+    }
+
+    private int runInstallWrite() throws IOException, RemoteException {
+        long sizeBytes = -1;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("-S")) {
+                sizeBytes = Long.parseLong(nextOptionData());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + opt);
+            }
+        }
+
+        final int sessionId = Integer.parseInt(nextArg());
+        final String splitName = nextArg();
+
+        String path = nextArg();
+        if ("-".equals(path)) {
+            path = null;
+        } else if (path != null) {
+            final File file = new File(path);
+            if (file.isFile()) {
+                sizeBytes = file.length();
+            }
+        }
+
+        final SessionInfo info = mInstaller.getSessionInfo(sessionId);
+
+        PackageInstaller.Session session = null;
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+
+            if (path != null) {
+                in = new FileInputStream(path);
+            } else {
+                in = new SizedInputStream(System.in, sizeBytes);
+            }
+            out = session.openWrite(splitName, 0, sizeBytes);
+
+            int total = 0;
+            byte[] buffer = new byte[65536];
+            int c;
+            while ((c = in.read(buffer)) != -1) {
+                total += c;
+                out.write(buffer, 0, c);
+
+                if (info.sizeBytes > 0) {
+                    final float fraction = ((float) c / (float) info.sizeBytes);
+                    session.addProgress(fraction);
+                }
+            }
+            session.fsync(out);
+
+            System.out.println("Success: streamed " + total + " bytes");
+            return 0;
+        } finally {
+            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(in);
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private int runInstallCommit() throws RemoteException {
+        final int sessionId = Integer.parseInt(nextArg());
+
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+
+            final LocalIntentReceiver receiver = new LocalIntentReceiver();
+            session.commit(receiver.getIntentSender());
+
+            final Intent result = receiver.getResult();
+            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_FAILURE);
+            if (status == PackageInstaller.STATUS_SUCCESS) {
+                System.out.println("Success");
+                return 0;
+            } else {
+                Log.e(TAG, "Failure details: " + result.getExtras());
+                System.err.println("Failure ["
+                        + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+                return 1;
+            }
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+    }
+
+    private int runInstallAbandon() throws RemoteException {
+        final int sessionId = Integer.parseInt(nextArg());
+
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+            session.abandon();
+            System.out.println("Success");
+            return 0;
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+    }
+
     private int runSetInstaller() throws RemoteException {
         final String targetPackage = nextArg();
         final String installerPackageName = nextArg();
@@ -708,6 +1077,80 @@ public final class Pm {
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    private int runUninstall() throws RemoteException {
+        int flags = 0;
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-k")) {
+                flags |= PackageManager.DELETE_KEEP_DATA;
+            } else if (opt.equals("--user")) {
+                String param = nextArg();
+                if (isNumber(param)) {
+                    userId = Integer.parseInt(param);
+                } else {
+                    showUsage();
+                    System.err.println("Error: Invalid user: " + param);
+                    return 1;
+                }
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return 1;
+            }
+        }
+
+        String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified");
+            return showUsage();
+        }
+
+        userId = translateUserId(userId, "runUninstall");
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+            flags |= PackageManager.DELETE_ALL_USERS;
+        } else {
+            PackageInfo info;
+            try {
+                info = mPm.getPackageInfo(pkg, 0, userId);
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(PM_NOT_RUNNING_ERR);
+                return 1;
+            }
+            if (info == null) {
+                System.err.println("Failure - not installed for " + userId);
+                return 1;
+            }
+            final boolean isSystem =
+                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+            // If we are being asked to delete a system app for just one
+            // user set flag so it disables rather than reverting to system
+            // version of the app.
+            if (isSystem) {
+                flags |= PackageManager.DELETE_SYSTEM_APP;
+            }
+        }
+
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
+        mInstaller.uninstall(pkg, null /* callerPackageName */, flags,
+                receiver.getIntentSender(), userId);
+
+        final Intent result = receiver.getResult();
+        final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                PackageInstaller.STATUS_FAILURE);
+        if (status == PackageInstaller.STATUS_SUCCESS) {
+            System.out.println("Success");
+            return 0;
+        } else {
+            Log.e(TAG, "Failure details: " + result.getExtras());
+            System.err.println("Failure ["
+                    + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+            return 1;
         }
     }
 
@@ -1054,6 +1497,54 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
         return 1;
+    }
+
+    private static String checkAbiArgument(String abi) {
+        if (TextUtils.isEmpty(abi)) {
+            throw new IllegalArgumentException("Missing ABI argument");
+        }
+
+        if ("-".equals(abi)) {
+            return abi;
+        }
+
+        final String[] supportedAbis = Build.SUPPORTED_ABIS;
+        for (String supportedAbi : supportedAbis) {
+            if (supportedAbi.equals(abi)) {
+                return abi;
+            }
+        }
+
+        throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
+    }
+
+    private static class LocalIntentReceiver {
+        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
+
+        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+            @Override
+            public int send(int code, Intent intent, String resolvedType,
+                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+                try {
+                    mResult.offer(intent, 5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return 0;
+            }
+        };
+
+        public IntentSender getIntentSender() {
+            return new IntentSender((IIntentSender) mLocalSender);
+        }
+
+        public Intent getResult() {
+            try {
+                return mResult.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private String nextOption() {
