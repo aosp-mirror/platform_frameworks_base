@@ -1054,7 +1054,8 @@ public class KeyguardViewMediator extends SystemUI {
 
         // In split system user mode, we never unlock system user.
         if (!UserManager.isSplitSystemUser()
-                || KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM) {
+                || KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM
+                || !mUpdateMonitor.isDeviceProvisioned()) {
 
             // if the setup wizard hasn't run yet, don't show
             final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
