@@ -184,7 +184,7 @@ public class DirectoryFragment extends Fragment {
     private Point mThumbSize;
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<DirectoryResult> mCallbacks;
-    private FragmentTuner mFragmentTuner;
+    private FragmentTuner mTuner;
     private DocumentClipper mClipper;
     // These are lazily initialized.
     private LinearLayoutManager mListLayout;
@@ -319,7 +319,7 @@ public class DirectoryFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         final Context context = getActivity();
-        final State state = getDisplayState(DirectoryFragment.this);
+        final State state = getDisplayState();
 
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
@@ -381,7 +381,7 @@ public class DirectoryFragment extends Fragment {
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
 
-        mFragmentTuner = FragmentTuner.pick(state);
+        mTuner = FragmentTuner.pick(state);
         mClipper = new DocumentClipper(context);
 
         if (mType == TYPE_RECENT_OPEN) {
@@ -485,7 +485,7 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        CopyService.start(getActivity(), getDisplayState(this).selectedDocumentsForCopy,
+        CopyService.start(getActivity(), getDisplayState().selectedDocumentsForCopy,
                 (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
                 data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_COPY));
     }
@@ -524,7 +524,7 @@ public class DirectoryFragment extends Fragment {
         checkNotNull(cursor, "Cursor cannot be null.");
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-        if (isDocumentEnabled(docMimeType, docFlags)) {
+        if (mTuner.isDocumentEnabled(docMimeType, docFlags)) {
             final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
             ((BaseActivity) getActivity()).onDocumentPicked(doc, mModel);
             mSelectionManager.clearSelection();
@@ -540,7 +540,7 @@ public class DirectoryFragment extends Fragment {
         // Remember last scroll location
         final SparseArray<Parcelable> container = new SparseArray<Parcelable>();
         getView().saveHierarchyState(container);
-        final State state = getDisplayState(this);
+        final State state = getDisplayState();
         state.dirState.put(mStateKey, container);
     }
 
@@ -562,7 +562,7 @@ public class DirectoryFragment extends Fragment {
 
     public void onUserModeChanged() {
         final ContentResolver resolver = getActivity().getContentResolver();
-        final State state = getDisplayState(this);
+        final State state = getDisplayState();
 
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
@@ -591,7 +591,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void updateDisplayState() {
-        final State state = getDisplayState(this);
+        final State state = getDisplayState();
 
         if (mLastMode == state.derivedMode && mLastShowSize == state.showSize) return;
         mLastMode = state.derivedMode;
@@ -665,13 +665,13 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onBeforeItemStateChange(int position, boolean selected) {
-            // Directories cannot be checked
             if (selected) {
                 final Cursor cursor = mModel.getItem(position);
                 checkNotNull(cursor, "Cursor cannot be null.");
                 final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-                return isDocumentEnabled(docMimeType, docFlags);
+                return mTuner.canSelectType(docMimeType)
+                        && mTuner.isDocumentEnabled(docMimeType, docFlags);
             }
             return true;
         }
@@ -743,7 +743,7 @@ public class DirectoryFragment extends Fragment {
         private void updateActionMenu() {
             checkNotNull(mMenu);
             // Delegate update logic to our owning action, since specialized logic is desired.
-            mFragmentTuner.updateActionMenu(mMenu, mType, mNoDeleteCount == 0);
+            mTuner.updateActionMenu(mMenu, mType, mNoDeleteCount == 0);
             Menus.disableHiddenItems(mMenu);
         }
 
@@ -915,7 +915,7 @@ public class DirectoryFragment extends Fragment {
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
-                getDisplayState(DirectoryFragment.this).selectedDocumentsForCopy = docs;
+                getDisplayState().selectedDocumentsForCopy = docs;
 
                 boolean directoryCopy = false;
                 for (DocumentInfo info : docs) {
@@ -931,8 +931,8 @@ public class DirectoryFragment extends Fragment {
         }.execute(selected);
     }
 
-    private static State getDisplayState(Fragment fragment) {
-        return ((BaseActivity) fragment.getActivity()).getDisplayState();
+    private State getDisplayState() {
+        return ((BaseActivity) getActivity()).getDisplayState();
     }
 
     // Provide a reference to the views for each data item
@@ -1027,7 +1027,7 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public DocumentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            final State state = getDisplayState(DirectoryFragment.this);
+            final State state = getDisplayState();
             final LayoutInflater inflater = LayoutInflater.from(getContext());
             View item = null;
             switch (state.derivedMode) {
@@ -1070,8 +1070,7 @@ public class DirectoryFragment extends Fragment {
         public void onBindViewHolder(DocumentHolder holder, int position) {
 
             final Context context = getContext();
-            final State state = getDisplayState(DirectoryFragment.this);
-            final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
+            final State state = getDisplayState();
             final RootsCache roots = DocumentsApplication.getRootsCache(context);
             final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                     context, mThumbSize);
@@ -1121,7 +1120,7 @@ public class DirectoryFragment extends Fragment {
                     || MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, docMimeType);
             final boolean showThumbnail = supportsThumbnail && allowThumbnail && !mSvelteRecents;
 
-            final boolean enabled = isDocumentEnabled(docMimeType, docFlags);
+            final boolean enabled = mTuner.isDocumentEnabled(docMimeType, docFlags);
             final float iconAlpha = (state.derivedMode == MODE_LIST && !enabled) ? 0.5f : 1f;
 
             boolean cacheHit = false;
@@ -1330,22 +1329,6 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private boolean isDocumentEnabled(String docMimeType, int docFlags) {
-        final State state = getDisplayState(DirectoryFragment.this);
-
-        // Directories are always enabled
-        if (Document.MIME_TYPE_DIR.equals(docMimeType)) {
-            return true;
-        }
-
-        // Read-only files are disabled when creating
-        if (state.action == ACTION_CREATE && (docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
-            return false;
-        }
-
-        return MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
-    }
-
     private void copyFromClipboard() {
         new AsyncTask<Void, Void, List<DocumentInfo>>() {
 
@@ -1393,7 +1376,7 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        final DocumentStack curStack = getDisplayState(DirectoryFragment.this).stack;
+        final DocumentStack curStack = getDisplayState().stack;
         DocumentStack tmpStack = new DocumentStack();
         if (destination != null) {
             tmpStack.push(destination);
@@ -1590,7 +1573,7 @@ public class DirectoryFragment extends Fragment {
         if (docs.size() == 1) {
             final DocumentInfo doc = docs.get(0);
             return getDocumentIcon(getActivity(), doc.authority, doc.documentId,
-                    doc.mimeType, doc.icon, getDisplayState(this));
+                    doc.mimeType, doc.icon, getDisplayState());
         }
         return getActivity().getDrawable(R.drawable.ic_doc_generic);
     }
