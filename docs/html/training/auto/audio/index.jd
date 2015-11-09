@@ -491,7 +491,13 @@ to be played over the car's speakers.</p>
 <a href="{@docRoot}training/managing-audio/index.html">Managing Audio Playback</a>, and
 <a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.</p>
 
-
+<a class="notice-developers-video wide"
+href="https://www.youtube.com/watch?v=xc2HZSwPcwM">
+<div>
+    <h3>Video</h3>
+    <p>Devbytes: Android Auto Voice Actions</p>
+</div>
+</a>
 <h2 id="support_voice">Support Voice Actions</h2>
 
 <p>To reduce driver distractions, you can add voice actions in your audio playback app. With voice
