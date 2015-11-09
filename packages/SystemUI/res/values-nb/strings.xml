@@ -384,7 +384,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten forblir låst til du låser den opp manuelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Motta varsler raskere"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Se dem før du låser opp"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nei takk"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nei, takk"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Konfigurer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Avslutt nå"</string>
@@ -393,7 +393,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skjermen er låst"</string>
     <string name="screen_pinning_description" msgid="3577937698406151604">"På denne måten blir skjermen synlig frem til du låser den opp. Trykk og hold inne Tilbake for å låse opp."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Skjønner"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"Nei takk"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Nei, takk"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vil du skjule <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Den vises igjen neste gang du slår den på i innstillingene."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Skjul"</string>
@@ -402,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ikke tillat"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er volumdialogen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
-    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruker jobbprofilen din"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>

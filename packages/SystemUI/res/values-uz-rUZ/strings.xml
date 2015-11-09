@@ -145,10 +145,10 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rouming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth modem"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Hech qanday SIM-karta yo‘q."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Hech qanday SIM karta yo‘q."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Tizim sozlamalari."</string>
@@ -402,8 +402,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Rad etish"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
-    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Batareya foizi ko‘rsatilsin"</string>

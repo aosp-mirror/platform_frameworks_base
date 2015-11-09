@@ -404,8 +404,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odmów"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> steruje głośnością"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dotknij, by przywrócić pierwotną."</string>
-    <!-- no translation found for group_summary_concadenation (2705151242008937028) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Używasz profilu do pracy"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Kalibrator System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Pokaż procent naładowania baterii"</string>
