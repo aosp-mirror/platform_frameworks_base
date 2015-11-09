@@ -394,6 +394,14 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "directories");
 
         /**
+         * The content:// style URI for enterprise Directory table. Requests to this URI can be
+         * performed on the UI thread because they are always unblocking.
+         *
+         */
+        public static final Uri CORP_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "directories_corp");
+
+        /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
          * contact directories.
          */
@@ -415,6 +423,22 @@ public final class ContactsContract {
          * _ID of the directory that represents locally stored invisible contacts.
          */
         public static final long LOCAL_INVISIBLE = 1;
+
+        /**
+         * _ID of the work profile default directory, which represents locally stored contacts.
+         *
+         * @hide
+         */
+        public static final long ENTERPRISE_DEFAULT = Directory.ENTERPRISE_DIRECTORY_ID_BASE
+                + DEFAULT;
+
+        /**
+         * _ID of the work profile directory that represents locally stored invisible contacts.
+         *
+         * @hide
+         */
+        public static final long ENTERPRISE_LOCAL_INVISIBLE = Directory.ENTERPRISE_DIRECTORY_ID_BASE
+                + LOCAL_INVISIBLE;
 
         /**
          * The name of the package that owns this directory. Contacts Provider
@@ -470,6 +494,15 @@ public final class ContactsContract {
          * <p>TYPE: text</p>
          */
         public static final String ACCOUNT_NAME = "accountName";
+
+        /**
+         * Mimimal ID for corp directory returned from
+         * {@link Directory#CORP_CONTENT_URI}.
+         *
+         * @hide
+         */
+        // slightly smaller than 2 ** 30
+        public static final long ENTERPRISE_DIRECTORY_ID_BASE = 1000000000;
 
         /**
          * One of {@link #EXPORT_SUPPORT_NONE}, {@link #EXPORT_SUPPORT_ANY_ACCOUNT},
@@ -553,6 +586,24 @@ public final class ContactsContract {
          * can produce thumbnails as well as full-size contact photos.
          */
         public static final int PHOTO_SUPPORT_FULL = 3;
+
+        /**
+         * Return TRUE if it is a remote stored directory.
+         */
+        public static boolean isRemoteDirectory(long directoryId) {
+            return directoryId != Directory.DEFAULT
+                    && directoryId != Directory.LOCAL_INVISIBLE
+                    && directoryId != Directory.ENTERPRISE_DEFAULT
+                    && directoryId != Directory.ENTERPRISE_LOCAL_INVISIBLE;
+        }
+
+        /**
+         * Return TRUE if a directory ID is from the contacts provider on the enterprise profile.
+         *
+         */
+        public static boolean isEnterpriseDirectoryId(long directoryId) {
+            return directoryId >= ENTERPRISE_DIRECTORY_ID_BASE;
+        }
 
         /**
          * Notifies the system of a change in the list of directories handled by
