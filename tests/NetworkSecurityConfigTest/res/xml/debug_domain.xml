@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <domain-config>
+    <domain>android.com</domain>
+    <trust-anchors>
+      <certificates src="@raw/ca_certs_pem" />
+    </trust-anchors>
+  </domain-config>
+  <debug-overrides>
+    <trust-anchors>
+      <certificates src="@raw/test_debug_ca" />
+    </trust-anchors>
+  </debug-overrides>
+</network-security-config>

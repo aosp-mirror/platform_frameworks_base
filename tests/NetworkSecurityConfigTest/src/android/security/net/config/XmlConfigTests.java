@@ -26,12 +26,15 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.TrustManager;
 
 public class XmlConfigTests extends AndroidTestCase {
+
+    private final static String DEBUG_CA_SUBJ = "O=AOSP, CN=Test debug CA";
 
     public void testEmptyConfigFile() throws Exception {
         XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.empty_config);
@@ -272,6 +275,68 @@ public class XmlConfigTests extends AndroidTestCase {
         MoreAsserts.assertNotEqual(parent, child);
         assertTrue(parent.isCleartextTrafficPermitted());
         assertFalse(child.isCleartextTrafficPermitted());
+    }
+
+    public void testDebugOverridesDisabled() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_basic, false);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        NetworkSecurityConfig config = appConfig.getConfigForHostname("");
+        Set<TrustAnchor> anchors = config.getTrustAnchors();
+        MoreAsserts.assertEmpty(anchors);
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionFails(context, "android.com", 443);
+        TestUtils.assertConnectionFails(context, "developer.android.com", 443);
+    }
+
+    public void testBasicDebugOverrides() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_basic, true);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        NetworkSecurityConfig config = appConfig.getConfigForHostname("");
+        Set<TrustAnchor> anchors = config.getTrustAnchors();
+        MoreAsserts.assertNotEmpty(anchors);
+        for (TrustAnchor anchor : anchors) {
+            assertTrue(anchor.overridesPins);
+        }
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
+    }
+
+    public void testDebugOverridesWithDomain() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_domain, true);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
+        Set<TrustAnchor> anchors = config.getTrustAnchors();
+        boolean foundDebugCA = false;
+        for (TrustAnchor anchor : anchors) {
+            if (anchor.certificate.getSubjectDN().toString().equals(DEBUG_CA_SUBJ)) {
+                foundDebugCA = true;
+                assertTrue(anchor.overridesPins);
+            }
+        }
+        assertTrue(foundDebugCA);
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
+    }
+
+    public void testDebugInherit() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_domain, true);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
+        Set<TrustAnchor> anchors = config.getTrustAnchors();
+        boolean foundDebugCA = false;
+        for (TrustAnchor anchor : anchors) {
+            if (anchor.certificate.getSubjectDN().toString().equals(DEBUG_CA_SUBJ)) {
+                foundDebugCA = true;
+                assertTrue(anchor.overridesPins);
+            }
+        }
+        assertTrue(foundDebugCA);
+        assertTrue(anchors.size() > 1);
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertConnectionSucceeds(context, "developer.android.com", 443);
     }
 
     private void testBadConfig(int configId) throws Exception {

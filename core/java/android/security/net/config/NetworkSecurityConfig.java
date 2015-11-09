@@ -227,8 +227,12 @@ public final class NetworkSecurityConfig {
             return Collections.<CertificatesEntryRef>emptyList();
         }
 
-        public boolean hasCertificateEntryRefs() {
+        public boolean hasCertificatesEntryRefs() {
             return mCertificatesEntryRefs != null;
+        }
+
+        List<CertificatesEntryRef> getCertificatesEntryRefs() {
+            return mCertificatesEntryRefs;
         }
 
         public NetworkSecurityConfig build() {
