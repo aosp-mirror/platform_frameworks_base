@@ -17,14 +17,21 @@
 package com.android.printspooler.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -81,6 +88,7 @@ import com.android.printspooler.model.RemotePrintDocument;
 import com.android.printspooler.model.RemotePrintDocument.RemotePrintDocumentInfo;
 import com.android.printspooler.renderer.IPdfEditor;
 import com.android.printspooler.renderer.PdfManipulationService;
+import com.android.printspooler.util.ApprovedPrintServices;
 import com.android.printspooler.util.MediaSizeUtils;
 import com.android.printspooler.util.MediaSizeUtils.MediaSizeComparator;
 import com.android.printspooler.util.PageRangeUtils;
@@ -88,6 +96,7 @@ import com.android.printspooler.util.PrintOptionUtils;
 import com.android.printspooler.widget.PrintContentView;
 import com.android.printspooler.widget.PrintContentView.OptionsStateChangeListener;
 import com.android.printspooler.widget.PrintContentView.OptionsStateController;
+
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -1184,12 +1193,125 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mPrintButton.setOnClickListener(clickListener);
     }
 
+    /**
+     * A dialog that asks the user to approve a {@link PrintService}. This dialog is automatically
+     * dismissed if the same {@link PrintService} gets approved by another
+     * {@link PrintServiceApprovalDialog}.
+     */
+    private static final class PrintServiceApprovalDialog extends DialogFragment
+            implements OnSharedPreferenceChangeListener {
+        private static final String PRINTSERVICE_KEY = "PRINTSERVICE";
+        private ApprovedPrintServices mApprovedServices;
+
+        /**
+         * Create a new {@link PrintServiceApprovalDialog} that ask the user to approve a
+         * {@link PrintService}.
+         *
+         * @param printService The {@link ComponentName} of the service to approve
+         * @return A new {@link PrintServiceApprovalDialog} that might approve the service
+         */
+        static PrintServiceApprovalDialog newInstance(ComponentName printService) {
+            PrintServiceApprovalDialog dialog = new PrintServiceApprovalDialog();
+
+            Bundle args = new Bundle();
+            args.putParcelable(PRINTSERVICE_KEY, printService);
+            dialog.setArguments(args);
+
+            return dialog;
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+
+            mApprovedServices.unregisterChangeListener(this);
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+
+            ComponentName printService = getArguments().getParcelable(PRINTSERVICE_KEY);
+            synchronized (ApprovedPrintServices.sLock) {
+                if (mApprovedServices.isApprovedService(printService)) {
+                    dismiss();
+                } else {
+                    mApprovedServices.registerChangeListenerLocked(this);
+                }
+            }
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            super.onCreateDialog(savedInstanceState);
+
+            mApprovedServices = new ApprovedPrintServices(getActivity());
+
+            PackageManager packageManager = getActivity().getPackageManager();
+            CharSequence serviceLabel;
+            try {
+                ComponentName printService = getArguments().getParcelable(PRINTSERVICE_KEY);
+
+                serviceLabel = packageManager.getApplicationInfo(printService.getPackageName(), 0)
+                        .loadLabel(packageManager);
+            } catch (NameNotFoundException e) {
+                serviceLabel = null;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(getString(R.string.print_service_security_warning_title,
+                    serviceLabel))
+                    .setMessage(getString(R.string.print_service_security_warning_summary,
+                            serviceLabel))
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            ComponentName printService =
+                                    getArguments().getParcelable(PRINTSERVICE_KEY);
+                            // Prevent onSharedPreferenceChanged from getting triggered
+                            mApprovedServices
+                                    .unregisterChangeListener(PrintServiceApprovalDialog.this);
+
+                            mApprovedServices.addApprovedService(printService);
+                            ((PrintActivity) getActivity()).confirmPrint();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, null);
+
+            return builder.create();
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            ComponentName printService = getArguments().getParcelable(PRINTSERVICE_KEY);
+
+            synchronized (ApprovedPrintServices.sLock) {
+                if (mApprovedServices.isApprovedService(printService)) {
+                    dismiss();
+                }
+            }
+        }
+    }
+
     private final class MyClickListener implements OnClickListener {
         @Override
         public void onClick(View view) {
             if (view == mPrintButton) {
                 if (mCurrentPrinter != null) {
-                    confirmPrint();
+                    if (mDestinationSpinnerAdapter.getPdfPrinter() == mCurrentPrinter) {
+                        confirmPrint();
+                    } else {
+                        ApprovedPrintServices approvedServices =
+                                new ApprovedPrintServices(PrintActivity.this);
+
+                        ComponentName printService = mCurrentPrinter.getId().getServiceName();
+                        if (approvedServices.isApprovedService(printService)) {
+                            confirmPrint();
+                        } else {
+                            PrintServiceApprovalDialog.newInstance(printService)
+                                    .show(getFragmentManager(), "approve");
+                        }
+                    }
                 } else {
                     cancelPrint();
                 }

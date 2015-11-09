@@ -46,4 +46,5 @@ oneway interface IPrintSpooler {
     void writePrintJobData(in ParcelFileDescriptor fd, in PrintJobId printJobId);
     void setClient(IPrintSpoolerClient client);
     void setPrintJobCancelling(in PrintJobId printJobId, boolean cancelling);
+    void removeApprovedPrintService(in ComponentName serviceToRemove);
 }

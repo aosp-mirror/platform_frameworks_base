@@ -50,6 +50,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.printspooler.R;
+import com.android.printspooler.util.ApprovedPrintServices;
 
 import libcore.io.IoUtils;
 
@@ -67,6 +68,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for exposing some of the {@link PrintSpooler} functionality to
@@ -136,10 +138,10 @@ public final class PrintSpoolerService extends Service {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (mLock) {
-            String prefix = (args.length > 0) ? args[0] : "";
-            String tab = "  ";
+        String prefix = (args.length > 0) ? args[0] : "";
+        String tab = "  ";
 
+        synchronized (mLock) {
             pw.append(prefix).append("print jobs:").println();
             final int printJobCount = mPrintJobs.size();
             for (int i = 0; i < printJobCount; i++) {
@@ -158,6 +160,14 @@ public final class PrintSpoolerService extends Service {
                         pw.append(prefix).append(tab).append(file.getName()).println();
                     }
                 }
+            }
+        }
+
+        pw.append(prefix).append("approved print services:").println();
+        Set<String> approvedPrintServices = (new ApprovedPrintServices(this)).getApprovedServices();
+        if (approvedPrintServices != null) {
+            for (String approvedService : approvedPrintServices) {
+                pw.append(prefix).append(tab).append(approvedService).println();
             }
         }
     }
@@ -1305,6 +1315,12 @@ public final class PrintSpoolerService extends Service {
         @Override
         public void setPrintJobCancelling(PrintJobId printJobId, boolean cancelling) {
             PrintSpoolerService.this.setPrintJobCancelling(printJobId, cancelling);
+        }
+
+        @Override
+        public void removeApprovedPrintService(ComponentName serviceToRemove) {
+            (new ApprovedPrintServices(PrintSpoolerService.this))
+                    .removeApprovedService(serviceToRemove);
         }
 
         public PrintSpoolerService getService() {
