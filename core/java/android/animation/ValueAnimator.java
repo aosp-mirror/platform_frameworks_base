@@ -955,7 +955,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStarted = true;
         mPaused = false;
         mRunning = false;
-        mAnimationEndRequested = false;
         AnimationHandler animationHandler = AnimationHandler.getInstance();
         animationHandler.addAnimationFrameCallback(this, (long) (mStartDelay * sDurationScale));
 
@@ -1123,6 +1122,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
         }
+
+        mAnimationEndRequested = false;
         initAnimation();
         mRunning = true;
         if (mSeekFraction >= 0) {
