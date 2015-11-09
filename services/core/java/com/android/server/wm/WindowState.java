@@ -1886,10 +1886,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             Configuration newConfig) throws RemoteException {
         DisplayInfo displayInfo = getDisplayInfo();
         mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        boolean resizing = computeDragResizing();
+        // When the task is docked, we send fullscreen sized backDropFrame as soon as resizing
+        // start even if we haven't received the relayout window, so that the client requests
+        // the relayout sooner. When dragging stops, backDropFrame needs to stay fullscreen
+        // until the window to small size, otherwise the multithread renderer will shift last
+        // one or more frame to wrong offset. So here we send fullscreen backdrop if either
+        // isDragResizing() or isDragResizeChanged() is true.
+        boolean resizing = isDragResizing() || isDragResizeChanged();
+        final Rect backDropFrame = (inFreeformWorkspace() || !resizing) ? frame : mTmpRect;
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                outsets, reportDraw, newConfig, inFreeformWorkspace() || !resizing
-                         ? frame : mTmpRect);
+                outsets, reportDraw, newConfig, backDropFrame);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
