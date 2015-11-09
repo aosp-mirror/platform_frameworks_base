@@ -4539,6 +4539,11 @@ final class ActivityStack {
         if (!moving) {
             mStackSupervisor.removeLockedTaskLocked(task);
             mWindowManager.removeTask(task.taskId);
+            if (!StackId.persistTaskBounds(mStackId)) {
+                // Reset current bounds for task whose bounds shouldn't be persisted so it uses
+                // default configuration the next time it launches.
+                task.updateOverrideConfiguration(null);
+            }
         }
 
         final ActivityRecord r = mResumedActivity;
