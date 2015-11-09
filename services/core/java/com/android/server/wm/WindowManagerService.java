@@ -1242,7 +1242,16 @@ public class WindowManagerService extends IWindowManager.Stub
         final int myLayer = win.mBaseLayer;
         int i;
         for (i = windows.size() - 1; i >= 0; i--) {
-            if (windows.get(i).mBaseLayer <= myLayer) {
+            final WindowState otherWin = windows.get(i);
+            if (otherWin.getBaseType() != TYPE_WALLPAPER && otherWin.mBaseLayer <= myLayer) {
+                // Wallpaper wanders through the window list, for example to position itself
+                // directly behind keyguard. Because of this it will break the ordering based on
+                // WindowState.mBaseLayer. There might windows with higher mBaseLayer behind it and
+                // we don't want the new window to appear above them. An example of this is adding
+                // of the docked stack divider. Consider a scenario with the following ordering (top
+                // to bottom): keyguard, wallpaper, assist preview, apps. We want the dock divider
+                // to land below the assist preview, so the dock divider must ignore the wallpaper,
+                // with which it shares the base layer.
                 break;
             }
         }
