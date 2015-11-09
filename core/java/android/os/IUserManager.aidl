@@ -44,7 +44,7 @@ interface IUserManager {
     UserInfo getPrimaryUser();
     List<UserInfo> getUsers(boolean excludeDying);
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
-    boolean canAddMoreManagedProfiles(int userId);
+    boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne);
     UserInfo getProfileParent(int userHandle);
     boolean isSameProfileGroup(int userId, int otherUserId);
     UserInfo getUserInfo(int userHandle);

@@ -4321,4 +4321,23 @@ public class DevicePolicyManager {
             return PERMISSION_GRANT_STATE_DEFAULT;
         }
     }
+
+    /**
+     * Returns if provisioning a managed profile or device is possible or not.
+     * @param action One of {@link #ACTION_PROVISION_MANAGED_DEVICE},
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     * Note that even if this method returns true, there is a slight possibility that the
+     * provisioning will not be allowed when it is actually initiated because some event has
+     * happened in between.
+     * @return if provisioning a managed profile or device is possible or not.
+     * @throws IllegalArgumentException if the supplied action is not valid.
+     */
+    public boolean isProvisioningAllowed(String action) {
+        try {
+            return mService.isProvisioningAllowed(action);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return false;
+        }
+    }
 }

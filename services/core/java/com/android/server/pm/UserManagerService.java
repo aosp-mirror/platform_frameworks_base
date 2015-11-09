@@ -890,7 +890,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean canAddMoreManagedProfiles(int userId) {
+    public boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne) {
         checkManageUsersPermission("check if more managed profiles can be added.");
         if (ActivityManager.isLowRamDeviceStatic()) {
             return false;
@@ -900,8 +900,9 @@ public class UserManagerService extends IUserManager.Stub {
             return false;
         }
         // Limit number of managed profiles that can be created
-        int managedProfilesCount = getProfiles(userId, true).size() - 1;
-        if (managedProfilesCount >= MAX_MANAGED_PROFILES) {
+        final int managedProfilesCount = getProfiles(userId, true).size() - 1;
+        final int profilesRemovedCount = managedProfilesCount > 0 && allowedToRemoveOne ? 1 : 0;
+        if (managedProfilesCount - profilesRemovedCount >= MAX_MANAGED_PROFILES) {
             return false;
         }
         synchronized(mUsersLock) {
@@ -909,9 +910,11 @@ public class UserManagerService extends IUserManager.Stub {
             if (!userInfo.canHaveProfile()) {
                 return false;
             }
-            int usersCount = getAliveUsersExcludingGuestsCountLU();
+            int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
+                    - profilesRemovedCount;
             // We allow creating a managed profile in the special case where there is only one user.
-            return usersCount == 1 || usersCount < UserManager.getMaxSupportedUsers();
+            return usersCountAfterRemoving  == 1
+                    || usersCountAfterRemoving < UserManager.getMaxSupportedUsers();
         }
     }
 
@@ -1489,7 +1492,7 @@ public class UserManagerService extends IUserManager.Stub {
                         }
                         if (parent == null) return null;
                     }
-                    if (isManagedProfile && !canAddMoreManagedProfiles(parentId)) {
+                    if (isManagedProfile && !canAddMoreManagedProfiles(parentId, false)) {
                         Log.e(LOG_TAG, "Cannot add more managed profiles for user " + parentId);
                         return null;
                     }
