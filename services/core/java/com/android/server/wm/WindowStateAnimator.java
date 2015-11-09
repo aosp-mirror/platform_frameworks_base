@@ -475,7 +475,9 @@ class WindowStateAnimator {
         if (!mLastHidden) {
             //dump();
             mLastHidden = true;
-            mSurfaceController.hideInTransaction(reason);
+            if (mSurfaceController != null) {
+                mSurfaceController.hideInTransaction(reason);
+            }
         }
     }
 
@@ -537,7 +539,9 @@ class WindowStateAnimator {
             return;
         }
         if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", null);
-        mSurfaceController.setLayer(mAnimLayer + 1);
+        if (mSurfaceController != null) {
+            mSurfaceController.setLayer(mAnimLayer + 1);
+        }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
         destroySurfaceLocked();
@@ -1328,6 +1332,10 @@ class WindowStateAnimator {
     }
 
     void setTransparentRegionHintLocked(final Region region) {
+        if (mSurfaceController == null) {
+            Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
+            return;
+        }
         mSurfaceController.setTransparentRegionHint(region);
     }
 
@@ -1374,10 +1382,16 @@ class WindowStateAnimator {
     }
 
     void setOpaqueLocked(boolean isOpaque) {
+        if (mSurfaceController == null) {
+            return;
+        }
         mSurfaceController.setOpaque(isOpaque);
     }
 
     void setSecureLocked(boolean isSecure) {
+        if (mSurfaceController == null) {
+            return;
+        }
         mSurfaceController.setSecure(isSecure);
     }
 
