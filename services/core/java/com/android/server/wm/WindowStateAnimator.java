@@ -752,7 +752,11 @@ class WindowStateAnimator {
                     WindowManagerService.logSurface(mWin, "DESTROY", null);
                     destroySurface();
                 }
-                mWallpaperControllerLocked.hideWallpapers(mWin);
+                // Don't hide wallpaper if we're deferring the surface destroy
+                // because of a surface change.
+                if (!(mSurfaceDestroyDeferred && mDestroyPreservedSurfaceUponRedraw)) {
+                    mWallpaperControllerLocked.hideWallpapers(mWin);
+                }
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurfaceController + " session " + mSession
@@ -783,7 +787,11 @@ class WindowStateAnimator {
                     WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
                 }
                 mPendingDestroySurface.destroyInTransaction();
-                mWallpaperControllerLocked.hideWallpapers(mWin);
+                // Don't hide wallpaper if we're destroying a deferred surface
+                // after a surface mode change.
+                if (!mDestroyPreservedSurfaceUponRedraw) {
+                    mWallpaperControllerLocked.hideWallpapers(mWin);
+                }
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window "
