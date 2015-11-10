@@ -3272,7 +3272,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             task.stack.removeTask(task, "restoreRecentTaskLocked", MOVING);
         }
 
-        ActivityStack stack =
+        final ActivityStack stack =
                 getStack(stackId, CREATE_IF_NEEDED, !ON_TOP);
 
         if (stack == null) {
@@ -3339,15 +3339,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
             return;
         }
-        if (StackId.preserveWindowOnTaskMove(stackId)) {
+
+        final ActivityRecord topActivity = task.getTopActivity();
+        if (StackId.preserveWindowOnTaskMove(stackId) && topActivity != null) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
             // and then add a new one. This call will tell window manager about this, so it can
             // preserve the old window until the new one is drawn. This prevents having a gap
             // between the removal and addition, in which no window is visible. We also want the
             // entrance of the new window to be properly animated.
-            ActivityRecord r = task.getTopActivity();
-            mWindowManager.setReplacingWindow(r.appToken, true /* animate */);
+            mWindowManager.setReplacingWindow(topActivity.appToken, true /* animate */);
         }
         final ActivityStack stack =
                 moveTaskToStackUncheckedLocked(task, stackId, toTop, forceFocus,
