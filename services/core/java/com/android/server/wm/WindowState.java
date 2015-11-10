@@ -1355,6 +1355,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void applyDimLayerIfNeeded() {
+        // When the app is terminated (eg. from Recents), the task might have already been
+        // removed with the window pending removal. Don't apply dim in such cases, as there
+        // will be no more updateDimLayer() calls, which leaves the dimlayer invalid.
+        final AppWindowToken token = mAppToken;
+        if (token != null && token.removed) {
+            return;
+        }
+
         if (!mExiting && mAppDied) {
             // If app died visible, apply a dim over the window to indicate that it's inactive
             mDisplayContent.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
