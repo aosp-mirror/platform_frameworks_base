@@ -240,11 +240,15 @@ int SkiaCanvas::save(SkCanvas::SaveFlags flags) {
     return count;
 }
 
+// The SkiaCanvas::restore operation layers on the capability to preserve
+// either (or both) the matrix and/or clip state after a SkCanvas::restore
+// operation. It does this by explicitly saving off the clip & matrix state
+// when requested and playing it back after the SkCanvas::restore.
 void SkiaCanvas::restore() {
     const SaveRec* rec = (NULL == mSaveStack.get())
             ? NULL
             : static_cast<SaveRec*>(mSaveStack->back());
-    int currentSaveCount = mCanvas->getSaveCount() - 1;
+    int currentSaveCount = mCanvas->getSaveCount();
     SkASSERT(NULL == rec || currentSaveCount >= rec->saveCount);
 
     if (NULL == rec || rec->saveCount != currentSaveCount) {
@@ -262,8 +266,9 @@ void SkiaCanvas::restore() {
     }
 
     SkTArray<SkClipStack::Element> savedClips;
+    int topClipStackFrame = mCanvas->getClipStack()->getSaveCount();
     if (preserveClip) {
-        saveClipsForFrame(savedClips, currentSaveCount);
+        saveClipsForFrame(savedClips, topClipStackFrame);
     }
 
     mCanvas->restore();
@@ -272,7 +277,11 @@ void SkiaCanvas::restore() {
         mCanvas->setMatrix(savedMatrix);
     }
 
-    if (preserveClip && !savedClips.empty()) {
+    if (preserveClip && !savedClips.empty() &&
+        topClipStackFrame != mCanvas->getClipStack()->getSaveCount()) {
+        // Only reapply the saved clips if the top clip stack frame was actually
+        // popped by restore().  If it wasn't, it means it doesn't belong to the
+        // restored canvas frame (SkCanvas lazy save/restore kicked in).
         applyClips(savedClips);
     }
 
@@ -322,21 +331,23 @@ void SkiaCanvas::recordPartialSave(SkCanvas::SaveFlags flags) {
     }
 
     SaveRec* rec = static_cast<SaveRec*>(mSaveStack->push_back());
-    // Store the save counter in the SkClipStack domain.
-    // (0-based, equal to the number of save ops on the stack).
-    rec->saveCount = mCanvas->getSaveCount() - 1;
+    rec->saveCount = mCanvas->getSaveCount();
     rec->saveFlags = flags;
 }
 
-void SkiaCanvas::saveClipsForFrame(SkTArray<SkClipStack::Element>& clips, int frameSaveCount) {
+void SkiaCanvas::saveClipsForFrame(SkTArray<SkClipStack::Element>& clips,
+                                   int saveCountToBackup) {
+    // Each SkClipStack::Element stores the index of the canvas save
+    // with which it is associated. Backup only those Elements that
+    // are associated with 'saveCountToBackup'
     SkClipStack::Iter clipIterator(*mCanvas->getClipStack(),
                                    SkClipStack::Iter::kTop_IterStart);
-    while (const SkClipStack::Element* elem = clipIterator.next()) {
-        if (elem->getSaveCount() < frameSaveCount) {
-            // done with the current frame.
+    while (const SkClipStack::Element* elem = clipIterator.prev()) {
+        if (elem->getSaveCount() < saveCountToBackup) {
+            // done with the target save count.
             break;
         }
-        SkASSERT(elem->getSaveCount() == frameSaveCount);
+        SkASSERT(elem->getSaveCount() == saveCountToBackup);
         clips.push_back(*elem);
     }
 }
