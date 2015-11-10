@@ -218,6 +218,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mUIDozeTrigger.resetTrigger();
         }
         mStackScroller.reset();
+
+        mStartEnterAnimationCompleted = false;
     }
 
     /** Requests that the views be synchronized with the model */
@@ -500,26 +502,34 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Focuses the task at the specified index in the stack */
-    void focusTask(int taskIndex, boolean scrollToNewPosition, final boolean animateFocusedState) {
+    void focusTask(int taskIndex, boolean scrollToNewPosition) {
         // Return early if the task is already focused
         if (taskIndex == mFocusedTaskIndex) return;
 
         if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
+            resetFocusedTask();
             mFocusedTaskIndex = taskIndex;
             mPrevAccessibilityFocusedIndex = taskIndex;
 
             // Focus the view if possible, otherwise, focus the view after we scroll into position
+            Runnable postScrollRunnable = null;
             final Task t = mStack.getTasks().get(mFocusedTaskIndex);
-            Runnable postScrollRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    TaskView tv = getChildViewForTask(t);
-                    if (tv != null) {
-                        tv.setFocusedTask(animateFocusedState);
-                        tv.requestAccessibilityFocus();
+            final TaskView tv = getChildViewForTask(t);
+            if (tv != null) {
+                tv.setFocusedTask();
+                tv.requestAccessibilityFocus();
+            } else {
+                postScrollRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        TaskView tv = getChildViewForTask(t);
+                        if (tv != null) {
+                            tv.setFocusedTask();
+                            tv.requestAccessibilityFocus();
+                        }
                     }
-                }
-            };
+                };
+            }
 
             // Scroll the view into position (just center it in the curve)
             if (scrollToNewPosition) {
@@ -574,7 +584,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *                            the change in focus, as well as whether to scroll to fit the
      *                            task into view.
      */
-    public void focusNextTask(boolean forward, boolean animateFocusedState) {
+    public void focusNextTask(boolean forward) {
         // Find the next index to focus
         int numTasks = mStack.getTaskCount();
         if (numTasks == 0) return;
@@ -587,7 +597,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             newIndex = 0;
         }
 
-        focusTask(newIndex, true, animateFocusedState);
+        focusTask(newIndex, true);
     }
 
     /** Dismisses the focused task. */
@@ -663,14 +673,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             switch (action) {
                 case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                     if (mPrevAccessibilityFocusedIndex > 0) {
-                        focusNextTask(true, false);
+                        focusNextTask(true);
                         return true;
                     }
                 }
                 break;
                 case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
                     if (mPrevAccessibilityFocusedIndex < mStack.getTaskCount() - 1) {
-                        focusNextTask(false, false);
+                        focusNextTask(false);
                         return true;
                     }
                 }
@@ -869,11 +879,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // enter animation).
         if (mConfig.launchedWithAltTab) {
             if (mConfig.launchedFromAppWithThumbnail) {
-                focusTask(Math.max(0, mStack.getTaskCount() - 2), false,
-                        mConfig.launchedHasConfigurationChanged);
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
             } else {
-                focusTask(Math.max(0, mStack.getTaskCount() - 1), false,
-                        mConfig.launchedHasConfigurationChanged);
+                focusTask(Math.max(0, mStack.getTaskCount() - 1), false);
             }
         }
 
@@ -948,7 +956,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                             0 <= mFocusedTaskIndex && mFocusedTaskIndex < tasks.size()) {
                         TaskView tv = getChildViewForTask(tasks.get(mFocusedTaskIndex));
                         if (tv != null) {
-                            tv.setFocusedTask(true);
+                            tv.setFocusedTask();
                         }
                     }
 
@@ -1404,7 +1412,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 if (nextTv != null) {
                     // Focus the next task, and only animate the visible state if we are launched
                     // from Alt-Tab
-                    nextTv.setFocusedTask(mConfig.launchedWithAltTab);
+                    nextTv.setFocusedTask();
                 }
             }
         }

@@ -409,7 +409,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // Get the first stack view
         List<TaskStackView> stackViews = getTaskStackViews();
         if (!stackViews.isEmpty()) {
-            stackViews.get(0).focusNextTask(forward, true);
+            stackViews.get(0).focusNextTask(forward);
         }
     }
 

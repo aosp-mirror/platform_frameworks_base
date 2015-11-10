@@ -10,6 +10,16 @@
   public void setGlowScale(float);
 }
 
+-keep class com.android.systemui.recents.views.TaskView {
+  public void setHighlightProgress(float);
+  public float getHighlightProgress();
+}
+
+-keep class com.android.systemui.recents.views.TaskViewHeader {
+  public void setFocusProgress(float);
+  public float getFocusProgress();
+}
+
 -keep class com.android.systemui.statusbar.phone.PhoneStatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.recents.*

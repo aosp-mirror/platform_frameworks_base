@@ -18,7 +18,9 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -32,6 +34,11 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.OvershootInterpolator;
+
+import com.android.systemui.R;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -57,8 +64,8 @@ public class TaskViewThumbnail extends View {
     // Thumbnail alpha
     float mThumbnailAlpha;
     ValueAnimator mThumbnailAlphaAnimator;
-    ValueAnimator.AnimatorUpdateListener mThumbnailAlphaUpdateListener
-            = new ValueAnimator.AnimatorUpdateListener() {
+    ValueAnimator.AnimatorUpdateListener mThumbnailAlphaUpdateListener =
+            new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             mThumbnailAlpha = (float) animation.getAnimatedValue();
