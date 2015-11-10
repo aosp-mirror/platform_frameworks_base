@@ -36,3 +36,18 @@ TEST(StringUtils, advancedBuildSet) {
     EXPECT_TRUE(collection.has("GL_ext1"));
     EXPECT_FALSE(collection.has("GL_ext")); // string present, but not in list
 }
+
+TEST(StringUtils, sizePrinter) {
+    std::stringstream os;
+    os << SizePrinter{500};
+    EXPECT_EQ("500.00B", os.str());
+    os.str("");
+    os << SizePrinter{46080};
+    EXPECT_EQ("45.00KiB", os.str());
+    os.str("");
+    os << SizePrinter{5 * 1024 * 1024 + 520 * 1024};
+    EXPECT_EQ("5.51MiB", os.str());
+    os.str("");
+    os << SizePrinter{2147483647};
+    EXPECT_EQ("2048.00MiB", os.str());
+}

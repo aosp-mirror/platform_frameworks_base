@@ -36,7 +36,8 @@ namespace android {
 namespace uirenderer {
 
 Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
-        : state(State::Uncached)
+        : GpuMemoryTracker(GpuObjectType::Layer)
+        , state(State::Uncached)
         , caches(Caches::getInstance())
         , renderState(renderState)
         , texture(caches)
@@ -45,8 +46,8 @@ Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
     renderTarget = GL_TEXTURE_2D;
-    texture.width = layerWidth;
-    texture.height = layerHeight;
+    texture.mWidth = layerWidth;
+    texture.mHeight = layerHeight;
     renderState.registerLayer(this);
 }
 
@@ -54,10 +55,10 @@ Layer::~Layer() {
     renderState.unregisterLayer(this);
     SkSafeUnref(colorFilter);
 
-    if (stencil || fbo || texture.id) {
+    if (stencil || fbo || texture.mId) {
         renderState.requireGLContext();
         removeFbo();
-        deleteTexture();
+        texture.deleteTexture();
     }
 
     delete[] mesh;
@@ -65,7 +66,7 @@ Layer::~Layer() {
 
 void Layer::onGlContextLost() {
     removeFbo();
-    deleteTexture();
+    texture.deleteTexture();
 }
 
 uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
@@ -179,8 +180,8 @@ void Layer::setColorFilter(SkColorFilter* filter) {
 }
 
 void Layer::bindTexture() const {
-    if (texture.id) {
-        caches.textureState().bindTexture(renderTarget, texture.id);
+    if (texture.mId) {
+        caches.textureState().bindTexture(renderTarget, texture.mId);
     }
 }
 
@@ -191,28 +192,22 @@ void Layer::bindStencilRenderBuffer() const {
 }
 
 void Layer::generateTexture() {
-    if (!texture.id) {
-        glGenTextures(1, &texture.id);
-    }
-}
-
-void Layer::deleteTexture() {
-    if (texture.id) {
-        texture.deleteTexture();
-        texture.id = 0;
+    if (!texture.mId) {
+        glGenTextures(1, &texture.mId);
     }
 }
 
 void Layer::clearTexture() {
-    caches.textureState().unbindTexture(texture.id);
-    texture.id = 0;
+    caches.textureState().unbindTexture(texture.mId);
+    texture.mId = 0;
 }
 
 void Layer::allocateTexture() {
 #if DEBUG_LAYERS
     ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
 #endif
-    if (texture.id) {
+    if (texture.mId) {
+        texture.updateSize(getWidth(), getHeight(), GL_RGBA);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, nullptr);

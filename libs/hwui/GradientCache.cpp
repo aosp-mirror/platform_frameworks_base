@@ -110,9 +110,7 @@ void GradientCache::setMaxSize(uint32_t maxSize) {
 
 void GradientCache::operator()(GradientCacheEntry&, Texture*& texture) {
     if (texture) {
-        const uint32_t size = texture->width * texture->height * bytesPerPixel();
-        mSize -= size;
-
+        mSize -= texture->objectSize();
         texture->deleteTexture();
         delete texture;
     }
@@ -167,18 +165,16 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     getGradientInfo(colors, count, info);
 
     Texture* texture = new Texture(Caches::getInstance());
-    texture->width = info.width;
-    texture->height = 2;
     texture->blend = info.hasAlpha;
     texture->generation = 1;
 
     // Asume the cache is always big enough
-    const uint32_t size = texture->width * texture->height * bytesPerPixel();
+    const uint32_t size = info.width * 2 * bytesPerPixel();
     while (getSize() + size > mMaxSize) {
         mCache.removeOldest();
     }
 
-    generateTexture(colors, positions, texture);
+    generateTexture(colors, positions, info.width, 2, texture);
 
     mSize += size;
     mCache.put(gradient, texture);
@@ -231,10 +227,10 @@ void GradientCache::mixFloats(GradientColor& start, GradientColor& end, float am
     dst += 4 * sizeof(float);
 }
 
-void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture* texture) {
-    const uint32_t width = texture->width;
+void GradientCache::generateTexture(uint32_t* colors, float* positions,
+        const uint32_t width, const uint32_t height, Texture* texture) {
     const GLsizei rowBytes = width * bytesPerPixel();
-    uint8_t pixels[rowBytes * texture->height];
+    uint8_t pixels[rowBytes * height];
 
     static ChannelSplitter gSplitters[] = {
             &android::uirenderer::GradientCache::splitToBytes,
@@ -277,17 +273,13 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture*
 
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
-    glGenTextures(1, &texture->id);
-    Caches::getInstance().textureState().bindTexture(texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     if (mUseFloatTexture) {
         // We have to use GL_RGBA16F because GL_RGBA32F does not support filtering
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, texture->height, 0,
-                GL_RGBA, GL_FLOAT, pixels);
+        texture->upload(width, height, GL_RGBA16F, GL_RGBA, GL_FLOAT, pixels);
     } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, texture->height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        texture->upload(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     }
 
     texture->setFilter(GL_LINEAR);

@@ -18,6 +18,8 @@
 
 #include <string>
 #include <unordered_set>
+#include <ostream>
+#include <iomanip>
 
 namespace android {
 namespace uirenderer {
@@ -32,6 +34,21 @@ public:
 class StringUtils {
 public:
     static unordered_string_set split(const char* spacedList);
+};
+
+struct SizePrinter {
+    int bytes;
+    friend std::ostream& operator<<(std::ostream& stream, const SizePrinter& d) {
+        static const char* SUFFIXES[] = {"B", "KiB", "MiB"};
+        size_t suffix = 0;
+        double temp = d.bytes;
+        while (temp > 1000 && suffix < 2) {
+            temp /= 1024.0;
+            suffix++;
+        }
+        stream << std::fixed << std::setprecision(2) << temp << SUFFIXES[suffix];
+        return stream;
+    }
 };
 
 } /* namespace uirenderer */

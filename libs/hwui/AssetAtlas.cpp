@@ -39,40 +39,22 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
         if (!mTexture) {
             Caches& caches = Caches::getInstance();
             mTexture = new Texture(caches);
-            mTexture->width = buffer->getWidth();
-            mTexture->height = buffer->getHeight();
+            mTexture->wrap(mImage->getTexture(),
+                    buffer->getWidth(), buffer->getHeight(), GL_RGBA);
             createEntries(caches, map, count);
         }
     } else {
         ALOGW("Could not create atlas image");
-        delete mImage;
-        mImage = nullptr;
+        terminate();
     }
-
-    updateTextureId();
 }
 
 void AssetAtlas::terminate() {
-    if (mImage) {
-        delete mImage;
-        mImage = nullptr;
-        updateTextureId();
-    }
-}
-
-
-void AssetAtlas::updateTextureId() {
-    mTexture->id = mImage ? mImage->getTexture() : 0;
-    if (mTexture->id) {
-        // Texture ID changed, force-set to defaults to sync the wrapper & GL
-        // state objects
-        mTexture->setWrap(GL_CLAMP_TO_EDGE, false, true);
-        mTexture->setFilter(GL_NEAREST, false, true);
-    }
-    for (size_t i = 0; i < mEntries.size(); i++) {
-        AssetAtlas::Entry* entry = mEntries.valueAt(i);
-        entry->texture->id = mTexture->id;
-    }
+    delete mImage;
+    mImage = nullptr;
+    delete mTexture;
+    mTexture = nullptr;
+    mEntries.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,13 +62,13 @@ void AssetAtlas::updateTextureId() {
 ///////////////////////////////////////////////////////////////////////////////
 
 AssetAtlas::Entry* AssetAtlas::getEntry(const SkPixelRef* pixelRef) const {
-    ssize_t index = mEntries.indexOfKey(pixelRef);
-    return index >= 0 ? mEntries.valueAt(index) : nullptr;
+    auto result = mEntries.find(pixelRef);
+    return result != mEntries.end() ? result->second.get() : nullptr;
 }
 
 Texture* AssetAtlas::getEntryTexture(const SkPixelRef* pixelRef) const {
-    ssize_t index = mEntries.indexOfKey(pixelRef);
-    return index >= 0 ? mEntries.valueAt(index)->texture : nullptr;
+    auto result = mEntries.find(pixelRef);
+    return result != mEntries.end() ? result->second->texture : nullptr;
 }
 
 /**
@@ -94,7 +76,8 @@ Texture* AssetAtlas::getEntryTexture(const SkPixelRef* pixelRef) const {
  * instead of applying the changes to the virtual textures.
  */
 struct DelegateTexture: public Texture {
-    DelegateTexture(Caches& caches, Texture* delegate): Texture(caches), mDelegate(delegate) { }
+    DelegateTexture(Caches& caches, Texture* delegate)
+            : Texture(caches), mDelegate(delegate) { }
 
     virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
             bool force = false, GLenum renderTarget = GL_TEXTURE_2D) override {
@@ -111,8 +94,8 @@ private:
 }; // struct DelegateTexture
 
 void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
-    const float width = float(mTexture->width);
-    const float height = float(mTexture->height);
+    const float width = float(mTexture->width());
+    const float height = float(mTexture->height());
 
     for (int i = 0; i < count; ) {
         SkPixelRef* pixelRef = reinterpret_cast<SkPixelRef*>(map[i++]);
@@ -133,13 +116,13 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
 
         Texture* texture = new DelegateTexture(caches, mTexture);
         texture->blend = !SkAlphaTypeIsOpaque(pixelRef->info().alphaType());
-        texture->width = pixelRef->info().width();
-        texture->height = pixelRef->info().height();
+        texture->wrap(mTexture->id(), pixelRef->info().width(),
+                pixelRef->info().height(), mTexture->format());
 
-        Entry* entry = new Entry(pixelRef, texture, mapper, *this);
+        std::unique_ptr<Entry> entry(new Entry(pixelRef, texture, mapper, *this));
         texture->uvMapper = &entry->uvMapper;
 
-        mEntries.add(entry->pixelRef, entry);
+        mEntries.emplace(entry->pixelRef, std::move(entry));
     }
 }
 

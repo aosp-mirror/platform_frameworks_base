@@ -17,10 +17,10 @@
 #ifndef ANDROID_HWUI_OFFSCREEN_BUFFER_POOL_H
 #define ANDROID_HWUI_OFFSCREEN_BUFFER_POOL_H
 
+#include <GpuMemoryTracker.h>
 #include "Caches.h"
 #include "Texture.h"
 #include "utils/Macros.h"
-
 #include <ui/Region.h>
 
 #include <set>
@@ -40,7 +40,7 @@ class RenderState;
  * viewport bounds, since textures are always allocated with width / height as a multiple of 64, for
  * the purpose of improving reuse.
  */
-class OffscreenBuffer {
+class OffscreenBuffer : GpuMemoryTracker {
 public:
     OffscreenBuffer(RenderState& renderState, Caches& caches,
             uint32_t viewportWidth, uint32_t viewportHeight);
@@ -58,7 +58,7 @@ public:
 
     static uint32_t computeIdealDimension(uint32_t dimension);
 
-    uint32_t getSizeInBytes() { return texture.width * texture.height * 4; }
+    uint32_t getSizeInBytes() { return texture.objectSize(); }
 
     RenderState& renderState;
 
@@ -124,8 +124,8 @@ private:
 
         Entry(OffscreenBuffer* layer)
                 : layer(layer)
-                , width(layer->texture.width)
-                , height(layer->texture.height) {
+                , width(layer->texture.width())
+                , height(layer->texture.height()) {
         }
 
         static int compare(const Entry& lhs, const Entry& rhs);

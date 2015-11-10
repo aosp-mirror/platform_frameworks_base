@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <GpuMemoryTracker.h>
 #include "CanvasContext.h"
 
 #include "AnimationContext.h"
@@ -497,6 +498,8 @@ void CanvasContext::draw() {
 
     mJankTracker.addFrame(*mCurrentFrameInfo);
     mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
+
+    GpuMemoryTracker::onFrameCompleted();
 }
 
 // Called by choreographer to do an RT-driven animation

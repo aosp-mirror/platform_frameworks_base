@@ -48,7 +48,7 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
 
     // attach the texture to the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            offscreenBuffer->texture.id, 0);
+            offscreenBuffer->texture.id(), 0);
     LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "startLayer FAILED");
     LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
             "framebuffer incomplete!");
@@ -84,7 +84,7 @@ OffscreenBuffer* BakedOpRenderer::copyToLayer(const Rect& area) {
             area.getWidth(), area.getHeight());
     if (!area.isEmpty()) {
         mCaches.textureState().activateTexture(0);
-        mCaches.textureState().bindTexture(buffer->texture.id);
+        mCaches.textureState().bindTexture(buffer->texture.id());
 
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
                 area.left, mRenderTarget.viewportHeight - area.bottom,
@@ -272,7 +272,7 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
                     OffscreenBuffer* layer = mRenderTarget.offscreenBuffer;
                     mRenderTarget.stencil = mCaches.renderBufferCache.get(
                             Stencil::getLayerStencilFormat(),
-                            layer->texture.width, layer->texture.height);
+                            layer->texture.width(), layer->texture.height());
                     // stencil is bound + allocated - associate it with current FBO
                     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, mRenderTarget.stencil->getName());
