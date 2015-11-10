@@ -889,21 +889,22 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
                        profileMaxStackDepth,
                        "-Xprofile-max-stack-depth:");
 
-    /*
-     * Tracing options.
-     */
-    property_get("dalvik.vm.method-trace", propBuf, "false");
-    if (strcmp(propBuf, "true") == 0) {
-        addOption("-Xmethod-trace");
-        parseRuntimeOption("dalvik.vm.method-trace-file",
-                           methodTraceFileBuf,
-                           "-Xmethod-trace-file:");
-        parseRuntimeOption("dalvik.vm.method-trace-file-siz",
-                           methodTraceFileSizeBuf,
-                           "-Xmethod-trace-file-size:");
-        property_get("dalvik.vm.method-trace-stream", propBuf, "false");
+    // Trace files are stored in /data/misc/trace which is writable only in debug mode.
+    property_get("ro.debuggable", propBuf, "0");
+    if (strcmp(propBuf, "1") == 0) {
+        property_get("dalvik.vm.method-trace", propBuf, "false");
         if (strcmp(propBuf, "true") == 0) {
-            addOption("-Xmethod-trace-stream");
+            addOption("-Xmethod-trace");
+            parseRuntimeOption("dalvik.vm.method-trace-file",
+                               methodTraceFileBuf,
+                               "-Xmethod-trace-file:");
+            parseRuntimeOption("dalvik.vm.method-trace-file-siz",
+                               methodTraceFileSizeBuf,
+                               "-Xmethod-trace-file-size:");
+            property_get("dalvik.vm.method-trace-stream", propBuf, "false");
+            if (strcmp(propBuf, "true") == 0) {
+                addOption("-Xmethod-trace-stream");
+            }
         }
     }
 
