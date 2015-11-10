@@ -1505,21 +1505,27 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      *
      * @hide
      */
-    public static String localeToResourceQualifier(Locale loc) {
+    public static String localesToResourceQualifier(LocaleList locs) {
         StringBuilder sb = new StringBuilder();
-        boolean l = (loc.getLanguage().length() != 0);
-        boolean c = (loc.getCountry().length() != 0);
-        boolean s = (loc.getScript().length() != 0);
-        boolean v = (loc.getVariant().length() != 0);
-        // TODO: take script and extensions into account
-        if (l) {
-            sb.append(loc.getLanguage());
-            if (c) {
-                sb.append("-r").append(loc.getCountry());
-                if (s) {
-                    sb.append("-s").append(loc.getScript());
-                    if (v) {
-                        sb.append("-v").append(loc.getVariant());
+        for (int i = 0; i < locs.size(); i++) {
+            Locale loc = locs.get(i);
+            boolean l = (loc.getLanguage().length() != 0);
+            boolean c = (loc.getCountry().length() != 0);
+            boolean s = (loc.getScript().length() != 0);
+            boolean v = (loc.getVariant().length() != 0);
+            // TODO: take script and extensions into account
+            if (l) {
+                if (sb.length() != 0) {
+                    sb.append(",");
+                }
+                sb.append(loc.getLanguage());
+                if (c) {
+                    sb.append("-r").append(loc.getCountry());
+                    if (s) {
+                        sb.append("-s").append(loc.getScript());
+                        if (v) {
+                            sb.append("-v").append(loc.getVariant());
+                        }
                     }
                 }
             }
@@ -1544,9 +1550,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             }
         }
 
-        // TODO: send the whole locale list
-        if (config.locale != null && !config.locale.getLanguage().isEmpty()) {
-            parts.add(localeToResourceQualifier(config.locale));
+        if (!config.mLocaleList.isEmpty()) {
+            parts.add(localesToResourceQualifier(config.mLocaleList));
         }
 
         switch (config.screenLayout & Configuration.SCREENLAYOUT_LAYOUTDIR_MASK) {
