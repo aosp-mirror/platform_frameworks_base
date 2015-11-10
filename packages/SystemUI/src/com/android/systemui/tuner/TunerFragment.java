@@ -16,9 +16,10 @@
 package com.android.systemui.tuner;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,7 +34,6 @@ import android.provider.Settings.System;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -50,6 +50,8 @@ public class TunerFragment extends PreferenceFragment {
     private static final String KEY_BATTERY_PCT = "battery_pct";
 
     public static final String SETTING_SEEN_TUNER_WARNING = "seen_tuner_warning";
+
+    private static final String WARNING_TAG = "tuner_warning";
 
     private static final int MENU_REMOVE = Menu.FIRST + 1;
 
@@ -90,16 +92,9 @@ public class TunerFragment extends PreferenceFragment {
         mBatteryPct = (SwitchPreference) findPreference(KEY_BATTERY_PCT);
         if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,
                 0) == 0) {
-            new AlertDialog.Builder(getContext())
-                    .setTitle(R.string.tuner_warning_title)
-                    .setMessage(R.string.tuner_warning)
-                    .setPositiveButton(R.string.got_it, new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Settings.Secure.putInt(getContext().getContentResolver(),
-                                    SETTING_SEEN_TUNER_WARNING, 1);
-                        }
-                    }).show();
+            if (getFragmentManager().findFragmentByTag(WARNING_TAG) == null) {
+                new TunerWarningFragment().show(getFragmentManager(), WARNING_TAG);
+            }
         }
         TunerService.get(getContext()).addTunable(mQsPaging, QSPanel.QS_THE_NEW_QS);
     }
@@ -187,4 +182,20 @@ public class TunerFragment extends PreferenceFragment {
             mQsTuner.setEnabled(newValue == null || Integer.parseInt(newValue) == 0);
         }
     };
+
+    public static class TunerWarningFragment extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return new AlertDialog.Builder(getContext())
+                    .setTitle(R.string.tuner_warning_title)
+                    .setMessage(R.string.tuner_warning)
+                    .setPositiveButton(R.string.got_it, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Settings.Secure.putInt(getContext().getContentResolver(),
+                                    SETTING_SEEN_TUNER_WARNING, 1);
+                        }
+                    }).show();
+        }
+    }
 }

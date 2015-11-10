@@ -116,8 +116,12 @@ public class TunerService extends SystemUI {
 
     public void reloadSetting(Uri uri) {
         String key = mListeningUris.get(uri);
+        List<Tunable> tunables = mTunableLookup.get(key);
+        if (tunables == null) {
+            return;
+        }
         String value = Settings.Secure.getStringForUser(mContentResolver, key, mCurrentUser);
-        for (Tunable tunable : mTunableLookup.get(key)) {
+        for (Tunable tunable : tunables) {
             tunable.onTuningChanged(key, value);
         }
     }
