@@ -18,6 +18,7 @@ package android.accounts;
 
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.os.Binder;
 import android.os.IBinder;
 import android.content.pm.PackageManager;
@@ -121,24 +122,28 @@ public abstract class AbstractAccountAuthenticator {
      * This is used in the default implementation of
      * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
      */
-    private static final String KEY_AUTH_TOKEN_TYPE = "android.accounts.KEY_AUTH_TOKEN_TYPE";
+    private static final String KEY_AUTH_TOKEN_TYPE =
+            "android.accounts.AbstractAccountAuthenticato.KEY_AUTH_TOKEN_TYPE";
     /**
      * Bundle key used for the {@link String} array of required features in
      * session bundle. This is used in the default implementation of
      * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
      */
-    private static final String KEY_REQUIRED_FEATURES = "android.accounts.AbstractAccountAuthenticator.KEY_REQUIRED_FEATURES";
+    private static final String KEY_REQUIRED_FEATURES =
+            "android.accounts.AbstractAccountAuthenticator.KEY_REQUIRED_FEATURES";
     /**
      * Bundle key used for the {@link Bundle} options in session bundle. This is
      * used in default implementation of {@link #startAddAccountSession} and
      * {@link startUpdateCredentialsSession}.
      */
-    private static final String KEY_OPTIONS = "android.accounts.AbstractAccountAuthenticator.KEY_OPTIONS";
+    private static final String KEY_OPTIONS =
+            "android.accounts.AbstractAccountAuthenticator.KEY_OPTIONS";
     /**
      * Bundle key used for the {@link Account} account in session bundle. This is used
      * used in default implementation of {@link startUpdateCredentialsSession}.
      */
-    private static final String KEY_ACCOUNT = "android.accounts.AbstractAccountAuthenticator.KEY_ACCOUNT";
+    private static final String KEY_ACCOUNT =
+            "android.accounts.AbstractAccountAuthenticator.KEY_ACCOUNT";
 
     private final Context mContext;
 
@@ -418,6 +423,7 @@ public abstract class AbstractAccountAuthenticator {
                     }
                     Log.v(TAG, "startUpdateCredentialsSession: result "
                             + AccountManager.sanitizeResult(result));
+
                 }
                 if (result != null) {
                     response.onResult(result);
@@ -425,6 +431,33 @@ public abstract class AbstractAccountAuthenticator {
             } catch (Exception e) {
                 handleException(response, "startUpdateCredentialsSession",
                         account.toString() + "," + authTokenType, e);
+
+            }
+        }
+
+        public void finishSession(
+                IAccountAuthenticatorResponse response,
+                String accountType,
+                Bundle sessionBundle) throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "finishSession: accountType " + accountType);
+            }
+            checkBinderPermission();
+            try {
+                final Bundle result = AbstractAccountAuthenticator.this.finishSession(
+                        new AccountAuthenticatorResponse(response), accountType, sessionBundle);
+                if (result != null) {
+                    result.keySet(); // force it to be unparcelled
+                }
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "finishSession: result " + AccountManager.sanitizeResult(result));
+                }
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (Exception e) {
+                handleException(response, "finishSession", accountType, e);
+
             }
         }
     }
@@ -697,7 +730,13 @@ public abstract class AbstractAccountAuthenticator {
 
     /**
      * Starts the add account session to authenticate user to an account of the
-     * specified accountType.
+     * specified accountType. No file I/O should be performed in this call.
+     * Account should be added to device only when {@link #finishSession} is
+     * called after this.
+     * <p>
+     * Note: when overriding this method, {@link #finishSession} should be
+     * overridden too.
+     * </p>
      *
      * @param response to send the result back to the AccountManager, will never
      *            be null
@@ -722,9 +761,13 @@ public abstract class AbstractAccountAuthenticator {
      *         </ul>
      * @throws NetworkErrorException if the authenticator could not honor the
      *             request due to a network error
+     * @see #finishSession(AccountAuthenticatorResponse, String, Bundle)
      */
-    public Bundle startAddAccountSession(final AccountAuthenticatorResponse response,
-            final String accountType, final String authTokenType, final String[] requiredFeatures,
+    public Bundle startAddAccountSession(
+            final AccountAuthenticatorResponse response,
+            final String accountType,
+            final String authTokenType,
+            final String[] requiredFeatures,
             final Bundle options)
             throws NetworkErrorException {
         new Thread(new Runnable() {
@@ -744,34 +787,43 @@ public abstract class AbstractAccountAuthenticator {
     }
 
     /**
-     * Asks user to re-authenticate for an account but defers updating the locally stored
-     * credentials.
+     * Asks user to re-authenticate for an account but defers updating the
+     * locally stored credentials. No file I/O should be performed in this call.
+     * Local credentials should be updated only when {@link #finishSession} is
+     * called after this.
+     * <p>
+     * Note: when overriding this method, {@link #finishSession} should be
+     * overridden too.
+     * </p>
      *
      * @param response to send the result back to the AccountManager, will never
      *            be null
      * @param account the account whose credentials are to be updated, will
      *            never be null
      * @param authTokenType the type of auth token to retrieve after updating
-     *            the credentials, may be null (TODO)
+     *            the credentials, may be null
      * @param options a Bundle of authenticator-specific options, may be null
      * @return a Bundle result or null if the result is to be returned via the
      *         response. The result will contain either:
      *         <ul>
      *         <li>{@link AccountManager#KEY_INTENT}, or
-     *         <li>{@link AccountManager#KEY_ACCOUNT_SESSION_BUNDLE} for updating the
-     *         locally stored credentials later, and if account is
-     *         re-authenticated, {@link AccountManager#KEY_PASSWORD} and
-     *         {@link AccountManager#KEY_ACCOUNT_STATUS_TOKEN} for checking the
-     *         status of the account later, or
+     *         <li>{@link AccountManager#KEY_ACCOUNT_SESSION_BUNDLE} for
+     *         updating the locally stored credentials later, and if account is
+     *         re-authenticated, optional {@link AccountManager#KEY_PASSWORD}
+     *         and {@link AccountManager#KEY_ACCOUNT_STATUS_TOKEN} for checking
+     *         the status of the account later, or
      *         <li>{@link AccountManager#KEY_ERROR_CODE} and
      *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
      *         </ul>
      * @throws NetworkErrorException if the authenticator could not honor the
      *             request due to a network error
+     * @see #finishSession(AccountAuthenticatorResponse, String, Bundle)
      */
-    public Bundle startUpdateCredentialsSession(final AccountAuthenticatorResponse response,
-            final Account account, final String authTokenType, final Bundle options)
-                    throws NetworkErrorException {
+    public Bundle startUpdateCredentialsSession(
+            final AccountAuthenticatorResponse response,
+            final Account account,
+            final String authTokenType,
+            final Bundle options) throws NetworkErrorException {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -786,5 +838,103 @@ public abstract class AbstractAccountAuthenticator {
 
         }).start();
         return null;
+    }
+
+    /**
+     * Finishes the session started by #startAddAccountSession or
+     * #startUpdateCredentials by installing the account to device with
+     * AccountManager, or updating the local credentials. File I/O may be
+     * performed in this call.
+     * <p>
+     * Note: when overriding this method, {@link #startAddAccountSession} and
+     * {@link #startUpdateCredentialsSession} should be overridden too.
+     * </p>
+     *
+     * @param response to send the result back to the AccountManager, will never
+     *            be null
+     * @param accountType the type of account to authenticate with, will never
+     *            be null
+     * @param sessionBundle a bundle of session data created by
+     *            {@link #startAddAccountSession} used for adding account to
+     *            device, or by {@link #startUpdateCredentialsSession} used for
+     *            updating local credentials.
+     * @return a Bundle result or null if the result is to be returned via the
+     *         response. The result will contain either:
+     *         <ul>
+     *         <li>{@link AccountManager#KEY_INTENT}, or
+     *         <li>{@link AccountManager#KEY_ACCOUNT_NAME} and
+     *         {@link AccountManager#KEY_ACCOUNT_TYPE} of the account that was
+     *         added or local credentials were updated, or
+     *         <li>{@link AccountManager#KEY_ERROR_CODE} and
+     *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
+     *         </ul>
+     * @throws NetworkErrorException
+     * @see #startAddAccountSession and #startUpdateCredentialsSession
+     */
+    public Bundle finishSession(
+            final AccountAuthenticatorResponse response,
+            final String accountType,
+            final Bundle sessionBundle) throws NetworkErrorException {
+        if (TextUtils.isEmpty(accountType)) {
+            Log.e(TAG, "Account type cannot be empty.");
+            Bundle result = new Bundle();
+            result.putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_BAD_ARGUMENTS);
+            result.putString(AccountManager.KEY_ERROR_MESSAGE,
+                    "accountType cannot be empty.");
+            return result;
+        }
+
+        if (sessionBundle == null) {
+            Log.e(TAG, "Session bundle cannot be null.");
+            Bundle result = new Bundle();
+            result.putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_BAD_ARGUMENTS);
+            result.putString(AccountManager.KEY_ERROR_MESSAGE,
+                    "sessionBundle cannot be null.");
+            return result;
+        }
+
+        if (!sessionBundle.containsKey(KEY_AUTH_TOKEN_TYPE)) {
+            // We cannot handle Session bundle not created by default startAddAccountSession(...)
+            // nor startUpdateCredentialsSession(...) implementation. Return error.
+            Bundle result = new Bundle();
+            result.putInt(AccountManager.KEY_ERROR_CODE,
+                    AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION);
+            result.putString(AccountManager.KEY_ERROR_MESSAGE,
+                    "Authenticator must override finishSession if startAddAccountSession"
+                            + " or startUpdateCredentialsSession is overridden.");
+            response.onResult(result);
+            return result;
+        }
+        String authTokenType = sessionBundle.getString(KEY_AUTH_TOKEN_TYPE);
+        Bundle options = sessionBundle.getBundle(KEY_OPTIONS);
+        String[] requiredFeatures = sessionBundle.getStringArray(KEY_REQUIRED_FEATURES);
+        Account account = sessionBundle.getParcelable(KEY_ACCOUNT);
+        boolean containsKeyAccount = sessionBundle.containsKey(KEY_ACCOUNT);
+
+        // Actual options passed to add account or update credentials flow.
+        Bundle sessionOptions = new Bundle(sessionBundle);
+        // Remove redundant extras in session bundle before passing it to addAccount(...) or
+        // updateCredentials(...).
+        sessionOptions.remove(KEY_AUTH_TOKEN_TYPE);
+        sessionOptions.remove(KEY_REQUIRED_FEATURES);
+        sessionOptions.remove(KEY_OPTIONS);
+        sessionOptions.remove(KEY_ACCOUNT);
+
+        if (options != null) {
+            // options may contains old system info such as
+            // AccountManager.KEY_ANDROID_PACKAGE_NAME required by the add account flow or update
+            // credentials flow, we should replace with the new values of the current call added
+            // to sessionBundle by AccountManager or AccountManagerService.
+            options.putAll(sessionOptions);
+            sessionOptions = options;
+        }
+
+        // Session bundle created by startUpdateCredentialsSession default implementation should
+        // contain KEY_ACCOUNT.
+        if (containsKeyAccount) {
+            return updateCredentials(response, account, authTokenType, options);
+        }
+        // Otherwise, session bundle was created by startAddAccountSession default implementation.
+        return addAccount(response, accountType, authTokenType, requiredFeatures, sessionOptions);
     }
 }

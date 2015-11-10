@@ -2475,6 +2475,129 @@ public class AccountManagerService
         }
     }
 
+    @Override
+    public void finishSession(IAccountManagerResponse response,
+            @NonNull Bundle sessionBundle,
+            boolean expectActivityLaunch,
+            Bundle appInfo) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG,
+                    "finishSession: response "+ response
+                            + ", expectActivityLaunch " + expectActivityLaunch
+                            + ", caller's uid " + Binder.getCallingUid()
+                            + ", pid " + Binder.getCallingPid());
+        }
+        if (response == null) {
+            throw new IllegalArgumentException("response is null");
+        }
+
+        // Session bundle is the encrypted bundle of the original bundle created by authenticator.
+        // Account type is added to it before encryption.
+        if (sessionBundle == null || sessionBundle.size() == 0) {
+            throw new IllegalArgumentException("sessionBundle is empty");
+        }
+
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        if (!canUserModifyAccounts(userId)) {
+            sendErrorResponse(response,
+                    AccountManager.ERROR_CODE_USER_RESTRICTED,
+                    "User is not allowed to add an account!");
+            showCantAddAccount(AccountManager.ERROR_CODE_USER_RESTRICTED, userId);
+            return;
+        }
+
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final Bundle decryptedBundle;
+        final String accountType;
+        // First decrypt session bundle to get account type for checking permission.
+        try {
+            CryptoHelper cryptoHelper = CryptoHelper.getInstance();
+            decryptedBundle = cryptoHelper.decryptBundle(sessionBundle);
+            if (decryptedBundle == null) {
+                sendErrorResponse(
+                        response,
+                        AccountManager.ERROR_CODE_BAD_REQUEST,
+                        "failed to decrypt session bundle");
+                return;
+            }
+            accountType = decryptedBundle.getString(AccountManager.KEY_ACCOUNT_TYPE);
+            // Account type cannot be null. This should not happen if session bundle was created
+            // properly by #StartAccountSession.
+            if (TextUtils.isEmpty(accountType)) {
+                sendErrorResponse(
+                        response,
+                        AccountManager.ERROR_CODE_BAD_ARGUMENTS,
+                        "accountType is empty");
+                return;
+            }
+
+            // If by any chances, decryptedBundle contains colliding keys with
+            // system info
+            // such as AccountManager.KEY_ANDROID_PACKAGE_NAME required by the add account flow or
+            // update credentials flow, we should replace with the new values of the current call.
+            if (appInfo != null) {
+                decryptedBundle.putAll(appInfo);
+            }
+
+            // Add info that may be used by add account or update credentials flow.
+            decryptedBundle.putInt(AccountManager.KEY_CALLER_UID, uid);
+            decryptedBundle.putInt(AccountManager.KEY_CALLER_PID, pid);
+        } catch (GeneralSecurityException e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.v(TAG, "Failed to decrypt session bundle!", e);
+            }
+            sendErrorResponse(
+                    response,
+                    AccountManager.ERROR_CODE_BAD_REQUEST,
+                    "failed to decrypt session bundle");
+            return;
+        }
+
+        if (!canUserModifyAccountsForType(userId, accountType)) {
+            sendErrorResponse(
+                    response,
+                    AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                    "User cannot modify accounts of this type (policy).");
+            showCantAddAccount(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
+                    userId);
+            return;
+        }
+
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            logRecordWithUid(
+                    accounts,
+                    DebugDbHelper.ACTION_CALLED_ACCOUNT_SESSION_FINISH,
+                    TABLE_ACCOUNTS,
+                    uid);
+            new Session(
+                    accounts,
+                    response,
+                    accountType,
+                    expectActivityLaunch,
+                    true /* stripAuthTokenFromResult */,
+                    null /* accountName */,
+                    false /* authDetailsRequired */,
+                    true /* updateLastAuthenticationTime */) {
+                @Override
+                public void run() throws RemoteException {
+                    mAuthenticator.finishSession(this, mAccountType, decryptedBundle);
+                }
+
+                @Override
+                protected String toDebugString(long now) {
+                    return super.toDebugString(now)
+                            + ", finishSession"
+                            + ", accountType " + accountType;
+                }
+            }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
     private void showCantAddAccount(int errorCode, int userId) {
         Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
         cantAddAccount.putExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, errorCode);
@@ -3582,10 +3705,11 @@ public class AccountManagerService
         private static String ACTION_CALLED_ACCOUNT_ADD = "action_called_account_add";
         private static String ACTION_CALLED_ACCOUNT_REMOVE = "action_called_account_remove";
 
-        // TODO: This action doesn't add account to accountdb. Account is only
-        // added in finishAddAccount or finishAddAccountAsUser which may be in
-        // a different user profile.
+        //This action doesn't add account to accountdb. Account is only
+        // added in finishSession which may be in a different user profile.
         private static String ACTION_CALLED_START_ACCOUNT_ADD = "action_called_start_account_add";
+        private static String ACTION_CALLED_ACCOUNT_SESSION_FINISH =
+                "action_called_account_session_finish";
 
         private static SimpleDateFormat dateFromat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

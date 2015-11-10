@@ -91,4 +91,8 @@ interface IAccountManager {
     /* Update credentials in two steps. */
     void startUpdateCredentialsSession(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
+
+    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...) */
+    void finishSession(in IAccountManagerResponse response, in Bundle sessionBundle,
+        boolean expectActivityLaunch, in Bundle appInfo);
 }

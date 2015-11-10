@@ -2617,7 +2617,8 @@ public class AccountManager {
      * <p>
      * <p>
      * <b>NOTE:</b> The account will not be installed to the device by calling
-     * this api alone.
+     * this api alone. #finishSession should be called after this to install the
+     * account on device.
      *
      * @param accountType The type of account to add; must not be null
      * @param authTokenType The type of auth token (see {@link #getAuthToken})
@@ -2665,6 +2666,7 @@ public class AccountManager {
      *         problem creating a new account, usually because of network
      *         trouble
      *         </ul>
+     * @see #finishSession
      */
     public AccountManagerFuture<Bundle> startAddAccountSession(
             final String accountType,
@@ -2697,14 +2699,14 @@ public class AccountManager {
 
     /**
      * Asks the user to enter a new password for an account but not updating the
-     * saved credentials for the account until finishSession is
-     * called.
+     * saved credentials for the account until {@link #finishSession} is called.
      * <p>
      * This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
      * <p>
      * <b>NOTE:</b> The saved credentials for the account alone will not be
-     * updated by calling this API alone .
+     * updated by calling this API alone. #finishSession should be called after
+     * this to update local credentials
      *
      * @param account The account to update credentials for
      * @param authTokenType The credentials entered must allow an auth token of
@@ -2723,15 +2725,14 @@ public class AccountManager {
      *            the main thread
      * @return An {@link AccountManagerFuture} which resolves to a Bundle with
      *         these fields if an activity was supplied and user was
-     *         successfully re-authenticated to the account (TODO: default impl
-     *         only returns escorw?):
+     *         successfully re-authenticated to the account:
      *         <ul>
      *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
      *         updating the local credentials on device later.
-     *         <li>{@link #KEY_PASSWORD} - optional, the password or password hash of the
-     *         account
-     *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check status of
-     *         the account
+     *         <li>{@link #KEY_PASSWORD} - optional, the password or password
+     *         hash of the account
+     *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
+     *         status of the account
      *         </ul>
      *         If no activity was specified, the returned Bundle contains
      *         {@link #KEY_INTENT} with the {@link Intent} needed to launch the
@@ -2747,6 +2748,7 @@ public class AccountManager {
      *         problem verifying the password, usually because of network
      *         trouble
      *         </ul>
+     * @see #finishSession
      */
     public AccountManagerFuture<Bundle> startUpdateCredentialsSession(
             final Account account,
@@ -2767,6 +2769,73 @@ public class AccountManager {
                         authTokenType,
                         activity != null,
                         options);
+            }
+        }.start();
+    }
+
+    /**
+     * Finishes the session started by {@link #startAddAccountSession} or
+     * {@link #startUpdateCredentialsSession}. This will either add the account
+     * to AccountManager or update the local credentials stored.
+     * <p>
+     * This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * @param sessionBundle a {@link Bundle} created by {@link #startAddAccountSession} or
+     *            {@link #startUpdateCredentialsSession}
+     * @param activity The {@link Activity} context to use for launching a new
+     *            authenticator-defined sub-Activity to prompt the user to
+     *            create an account or reauthenticate existing account; used
+     *            only to call startActivity(); if null, the prompt will not
+     *            be launched directly, but the necessary {@link Intent} will
+     *            be returned to the caller instead
+     * @param callback Callback to invoke when the request completes, null for
+     *            no callback
+     * @param handler {@link Handler} identifying the callback thread, null for
+     *            the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *         these fields if an activity was supplied and an account was added
+     *         to device or local credentials were updated::
+     *         <ul>
+     *         <li>{@link #KEY_ACCOUNT_NAME} - the name of the account created
+     *         <li>{@link #KEY_ACCOUNT_TYPE} - the type of the account
+     *         </ul>
+     *         If no activity was specified and additional information is needed
+     *         from user, the returned Bundle may contains only
+     *         {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     *         actual account creation process. If an error occurred,
+     *         {@link AccountManagerFuture#getResult()} throws:
+     *         <ul>
+     *         <li>{@link AuthenticatorException} if no authenticator was
+     *         registered for this account type or the authenticator failed to
+     *         respond
+     *         <li>{@link OperationCanceledException} if the operation was
+     *         canceled for any reason, including the user canceling the
+     *         creation process or adding accounts (of this type) has been
+     *         disabled by policy
+     *         <li>{@link IOException} if the authenticator experienced an I/O
+     *         problem creating a new account, usually because of network
+     *         trouble
+     *         </ul>
+     * @see #startAddAccountSession and #startUpdateCredentialsSession
+     */
+    public AccountManagerFuture<Bundle> finishSession(
+            final Bundle sessionBundle,
+            final Activity activity,
+            AccountManagerCallback<Bundle> callback,
+            Handler handler) {
+        if (sessionBundle == null) {
+            throw new IllegalArgumentException("sessionBundle is null");
+        }
+
+        /* Add information required by add account flow */
+        final Bundle appInfo = new Bundle();
+        appInfo.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
+
+        return new AmsTask(activity, handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.finishSession(mResponse, sessionBundle, activity != null, appInfo);
             }
         }.start();
     }
