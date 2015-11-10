@@ -3420,9 +3420,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "positionTaskInStackLocked: no task for id=" + taskId);
             return;
         }
-        ActivityStack stack =
-                getStack(stackId, CREATE_IF_NEEDED, !ON_TOP);
-        mWindowManager.positionTaskInStack(taskId, stackId, position);
+        final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, !ON_TOP);
+
+        task.updateOverrideConfigurationForStack(stack);
+
+        mWindowManager.positionTaskInStack(
+                taskId, stackId, position, task.mBounds, task.mOverrideConfig);
         final boolean stackChanged = task.stack != null && task.stack != stack;
         if (stackChanged) {
             task.stack.removeTask(task, "moveTaskToStack", MOVING);

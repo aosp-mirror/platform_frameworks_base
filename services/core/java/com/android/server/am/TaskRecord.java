@@ -1234,6 +1234,31 @@ final class TaskRecord {
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
     }
 
+    /** Updates the task's bounds and override configuration to match what is expected for the
+     * input stack. */
+    void updateOverrideConfigurationForStack(ActivityStack inStack) {
+        if (stack != null && stack == inStack) {
+            return;
+        }
+
+        if (inStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+            if (!mResizeable) {
+                throw new IllegalArgumentException("Can not position non-resizeable task="
+                        + this + " in stack=" + inStack);
+            }
+            if (mBounds != null) {
+                return;
+            }
+            if (mLastNonFullscreenBounds != null) {
+                updateOverrideConfiguration(mLastNonFullscreenBounds);
+            } else {
+                inStack.layoutTaskInStack(this, null);
+            }
+        } else {
+            updateOverrideConfiguration(inStack.mBounds);
+        }
+    }
+
     /**
      * Returns the correct stack to use based on task type and currently set bounds,
      * regardless of the focused stack and current stack association of the task.

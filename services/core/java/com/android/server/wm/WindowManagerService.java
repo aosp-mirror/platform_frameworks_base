@@ -4795,7 +4795,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void positionTaskInStack(int taskId, int stackId, int position) {
+    public void positionTaskInStack(int taskId, int stackId, int position, Rect bounds,
+            Configuration config) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: positioning taskId=" + taskId
                     + " in stackId=" + stackId + " at " + position);
@@ -4811,7 +4812,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         "positionTaskInStack: could not find stackId=" + stackId);
                 return;
             }
-            task.positionTaskInStack(stack, position);
+            task.positionTaskInStack(stack, position, bounds, config);
             final DisplayContent displayContent = stack.getDisplayContent();
             displayContent.layoutNeeded = true;
             mWindowPlacerLocked.performSurfacePlacement();

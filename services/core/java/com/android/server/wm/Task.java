@@ -135,7 +135,7 @@ class Task implements DimLayer.DimLayerUser {
         stack.addTask(this, toTop);
     }
 
-    void positionTaskInStack(TaskStack stack, int position) {
+    void positionTaskInStack(TaskStack stack, int position, Rect bounds, Configuration config) {
         if (mStack != null && stack != mStack) {
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
@@ -143,6 +143,7 @@ class Task implements DimLayer.DimLayerUser {
             mStack.removeTask(this);
         }
         stack.positionTask(this, position, showForAllUsers());
+        setBounds(bounds, config);
     }
 
     boolean removeAppToken(AppWindowToken wtoken) {
