@@ -6285,7 +6285,10 @@ public final class Settings {
        public static final String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
 
        /**
-        * Whether the device has been provisioned (0 = false, 1 = true)
+        * Whether the device has been provisioned (0 = false, 1 = true).
+        * <p>On a multiuser device with a separate system user, the screen may be locked
+        * as soon as this is set to true and further activities cannot be launched on the
+        * system user unless they are marked to show over keyguard.
         */
        public static final String DEVICE_PROVISIONED = "device_provisioned";
 
