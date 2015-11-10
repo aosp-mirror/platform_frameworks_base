@@ -240,7 +240,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             throw new IllegalArgumentException(PrintManager.EXTRA_PRINT_JOB
                     + " cannot be null");
         }
-        mPrintJob.setAttributes(new PrintAttributes.Builder().build());
+        if (mPrintJob.getAttributes() == null) {
+            mPrintJob.setAttributes(new PrintAttributes.Builder().build());
+        }
 
         final IBinder adapter = extras.getBinder(PrintManager.EXTRA_PRINT_DOCUMENT_ADAPTER);
         if (adapter == null) {
