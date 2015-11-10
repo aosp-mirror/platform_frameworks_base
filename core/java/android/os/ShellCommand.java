@@ -19,8 +19,11 @@ package android.os;
 import android.util.Slog;
 import com.android.internal.util.FastPrintWriter;
 
+import java.io.BufferedInputStream;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 
 /**
@@ -43,6 +46,7 @@ public abstract class ShellCommand {
 
     private FastPrintWriter mOutPrintWriter;
     private FastPrintWriter mErrPrintWriter;
+    private InputStream mInputStream;
 
     public int exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ResultReceiver resultReceiver) {
@@ -109,6 +113,13 @@ public abstract class ShellCommand {
             mErrPrintWriter = new FastPrintWriter(fout);
         }
         return mErrPrintWriter;
+    }
+
+    public InputStream getInputStream() {
+        if (mInputStream == null) {
+            mInputStream = new BufferedInputStream(new FileInputStream(mIn));
+        }
+        return mInputStream;
     }
 
     /**
