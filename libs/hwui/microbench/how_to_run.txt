@@ -1,0 +1,4 @@
+mmm -j8 frameworks/base/libs/hwui &&
+adb push $ANDROID_PRODUCT_OUT/data/local/tmp/hwuimicro \
+    /data/local/tmp/hwuimicro &&
+    adb shell /data/local/tmp/hwuimicro

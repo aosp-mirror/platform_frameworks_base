@@ -275,6 +275,7 @@ LOCAL_STATIC_LIBRARIES := libbenchmark libbase
 LOCAL_SRC_FILES += \
     microbench/DisplayListCanvasBench.cpp \
     microbench/LinearAllocatorBench.cpp \
+    microbench/PathParserBench.cpp \
     microbench/ShadowBench.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
