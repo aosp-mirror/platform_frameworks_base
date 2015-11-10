@@ -201,6 +201,7 @@ public:
     PathTexture* getArc(float width, float height, float startAngle, float sweepAngle,
             bool useCenter, const SkPaint* paint);
     PathTexture* get(const SkPath* path, const SkPaint* paint);
+    void         remove(const SkPath* path, const SkPaint* paint);
 
     /**
      * Removes the specified path. This is meant to be called from threads
