@@ -20306,6 +20306,7 @@ package android.net {
     method public static void incrementOperationCount(int, int);
     method public static void setThreadStatsTag(int);
     method public static void setThreadStatsTagBackup();
+    method public static void setThreadStatsTagRestore();
     method public static void setThreadStatsUid(int);
     method public static void tagSocket(java.net.Socket) throws java.net.SocketException;
     method public static void untagSocket(java.net.Socket) throws java.net.SocketException;

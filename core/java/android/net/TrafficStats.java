@@ -87,11 +87,20 @@ public class TrafficStats {
     public static final int TAG_SYSTEM_MEDIA = 0xFFFFFF02;
 
     /**
-     * Default tag value for {@link BackupManager} traffic.
+     * Default tag value for {@link BackupManager} backup traffic; that is,
+     * traffic from the device to the storage backend.
      *
      * @hide
      */
     public static final int TAG_SYSTEM_BACKUP = 0xFFFFFF03;
+
+    /**
+     * Default tag value for {@link BackupManager} restore traffic; that is,
+     * app data retrieved from the storage backend at install time.
+     *
+     * @hide
+     */
+    public static final int TAG_SYSTEM_RESTORE = 0xFFFFFF04;
 
     private static INetworkStatsService sStatsService;
 
@@ -139,6 +148,16 @@ public class TrafficStats {
     @SystemApi
     public static void setThreadStatsTagBackup() {
         setThreadStatsTag(TAG_SYSTEM_BACKUP);
+    }
+
+    /**
+     * System API for restore-related support components to tag network traffic
+     * appropriately.
+     * @hide
+     */
+    @SystemApi
+    public static void setThreadStatsTagRestore() {
+        setThreadStatsTag(TAG_SYSTEM_RESTORE);
     }
 
     /**
