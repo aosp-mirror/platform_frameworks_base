@@ -164,6 +164,7 @@ public class AppTransition implements Dump {
     // Used for thumbnail transitions. True if we're scaling up, false if scaling down
     private boolean mNextAppTransitionScaleUp;
     private IRemoteCallback mNextAppTransitionCallback;
+    private IRemoteCallback mNextAppTransitionFutureCallback;
     private IRemoteCallback mAnimationFinishedCallback;
     private int mNextAppTransitionEnter;
     private int mNextAppTransitionExit;
@@ -1448,10 +1449,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionAnimationsSpecsFuture = specsFuture;
             mNextAppTransitionScaleUp = scaleUp;
-            postAnimationCallback();
-            mNextAppTransitionCallback = callback;
-        } else {
-            postAnimationCallback();
+            mNextAppTransitionFutureCallback = callback;
         }
     }
 
@@ -1486,8 +1484,10 @@ public class AppTransition implements Dump {
                     }
                     synchronized (mServiceLock) {
                         mNextAppTransitionAnimationsSpecsPending = false;
-                        overridePendingAppTransitionMultiThumb(specs, mNextAppTransitionCallback,
-                                null /* finishedCallback */, mNextAppTransitionScaleUp);
+                        overridePendingAppTransitionMultiThumb(specs,
+                                mNextAppTransitionFutureCallback, null /* finishedCallback */,
+                                mNextAppTransitionScaleUp);
+                        mNextAppTransitionFutureCallback = null;
                         mWindowSurfacePlacer.requestTraversal();
                     }
                 }
