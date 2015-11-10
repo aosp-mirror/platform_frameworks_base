@@ -655,9 +655,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
         }
 
-        PrinterId printerId = mCurrentPrinter.getId();
-        final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
-        mDestinationSpinner.setSelection(index);
+        if (mCurrentPrinter != null) {
+            PrinterId printerId = mCurrentPrinter.getId();
+            final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
+            mDestinationSpinner.setSelection(index);
+        }
     }
 
     private void startAdvancedPrintOptionsActivity(PrinterInfo printer) {
