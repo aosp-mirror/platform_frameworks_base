@@ -149,7 +149,25 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * TODO Add Documentation
+     * Activity action: Starts the provisioning flow which sets up a managed user.
+     *
+     * <p>This intent will typically be sent by a mobile device management application (MDM).
+     * Provisioning configures the current user as managed user and sets the MDM as the profile
+     * owner who has full control over the user. Provisioning can only happen before user setup has
+     * been completed. Use {@link #isProvisioningAllowed(String)} to check if provisioning is
+     * allowed.
+     *
+     * This intent should contain the extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME},
+     * although specifying only {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is also
+     * supported.
+     *
+     * <p> If provisioning fails, the device returns to its previous state.
+     *
+     * <p>If launched with {@link android.app.Activity#startActivityForResult(Intent, int)} a
+     * result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part of
+     * the provisioning flow was successful, although this doesn't guarantee the full flow will
+     * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
+     * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_USER
