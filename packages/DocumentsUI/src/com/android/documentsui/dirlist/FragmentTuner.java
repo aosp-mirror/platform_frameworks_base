@@ -17,39 +17,104 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.State.ACTION_BROWSE;
+import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_MANAGE;
+import static com.android.documentsui.State.ACTION_OPEN;
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
 import static com.android.internal.util.Preconditions.checkArgument;
 
-import android.os.SystemProperties;
-import android.view.Menu;
-import android.view.MenuItem;
-
 import com.android.documentsui.Menus;
+import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
 import com.android.documentsui.State;
+
+import android.os.SystemProperties;
+import android.provider.DocumentsContract.Document;
+import android.view.Menu;
+import android.view.MenuItem;
 
 /**
  * Providers support for specializing the DirectoryFragment to the "host" Activity.
  * Feel free to expand the role of this class to handle other specializations.
  */
 public abstract class FragmentTuner {
+
+    final State mState;
+
+    public FragmentTuner(State state) {
+        mState = state;
+    }
+
     public static FragmentTuner pick(State state) {
         switch (state.action) {
             case ACTION_BROWSE:
-                return new FilesTuner();
+                return new FilesTuner(state);
             case ACTION_MANAGE:
-                return new ManageTuner();
+                return new DownloadsTuner(state);
             default:
-                return new DocumentsTuner();
+                return new DocumentsTuner(state);
         }
     }
 
+
     public abstract void updateActionMenu(Menu menu, int dirType, boolean canDelete);
+
+    // Subtly different from isDocumentEnabled. The reason may be illuminated as follows.
+    // A folder is enabled such that it may be double clicked, even in settings
+    // when the folder itself cannot be selected. This may also be true of container types.
+    public boolean canSelectType(String docMimeType) {
+        return true;
+    }
+
+    public boolean isDocumentEnabled(String docMimeType, int docFlags) {
+        if (isDirectory(docMimeType)) {
+            return true;
+        }
+
+        return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);
+    }
 
     /**
      * Provides support for Platform specific specializations of DirectoryFragment.
      */
     private static final class DocumentsTuner extends FragmentTuner {
+
+        public DocumentsTuner(State state) {
+            super(state);
+        }
+
+        @Override
+        public boolean canSelectType(String docMimeType) {
+            switch (mState.action) {
+                case ACTION_OPEN:
+                case ACTION_CREATE:
+                case ACTION_GET_CONTENT:
+                    return !isDirectory(docMimeType);
+                case ACTION_OPEN_TREE:
+                    // In this case nothing *ever* is selectable...the expected user behavior is
+                    // they navigate *into* a folder, then click a confirmation button indicating
+                    // that the current directory is the directory they are picking.
+                    return false;
+            }
+            return true;
+        }
+
+        @Override
+        public boolean isDocumentEnabled(String docMimeType, int docFlags) {
+            // Directories are always enabled
+            if (isDirectory(docMimeType)) {
+                return true;
+            }
+
+            // Read-only files are disabled when creating
+            if (mState.action == ACTION_CREATE && (docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
+                return false;
+            }
+
+            return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);
+        }
+
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
 
@@ -77,7 +142,11 @@ public abstract class FragmentTuner {
     /**
      * Provides support for Platform specific specializations of DirectoryFragment.
      */
-    private static final class ManageTuner extends FragmentTuner {
+    private static final class DownloadsTuner extends FragmentTuner {
+
+        public DownloadsTuner(State state) {
+            super(state);
+        }
 
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
@@ -107,6 +176,11 @@ public abstract class FragmentTuner {
      * Provides support for Files activity specific specializations of DirectoryFragment.
      */
     private static final class FilesTuner extends FragmentTuner {
+
+        public FilesTuner(State state) {
+            super(state);
+        }
+
         @Override
         public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
 
@@ -123,5 +197,9 @@ public abstract class FragmentTuner {
 
             Menus.disableHiddenItems(menu, copy, paste);
         }
+    }
+
+    private static boolean isDirectory(String mimeType) {
+        return Document.MIME_TYPE_DIR.equals(mimeType);
     }
 }
