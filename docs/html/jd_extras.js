@@ -247,6 +247,42 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"video"
   },
   {
+    "title":"Toolbars for a flexible Action Bar & more",
+    "titleFriendly":"",
+    "summary":"Toolbars are a flexible View you can add to your Android app which provides many of the same APIs as the system provided Action Bar, but can also do so much more such as reacting to scrolling or being integrated directly into your layouts.",
+    "url":"https://www.youtube.com/watch?v=kmUGLURRPkI",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/kmUGLURRPkI/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Protecting Implicit Intents with Runtime Checks",
+    "titleFriendly":"",
+    "summary":"Make sure you protect your implicit intents with a simple runtime check.",
+    "url":"https://www.youtube.com/watch?v=HGElAW224dE",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/HGElAW224dE/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Tabs and ViewPager",
+    "titleFriendly":"",
+    "summary":"Showing multiple screens or pages of content is easy with the help of ViewPager and a PagerAdapter. Combining that with tabs make for an effective top level navigation strategy for your app or for moving between content at the same level of hierarchy within your app.",
+    "url":"https://www.youtube.com/watch?v=zQekzaAgIlQ",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/zQekzaAgIlQ/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
     "title":"Battery Drain and Networking",
     "titleFriendly":"",
     "summary":"Let’s take a moment to make something insanely clear: As far as battery is concerned, NETWORKING is the biggest, baddest, dirtiest offender there is. And optimizing performance here isn’t easy. Since the chip isn’t always awake and draining power, means you can optimize how it wakes up, sends traffic, and saves battery.",
