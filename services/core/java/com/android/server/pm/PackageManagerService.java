@@ -139,6 +139,7 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
+import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageStats;
@@ -263,6 +264,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -277,6 +279,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -313,7 +316,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_INTENT_MATCHING = false;
     private static final boolean DEBUG_PACKAGE_SCANNING = false;
     private static final boolean DEBUG_VERIFY = false;
-    private static final boolean DEBUG_DEXOPT = false;
+
+    // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
+    // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
+    // user, but by default initialize to this.
+    static final boolean DEBUG_DEXOPT = false;
+
     private static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_EPHEMERAL = false;
     private static final boolean DEBUG_TRIAGED_MISSING = false;
@@ -1990,7 +1998,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         mInstaller = installer;
-        mPackageDexOptimizer = new PackageDexOptimizer(this);
+        mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
+                "*dexopt*");
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -3372,19 +3381,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 String[] libs = new String[size];
                 libSet.toArray(libs);
                 return libs;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @hide
-     */
-    PackageParser.Package findSharedNonSystemLibrary(String libName) {
-        synchronized (mPackages) {
-            PackageManagerService.SharedLibraryEntry lib = mSharedLibraries.get(libName);
-            if (lib != null && lib.apk != null) {
-                return mPackages.get(lib.apk);
             }
         }
         return null;
@@ -6718,8 +6714,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
-                int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        true /* inclDependencies */, useProfiles, extractOnly, force);
+                int result = performDexOptInternalWithDependenciesLI(p, instructionSets,
+                        useProfiles, extractOnly, force);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6737,6 +6733,80 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return pkgs;
+    }
+
+    private int performDexOptInternalWithDependenciesLI(PackageParser.Package p,
+            String instructionSets[], boolean useProfiles, boolean extractOnly, boolean force) {
+        // Select the dex optimizer based on the force parameter.
+        // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
+        //       allocate an object here.
+        PackageDexOptimizer pdo = force
+                ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
+                : mPackageDexOptimizer;
+
+        // Optimize all dependencies first. Note: we ignore the return value and march on
+        // on errors.
+        Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
+        if (!deps.isEmpty()) {
+            for (PackageParser.Package depPackage : deps) {
+                // TODO: Analyze and investigate if we (should) profile libraries.
+                // Currently this will do a full compilation of the library.
+                pdo.performDexOpt(depPackage, instructionSets, false /* useProfiles */,
+                        false /* extractOnly */);
+            }
+        }
+
+        return pdo.performDexOpt(p, instructionSets, useProfiles, extractOnly);
+    }
+
+    Collection<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
+        if (p.usesLibraries != null || p.usesOptionalLibraries != null) {
+            ArrayList<PackageParser.Package> retValue = new ArrayList<>();
+            Set<String> collectedNames = new HashSet<>();
+            findSharedNonSystemLibrariesRecursive(p, retValue, collectedNames);
+
+            retValue.remove(p);
+
+            return retValue;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private void findSharedNonSystemLibrariesRecursive(PackageParser.Package p,
+            Collection<PackageParser.Package> collected, Set<String> collectedNames) {
+        if (!collectedNames.contains(p.packageName)) {
+            collectedNames.add(p.packageName);
+            collected.add(p);
+
+            if (p.usesLibraries != null) {
+                findSharedNonSystemLibrariesRecursive(p.usesLibraries, collected, collectedNames);
+            }
+            if (p.usesOptionalLibraries != null) {
+                findSharedNonSystemLibrariesRecursive(p.usesOptionalLibraries, collected,
+                        collectedNames);
+            }
+        }
+    }
+
+    private void findSharedNonSystemLibrariesRecursive(Collection<String> libs,
+            Collection<PackageParser.Package> collected, Set<String> collectedNames) {
+        for (String libName : libs) {
+            PackageParser.Package libPkg = findSharedNonSystemLibrary(libName);
+            if (libPkg != null) {
+                findSharedNonSystemLibrariesRecursive(libPkg, collected, collectedNames);
+            }
+        }
+    }
+
+    private PackageParser.Package findSharedNonSystemLibrary(String libName) {
+        synchronized (mPackages) {
+            PackageManagerService.SharedLibraryEntry lib = mSharedLibraries.get(libName);
+            if (lib != null && lib.apk != null) {
+                return mPackages.get(lib.apk);
+            }
+        }
+        return null;
     }
 
     public void shutdown() {
@@ -6763,9 +6833,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Whoever is calling forceDexOpt wants a fully compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
-            final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
-                    true /* inclDependencies */, false /* useProfiles */,
-                    false /* extractOnly */, true /* force */);
+            final int res = performDexOptInternalWithDependenciesLI(pkg, instructionSets,
+                    false /* useProfiles */, false /* extractOnly */, true /* force */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -13032,8 +13101,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Do not run PackageDexOptimizer through the local performDexOpt
                 // method because `pkg` is not in `mPackages` yet.
                 int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
-                        false /* inclDependencies */, false /* useProfiles */,
-                        true /* extractOnly */, false /* force */);
+                        false /* useProfiles */, true /* extractOnly */);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                     String msg = "Extracking package failed for " + pkgName;
@@ -18032,5 +18100,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             throw new SecurityException(
                     "Cannot call " + tag + " from UID " + callingUid);
         }
+    }
+
+    boolean isHistoricalPackageUsageAvailable() {
+        return mPackageUsage.isHistoricalPackageUsageAvailable();
     }
 }
