@@ -1060,7 +1060,7 @@ class NavigationBarApps extends LinearLayout
             ris = packageManager.queryIntentActivitiesAsUser(intentToResolve, 0, userId);
         }
         if (ris == null || ris.size() <= 0) {
-            Slog.e(TAG, "Failed to build intent for " + packageName);
+            Slog.i(TAG, "Failed to build intent for " + packageName);
             return null;
         }
         return new ComponentName(ris.get(0).activityInfo.packageName,
