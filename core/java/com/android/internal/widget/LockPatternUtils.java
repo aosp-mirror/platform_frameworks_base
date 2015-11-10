@@ -126,6 +126,8 @@ public class LockPatternUtils {
     private static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
 
+    private static final String LOCK_SCREEN_DEVICE_OWNER_INFO = "lockscreen.device_owner_info";
+
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
 
     // Maximum allowed number of repeated or ordered characters in a sequence before we'll
@@ -575,6 +577,29 @@ public class LockPatternUtils {
 
     public boolean isOwnerInfoEnabled(int userId) {
         return getBoolean(LOCK_SCREEN_OWNER_INFO_ENABLED, false, userId);
+    }
+
+    /**
+     * Sets the device owner information. If the information is {@code null} or empty then the
+     * device owner info is cleared.
+     *
+     * @param info Device owner information which will be displayed instead of the user
+     * owner info.
+     */
+    public void setDeviceOwnerInfo(String info) {
+        if (info != null && info.isEmpty()) {
+            info = null;
+        }
+
+        setString(LOCK_SCREEN_DEVICE_OWNER_INFO, info, UserHandle.USER_SYSTEM);
+    }
+
+    public String getDeviceOwnerInfo() {
+        return getString(LOCK_SCREEN_DEVICE_OWNER_INFO, UserHandle.USER_SYSTEM);
+    }
+
+    public boolean isDeviceOwnerInfoEnabled() {
+        return getDeviceOwnerInfo() != null;
     }
 
     /**
