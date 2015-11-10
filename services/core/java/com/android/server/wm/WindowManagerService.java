@@ -8726,9 +8726,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // we need to go through the process of getting informed by the
                 // application when it has finished drawing.
                 if (w.mOrientationChanging || dragResizingChanged) {
-                    if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation start waiting for draw mDrawState=DRAW_PENDING in "
-                            + w + ", surfaceController " + winAnimator.mSurfaceController);
+                    if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
+                        Slog.v(TAG, "Orientation or resize start waiting for draw"
+                                + ", mDrawState=DRAW_PENDING in " + w
+                                + ", surfaceController " + winAnimator.mSurfaceController);
+                    }
                     winAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                     if (w.mAppToken != null) {
                         w.mAppToken.allDrawn = false;
