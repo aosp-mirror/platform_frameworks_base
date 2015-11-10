@@ -156,6 +156,11 @@ import java.util.Set;
 
 /**
  * Implementation of the device policy APIs.
+ *
+ * Locking policies:
+ * - {@link DevicePolicyManagerService} must not call into {@link IActivityManager} within {@code
+ * this} lock to avoid lock inversion.
+ * - Methods that call into {@link IActivityManager} must have the "AM" suffix.
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
@@ -1105,7 +1110,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
         }
 
-        IActivityManager getIActivityManager() {
+        IActivityManager getIActivityManagerInner() {
             return ActivityManagerNative.getDefault();
         }
 
@@ -1236,6 +1241,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
+     * Caller must not hold {@code this} lock.  See also the class javadoc.
+     */
+    final IActivityManager getIActivityManager() {
+        if (Thread.holdsLock(this)) {
+            Slog.wtfStack(LOG_TAG, "Call to ActivityManager detected within DPMS lock");
+        }
+        return mInjector.getIActivityManagerInner();
+    }
+
+    /**
      * Instantiates the service.
      */
     public DevicePolicyManagerService(Context context) {
@@ -1348,8 +1363,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             migrateUserRestrictionsIfNecessaryLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
-
-            updateDeviceOwnerLocked();
 
             // TODO Notify UM to update restrictions (?)
         }
@@ -2037,36 +2050,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         validatePasswordOwnerLocked(policy);
         updateMaximumTimeToLockLocked(policy);
-        updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
+        updateLockTaskPackages(policy.mLockTaskPackages, userHandle);
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
     }
 
-    private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            mInjector.getIActivityManager()
-                    .updateLockTaskPackages(userId, packages.toArray(new String[packages.size()]));
-        } catch (RemoteException e) {
-            // Not gonna happen.
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
-    }
-
-    private void updateDeviceOwnerLocked() {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            if (getDeviceOwner() != null) {
-                mInjector.getIActivityManager()
-                        .updateDeviceOwner(getDeviceOwner().getPackageName());
+    private void updateLockTaskPackages(List<String> packages, final int userId) {
+        final String[] copy = packages.toArray(new String[packages.size()]);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getIActivityManager().updateLockTaskPackages(userId, copy);
+                } catch (RemoteException willNotHappen) {
+                }
             }
-        } catch (RemoteException e) {
-            // Not gonna happen.
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        });
     }
 
     static void validateQualityConstant(int quality) {
@@ -2137,14 +2137,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void ensureDeviceOwnerUserStarted() {
-        if (mOwners.hasDeviceOwner()) {
-            final int userId = mOwners.getDeviceOwnerUserId();
-            if (VERBOSE_LOG) {
-                Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
-            }
-            if (userId != UserHandle.USER_SYSTEM) {
+        if (!mOwners.hasDeviceOwner()) {
+            return;
+        }
+        final int userId = mOwners.getDeviceOwnerUserId();
+        if (userId == UserHandle.USER_SYSTEM) {
+            return;
+        }
+        if (VERBOSE_LOG) {
+            Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
+        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    mInjector.getIActivityManager().startUserInBackground(userId);
+                    getIActivityManager().startUserInBackground(userId);
 
                     // STOPSHIP Prevent the DO user from being killed.
 
@@ -2152,7 +2159,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Slog.w(LOG_TAG, "Exception starting user", e);
                 }
             }
-        }
+        });
     }
 
     private void cleanUpOldUsers() {
@@ -2418,15 +2425,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
-            DevicePolicyData policy = getUserData(userHandle);
-            final int N = policy.mAdminList.size();
-            for (int i=0; i<N; i++) {
-                if (policy.mAdminList.get(i).info.getPackageName().equals(packageName)) {
-                    return true;
-                }
-            }
-            return false;
+            return packageHasActiveAdminsLocked(packageName, userHandle);
         }
+    }
+
+    boolean packageHasActiveAdminsLocked(String packageName, int userHandle) {
+        DevicePolicyData policy = getUserData(userHandle);
+        final int N = policy.mAdminList.size();
+        for (int i = 0; i < N; i++) {
+            if (policy.mAdminList.get(i).info.getPackageName().equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -3729,7 +3740,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 @Override
                 public void run() {
                     try {
-                        IActivityManager am = mInjector.getIActivityManager();
+                        IActivityManager am = getIActivityManager();
                         if (am.getCurrentUser().id == userHandle) {
                             am.switchUser(UserHandle.USER_SYSTEM);
                         }
@@ -4485,7 +4496,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mOwners.setDeviceOwner(admin, ownerName, userId);
             mOwners.writeDeviceOwner();
-            updateDeviceOwnerLocked();
             Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
 
             ident = mInjector.binderClearCallingIdentity();
@@ -4587,7 +4597,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mOwners.clearDeviceOwner();
             mOwners.writeDeviceOwner();
-            updateDeviceOwnerLocked();
             // Reactivate backup service.
             long ident = mInjector.binderClearCallingIdentity();
             try {
@@ -5348,14 +5357,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private boolean checkCallerIsCurrentUserOrProfile() {
+    private boolean checkCallerIsCurrentUserOrProfileAM() {
         int callingUserId = UserHandle.getCallingUserId();
         long token = mInjector.binderClearCallingIdentity();
         try {
             UserInfo currentUser;
             UserInfo callingUser = mUserManager.getUserInfo(callingUserId);
             try {
-                currentUser = mInjector.getIActivityManager().getCurrentUser();
+                currentUser = getIActivityManager().getCurrentUser();
             } catch (RemoteException e) {
                 Slog.e(LOG_TAG, "Failed to talk to activity managed.", e);
                 return false;
@@ -5386,7 +5395,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // TODO When InputMethodManager supports per user calls remove
         //      this restriction.
-        if (!checkCallerIsCurrentUserOrProfile()) {
+        if (!checkCallerIsCurrentUserOrProfileAM()) {
             return false;
         }
 
@@ -5438,7 +5447,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public List getPermittedInputMethodsForCurrentUser() {
         UserInfo currentUser;
         try {
-            currentUser = mInjector.getIActivityManager().getCurrentUser();
+            currentUser = getIActivityManager().getCurrentUser();
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Failed to make remote calls to get current user", e);
             // Activity managed is dead, just allow all IMEs
@@ -5533,7 +5542,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
 
                 // Start user in background.
-                mInjector.getIActivityManager().startUserInBackground(userHandle);
+                getIActivityManager().startUserInBackground(userHandle);
             } catch (RemoteException e) {
                 Slog.e(LOG_TAG, "Failed to make remote calls for configureUser", e);
             }
@@ -5566,20 +5575,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
 
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                int userId = UserHandle.USER_SYSTEM;
-                if (userHandle != null) {
-                    userId = userHandle.getIdentifier();
-                }
-                return mInjector.getIActivityManager().switchUser(userId);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Couldn't switch user", e);
-                return false;
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+        long id = mInjector.binderClearCallingIdentity();
+        try {
+            int userId = UserHandle.USER_SYSTEM;
+            if (userHandle != null) {
+                userId = userHandle.getIdentifier();
             }
+            return getIActivityManager().switchUser(userId);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Couldn't switch user", e);
+            return false;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
@@ -6051,7 +6060,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Store the settings persistently.
         saveSettingsLocked(userHandle);
-        updateLockTaskPackagesLocked(packages, userHandle);
+        updateLockTaskPackages(packages, userHandle);
     }
 
     /**
@@ -6416,6 +6425,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
 
                 return composed;
+            }
+        }
+
+        @Override
+        public boolean isDeviceAdminPackage(int userId, String packageName) {
+            if (packageName == null) {
+                return false;
+            }
+            synchronized (DevicePolicyManagerService.this) {
+                return packageHasActiveAdminsLocked(packageName, userId);
             }
         }
 
