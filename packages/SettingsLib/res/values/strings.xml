@@ -348,4 +348,7 @@
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="category_work">Work</string>
 
+    <!-- Full package name of OEM preferred device feedback reporter. Leave this blank, overlaid in Settings/TvSettings [DO NOT TRANSLATE] -->
+    <string name="oem_preferred_feedback_reporter" translatable="false" />
+
 </resources>
