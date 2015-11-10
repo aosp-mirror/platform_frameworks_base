@@ -1551,7 +1551,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
 
         if (!config.mLocaleList.isEmpty()) {
-            parts.add(localesToResourceQualifier(config.mLocaleList));
+            final String resourceQualifier = localesToResourceQualifier(config.mLocaleList);
+            if (!resourceQualifier.isEmpty()) {
+                parts.add(resourceQualifier);
+            }
         }
 
         switch (config.screenLayout & Configuration.SCREENLAYOUT_LAYOUTDIR_MASK) {
