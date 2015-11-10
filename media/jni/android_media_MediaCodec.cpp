@@ -834,28 +834,35 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
         env->GetMethodID(clazz.get(), "<init>", "(ILjava/lang/String;)V");
     CHECK(constructID != NULL);
 
-    jstring msgObj = env->NewStringUTF(msg != NULL ? msg : "Unknown Error");
+    const char *defaultMsg = "Unknown Error";
 
     /* translate OS errors to Java API CryptoException errorCodes (which are positive) */
     switch (err) {
         case ERROR_DRM_NO_LICENSE:
             err = gCryptoErrorCodes.cryptoErrorNoKey;
+            defaultMsg = "Crypto key not available";
             break;
         case ERROR_DRM_LICENSE_EXPIRED:
             err = gCryptoErrorCodes.cryptoErrorKeyExpired;
+            defaultMsg = "License expired";
             break;
         case ERROR_DRM_RESOURCE_BUSY:
             err = gCryptoErrorCodes.cryptoErrorResourceBusy;
+            defaultMsg = "Resource busy or unavailable";
             break;
         case ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION:
             err = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
+            defaultMsg = "Required output protections are not active";
             break;
         case ERROR_DRM_SESSION_NOT_OPENED:
             err = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
+            defaultMsg = "Attempted to use a closed session";
             break;
         default:  /* Other negative DRM error codes go out as is. */
             break;
     }
+
+    jstring msgObj = env->NewStringUTF(msg != NULL ? msg : defaultMsg);
 
     jthrowable exception =
         (jthrowable)env->NewObject(clazz.get(), constructID, err, msgObj);
