@@ -15,18 +15,18 @@
   ~ limitations under the License
   -->
 
-<LinearLayout
+<NotificationHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_header"
     android:orientation="horizontal"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="48dp"
     android:clipChildren="false"
     android:layout_gravity="start|top"
     android:gravity="center_vertical"
     android:paddingBottom="16dp"
     android:paddingStart="@dimen/notification_content_margin_start"
-    android:paddingEnd="8dp">
+    android:paddingEnd="16dp">
     <ImageView
         android:id="@+id/icon"
         android:layout_width="18dp"
@@ -41,6 +41,7 @@
         android:layout_marginEnd="3dp"
         android:layout_marginStart="2dp"
         android:visibility="gone"
+        android:singleLine="true"
         />
     <TextView
         android:id="@+id/app_name_text"
@@ -49,6 +50,7 @@
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
         android:layout_marginStart="3dp"
         android:layout_marginEnd="4dp"
+        android:singleLine="true"
         />
     <TextView
         android:id="@+id/app_title_sub_text_divider"
@@ -64,7 +66,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
         android:layout_marginEnd="4dp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:singleLine="true"/>
     <TextView
         android:id="@+id/sub_text_time_divider"
         android:layout_width="wrap_content"
@@ -72,13 +75,13 @@
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
         android:layout_marginEnd="4dp"
         android:text="@string/notification_header_divider_symbol"
+        android:singleLine="true"
         android:visibility="gone"/>
     <ViewStub
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
-        android:layout_weight="0"
         android:layout="@layout/notification_template_part_time"
         android:visibility="gone"
         />
@@ -87,7 +90,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
-        android:layout_weight="0"
         android:layout="@layout/notification_template_part_chronometer"
         android:visibility="gone"
         />
@@ -100,5 +102,5 @@
         android:src="@drawable/ic_arrow_drop_down"
         android:visibility="gone"
         />
-</LinearLayout>
+</NotificationHeaderView>
 
