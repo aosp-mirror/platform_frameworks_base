@@ -25,7 +25,9 @@
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <sys/resource.h>
+#include <utils/Condition.h>
 #include <utils/Log.h>
+#include <utils/Mutex.h>
 
 namespace android {
 namespace uirenderer {
@@ -325,10 +327,16 @@ void RenderThread::queue(RenderTask* task) {
 }
 
 void RenderThread::queueAndWait(RenderTask* task) {
-    SignalingRenderTask syncTask(task, &mSyncMutex, &mSyncCondition);
-    AutoMutex _lock(mSyncMutex);
+    // These need to be local to the thread to avoid the Condition
+    // signaling the wrong thread. The easiest way to achieve that is to just
+    // make this on the stack, although that has a slight cost to it
+    Mutex mutex;
+    Condition condition;
+    SignalingRenderTask syncTask(task, &mutex, &condition);
+
+    AutoMutex _lock(mutex);
     queue(&syncTask);
-    mSyncCondition.wait(mSyncMutex);
+    condition.wait(mutex);
 }
 
 void RenderThread::queueAtFront(RenderTask* task) {
