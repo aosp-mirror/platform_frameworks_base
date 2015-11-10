@@ -463,7 +463,7 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer",
       "distribute/tools/promote/brand.html",
       "distribute/tools/promote/device-art.html",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html",
       "distribute/tools/open-distribution.html",
       "about/dashboards/index.html"

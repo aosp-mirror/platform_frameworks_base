@@ -461,6 +461,17 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"google"
   },
   {
+    "title":"Google Play Badge Generator",
+    "titleFriendly":"",
+    "summary":"Build badges for your app in just a few clicks, or download hi-res badge assets localized for a variety of languages.",
+    "url":"https://play.google.com/intl/en_us/badges/",
+    "group":"",
+    "keywords": [],
+    "tags": ["#developersupport"],
+    "image":"images/gp-badges-set.png",
+    "type":"google"
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": ["#developersupport #termsandpolicies"],
