@@ -2242,7 +2242,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAccessibilityController.onWindowTransitionLocked(win, transit);
                 }
             }
-            final boolean isAnimating = win.mWinAnimator.isAnimating();
+            final boolean isAnimating = win.mWinAnimator.isAnimating()
+                    && !win.mWinAnimator.isDummyAnimation();
             // The starting window is the last window in this app token and it isn't animating.
             // Allow it to be removed now as there is no additional window or animation that will
             // trigger its removal.
