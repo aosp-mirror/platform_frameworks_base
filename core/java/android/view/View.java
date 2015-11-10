@@ -18498,21 +18498,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * must be an array of two integers. After the method returns, the array
      * contains the x and y location in that order.</p>
      *
-     * @param location an array of two integers in which to hold the coordinates
+     * @param outWindowSpace an array of two integers in which to hold the coordinates
      */
-    public void getLocationInWindow(@Size(2) int[] location) {
-        if (location == null || location.length < 2) {
-            throw new IllegalArgumentException("location must be an array of two integers");
+    public void getLocationInWindow(@Size(2) int[] outWindowSpace) {
+        outWindowSpace[0] = 0;
+        outWindowSpace[1] = 0;
+
+        transformFromViewToWindowSpace(outWindowSpace);
+    }
+
+    void transformFromViewToWindowSpace(@Size(2) int[] inOutLocation) {
+        if (inOutLocation == null || inOutLocation.length < 2) {
+            throw new IllegalArgumentException("inOutLocation must be an array of two integers");
         }
 
         if (mAttachInfo == null) {
             // When the view is not attached to a window, this method does not make sense
-            location[0] = location[1] = 0;
+            inOutLocation[0] = inOutLocation[1] = 0;
             return;
         }
 
-        float[] position = mAttachInfo.mTmpTransformLocation;
-        position[0] = position[1] = 0.0f;
+        float position[] = mAttachInfo.mTmpTransformLocation;
+        position[0] = inOutLocation[0];
+        position[1] = inOutLocation[1];
 
         if (!hasIdentityMatrix()) {
             getMatrix().mapPoints(position);
@@ -18544,8 +18552,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             position[1] -= vr.mCurScrollY;
         }
 
-        location[0] = (int) (position[0] + 0.5f);
-        location[1] = (int) (position[1] + 0.5f);
+        inOutLocation[0] = (int) (position[0] + 0.5f);
+        inOutLocation[1] = (int) (position[1] + 0.5f);
     }
 
     /**

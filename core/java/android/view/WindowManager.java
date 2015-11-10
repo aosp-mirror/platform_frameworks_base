@@ -1148,6 +1148,16 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT = 0x00001000;
 
         /**
+         * Flag indicating that the x, y, width, and height members should be
+         * ignored (and thus their previous value preserved). For example 
+         * because they are being managed externally through repositionChild.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_PRESERVE_GEOMETRY = 0x00002000;
+
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */

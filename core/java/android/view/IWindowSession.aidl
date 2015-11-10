@@ -101,16 +101,24 @@ interface IWindowSession {
      *  for the parent window appears. This allows for synchronizing movement of a child
      *  to repainting the contents of the parent.
      *
+     *  "width" and "height" correspond to the width and height members of
+     *  WindowManager.LayoutParams in the {@link #relayout relayout()} case.
+     *  This may differ from the surface buffer size in the
+     *  case of {@link LayoutParams#FLAG_SCALED} and {@link #relayout relayout()}
+     *  must be used with requestedWidth/height if this must be changed.
+     *
      *  @param window The window being modified. Must be attached to a parent window
      *  or this call will fail.
      *  @param x The new x position
      *  @param y The new y position
+     *  @param width The new width
+     *  @param height The new height
      *  @param deferTransactionUntilFrame Frame number from our parent (attached) to
      *  defer this action until.
      *  @param outFrame Rect in which is placed the new position/size on screen.
      */
-    void repositionChild(IWindow childWindow, int x, int y, long deferTransactionUntilFrame,
-            out Rect outFrame);
+    void repositionChild(IWindow childWindow, int left, int top, int right, int bottom,
+            long deferTransactionUntilFrame, out Rect outFrame);
 
     /**
      * If a call to relayout() asked to have the surface destroy deferred,
