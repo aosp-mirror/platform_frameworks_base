@@ -563,7 +563,10 @@ void RenderProxy::post(RenderTask* task) {
 void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {
     void* retval;
     task->setReturnPtr(&retval);
-    mRenderThread.queueAndWait(task);
+    SignalingRenderTask syncTask(task, &mSyncMutex, &mSyncCondition);
+    AutoMutex _lock(mSyncMutex);
+    mRenderThread.queue(&syncTask);
+    mSyncCondition.wait(mSyncMutex);
     return retval;
 }
 

@@ -27,9 +27,7 @@
 #include <utils/Looper.h>
 #include <utils/Thread.h>
 
-#include <condition_variable>
 #include <memory>
-#include <mutex>
 #include <set>
 
 namespace android {
@@ -127,8 +125,6 @@ private:
 
     nsecs_t mNextWakeup;
     TaskQueue mQueue;
-    Mutex mSyncMutex;
-    Condition mSyncCondition;
 
     DisplayInfo mDisplayInfo;
 
