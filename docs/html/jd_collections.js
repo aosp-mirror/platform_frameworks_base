@@ -95,6 +95,14 @@ var RESOURCE_COLLECTIONS = {
       "http://android-developers.blogspot.com/2015/03/a-new-reference-app-for-multi-device.html"
     ]
   },
+  "develop/landing/devpatterns": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=kmUGLURRPkI",
+      "https://www.youtube.com/watch?v=HGElAW224dE",
+      "https://www.youtube.com/watch?v=zQekzaAgIlQ"
+    ]
+  },
   "develop/landing/performance": {
     "title": "",
     "resources": [

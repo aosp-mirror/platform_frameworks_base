@@ -84,6 +84,23 @@ excludeFromSuggestions=true
        data-sortOrder="random"></div>
 </div></section>
 
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">Android development patterns</h1>
+  <div class="dac-section-subtitle">
+    Fundamental components and best practices that can help you build better apps.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/devpatterns"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Playlist
+    </a></li>
+  </ul>
+</div></section>
+
 <section class="dac-section dac-section-light"><div class="wrap">
   <h1 class="dac-section-title">Android performance patterns</h1>
   <div class="dac-section-subtitle">
