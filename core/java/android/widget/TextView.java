@@ -6118,6 +6118,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return -1;
                 }
                 break;
+
+            case KeyEvent.KEYCODE_CUT:
+                if (event.hasNoModifiers() && canCut()) {
+                    if (onTextContextMenuItem(ID_CUT)) {
+                        return -1;
+                    }
+                }
+                break;
+
+            case KeyEvent.KEYCODE_COPY:
+                if (event.hasNoModifiers() && canCopy()) {
+                    if (onTextContextMenuItem(ID_COPY)) {
+                        return -1;
+                    }
+                }
+                break;
+
+            case KeyEvent.KEYCODE_PASTE:
+                if (event.hasNoModifiers() && canPaste()) {
+                    if (onTextContextMenuItem(ID_PASTE)) {
+                        return -1;
+                    }
+                }
+                break;
         }
 
         if (mEditor != null && mEditor.mKeyListener != null) {
