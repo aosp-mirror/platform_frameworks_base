@@ -469,10 +469,6 @@ public abstract class MediaBrowserService extends Service {
                 = new Result<List<MediaBrowser.MediaItem>>(parentId) {
             @Override
             void onResultSent(List<MediaBrowser.MediaItem> list) {
-                if (list == null) {
-                    throw new IllegalStateException("onLoadChildren sent null list for id "
-                            + parentId);
-                }
                 if (mConnections.get(connection.callbacks.asBinder()) != connection) {
                     if (DBG) {
                         Log.d(TAG, "Not sending onLoadChildren result for connection that has"
@@ -481,7 +477,8 @@ public abstract class MediaBrowserService extends Service {
                     return;
                 }
 
-                final ParceledListSlice<MediaBrowser.MediaItem> pls = new ParceledListSlice(list);
+                final ParceledListSlice<MediaBrowser.MediaItem> pls =
+                        list == null ? null : new ParceledListSlice(list);
                 try {
                     connection.callbacks.onLoadChildren(parentId, pls);
                 } catch (RemoteException ex) {
