@@ -278,6 +278,8 @@ public final class ScriptGroup extends BaseObj {
             public ValueAndSize(RenderScript rs, Object obj) {
                 if (obj instanceof Allocation) {
                     value = ((Allocation)obj).getID(rs);
+                    // Special value for size to tell the runtime and driver that
+                    // the value is an Allocation
                     size = -1;
                 } else if (obj instanceof Boolean) {
                     value = ((Boolean)obj).booleanValue() ? 1 : 0;
@@ -289,10 +291,10 @@ public final class ScriptGroup extends BaseObj {
                     value = ((Long)obj).longValue();
                     size = 8;
                 } else if (obj instanceof Float) {
-                    value = ((Float)obj).longValue();
+                    value = Float.floatToRawIntBits(((Float)obj).floatValue());
                     size = 4;
                 } else if (obj instanceof Double) {
-                    value = ((Double)obj).longValue();
+                    value = Double.doubleToRawLongBits(((Double)obj).doubleValue());
                     size = 8;
                 }
             }
