@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.util.Slog;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -38,6 +39,7 @@ public class DockedStackDividerController {
     private boolean mResizing;
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
+    private final Rect mLastRect = new Rect();
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -79,11 +81,15 @@ public class DockedStackDividerController {
         if (stack == null) {
             // Unfortunately we might end up with still having a divider, even though the underlying
             // stack was already removed. This is because we are on AM thread and the removal of the
-            // divider was deferred to WM thread and hasn't happened yet.
+            // divider was deferred to WM thread and hasn't happened yet. In that case let's just
+            // keep putting it in the same place it was before the stack was removed to have
+            // continuity and prevent it from jumping to the center. It will get hidden soon.
+            frame.set(mLastRect);
             return;
+        } else {
+            stack.getBounds(mTmpRect);
         }
         int side = stack.getDockSide();
-        stack.getBounds(mTmpRect);
         switch (side) {
             case DOCKED_LEFT:
                 frame.set(mTmpRect.right - mDividerInsets, frame.top,
@@ -102,5 +108,6 @@ public class DockedStackDividerController {
                         frame.right, mTmpRect.top + mDividerInsets);
                 break;
         }
+        mLastRect.set(frame);
     }
 }
