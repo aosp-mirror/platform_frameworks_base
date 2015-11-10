@@ -148,6 +148,14 @@ public class DevicePolicyManager {
         = "android.app.action.PROVISION_MANAGED_PROFILE";
 
     /**
+     * @hide
+     * TODO Add Documentation
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROVISION_MANAGED_USER
+        = "android.app.action.PROVISION_MANAGED_USER";
+
+    /**
      * Activity action: Starts the provisioning flow which sets up a managed device.
      * Must be started with {@link android.app.Activity#startActivityForResult(Intent, int)}.
      *
