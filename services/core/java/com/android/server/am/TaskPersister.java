@@ -16,22 +16,14 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
-import android.app.AppGlobals;
-import android.content.ComponentName;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Debug;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.text.format.DateUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.Xml;
 import android.os.Process;
 
@@ -51,13 +43,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 import libcore.io.IoUtils;
-
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 public class TaskPersister {
     static final String TAG = "TaskPersister";
@@ -104,6 +92,7 @@ public class TaskPersister {
     private static class WriteQueueItem {}
     private static class TaskWriteQueueItem extends WriteQueueItem {
         final TaskRecord mTask;
+
         TaskWriteQueueItem(TaskRecord task) {
             mTask = task;
         }
@@ -111,6 +100,7 @@ public class TaskPersister {
     private static class ImageWriteQueueItem extends WriteQueueItem {
         final String mFilename;
         Bitmap mImage;
+
         ImageWriteQueueItem(String filename, Bitmap image) {
             mFilename = filename;
             mImage = image;

@@ -1531,12 +1531,88 @@ public class ActivityManager {
         }
     }
 
+    /**
+     * Metadata related to the {@link TaskThumbnail}.
+     *
+     * @hide
+     */
+    public static class TaskThumbnailInfo implements Parcelable {
+        /** @hide */
+        public static final String ATTR_TASK_THUMBNAILINFO_PREFIX = "task_thumbnailinfo_";
+        private static final String ATTR_TASK_WIDTH =
+                ATTR_TASK_THUMBNAILINFO_PREFIX + "task_width";
+        private static final String ATTR_TASK_HEIGHT =
+                ATTR_TASK_THUMBNAILINFO_PREFIX + "task_height";
+        private static final String ATTR_SCREEN_ORIENTATION =
+                ATTR_TASK_THUMBNAILINFO_PREFIX + "screen_orientation";
+
+        public int taskWidth;
+        public int taskHeight;
+        public int screenOrientation;
+
+        public TaskThumbnailInfo() {
+            // Do nothing
+        }
+
+        private TaskThumbnailInfo(Parcel source) {
+            readFromParcel(source);
+        }
+
+        /** @hide */
+        public void saveToXml(XmlSerializer out) throws IOException {
+            out.attribute(null, ATTR_TASK_WIDTH, Integer.toString(taskWidth));
+            out.attribute(null, ATTR_TASK_HEIGHT, Integer.toString(taskHeight));
+            out.attribute(null, ATTR_SCREEN_ORIENTATION, Integer.toString(screenOrientation));
+        }
+
+        /** @hide */
+        public void restoreFromXml(String attrName, String attrValue) {
+            if (ATTR_TASK_WIDTH.equals(attrName)) {
+                taskWidth = Integer.parseInt(attrValue);
+            } else if (ATTR_TASK_HEIGHT.equals(attrName)) {
+                taskHeight = Integer.parseInt(attrValue);
+            } else if (ATTR_SCREEN_ORIENTATION.equals(attrName)) {
+                screenOrientation = Integer.parseInt(attrValue);
+            }
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(taskWidth);
+            dest.writeInt(taskHeight);
+            dest.writeInt(screenOrientation);
+        }
+
+        public void readFromParcel(Parcel source) {
+            taskWidth = source.readInt();
+            taskHeight = source.readInt();
+            screenOrientation = source.readInt();
+        }
+
+        public static final Creator<TaskThumbnailInfo> CREATOR = new Creator<TaskThumbnailInfo>() {
+            public TaskThumbnailInfo createFromParcel(Parcel source) {
+                return new TaskThumbnailInfo(source);
+            }
+            public TaskThumbnailInfo[] newArray(int size) {
+                return new TaskThumbnailInfo[size];
+            }
+        };
+    }
+
     /** @hide */
     public static class TaskThumbnail implements Parcelable {
         public Bitmap mainThumbnail;
         public ParcelFileDescriptor thumbnailFileDescriptor;
+        public TaskThumbnailInfo thumbnailInfo;
 
         public TaskThumbnail() {
+        }
+
+        private TaskThumbnail(Parcel source) {
+            readFromParcel(source);
         }
 
         public int describeContents() {
@@ -1559,6 +1635,12 @@ public class ActivityManager {
             } else {
                 dest.writeInt(0);
             }
+            if (thumbnailInfo != null) {
+                dest.writeInt(1);
+                thumbnailInfo.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -1572,6 +1654,11 @@ public class ActivityManager {
             } else {
                 thumbnailFileDescriptor = null;
             }
+            if (source.readInt() != 0) {
+                thumbnailInfo = TaskThumbnailInfo.CREATOR.createFromParcel(source);
+            } else {
+                thumbnailInfo = null;
+            }
         }
 
         public static final Creator<TaskThumbnail> CREATOR = new Creator<TaskThumbnail>() {
@@ -1582,10 +1669,6 @@ public class ActivityManager {
                 return new TaskThumbnail[size];
             }
         };
-
-        private TaskThumbnail(Parcel source) {
-            readFromParcel(source);
-        }
     }
 
     /** @hide */

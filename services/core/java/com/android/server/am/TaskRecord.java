@@ -37,6 +37,8 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityManager.TaskThumbnail;
+import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -47,6 +49,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
@@ -194,6 +197,7 @@ final class TaskRecord {
     private Bitmap mLastThumbnail; // Last thumbnail captured for this item.
     private final File mLastThumbnailFile; // File containing last thumbnail.
     private final String mFilename;
+    private TaskThumbnailInfo mLastThumbnailInfo;
     CharSequence lastDescription; // Last description captured for this item.
 
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
@@ -234,6 +238,7 @@ final class TaskRecord {
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
         mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        mLastThumbnailInfo = new TaskThumbnailInfo();
         taskId = _taskId;
         mAffiliatedTaskId = _taskId;
         voiceSession = _voiceSession;
@@ -247,11 +252,12 @@ final class TaskRecord {
     }
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            TaskDescription _taskDescription) {
+            TaskDescription _taskDescription, TaskThumbnailInfo thumbnailInfo) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
         mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        mLastThumbnailInfo = thumbnailInfo;
         taskId = _taskId;
         mAffiliatedTaskId = _taskId;
         voiceSession = null;
@@ -282,12 +288,14 @@ final class TaskRecord {
             int _effectiveUid, String _lastDescription, ArrayList<ActivityRecord> activities,
             long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
-            int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-            int callingUid, String callingPackage, boolean resizeable, boolean privileged) {
+            TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
+            int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
+            boolean resizeable, boolean privileged) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
         mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        mLastThumbnailInfo = lastThumbnailInfo;
         taskId = _taskId;
         intent = _intent;
         affinityIntent = _affinityIntent;
@@ -490,12 +498,40 @@ final class TaskRecord {
     }
 
     /**
-     * Sets the last thumbnail.
+     * Sets the last thumbnail with the current task bounds and the system orientation.
      * @return whether the thumbnail was set
      */
-    boolean setLastThumbnail(Bitmap thumbnail) {
+    boolean setLastThumbnailLocked(Bitmap thumbnail) {
+        final Configuration serviceConfig = mService.mConfiguration;
+        int taskWidth = 0;
+        int taskHeight = 0;
+        if (mBounds != null) {
+            // Non-fullscreen tasks
+            taskWidth = mBounds.width();
+            taskHeight = mBounds.height();
+        } else if (stack != null) {
+            // Fullscreen tasks
+            final Point displaySize = new Point();
+            stack.getDisplaySize(displaySize);
+            taskWidth = displaySize.x;
+            taskHeight = displaySize.y;
+        } else {
+            Slog.e(TAG, "setLastThumbnailLocked() called on Task without stack");
+        }
+        return setLastThumbnailLocked(thumbnail, taskWidth, taskHeight, serviceConfig.orientation);
+    }
+
+    /**
+     * Sets the last thumbnail with the current task bounds.
+     * @return whether the thumbnail was set
+     */
+    private boolean setLastThumbnailLocked(Bitmap thumbnail, int taskWidth, int taskHeight,
+            int screenOrientation) {
         if (mLastThumbnail != thumbnail) {
             mLastThumbnail = thumbnail;
+            mLastThumbnailInfo.taskWidth = taskWidth;
+            mLastThumbnailInfo.taskHeight = taskHeight;
+            mLastThumbnailInfo.screenOrientation = screenOrientation;
             if (thumbnail == null) {
                 if (mLastThumbnailFile != null) {
                     mLastThumbnailFile.delete();
@@ -510,6 +546,7 @@ final class TaskRecord {
 
     void getLastThumbnail(TaskThumbnail thumbs) {
         thumbs.mainThumbnail = mLastThumbnail;
+        thumbs.thumbnailInfo = mLastThumbnailInfo;
         thumbs.thumbnailFileDescriptor = null;
         if (mLastThumbnail == null) {
             thumbs.mainThumbnail = mService.mTaskPersister.getImageFromWriteQueue(mFilename);
@@ -524,12 +561,19 @@ final class TaskRecord {
         }
     }
 
+    /**
+     * Removes in-memory thumbnail data when the max number of in-memory task thumbnails is reached.
+     */
     void freeLastThumbnail() {
         mLastThumbnail = null;
     }
 
+    /**
+     * Removes all associated thumbnail data when a task is removed or pruned from recents.
+     */
     void disposeThumbnail() {
         mLastThumbnail = null;
+        mLastThumbnailInfo = null;
         lastDescription = null;
     }
 
@@ -779,7 +823,7 @@ final class TaskRecord {
             final ActivityRecord resumedActivity = stack.mResumedActivity;
             if (resumedActivity != null && resumedActivity.task == this) {
                 final Bitmap thumbnail = stack.screenshotActivities(resumedActivity);
-                setLastThumbnail(thumbnail);
+                setLastThumbnailLocked(thumbnail);
             }
         }
         final TaskThumbnail taskThumbnail = new TaskThumbnail();
@@ -991,6 +1035,7 @@ final class TaskRecord {
         if (lastTaskDescription != null) {
             lastTaskDescription.saveToXml(out);
         }
+        mLastThumbnailInfo.saveToXml(out);
         out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
         out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
@@ -1035,7 +1080,7 @@ final class TaskRecord {
             throws IOException, XmlPullParserException {
         Intent intent = null;
         Intent affinityIntent = null;
-        ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+        ArrayList<ActivityRecord> activities = new ArrayList<>();
         ComponentName realActivity = null;
         ComponentName origActivity = null;
         String affinity = null;
@@ -1055,6 +1100,7 @@ final class TaskRecord {
         int taskId = INVALID_TASK_ID;
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
+        TaskThumbnailInfo thumbnailInfo = new TaskThumbnailInfo();
         int taskAffiliation = INVALID_TASK_ID;
         int taskAffiliationColor = 0;
         int prevTaskId = INVALID_TASK_ID;
@@ -1103,6 +1149,8 @@ final class TaskRecord {
                 lastTimeOnTop = Long.valueOf(attrValue);
             } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
                 neverRelinquishIdentity = Boolean.valueOf(attrValue);
+            } else if (attrName.startsWith(TaskThumbnailInfo.ATTR_TASK_THUMBNAILINFO_PREFIX)) {
+                thumbnailInfo.restoreFromXml(attrName, attrValue);
             } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                 taskDescription.restoreFromXml(attrName, attrValue);
             } else if (ATTR_TASK_AFFILIATION.equals(attrName)) {
@@ -1181,8 +1229,8 @@ final class TaskRecord {
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
-                taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeable, privileged);
+                taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
+                taskAffiliationColor, callingUid, callingPackage, resizeable, privileged);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {

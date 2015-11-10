@@ -31,6 +31,7 @@ import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.MOVING;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArraySet;
 
@@ -386,6 +387,10 @@ final class ActivityStack {
             mTaskPositioner.reset();
         }
         mWindowManager.detachStack(mStackId);
+    }
+
+    public void getDisplaySize(Point out) {
+        mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
     }
 
     void setBounds(Rect bounds) {

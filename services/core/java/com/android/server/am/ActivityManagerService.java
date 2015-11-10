@@ -114,6 +114,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.ActivityStackSupervisor.ActivityDisplay;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerService;
@@ -134,6 +135,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityManagerNative;
@@ -8577,8 +8579,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
+                // Use the full screen as the context for the task thumbnail
+                final Point displaySize = new Point();
+                final TaskThumbnailInfo thumbnailInfo = new TaskThumbnailInfo();
+                r.task.stack.getDisplaySize(displaySize);
+                thumbnailInfo.taskWidth = displaySize.x;
+                thumbnailInfo.taskHeight = displaySize.y;
+                thumbnailInfo.screenOrientation = mConfiguration.orientation;
+
                 TaskRecord task = new TaskRecord(this, mStackSupervisor.getNextTaskId(), ainfo,
-                        intent, description);
+                        intent, description, thumbnailInfo);
 
                 int trimIdx = mRecentTasks.trimForTaskLocked(task, false);
                 if (trimIdx >= 0) {
@@ -8597,7 +8607,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mRecentTasks.add(task);
                 r.task.stack.addTask(task, false, false);
 
-                task.setLastThumbnail(thumbnail);
+                task.setLastThumbnailLocked(thumbnail);
                 task.freeLastThumbnail();
 
                 return task.taskId;
