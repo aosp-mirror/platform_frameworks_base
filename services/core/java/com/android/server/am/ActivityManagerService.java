@@ -4183,13 +4183,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                         "startActivityFromRecentsInner: Task " + taskId + " not found.");
             }
 
-            if (launchStackId != INVALID_STACK_ID && task.stack.mStackId != launchStackId) {
+            if (launchStackId != INVALID_STACK_ID) {
                 if (launchStackId == DOCKED_STACK_ID && bOptions != null) {
                     ActivityOptions activityOptions = new ActivityOptions(bOptions);
                     mWindowManager.setDockedStackCreateMode(activityOptions.getDockCreateMode());
                 }
-                mStackSupervisor.moveTaskToStackLocked(
-                        taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents");
+                if (task.stack.mStackId != launchStackId) {
+                    mStackSupervisor.moveTaskToStackLocked(
+                            taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents");
+                }
             }
 
             if (task.getRootActivity() != null) {
@@ -8690,12 +8692,25 @@ public final class ActivityManagerService extends ActivityManagerNative
         Rect rect = new Rect();
         try {
             synchronized (this) {
-                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
+                        taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
                 if (task == null) {
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
                     return rect;
                 }
-                mWindowManager.getTaskBounds(task.taskId, rect);
+                if (task.stack != null) {
+                    // Return the bounds from window manager since it will be adjusted for various
+                    // things like the presense of a docked stack for tasks that aren't resizeable.
+                    mWindowManager.getTaskBounds(task.taskId, rect);
+                } else {
+                    // Task isn't in window manager yet since it isn't associated with a stack.
+                    // Return the persist value from activity manager
+                    if (task.mBounds != null) {
+                        rect.set(task.mBounds);
+                    } else if (task.mLastNonFullscreenBounds != null) {
+                        rect.set(task.mLastNonFullscreenBounds);
+                    }
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

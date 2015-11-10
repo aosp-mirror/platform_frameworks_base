@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
@@ -1366,6 +1367,8 @@ final class TaskRecord {
             sb.append(stringName);
             sb.append(" U=");
             sb.append(userId);
+            sb.append(" StackId=");
+            sb.append(stack != null ? stack.mStackId : INVALID_STACK_ID);
             sb.append(" sz=");
             sb.append(mActivities.size());
             sb.append('}');
