@@ -3975,6 +3975,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         ((Editable) mText).append(text, start, end);
+
+        if (mAutoLinkMask != 0) {
+            boolean linksWereAdded = Linkify.addLinks((Spannable) mText, mAutoLinkMask);
+            // Do not change the movement method for text that support text selection as it
+            // would prevent an arbitrary cursor displacement.
+            if (linksWereAdded && mLinksClickable && !textCanBeSelected()) {
+                setMovementMethod(LinkMovementMethod.getInstance());
+            }
+        }
     }
 
     private void updateTextColors() {
