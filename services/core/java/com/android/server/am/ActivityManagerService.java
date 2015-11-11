@@ -3059,12 +3059,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         return proc;
     }
 
-    void ensurePackageDexOpt(String packageName) {
+    void notifyPackageUse(String packageName) {
         IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            if (pm.performDexOptIfNeeded(packageName, null /* instruction set */)) {
-                mDidDexOpt = true;
-            }
+            pm.notifyPackageUse(packageName);
         } catch (RemoteException e) {
         }
     }
@@ -6137,11 +6135,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
 
-            ensurePackageDexOpt(app.instrumentationInfo != null
+            notifyPackageUse(app.instrumentationInfo != null
                     ? app.instrumentationInfo.packageName
                     : app.info.packageName);
             if (app.instrumentationClass != null) {
-                ensurePackageDexOpt(app.instrumentationClass.getPackageName());
+                notifyPackageUse(app.instrumentationClass.getPackageName());
             }
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
                     + processName + " with config " + mConfiguration);
@@ -6221,7 +6219,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.uid) {
             if (DEBUG_BACKUP) Slog.v(TAG_BACKUP,
                     "New app is backup target, launching agent for " + app);
-            ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
+            notifyPackageUse(mBackupTarget.appInfo.packageName);
             try {
                 thread.scheduleCreateBackupAgent(mBackupTarget.appInfo,
                         compatibilityInfoForPackageLocked(mBackupTarget.appInfo),
@@ -9462,7 +9460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.addPackage(cpi.applicationInfo.packageName, cpi.applicationInfo.versionCode,
                             mProcessStats);
                 }
-                ensurePackageDexOpt(cpi.applicationInfo.packageName);
+                notifyPackageUse(cpi.applicationInfo.packageName);
             }
         }
         return providers;

@@ -28,6 +28,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@hide}
@@ -55,6 +56,7 @@ public class BackgroundDexOptService extends JobService {
                 .setRequiresDeviceIdle(true)
                 .setRequiresCharging(true)
                 .setMinimumLatency(minLatency)
+                .setPeriodic(TimeUnit.DAYS.toMillis(1))
                 .build();
         js.schedule(job);
     }
@@ -89,7 +91,7 @@ public class BackgroundDexOptService extends JobService {
                         // skip previously failing package
                         continue;
                     }
-                    if (!pm.performDexOpt(pkg, null /* instruction set */, true)) {
+                    if (!pm.performDexOpt(pkg, null /* instruction set */)) {
                         // there was a problem running dexopt,
                         // remember this so we do not keep retrying.
                         sFailedPackageNames.add(pkg);

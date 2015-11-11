@@ -1527,7 +1527,7 @@ public final class ActiveServices {
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
-            mAm.ensurePackageDexOpt(r.serviceInfo.packageName);
+            mAm.notifyPackageUse(r.serviceInfo.packageName);
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
             app.thread.scheduleCreateService(r, r.serviceInfo,
                     mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo),

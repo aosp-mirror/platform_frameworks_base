@@ -1294,7 +1294,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // Home process is the root process of the task.
                 mService.mHomeProcess = task.mActivities.get(0).app;
             }
-            mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
+            mService.notifyPackageUse(r.intent.getComponent().getPackageName());
             r.sleeping = false;
             r.forceNewConfig = false;
             mService.showAskCompatModeDialogLocked(r);

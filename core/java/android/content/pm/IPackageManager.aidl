@@ -420,10 +420,14 @@ interface IPackageManager {
     boolean hasSystemUidErrors();
 
     /**
-     * Ask the package manager to perform boot-time dex-opt of all
-     * existing packages.
+     * Ask the package manager to fstrim the disk if needed.
      */
-    void performBootDexOpt();
+    void performFstrimIfNeeded();
+
+    /**
+     * Notify the package manager that a package is going to be used.
+     */
+    void notifyPackageUse(String packageName);
 
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given

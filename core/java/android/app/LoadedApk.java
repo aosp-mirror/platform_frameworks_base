@@ -275,7 +275,7 @@ public final class LoadedApk {
                 if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
                     final String isa = VMRuntime.getRuntime().vmInstructionSet();
                     try {
-                        ActivityThread.getPackageManager().performDexOptIfNeeded(mPackageName, isa);
+                        ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
                     } catch (RemoteException re) {
                         // Ignored.
                     }
