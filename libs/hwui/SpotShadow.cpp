@@ -742,7 +742,7 @@ inline void genNewPenumbraAndPairWithUmbra(const Vector2* penumbra, int penumbra
             // vertex's location.
             int newPenumbraNumber = indexDelta - 1;
 
-            float accumulatedDeltaLength[newPenumbraNumber];
+            float accumulatedDeltaLength[indexDelta];
             float totalDeltaLength = 0;
 
             // To save time, cache the previous umbra vertex info outside the loop
