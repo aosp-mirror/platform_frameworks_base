@@ -699,7 +699,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Fiók feloldása"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Túl sok mintarajzolási próbálkozás"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Felhasználónév (e-mail cím)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Felhasználónév (e-mail-cím)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Jelszó"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Bejelentkezés"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Érvénytelen felhasználónév vagy jelszó."</string>
@@ -1297,7 +1297,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Felhasználónév (e-mail cím)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"Felhasználónév (e-mail-cím)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Jelszó"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Bejelentkezés"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Érvénytelen felhasználónév vagy jelszó."</string>

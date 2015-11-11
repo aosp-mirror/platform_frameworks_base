@@ -358,7 +358,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"accesează serviciul de apelare IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite aplicației să folosească serviciul IMS pentru apeluri, fără intervenția dvs."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"citeşte starea și identitatea telefonului"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicația stabilește numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanţă conectat printr-un apel."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcţiile de telefon ale dispozitivului. Cu această permisiune aplicația stabilește numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanță conectat printr-un apel."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"împiedică intrarea televizorului în stare de inactivitate"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"împiedicare intrare telefon în repaus"</string>
@@ -398,9 +398,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Permite aplicației să primească pachetele trimise către toate dispozitivele dintr-o rețea Wi-Fi, utilizând adrese cu difuzare multiplă, nu doar televizorul dvs. Această funcție utilizează mai multă energie decât modul fără difuzare multiplă."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permite aplicației să primească pachetele trimise către toate dispozitivele dintr-o rețea Wi-Fi, utilizând adrese cu difuzare multiplă, nu doar telefonul dvs. Această funcție utilizează mai multă energie decât modul fără difuzare multiplă."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"accesează setările Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite aplicației să configureze tableta Bluetooth locală, să descopere și să se împerecheze cu dispozitive la distanţă."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite aplicației să configureze tableta Bluetooth locală, să descopere și să se împerecheze cu dispozitive la distanță."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Permite aplicației să configureze televizorul Bluetooth local, precum și să descopere și să se asocieze cu dispozitive la distanță."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite aplicației să configureze telefonul Bluetooth local, să descopere și să se împerecheze cu dispozitive la distanţă."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite aplicației să configureze telefonul Bluetooth local, să descopere și să se împerecheze cu dispozitive la distanță."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"se conectează și se deconectează de la WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite aplicației să stabilească dacă o rețea WiMAX este activată și să vadă informațiile cu privire la toate reţelele WiMAX conectate."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>

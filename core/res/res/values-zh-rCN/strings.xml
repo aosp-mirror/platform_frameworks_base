@@ -376,10 +376,10 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"允许应用更改平板电脑的时区。"</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"允许应用更改电视的时区。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"允许应用更改手机的时区。"</string>
-    <string name="permlab_getAccounts" msgid="1086795467760122114">"查找设备上的帐户"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"允许该应用获取平板电脑已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"允许应用获取电视已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"允许该应用获取手机已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"查找设备上的帐号"</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"允许该应用获取平板电脑已知的帐号列表，其中可能包括由已安装的应用创建的所有帐号。"</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"允许应用获取电视已知的帐号列表，其中可能包括由已安装的应用创建的所有帐号。"</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"允许该应用获取手机已知的帐号列表，其中可能包括由已安装的应用创建的所有帐号。"</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"查看网络连接"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"允许该应用查看网络连接的相关信息，例如存在和连接的网络。"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"完全的网络访问权限"</string>
@@ -436,11 +436,11 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指纹图标"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允许该应用读取某个帐户的同步设置。例如，此权限可确定“联系人”应用是否与某个帐户同步。"</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允许该应用读取某个帐号的同步设置。例如，此权限可确定“联系人”应用是否与某个帐号同步。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"启用和停用同步"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许该应用修改某个帐户的同步设置。例如，此权限可用于在“联系人”应用与某个帐户之间启用同步。"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许该应用修改某个帐号的同步设置。例如，此权限可用于在“联系人”应用与某个帐号之间启用同步。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"读取同步统计信息"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许该应用读取某个帐户的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许该应用读取某个帐号的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"读取您的USB存储设备中的内容"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"读取您的SD卡中的内容"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允许应用读取您USB存储设备中的内容。"</string>
@@ -696,9 +696,9 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁手机。手机现在将恢复为出厂默认设置。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帐户解锁"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帐号解锁"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"图案尝试次数过多"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"要解除锁定，请使用您的Google帐户登录。"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"要解除锁定，请使用您的Google帐号登录。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"用户名（电子邮件）"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密码"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登录"</string>
@@ -1108,13 +1108,13 @@
     <string name="ime_action_default" msgid="2840921885558045721">"执行"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"拨打电话\n<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"创建电话号码为\n<xliff:g id="NUMBER">%s</xliff:g> 的联系人"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"以下一个或多个应用请求获得相应权限，以便在当前和以后访问您的帐户。"</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"以下一个或多个应用请求获得相应权限，以便在当前和以后访问您的帐号。"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"您是否同意此请求？"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"访问权限请求"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"权限请求"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐户 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐号 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"您目前是在工作资料之外使用此应用"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"您目前是在工作资料内使用此应用"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
@@ -1163,13 +1163,13 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"是"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"否"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"超出删除限制"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"帐户 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 在进行“<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>”同步时删除了 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 项内容。您要如何处理这些删除的内容？"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"帐号 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 在进行“<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>”同步时删除了 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 项内容。您要如何处理这些删除的内容？"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"删除这些内容"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"撤消删除"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"目前不进行任何操作"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"选择帐户"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"添加帐户"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"添加帐户"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"选择帐号"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"添加帐号"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"添加帐号"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"增大"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"减小"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"触摸 <xliff:g id="VALUE">%s</xliff:g> 次并按住。"</string>
@@ -1296,13 +1296,13 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐户。"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐号。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密码"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登录"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"用户名或密码无效。"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘记了用户名或密码？\n请访问 "<b>"google.com/accounts/recovery"</b>"。"</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"正在检查帐户…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"正在检查帐号…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您已经<xliff:g id="NUMBER_0">%d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%d</xliff:g>秒后重试。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
@@ -1312,9 +1312,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁平板电脑。平板电脑现在将恢复为出厂默认设置。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁电视。电视现在将恢复为出厂默认设置。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您已经<xliff:g id="NUMBER">%d</xliff:g>次错误地尝试解锁手机。手机现在将恢复为出厂默认设置。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用电子邮件帐户解锁电视。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用电子邮件帐号解锁电视。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已连续 <xliff:g id="NUMBER_0">%d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量调高到推荐水平以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
