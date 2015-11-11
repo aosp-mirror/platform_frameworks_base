@@ -35,6 +35,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -46,6 +47,7 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
+import android.util.PrintWriterPrinter;
 import com.android.internal.util.SizedInputStream;
 
 import libcore.io.IoUtils;
@@ -56,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -68,6 +71,7 @@ class PackageManagerShellCommand extends ShellCommand {
     final IPackageManager mInterface;
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
+    int mTargetUser;
 
     PackageManagerShellCommand(PackageManagerService service) {
         mInterface = service;
@@ -97,6 +101,12 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runList();
                 case "uninstall":
                     return runUninstall();
+                case "query-intent-activities":
+                    return runQueryIntentActivities();
+                case "query-intent-services":
+                    return runQueryIntentServices();
+                case "query-intent-receivers":
+                    return runQueryIntentReceivers();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -340,7 +350,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         listThirdParty = true;
                         break;
                     case "--user":
-                        userId = Integer.parseInt(getNextArg());
+                        userId = UserHandle.parseUserArg(getNextArgRequired());
                         break;
                     default:
                         pw.println("Error: Unknown option: " + opt);
@@ -487,7 +497,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     flags |= PackageManager.DELETE_KEEP_DATA;
                     break;
                 case "--user":
-                    userId = Integer.parseInt(getNextArg());
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -536,6 +546,104 @@ class PackageManagerShellCommand extends ShellCommand {
                     + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
             return 1;
         }
+    }
+
+    private Intent parseIntentAndUser() throws URISyntaxException {
+        mTargetUser = UserHandle.USER_CURRENT;
+        Intent intent = Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
+            @Override
+            public boolean handleOption(String opt, ShellCommand cmd) {
+                if ("--user".equals(opt)) {
+                    mTargetUser = UserHandle.parseUserArg(cmd.getNextArgRequired());
+                    return true;
+                }
+                return false;
+            }
+        });
+        mTargetUser = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), mTargetUser, false, false, null, null);
+        return intent;
+    }
+
+    private int runQueryIntentActivities() {
+        Intent intent;
+        try {
+            intent = parseIntentAndUser();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        try {
+            List<ResolveInfo> result = mInterface.queryIntentActivities(intent, null, 0,
+                    mTargetUser);
+            PrintWriter pw = getOutPrintWriter();
+            if (result == null || result.size() <= 0) {
+                pw.println("No activities found");
+            } else {
+                pw.print(result.size()); pw.println(" activities found:");
+                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                for (int i=0; i<result.size(); i++) {
+                    pw.print("  Activity #"); pw.print(i); pw.println(":");
+                    result.get(i).dump(pr, "    ");
+                }
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed calling service", e);
+        }
+        return 0;
+    }
+
+    private int runQueryIntentServices() {
+        Intent intent;
+        try {
+            intent = parseIntentAndUser();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        try {
+            List<ResolveInfo> result = mInterface.queryIntentServices(intent, null, 0,
+                    mTargetUser);
+            PrintWriter pw = getOutPrintWriter();
+            if (result == null || result.size() <= 0) {
+                pw.println("No services found");
+            } else {
+                pw.print(result.size()); pw.println(" services found:");
+                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                for (int i=0; i<result.size(); i++) {
+                    pw.print("  Service #"); pw.print(i); pw.println(":");
+                    result.get(i).dump(pr, "    ");
+                }
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed calling service", e);
+        }
+        return 0;
+    }
+
+    private int runQueryIntentReceivers() {
+        Intent intent;
+        try {
+            intent = parseIntentAndUser();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        try {
+            List<ResolveInfo> result = mInterface.queryIntentReceivers(intent, null, 0,
+                    mTargetUser);
+            PrintWriter pw = getOutPrintWriter();
+            if (result == null || result.size() <= 0) {
+                pw.println("No receivers found");
+            } else {
+                pw.print(result.size()); pw.println(" receivers found:");
+                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                for (int i=0; i<result.size(); i++) {
+                    pw.print("  Receiver #"); pw.print(i); pw.println(":");
+                    result.get(i).dump(pr, "    ");
+                }
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed calling service", e);
+        }
+        return 0;
     }
 
     private static class InstallParams {
@@ -598,7 +706,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.abiOverride = checkAbiArgument(getNextArg());
                     break;
                 case "--user":
-                    params.userId = Integer.parseInt(getNextArg());
+                    params.userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;
                 case "--install-location":
                     sessionParams.installLocation = Integer.parseInt(getNextArg());
@@ -908,7 +1016,14 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -s: short summary");
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
-        pw.println("");
+        pw.println("  query-intent-activities [--user USER_ID] INTENT");
+        pw.println("    Prints all activities that can handle the given Intent.");
+        pw.println("  query-intent-services [--user USER_ID] INTENT");
+        pw.println("    Prints all services that can handle the given Intent.");
+        pw.println("  query-intent-receivers [--user USER_ID] INTENT");
+        pw.println("    Prints all broadcast receivers that can handle the given Intent.");
+        pw.println();
+        Intent.printIntentArgsHelp(pw , "");
     }
 
     private static class LocalIntentReceiver {

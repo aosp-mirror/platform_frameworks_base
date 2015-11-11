@@ -15051,20 +15051,23 @@ public class PackageManagerService extends IPackageManager.Stub {
     static class DumpState {
         public static final int DUMP_LIBS = 1 << 0;
         public static final int DUMP_FEATURES = 1 << 1;
-        public static final int DUMP_RESOLVERS = 1 << 2;
-        public static final int DUMP_PERMISSIONS = 1 << 3;
-        public static final int DUMP_PACKAGES = 1 << 4;
-        public static final int DUMP_SHARED_USERS = 1 << 5;
-        public static final int DUMP_MESSAGES = 1 << 6;
-        public static final int DUMP_PROVIDERS = 1 << 7;
-        public static final int DUMP_VERIFIERS = 1 << 8;
-        public static final int DUMP_PREFERRED = 1 << 9;
-        public static final int DUMP_PREFERRED_XML = 1 << 10;
-        public static final int DUMP_KEYSETS = 1 << 11;
-        public static final int DUMP_VERSION = 1 << 12;
-        public static final int DUMP_INSTALLS = 1 << 13;
-        public static final int DUMP_INTENT_FILTER_VERIFIERS = 1 << 14;
-        public static final int DUMP_DOMAIN_PREFERRED = 1 << 15;
+        public static final int DUMP_ACTIVITY_RESOLVERS = 1 << 2;
+        public static final int DUMP_SERVICE_RESOLVERS = 1 << 3;
+        public static final int DUMP_RECEIVER_RESOLVERS = 1 << 4;
+        public static final int DUMP_CONTENT_RESOLVERS = 1 << 5;
+        public static final int DUMP_PERMISSIONS = 1 << 6;
+        public static final int DUMP_PACKAGES = 1 << 7;
+        public static final int DUMP_SHARED_USERS = 1 << 8;
+        public static final int DUMP_MESSAGES = 1 << 9;
+        public static final int DUMP_PROVIDERS = 1 << 10;
+        public static final int DUMP_VERIFIERS = 1 << 11;
+        public static final int DUMP_PREFERRED = 1 << 12;
+        public static final int DUMP_PREFERRED_XML = 1 << 13;
+        public static final int DUMP_KEYSETS = 1 << 14;
+        public static final int DUMP_VERSION = 1 << 15;
+        public static final int DUMP_INSTALLS = 1 << 16;
+        public static final int DUMP_INTENT_FILTER_VERIFIERS = 1 << 17;
+        public static final int DUMP_DOMAIN_PREFERRED = 1 << 18;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -15163,9 +15166,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    -h: print this help");
                 pw.println("  cmd may be one of:");
                 pw.println("    l[ibraries]: list known shared libraries");
-                pw.println("    f[ibraries]: list device features");
+                pw.println("    f[eatures]: list device features");
                 pw.println("    k[eysets]: print known keysets");
-                pw.println("    r[esolvers]: dump intent resolvers");
+                pw.println("    r[esolvers] [activity|service|receiver|content]: dump intent resolvers");
                 pw.println("    perm[issions]: dump permissions");
                 pw.println("    permission [name ...]: dump declaration and use of given permission");
                 pw.println("    pref[erred]: print preferred package settings");
@@ -15232,7 +15235,29 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else if ("f".equals(cmd) || "features".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_FEATURES);
             } else if ("r".equals(cmd) || "resolvers".equals(cmd)) {
-                dumpState.setDump(DumpState.DUMP_RESOLVERS);
+                if (opti >= args.length) {
+                    dumpState.setDump(DumpState.DUMP_ACTIVITY_RESOLVERS
+                            | DumpState.DUMP_SERVICE_RESOLVERS
+                            | DumpState.DUMP_RECEIVER_RESOLVERS
+                            | DumpState.DUMP_CONTENT_RESOLVERS);
+                } else {
+                    while (opti < args.length) {
+                        String name = args[opti];
+                        if ("a".equals(name) || "activity".equals(name)) {
+                            dumpState.setDump(DumpState.DUMP_ACTIVITY_RESOLVERS);
+                        } else if ("s".equals(name) || "service".equals(name)) {
+                            dumpState.setDump(DumpState.DUMP_SERVICE_RESOLVERS);
+                        } else if ("r".equals(name) || "receiver".equals(name)) {
+                            dumpState.setDump(DumpState.DUMP_RECEIVER_RESOLVERS);
+                        } else if ("c".equals(name) || "content".equals(name)) {
+                            dumpState.setDump(DumpState.DUMP_CONTENT_RESOLVERS);
+                        } else {
+                            pw.println("Error: unknown resolver table type: " + name);
+                            return;
+                        }
+                        opti++;
+                    }
+                }
             } else if ("perm".equals(cmd) || "permissions".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PERMISSIONS);
             } else if ("permission".equals(cmd)) {
@@ -15399,22 +15424,28 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_RESOLVERS)) {
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
                 if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
                         : "Activity Resolver Table:", "  ", packageName,
                         dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
+            }
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
                 if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
                         : "Receiver Resolver Table:", "  ", packageName,
                         dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
+            }
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
                 if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
                         : "Service Resolver Table:", "  ", packageName,
                         dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
+            }
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
                 if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
                         : "Provider Resolver Table:", "  ", packageName,
                         dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {

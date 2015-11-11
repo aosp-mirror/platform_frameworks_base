@@ -73,7 +73,7 @@ class ActivityManagerShellCommand extends ShellCommand {
         String opt;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--user")) {
-                userId = parseUserArg(getNextArgRequired());
+                userId = UserHandle.parseUserArg(getNextArgRequired());
             } else {
                 pw.println("Error: Unknown option: " + opt);
                 return -1;
@@ -89,7 +89,7 @@ class ActivityManagerShellCommand extends ShellCommand {
         String opt;
         while ((opt=getNextOption()) != null) {
             if (opt.equals("--user")) {
-                userId = parseUserArg(getNextArgRequired());
+                userId = UserHandle.parseUserArg(getNextArgRequired());
             } else {
                 pw.println("Error: Unknown option: " + opt);
                 return -1;
@@ -139,22 +139,6 @@ class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         return 0;
-    }
-
-    int parseUserArg(String arg) {
-        int userId;
-        if ("all".equals(arg)) {
-            userId = UserHandle.USER_ALL;
-        } else if ("current".equals(arg) || "cur".equals(arg)) {
-            userId = UserHandle.USER_CURRENT;
-        } else {
-            try {
-                userId = Integer.parseInt(arg);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Bad user number: " + arg);
-            }
-        }
-        return userId;
     }
 
     @Override
