@@ -189,8 +189,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
         return false;
     }
 
-    /** Bounds of the stack with other system factors taken into consideration. */
-    @Override
     public void getBounds(Rect out) {
         if (useCurrentBounds()) {
             // No need to adjust the output bounds if fullscreen or the docked stack is visible
@@ -203,6 +201,12 @@ public class TaskStack implements DimLayer.DimLayerUser {
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
         // system.
         mDisplayContent.getLogicalDisplayRect(out);
+    }
+
+    /** Bounds of the stack with other system factors taken into consideration. */
+    @Override
+    public void getDimBounds(Rect out) {
+        getBounds(out);
     }
 
     void updateDisplayInfo(Rect bounds) {

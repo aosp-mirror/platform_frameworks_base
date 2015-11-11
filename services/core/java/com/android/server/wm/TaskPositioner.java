@@ -149,7 +149,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                         }
                         synchronized (mService.mWindowMap) {
                             mDragEnded = notifyMoveLocked(newX, newY);
-                            mTask.getBounds(mTmpRect);
+                            mTask.getDimBounds(mTmpRect);
                         }
                         if (!mTmpRect.equals(mWindowDragBounds)) {
                             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
@@ -353,7 +353,9 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mStartDragX = startX;
         mStartDragY = startY;
 
-        mService.getTaskBounds(mTask.mTaskId, mWindowOriginalBounds);
+        // Use the visible bounds, not the original task bounds. The cursor
+        // movement should be calculated relative to the visible bounds.
+        mWindowOriginalBounds.set(win.mVisibleFrame);
     }
 
     private void endDragLocked() {
@@ -393,7 +395,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         }
 
         // This is a moving operation.
-        mTask.mStack.getBounds(mTmpRect);
+        mTask.mStack.getDimBounds(mTmpRect);
         mTmpRect.inset(mMinVisibleWidth, mMinVisibleHeight);
         if (!mTmpRect.contains((int) x, (int) y)) {
             // We end the moving operation if position is outside the stack bounds.
@@ -438,7 +440,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
             return CTRL_NONE;
         }
 
-        mTask.mStack.getBounds(mTmpRect);
+        mTask.mStack.getDimBounds(mTmpRect);
         if (x - mSideMargin <= mTmpRect.left) {
             return CTRL_LEFT;
         }
@@ -450,7 +452,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     }
 
     private void showDimLayer() {
-        mTask.mStack.getBounds(mTmpRect);
+        mTask.mStack.getDimBounds(mTmpRect);
         if (mCurrentDimSide == CTRL_LEFT) {
             mTmpRect.right = mTmpRect.centerX();
         } else if (mCurrentDimSide == CTRL_RIGHT) {
@@ -473,7 +475,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     }
 
     @Override
-    public void getBounds(Rect out) {
+    public void getDimBounds(Rect out) {
         // This dim layer user doesn't need this.
     }
 

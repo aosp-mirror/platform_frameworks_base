@@ -70,7 +70,7 @@ public class DimLayer {
         /** Returns the display info. of the dim layer user. */
         DisplayInfo getDisplayInfo();
         /** Gets the bounds of the dim layer user. */
-        void getBounds(Rect outBounds);
+        void getDimBounds(Rect outBounds);
         String toShortString();
     }
     /** The user of this dim layer. */

@@ -43,7 +43,7 @@ class DimLayerController {
 
     /** Updates the dim layer bounds, recreating it if needed. */
     void updateDimLayer(DimLayer.DimLayerUser dimLayerUser) {
-        DimLayerState state = getOrCreateDimLayerState(dimLayerUser, false);
+        DimLayerState state = getOrCreateDimLayerState(dimLayerUser);
         final boolean previousFullscreen = state.dimLayer != null
                 && state.dimLayer == mSharedFullScreenDimLayer;
         DimLayer newDimLayer;
@@ -63,7 +63,7 @@ class DimLayerController {
                     // Create new full screen dim layer.
                     newDimLayer = new DimLayer(mDisplayContent.mService, dimLayerUser, displayId);
                 }
-                dimLayerUser.getBounds(mTmpBounds);
+                dimLayerUser.getDimBounds(mTmpBounds);
                 newDimLayer.setBounds(mTmpBounds);
                 mSharedFullScreenDimLayer = newDimLayer;
             } else if (state.dimLayer != null) {
@@ -73,14 +73,13 @@ class DimLayerController {
             newDimLayer = (state.dimLayer == null || previousFullscreen)
                     ? new DimLayer(mDisplayContent.mService, dimLayerUser, displayId)
                     : state.dimLayer;
-            dimLayerUser.getBounds(mTmpBounds);
+            dimLayerUser.getDimBounds(mTmpBounds);
             newDimLayer.setBounds(mTmpBounds);
         }
         state.dimLayer = newDimLayer;
     }
 
-    private DimLayerState getOrCreateDimLayerState(
-            DimLayer.DimLayerUser dimLayerUser, boolean aboveApp) {
+    private DimLayerState getOrCreateDimLayerState(DimLayer.DimLayerUser dimLayerUser) {
         if (DEBUG_DIM_LAYER) Slog.v(TAG, "getOrCreateDimLayerState, dimLayerUser="
                 + dimLayerUser.toShortString());
         DimLayerState state = mState.get(dimLayerUser);
@@ -88,7 +87,6 @@ class DimLayerController {
             state = new DimLayerState();
             mState.put(dimLayerUser, state);
         }
-        state.dimAbove = aboveApp;
         return state;
     }
 
@@ -127,7 +125,8 @@ class DimLayerController {
             WindowStateAnimator newWinAnimator, boolean aboveApp) {
         // Only set dim params on the highest dimmed layer.
         // Don't turn on for an unshown surface, or for any layer but the highest dimmed layer.
-        DimLayerState state = getOrCreateDimLayerState(dimLayerUser, aboveApp);
+        DimLayerState state = getOrCreateDimLayerState(dimLayerUser);
+        state.dimAbove = aboveApp;
         if (DEBUG_DIM_LAYER) Slog.v(TAG, "startDimmingIfNeeded,"
                 + " dimLayerUser=" + dimLayerUser.toShortString()
                 + " newWinAnimator=" + newWinAnimator
@@ -161,7 +160,7 @@ class DimLayerController {
                 + " state.dimLayer.isDimming=" + state.dimLayer.isDimming());
         if (!state.continueDimming && state.dimLayer.isDimming()) {
             state.animator = null;
-            dimLayerUser.getBounds(mTmpBounds);
+            dimLayerUser.getDimBounds(mTmpBounds);
             state.dimLayer.setBounds(mTmpBounds);
         }
     }

@@ -94,7 +94,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 if (window == null) {
                     break;
                 }
-                window.getVisibleBounds(mTmpRect, false);
+                window.getVisibleBounds(mTmpRect);
                 if (!mTmpRect.isEmpty() && !mTmpRect.contains(x, y)) {
                     int iconShape = STYLE_DEFAULT;
                     if (x < mTmpRect.left) {
