@@ -22,6 +22,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import junit.framework.Assert;
 
@@ -69,8 +70,11 @@ public final class TestUtils extends Assert {
 
     public static SSLContext getSSLContext(ConfigSource source) throws Exception {
         ApplicationConfig config = new ApplicationConfig(source);
+        TrustManagerFactory tmf =
+                TrustManagerFactory.getInstance("PKIX", new NetworkSecurityConfigProvider());
+        tmf.init(new RootTrustManagerFactorySpi.ApplicationConfigParameters(config));
         SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, new TrustManager[] {config.getTrustManager()}, null);
+        context.init(null, tmf.getTrustManagers(), null);
         return context;
     }
 }
