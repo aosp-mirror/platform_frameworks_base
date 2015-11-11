@@ -15,45 +15,54 @@
   ~ limitations under the License
   -->
 
+<!-- Layout for the expanded media notification -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="128dp"
     android:background="#00000000"
-    android:tag="bigMedia"
+    android:tag="bigMediaNarrow"
     >
-    <include layout="@layout/notification_template_header" />
+    <include layout="@layout/notification_template_header"
+        android:layout_width="fill_parent"
+        android:layout_height="48dp"
+        android:layout_marginEnd="106dp"/>
     <LinearLayout
         android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/notification_content_margin_start"
         android:layout_marginTop="@dimen/notification_content_margin_top"
-        android:layout_marginEnd="@dimen/notification_content_margin_end"
-        android:minHeight="@dimen/notification_large_icon_height"
+        android:layout_marginStart="@dimen/notification_content_margin_start"
+        android:layout_marginEnd="24dp"
+        android:layout_toStartOf="@id/right_icon"
+        android:minHeight="54dp"
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />
         <include layout="@layout/notification_template_part_line2" />
         <include layout="@layout/notification_template_part_line3" />
     </LinearLayout>
-    <include layout="@layout/notification_template_right_icon" />
     <LinearLayout
         android:id="@+id/media_actions"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_alignParentStart="true"
+        android:paddingStart="8dp"
+        android:paddingBottom="8dp"
         android:orientation="horizontal"
         android:layoutDirection="ltr"
         >
         <!-- media buttons will be added here -->
     </LinearLayout>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_above="@id/media_actions"
-        android:id="@+id/action_divider"
-        android:background="@drawable/notification_template_divider_media" />
+
+    <ImageView android:id="@+id/right_icon"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:scaleType="centerCrop"
+        />
 </RelativeLayout>

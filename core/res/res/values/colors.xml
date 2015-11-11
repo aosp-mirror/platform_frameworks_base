@@ -133,9 +133,6 @@
     <color name="notification_icon_default_color">#ff616161</color>
     <color name="notification_action_color_filter">@color/secondary_text_material_light</color>
 
-    <color name="notification_media_primary_color">@color/primary_text_material_dark</color>
-    <color name="notification_media_secondary_color">@color/secondary_text_material_dark</color>
-
     <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
 
     <!-- Keyguard colors -->

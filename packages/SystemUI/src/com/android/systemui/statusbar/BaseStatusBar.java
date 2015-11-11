@@ -886,15 +886,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.row.setShowingLegacyBackground(true);
                 entry.legacy = true;
             }
-        } else {
-            // Using platform templates
-            final int color = sbn.getNotification().color;
-            if (isMediaNotification(entry)) {
-                entry.row.setTintColor(color == Notification.COLOR_DEFAULT
-                        ? mContext.getColor(
-                                R.color.notification_material_background_media_default_color)
-                        : color);
-            }
         }
 
         if (entry.icon != null) {

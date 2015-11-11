@@ -45,7 +45,6 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -3381,7 +3380,7 @@ public class Notification implements Parcelable
             }
         }
 
-        private int resolveColor() {
+        int resolveColor() {
             if (mN.color == COLOR_DEFAULT) {
                 return mContext.getColor(R.color.notification_icon_default_color);
             }
@@ -4224,14 +4223,13 @@ public class Notification implements Parcelable
             }
         }
 
-        private RemoteViews generateMediaActionButton(Action action) {
+        private RemoteViews generateMediaActionButton(Action action, int color) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new BuilderRemoteViews(mBuilder.mContext.getApplicationInfo(),
                     R.layout.notification_material_media_action);
             button.setImageViewIcon(R.id.action0, action.getIcon());
-            button.setDrawableParameters(R.id.action0, false, -1,
-                    0xFFFFFFFF,
-                    PorterDuff.Mode.SRC_ATOP, -1);
+            button.setDrawableParameters(R.id.action0, false, -1, color, PorterDuff.Mode.SRC_ATOP,
+                    -1);
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
@@ -4257,64 +4255,40 @@ public class Notification implements Parcelable
                     }
 
                     final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
-                    final RemoteViews button = generateMediaActionButton(action);
+                    final RemoteViews button = generateMediaActionButton(action,
+                            mBuilder.resolveColor());
                     view.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
-            styleText(view);
-            hideRightIcon(view);
+            handleImage(view  /* addPaddingToMainColumn */);
             return view;
         }
 
         private RemoteViews makeMediaBigContentView() {
             final int actionCount = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
-            RemoteViews big = mBuilder.applyStandardTemplate(getBigLayoutResource(actionCount),
-                    false /* hasProgress */);
+            RemoteViews big = mBuilder.applyStandardTemplate(
+                    R.layout.notification_template_material_big_media,
+                    false);
 
             if (actionCount > 0) {
                 big.removeAllViews(com.android.internal.R.id.media_actions);
                 for (int i = 0; i < actionCount; i++) {
-                    final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i));
+                    final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i),
+                            mBuilder.resolveColor());
                     big.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
-            styleText(big);
-            hideRightIcon(big);
+            handleImage(big);
             big.setViewVisibility(android.R.id.progress, View.GONE);
             return big;
         }
 
-        private int getBigLayoutResource(int actionCount) {
-            if (actionCount <= 3) {
-                return R.layout.notification_template_material_big_media_narrow;
-            } else {
-                return R.layout.notification_template_material_big_media;
+        private void handleImage(RemoteViews contentView) {
+            if (mBuilder.mN.mLargeIcon != null) {
+                contentView.setViewLayoutMarginEnd(R.id.line1, 0);
+                contentView.setViewLayoutMarginEnd(R.id.line2, 0);
+                contentView.setViewLayoutMarginEnd(R.id.line3, 0);
             }
-        }
-
-        private void hideRightIcon(RemoteViews contentView) {
-            contentView.setViewVisibility(R.id.right_icon, View.GONE);
-        }
-
-        /**
-         * Applies the special text colors for media notifications to all text views.
-         */
-        private void styleText(RemoteViews contentView) {
-            int primaryColor = mBuilder.mContext.getColor(
-                    R.color.notification_media_primary_color);
-            int secondaryColor = mBuilder.mContext.getColor(
-                    R.color.notification_media_secondary_color);
-            contentView.setTextColor(R.id.title, primaryColor);
-            if (mBuilder.showsTimeOrChronometer()) {
-                if (mBuilder.getAllExtras().getBoolean(EXTRA_SHOW_CHRONOMETER)) {
-                    contentView.setTextColor(R.id.chronometer, secondaryColor);
-                } else {
-                    contentView.setTextColor(R.id.time, secondaryColor);
-                }
-            }
-            contentView.setTextColor(R.id.text2, secondaryColor);
-            contentView.setTextColor(R.id.text, secondaryColor);
-            contentView.setTextColor(R.id.info, secondaryColor);
         }
 
         /**
