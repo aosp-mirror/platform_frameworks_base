@@ -164,10 +164,10 @@
          In order to defer the in-app animations until after the transition is complete,
          we also need to use this value as the starting delay when animating the first
          task decorations in. -->
-    <integer name="recents_enter_from_app_transition_duration">325</integer>
+    <integer name="recents_enter_from_app_transition_duration">270</integer>
 
     <!-- The duration for animating the task decorations in after transitioning from an app. -->
-    <integer name="recents_task_enter_from_app_duration">350</integer>
+    <integer name="recents_task_enter_from_app_duration">290</integer>
 
     <!-- The duration for animating the task decorations out before transitioning to an app. -->
     <integer name="recents_task_exit_to_app_duration">125</integer>

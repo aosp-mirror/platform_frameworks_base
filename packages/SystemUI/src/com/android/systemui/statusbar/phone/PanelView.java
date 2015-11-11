@@ -47,6 +47,8 @@ public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
 
+    public static final float SPEED_UP_FACTOR_CLICKED = 1.7f;
+
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
@@ -1026,6 +1028,13 @@ public abstract class PanelView extends FrameLayout {
         }
         return onMiddleClicked();
     }
+
+    protected final Runnable mEmptySpaceClickedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            collapse(false /* delayed */, SPEED_UP_FACTOR_CLICKED /* speedUpFactor */);
+        }
+    };
 
     protected final Runnable mPostCollapseRunnable = new Runnable() {
         @Override

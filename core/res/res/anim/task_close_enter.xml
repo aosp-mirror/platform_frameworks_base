@@ -23,14 +23,14 @@
     <alpha android:fromAlpha="0.6" android:toAlpha="1.0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_cubic"
-            android:startOffset="600"
+            android:startOffset="500"
             android:duration="133"/>
 
     <translate android:fromYDelta="10%" android:toYDelta="0"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_cubic"
             android:startOffset="300"
-            android:duration="433" />
+            android:duration="350" />
 
     <scale android:fromXScale=".9" android:toXScale="1.0"
             android:fromYScale=".9" android:toYScale="1.0"
@@ -38,5 +38,5 @@
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/fast_out_slow_in"
             android:startOffset="300"
-            android:duration="433" />
+            android:duration="350" />
 </set>
