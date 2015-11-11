@@ -81,7 +81,7 @@ interface IDevicePolicyManager {
 
     void lockNow();
 
-    void wipeData(int flags, int userHandle);
+    void wipeData(int flags);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
@@ -114,7 +114,6 @@ interface IDevicePolicyManager {
     void reportSuccessfulPasswordAttempt(int userHandle);
 
     boolean setDeviceOwner(in ComponentName who, String ownerName, int userId);
-    boolean isDeviceOwnerPackage(String packageName);
     ComponentName getDeviceOwner();
     String getDeviceOwnerName();
     void clearDeviceOwner(String packageName);

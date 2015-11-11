@@ -1612,25 +1612,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @VisibleForTesting
     boolean isActiveAdminWithPolicyForUserLocked(ActiveAdmin admin, int reqPolicy,
             int userId) {
-        boolean ownsDevice = isDeviceOwner(admin.info.getComponent());
-        boolean ownsProfile = (getProfileOwner(userId) != null
-                && getProfileOwner(userId).getPackageName()
-                    .equals(admin.info.getPackageName()));
+        final boolean ownsDevice = isDeviceOwner(admin.info.getComponent(), userId);
+        final boolean ownsProfile = isProfileOwner(admin.info.getComponent(), userId);
 
         if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-            if ((userId == UserHandle.USER_SYSTEM && ownsDevice) || (ownsDevice && ownsProfile)) {
-                return true;
-            }
+            return ownsDevice;
         } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-            if ((userId == UserHandle.USER_SYSTEM && ownsDevice) || ownsProfile) {
-                return true;
-            }
+            // DO always has the PO power.
+            return ownsDevice || ownsProfile;
         } else {
-            if (admin.info.usesPolicy(reqPolicy)) {
-                return true;
-            }
+            return admin.info.usesPolicy(reqPolicy);
         }
-        return false;
     }
 
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
@@ -2441,8 +2433,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
             if (admin.getUid() != mInjector.binderGetCallingUid()) {
-                // Active device owners must remain active admins.
-                if (isDeviceOwner(adminReceiver)) {
+                // Active device/profile owners must remain active admins.
+                if (isDeviceOwner(adminReceiver, userHandle)
+                        || isProfileOwner(adminReceiver, userHandle)) {
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
@@ -3187,12 +3180,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean resetPassword(String passwordOrNull, int flags) {
+    public boolean resetPassword(String passwordOrNull, int flags) throws RemoteException {
         if (!mHasFeature) {
             return false;
         }
         final int userHandle = UserHandle.getCallingUserId();
-        enforceNotManagedProfile(userHandle, "reset the password");
+
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            if (mUserManager.getCredentialOwnerProfile(userHandle) != userHandle) {
+                throw new SecurityException("You can not change password for this profile because"
+                    + " it shares the password with the owner profile");
+            }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
 
         String password = passwordOrNull != null ? passwordOrNull : "";
 
@@ -3200,8 +3202,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This api can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null,
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
+            final ComponentName adminComponent = admin.info.getComponent();
+
+            // As of N, only profile owners and device owners can reset the password.
+            if (!(isProfileOwner(adminComponent, userHandle)
+                    || isDeviceOwner(adminComponent, userHandle))) {
+                final boolean preN = getTargetSdk(admin.info.getPackageName(), userHandle)
+                        < android.os.Build.VERSION_CODES.N;
+                // As of N, password resetting to empty/null is not allowed anymore.
+                // TODO Should we allow DO/PO to set an empty password?
+                if (TextUtils.isEmpty(password)) {
+                    if (!preN) {
+                        throw new SecurityException("Cannot call with null password");
+                    } else {
+                        Slog.e(LOG_TAG, "Cannot call with null password");
+                        return false;
+                    }
+                }
+                // As of N, password cannot be changed by the admin if it is already set.
+                if (isLockScreenSecureUnchecked(userHandle)) {
+                    if (!preN) {
+                        throw new SecurityException("Admin cannot change current password");
+                    } else {
+                        Slog.e(LOG_TAG, "Admin cannot change current password");
+                        return false;
+                    }
+                }
+            }
             quality = getPasswordQuality(null, userHandle);
             if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 int realQuality = LockPatternUtils.computePasswordQuality(password);
@@ -3303,9 +3332,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
-        long ident = mInjector.binderClearCallingIdentity();
+        ident = mInjector.binderClearCallingIdentity();
         try {
-            LockPatternUtils utils = new LockPatternUtils(mContext);
+            LockPatternUtils utils = mInjector.newLockPatternUtils();
             if (!TextUtils.isEmpty(password)) {
                 utils.saveLockPassword(password, null, quality, userHandle);
             } else {
@@ -3328,6 +3357,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         return true;
+    }
+
+    private boolean isLockScreenSecureUnchecked(int userId) {
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            return mInjector.newLockPatternUtils().isSecure(userId);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
     private void setDoNotAskCredentialsOnBoot() {
@@ -3685,10 +3723,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void wipeData(int flags, final int userHandle) {
+    public void wipeData(int flags) {
         if (!mHasFeature) {
             return;
         }
+        final int userHandle = mInjector.userHandleGetCallingUserId();
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -3701,8 +3740,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
-                    if (userHandle != UserHandle.USER_SYSTEM
-                            || !isDeviceOwner(admin.info.getComponent())) {
+                    if (!isDeviceOwner(admin.info.getComponent(), userHandle)) {
                         throw new SecurityException(
                                "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
                     }
@@ -4325,7 +4363,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        final int userHandle = UserHandle.getCallingUserId();
+        final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA);
@@ -4337,7 +4375,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Tell the user manager that the restrictions have changed.
         synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
             synchronized (this) {
-                if (isDeviceOwner(who)) {
+                if (isDeviceOwner(who, userHandle)) {
                     mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersLR();
                 } else {
                     mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
@@ -4499,24 +4537,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public boolean isDeviceOwner(ComponentName who) {
-        if (!mHasFeature) {
-            return false;
-        }
+    public boolean isDeviceOwner(ComponentName who, int userId) {
         synchronized (this) {
-            return mOwners.hasDeviceOwner() && mOwners.getDeviceOwnerComponent().equals(who);
+            return mOwners.hasDeviceOwner()
+                    && mOwners.getDeviceOwnerUserId() == userId
+                    && mOwners.getDeviceOwnerComponent().equals(who);
         }
     }
 
-    @Override
-    public boolean isDeviceOwnerPackage(String packageName) {
-        if (!mHasFeature) {
-            return false;
-        }
-        synchronized (this) {
-            return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerComponent().getPackageName().equals(packageName);
-        }
+    public boolean isProfileOwner(ComponentName who, int userId) {
+        final ComponentName profileOwner = getProfileOwner(userId);
+        return who != null && who.equals(profileOwner);
     }
 
     @Override
@@ -5637,9 +5668,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ActiveAdmin activeAdmin =
                         getActiveAdminForCallerLocked(who,
                                 DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-                final boolean isDeviceOwner = isDeviceOwner(who);
-                if (!isDeviceOwner && userHandle != UserHandle.USER_SYSTEM
-                        && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
+                final boolean isDeviceOwner = isDeviceOwner(who, userHandle);
+                if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                     throw new SecurityException(
                             "Profile owners cannot set user restriction " + key);
                 }
@@ -6132,9 +6162,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Bundle adminExtras = new Bundle();
             adminExtras.putString(DeviceAdminReceiver.EXTRA_LOCK_TASK_PACKAGE, pkg);
             for (ActiveAdmin admin : policy.mAdminList) {
-                boolean ownsDevice = isDeviceOwner(admin.info.getComponent());
-                boolean ownsProfile = (getProfileOwner(userHandle) != null
-                        && getProfileOwner(userHandle).equals(admin.info.getPackageName()));
+                final boolean ownsDevice = isDeviceOwner(admin.info.getComponent(), userHandle);
+                final boolean ownsProfile = isProfileOwner(admin.info.getComponent(), userHandle);
                 if (ownsDevice || ownsProfile) {
                     if (isEnabled) {
                         sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_LOCK_TASK_ENTERING,
@@ -6186,13 +6215,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setSecureSetting(ComponentName who, String setting, String value) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        int callingUserId = UserHandle.getCallingUserId();
-        final ContentResolver contentResolver = mContext.getContentResolver();
+        int callingUserId = mInjector.userHandleGetCallingUserId();
 
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            if (isDeviceOwner(who)) {
+            if (isDeviceOwner(who, mInjector.userHandleGetCallingUserId())) {
                 if (!SECURE_SETTINGS_DEVICEOWNER_WHITELIST.contains(setting)) {
                     throw new SecurityException(String.format(
                             "Permission denial: Device owners cannot update %1$s", setting));
@@ -6504,13 +6532,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @param callerUid UID of the caller.
      * @return true if the caller is the device owner app
      */
-    private boolean isCallerDeviceOwner(int callerUid) {
-        String[] pkgs = mContext.getPackageManager().getPackagesForUid(callerUid);
-        for (String pkg : pkgs) {
-            if (isDeviceOwnerPackage(pkg)) {
-                return true;
+    @VisibleForTesting
+    boolean isCallerDeviceOwner(int callerUid) {
+        synchronized (this) {
+            if (!mOwners.hasDeviceOwner()) {
+                return false;
+            }
+            if (UserHandle.getUserId(callerUid) != mOwners.getDeviceOwnerUserId()) {
+                return false;
+            }
+            final String deviceOwnerPackageName = mOwners.getDeviceOwnerComponent()
+                    .getPackageName();
+            final String[] pkgs = mContext.getPackageManager().getPackagesForUid(callerUid);
+
+            for (String pkg : pkgs) {
+                if (deviceOwnerPackageName.equals(pkg)) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 
@@ -6590,10 +6631,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                final ApplicationInfo ai = mIPackageManager
-                        .getApplicationInfo(packageName, 0, user.getIdentifier());
-                final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
-                if (targetSdkVersion < android.os.Build.VERSION_CODES.M) {
+                if (getTargetSdk(packageName, user.getIdentifier())
+                        < android.os.Build.VERSION_CODES.M) {
                     return false;
                 }
                 final PackageManager packageManager = mContext.getPackageManager();
@@ -6707,5 +6746,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return true;
         }
         throw new IllegalArgumentException("Unknown provisioning action " + action);
+    }
+
+    /**
+     * Returns the target sdk version number that the given packageName was built for
+     * in the given user.
+     */
+    private int getTargetSdk(String packageName, int userId) throws RemoteException {
+        final ApplicationInfo ai = mIPackageManager
+                .getApplicationInfo(packageName, 0, userId);
+        final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
+        return targetSdkVersion;
     }
 }
