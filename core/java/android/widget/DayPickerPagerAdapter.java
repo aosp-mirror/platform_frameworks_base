@@ -287,6 +287,14 @@ class DayPickerPagerAdapter extends PagerAdapter {
         return null;
     }
 
+    SimpleMonthView getView(Object object) {
+        if (object == null) {
+            return null;
+        }
+        final ViewHolder holder = (ViewHolder) object;
+        return holder.calendar;
+    }
+
     private final OnDayClickListener mOnDayClickListener = new OnDayClickListener() {
         @Override
         public void onDayClick(SimpleMonthView view, Calendar day) {

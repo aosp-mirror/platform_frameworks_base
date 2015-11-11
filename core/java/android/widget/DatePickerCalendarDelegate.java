@@ -171,7 +171,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         // Set up year picker view.
         mYearPickerView = (YearPickerView) mAnimator.findViewById(R.id.date_picker_year_picker);
         mYearPickerView.setRange(mMinDate, mMaxDate);
-        mYearPickerView.setDate(mCurrentDate.getTimeInMillis());
+        mYearPickerView.setYear(mCurrentDate.get(Calendar.YEAR));
         mYearPickerView.setOnYearSelectedListener(mOnYearSelectedListener);
 
         // Set up content descriptions.
@@ -267,6 +267,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
             // Automatically switch to day picker.
             setCurrentView(VIEW_MONTH_DAY);
+
+            // Switch focus back to the year text.
+            mHeaderYear.requestFocus();
         }
     };
 
@@ -344,7 +347,18 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
                 mAnimator.announceForAccessibility(mSelectDay);
                 break;
             case VIEW_YEAR:
-                mYearPickerView.setDate(mCurrentDate.getTimeInMillis());
+                final int year = mCurrentDate.get(Calendar.YEAR);
+                mYearPickerView.setYear(year);
+                mYearPickerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mYearPickerView.requestFocus();
+                        final View selected = mYearPickerView.getSelectedView();
+                        if (selected != null) {
+                            selected.requestFocus();
+                        }
+                    }
+                });
 
                 if (mCurrentView != viewIndex) {
                     mHeaderMonthDay.setActivated(false);
