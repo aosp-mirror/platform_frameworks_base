@@ -1530,8 +1530,8 @@
     <!-- If the time difference is greater than this threshold in milliseconds,
          then update the time. -->
     <integer name="config_ntpThreshold">5000</integer>
-    <!-- Timeout to wait for NTP server response. -->
-    <integer name="config_ntpTimeout">20000</integer>
+    <!-- Timeout to wait for NTP server response in milliseconds. -->
+    <integer name="config_ntpTimeout">5000</integer>
 
     <!-- Default network policy warning threshold, in megabytes. -->
     <integer name="config_networkPolicyDefaultWarning">2048</integer>
