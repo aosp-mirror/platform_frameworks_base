@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
@@ -24,12 +26,12 @@ import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowState.*;
+import static com.android.server.wm.WindowManagerService.localLOGV;
+import static com.android.server.wm.WindowState.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 
@@ -37,7 +39,6 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
@@ -47,12 +48,10 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.Surface.OutOfResourcesException;
-import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
@@ -61,7 +60,6 @@ import android.view.animation.Transformation;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Keep track of animations and surface operations for a single WindowState.
@@ -182,6 +180,8 @@ class WindowStateAnimator {
     boolean mLastHidden;
 
     int mAttrType;
+
+    private final Rect mTmpSize = new Rect();
 
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
@@ -442,7 +442,7 @@ class WindowStateAnimator {
         if (!isWindowAnimating()) {
             //TODO (multidisplay): Accessibility is supported only for the default display.
             if (mService.mAccessibilityController != null
-                    && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                    && mWin.getDisplayId() == DEFAULT_DISPLAY) {
                 mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
             }
         }
@@ -581,52 +581,16 @@ class WindowStateAnimator {
                 flags |= SurfaceControl.SECURE;
             }
 
-            float left = w.mFrame.left + w.mXOffset;
-            float top = w.mFrame.top + w.mYOffset;
-
-            int width;
-            int height;
-            if ((attrs.flags & LayoutParams.FLAG_SCALED) != 0) {
-                // for a scaled surface, we always want the requested
-                // size.
-                width = w.mRequestedWidth;
-                height = w.mRequestedHeight;
-            } else {
-                // When we're doing a drag-resizing, request a surface that's fullscreen size,
-                // so that we don't need to reallocate during the process. This also prevents
-                // buffer drops due to size mismatch.
-                final DisplayInfo displayInfo = w.getDisplayInfo();
-                if (displayInfo != null && w.isDragResizing()) {
-                    left = 0;
-                    top = 0;
-                    width = displayInfo.logicalWidth;
-                    height = displayInfo.logicalHeight;
-                } else {
-                    width = w.mCompatFrame.width();
-                    height = w.mCompatFrame.height();
-                }
-            }
-
-            // Something is wrong and SurfaceFlinger will not like this,
-            // try to revert to sane values
-            if (width <= 0) {
-                width = 1;
-            }
-            if (height <= 0) {
-                height = 1;
-            }
-
-            // Adjust for surface insets.
-            width += attrs.surfaceInsets.left + attrs.surfaceInsets.right;
-            height += attrs.surfaceInsets.top + attrs.surfaceInsets.bottom;
-            left -= attrs.surfaceInsets.left;
-            top -= attrs.surfaceInsets.top;
+            mTmpSize.set(w.mFrame.left + w.mXOffset, w.mFrame.top + w.mYOffset, 0, 0);
+            calculateSurfaceBounds(w, attrs);
+            final int width = mTmpSize.width();
+            final int height = mTmpSize.height();
 
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG, "Creating surface in session "
                         + mSession.mSurfaceSession + " window " + this
                         + " w=" + width + " h=" + height
-                        + " x=" + left + " y=" + top
+                        + " x=" + mTmpSize.left + " y=" + mTmpSize.top
                         + " format=" + attrs.format + " flags=" + flags);
             }
 
@@ -692,21 +656,72 @@ class WindowStateAnimator {
                 Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
                 WindowManagerService.logSurface(w, "CREATE pos=("
                         + w.mFrame.left + "," + w.mFrame.top + ") ("
-                        + w.mCompatFrame.width() + "x" + w.mCompatFrame.height()
-                        + "), layer=" + mAnimLayer + " HIDE", null);
+                        + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", null);
             }
 
             // Start a new transaction and apply position & offset.
             final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
             if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                    "POS " + left + ", " + top, null);
-            mSurfaceController.setPositionAndLayer(left, top, layerStack, mAnimLayer);
+                    "POS " + mTmpSize.left + ", " + mTmpSize.top, null);
+            mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack,
+                    mAnimLayer);
             mLastHidden = true;
 
             if (WindowManagerService.localLOGV) Slog.v(
                     TAG, "Created surface " + this);
         }
         return mSurfaceController;
+    }
+
+    private void calculateSurfaceBounds(WindowState w, LayoutParams attrs) {
+        if ((attrs.flags & FLAG_SCALED) != 0) {
+            // For a scaled surface, we always want the requested size.
+            mTmpSize.right = mTmpSize.left + w.mRequestedWidth;
+            mTmpSize.bottom = mTmpSize.top + w.mRequestedHeight;
+        } else {
+            // When we're doing a drag-resizing, request a surface that's fullscreen size,
+            // so that we don't need to reallocate during the process. This also prevents
+            // buffer drops due to size mismatch.
+            if (w.isDragResizing()) {
+                if (w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM) {
+                    mTmpSize.left = 0;
+                    mTmpSize.top = 0;
+                }
+                final DisplayInfo displayInfo = w.getDisplayInfo();
+                mTmpSize.right = mTmpSize.left + displayInfo.logicalWidth;
+                mTmpSize.bottom = mTmpSize.top + displayInfo.logicalHeight;
+            } else {
+                mTmpSize.right = mTmpSize.left + w.mCompatFrame.width();
+                mTmpSize.bottom = mTmpSize.top + w.mCompatFrame.height();
+            }
+        }
+
+        // Something is wrong and SurfaceFlinger will not like this, try to revert to sane values.
+        if (mTmpSize.width() < 1) {
+            Slog.w(TAG, "Width of " + w + " is not positive " + mTmpSize.width());
+            mTmpSize.right = mTmpSize.left + 1;
+        }
+        if (mTmpSize.height() < 1) {
+            Slog.w(TAG, "Height of " + w + " is not positive " + mTmpSize.height());
+            mTmpSize.bottom = mTmpSize.top + 1;
+        }
+
+        final int displayId = w.getDisplayId();
+        float scale = 1.0f;
+        // Magnification is supported only for the default display.
+        if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
+            final MagnificationSpec spec =
+                    mService.mAccessibilityController.getMagnificationSpecForWindowLocked(w);
+            if (spec != null && !spec.isNop()) {
+                scale = spec.scale;
+            }
+        }
+
+        // Adjust for surface insets.
+        mTmpSize.left -= scale * attrs.surfaceInsets.left;
+        mTmpSize.top -= scale * attrs.surfaceInsets.top;
+        mTmpSize.right += scale * (attrs.surfaceInsets.left + attrs.surfaceInsets.right);
+        mTmpSize.bottom += scale * (attrs.surfaceInsets.top + attrs.surfaceInsets.bottom);
     }
 
     void destroySurfaceLocked() {
@@ -891,7 +906,7 @@ class WindowStateAnimator {
             tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
 
             //TODO (multidisplay): Magnification is supported only for the default display.
-            if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
+            if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
                 MagnificationSpec spec = mService.mAccessibilityController
                         .getMagnificationSpecForWindowLocked(mWin);
                 if (spec != null && !spec.isNop()) {
@@ -974,7 +989,7 @@ class WindowStateAnimator {
 
         MagnificationSpec spec = null;
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
+        if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
             spec = mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
         }
         if (spec != null) {
@@ -1157,65 +1172,12 @@ class WindowStateAnimator {
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
 
-        float left = w.mShownPosition.x;
-        float top = w.mShownPosition.y;
+        mTmpSize.set(w.mShownPosition.x, w.mShownPosition.y, 0, 0);
+        calculateSurfaceBounds(w, w.getAttrs());
 
-        int width;
-        int height;
-        if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
-            // for a scaled surface, we always want the requested
-            // size.
-            width  = w.mRequestedWidth;
-            height = w.mRequestedHeight;
-        } else {
-            // When we're doing a drag-resizing, request a surface that's fullscreen size,
-            // so that we don't need to reallocate during the process. This also prevents
-            // buffer drops due to size mismatch.
-            final DisplayInfo displayInfo = w.getDisplayInfo();
-
-            // In freeform resize mode, put surface at 0/0.
-            if (w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM) {
-                left = 0;
-                top = 0;
-            }
-            if (displayInfo != null && w.isDragResizing()) {
-                width = displayInfo.logicalWidth;
-                height = displayInfo.logicalHeight;
-            } else {
-                width = w.mCompatFrame.width();
-                height = w.mCompatFrame.height();
-            }
-        }
-
-        // Something is wrong and SurfaceFlinger will not like this,
-        // try to revert to sane values
-        if (width < 1) {
-            width = 1;
-        }
-        if (height < 1) {
-            height = 1;
-        }
-
-        // Adjust for surface insets.
-        final LayoutParams attrs = w.getAttrs();
-        final int displayId = w.getDisplayId();
-        float scale = 1.0f;
-        // Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
-            MagnificationSpec spec =
-                    mService.mAccessibilityController.getMagnificationSpecForWindowLocked(w);
-            if (spec != null && !spec.isNop()) {
-                scale = spec.scale;
-            }
-        }
-
-        width += scale * (attrs.surfaceInsets.left + attrs.surfaceInsets.right);
-        height += scale * (attrs.surfaceInsets.top + attrs.surfaceInsets.bottom);
-        left -= scale * attrs.surfaceInsets.left;
-        top -= scale * attrs.surfaceInsets.top;
-
-        mSurfaceController.setPositionInTransaction(left, top, recoveringMemory);
-        mSurfaceResized = mSurfaceController.setSizeInTransaction(width, height,
+        mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, recoveringMemory);
+        mSurfaceResized = mSurfaceController.setSizeInTransaction(
+                mTmpSize.width(), mTmpSize.height(),
                 mDsDx * w.mHScale, mDtDx * w.mVScale,
                 mDsDy * w.mHScale, mDtDy * w.mVScale,
                 recoveringMemory);
@@ -1532,7 +1494,7 @@ class WindowStateAnimator {
         applyAnimationLocked(transit, true);
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService.mAccessibilityController != null
-                && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                && mWin.getDisplayId() == DEFAULT_DISPLAY) {
             mService.mAccessibilityController.onWindowTransitionLocked(mWin, transit);
         }
     }
