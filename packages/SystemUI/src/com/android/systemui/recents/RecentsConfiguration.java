@@ -202,7 +202,7 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_new_views_duration);
 
         // Loading
-        maxNumTasksToLoad = Constants.Values.App.MaxRecents;
+        maxNumTasksToLoad = ActivityManager.getMaxRecentTasksStatic();
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
