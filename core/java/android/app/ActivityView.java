@@ -24,8 +24,6 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.SurfaceTexture;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.OperationCanceledException;
@@ -45,6 +43,17 @@ import android.view.WindowManager;
 import dalvik.system.CloseGuard;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
+import java.util.concurrent.Executor;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.android.internal.annotations.GuardedBy;
+
 
 /** @hide */
 public class ActivityView extends ViewGroup {
@@ -53,9 +62,64 @@ public class ActivityView extends ViewGroup {
 
     private static final int MSG_SET_SURFACE = 1;
 
-    DisplayMetrics mMetrics = new DisplayMetrics();
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int MINIMUM_POOL_SIZE = 1;
+    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+    private static final int KEEP_ALIVE = 1;
+
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+        private final AtomicInteger mCount = new AtomicInteger(1);
+
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "ActivityView #" + mCount.getAndIncrement());
+        }
+    };
+
+    private static final BlockingQueue<Runnable> sPoolWorkQueue =
+            new LinkedBlockingQueue<Runnable>(128);
+
+    /**
+     * An {@link Executor} that can be used to execute tasks in parallel.
+     */
+    private static final Executor sExecutor = new ThreadPoolExecutor(MINIMUM_POOL_SIZE,
+            MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+
+
+    private static class SerialExecutor implements Executor {
+        private final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
+        private Runnable mActive;
+
+        public synchronized void execute(final Runnable r) {
+            mTasks.offer(new Runnable() {
+                public void run() {
+                    try {
+                        r.run();
+                    } finally {
+                        scheduleNext();
+                    }
+                }
+            });
+            if (mActive == null) {
+                scheduleNext();
+            }
+        }
+
+        protected synchronized void scheduleNext() {
+            if ((mActive = mTasks.poll()) != null) {
+                sExecutor.execute(mActive);
+            }
+        }
+    }
+
+    private final SerialExecutor mExecutor = new SerialExecutor();
+
+    private final int mDensityDpi;
     private final TextureView mTextureView;
+
+    @GuardedBy("mActivityContainerLock")
     private ActivityContainerWrapper mActivityContainer;
+    private Object mActivityContainerLock = new Object();
+
     private Activity mActivity;
     private int mWidth;
     private int mHeight;
@@ -63,8 +127,6 @@ public class ActivityView extends ViewGroup {
     private int mLastVisibility;
     private ActivityViewCallback mActivityViewCallback;
 
-    private HandlerThread mThread = new HandlerThread("ActivityViewThread");
-    private Handler mHandler;
 
     public ActivityView(Context context) {
         this(context, null);
@@ -97,28 +159,14 @@ public class ActivityView extends ViewGroup {
                     + e);
         }
 
-        mThread.start();
-        mHandler = new Handler(mThread.getLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                if (msg.what == MSG_SET_SURFACE) {
-                    try {
-                        mActivityContainer.setSurface((Surface) msg.obj, msg.arg1, msg.arg2,
-                                mMetrics.densityDpi);
-                    } catch (RemoteException e) {
-                        throw new RuntimeException(
-                                "ActivityView: Unable to set surface of ActivityContainer. " + e);
-                    }
-                }
-            }
-        };
         mTextureView = new TextureView(context);
         mTextureView.setSurfaceTextureListener(new ActivityViewSurfaceTextureListener());
         addView(mTextureView);
 
         WindowManager wm = (WindowManager)mActivity.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(mMetrics);
+        DisplayMetrics metrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(metrics);
+        mDensityDpi = metrics.densityDpi;
 
         mLastVisibility = getVisibility();
 
@@ -131,15 +179,13 @@ public class ActivityView extends ViewGroup {
     }
 
     @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
+    protected void onVisibilityChanged(View changedView, final int visibility) {
         super.onVisibilityChanged(changedView, visibility);
 
         if (mSurface != null && (visibility == View.GONE || mLastVisibility == View.GONE)) {
-            Message msg = Message.obtain(mHandler, MSG_SET_SURFACE);
-            msg.obj = (visibility == View.GONE) ? null : mSurface;
-            msg.arg1 = mWidth;
-            msg.arg2 = mHeight;
-            mHandler.sendMessage(msg);
+            if (DEBUG) Log.v(TAG, "visibility changed; enqueing runnable");
+            final Surface surface = (visibility == View.GONE) ? null : mSurface;
+            setSurfaceAsync(surface, mWidth, mHeight, mDensityDpi, false);
         }
         mLastVisibility = visibility;
     }
@@ -230,8 +276,10 @@ public class ActivityView extends ViewGroup {
             Log.e(TAG, "Duplicate call to release");
             return;
         }
-        mActivityContainer.release();
-        mActivityContainer = null;
+        synchronized (mActivityContainerLock) {
+            mActivityContainer.release();
+            mActivityContainer = null;
+        }
 
         if (mSurface != null) {
             mSurface.release();
@@ -239,25 +287,39 @@ public class ActivityView extends ViewGroup {
         }
 
         mTextureView.setSurfaceTextureListener(null);
-
-        mThread.quit();
     }
 
-    private void attachToSurfaceWhenReady() {
-        final SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
-        if (surfaceTexture == null || mSurface != null) {
-            // Either not ready to attach, or already attached.
-            return;
-        }
-
-        mSurface = new Surface(surfaceTexture);
-        try {
-            mActivityContainer.setSurface(mSurface, mWidth, mHeight, mMetrics.densityDpi);
-        } catch (RemoteException e) {
-            mSurface.release();
-            mSurface = null;
-            throw new RuntimeException("ActivityView: Unable to create ActivityContainer. " + e);
-        }
+    private void setSurfaceAsync(final Surface surface, final int width, final int height,
+            final int densityDpi, final boolean callback) {
+        mExecutor.execute(new Runnable() {
+            public void run() {
+                try {
+                    synchronized (mActivityContainerLock) {
+                        if (mActivityContainer != null) {
+                            mActivityContainer.setSurface(surface, width, height, densityDpi);
+                        }
+                    }
+                } catch (RemoteException e) {
+                    throw new RuntimeException(
+                        "ActivityView: Unable to set surface of ActivityContainer. ",
+                        e);
+                }
+                if (callback) {
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mActivityViewCallback != null) {
+                                if (surface != null) {
+                                    mActivityViewCallback.onSurfaceAvailable(ActivityView.this);
+                                } else {
+                                    mActivityViewCallback.onSurfaceDestroyed(ActivityView.this);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -308,10 +370,8 @@ public class ActivityView extends ViewGroup {
                     + height);
             mWidth = width;
             mHeight = height;
-            attachToSurfaceWhenReady();
-            if (mActivityViewCallback != null) {
-                mActivityViewCallback.onSurfaceAvailable(ActivityView.this);
-            }
+            mSurface = new Surface(surfaceTexture);
+            setSurfaceAsync(mSurface, mWidth, mHeight, mDensityDpi, true);
         }
 
         @Override
@@ -331,15 +391,7 @@ public class ActivityView extends ViewGroup {
             if (DEBUG) Log.d(TAG, "onSurfaceTextureDestroyed");
             mSurface.release();
             mSurface = null;
-            try {
-                mActivityContainer.setSurface(null, mWidth, mHeight, mMetrics.densityDpi);
-            } catch (RemoteException e) {
-                throw new RuntimeException(
-                        "ActivityView: Unable to set surface of ActivityContainer. " + e);
-            }
-            if (mActivityViewCallback != null) {
-                mActivityViewCallback.onSurfaceDestroyed(ActivityView.this);
-            }
+            setSurfaceAsync(null, mWidth, mHeight, mDensityDpi, true);
             return true;
         }
 
