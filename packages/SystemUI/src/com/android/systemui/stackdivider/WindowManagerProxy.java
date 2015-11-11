@@ -49,8 +49,29 @@ public class WindowManagerProxy {
                 mTmpRect.set(mResizeRect);
             }
             try {
-                ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID,
-                        mTmpRect, true);
+                ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, mTmpRect, true);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to resize stack: " + e);
+            }
+        }
+    };
+
+    private final Runnable mDismissRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                ActivityManagerNative.getDefault().removeStack(DOCKED_STACK_ID);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to remove stack: " + e);
+            }
+        }
+    };
+
+    private final Runnable mMaximizeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, null, true);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }
@@ -65,27 +86,24 @@ public class WindowManagerProxy {
     }
 
     public void dismissDockedStack() {
-        try {
-            ActivityManagerNative.getDefault().removeStack(DOCKED_STACK_ID);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to remove stack: " + e);
-        }
+        mExecutor.execute(mDismissRunnable);
     }
 
     public void maximizeDockedStack() {
-        try {
-            ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, null, true);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to resize stack: " + e);
-        }
+        mExecutor.execute(mMaximizeRunnable);
     }
 
-    public void setResizing(boolean resizing) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().setDockedStackResizing(resizing);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Error calling setDockedStackResizing: " + e);
-        }
+    public void setResizing(final boolean resizing) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    WindowManagerGlobal.getWindowManagerService().setDockedStackResizing(resizing);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Error calling setDockedStackResizing: " + e);
+                }
+            }
+        });
     }
 
     public int getDockSide() {
