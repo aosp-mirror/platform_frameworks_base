@@ -46,6 +46,8 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationS
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -108,7 +110,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
         @Override
         public void run() {
-            boolean dismissed = dismissRecentsToFocusedTask(false);
+            dismissRecentsToFocusedTask(false);
         }
     });
 
@@ -569,12 +571,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
 
     @Override
-    public void onTaskLaunchFailed() {
-        // Return to Home
-        dismissRecentsToHome(true);
-    }
-
-    @Override
     public void onAllTaskViewsDismissed() {
         mFinishLaunchHomeRunnable.run();
     }
@@ -699,6 +695,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public final void onBusEvent(DragEndEvent event) {
         // Unlock the orientation when dragging completes
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_BEHIND);
+    }
+
+    public final void onBusEvent(LaunchTaskSucceededEvent event) {
+        MetricsLogger.histogram(this, "overview_task_launch_index", event.taskIndexFromStackFront);
+    }
+
+    public final void onBusEvent(LaunchTaskFailedEvent event) {
+        // Return to Home
+        dismissRecentsToHome(true);
+
+        MetricsLogger.count(this, "overview_task_launch_failed", 1);
     }
 
     public final void onBusEvent(ScreenPinningRequestEvent event) {

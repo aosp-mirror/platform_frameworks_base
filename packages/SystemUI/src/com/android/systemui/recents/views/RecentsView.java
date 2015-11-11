@@ -16,45 +16,31 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.ActivityOptions;
-import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.IRemoteCallback;
-import android.os.RemoteException;
+import android.os.Handler;
 import android.util.ArraySet;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.SparseArray;
 import android.view.AppTransitionAnimationSpec;
-import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManagerGlobal;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
-import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
-import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
-import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -65,8 +51,6 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
@@ -78,29 +62,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private static final String TAG = "RecentsView";
     private static final boolean DEBUG = false;
 
-    private static final boolean ADD_HEADER_BITMAP = true;
-
-    /**
-     * Special value for {@link #mAppTransitionAnimationSpecs}: Indicate that we are currently
-     * waiting for the specs to be retrieved.
-     */
-    private static final List<AppTransitionAnimationSpec> SPECS_WAITING = new ArrayList<>();
-
     private int mStackViewVisibility = View.VISIBLE;
 
     /** The RecentsView callbacks */
     public interface RecentsViewCallbacks {
-        public void onTaskLaunchFailed();
         public void onAllTaskViewsDismissed();
     }
 
     LayoutInflater mInflater;
+    Handler mHandler;
 
     ArrayList<TaskStack> mStacks;
     TaskStackView mTaskStackView;
     RecentsAppWidgetHostView mSearchBar;
     RecentsViewCallbacks mCb;
 
+    RecentsTransitionHelper mTransitionHelper;
     RecentsViewTouchHandler mTouchHandler;
     DragView mDragView;
     TaskStack.DockState[] mVisibleDockStates = {
@@ -113,10 +90,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     Interpolator mFastOutSlowInInterpolator;
 
     Rect mSystemInsets = new Rect();
-
-
-    @GuardedBy("this")
-    List<AppTransitionAnimationSpec> mAppTransitionAnimationSpecs = SPECS_WAITING;
 
     public RecentsView(Context context) {
         super(context);
@@ -134,6 +107,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         super(context, attrs, defStyleAttr, defStyleRes);
         setWillNotDraw(false);
         mInflater = LayoutInflater.from(context);
+        mHandler = new Handler();
+        mTransitionHelper = new RecentsTransitionHelper(getContext(), mHandler);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mTouchHandler = new RecentsViewTouchHandler(this);
@@ -201,7 +176,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             Task task = mTaskStackView.getFocusedTask();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
-                onTaskViewClicked(mTaskStackView, taskView, stack, task, false, false, null,
+                onTaskViewClicked(mTaskStackView, taskView, stack, task, false, null,
                         INVALID_STACK_ID);
                 return true;
             }
@@ -219,7 +194,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             for (int j = 0; j < taskViewCount; j++) {
                 TaskView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
-                    onTaskViewClicked(mTaskStackView, tv, stack, task, false, taskBounds != null,
+                    onTaskViewClicked(mTaskStackView, tv, stack, task, false,
                             taskBounds, destinationStack);
                     return true;
                 }
@@ -424,282 +399,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
-    private IAppTransitionAnimationSpecsFuture getAppTransitionFuture(final TaskStackView stackView,
-            final TaskView clickedTask, final int offsetX, final int offsetY,
-            final float stackScroll, final int destinationStack) {
-        return new IAppTransitionAnimationSpecsFuture.Stub() {
-            @Override
-            public AppTransitionAnimationSpec[] get() throws RemoteException {
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (RecentsView.this) {
-                            mAppTransitionAnimationSpecs = getAppTransitionAnimationSpecs(stackView,
-                                    clickedTask, offsetX, offsetY, stackScroll, destinationStack);
-                            RecentsView.this.notifyAll();
-                        }
-                    }
-                });
-                synchronized (RecentsView.this) {
-                    while (mAppTransitionAnimationSpecs == SPECS_WAITING) {
-                        try {
-                            RecentsView.this.wait();
-                        } catch (InterruptedException e) {}
-                    }
-                    if (mAppTransitionAnimationSpecs == null) {
-                        return null;
-                    }
-                    AppTransitionAnimationSpec[] specs
-                            = new AppTransitionAnimationSpec[mAppTransitionAnimationSpecs.size()];
-                    mAppTransitionAnimationSpecs.toArray(specs);
-                    mAppTransitionAnimationSpecs = SPECS_WAITING;
-                    return specs;
-                }
-            }
-        };
-    }
-
-    private List<AppTransitionAnimationSpec> getAppTransitionAnimationSpecs(TaskStackView stackView,
-            TaskView clickedTask, int offsetX, int offsetY, float stackScroll,
-            int destinationStack) {
-        final int targetStackId = destinationStack != INVALID_STACK_ID ?
-                destinationStack : clickedTask.getTask().key.stackId;
-        if (targetStackId != FREEFORM_WORKSPACE_STACK_ID
-                && targetStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
-            return null;
-        }
-        // If this is a full screen stack, the transition will be towards the single, full screen
-        // task. We only need the transition spec for this task.
-        List<AppTransitionAnimationSpec> specs = new ArrayList<>();
-        if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
-            specs.add(createThumbnailHeaderAnimationSpec(
-                    stackView, offsetX, offsetY, stackScroll, clickedTask,
-                    clickedTask.getTask().key.id, ADD_HEADER_BITMAP));
-            return specs;
-        }
-        // This is a free form stack or full screen stack, so there will be multiple windows
-        // animating from thumbnails. We need transition animation specs for all of them.
-
-        // We will use top and bottom task views as a base for tasks, that aren't visible on the
-        // screen. This is necessary for cascade recents list, where some of the tasks might be
-        // hidden.
-        List<TaskView> taskViews = stackView.getTaskViews();
-        int childCount = taskViews.size();
-        TaskView topChild = taskViews.get(0);
-        TaskView bottomChild = taskViews.get(childCount - 1);
-        SparseArray<TaskView> taskViewsByTaskId = new SparseArray<>();
-        for (int i = 0; i < childCount; i++) {
-            TaskView taskView = taskViews.get(i);
-            taskViewsByTaskId.put(taskView.getTask().key.id, taskView);
-        }
-
-        TaskStack stack = stackView.getStack();
-        // We go through all tasks now and for each generate transition animation spec. If there is
-        // a view associated with a task, we use that view as a base for the animation. If there
-        // isn't, we use bottom or top view, depending on which one would be closer to the task
-        // view if it existed.
-        ArrayList<Task> tasks = stack.getTasks();
-        boolean passedClickedTask = false;
-        for (int i = 0, n = tasks.size(); i < n; i++) {
-            Task task = tasks.get(i);
-            TaskView taskView = taskViewsByTaskId.get(task.key.id);
-            if (taskView != null) {
-                specs.add(createThumbnailHeaderAnimationSpec(stackView, offsetX, offsetY,
-                        stackScroll, taskView, taskView.getTask().key.id, ADD_HEADER_BITMAP));
-                if (taskView == clickedTask) {
-                    passedClickedTask = true;
-                }
-            } else {
-                taskView = passedClickedTask ? bottomChild : topChild;
-                specs.add(createThumbnailHeaderAnimationSpec(stackView, offsetX, offsetY,
-                        stackScroll, taskView, task.key.id, !ADD_HEADER_BITMAP));
-            }
-        }
-
-        return specs;
-    }
-
-    private AppTransitionAnimationSpec createThumbnailHeaderAnimationSpec(TaskStackView stackView,
-            int offsetX, int offsetY, float stackScroll, TaskView tv, int taskId,
-            boolean addHeaderBitmap) {
-        // Disable any focused state before we draw the header
-        // Upfront the processing of the thumbnail
-        if (tv.isFocusedTask()) {
-            tv.setFocusedState(false, false /* animated */, false /* requestViewFocus */);
-        }
-        TaskViewTransform transform = new TaskViewTransform();
-        transform = stackView.getStackAlgorithm().getStackTransform(tv.mTask, stackScroll,
-                transform, null);
-
-        float scale = tv.getScaleX();
-        int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
-        int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
-
-        Bitmap b = null;
-        if (addHeaderBitmap) {
-            b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
-                    Bitmap.Config.ARGB_8888);
-
-            if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
-                b.eraseColor(0xFFff0000);
-            } else {
-                Canvas c = new Canvas(b);
-                c.scale(tv.getScaleX(), tv.getScaleY());
-                tv.mHeaderView.draw(c);
-                c.setBitmap(null);
-
-            }
-            b = b.createAshmemBitmap();
-        }
-
-        int[] pts = new int[2];
-        tv.getLocationOnScreen(pts);
-
-        final int left = pts[0] + offsetX;
-        final int top = pts[1] + offsetY;
-        final Rect rect = new Rect(left, top, left + (int) transform.rect.width(),
-                top + (int) transform.rect.height());
-
-        return new AppTransitionAnimationSpec(taskId, b, rect);
-    }
-
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
             final TaskStack stack, final Task task, final boolean lockToTask,
-            final boolean boundsValid, final Rect bounds, int destinationStack) {
-
-        // Upfront the processing of the thumbnail
-        TaskViewTransform transform = new TaskViewTransform();
-        View sourceView;
-        int offsetX = 0;
-        int offsetY = 0;
-        float stackScroll = stackView.getScroller().getStackScroll();
-        if (tv == null) {
-            // If there is no actual task view, then use the stack view as the source view
-            // and then offset to the expected transform rect, but bound this to just
-            // outside the display rect (to ensure we don't animate from too far away)
-            sourceView = stackView;
-            offsetX = (int) transform.rect.left;
-            offsetY = getMeasuredHeight();
-        } else {
-            sourceView = tv.mThumbnailView;
-        }
-
-        // Compute the thumbnail to scale up from
-        final SystemServicesProxy ssp = Recents.getSystemServices();
-        boolean screenPinningRequested = false;
-        ActivityOptions opts = ActivityOptions.makeBasic();
-        ActivityOptions.OnAnimationStartedListener animStartedListener = null;
-        final IAppTransitionAnimationSpecsFuture transitionFuture;
-        if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
-                task.thumbnail.getHeight() > 0) {
-            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                @Override
-                public void onAnimationStarted() {
-                    // If we are launching into another task, cancel the previous task's
-                    // window transition
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
-
-                    if (lockToTask) {
-                        // Request screen pinning after the animation runs
-                        postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                EventBus.getDefault().send(new ScreenPinningRequestEvent(
-                                        getContext(), ssp));
-                            }
-                        }, 350);
-                    }
-                }
-            };
-            transitionFuture = getAppTransitionFuture(stackView, tv, offsetX, offsetY, stackScroll,
-                    destinationStack);
-            screenPinningRequested = true;
-        } else {
-            transitionFuture = null;
-        }
-        if (boundsValid) {
-            opts.setBounds(bounds.isEmpty() ? null : bounds);
-        }
-        final ActivityOptions launchOpts = opts;
-        final boolean finalScreenPinningRequested = screenPinningRequested;
-        final OnAnimationStartedListener finalAnimStartedListener = animStartedListener;
-        final Runnable launchRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (task.isActive) {
-                    // Bring an active task to the foreground
-                    ssp.moveTaskToFront(task.key.id, launchOpts);
-                } else {
-                    if (ssp.startActivityFromRecents(getContext(), task.key.id, task.activityLabel,
-                            launchOpts)) {
-                        if (!finalScreenPinningRequested) {
-                            // If we have not requested this already to be run after the window
-                            // transition, then just run it now
-                            EventBus.getDefault().send(new ScreenPinningRequestEvent(
-                                    getContext(), ssp));
-                        }
-                    } else {
-                        // Dismiss the task and return the user to home if we fail to
-                        // launch the task
-                        EventBus.getDefault().send(new DismissTaskViewEvent(task, tv));
-                        if (mCb != null) {
-                            mCb.onTaskLaunchFailed();
-                        }
-
-                        // Keep track of failed launches
-                        MetricsLogger.count(getContext(), "overview_task_launch_failed", 1);
-                    }
-                }
-                if (transitionFuture != null) {
-                    IRemoteCallback.Stub callback = new IRemoteCallback.Stub() {
-                        @Override
-                        public void sendResult(Bundle data) throws RemoteException {
-                            post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (finalAnimStartedListener != null) {
-                                        finalAnimStartedListener.onAnimationStarted();
-                                    }
-                                }
-                            });
-                        }
-                    };
-                    try {
-                        WindowManagerGlobal.getWindowManagerService()
-                                .overridePendingAppTransitionMultiThumbFuture(transitionFuture,
-                                        callback, true /* scaleUp */);
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "Failed to override transition: " + e);
-                    }
-                }
-            }
-        };
-
-        // Keep track of the index of the task launch
-        int taskIndexFromFront = 0;
-        int taskIndex = stack.indexOfTask(task);
-        if (taskIndex > -1) {
-            taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
-        }
-        MetricsLogger.histogram(getContext(), "overview_task_launch_index", taskIndexFromFront);
-
-        // Launch the app right away if there is no task view, otherwise, animate the icon out first
-        if (tv == null) {
-            launchRunnable.run();
-        } else {
-            if (task.group != null && !task.group.isFrontMostTask(task)) {
-                // For affiliated tasks that are behind other tasks, we must animate the front cards
-                // out of view before starting the task transition
-                stackView.startLaunchTaskAnimation(tv, launchRunnable, lockToTask);
-            } else {
-                // Otherwise, we can start the task transition immediately
-                stackView.startLaunchTaskAnimation(tv, null, lockToTask);
-                launchRunnable.run();
-            }
-        }
+            final Rect bounds, int destinationStack) {
+        mTransitionHelper.launchTaskFromRecents(stack, task, stackView, tv, lockToTask, bounds,
+                destinationStack);
     }
 
     @Override
