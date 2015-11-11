@@ -6841,4 +6841,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int targetSdkVersion = ai == null ? 0 : ai.targetSdkVersion;
         return targetSdkVersion;
     }
+
+    @Override
+    public boolean isManagedProfile(ComponentName admin) {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        final UserInfo user;
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            user = mUserManager.getUserInfo(callingUserId);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+        return user != null && user.isManagedProfile();
+    }
+
+    @Override
+    public boolean isSystemOnlyUser(ComponentName admin) {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        return UserManager.isSplitSystemUser() && callingUserId == UserHandle.USER_SYSTEM;
+    }
+
 }

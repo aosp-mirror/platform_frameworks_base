@@ -4558,4 +4558,37 @@ public class DevicePolicyManager {
             return false;
         }
     }
+
+    /**
+     * @hide
+     * Return if this user is a managed profile of another user. An admin can become the profile
+     * owner of a managed profile with {@link #ACTION_PROVISION_MANAGED_PROFILE} and of a managed
+     * user with {@link #ACTION_PROVISION_MANAGED_USER}.
+     * @param admin Which profile owner this request is associated with.
+     * @return if this user is a managed profile of another user.
+     */
+    public boolean isManagedProfile(@NonNull ComponentName admin) {
+        try {
+            return mService.isManagedProfile(admin);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     * Return if this user is a system-only user. An admin can manage a device from a system only
+     * user by calling {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE}.
+     * @param admin Which device owner this request is associated with.
+     * @return if this user is a system-only user.
+     */
+    public boolean isSystemOnlyUser(@NonNull ComponentName admin) {
+        try {
+            return mService.isSystemOnlyUser(admin);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return false;
+        }
+    }
 }

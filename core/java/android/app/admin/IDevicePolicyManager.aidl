@@ -233,4 +233,6 @@ interface IDevicePolicyManager {
     boolean isProvisioningAllowed(String action);
     void setKeepUninstalledPackages(in ComponentName admin,in List<String> packageList);
     List<String> getKeepUninstalledPackages(in ComponentName admin);
+    boolean isManagedProfile(in ComponentName admin);
+    boolean isSystemOnlyUser(in ComponentName admin);
 }
