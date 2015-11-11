@@ -843,7 +843,7 @@
     <!-- =============================================================== -->
     <eat-comment />
 
-    <!-- Allows an application to modify and remove existing voicemails in the system
+    <!-- Allows an application to modify and remove existing voicemails in the system.
         <p>Protection level: system|signature
     -->
     <permission android:name="com.android.voicemail.permission.WRITE_VOICEMAIL"
@@ -860,7 +860,7 @@
     <!-- ======================================= -->
     <eat-comment />
 
-    <!-- Allows an application to access extra location provider commands
+    <!-- Allows an application to access extra location provider commands.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"
@@ -906,7 +906,7 @@
         android:label="@string/permlab_createNetworkSockets"
         android:protectionLevel="normal" />
 
-    <!-- Allows applications to access information about networks
+    <!-- Allows applications to access information about networks.
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.ACCESS_NETWORK_STATE"
@@ -1037,7 +1037,7 @@
     <eat-comment />
 
     <!-- Allows access to the list of accounts in the Accounts Service.
-        <p>Protection level: normal
+        <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.GET_ACCOUNTS"
         android:permissionGroup="android.permission-group.CONTACTS"
@@ -1934,7 +1934,7 @@
     <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by a TextService (e.g. SpellCheckerService)
+    <!-- Must be required by a TextService (eg SpellCheckerService)
          to ensure that only the system can bind to it.
          <p>Protection level: signature
     -->
