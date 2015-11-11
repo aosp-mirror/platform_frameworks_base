@@ -74,6 +74,8 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"પ્રિન્ટર માટે કોઈ કનેક્શન નથી"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"અજાણ્યું"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – અનુપલબ્ધ"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> નો ઉપયોગ કરીએ?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"તમારો દસ્તાવેજ પ્રિન્ટર સુધીના તેના માર્ગમાં એક અથવા વધુ સર્વર્સથી પસાર થઈ શકે છે."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"શ્યામ અને શ્વેત"</item>
     <item msgid="2762241247228983754">"રંગ"</item>
