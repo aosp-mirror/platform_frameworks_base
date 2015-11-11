@@ -179,7 +179,7 @@ class NavigationBarAppsModel {
             }
         }
 
-        Slog.e(TAG, "Activity doesn't have category Intent.CATEGORY_LAUNCHER " + component);
+        Slog.i(TAG, "Activity doesn't have category Intent.CATEGORY_LAUNCHER " + component);
         return null;
     }
 
