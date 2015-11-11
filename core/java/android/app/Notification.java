@@ -3271,18 +3271,27 @@ public class Notification implements Parcelable
          * Construct a RemoteViews for the final big notification layout.
          */
         public RemoteViews makeBigContentView() {
+            RemoteViews result = null;
             if (mN.bigContentView != null) {
                 return mN.bigContentView;
             } else if (mStyle != null) {
-                final RemoteViews styleView = mStyle.makeBigContentView();
-                if (styleView != null) {
-                    return styleView;
-                }
+                result = mStyle.makeBigContentView();
             } else if (mActions.size() == 0) {
                 return null;
             }
+            if (result == null) {
+                result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
+            }
+            adaptNotificationHeaderForBigContentView(result);
+            return result;
+        }
 
-            return applyStandardTemplateWithActions(getBigBaseLayoutResource());
+        private void adaptNotificationHeaderForBigContentView(RemoteViews result) {
+            // We have to set the collapse button instead
+            result.setImageViewResource(R.id.expand_button, R.drawable.ic_arrow_up_14dp);
+            // Apply the color again
+            result.setDrawableParameters(R.id.expand_button, false, -1, resolveColor(),
+                    PorterDuff.Mode.SRC_ATOP, -1);
         }
 
         /**
