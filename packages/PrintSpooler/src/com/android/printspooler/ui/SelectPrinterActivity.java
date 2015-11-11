@@ -84,6 +84,11 @@ public final class SelectPrinterActivity extends Activity {
 
     private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
+    /**
+     * If there are any enabled print services
+     */
+    private boolean mHasEnabledPrintServices;
+
     private final ArrayList<PrintServiceInfo> mAddPrinterServices =
             new ArrayList<>();
 
@@ -175,10 +180,6 @@ public final class SelectPrinterActivity extends Activity {
             }
         });
 
-        if (mAddPrinterServices.isEmpty()) {
-            menu.removeItem(R.id.action_add_printer);
-        }
-
         return true;
     }
 
@@ -230,6 +231,7 @@ public final class SelectPrinterActivity extends Activity {
     public void onResume() {
         super.onResume();
         updateServicesWithAddPrinterActivity();
+        updateEmptyView((DestinationAdapter)mListView.getAdapter());
         invalidateOptionsMenu();
     }
 
@@ -258,6 +260,7 @@ public final class SelectPrinterActivity extends Activity {
     }
 
     private void updateServicesWithAddPrinterActivity() {
+        mHasEnabledPrintServices = true;
         mAddPrinterServices.clear();
 
         // Get all enabled print services.
@@ -266,6 +269,7 @@ public final class SelectPrinterActivity extends Activity {
 
         // No enabled print services - done.
         if (enabledServices.isEmpty()) {
+            mHasEnabledPrintServices = false;
             return;
         }
 
@@ -324,7 +328,10 @@ public final class SelectPrinterActivity extends Activity {
         }
         TextView titleView = (TextView) findViewById(R.id.title);
         View progressBar = findViewById(R.id.progress_bar);
-        if (adapter.getUnfilteredCount() <= 0) {
+        if (!mHasEnabledPrintServices) {
+            titleView.setText(R.string.print_no_print_services);
+            progressBar.setVisibility(View.GONE);
+        } else if (adapter.getUnfilteredCount() <= 0) {
             titleView.setText(R.string.print_searching_for_printers);
             progressBar.setVisibility(View.VISIBLE);
         } else {
