@@ -117,6 +117,8 @@ public final class Events {
         public MotionInputEvent(MotionEvent event, RecyclerView view) {
             mEvent = event;
             mView = view;
+
+            // Consider determining position lazily as an optimization.
             View child = mView.findChildViewUnder(mEvent.getX(), mEvent.getY());
             mPosition = (child != null)
                     ? mView.getChildAdapterPosition(child)
