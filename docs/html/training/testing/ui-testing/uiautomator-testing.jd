@@ -89,9 +89,11 @@ test runner.
 
         <pre>
 dependencies {
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.android.support.test:rules:0.3'
+    androidTestCompile 'com.android.support:support-annotations:23.0.1'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+    // Set this dependency if you want to use Hamcrest matching
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
 }
 </pre>
       </li>
@@ -186,9 +188,21 @@ extend an existing container implementation
 
 <h2 id="build">Create a UI Automator Test Class</h2>
 
-<p>To build a UI Automator test, create a class that extends
-{@link android.test.InstrumentationTestCase}. Implement the following programming model in your
-UI Automator test class:</p>
+<p>
+Your UI Automator test class should be written the same way as a JUnit 4 test class. To learn more
+about creating JUnit 4 test classes and using JUnit 4 assertions and annotations, see
+<a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#build">
+Create an Instrumented Unit Test Class</a>.
+</p>
+<p>Add the {@code &#64;RunWith(AndroidJUnit4.class)} annotation at the beginning of your test class
+definition. You also need to specify the
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> class
+provided in the Android Testing Support Library as your default test runner. This step is described
+in more detail in <a href="#run">Run UI Automator Tests on a Device or Emulator</a>.
+</p>
+
+<p>Implement the following programming model in your UI Automator test class:</p>
 
 <ol>
 <li>Get a
@@ -241,21 +255,52 @@ the UI Automator API to select and interact with specific UI elements. </p>
 and simulate a Home button press:</p>
 
 <pre>
-import android.test.InstrumentationTestCase;
+import org.junit.Before;
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.Until;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import static org.junit.Assert.assertThat;
 
-public class CalculatorUiTest extends InstrumentationTestCase {
+&#64;RunWith(AndroidJUnit4.class)
+&#64;SdkSuppress(minSdkVersion = 18)
+public class ChangeTextBehaviorTest {
 
+    private static final String BASIC_SAMPLE_PACKAGE
+            = "com.example.android.testing.uiautomator.BasicSample";
+    private static final int LAUNCH_TIMEOUT = 5000;
+    private static final String STRING_TO_BE_TYPED = "UiAutomator";
     private UiDevice mDevice;
 
-    public void setUp() {
+    &#64;Before
+    public void startMainActivityFromHomeScreen() {
         // Initialize UiDevice instance
-        mDevice = UiDevice.getInstance(getInstrumentation());
+        mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
         // Start from the home screen
         mDevice.pressHome();
-        mDevice.wait(Until.hasObject(By.pkg(getHomeScreenPackage()).depth(0)),
+
+        // Wait for launcher
+        final String launcherPackage = mDevice.getLauncherPackageName();
+        assertThat(launcherPackage, notNullValue());
+        mDevice.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)),
+                LAUNCH_TIMEOUT);
+
+        // Launch the app
+        Context context = InstrumentationRegistry.getContext();
+        final Intent intent = context.getPackageManager()
+                .getLaunchIntentForPackage(BASIC_SAMPLE_PACKAGE);
+        // Clear out any previous instances
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
+
+        // Wait for the app to appear
+        mDevice.wait(Until.hasObject(By.pkg(BASIC_SAMPLE_PACKAGE).depth(0)),
+                LAUNCH_TIMEOUT);
     }
 }
 </pre>
@@ -292,8 +337,7 @@ if(okButton.exists() &#38;&#38; okButton.isEnabled()) {
 <h4 id="specifying-selector">Specifying a selector</h4>
 <p>If you want to access a specific UI component in an app, use the
 <a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html">{@code UiSelector}</a>
-class. This class represents a query for specific elements in the
-currently displayed UI. </p>
+class. This class represents a query for specific elements in the currently displayed UI. </p>
 
 <p>If more than one matching element is found, the first matching element in the layout hierarchy
 is returned as the target
@@ -306,8 +350,8 @@ found, a
 {@code UiAutomatorObjectNotFoundException}</a> is thrown. </p>
 
 <p>You can use the
-<a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html#childSelector(android.support.test.uiautomator.UiSelector)">{@code childSelector()}</a>
-method to nest multiple
+<a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html#childSelector(android.support.test.uiautomator.UiSelector)">
+{@code childSelector()}</a> method to nest multiple
 <a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html">{@code UiSelector}</a>
 instances. For example, the following code example shows how your test might specify a search to
 find the first {@link android.widget.ListView} in the currently displayed UI, then search within that
