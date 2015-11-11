@@ -24,7 +24,7 @@
     
     <color name="directory_background">@*android:color/material_grey_300</color>
     <color name="item_doc_grid_background">@android:color/white</color>
-    <color name="item_doc_grid_protect_background">#88000000</color>
+    <color name="item_doc_grid_protect_background">@android:color/white</color>
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>
 </resources>
