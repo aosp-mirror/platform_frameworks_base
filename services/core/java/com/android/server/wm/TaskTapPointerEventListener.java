@@ -90,11 +90,11 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             case MotionEvent.ACTION_HOVER_MOVE: {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
-                final WindowState window = mDisplayContent.findWindowForControlPoint(x, y);
-                if (window == null) {
+                final Task task = mDisplayContent.findTaskForControlPoint(x, y);
+                if (task == null) {
                     break;
                 }
-                window.getVisibleBounds(mTmpRect);
+                task.getDimBounds(mTmpRect);
                 if (!mTmpRect.isEmpty() && !mTmpRect.contains(x, y)) {
                     int iconShape = STYLE_DEFAULT;
                     if (x < mTmpRect.left) {
