@@ -379,6 +379,13 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void onDeviceProvisioned() {
             sendUserPresentBroadcast();
+            synchronized (KeyguardViewMediator.this) {
+                // If system user is provisioned, we might want to lock now to avoid showing launcher
+                if (UserManager.isSplitSystemUser()
+                        && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM) {
+                    doKeyguardLocked(null);
+                }
+            }
         }
 
         @Override
