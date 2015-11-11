@@ -50,9 +50,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:divider="?android:attr/dividerVertical"
-            android:showDividers="middle">
+            android:baselineAligned="false">
 
             <FrameLayout
                 android:id="@+id/container_roots"
@@ -62,8 +60,7 @@
             <include layout="@layout/directory_cluster"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:elevation="8dp"
-                android:background="@color/material_grey_50" />
+                android:elevation="8dp" />
 
         </LinearLayout>
 

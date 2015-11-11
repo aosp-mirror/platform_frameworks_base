@@ -17,14 +17,20 @@
 <resources>
     <color name="material_grey_400">#ffbdbdbd</color>
 
+    <!-- This is the window background, but also the background for anything
+         else that needs to manually declare a background matching the "default"
+         app background (e.g. the drawer overlay). -->
+    <color name="window_background">#fff1f1f1</color>
+
     <color name="primary_dark">@*android:color/primary_dark_material_dark</color>
     <color name="primary">@*android:color/material_blue_grey_900</color>
     <color name="accent">@*android:color/accent_material_light</color>
     <color name="action_mode">@color/material_grey_400</color>
-    
-    <color name="directory_background">@*android:color/material_grey_300</color>
-    <color name="item_doc_grid_background">@android:color/white</color>
-    <color name="item_doc_grid_protect_background">@android:color/white</color>
+
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>
+
+    <color name="item_doc_background">#fffafafa</color>
+    <color name="item_doc_background_selected">#ffe0f2f1</color>
+
 </resources>

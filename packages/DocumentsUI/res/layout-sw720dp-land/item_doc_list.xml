@@ -17,7 +17,7 @@
 <com.android.documentsui.ListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/item_doc_list_background"
+    android:background="@color/item_doc_background"
     android:orientation="horizontal"
     android:focusable="true">
 
