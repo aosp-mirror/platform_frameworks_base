@@ -183,10 +183,16 @@ void PathParser::dump(const PathData& data) {
     ALOGD("points are : %s", os.str().c_str());
 }
 
-void PathParser::parseStringForSkPath(SkPath* skPath, const char* pathStr, size_t strLen) {
+bool PathParser::parseStringForSkPath(SkPath* skPath, const char* pathStr, size_t strLen) {
     PathData pathData;
     getPathDataFromString(&pathData, pathStr, strLen);
+
+    // Check if there is valid data coming out of parsing the string.
+    if (pathData.verbs.size() == 0) {
+        return false;
+    }
     VectorDrawablePath::verbsToPath(skPath, &pathData);
+    return true;
 }
 
 }; // namespace uirenderer

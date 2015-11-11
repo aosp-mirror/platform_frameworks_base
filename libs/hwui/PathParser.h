@@ -21,13 +21,18 @@
 
 #include <jni.h>
 #include <android/log.h>
+#include <cutils/compiler.h>
 
 namespace android {
 namespace uirenderer {
 
 class PathParser {
 public:
-    static void parseStringForSkPath(SkPath* outPath, const char* pathStr, size_t strLength);
+    /**
+     * Parse the string literal and create a Skia Path. Return true on success.
+     */
+    ANDROID_API static bool parseStringForSkPath(SkPath* outPath, const char* pathStr,
+            size_t strLength);
     static void getPathDataFromString(PathData* outData, const char* pathStr, size_t strLength);
     static void dump(const PathData& data);
 };
