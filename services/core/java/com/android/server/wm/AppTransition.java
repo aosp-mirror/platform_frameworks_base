@@ -1331,17 +1331,23 @@ public class AppTransition implements Dump {
         }
     }
 
+    private void clearAppTransitionState() {
+        mNextAppTransitionPackage = null;
+        mNextAppTransitionAnimationsSpecs.clear();
+        mDefaultNextAppTransitionAnimationSpec = null;
+        mAnimationFinishedCallback = null;
+    }
+
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
             IRemoteCallback startedCallback) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
             mNextAppTransitionPackage = packageName;
-            mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionEnter = enterAnim;
             mNextAppTransitionExit = exitAnim;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
-            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
@@ -1350,40 +1356,34 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionAnimationsSpecs.clear();
             putDefaultNextAppTransitionCoordinates(startX, startY, startX + startWidth,
                     startY + startHeight, null);
             postAnimationCallback();
-            mNextAppTransitionCallback = null;
-            mAnimationFinishedCallback = null;
         }
     }
 
     void overridePendingAppTransitionClipReveal(int startX, int startY,
                                                 int startWidth, int startHeight) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CLIP_REVEAL;
             putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
             postAnimationCallback();
-            mNextAppTransitionCallback = null;
-            mAnimationFinishedCallback = null;
         }
     }
 
     void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
                                            IRemoteCallback startedCallback, boolean scaleUp) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
             putDefaultNextAppTransitionCoordinates(startX, startY, 0, 0, srcThumb);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
-            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
@@ -1392,16 +1392,14 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX, int startY,
             int targetWidth, int targetHeight, IRemoteCallback startedCallback, boolean scaleUp) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
-            mNextAppTransitionPackage = null;
-            mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
             putDefaultNextAppTransitionCoordinates(startX, startY, targetWidth, targetHeight,
                     srcThumb);
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
-            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
@@ -1411,11 +1409,9 @@ public class AppTransition implements Dump {
             IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
             boolean scaleUp) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
-            mNextAppTransitionPackage = null;
-            mDefaultNextAppTransitionAnimationSpec = null;
-            mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
             if (specs != null) {
                 for (int i = 0; i < specs.length; i++) {
@@ -1444,11 +1440,9 @@ public class AppTransition implements Dump {
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
             boolean scaleUp) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
-            mNextAppTransitionPackage = null;
-            mDefaultNextAppTransitionAnimationSpec = null;
-            mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionAnimationsSpecsFuture = specsFuture;
             mNextAppTransitionScaleUp = scaleUp;
             mNextAppTransitionFutureCallback = callback;
@@ -1457,10 +1451,10 @@ public class AppTransition implements Dump {
 
     void overrideInPlaceAppTransition(String packageName, int anim) {
         if (isTransitionSet()) {
+            clearAppTransitionState();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionInPlace = anim;
-            mAnimationFinishedCallback = null;
         } else {
             postAnimationCallback();
         }
