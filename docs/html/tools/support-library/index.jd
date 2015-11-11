@@ -58,10 +58,54 @@ page.title=Support Library
 
 <p>This section provides details about the Support Library package releases.</p>
 
-
 <div class="toggle-content opened">
-  <p id="rev23-1-0"><a href="#" onclick="return toggleContent(this)">
+  <p id="rev23"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23.1.1</a> <em>(November 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed a crash that occurs when you perform a swipe-to-dismiss action that the
+            {@code ItemTouchHelper} utility class provides, and then add an item.
+            (<a href="http://b.android.com/190500">Issue 190500</a>)</li>
+         </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-preference">v7 preference library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed an issue with ProGuard usage.
+          (<a href="http://b.android.com/183261">Issue 183261</a>)</li>
+         </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v17-leanback">v17 Leanback Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed a number of internal issues in this library.</li>
+         </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the <code>getHeaderView</code> method to the <code>NavigationView</code> class.</li>
+          <li>Fixed a transparent background issue for a <code>FloatingActionButton</code> object on
+          devices running Android 4.0 (API level 15) and lower.
+          (<a href="http://b.android.com/183315">Issue 183315</a>)</li>
+         </ul>
+       </dd>
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev23-1-0"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 23.1.0</a> <em>(October 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
