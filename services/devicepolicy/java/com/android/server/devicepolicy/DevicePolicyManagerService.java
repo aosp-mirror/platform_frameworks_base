@@ -5703,11 +5703,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public Bundle getUserRestrictions(ComponentName who) {
+    public Bundle getUserRestrictions(ComponentName who, int userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceCrossUserPermission(userHandle);
         synchronized (this) {
-            final ActiveAdmin activeAdmin =
-                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (activeAdmin == null) {
+                throw new SecurityException("No active admin: " + activeAdmin);
+            }
+            if (activeAdmin.getUid() != mInjector.binderGetCallingUid()) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+            }
             return activeAdmin.userRestrictions;
         }
     }
