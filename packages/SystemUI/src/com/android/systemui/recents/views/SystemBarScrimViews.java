@@ -26,7 +26,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
-import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
@@ -81,21 +81,11 @@ public class SystemBarScrimViews {
     /**
      * Starts animating the scrim views when entering Recents.
      */
-    public final void onBusEvent(EnterRecentsWindowAnimationStartedEvent event) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
-        int transitionEnterFromAppDelay = mContext.getResources().getInteger(
-                R.integer.recents_enter_from_app_transition_duration);
-        int transitionEnterFromHomeDelay = mContext.getResources().getInteger(
-                R.integer.recents_enter_from_home_transition_duration);
-
+    public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         if (mHasStatusBarScrim && mShouldAnimateStatusBarScrim) {
             mStatusBarScrimView.setTranslationY(-mStatusBarScrimView.getMeasuredHeight());
             mStatusBarScrimView.animate()
                     .translationY(0)
-                    .setStartDelay(launchState.launchedFromHome ?
-                            transitionEnterFromHomeDelay :
-                            transitionEnterFromAppDelay)
                     .setDuration(mNavBarScrimEnterDuration)
                     .setInterpolator(mQuintOutInterpolator)
                     .withStartAction(new Runnable() {
@@ -110,9 +100,6 @@ public class SystemBarScrimViews {
             mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
             mNavBarScrimView.animate()
                     .translationY(0)
-                    .setStartDelay(launchState.launchedFromHome ?
-                            transitionEnterFromHomeDelay :
-                            transitionEnterFromAppDelay)
                     .setDuration(mNavBarScrimEnterDuration)
                     .setInterpolator(mQuintOutInterpolator)
                     .withStartAction(new Runnable() {

@@ -19,8 +19,10 @@ package com.android.systemui.recents.events.activity;
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent when the window animation into Recents starts.
+ * This is sent when the window animation into Recents completes.  We use this signal to know when
+ * we can start in-app animations so that they don't conflict with the window transition into
+ * Recents.
  */
-public class EnterRecentsWindowAnimationStartedEvent extends EventBus.Event {
+public class EnterRecentsWindowAnimationCompletedEvent extends EventBus.Event {
     // Simple event
 }
