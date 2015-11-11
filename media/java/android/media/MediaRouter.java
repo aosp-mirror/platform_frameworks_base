@@ -18,6 +18,7 @@ package android.media;
 
 import android.Manifest;
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
@@ -41,6 +42,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -201,6 +204,7 @@ public class MediaRouter {
                         info.mDescription = sStatic.mResources.getText(
                                 com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
+                        info.mDeviceType = RouteInfo.DEVICE_TYPE_BLUETOOTH;
                         sStatic.mBluetoothA2dpRoute = info;
                         addRouteStatic(sStatic.mBluetoothA2dpRoute);
                     } else {
@@ -480,6 +484,7 @@ public class MediaRouter {
             route.mName = globalRoute.name;
             route.mDescription = globalRoute.description;
             route.mSupportedTypes = globalRoute.supportedTypes;
+            route.mDeviceType = globalRoute.deviceType;
             route.mEnabled = globalRoute.enabled;
             route.setRealStatusCode(globalRoute.statusCode);
             route.mPlaybackType = globalRoute.playbackType;
@@ -1411,6 +1416,7 @@ public class MediaRouter {
         newRoute.mDescription = sStatic.mResources.getText(
                 com.android.internal.R.string.wireless_display_route_description);
         newRoute.updatePresentationDisplay();
+        newRoute.mDeviceType = RouteInfo.DEVICE_TYPE_TV;
         return newRoute;
     }
 
@@ -1470,6 +1476,7 @@ public class MediaRouter {
         CharSequence mDescription;
         private CharSequence mStatus;
         int mSupportedTypes;
+        int mDeviceType;
         RouteGroup mGroup;
         final RouteCategory mCategory;
         Drawable mIcon;
@@ -1502,6 +1509,42 @@ public class MediaRouter {
         /** @hide */ public static final int STATUS_IN_USE = 5;
         /** @hide */ public static final int STATUS_CONNECTED = 6;
 
+        /** @hide */
+        @IntDef({DEVICE_TYPE_UNKNOWN, DEVICE_TYPE_TV, DEVICE_TYPE_SPEAKER, DEVICE_TYPE_BLUETOOTH})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface DeviceType {}
+
+        /**
+         * The default receiver device type of the route indicating the type is unknown.
+         *
+         * @see #getDeviceType
+         */
+        public static final int DEVICE_TYPE_UNKNOWN = 0;
+
+        /**
+         * A receiver device type of the route indicating the presentation of the media is happening
+         * on a TV.
+         *
+         * @see #getDeviceType
+         */
+        public static final int DEVICE_TYPE_TV = 1;
+
+        /**
+         * A receiver device type of the route indicating the presentation of the media is happening
+         * on a speaker.
+         *
+         * @see #getDeviceType
+         */
+        public static final int DEVICE_TYPE_SPEAKER = 2;
+
+        /**
+         * A receiver device type of the route indicating the presentation of the media is happening
+         * on a bluetooth device such as a bluetooth speaker.
+         *
+         * @see #getDeviceType
+         */
+        public static final int DEVICE_TYPE_BLUETOOTH = 3;
+
         private Object mTag;
 
         /**
@@ -1533,6 +1576,7 @@ public class MediaRouter {
 
         RouteInfo(RouteCategory category) {
             mCategory = category;
+            mDeviceType = DEVICE_TYPE_UNKNOWN;
         }
 
         /**
@@ -1668,6 +1712,18 @@ public class MediaRouter {
          */
         public int getSupportedTypes() {
             return mSupportedTypes;
+        }
+
+        /**
+         * Gets the type of the receiver device associated with this route.
+         *
+         * @return The type of the receiver device associated with this route:
+         * {@link #DEVICE_TYPE_BLUETOOTH}, {@link #DEVICE_TYPE_TV}, {@link #DEVICE_TYPE_SPEAKER},
+         * or {@link #DEVICE_TYPE_UNKNOWN}.
+         */
+        @DeviceType
+        public int getDeviceType() {
+            return mDeviceType;
         }
 
         /** @hide */

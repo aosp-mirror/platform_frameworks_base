@@ -20736,6 +20736,7 @@ package android.media {
   public static class MediaRouter.RouteInfo {
     method public android.media.MediaRouter.RouteCategory getCategory();
     method public java.lang.CharSequence getDescription();
+    method public int getDeviceType();
     method public android.media.MediaRouter.RouteGroup getGroup();
     method public android.graphics.drawable.Drawable getIconDrawable();
     method public java.lang.CharSequence getName();
@@ -20754,6 +20755,10 @@ package android.media {
     method public void requestSetVolume(int);
     method public void requestUpdateVolume(int);
     method public void setTag(java.lang.Object);
+    field public static final int DEVICE_TYPE_BLUETOOTH = 3; // 0x3
+    field public static final int DEVICE_TYPE_SPEAKER = 2; // 0x2
+    field public static final int DEVICE_TYPE_TV = 1; // 0x1
+    field public static final int DEVICE_TYPE_UNKNOWN = 0; // 0x0
     field public static final int PLAYBACK_TYPE_LOCAL = 0; // 0x0
     field public static final int PLAYBACK_TYPE_REMOTE = 1; // 0x1
     field public static final int PLAYBACK_VOLUME_FIXED = 0; // 0x0
