@@ -1417,16 +1417,18 @@ public class AppTransition implements Dump {
             mDefaultNextAppTransitionAnimationSpec = null;
             mNextAppTransitionAnimationsSpecs.clear();
             mNextAppTransitionScaleUp = scaleUp;
-            for (int i = 0; i < specs.length; i++) {
-                AppTransitionAnimationSpec spec = specs[i];
-                if (spec != null) {
-                    mNextAppTransitionAnimationsSpecs.put(spec.taskId, spec);
-                    if (i == 0) {
-                        // In full screen mode, the transition code depends on the default spec to
-                        // be set.
-                        Rect rect = spec.rect;
-                        putDefaultNextAppTransitionCoordinates(rect.left, rect.top, rect.width(),
-                                rect.height(), null);
+            if (specs != null) {
+                for (int i = 0; i < specs.length; i++) {
+                    AppTransitionAnimationSpec spec = specs[i];
+                    if (spec != null) {
+                        mNextAppTransitionAnimationsSpecs.put(spec.taskId, spec);
+                        if (i == 0) {
+                            // In full screen mode, the transition code depends on the default spec
+                            // to be set.
+                            Rect rect = spec.rect;
+                            putDefaultNextAppTransitionCoordinates(rect.left, rect.top,
+                                    rect.width(), rect.height(), null);
+                        }
                     }
                 }
             }
