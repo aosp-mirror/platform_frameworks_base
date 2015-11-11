@@ -932,6 +932,13 @@ class WindowSurfacePlacer {
                     win.prelayout();
                     mService.mPolicy.layoutWindowLw(win, null);
                     win.mLayoutSeq = seq;
+
+                    // Window frames may have changed. Update dim layer with the new bounds.
+                    final Task task = win.getTask();
+                    if (task != null) {
+                        displayContent.mDimLayerController.updateDimLayer(task);
+                    }
+
                     if (DEBUG_LAYOUT) Slog.v(TAG,
                             "  LAYOUT: mFrame="
                             + win.mFrame + " mContainingFrame="
@@ -986,7 +993,7 @@ class WindowSurfacePlacer {
             }
         }
 
-        // Window frames may have changed.  Tell the input dispatcher about it.
+        // Window frames may have changed. Tell the input dispatcher about it.
         mService.mInputMonitor.setUpdateInputWindowsNeededLw();
         if (updateInputWindows) {
             mService.mInputMonitor.updateInputWindowsLw(false /*force*/);

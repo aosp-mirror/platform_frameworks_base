@@ -87,7 +87,7 @@ public class DockedStackDividerController {
             frame.set(mLastRect);
             return;
         } else {
-            stack.getBounds(mTmpRect);
+            stack.getDimBounds(mTmpRect);
         }
         int side = stack.getDockSide();
         switch (side) {

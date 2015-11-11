@@ -1133,7 +1133,7 @@ class WindowStateAnimator {
         // gets removed. The window that will replace it will abide them.
         if (task != null && appToken.mCropWindowsToStack && !appToken.mWillReplaceWindow) {
             TaskStack stack = task.mStack;
-            stack.getBounds(mTmpStackBounds);
+            stack.getDimBounds(mTmpStackBounds);
             // When we resize we use the big surface approach, which means we can't trust the
             // window frame bounds anymore. Instead, the window will be placed at 0, 0, but to avoid
             // hardcoding it, we use surface coordinates.

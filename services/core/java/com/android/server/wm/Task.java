@@ -253,12 +253,70 @@ class Task implements DimLayer.DimLayerUser {
         return false;
     }
 
-    /** Bounds of the task with other system factors taken into consideration. */
-    @Override
+    /** Original bounds of the task if applicable, otherwise fullscreen rect. */
     public void getBounds(Rect out) {
         if (useCurrentBounds()) {
             // No need to adjust the output bounds if fullscreen or the docked stack is visible
             // since it is already what we want to represent to the rest of the system.
+            out.set(mBounds);
+            return;
+        }
+
+        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
+        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
+        // system.
+        mStack.getDisplayContent().getLogicalDisplayRect(out);
+    }
+
+
+    /**
+     * Calculate the maximum visible area of this task. If the task has only one app,
+     * the result will be visible frame of that app. If the task has more than one apps,
+     * we search from top down if the next app got different visible area.
+     *
+     * This effort is to handle the case where some task (eg. GMail composer) might pop up
+     * a dialog that's different in size from the activity below, in which case we should
+     * be dimming the entire task area behind the dialog.
+     *
+     * @param out Rect containing the max visible bounds.
+     * @return true if the task has some visible app windows; false otherwise.
+     */
+    boolean getMaxVisibleBounds(Rect out) {
+        boolean foundTop = false;
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            final WindowState win = mAppTokens.get(i).findMainWindow();
+            if (win == null) {
+                continue;
+            }
+            if (!foundTop) {
+                out.set(win.mVisibleFrame);
+                foundTop = true;
+                continue;
+            }
+            if (win.mVisibleFrame.left < out.left) {
+                out.left = win.mVisibleFrame.left;
+            }
+            if (win.mVisibleFrame.top < out.top) {
+                out.top = win.mVisibleFrame.top;
+            }
+            if (win.mVisibleFrame.right > out.right) {
+                out.right = win.mVisibleFrame.right;
+            }
+            if (win.mVisibleFrame.bottom > out.bottom) {
+                out.bottom = win.mVisibleFrame.bottom;
+            }
+        }
+        return foundTop;
+    }
+
+    /** Bounds of the task to be used for dimming, as well as touch related tests. */
+    @Override
+    public void getDimBounds(Rect out) {
+        if (useCurrentBounds()) {
+            if (inFreeformWorkspace() && getMaxVisibleBounds(out)) {
+                return;
+            }
+
             out.set(mBounds);
             return;
         }

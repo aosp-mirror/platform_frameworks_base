@@ -297,7 +297,7 @@ class DisplayContent {
                 // windows frames when the app window is the IME target.
                 final WindowState win = task.getTopAppMainWindow();
                 if (win != null) {
-                    win.getVisibleBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
+                    win.getVisibleBounds(mTmpRect);
                     if (mTmpRect.contains(x, y)) {
                         return task.mTaskId;
                     }
@@ -332,7 +332,7 @@ class DisplayContent {
                 // start at (0,0) after it's adjusted for the status bar.)
                 final WindowState win = task.getTopAppMainWindow();
                 if (win != null) {
-                    win.getVisibleBounds(mTmpRect, !BOUNDS_FOR_TOUCH);
+                    win.getVisibleBounds(mTmpRect);
                     mTmpRect.inset(-delta, -delta);
                     if (mTmpRect.contains(x, y)) {
                         mTmpRect.inset(delta, delta);
