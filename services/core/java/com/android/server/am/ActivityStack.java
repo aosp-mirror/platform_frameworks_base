@@ -4611,12 +4611,18 @@ final class ActivityStack {
                 voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, false);
-        if (mTaskPositioner != null) {
-            mTaskPositioner.updateDefaultBounds(task, mTaskHistory, info.layout);
-        } else if (mBounds != null && task.mResizeable) {
+        if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.mResizeable) {
             task.updateOverrideConfiguration(mBounds);
         }
         return task;
+    }
+
+    boolean layoutTaskInStack(TaskRecord task, ActivityInfo.Layout layout) {
+        if (mTaskPositioner == null) {
+            return false;
+        }
+        mTaskPositioner.updateDefaultBounds(task, mTaskHistory, layout);
+        return true;
     }
 
     ArrayList<TaskRecord> getAllTasks() {
