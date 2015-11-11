@@ -69,7 +69,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorPrimary">
+            android:textColor="?android:attr/textColorPrimary"
+            android:singleLine="true"
+            android:ellipsize="end">
         </TextView>
 
         <TextView
@@ -87,7 +89,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorPrimary">
+            android:textColor="?android:attr/textColorPrimary"
+            android:singleLine="true"
+            android:ellipsize="end">
         </TextView>
 
     </LinearLayout>
