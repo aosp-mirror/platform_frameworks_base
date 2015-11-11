@@ -24,6 +24,10 @@ import android.util.Pair;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.security.KeyStore;
+import java.security.Provider;
+import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
@@ -31,6 +35,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 public class XmlConfigTests extends AndroidTestCase {
 
@@ -374,5 +379,27 @@ public class XmlConfigTests extends AndroidTestCase {
 
     public void testBadConfig5() throws Exception {
         testBadConfig(R.xml.bad_config4);
+    }
+
+    public void testTrustManagerKeystore() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.bad_pin, true);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        Provider provider = new NetworkSecurityConfigProvider();
+        TrustManagerFactory tmf =
+                TrustManagerFactory.getInstance("PKIX", provider);
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(null);
+        int i = 0;
+        for (X509Certificate cert : SystemCertificateSource.getInstance().getCertificates()) {
+            keystore.setEntry(String.valueOf(i),
+                    new KeyStore.TrustedCertificateEntry(cert),
+                    null);
+            i++;
+        }
+        tmf.init(keystore);
+        TrustManager[] tms = tmf.getTrustManagers();
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, tms, null);
+        TestUtils.assertConnectionSucceeds(context, "android.com" , 443);
     }
 }
