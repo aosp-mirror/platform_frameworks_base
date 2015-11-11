@@ -128,6 +128,15 @@ public class EditText extends TextView {
 
     /** @hide */
     @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        if (isEnabled()) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT);
+        }
+    }
+
+    /** @hide */
+    @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SET_TEXT: {
