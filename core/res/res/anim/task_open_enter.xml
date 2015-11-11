@@ -30,5 +30,5 @@
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/decelerate_quint"
             android:startOffset="300"
-            android:duration="417" />
+            android:duration="350" />
 </set>

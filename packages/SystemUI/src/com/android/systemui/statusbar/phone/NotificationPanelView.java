@@ -2249,7 +2249,7 @@ public class NotificationPanelView extends PanelView implements
 
                 // This gets called in the middle of the touch handling, where the state is still
                 // that we are tracking the panel. Collapse the panel after this is done.
-                post(mPostCollapseRunnable);
+                post(mEmptySpaceClickedRunnable);
                 return false;
             default:
                 return true;

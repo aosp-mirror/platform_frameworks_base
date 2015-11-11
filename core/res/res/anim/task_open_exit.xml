@@ -28,16 +28,16 @@
     <translate android:fromYDelta="0" android:toYDelta="10%"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:interpolator="@interpolator/accelerate_cubic"
-            android:duration="433"/>
+            android:duration="350"/>
 
     <scale android:fromXScale="1.0" android:toXScale="0.9"
             android:fromYScale="1.0" android:toYScale="0.9"
             android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
             android:pivotX="50%p" android:pivotY="50%p"
             android:interpolator="@interpolator/fast_out_slow_in"
-            android:duration="433" />
+            android:duration="350" />
 
     <!-- This is needed to keep the animation running while task_open_enter completes -->
     <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:duration="700" />
+            android:duration="650" />
 </set>
