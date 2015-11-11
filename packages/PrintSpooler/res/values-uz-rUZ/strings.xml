@@ -74,6 +74,8 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Printer ulanmagan"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"noma’lum"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – mavjud emas"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> xizmatidan foydalanilsinmi?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Hujjatingiz chop etilishidan oldin bir yoki bir necha serverlardan o‘tishi mumkin."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Oq &amp; qora"</item>
     <item msgid="2762241247228983754">"Rang"</item>

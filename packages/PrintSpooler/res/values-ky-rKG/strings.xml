@@ -74,6 +74,8 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Принтер менен байланыш жок"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"белгисиз"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – жеткиликтүү эмес"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> колдонулсунбу?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"Принтерге жеткиче документиңиз бир же андан көп серверлерден өтүшү мүмкүн."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Кара-ак"</item>
     <item msgid="2762241247228983754">"Түстүү"</item>
