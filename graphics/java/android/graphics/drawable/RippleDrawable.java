@@ -160,7 +160,7 @@ public class RippleDrawable extends LayerDrawable {
     private Paint mRipplePaint;
 
     /** Target density of the display into which ripples are drawn. */
-    private float mDensity = 1.0f;
+    private int mDensity;
 
     /** Whether bounds are being overridden. */
     private boolean mOverrideBounds;
@@ -544,8 +544,7 @@ public class RippleDrawable extends LayerDrawable {
             mBackground = new RippleBackground(this, mHotspotBounds, mForceSoftware);
         }
 
-        final float densityScale = mState.mDensity * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        mBackground.setup(mState.mMaxRadius, densityScale);
+        mBackground.setup(mState.mMaxRadius, mDensity);
         mBackground.enter(focused);
     }
 
