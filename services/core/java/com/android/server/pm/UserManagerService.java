@@ -1563,13 +1563,15 @@ public class UserManagerService extends IUserManager.Stub {
                             userInfo.restrictedProfileParentId = parent.restrictedProfileParentId;
                         }
                     }
+
                     final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                    storage.createUserKey(userId, userInfo.serialNumber);
                     for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
                         final String volumeUuid = vol.getFsUuid();
                         try {
                             final File userDir = Environment.getDataUserDirectory(volumeUuid,
                                     userId);
-                            prepareUserDirectory(mContext, volumeUuid, userId);
+                            storage.prepareUserStorage(volumeUuid, userId, userInfo.serialNumber);
                             enforceSerialNumber(userDir, userInfo.serialNumber);
                         } catch (IOException e) {
                             Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);
@@ -1797,8 +1799,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void removeUserStateLILP(final int userHandle) {
-        mContext.getSystemService(StorageManager.class)
-            .deleteUserKey(userHandle);
+        mContext.getSystemService(StorageManager.class).destroyUserKey(userHandle);
         // Cleanup package manager settings
         mPm.cleanUpUserLILPw(this, userHandle);
 
@@ -2180,16 +2181,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     private String packageToRestrictionsFileName(String packageName) {
         return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
-    }
-
-    /**
-     * Create new {@code /data/user/[id]} directory and sets default
-     * permissions.
-     */
-    public static void prepareUserDirectory(Context context, String volumeUuid, int userId) {
-        final StorageManager storage = context.getSystemService(StorageManager.class);
-        final File userDir = Environment.getDataUserDirectory(volumeUuid, userId);
-        storage.createNewUserDir(userId, userDir);
     }
 
     /**

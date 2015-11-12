@@ -2636,6 +2636,10 @@ public class PackageParser {
                 && (flags & PARSE_IS_SYSTEM) != 0) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED;
         }
+        if (sa.getBoolean(R.styleable.AndroidManifestApplication_encryptionAware, false)
+                && (flags & PARSE_IS_SYSTEM) != 0) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE;
+        }
 
         String str;
         str = sa.getNonConfigurationString(
@@ -3236,7 +3240,8 @@ public class PackageParser {
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
 
             a.info.encryptionAware = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_encryptionAware, false);
+                    R.styleable.AndroidManifestActivity_encryptionAware,
+                    owner.applicationInfo.isEncryptionAware());
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
@@ -3253,7 +3258,8 @@ public class PackageParser {
             }
 
             a.info.encryptionAware = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_encryptionAware, false);
+                    R.styleable.AndroidManifestActivity_encryptionAware,
+                    owner.applicationInfo.isEncryptionAware());
         }
 
         sa.recycle();
@@ -3655,7 +3661,8 @@ public class PackageParser {
         }
 
         p.info.encryptionAware = sa.getBoolean(
-                R.styleable.AndroidManifestProvider_encryptionAware, false);
+                R.styleable.AndroidManifestProvider_encryptionAware,
+                owner.applicationInfo.isEncryptionAware());
 
         sa.recycle();
 
@@ -3938,7 +3945,8 @@ public class PackageParser {
         }
 
         s.info.encryptionAware = sa.getBoolean(
-                R.styleable.AndroidManifestService_encryptionAware, false);
+                R.styleable.AndroidManifestService_encryptionAware,
+                owner.applicationInfo.isEncryptionAware());
 
         sa.recycle();
 

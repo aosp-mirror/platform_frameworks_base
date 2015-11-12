@@ -291,21 +291,26 @@ public class VoiceInteractionManagerService extends SystemService {
                 String curService = Settings.Secure.getStringForUser(
                         mResolver, Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);
                 ComponentName serviceComponent = null;
+                ServiceInfo serviceInfo = null;
                 if (curService != null && !curService.isEmpty()) {
                     try {
                         serviceComponent = ComponentName.unflattenFromString(curService);
-                    } catch (RuntimeException e) {
+                        serviceInfo = AppGlobals.getPackageManager()
+                                .getServiceInfo(serviceComponent, 0, mCurUser);
+                    } catch (RuntimeException | RemoteException e) {
                         Slog.wtf(TAG, "Bad voice interaction service name " + curService, e);
                         serviceComponent = null;
+                        serviceInfo = null;
                     }
                 }
+
                 if (force || mImpl == null || mImpl.mUser != mCurUser
                         || !mImpl.mComponent.equals(serviceComponent)) {
                     mSoundTriggerHelper.stopAllRecognitions();
                     if (mImpl != null) {
                         mImpl.shutdownLocked();
                     }
-                    if (serviceComponent != null) {
+                    if (serviceComponent != null && serviceInfo != null) {
                         mImpl = new VoiceInteractionManagerServiceImpl(mContext,
                                 UiThread.getHandler(), this, mCurUser, serviceComponent);
                         mImpl.startLocked();

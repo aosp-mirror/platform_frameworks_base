@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.os.Process.SYSTEM_UID;
@@ -57,8 +56,11 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -134,7 +136,9 @@ final class UserController {
         mService = service;
         mHandler = mService.mHandler;
         // User 0 is the first and only user that runs at boot.
-        mStartedUsers.put(UserHandle.USER_SYSTEM, new UserState(UserHandle.SYSTEM, true));
+        final UserState uss = new UserState(UserHandle.SYSTEM);
+        mStartedUsers.put(UserHandle.USER_SYSTEM, uss);
+        updateUserUnlockedState(uss);
         mUserLru.add(UserHandle.USER_SYSTEM);
         updateStartedUserArrayLocked();
     }
@@ -409,6 +413,21 @@ final class UserController {
         return userManager;
     }
 
+    private void updateUserUnlockedState(UserState uss) {
+        final IMountService mountService = IMountService.Stub
+                .asInterface(ServiceManager.getService(Context.STORAGE_SERVICE));
+        if (mountService != null) {
+            try {
+                uss.unlocked = mountService.isUserKeyUnlocked(uss.mHandle.getIdentifier());
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            // System isn't fully booted yet, so guess based on property
+            uss.unlocked = !SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false);
+        }
+    }
+
     boolean startUser(final int userId, final boolean foreground) {
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -453,10 +472,13 @@ final class UserController {
                 // If the user we are switching to is not currently started, then
                 // we need to start it now.
                 if (mStartedUsers.get(userId) == null) {
-                    mStartedUsers.put(userId, new UserState(new UserHandle(userId), false));
+                    mStartedUsers.put(userId, new UserState(new UserHandle(userId)));
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }
+
+                final UserState uss = mStartedUsers.get(userId);
+                updateUserUnlockedState(uss);
 
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
@@ -478,8 +500,6 @@ final class UserController {
                     mUserLru.remove(currentUserIdInt);
                     mUserLru.add(currentUserIdInt);
                 }
-
-                final UserState uss = mStartedUsers.get(userId);
 
                 // Make sure user is in the started state.  If it is currently
                 // stopping, we need to knock that off.
@@ -956,8 +976,11 @@ final class UserController {
             return true;
         }
         if ((flags & ActivityManager.FLAG_WITH_AMNESIA) != 0) {
-            // TODO: add in amnesia lifecycle
-            return false;
+            // If user is currently locked, we fall through to default "running"
+            // behavior below
+            if (state.unlocked) {
+                return false;
+            }
         }
         return state.mState != UserState.STATE_STOPPING
                 && state.mState != UserState.STATE_SHUTDOWN;

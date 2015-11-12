@@ -40,6 +40,7 @@ public final class UserState {
     public int mState = STATE_BOOTING;
     public boolean switching;
     public boolean initializing;
+    public boolean unlocked;
 
     /**
      * The last time that a provider was reported to usage stats as being brought to important
@@ -47,7 +48,7 @@ public final class UserState {
      */
     public final ArrayMap<String,Long> mProviderLastReportedFg = new ArrayMap<>();
 
-    public UserState(UserHandle handle, boolean initial) {
+    public UserState(UserHandle handle) {
         mHandle = handle;
     }
 
@@ -62,6 +63,11 @@ public final class UserState {
         }
         if (switching) pw.print(" SWITCHING");
         if (initializing) pw.print(" INITIALIZING");
+        if (unlocked) {
+            pw.print(" UNLOCKED");
+        } else {
+            pw.print(" LOCKED");
+        }
         pw.println();
     }
 }

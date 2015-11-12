@@ -22,7 +22,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Printer;
 
@@ -467,6 +469,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public static final int PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED = 1 << 5;
+
+    /**
+     * When set, assume that all components under the given app are encryption
+     * aware, unless otherwise specified.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ENCRYPTION_AWARE = 1 << 6;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
@@ -963,7 +973,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 .getDataUserCredentialEncryptedPackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
 
-        if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0) {
+        if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0
+                && SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false)) {
             dataDir = deviceEncryptedDataDir;
         } else {
             dataDir = credentialEncryptedDataDir;
@@ -1028,6 +1039,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public boolean isExternalAsec() {
         return TextUtils.isEmpty(volumeUuid)
                 && (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
+    }
+
+    /** @hide */
+    public boolean isEncryptionAware() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE) != 0;
     }
 
     /**

@@ -185,15 +185,6 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
-    public int rename(String oldname, String newname) {
-        StringBuilder builder = new StringBuilder("rename");
-        builder.append(' ');
-        builder.append(oldname);
-        builder.append(' ');
-        builder.append(newname);
-        return mInstaller.execute(builder.toString());
-    }
-
     @Deprecated
     public int fixUid(String name, int uid, int gid) {
         return fixUid(null, name, uid, gid);
