@@ -164,16 +164,37 @@ const static TestData sTestDataSet[] = {
 
 };
 
+struct StringPath {
+    const char* stringPath;
+    bool isValid;
+};
+
+const StringPath sStringPaths[] = {
+    {"3e...3", false},
+    {"L.M.F.A.O", false},
+    {"m 1 1", true},
+    {"z", true},
+    {"1-2e34567", false}
+};
+
 TEST(PathParser, parseStringForData) {
     for (TestData testData: sTestDataSet) {
+        PathParser::ParseResult result;
         // Test generated path data against the given data.
         PathData pathData;
         size_t length = strlen(testData.pathString);
-        PathParser::getPathDataFromString(&pathData, testData.pathString, length);
-        PathParser::dump(pathData);
+        PathParser::getPathDataFromString(&pathData, &result, testData.pathString, length);
         EXPECT_EQ(testData.pathData, pathData);
     }
 
+    for (StringPath stringPath : sStringPaths) {
+        PathParser::ParseResult result;
+        PathData pathData;
+        SkPath skPath;
+        PathParser::getPathDataFromString(&pathData, &result,
+                stringPath.stringPath, strlen(stringPath.stringPath));
+        EXPECT_EQ(stringPath.isValid, !result.failureOccurred);
+    }
 }
 
 TEST(PathParser, createSkPathFromPathData) {
@@ -188,21 +209,25 @@ TEST(PathParser, createSkPathFromPathData) {
 
 TEST(PathParser, parseStringForSkPath) {
     for (TestData testData: sTestDataSet) {
+        PathParser::ParseResult result;
         size_t length = strlen(testData.pathString);
         // Check the return value as well as the SkPath generated.
         SkPath actualPath;
-        bool hasValidData = PathParser::parseStringForSkPath(&actualPath, testData.pathString,
-                length);
+        PathParser::parseStringForSkPath(&actualPath, &result, testData.pathString, length);
+        bool hasValidData = !result.failureOccurred;
         EXPECT_EQ(hasValidData, testData.pathData.verbs.size() > 0);
         SkPath expectedPath;
         testData.skPathLamda(&expectedPath);
         EXPECT_EQ(expectedPath, actualPath);
     }
-    SkPath path;
-    EXPECT_FALSE(PathParser::parseStringForSkPath(&path, "l", 1));
-    EXPECT_FALSE(PathParser::parseStringForSkPath(&path, "1 1", 3));
-    EXPECT_FALSE(PathParser::parseStringForSkPath(&path, "LMFAO", 5));
-    EXPECT_TRUE(PathParser::parseStringForSkPath(&path, "m1 1", 4));
+
+    for (StringPath stringPath : sStringPaths) {
+        PathParser::ParseResult result;
+        SkPath skPath;
+        PathParser::parseStringForSkPath(&skPath, &result, stringPath.stringPath,
+                strlen(stringPath.stringPath));
+        EXPECT_EQ(stringPath.isValid, !result.failureOccurred);
+    }
 }
 
 }; // namespace uirenderer

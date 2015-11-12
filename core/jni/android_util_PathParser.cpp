@@ -19,6 +19,7 @@
 #include <PathParser.h>
 #include <SkPath.h>
 
+#include <android/log.h>
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -27,10 +28,14 @@ static bool parseStringForPath(JNIEnv* env, jobject, jlong skPathHandle, jstring
         jint strLength) {
     const char* pathString = env->GetStringUTFChars(inputPathStr, NULL);
     SkPath* skPath = reinterpret_cast<SkPath*>(skPathHandle);
-    bool hasValidData = android::uirenderer::PathParser::parseStringForSkPath(skPath, pathString,
-            strLength);
+
+    android::uirenderer::PathParser::ParseResult result;
+    android::uirenderer::PathParser::parseStringForSkPath(skPath, &result, pathString, strLength);
     env->ReleaseStringUTFChars(inputPathStr, pathString);
-    return hasValidData;
+    if (result.failureOccurred) {
+        ALOGE(result.failureMessage.c_str());
+    }
+    return !result.failureOccurred;
 }
 
 static const JNINativeMethod gMethods[] = {
