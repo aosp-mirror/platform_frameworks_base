@@ -41,7 +41,7 @@ public final class NetworkSecurityConfig {
     private final List<CertificatesEntryRef> mCertificatesEntryRefs;
     private Set<TrustAnchor> mAnchors;
     private final Object mAnchorsLock = new Object();
-    private X509TrustManager mTrustManager;
+    private NetworkSecurityTrustManager mTrustManager;
     private final Object mTrustManagerLock = new Object();
 
     private NetworkSecurityConfig(boolean cleartextTrafficPermitted, boolean hstsEnforced,
@@ -78,7 +78,7 @@ public final class NetworkSecurityConfig {
         return mPins;
     }
 
-    public X509TrustManager getTrustManager() {
+    public NetworkSecurityTrustManager getTrustManager() {
         synchronized(mTrustManagerLock) {
             if (mTrustManager == null) {
                 mTrustManager = new NetworkSecurityTrustManager(this);
