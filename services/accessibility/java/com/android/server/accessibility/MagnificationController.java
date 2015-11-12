@@ -341,7 +341,7 @@ class MagnificationController {
         mTransformationAnimator.start();
     }
 
-    private void setMagnificationSpec(MagnificationSpec spec) {
+    public void setMagnificationSpec(MagnificationSpec spec) {
         if (DEBUG_SET_MAGNIFICATION_SPEC) {
             Slog.i(LOG_TAG, "Sending: " + spec);
         }
@@ -349,6 +349,10 @@ class MagnificationController {
         mSentMagnificationSpec.offsetX = spec.offsetX;
         mSentMagnificationSpec.offsetY = spec.offsetY;
         mWindowManager.setMagnificationSpec(MagnificationSpec.obtain(spec));
+    }
+
+    public MagnificationSpec getMagnificationSpec() {
+        return mSentMagnificationSpec;
     }
 
     private static class MagnificationSpecEvaluator implements TypeEvaluator<MagnificationSpec> {
