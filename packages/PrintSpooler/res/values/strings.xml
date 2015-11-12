@@ -149,6 +149,9 @@
     <!-- Title for the prompt shown as a placeholder if no printers are found while not searching. [CHAR LIMIT=50] -->
     <string name="print_searching_for_printers">Searching for printers</string>
 
+    <!-- Title for the prompt shown as a placeholder if there are no print services. [CHAR LIMIT=50] -->
+    <string name="print_no_print_services">No print services enabled</string>
+
     <!-- Title for the prompt shown as a placeholder if there are no printers while searching. [CHAR LIMIT=50] -->
     <string name="print_no_printers">No printers found</string>
 
