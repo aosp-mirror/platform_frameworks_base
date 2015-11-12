@@ -31,11 +31,13 @@ import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.Until;
 import android.test.InstrumentationTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import com.android.documentsui.model.RootInfo;
 
+@LargeTest
 public class FilesActivityUiTest extends InstrumentationTestCase {
 
     private static final int TIMEOUT = 5000;

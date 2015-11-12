@@ -25,6 +25,7 @@ import android.provider.DocumentsContract.Document;
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ViewGroup;
 
 import com.android.documentsui.DirectoryResult;
@@ -34,6 +35,7 @@ import com.android.documentsui.model.DocumentInfo;
 
 import java.util.List;
 
+@SmallTest
 public class DirectoryFragmentModelTest extends AndroidTestCase {
 
     private static final int ITEM_COUNT = 5;

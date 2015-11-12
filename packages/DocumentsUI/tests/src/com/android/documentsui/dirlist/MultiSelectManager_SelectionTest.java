@@ -17,10 +17,11 @@
 package com.android.documentsui.dirlist;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
-
+@SmallTest
 public class MultiSelectManager_SelectionTest extends AndroidTestCase{
 
     private Selection selection;
