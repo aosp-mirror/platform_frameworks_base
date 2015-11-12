@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -93,6 +94,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     int mHighlightInFillAlpha;
     int mHighlightInCircleAlpha;
     int mHighlightOutFillAlpha;
+    boolean mHighlightAnimatorWasTriggered;
 
     // Optimizations
     ValueAnimator.AnimatorUpdateListener mUpdateDimListener =
@@ -129,6 +131,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         setOutlineProvider(mViewBounds);
 
         mHighlightAnimator = ObjectAnimator.ofFloat(this, "highlightProgress", 1f);
+        mHighlightAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                mHighlightAnimatorWasTriggered = true;
+            }
+        });
+
         mHighlightColor =
                 context.getResources().getColor(R.color.status_bar_recents_highlight_color);
         mHighlightPaint.setColor(mHighlightColor);
@@ -145,6 +154,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         resetNoUserInteractionState();
         setClipViewInStack(false);
         setCallbacks(null);
+        disableFocusAnimations();
     }
 
     /** Gets the task */
@@ -548,20 +558,23 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     public void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if (mIsFocused) {
-            final int x = getWidth() / 2;
-            final int y = getHeight() / 2;
-            final float hypot = (float) Math.hypot(x, y);
-            final float radius = hypot * mHighlightInCircleRadiusProgress;
 
-            mHighlightPaint.setAlpha(mHighlightInFillAlpha);
-            canvas.drawRect(0, 0, getWidth(), getHeight(), mHighlightPaint);
+        if (mHighlightAnimatorWasTriggered) {
+            if (mIsFocused) {
+                final int x = getWidth() / 2;
+                final int y = getHeight() / 2;
+                final float hypot = (float) Math.hypot(x, y);
+                final float radius = hypot * mHighlightInCircleRadiusProgress;
 
-            mHighlightPaint.setAlpha(mHighlightInCircleAlpha);
-            canvas.drawCircle(x, y, radius, mHighlightPaint);
-        } else {
-            mHighlightPaint.setAlpha(mHighlightOutFillAlpha);
-            canvas.drawRect(0, 0, getWidth(), getHeight(), mHighlightPaint);
+                mHighlightPaint.setAlpha(mHighlightInFillAlpha);
+                canvas.drawRect(0, 0, getWidth(), getHeight(), mHighlightPaint);
+
+                mHighlightPaint.setAlpha(mHighlightInCircleAlpha);
+                canvas.drawCircle(x, y, radius, mHighlightPaint);
+            } else {
+                mHighlightPaint.setAlpha(mHighlightOutFillAlpha);
+                canvas.drawRect(0, 0, getWidth(), getHeight(), mHighlightPaint);
+            }
         }
     }
 
@@ -737,10 +750,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void enableFocusAnimations() {
         boolean wasFocusAnimationsEnabled = mFocusAnimationsEnabled;
         mFocusAnimationsEnabled = true;
-        if (mIsFocused) {
+        if (mIsFocused && !wasFocusAnimationsEnabled) {
             // Re-notify the header if we were focused and animations were not previously enabled
             performFocusAnimation();
         }
+    }
+
+    void disableFocusAnimations() {
+        mFocusAnimationsEnabled = false;
+        mIsFocused = false;
+        mHighlightAnimatorWasTriggered = false;
     }
 
     public void disableLayersForOneFrame() {
