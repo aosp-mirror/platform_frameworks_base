@@ -18,6 +18,7 @@ package com.android.settingslib.drawer;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Pair;
@@ -54,6 +55,13 @@ public class SettingsDrawerActivity extends Activity {
             return;
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.action_bar);
+        TypedArray theme = getTheme().obtainStyledAttributes(android.R.styleable.Theme);
+        if (theme.getBoolean(android.R.styleable.Theme_windowNoTitle, false)) {
+            toolbar.setVisibility(View.GONE);
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerLayout = null;
+            return;
+        }
         setActionBar(toolbar);
         mDrawerAdapter = new SettingsDrawerAdapter(this);
         ListView listView = (ListView) findViewById(R.id.left_drawer);
