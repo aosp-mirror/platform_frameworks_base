@@ -31,14 +31,15 @@ class BluetoothService extends SystemService {
 
     @Override
     public void onStart() {
-        Log.d(TAG, "onStart: publishing BluetoothManagerService");
-        publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, mBluetoothManagerService);
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
+            publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, mBluetoothManagerService);
+        } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            Log.d(TAG, "onBootPhase: PHASE_ACTIVITY_MANAGER_READY");
             mBluetoothManagerService.handleOnBootPhase();
         }
     }
