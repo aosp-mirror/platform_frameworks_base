@@ -80,10 +80,4 @@ public abstract class DevicePolicyManagerInternal {
      * This method always returns a new {@link Bundle}.
      */
     public abstract Bundle getComposedUserRestrictions(int userId, Bundle inBundle);
-
-    /**
-     * @return true if a package is a device admin (possibly DO or PO) running on
-     * user {@code userId}.
-     */
-    public abstract boolean isDeviceAdminPackage(int userId, String packageName);
 }

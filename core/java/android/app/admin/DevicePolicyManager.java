@@ -595,7 +595,7 @@ public class DevicePolicyManager {
      * extra field. This will invoke a UI to bring the user through adding the profile owner admin
      * to remotely control restrictions on the user.
      *
-     * <p>The intent must be invoked via {@link Activity#startActivityForResult} to receive the
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult()} to receive the
      * result of whether or not the user approved the action. If approved, the result will
      * be {@link Activity#RESULT_OK} and the component will be set as an active admin as well
      * as a profile owner.
@@ -2996,7 +2996,7 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * @param userId The user for whom to fetch the profile owner name, if any.
+     * @param user The user for whom to fetch the profile owner name, if any.
      * @return the human readable name of the organisation associated with this profile owner or
      *         null if one is not set.
      * @throws IllegalArgumentException if the userId is invalid.
