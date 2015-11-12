@@ -55,8 +55,6 @@ import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
 import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
-import android.app.admin.DevicePolicyManagerInternal;
-import android.app.admin.IDevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.usage.UsageEvents;
@@ -501,6 +499,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * List of packages whitelisted by DevicePolicyManager for locktask. Indexed by userId.
      */
     SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
+
+    /**
+     * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
+     */
+    String mDeviceOwnerName;
 
     final UserController mUserController;
 
@@ -5132,12 +5135,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
-
-        final DevicePolicyManagerInternal dpmi =
-                LocalServices.getService(DevicePolicyManagerInternal.class);
-        if (dpmi != null && dpmi.isDeviceAdminPackage(userId, packageName)) {
-            throw new SecurityException(
-                    "Clearing DeviceAdmin/DeviceOwner/ProfileOwner data is forbidden.");
+        if (packageName != null && packageName.equals(mDeviceOwnerName)) {
+            throw new SecurityException("Clearing DeviceOwner data is forbidden.");
         }
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
@@ -9213,6 +9212,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized(this) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
+        }
+    }
+
+    @Override
+    public void updateDeviceOwner(String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("updateDeviceOwner called from non-system process");
+        }
+        synchronized (this) {
+            mDeviceOwnerName = packageName;
         }
     }
 

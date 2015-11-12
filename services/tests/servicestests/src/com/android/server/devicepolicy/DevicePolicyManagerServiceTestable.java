@@ -128,7 +128,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        IActivityManager getIActivityManagerInner() {
+        IActivityManager getIActivityManager() {
             return context.iactivityManager;
         }
 
