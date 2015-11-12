@@ -3103,6 +3103,9 @@ final class ActivityStack {
             // If the activity is PAUSING, we will complete the finish once
             // it is done pausing; else we can just directly finish it here.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish not pausing: " + r);
+            if (r.visible) {
+                mWindowManager.setAppVisibility(r.appToken, false);
+            }
             return finishCurrentActivityLocked(r, FINISH_AFTER_PAUSE, oomAdj) == null;
         } else {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish waiting for pause of: " + r);
