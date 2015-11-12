@@ -30,9 +30,9 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.util.LruCache;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
@@ -283,9 +283,9 @@ public class RecentsTaskLoader {
                 res.getColor(R.color.recents_task_bar_default_background_color);
         mMaxThumbnailCacheSize = res.getInteger(R.integer.config_recents_max_thumbnail_count);
         mMaxIconCacheSize = res.getInteger(R.integer.config_recents_max_icon_count);
-        int iconCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
+        int iconCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
                 mMaxIconCacheSize;
-        int thumbnailCacheSize = Constants.DebugFlags.App.DisableBackgroundCache ? 1 :
+        int thumbnailCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
                 mMaxThumbnailCacheSize;
 
         // Create the default assets

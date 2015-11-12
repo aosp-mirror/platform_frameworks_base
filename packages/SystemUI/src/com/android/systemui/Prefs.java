@@ -30,7 +30,8 @@ public final class Prefs {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Key.SEARCH_APP_WIDGET_ID,
+        Key.OVERVIEW_SEARCH_APP_WIDGET_ID,
+        Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
         Key.DEBUG_MODE_ENABLED,
         Key.HOTSPOT_TILE_LAST_USED,
         Key.COLOR_INVERSION_TILE_LAST_USED,
@@ -43,8 +44,8 @@ public final class Prefs {
         Key.DND_FAVORITE_ZEN,
     })
     public @interface Key {
-        String SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
-        String SEARCH_APP_WIDGET_PACKAGE = "searchAppWidgetPackage";
+        String OVERVIEW_SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
+        String OVERVIEW_SEARCH_APP_WIDGET_PACKAGE = "searchAppWidgetPackage";
         String DEBUG_MODE_ENABLED = "debugModeEnabled";
         String HOTSPOT_TILE_LAST_USED = "HotspotTileLastUsed";
         String COLOR_INVERSION_TILE_LAST_USED = "ColorInversionTileLastUsed";

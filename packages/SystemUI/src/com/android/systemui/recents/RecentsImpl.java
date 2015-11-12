@@ -324,8 +324,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
-                if (Constants.DebugFlags.App.EnableFastToggleRecents &&
-                        !launchState.launchedWithAltTab) {
+                RecentsDebugFlags flags = Recents.getDebugFlags();
+                if (flags.isFastToggleRecentsEnabled() && !launchState.launchedWithAltTab) {
                     // Notify recents to move onto the next task
                     EventBus.getDefault().post(new IterateRecentsEvent());
                 } else {
@@ -555,7 +555,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         // Update the configuration for the current state
         config.update(mContext, ssp, ssp.getWindowRect());
 
-        if (!Constants.DebugFlags.App.DisableSearchBar && tryAndBindSearchWidget) {
+        if (!RecentsDebugFlags.Static.DisableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
             // have the right thumbnail bounds to animate to.
             // Note: We have to reload the widget id before we get the task stack bounds below
@@ -758,7 +758,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
                 int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
                 thumbnail = Bitmap.createBitmap(toHeaderWidth, toHeaderHeight,
                         Bitmap.Config.ARGB_8888);
-                if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
+                if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
                     thumbnail.eraseColor(0xFFff0000);
                 } else {
                     Canvas c = new Canvas(thumbnail);
@@ -816,11 +816,11 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (!useThumbnailTransition) {
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
-            if (!Constants.DebugFlags.App.DisableSearchBar && hasRecentTasks) {
+            if (!RecentsDebugFlags.Static.DisableSearchBar && hasRecentTasks) {
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 String homeActivityPackage = ssp.getHomeActivityPackageName();
                 String searchWidgetPackage = Prefs.getString(mContext,
-                        Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);
+                        Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null);
 
                 // Determine whether we are coming from a search owned home activity
                 boolean fromSearchHome = (homeActivityPackage != null) &&

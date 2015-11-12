@@ -45,6 +45,7 @@ import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEven
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
@@ -217,14 +218,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mEmptyView = mEmptyViewStub.inflate();
             }
             mEmptyView.setVisibility(View.VISIBLE);
-            if (!Constants.DebugFlags.App.DisableSearchBar) {
+            if (!RecentsDebugFlags.Static.DisableSearchBar) {
                 mRecentsView.setSearchBarVisibility(View.GONE);
             }
         } else {
             if (mEmptyView != null) {
                 mEmptyView.setVisibility(View.GONE);
             }
-            if (!Constants.DebugFlags.App.DisableSearchBar) {
+            if (!RecentsDebugFlags.Static.DisableSearchBar) {
                 if (mRecentsView.hasValidSearchBar()) {
                     mRecentsView.setSearchBarVisibility(View.VISIBLE);
                 } else {
@@ -338,7 +339,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
 
         // Initialize the widget host (the host id is static and does not change)
-        if (!Constants.DebugFlags.App.DisableSearchBar) {
+        if (!RecentsDebugFlags.Static.DisableSearchBar) {
             mAppWidgetHost = new RecentsAppWidgetHost(this, RecentsAppWidgetHost.HOST_ID);
         }
         mPackageMonitor = new RecentsPackageMonitor();
@@ -364,14 +365,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
 
         // Bind the search app widget when we first start up
-        if (!Constants.DebugFlags.App.DisableSearchBar) {
+        if (!RecentsDebugFlags.Static.DisableSearchBar) {
             mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
         }
 
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        if (!Constants.DebugFlags.App.DisableSearchBar) {
+        if (!RecentsDebugFlags.Static.DisableSearchBar) {
             filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         }
         registerReceiver(mSystemBroadcastReceiver, filter);
@@ -433,12 +434,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onPause() {
         super.onPause();
 
-        if (Constants.DebugFlags.App.EnableFastToggleRecents) {
-            // Stop the fast-toggle dozer
-            mIterateTrigger.stopDozing();
-        }
-
-        if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+        RecentsDebugFlags flags = Recents.getDebugFlags();
+        if (flags.isFastToggleRecentsEnabled()) {
             // Stop the fast-toggle dozer
             mIterateTrigger.stopDozing();
         }
@@ -483,7 +480,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mPackageMonitor.unregister();
 
         // Stop listening for widget package changes if there was one bound
-        if (!Constants.DebugFlags.App.DisableSearchBar) {
+        if (!RecentsDebugFlags.Static.DisableSearchBar) {
             mAppWidgetHost.stopListening();
         }
 
@@ -617,7 +614,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         ctx.postAnimationTrigger.increment();
         if (mSearchWidgetInfo != null) {
-            if (!Constants.DebugFlags.App.DisableSearchBar) {
+            if (!RecentsDebugFlags.Static.DisableSearchBar) {
                 ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                     @Override
                     public void run() {
@@ -636,8 +633,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 // the dozer now
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
-                if (Constants.DebugFlags.App.EnableFastToggleRecents &&
-                        !launchState.launchedWithAltTab) {
+                RecentsDebugFlags flags = Recents.getDebugFlags();
+                if (flags.isFastToggleRecentsEnabled() && !launchState.launchedWithAltTab) {
                     mIterateTrigger.startDozing();
                 }
             }
@@ -723,6 +720,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final void onBusEvent(ScreenPinningRequestEvent event) {
         MetricsLogger.count(this, "overview_screen_pinned", 1);
+    }
+
+    public final void onBusEvent(DebugFlagsChangedEvent event) {
+        // Just finish recents so that we can reload the flags anew on the next instantiation
+        finish();
     }
 
     private void refreshSearchWidgetView() {

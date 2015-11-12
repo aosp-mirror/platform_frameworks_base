@@ -24,8 +24,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
@@ -543,7 +543,7 @@ public class TaskStack {
      * Temporary: This method will simulate affiliation groups by
      */
     public void createAffiliatedGroupings(Context context) {
-        if (Constants.DebugFlags.App.EnableSimulatedTaskGroups) {
+        if (RecentsDebugFlags.Static.EnableSimulatedTaskGroups) {
             HashMap<Task.TaskKey, Task> taskMap = new HashMap<Task.TaskKey, Task>();
             // Sort all tasks by increasing firstActiveTime of the task
             ArrayList<Task> tasks = mTaskList.getTasks();
@@ -559,7 +559,7 @@ public class TaskStack {
             String prevPackage = "";
             int prevAffiliation = -1;
             Random r = new Random();
-            int groupCountDown = Constants.DebugFlags.App.TaskAffiliationsGroupCount;
+            int groupCountDown = RecentsDebugFlags.Static.TaskAffiliationsGroupCount;
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 String packageName = t.key.getComponent().getPackageName();
@@ -574,7 +574,7 @@ public class TaskStack {
                     addGroup(group);
                     prevAffiliation = affiliation;
                     prevPackage = packageName;
-                    groupCountDown = Constants.DebugFlags.App.TaskAffiliationsGroupCount;
+                    groupCountDown = RecentsDebugFlags.Static.TaskAffiliationsGroupCount;
                 }
                 group.addTask(t);
                 taskMap.put(t.key, t);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.events.activity;
+
+import com.android.systemui.recents.events.EventBus;
 
 /**
- * Constants
+ * This is sent when the SystemUI tuner changes a flag.
  */
-public class Constants {
-
-    // TODO: Move into RecentsMetrics
-    public static class Metrics {
-        // DO NOT MODIFY THE ORDER OF THESE METRICS
-        public static final int DismissSourceKeyboard = 0;
-        public static final int DismissSourceSwipeGesture = 1;
-        public static final int DismissSourceHeaderButton = 2;
-    }
-
+public class DebugFlagsChangedEvent extends EventBus.Event {
+    // Simple event
 }

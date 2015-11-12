@@ -34,6 +34,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
@@ -319,7 +320,7 @@ public class RecentsTransitionHelper {
             b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
                     Bitmap.Config.ARGB_8888);
 
-            if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
+            if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
                 b.eraseColor(0xFFff0000);
             } else {
                 Canvas c = new Canvas(b);

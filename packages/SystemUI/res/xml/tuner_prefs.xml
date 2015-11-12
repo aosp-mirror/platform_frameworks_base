@@ -87,6 +87,17 @@
 
     </PreferenceScreen>
 
+
+    <PreferenceScreen
+        android:title="@string/overview" >
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="overview_fast_toggle"
+            android:title="@string/overview_fast_toggle_via_button"
+            android:summary="@string/overview_fast_toggle_via_button_desc" />
+
+    </PreferenceScreen>
+
     <SwitchPreference
         android:key="battery_pct"
         android:title="@string/show_battery_percentage"

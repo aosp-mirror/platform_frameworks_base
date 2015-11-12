@@ -63,7 +63,8 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 
 import java.io.IOException;
@@ -113,6 +114,7 @@ public class SystemServicesProxy {
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
+        RecentsDebugFlags flags = Recents.getDebugFlags();
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManagerNative.getDefault();
@@ -124,8 +126,8 @@ public class SystemServicesProxy {
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mHasFreeformWorkspaceSupport = false && mPm.hasSystemFeature(
-                PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+        mHasFreeformWorkspaceSupport = false &&
+                mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -143,7 +145,7 @@ public class SystemServicesProxy {
         // Resolve the assist intent
         mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
 
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
             // Create a dummy icon
             mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             mDummyIcon.eraseColor(0xFF999999);
@@ -156,13 +158,13 @@ public class SystemServicesProxy {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
             ArrayList<ActivityManager.RecentTaskInfo> tasks =
                     new ArrayList<ActivityManager.RecentTaskInfo>();
-            int count = Math.min(numLatestTasks, Constants.DebugFlags.App.SystemServicesProxyMockTaskCount);
+            int count = Math.min(numLatestTasks, RecentsDebugFlags.Static.SystemServicesProxyMockTaskCount);
             for (int i = 0; i < count; i++) {
                 // Create a dummy component name
-                int packageIndex = i % Constants.DebugFlags.App.SystemServicesProxyMockPackageCount;
+                int packageIndex = i % RecentsDebugFlags.Static.SystemServicesProxyMockPackageCount;
                 ComponentName cn = new ComponentName("com.android.test" + packageIndex,
                         "com.android.test" + i + ".Activity");
                 String description = "" + i + " - " +
@@ -381,7 +383,7 @@ public class SystemServicesProxy {
         if (mAm == null) return null;
 
         // If we are mocking, then just return a dummy thumbnail
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
             Bitmap thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth, mDummyThumbnailHeight,
                     Bitmap.Config.ARGB_8888);
             thumbnail.eraseColor(0xff333333);
@@ -443,7 +445,7 @@ public class SystemServicesProxy {
     /** Moves a task to the front with the specified activity options. */
     public void moveTaskToFront(int taskId, ActivityOptions opts) {
         if (mAm == null) return;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return;
 
         if (opts != null) {
             mAm.moveTaskToFront(taskId, ActivityManager.MOVE_TASK_WITH_HOME,
@@ -456,7 +458,7 @@ public class SystemServicesProxy {
     /** Removes the task */
     public void removeTask(final int taskId) {
         if (mAm == null) return;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return;
 
         // Remove the task.
         BackgroundThread.getHandler().post(new Runnable() {
@@ -475,7 +477,7 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
         if (mIpm == null) return null;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return new ActivityInfo();
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return new ActivityInfo();
 
         try {
             return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
@@ -492,7 +494,7 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn) {
         if (mPm == null) return null;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return new ActivityInfo();
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return new ActivityInfo();
 
         try {
             return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);
@@ -507,7 +509,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
             return "Recent Task";
         }
 
@@ -519,7 +521,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
             return "Recent Task";
         }
 
@@ -549,7 +551,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
             return new ColorDrawable(0xFF666666);
         }
 
@@ -580,7 +582,7 @@ public class SystemServicesProxy {
     /** Returns the package name of the home activity. */
     public String getHomeActivityPackageName() {
         if (mPm == null) return null;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return null;
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return null;
 
         ArrayList<ResolveInfo> homeActivities = new ArrayList<ResolveInfo>();
         ComponentName defaultHomeActivity = mPm.getHomeActivities(homeActivities);
@@ -623,22 +625,22 @@ public class SystemServicesProxy {
      * Returns the current search widget id.
      */
     public int getSearchAppWidgetId(Context context) {
-        return Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, -1);
+        return Prefs.getInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, -1);
     }
 
     /**
      * Returns the current search widget info, binding a new one if necessary.
      */
     public AppWidgetProviderInfo getOrBindSearchAppWidget(Context context, AppWidgetHost host) {
-        int searchWidgetId = Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, -1);
+        int searchWidgetId = Prefs.getInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, -1);
         AppWidgetProviderInfo searchWidgetInfo = mAwm.getAppWidgetInfo(searchWidgetId);
         AppWidgetProviderInfo resolvedSearchWidgetInfo = resolveSearchAppWidget();
 
         // Return the search widget info if it hasn't changed
         if (searchWidgetInfo != null && resolvedSearchWidgetInfo != null &&
                 searchWidgetInfo.provider.equals(resolvedSearchWidgetInfo.provider)) {
-            if (Prefs.getString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null) == null) {
-                Prefs.putString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE,
+            if (Prefs.getString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null) == null) {
+                Prefs.putString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
                         searchWidgetInfo.provider.getPackageName());
             }
             return searchWidgetInfo;
@@ -654,16 +656,16 @@ public class SystemServicesProxy {
             Pair<Integer, AppWidgetProviderInfo> widgetInfo = bindSearchAppWidget(host,
                     resolvedSearchWidgetInfo);
             if (widgetInfo != null) {
-                Prefs.putInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, widgetInfo.first);
-                Prefs.putString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE,
+                Prefs.putInt(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID, widgetInfo.first);
+                Prefs.putString(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE,
                         widgetInfo.second.provider.getPackageName());
                 return widgetInfo.second;
             }
         }
 
         // If we fall through here, then there is no resolved search widget, so clear the state
-        Prefs.remove(context, Prefs.Key.SEARCH_APP_WIDGET_ID);
-        Prefs.remove(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE);
+        Prefs.remove(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_ID);
+        Prefs.remove(context, Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE);
         return null;
     }
 

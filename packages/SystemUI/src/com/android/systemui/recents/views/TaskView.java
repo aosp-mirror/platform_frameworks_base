@@ -45,6 +45,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
@@ -324,22 +325,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         if (launchState.launchedFromAppWithThumbnail) {
             if (mTask.isLaunchTarget) {
-                // Animate the dim/overlay
-                if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
-                    // Animate the thumbnail alpha before the dim animation (to prevent updating the
-                    // hardware layer)
-                    mThumbnailView.startEnterRecentsAnimation(new Runnable() {
-                            @Override
-                            public void run() {
-                                animateDimToProgress(taskViewEnterFromAppDuration,
-                                        ctx.postAnimationTrigger.decrementOnAnimationEnd());
-                            }
-                        });
-                } else {
-                    // Immediately start the dim animation
-                    animateDimToProgress(taskViewEnterFromAppDuration,
-                            ctx.postAnimationTrigger.decrementOnAnimationEnd());
-                }
+                // Immediately start the dim animation
+                animateDimToProgress(taskViewEnterFromAppDuration,
+                        ctx.postAnimationTrigger.decrementOnAnimationEnd());
                 ctx.postAnimationTrigger.increment();
 
                 // Animate the action button in
@@ -635,7 +623,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if (Constants.DebugFlags.App.EnableFastToggleRecents && mIsFocused) {
+
+        RecentsDebugFlags flags = Recents.getDebugFlags();
+        if (flags.isFastToggleRecentsEnabled() && mIsFocused) {
             Paint tmpPaint = new Paint();
             Rect tmpRect = new Rect();
             tmpRect.set(0, 0, getWidth(), getHeight());
@@ -676,7 +666,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 clearAccessibilityFocus();
             }
         }
-        if (Constants.DebugFlags.App.EnableFastToggleRecents) {
+        RecentsDebugFlags flags = Recents.getDebugFlags();
+        if (flags.isFastToggleRecentsEnabled()) {
             invalidate();
         }
     }

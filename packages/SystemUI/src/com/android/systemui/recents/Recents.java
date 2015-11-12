@@ -62,6 +62,7 @@ public class Recents extends SystemUI
     private final static String ACTION_TOGGLE_RECENTS = "com.android.systemui.recents.ACTION_TOGGLE";
 
     private static SystemServicesProxy sSystemServicesProxy;
+    private static RecentsDebugFlags sDebugFlags;
     private static RecentsTaskLoader sTaskLoader;
     private static RecentsConfiguration sConfiguration;
 
@@ -148,8 +149,13 @@ public class Recents extends SystemUI
         return sConfiguration;
     }
 
+    public static RecentsDebugFlags getDebugFlags() {
+        return sDebugFlags;
+    }
+
     @Override
     public void start() {
+        sDebugFlags = new RecentsDebugFlags(mContext);
         sSystemServicesProxy = new SystemServicesProxy(mContext);
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
@@ -166,6 +172,7 @@ public class Recents extends SystemUI
 
         // Register with the event bus
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
+        EventBus.getDefault().register(sSystemServicesProxy, EVENT_BUS_PRIORITY);
         EventBus.getDefault().register(sTaskLoader, EVENT_BUS_PRIORITY);
 
         // Due to the fact that RecentsActivity is per-user, we need to establish and interface for

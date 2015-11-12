@@ -1067,6 +1067,9 @@
     <!-- Name of status bar -->
     <string name="status_bar">Status bar</string>
 
+    <!-- Name of overview -->
+    <string name="overview">Overview</string>
+
     <!-- Name of demo mode (mode with preset icons for screenshots) -->
     <string name="demo_mode">Demo mode</string>
 
@@ -1155,6 +1158,11 @@
     <string name="show_brightness">Show brightness in Quick Settings</string>
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
+
+    <!-- Toggles fast-toggling recents via the recents button -->
+    <string name="overview_fast_toggle_via_button">Enable fast toggle</string>
+    <!-- Description for the toggle for fast-toggling recents via the recents button -->
+    <string name="overview_fast_toggle_via_button_desc">Enable paging via the Overview button</string>
 
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->
