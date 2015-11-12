@@ -30,7 +30,7 @@ struct TestData {
     const std::function<void(SkPath*)> skPathLamda;
 };
 
-const static std::vector<TestData> testDataSet = {
+const static TestData sTestDataSet[] = {
     // TestData with scientific notation -2e3 etc.
     {
         // Path
@@ -165,7 +165,7 @@ const static std::vector<TestData> testDataSet = {
 };
 
 TEST(PathParser, parseStringForData) {
-    for (TestData testData: testDataSet) {
+    for (TestData testData: sTestDataSet) {
         // Test generated path data against the given data.
         PathData pathData;
         size_t length = strlen(testData.pathString);
@@ -177,7 +177,7 @@ TEST(PathParser, parseStringForData) {
 }
 
 TEST(PathParser, createSkPathFromPathData) {
-    for (TestData testData: testDataSet) {
+    for (TestData testData: sTestDataSet) {
         SkPath expectedPath;
         testData.skPathLamda(&expectedPath);
         SkPath actualPath;
@@ -187,7 +187,7 @@ TEST(PathParser, createSkPathFromPathData) {
 }
 
 TEST(PathParser, parseStringForSkPath) {
-    for (TestData testData: testDataSet) {
+    for (TestData testData: sTestDataSet) {
         size_t length = strlen(testData.pathString);
         // Check the return value as well as the SkPath generated.
         SkPath actualPath;
