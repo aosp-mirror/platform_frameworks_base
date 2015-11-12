@@ -22,15 +22,14 @@ import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.MediumTest;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-@SmallTest
+@MediumTest
 public class DocumentLoaderTest extends AndroidTestCase {
     private BlockableTestMtpManager mManager;
     private TestContentResolver mResolver;

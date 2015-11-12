@@ -43,7 +43,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
-        mDatabase = new MtpDatabase(getContext());
+        mDatabase = new MtpDatabase(getContext(), true);
         mProvider.onCreateForTesting(mResources, mMtpManager, mResolver, mDatabase);
     }
 

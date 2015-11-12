@@ -79,8 +79,8 @@ class MtpDatabase {
     private final Map<String, Integer> mMappingMode = new HashMap<>();
 
     @VisibleForTesting
-    MtpDatabase(Context context) {
-        mDatabase = new MtpDatabaseInternal(context);
+    MtpDatabase(Context context, boolean inMemory) {
+        mDatabase = new MtpDatabaseInternal(context, inMemory);
     }
 
     /**

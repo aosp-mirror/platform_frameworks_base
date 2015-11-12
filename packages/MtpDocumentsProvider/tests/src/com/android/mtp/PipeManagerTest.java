@@ -19,15 +19,14 @@ package com.android.mtp;
 import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.MediumTest;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@SmallTest
+@MediumTest
 public class PipeManagerTest extends AndroidTestCase {
     private static final byte[] HELLO_BYTES = new byte[] { 'h', 'e', 'l', 'l', 'o' };
 

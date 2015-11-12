@@ -78,7 +78,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
-        mDatabase = new MtpDatabase(getContext());
+        mDatabase = new MtpDatabase(getContext(), false);
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
         return true;
     }

@@ -35,8 +35,8 @@ import java.util.Objects;
  */
 class MtpDatabaseInternal {
     private static class OpenHelper extends SQLiteOpenHelper {
-        public OpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        public OpenHelper(Context context, boolean inMemory) {
+            super(context, inMemory ? null : DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
@@ -54,8 +54,8 @@ class MtpDatabaseInternal {
 
     private final SQLiteDatabase mDatabase;
 
-    MtpDatabaseInternal(Context context) {
-        final OpenHelper helper = new OpenHelper(context);
+    MtpDatabaseInternal(Context context, boolean inMemory) {
+        final OpenHelper helper = new OpenHelper(context, inMemory);
         mDatabase = helper.getWritableDatabase();
     }
 

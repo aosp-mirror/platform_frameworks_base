@@ -12,8 +12,20 @@ public class TestResultInstrumentation extends InstrumentationTestRunner impleme
 
     @Override
     public void onCreate(Bundle arguments) {
+        if (arguments == null) {
+            arguments = new Bundle();
+        }
+        final boolean includeRealDeviceTest =
+                Boolean.parseBoolean(arguments.getString("realDeviceTest", "false"));
+        if (!includeRealDeviceTest) {
+            arguments.putString("notAnnotation", "com.android.mtp.RealDeviceTest");
+        }
         super.onCreate(arguments);
-        addTestListener(this);
+        if (includeRealDeviceTest) {
+            // Show the test result by using activity because we need to disconnect USB cable
+            // from adb host while testing with real MTP device.
+            addTestListener(this);
+        }
     }
 
     @Override
