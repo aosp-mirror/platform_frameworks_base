@@ -139,7 +139,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         });
 
         mFocusColor =
-                context.getResources().getColor(R.color.status_bar_recents_highlight_color);
+                context.getResources().getColor(R.color.status_bar_recents_focus_color);
         mFocusPaint.setColor(mFocusColor);
     }
 
