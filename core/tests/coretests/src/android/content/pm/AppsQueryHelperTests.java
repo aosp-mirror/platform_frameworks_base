@@ -33,7 +33,7 @@ public class AppsQueryHelperTests extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mAppsQueryHelper = new AppsQueryHelperTestable(getContext());
+        mAppsQueryHelper = new AppsQueryHelperTestable();
     }
 
     public void testQueryAppsSystemAppsOnly() {
@@ -78,32 +78,19 @@ public class AppsQueryHelperTests extends AndroidTestCase {
         assertEqualsIgnoreOrder(Arrays.asList("sys_app1", "sys_app3"), apps);
     }
 
-    public void testQueryAppsDefaultIme() {
-        // Test query default system IMEs
-        List<String> apps = mAppsQueryHelper.queryApps(AppsQueryHelper.GET_DEFAULT_IMES,
+    public void testQueryAppsImes() {
+        // Test query system IMEs
+        List<String> apps = mAppsQueryHelper.queryApps(AppsQueryHelper.GET_IMES,
                 true, UserHandle.of(UserHandle.myUserId()));
         assertEqualsIgnoreOrder(Arrays.asList("sys_app1"), apps);
 
-        // Test query default IMEs
-        apps = mAppsQueryHelper.queryApps(AppsQueryHelper.GET_DEFAULT_IMES, false,
+        // Test query IMEs
+        apps = mAppsQueryHelper.queryApps(AppsQueryHelper.GET_IMES, false,
                 UserHandle.of(UserHandle.myUserId()));
         assertEqualsIgnoreOrder(Arrays.asList("sys_app1", "app4"), apps);
-
-        // Test that GET_DEFAULT_IMES cannot be used with a user id different from current process
-        try {
-            mAppsQueryHelper.queryApps(AppsQueryHelper.GET_DEFAULT_IMES, false,
-                    UserHandle.of(UserHandle.USER_NULL));
-            fail("queryApps must fail if wrong user was passed");
-        } catch (IllegalArgumentException e) {
-            // OK
-        }
     }
 
     private class AppsQueryHelperTestable extends AppsQueryHelper {
-
-        public AppsQueryHelperTestable(Context context) {
-            super(context);
-        }
 
         @Override
         protected List<ApplicationInfo> getAllApps(int userId) {
@@ -145,18 +132,19 @@ public class AppsQueryHelperTests extends AndroidTestCase {
         }
 
         @Override
-        protected List<InputMethodInfo> getInputMethodList() {
+        protected List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int userId) {
             final ResolveInfo sysApp1 = new ResolveInfo();
             sysApp1.serviceInfo = new ServiceInfo();
             sysApp1.serviceInfo.packageName = "sys_app1";
             sysApp1.serviceInfo.name = "name";
-            InputMethodInfo imi1 = new InputMethodInfo(sysApp1, false, null, null, 0, true);
+            sysApp1.serviceInfo.applicationInfo = new ApplicationInfo();
+            sysApp1.serviceInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
             final ResolveInfo app4 = new ResolveInfo();
             app4.serviceInfo = new ServiceInfo();
             app4.serviceInfo.packageName = "app4";
             app4.serviceInfo.name = "name";
-            InputMethodInfo imi2 = new InputMethodInfo(app4, false, null, null, 0, true);
-            return Arrays.asList(imi1, imi2);
+            app4.serviceInfo.applicationInfo = new ApplicationInfo();
+            return Arrays.asList(sysApp1, app4);
         }
     }
 

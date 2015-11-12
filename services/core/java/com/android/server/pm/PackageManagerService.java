@@ -105,6 +105,7 @@ import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.AppsQueryHelper;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
@@ -1810,8 +1811,46 @@ public class PackageManagerService extends IPackageManager.Stub {
             boolean factoryTest, boolean onlyCore) {
         PackageManagerService m = new PackageManagerService(context, installer,
                 factoryTest, onlyCore);
+        m.enableSystemUserApps();
         ServiceManager.addService("package", m);
         return m;
+    }
+
+    private void enableSystemUserApps() {
+        if (!UserManager.isSplitSystemUser()) {
+            return;
+        }
+        // For system user, enable apps based on the following conditions:
+        // - app is whitelisted or belong to one of these groups:
+        //   -- system app which has no launcher icons
+        //   -- system app which has INTERACT_ACROSS_USERS permission
+        //   -- system IME app
+        // - app is not in the blacklist
+        AppsQueryHelper queryHelper = new AppsQueryHelper(this);
+        Set<String> enableApps = new ArraySet<>();
+        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
+                | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
+                | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
+        ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
+        enableApps.addAll(wlApps);
+        ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
+        enableApps.removeAll(blApps);
+
+        List<String> systemApps = queryHelper.queryApps(0, /* systemAppsOnly */ true,
+                UserHandle.SYSTEM);
+        final int systemAppsSize = systemApps.size();
+        synchronized (mPackages) {
+            for (int i = 0; i < systemAppsSize; i++) {
+                String pName = systemApps.get(i);
+                PackageSetting pkgSetting = mSettings.mPackages.get(pName);
+                // Should not happen, but we shouldn't be failing if it does
+                if (pkgSetting == null) {
+                    continue;
+                }
+                boolean installed = enableApps.contains(pName);
+                pkgSetting.setInstalled(installed, UserHandle.USER_SYSTEM);
+            }
+        }
     }
 
     static String[] splitString(String str, char sep) {

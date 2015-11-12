@@ -18,13 +18,11 @@ package android.content.pm;
 
 import android.Manifest;
 import android.app.AppGlobals;
-import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethod;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -44,36 +42,37 @@ public class AppsQueryHelper {
     public static int GET_NON_LAUNCHABLE_APPS = 1;
 
     /**
-     * Return apps with {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission
+     * Return apps with {@link Manifest.permission#INTERACT_ACROSS_USERS} permission
      */
     public static int GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM = 1 << 1;
 
     /**
-     * Return all input methods that are marked as default.
-     * <p>When this flag is set, {@code user} specified in
-     * {@link #queryApps(int, boolean, UserHandle)} must be
-     * {@link UserHandle#myUserId user of the current process}.
+     * Return all input methods available for the current user.
      */
-    public static int GET_DEFAULT_IMES = 1 << 2;
+    public static int GET_IMES = 1 << 2;
 
-    private final Context mContext;
+    private final IPackageManager mPackageManager;
     private List<ApplicationInfo> mAllApps;
 
-    public AppsQueryHelper(Context context) {
-        mContext = context;
+    public AppsQueryHelper(IPackageManager packageManager) {
+        mPackageManager = packageManager;
+    }
+
+    public AppsQueryHelper() {
+        this(AppGlobals.getPackageManager());
     }
 
     /**
      * Return a List of all packages that satisfy a specified criteria.
      * @param flags search flags. Use any combination of {@link #GET_NON_LAUNCHABLE_APPS},
-     * {@link #GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM} or {@link #GET_DEFAULT_IMES}.
+     * {@link #GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM} or {@link #GET_IMES}.
      * @param systemAppsOnly if true, only system apps will be returned
      * @param user user, whose apps are queried
      */
     public List<String> queryApps(int flags, boolean systemAppsOnly, UserHandle user) {
         boolean nonLaunchableApps = (flags & GET_NON_LAUNCHABLE_APPS) > 0;
         boolean interactAcrossUsers = (flags & GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM) > 0;
-        boolean defaultImes = (flags & GET_DEFAULT_IMES) > 0;
+        boolean imes = (flags & GET_IMES) > 0;
         if (mAllApps == null) {
             mAllApps = getAllApps(user.getIdentifier());
         }
@@ -113,7 +112,6 @@ public class AppsQueryHelper {
                 }
             }
         }
-
         if (interactAcrossUsers) {
             final List<PackageInfo> packagesHoldingPermissions = getPackagesHoldingPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS, user.getIdentifier());
@@ -129,29 +127,18 @@ public class AppsQueryHelper {
             }
         }
 
-        if (defaultImes) {
-            if (UserHandle.myUserId() != user.getIdentifier()) {
-                throw new IllegalArgumentException("Specified user handle " + user
-                        + " is not a user of the current process.");
-            }
-            List<InputMethodInfo> imis = getInputMethodList();
-            int imisSize = imis.size();
-            ArraySet<String> defaultImePackages = new ArraySet<>();
-            for (int i = 0; i < imisSize; i++) {
-                InputMethodInfo imi = imis.get(i);
-                if (imi.isDefault(mContext)) {
-                    defaultImePackages.add(imi.getPackageName());
-                }
-            }
-            final int allAppsSize = mAllApps.size();
-            for (int i = 0; i < allAppsSize; i++) {
-                final ApplicationInfo appInfo = mAllApps.get(i);
-                if (systemAppsOnly && !appInfo.isSystemApp()) {
+        if (imes) {
+            final List<ResolveInfo> resolveInfos = queryIntentServicesAsUser(
+                    new Intent(InputMethod.SERVICE_INTERFACE), user.getIdentifier());
+            final int resolveInfosSize = resolveInfos.size();
+
+            for (int i = 0; i < resolveInfosSize; i++) {
+                ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
+                if (systemAppsOnly && !serviceInfo.applicationInfo.isSystemApp()) {
                     continue;
                 }
-                final String packageName = appInfo.packageName;
-                if (defaultImePackages.contains(packageName)) {
-                    result.add(packageName);
+                if (!result.contains(serviceInfo.packageName)) {
+                    result.add(serviceInfo.packageName);
                 }
             }
         }
@@ -163,9 +150,8 @@ public class AppsQueryHelper {
     @SuppressWarnings("unchecked")
     protected List<ApplicationInfo> getAllApps(int userId) {
         try {
-            return AppGlobals.getPackageManager().getInstalledApplications(
-                    PackageManager.GET_UNINSTALLED_PACKAGES
-                            | PackageManager.GET_DISABLED_COMPONENTS, userId).getList();
+            return mPackageManager.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES
+                    | PackageManager.GET_DISABLED_COMPONENTS, userId).getList();
         } catch (RemoteException e) {
             throw new IllegalStateException("Package manager has died", e);
         }
@@ -173,17 +159,22 @@ public class AppsQueryHelper {
 
     @VisibleForTesting
     protected List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent, int userId) {
-        return mContext.getPackageManager()
-                .queryIntentActivitiesAsUser(intent, PackageManager.GET_DISABLED_COMPONENTS
-                        | PackageManager.GET_UNINSTALLED_PACKAGES, userId);
+        try {
+            return mPackageManager.queryIntentActivities(intent, null,
+                    PackageManager.GET_DISABLED_COMPONENTS
+                            | PackageManager.GET_UNINSTALLED_PACKAGES,
+                    userId);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Package manager has died", e);
+        }
     }
 
     @VisibleForTesting
-    @SuppressWarnings("unchecked")
-    protected List<PackageInfo> getPackagesHoldingPermission(String perm, int userId) {
+    protected List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int userId) {
         try {
-            return AppGlobals.getPackageManager().getPackagesHoldingPermissions(new String[]{perm},
-                    0, userId).getList();
+            return mPackageManager.queryIntentServices(intent, null,
+                    PackageManager.GET_META_DATA
+                            | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId);
         } catch (RemoteException e) {
             throw new IllegalStateException("Package manager has died", e);
         }
@@ -191,9 +182,13 @@ public class AppsQueryHelper {
 
     @VisibleForTesting
     @SuppressWarnings("unchecked")
-    protected List<InputMethodInfo> getInputMethodList() {
-        InputMethodManager imm = (InputMethodManager)
-                mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        return imm.getInputMethodList();
+    protected List<PackageInfo> getPackagesHoldingPermission(String perm, int userId) {
+        try {
+            return mPackageManager.getPackagesHoldingPermissions(new String[]{perm}, 0,
+                    userId).getList();
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Package manager has died", e);
+        }
     }
+
 }
