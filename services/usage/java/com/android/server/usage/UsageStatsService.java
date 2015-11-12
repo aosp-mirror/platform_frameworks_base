@@ -215,11 +215,11 @@ public class UsageStatsService extends SystemService implements
             mPowerManager = getContext().getSystemService(PowerManager.class);
 
             mScreenOnSystemTimeSnapshot = System.currentTimeMillis();
-            synchronized (this) {
+            synchronized (mLock) {
                 mScreenOnTime = readScreenOnTimeLocked();
             }
             mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
-            synchronized (this) {
+            synchronized (mLock) {
                 updateDisplayLocked();
             }
         } else if (phase == PHASE_BOOT_COMPLETED) {
