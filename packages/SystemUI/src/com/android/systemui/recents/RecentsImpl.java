@@ -401,22 +401,17 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task
         if (runningTask == null) return;
+        // Return early if the running task is in the home stack (optimization)
+        if (SystemServicesProxy.isHomeStack(runningTask.stackId)) return;
 
         // Find the task in the recents list
-        boolean isTopTaskHome = SystemServicesProxy.isHomeStack(runningTask.stackId);
         ArrayList<Task> tasks = focusedStack.getTasks();
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
         for (int i = taskCount - 1; i >= 1; i--) {
             Task task = tasks.get(i);
-            if (isTopTaskHome) {
-                toTask = tasks.get(i - 1);
-                launchOpts = ActivityOptions.makeCustomAnimation(mContext,
-                        R.anim.recents_launch_next_affiliated_task_target,
-                        R.anim.recents_fast_toggle_app_home_exit);
-                break;
-            } else if (task.key.id == runningTask.id) {
+            if (task.key.id == runningTask.id) {
                 toTask = tasks.get(i - 1);
                 launchOpts = ActivityOptions.makeCustomAnimation(mContext,
                         R.anim.recents_launch_prev_affiliated_task_target,
@@ -820,7 +815,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 String homeActivityPackage = ssp.getHomeActivityPackageName();
                 String searchWidgetPackage = Prefs.getString(mContext,
-                        Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null);
+                        Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null);
 
                 // Determine whether we are coming from a search owned home activity
                 boolean fromSearchHome = (homeActivityPackage != null) &&
