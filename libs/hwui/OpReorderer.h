@@ -51,6 +51,7 @@ namespace OpBatchType {
         AlphaMaskTexture,
         Text,
         ColorText,
+        Shadow,
 
         Count // must be last
     };
@@ -152,11 +153,11 @@ public:
             LayerReorderer& layer = mLayerReorderers[i];
             if (layer.renderNode) {
                 // cached HW layer - can't skip layer if empty
-                renderer.startLayer(layer.offscreenBuffer);
+                renderer.startRepaintLayer(layer.offscreenBuffer);
                 layer.replayBakedOpsImpl((void*)&renderer, receivers);
                 renderer.endLayer();
             } else if (!layer.empty()) { // save layer - skip entire layer if empty
-                layer.offscreenBuffer = renderer.createLayer(layer.width, layer.height);
+                layer.offscreenBuffer = renderer.startTemporaryLayer(layer.width, layer.height);
                 layer.replayBakedOpsImpl((void*)&renderer, receivers);
                 renderer.endLayer();
             }
@@ -210,6 +211,10 @@ private:
 
     void replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers);
 
+    SkPath* createFrameAllocatedPath() {
+        mFrameAllocatedPaths.emplace_back(new SkPath);
+        return mFrameAllocatedPaths.back().get();
+    }
     /**
      * Declares all OpReorderer::onXXXXOp() methods for every RecordedOp type.
      *
@@ -219,6 +224,8 @@ private:
 #define INTERNAL_OP_HANDLER(Type) \
     void on##Type(const Type& op);
     MAP_OPS(INTERNAL_OP_HANDLER)
+
+    std::vector<std::unique_ptr<SkPath> > mFrameAllocatedPaths;
 
     // List of every deferred layer's render state. Replayed in reverse order to render a frame.
     std::vector<LayerReorderer> mLayerReorderers;

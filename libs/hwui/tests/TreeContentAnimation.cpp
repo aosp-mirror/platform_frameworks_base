@@ -408,7 +408,7 @@ class HwLayerAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card = TestUtils::createNode<TestCanvas>(0, 0, 200, 200, [] (TestCanvas& canvas) {
         canvas.drawColor(0xFF0000FF, SkXfermode::kSrcOver_Mode);
-    }, true);
+    }, TestUtils::getHwLayerSetupCallback());
     void createContent(int width, int height, TestCanvas* canvas) override {
         canvas->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode); // background
         canvas->drawRenderNode(card.get());

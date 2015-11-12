@@ -89,6 +89,21 @@ public:
          *         and early return null in one place.
          */
     }
+
+    /**
+     * Constructor for unbounded ops without transform/clip (namely shadows)
+     *
+     * Since the op doesn't have known bounds, we conservatively set the mapped bounds
+     * to the current clipRect, and clipSideFlags to Full.
+     */
+    ResolvedRenderState(const Snapshot& snapshot) {
+        transform = *snapshot.transform;
+        clipRect = snapshot.getRenderTargetClip();
+        clippedBounds = clipRect;
+        transform.mapRect(clippedBounds);
+        clipSideFlags = OpClipSideFlags::Full;
+    }
+
     Matrix4 transform;
     Rect clipRect;
     int clipSideFlags = 0;
@@ -104,14 +119,21 @@ class BakedOpState {
 public:
     static BakedOpState* tryConstruct(LinearAllocator& allocator,
             const Snapshot& snapshot, const RecordedOp& recordedOp) {
-        BakedOpState* bakedOp = new (allocator) BakedOpState(
-                snapshot, recordedOp);
+        BakedOpState* bakedOp = new (allocator) BakedOpState(snapshot, recordedOp);
         if (bakedOp->computedState.clippedBounds.isEmpty()) {
             // bounds are empty, so op is rejected
             allocator.rewindIfLastAlloc(bakedOp);
             return nullptr;
         }
         return bakedOp;
+    }
+
+    static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator,
+            const Snapshot& snapshot, const ShadowOp* shadowOpPtr) {
+        if (snapshot.getRenderTargetClip().isEmpty()) return nullptr;
+
+        // clip isn't empty, so construct the op
+        return new (allocator) BakedOpState(snapshot, shadowOpPtr);
     }
 
     static void* operator new(size_t size, LinearAllocator& allocator) {
@@ -134,6 +156,13 @@ private:
             , roundRectClipState(snapshot.roundRectClipState)
             , projectionPathMask(snapshot.projectionPathMask)
             , op(&recordedOp) {}
+
+    BakedOpState(const Snapshot& snapshot, const ShadowOp* shadowOpPtr)
+            : computedState(snapshot)
+            , alpha(snapshot.alpha)
+            , roundRectClipState(snapshot.roundRectClipState)
+            , projectionPathMask(snapshot.projectionPathMask)
+            , op(shadowOpPtr) {}
 };
 
 }; // namespace uirenderer

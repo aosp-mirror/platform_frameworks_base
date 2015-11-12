@@ -43,6 +43,7 @@ struct Vertex;
         OP_FN(BitmapOp) \
         OP_FN(RectOp) \
         OP_FN(RenderNodeOp) \
+        OP_FN(ShadowOp) \
         OP_FN(SimpleRectsOp) \
         OP_FN(BeginLayerOp) \
         OP_FN(EndLayerOp) \
@@ -107,6 +108,31 @@ struct BitmapOp : RecordedOp {
 struct RectOp : RecordedOp {
     RectOp(BASE_PARAMS)
             : SUPER(RectOp) {}
+};
+
+/**
+ * Real-time, dynamic-lit shadow.
+ *
+ * Uses invalid/empty bounds and matrix since ShadowOp bounds aren't known at defer time,
+ * and are resolved dynamically, and transform isn't needed.
+ *
+ * State construction handles these properties specially.
+ */
+struct ShadowOp : RecordedOp {
+    ShadowOp(const RenderNodeOp& casterOp, float casterAlpha, const SkPath* casterPath, const Rect& clipRect)
+            : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), clipRect, nullptr)
+            , shadowMatrixXY(casterOp.localMatrix)
+            , shadowMatrixZ(casterOp.localMatrix)
+            , casterAlpha(casterAlpha)
+            , casterPath(casterPath) {
+        const RenderNode& node = *casterOp.renderNode;
+        node.applyViewPropertyTransforms(shadowMatrixXY, false);
+        node.applyViewPropertyTransforms(shadowMatrixZ, true);
+    };
+    Matrix4 shadowMatrixXY;
+    Matrix4 shadowMatrixZ;
+    const float casterAlpha;
+    const SkPath* casterPath;
 };
 
 struct SimpleRectsOp : RecordedOp { // Filled, no AA (TODO: better name?)

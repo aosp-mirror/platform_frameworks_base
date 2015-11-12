@@ -97,7 +97,18 @@ public:
         return std::unique_ptr<DisplayList>(canvas.finishRecording());
     }
 
-    static sp<RenderNode> createNode(int left, int top, int right, int bottom, bool onLayer = false) {
+    typedef std::function<int(RenderProperties&)> PropSetupCallback;
+
+    static PropSetupCallback getHwLayerSetupCallback() {
+        static PropSetupCallback sLayerSetupCallback = [] (RenderProperties& properties) {
+            properties.mutateLayerProperties().setType(LayerType::RenderLayer);
+            return RenderNode::GENERIC;
+        };
+        return sLayerSetupCallback;
+    }
+
+    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+            PropSetupCallback propSetupCallback = nullptr) {
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
         DeviceInfo::initialize();
@@ -105,17 +116,17 @@ public:
         sp<RenderNode> node = new RenderNode();
         node->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-        if (onLayer) {
-            node->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-            node->setPropertyFieldsDirty(RenderNode::GENERIC);
+        if (propSetupCallback) {
+            node->setPropertyFieldsDirty(propSetupCallback(node->mutateStagingProperties()));
         }
         return node;
     }
 
     template<class CanvasType>
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(CanvasType& canvas)> canvasCallback, bool onLayer = false) {
-        sp<RenderNode> node = createNode(left, top, right, bottom, onLayer);
+            std::function<void(CanvasType& canvas)> canvasCallback,
+            PropSetupCallback propSetupCallback = nullptr) {
+        sp<RenderNode> node = createNode(left, top, right, bottom, propSetupCallback);
 
         auto&& props = node->stagingProperties(); // staging, since not sync'd yet
         CanvasType canvas(props.getWidth(), props.getHeight());

@@ -38,17 +38,17 @@ LayerUpdateQueue sEmptyLayerUpdateQueue;
  * and allows Renderer vs Dispatching behavior to be merged.
  *
  * onXXXOp methods fail by default - tests should override ops they expect
- * startLayer fails by default - tests should override if expected
+ * startRepaintLayer fails by default - tests should override if expected
  * startFrame/endFrame do nothing by default - tests should override to intercept
  */
 class TestRendererBase {
 public:
     virtual ~TestRendererBase() {}
-    virtual OffscreenBuffer* createLayer(uint32_t, uint32_t) {
+    virtual OffscreenBuffer* startTemporaryLayer(uint32_t, uint32_t) {
         ADD_FAILURE() << "Layer creation not expected in this test";
         return nullptr;
     }
-    virtual void startLayer(OffscreenBuffer*) {
+    virtual void startRepaintLayer(OffscreenBuffer*) {
         ADD_FAILURE() << "Layer repaint not expected in this test";
     }
     virtual void endLayer() {
@@ -82,27 +82,27 @@ public:
     MAP_OPS(DISPATCHER_METHOD);
 };
 
-
 class FailRenderer : public TestRendererBase {};
 
-class SimpleTestRenderer : public TestRendererBase {
-public:
-    void startFrame(uint32_t width, uint32_t height) override {
-        EXPECT_EQ(0, mIndex++);
-        EXPECT_EQ(100u, width);
-        EXPECT_EQ(200u, height);
-    }
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(1, mIndex++);
-    }
-    void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(2, mIndex++);
-    }
-    void endFrame() override {
-        EXPECT_EQ(3, mIndex++);
-    }
-};
 TEST(OpReorderer, simple) {
+    class SimpleTestRenderer : public TestRendererBase {
+    public:
+        void startFrame(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(100u, width);
+            EXPECT_EQ(200u, height);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+        }
+        void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void endFrame() override {
+            EXPECT_EQ(3, mIndex++);
+        }
+    };
+
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(25, 25);
         canvas.drawRect(0, 0, 100, 200, SkPaint());
@@ -114,7 +114,6 @@ TEST(OpReorderer, simple) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
 }
-
 
 TEST(OpReorderer, simpleRejection) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
@@ -129,18 +128,18 @@ TEST(OpReorderer, simpleRejection) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-
-static int SIMPLE_BATCHING_LOOPS = 5;
-class SimpleBatchingTestRenderer : public TestRendererBase {
-public:
-    void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
-        EXPECT_TRUE(mIndex++ >= SIMPLE_BATCHING_LOOPS);
-    }
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        EXPECT_TRUE(mIndex++ < SIMPLE_BATCHING_LOOPS);
-    }
-};
 TEST(OpReorderer, simpleBatching) {
+    static int SIMPLE_BATCHING_LOOPS = 5;
+    class SimpleBatchingTestRenderer : public TestRendererBase {
+    public:
+        void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+            EXPECT_TRUE(mIndex++ >= SIMPLE_BATCHING_LOOPS);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_TRUE(mIndex++ < SIMPLE_BATCHING_LOOPS);
+        }
+    };
+
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
 
@@ -162,24 +161,25 @@ TEST(OpReorderer, simpleBatching) {
     EXPECT_EQ(2 * SIMPLE_BATCHING_LOOPS, renderer.getIndex()); // 2 x loops ops, because no merging (TODO: force no merging)
 }
 
-class RenderNodeTestRenderer : public TestRendererBase {
-public:
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        switch(mIndex++) {
-        case 0:
-            EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clippedBounds);
-            EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
-            break;
-        case 1:
-            EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clippedBounds);
-            EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
-            break;
-        default:
-            ADD_FAILURE();
-        }
-    }
-};
 TEST(OpReorderer, renderNode) {
+    class RenderNodeTestRenderer : public TestRendererBase {
+    public:
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            switch(mIndex++) {
+            case 0:
+                EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clippedBounds);
+                EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
+                break;
+            case 1:
+                EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clippedBounds);
+                EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
+                break;
+            default:
+                ADD_FAILURE();
+            }
+        }
+    };
+
     sp<RenderNode> child = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
@@ -210,16 +210,17 @@ TEST(OpReorderer, renderNode) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-class ClippedTestRenderer : public TestRendererBase {
-public:
-    void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(0, mIndex++);
-        EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clippedBounds);
-        EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect);
-        EXPECT_TRUE(state.computedState.transform.isIdentity());
-    }
-};
 TEST(OpReorderer, clipped) {
+    class ClippedTestRenderer : public TestRendererBase {
+    public:
+        void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clippedBounds);
+            EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect);
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+    };
+
     sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
@@ -236,36 +237,36 @@ TEST(OpReorderer, clipped) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-
-class SaveLayerSimpleTestRenderer : public TestRendererBase {
-public:
-    OffscreenBuffer* createLayer(uint32_t width, uint32_t height) override {
-        EXPECT_EQ(0, mIndex++);
-        EXPECT_EQ(180u, width);
-        EXPECT_EQ(180u, height);
-        return nullptr;
-    }
-    void endLayer() override {
-        EXPECT_EQ(2, mIndex++);
-    }
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(1, mIndex++);
-        EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
-        EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clippedBounds);
-        EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clipRect);
-
-        Matrix4 expectedTransform;
-        expectedTransform.loadTranslate(-10, -10, 0);
-        EXPECT_MATRIX_APPROX_EQ(expectedTransform, state.computedState.transform);
-    }
-    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(3, mIndex++);
-        EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
-        EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clipRect);
-        EXPECT_TRUE(state.computedState.transform.isIdentity());
-    }
-};
 TEST(OpReorderer, saveLayerSimple) {
+    class SaveLayerSimpleTestRenderer : public TestRendererBase {
+    public:
+        OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(180u, width);
+            EXPECT_EQ(180u, height);
+            return nullptr;
+        }
+        void endLayer() override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
+            EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clippedBounds);
+            EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clipRect);
+
+            Matrix4 expectedTransform;
+            expectedTransform.loadTranslate(-10, -10, 0);
+            EXPECT_MATRIX_APPROX_EQ(expectedTransform, state.computedState.transform);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(3, mIndex++);
+            EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
+            EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clipRect);
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+    };
+
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 10, 190, 190, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRect(10, 10, 190, 190, SkPaint());
@@ -279,57 +280,57 @@ TEST(OpReorderer, saveLayerSimple) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-
-/* saveLayer1 {rect1, saveLayer2 { rect2 } } will play back as:
- * - createLayer2, rect2 endLayer2
- * - createLayer1, rect1, drawLayer2, endLayer1
- * - startFrame, layerOp1, endFrame
- */
-class SaveLayerNestedTestRenderer : public TestRendererBase {
-public:
-    OffscreenBuffer* createLayer(uint32_t width, uint32_t height) override {
-        const int index = mIndex++;
-        if (index == 0) {
-            EXPECT_EQ(400u, width);
-            EXPECT_EQ(400u, height);
-            return (OffscreenBuffer*) 0x400;
-        } else if (index == 3) {
-            EXPECT_EQ(800u, width);
-            EXPECT_EQ(800u, height);
-            return (OffscreenBuffer*) 0x800;
-        } else { ADD_FAILURE(); }
-        return (OffscreenBuffer*) nullptr;
-    }
-    void endLayer() override {
-        int index = mIndex++;
-        EXPECT_TRUE(index == 2 || index == 6);
-    }
-    void startFrame(uint32_t width, uint32_t height) override {
-        EXPECT_EQ(7, mIndex++);
-    }
-    void endFrame() override {
-        EXPECT_EQ(9, mIndex++);
-    }
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        const int index = mIndex++;
-        if (index == 1) {
-            EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner rect
-        } else if (index == 4) {
-            EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer rect
-        } else { ADD_FAILURE(); }
-    }
-    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
-        const int index = mIndex++;
-        if (index == 5) {
-            EXPECT_EQ((OffscreenBuffer*)0x400, *op.layerHandle);
-            EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner layer
-        } else if (index == 8) {
-            EXPECT_EQ((OffscreenBuffer*)0x800, *op.layerHandle);
-            EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer layer
-        } else { ADD_FAILURE(); }
-    }
-};
 TEST(OpReorderer, saveLayerNested) {
+    /* saveLayer1 { rect1, saveLayer2 { rect2 } } will play back as:
+     * - startTemporaryLayer2, rect2 endLayer2
+     * - startTemporaryLayer1, rect1, drawLayer2, endLayer1
+     * - startFrame, layerOp1, endFrame
+     */
+    class SaveLayerNestedTestRenderer : public TestRendererBase {
+    public:
+        OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
+            const int index = mIndex++;
+            if (index == 0) {
+                EXPECT_EQ(400u, width);
+                EXPECT_EQ(400u, height);
+                return (OffscreenBuffer*) 0x400;
+            } else if (index == 3) {
+                EXPECT_EQ(800u, width);
+                EXPECT_EQ(800u, height);
+                return (OffscreenBuffer*) 0x800;
+            } else { ADD_FAILURE(); }
+            return (OffscreenBuffer*) nullptr;
+        }
+        void endLayer() override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 2 || index == 6);
+        }
+        void startFrame(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(7, mIndex++);
+        }
+        void endFrame() override {
+            EXPECT_EQ(9, mIndex++);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            const int index = mIndex++;
+            if (index == 1) {
+                EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner rect
+            } else if (index == 4) {
+                EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer rect
+            } else { ADD_FAILURE(); }
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            const int index = mIndex++;
+            if (index == 5) {
+                EXPECT_EQ((OffscreenBuffer*)0x400, *op.layerHandle);
+                EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner layer
+            } else if (index == 8) {
+                EXPECT_EQ((OffscreenBuffer*)0x800, *op.layerHandle);
+                EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer layer
+            } else { ADD_FAILURE(); }
+        }
+    };
+
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(800, 800, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(0, 0, 800, 800, 128, SkCanvas::kClipToLayer_SaveFlag);
         {
@@ -369,42 +370,41 @@ TEST(OpReorderer, saveLayerContentRejection) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-class HwLayerSimpleTestRenderer : public TestRendererBase {
-public:
-    void startLayer(OffscreenBuffer* offscreenBuffer) override {
-        EXPECT_EQ(0, mIndex++);
-        EXPECT_EQ(offscreenBuffer, (OffscreenBuffer*) 0x0124);
-    }
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(1, mIndex++);
-
-        EXPECT_TRUE(state.computedState.transform.isIdentity())
-                << "Transform should be reset within layer";
-
-        EXPECT_EQ(state.computedState.clipRect, Rect(25, 25, 75, 75))
-                << "Damage rect should be used to clip layer content";
-    }
-    void endLayer() override {
-        EXPECT_EQ(2, mIndex++);
-    }
-    void startFrame(uint32_t width, uint32_t height) override {
-        EXPECT_EQ(3, mIndex++);
-    }
-    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(4, mIndex++);
-    }
-    void endFrame() override {
-        EXPECT_EQ(5, mIndex++);
-    }
-};
 TEST(OpReorderer, hwLayerSimple) {
+    class HwLayerSimpleTestRenderer : public TestRendererBase {
+    public:
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(offscreenBuffer, (OffscreenBuffer*) 0x0124);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+
+            EXPECT_TRUE(state.computedState.transform.isIdentity())
+                    << "Transform should be reset within layer";
+
+            EXPECT_EQ(state.computedState.clipRect, Rect(25, 25, 75, 75))
+                    << "Damage rect should be used to clip layer content";
+        }
+        void endLayer() override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void startFrame(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(3, mIndex++);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(4, mIndex++);
+        }
+        void endFrame() override {
+            EXPECT_EQ(5, mIndex++);
+        }
+    };
+
     sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    });
-    node->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    node->setPropertyFieldsDirty(RenderNode::GENERIC);
+    }, TestUtils::getHwLayerSetupCallback());
     OffscreenBuffer** bufferHandle = node->getLayerHandle();
     *bufferHandle = (OffscreenBuffer*) 0x0124;
 
@@ -427,69 +427,67 @@ TEST(OpReorderer, hwLayerSimple) {
     *bufferHandle = nullptr;
 }
 
-
-/* parentLayer { greyRect, saveLayer { childLayer { whiteRect } } } will play back as:
- * - startLayer(child), rect(grey), endLayer
- * - createLayer, drawLayer(child), endLayer
- * - startLayer(parent), rect(white), drawLayer(saveLayer), endLayer
- * - startFrame, drawLayer(parent), endLayerb
- */
-class HwLayerComplexTestRenderer : public TestRendererBase {
-public:
-    OffscreenBuffer* createLayer(uint32_t width, uint32_t height) {
-        EXPECT_EQ(3, mIndex++); // savelayer first
-        return (OffscreenBuffer*)0xabcd;
-    }
-    void startLayer(OffscreenBuffer* offscreenBuffer) override {
-        int index = mIndex++;
-        if (index == 0) {
-            // starting inner layer
-            EXPECT_EQ((OffscreenBuffer*)0x4567, offscreenBuffer);
-        } else if (index == 6) {
-            // starting outer layer
-            EXPECT_EQ((OffscreenBuffer*)0x0123, offscreenBuffer);
-        } else { ADD_FAILURE(); }
-    }
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        int index = mIndex++;
-        if (index == 1) {
-            // inner layer's rect (white)
-            EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
-        } else if (index == 7) {
-            // outer layer's rect (grey)
-            EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
-        } else { ADD_FAILURE(); }
-    }
-    void endLayer() override {
-        int index = mIndex++;
-        EXPECT_TRUE(index == 2 || index == 5 || index == 9);
-    }
-    void startFrame(uint32_t width, uint32_t height) override {
-        EXPECT_EQ(10, mIndex++);
-    }
-    void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
-        int index = mIndex++;
-        if (index == 4) {
-            EXPECT_EQ((OffscreenBuffer*)0x4567, *op.layerHandle);
-        } else if (index == 8) {
-            EXPECT_EQ((OffscreenBuffer*)0xabcd, *op.layerHandle);
-        } else if (index == 11) {
-            EXPECT_EQ((OffscreenBuffer*)0x0123, *op.layerHandle);
-        } else { ADD_FAILURE(); }
-    }
-    void endFrame() override {
-        EXPECT_EQ(12, mIndex++);
-    }
-};
 TEST(OpReorderer, hwLayerComplex) {
+    /* parentLayer { greyRect, saveLayer { childLayer { whiteRect } } } will play back as:
+     * - startRepaintLayer(child), rect(grey), endLayer
+     * - startTemporaryLayer, drawLayer(child), endLayer
+     * - startRepaintLayer(parent), rect(white), drawLayer(saveLayer), endLayer
+     * - startFrame, drawLayer(parent), endLayerb
+     */
+    class HwLayerComplexTestRenderer : public TestRendererBase {
+    public:
+        OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) {
+            EXPECT_EQ(3, mIndex++); // savelayer first
+            return (OffscreenBuffer*)0xabcd;
+        }
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer) override {
+            int index = mIndex++;
+            if (index == 0) {
+                // starting inner layer
+                EXPECT_EQ((OffscreenBuffer*)0x4567, offscreenBuffer);
+            } else if (index == 6) {
+                // starting outer layer
+                EXPECT_EQ((OffscreenBuffer*)0x0123, offscreenBuffer);
+            } else { ADD_FAILURE(); }
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            if (index == 1) {
+                // inner layer's rect (white)
+                EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
+            } else if (index == 7) {
+                // outer layer's rect (grey)
+                EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
+            } else { ADD_FAILURE(); }
+        }
+        void endLayer() override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 2 || index == 5 || index == 9);
+        }
+        void startFrame(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(10, mIndex++);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            if (index == 4) {
+                EXPECT_EQ((OffscreenBuffer*)0x4567, *op.layerHandle);
+            } else if (index == 8) {
+                EXPECT_EQ((OffscreenBuffer*)0xabcd, *op.layerHandle);
+            } else if (index == 11) {
+                EXPECT_EQ((OffscreenBuffer*)0x0123, *op.layerHandle);
+            } else { ADD_FAILURE(); }
+        }
+        void endFrame() override {
+            EXPECT_EQ(12, mIndex++);
+        }
+    };
+
     auto child = TestUtils::createNode<RecordingCanvas>(50, 50, 150, 150,
             [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    });
-    child->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    child->setPropertyFieldsDirty(RenderNode::GENERIC);
+    }, TestUtils::getHwLayerSetupCallback());
     *(child->getLayerHandle()) = (OffscreenBuffer*) 0x4567;
 
     RenderNode* childPtr = child.get();
@@ -502,9 +500,7 @@ TEST(OpReorderer, hwLayerComplex) {
         canvas.saveLayerAlpha(50, 50, 150, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRenderNode(childPtr);
         canvas.restore();
-    });
-    parent->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    parent->setPropertyFieldsDirty(RenderNode::GENERIC);
+    }, TestUtils::getHwLayerSetupCallback());
     *(parent->getLayerHandle()) = (OffscreenBuffer*) 0x0123;
 
     TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
@@ -527,14 +523,6 @@ TEST(OpReorderer, hwLayerComplex) {
     *(parent->getLayerHandle()) = nullptr;
 }
 
-
-class ZReorderTestRenderer : public TestRendererBase {
-public:
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        int expectedOrder = SkColorGetB(op.paint->getColor()); // extract order from blue channel
-        EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
-    }
-};
 static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) {
     SkPaint paint;
     paint.setColor(SkColorSetARGB(256, 0, 0, expectedDrawOrder)); // order put in blue channel
@@ -550,6 +538,14 @@ static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, 
     canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
 }
 TEST(OpReorderer, zReorder) {
+    class ZReorderTestRenderer : public TestRendererBase {
+    public:
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            int expectedOrder = SkColorGetB(op.paint->getColor()); // extract order from blue channel
+            EXPECT_EQ(expectedOrder, mIndex++) << "An op was drawn out of order";
+        }
+    };
+
     auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RecordingCanvas& canvas) {
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
@@ -576,27 +572,64 @@ TEST(OpReorderer, zReorder) {
     EXPECT_EQ(10, renderer.getIndex());
 };
 
+TEST(OpReorderer, shadow) {
+    class ShadowTestRenderer : public TestRendererBase {
+    public:
+        void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+        }
+    };
 
-class PropertyTestRenderer : public TestRendererBase {
-public:
-    PropertyTestRenderer(std::function<void(const RectOp&, const BakedOpState&)> callback)
-            : mCallback(callback) {}
-    void onRectOp(const RectOp& op, const BakedOpState& state) override {
-        EXPECT_EQ(mIndex++, 0);
-        mCallback(op, state);
-    }
-    std::function<void(const RectOp&, const BakedOpState&)> mCallback;
-};
+    sp<RenderNode> caster = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    }, [] (RenderProperties& properties) {
+        properties.setTranslationZ(5.0f);
+        properties.mutableOutline().setRoundRect(0, 0, 100, 100, 5, 1.0f);
+        return RenderNode::GENERIC | RenderNode::TRANSLATION_Z;
+    });
+    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+            [&caster] (RecordingCanvas& canvas) {
+        canvas.insertReorderBarrier(true);
+        canvas.drawRenderNode(caster.get());
+    });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
+
+    std::vector< sp<RenderNode> > nodes;
+    nodes.push_back(parent.get());
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes);
+
+    ShadowTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
 
 static void testProperty(
-        std::function<int(RenderProperties&)> propSetupCallback,
+        TestUtils::PropSetupCallback propSetupCallback,
         std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
+    class PropertyTestRenderer : public TestRendererBase {
+    public:
+        PropertyTestRenderer(std::function<void(const RectOp&, const BakedOpState&)> callback)
+                : mCallback(callback) {}
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(mIndex++, 0);
+            mCallback(op, state);
+        }
+        std::function<void(const RectOp&, const BakedOpState&)> mCallback;
+    };
+
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    });
-    node->setPropertyFieldsDirty(propSetupCallback(node->mutateStagingProperties()));
+    }, propSetupCallback);
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
 
     std::vector< sp<RenderNode> > nodes;
