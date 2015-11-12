@@ -30,7 +30,7 @@
         android:layout_marginStart="@dimen/notification_content_margin_start"
         android:layout_marginTop="@dimen/notification_content_margin_top"
         android:layout_marginEnd="@dimen/notification_content_margin_end"
-        android:minHeight="@dimen/notification_large_icon_height"
+        android:minHeight="@dimen/notification_min_content_height"
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />
@@ -117,20 +117,10 @@
             android:visibility="gone"
             android:layout_weight="1"
             />
-        <TextView android:id="@+id/inbox_more"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            android:text="@android:string/notification_inbox_ellipsis"
-            />
         <FrameLayout
             android:id="@+id/inbox_end_pad"
             android:layout_width="match_parent"
-            android:layout_height="10dp"
+            android:layout_height="13dp"
             android:visibility="gone"
             android:layout_weight="0"
         />
@@ -139,27 +129,19 @@
             android:layout_height="1dip"
             android:id="@+id/action_divider"
             android:visibility="gone"
+            android:layout_marginStart="-16dp"
+            android:layout_marginEnd="-16dp"
+            android:clipChildren="false"
             android:background="@drawable/notification_template_divider" />
         <include
             layout="@layout/notification_material_action_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="-8dp"
-            android:layout_marginRight="-8dp"
+            android:layout_marginStart="-16dp"
+            android:layout_marginEnd="-16dp"
+            android:clipChildren="false"
             android:layout_weight="0"
             />
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:id="@+id/overflow_divider"
-            android:visibility="visible"
-            android:background="@drawable/notification_template_divider" />
-        <include
-            layout="@layout/notification_template_part_line3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="10dp" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>

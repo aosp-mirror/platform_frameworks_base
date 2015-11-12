@@ -35,7 +35,7 @@
         android:layout_marginStart="@dimen/notification_content_margin_start"
         android:layout_marginEnd="24dp"
         android:layout_toStartOf="@id/right_icon"
-        android:minHeight="54dp"
+        android:minHeight="@dimen/notification_min_content_height"
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />

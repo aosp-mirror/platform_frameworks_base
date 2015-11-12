@@ -67,7 +67,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private TextView mSubText;
     private TextView mInfoText;
     private View mProfileBadge;
-    private View mThirdLineDivider;
     private View mThirdLine;
     private ImageView mExpandButton;
     private View mNotificationHeader;
@@ -94,7 +93,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         mSubText = (TextView) mView.findViewById(com.android.internal.R.id.text);
         mInfoText = (TextView) mView.findViewById(com.android.internal.R.id.info);
         mProfileBadge = mView.findViewById(com.android.internal.R.id.profile_badge_line3);
-        mThirdLineDivider = mView.findViewById(com.android.internal.R.id.overflow_divider);
         mThirdLine = mView.findViewById(com.android.internal.R.id.line3);
         mExpandButton = (ImageView) mView.findViewById(com.android.internal.R.id.expand_button);
         mColor = resolveColor(mExpandButton);
@@ -271,13 +269,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         }
         boolean showThirdLine = (visible && (infoAvailable || subTextAvailable))
                 || mProfileBadge.getVisibility() == View.VISIBLE;
-        if (mThirdLineDivider != null) {
-            if (showThirdLine) {
-                mThirdLineDivider.setVisibility(View.VISIBLE);
-            } else {
-                mThirdLineDivider.setVisibility(View.GONE);
-            }
-        }
         if (mThirdLine != null) {
             if (showThirdLine) {
                 mThirdLine.setVisibility(View.VISIBLE);

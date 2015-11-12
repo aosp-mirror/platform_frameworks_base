@@ -3009,7 +3009,6 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.text2, View.GONE);
             contentView.setViewVisibility(R.id.info, View.GONE);
             contentView.setViewVisibility(R.id.line3, View.GONE);
-            contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
             contentView.setViewVisibility(R.id.progress, View.GONE);
         }
 
@@ -3117,7 +3116,6 @@ public class Notification implements Parcelable
 
             // Note getStandardView may hide line 3 again.
             contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
-            contentView.setViewVisibility(R.id.overflow_divider, showLine3 ? View.VISIBLE : View.GONE);
             return contentView;
         }
 
@@ -3597,18 +3595,13 @@ public class Notification implements Parcelable
 
             final CharSequence overflowText = mSummaryTextSet ? mSummaryText : null;
             final CharSequence subText = mBuilder.mN.extras.getCharSequence(EXTRA_SUB_TEXT);
-            boolean showSummaryOnBottom = overflowText != null && !overflowText.equals(subText);
-            if (showSummaryOnBottom) {
-                contentView
-                        .setTextViewText(R.id.text, mBuilder.processLegacyText(overflowText));
-                contentView.setViewVisibility(R.id.overflow_divider, View.VISIBLE);
-                contentView.setViewVisibility(R.id.line3, View.VISIBLE);
-            } else {
-                // Clear text in case we use the line to show the profile badge.
-                contentView.setTextViewText(com.android.internal.R.id.text, "");
-                contentView.setViewVisibility(com.android.internal.R.id.overflow_divider, View.GONE);
-                contentView.setViewVisibility(com.android.internal.R.id.line3, View.GONE);
+            if (overflowText != null && !overflowText.equals(subText)) {
+                mBuilder.bindHeaderSubText(contentView, overflowText);
             }
+
+            // Clear text in case we use the line to show the profile badge.
+            contentView.setTextViewText(com.android.internal.R.id.text, "");
+            contentView.setViewVisibility(com.android.internal.R.id.line3, View.GONE);
 
             return contentView;
         }
@@ -4076,6 +4069,9 @@ public class Notification implements Parcelable
             final float subTextSize = mBuilder.mContext.getResources().getDimensionPixelSize(
                     R.dimen.notification_subtext_size);
             int i=0;
+            final float density = mBuilder.mContext.getResources().getDisplayMetrics().density;
+            int topPadding = (int) (5 * density);
+            int bottomPadding = (int) (13 * density);
             while (i < mTexts.size() && i < rowIds.length) {
                 CharSequence str = mTexts.get(i);
                 if (str != null && !str.equals("")) {
@@ -4085,15 +4081,11 @@ public class Notification implements Parcelable
                         contentView.setTextViewTextSize(rowIds[i], TypedValue.COMPLEX_UNIT_PX,
                                 subTextSize);
                     }
+                    contentView.setViewPadding(rowIds[i], 0, topPadding, 0,
+                            i == rowIds.length - 1 || i == mTexts.size() - 1 ? bottomPadding : 0);
                 }
                 i++;
             }
-
-            contentView.setViewVisibility(R.id.inbox_end_pad,
-                    mTexts.size() > 0 ? View.VISIBLE : View.GONE);
-
-            contentView.setViewVisibility(R.id.inbox_more,
-                    mTexts.size() > rowIds.length ? View.VISIBLE : View.GONE);
 
             mBuilder.shrinkLine3Text(contentView);
 
