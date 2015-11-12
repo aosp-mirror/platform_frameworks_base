@@ -1692,13 +1692,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
         if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
-        if (mWindowManagerService.isHardKeyboardAvailable()) {
-            // When physical keyboard is attached, we show the ime switcher (or notification if
-            // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
-            // exists in the IME switcher dialog.  Might be OK to remove this condition once
-            // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
-            return true;
-        }
         if ((visibility & InputMethodService.IME_VISIBLE) == 0) return false;
 
         List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
