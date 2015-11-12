@@ -222,12 +222,20 @@ public class InsetDrawable extends DrawableWrapper {
 
     @Override
     public int getIntrinsicWidth() {
-        return getDrawable().getIntrinsicWidth() + mState.mInsetLeft + mState.mInsetRight;
+        final int childWidth = getDrawable().getIntrinsicWidth();
+        if (childWidth < 0) {
+            return -1;
+        }
+        return childWidth + mState.mInsetLeft + mState.mInsetRight;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return getDrawable().getIntrinsicHeight() + mState.mInsetTop + mState.mInsetBottom;
+        final int childHeight = getDrawable().getIntrinsicHeight();
+        if (childHeight < 0) {
+            return -1;
+        }
+        return childHeight + mState.mInsetTop + mState.mInsetBottom;
     }
 
     @Override

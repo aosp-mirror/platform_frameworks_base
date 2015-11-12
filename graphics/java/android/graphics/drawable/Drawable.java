@@ -913,16 +913,26 @@ public abstract class Drawable {
     protected void onBoundsChange(Rect bounds) {}
 
     /**
-     * Return the intrinsic width of the underlying drawable object.  Returns
-     * -1 if it has no intrinsic width, such as with a solid color.
+     * Returns the drawable's intrinsic width.
+     * <p>
+     * Intrinsic width is the width at which the drawable would like to be laid
+     * out, including any inherent padding. If the drawable has no intrinsic
+     * width, such as a solid color, this method returns -1.
+     *
+     * @return the intrinsic width, or -1 if no intrinsic width
      */
     public int getIntrinsicWidth() {
         return -1;
     }
 
     /**
-     * Return the intrinsic height of the underlying drawable object. Returns
-     * -1 if it has no intrinsic height, such as with a solid color.
+     * Returns the drawable's intrinsic height.
+     * <p>
+     * Intrinsic height is the height at which the drawable would like to be
+     * laid out, including any inherent padding. If the drawable has no
+     * intrinsic height, such as a solid color, this method returns -1.
+     *
+     * @return the intrinsic height, or -1 if no intrinsic height
      */
     public int getIntrinsicHeight() {
         return -1;
