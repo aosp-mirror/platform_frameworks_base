@@ -1558,6 +1558,16 @@ public class ActivityManager {
             readFromParcel(source);
         }
 
+        /**
+         * Resets this info state to the initial state.
+         * @hide
+         */
+        public void reset() {
+            taskWidth = 0;
+            taskHeight = 0;
+            screenOrientation = 0;
+        }
+
         /** @hide */
         public void saveToXml(XmlSerializer out) throws IOException {
             out.attribute(null, ATTR_TASK_WIDTH, Integer.toString(taskWidth));

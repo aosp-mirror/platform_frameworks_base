@@ -572,8 +572,8 @@ final class TaskRecord {
      * Removes all associated thumbnail data when a task is removed or pruned from recents.
      */
     void disposeThumbnail() {
+        mLastThumbnailInfo.reset();
         mLastThumbnail = null;
-        mLastThumbnailInfo = null;
         lastDescription = null;
     }
 
