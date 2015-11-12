@@ -11,8 +11,8 @@
 }
 
 -keep class com.android.systemui.recents.views.TaskView {
-  public void setHighlightProgress(float);
-  public float getHighlightProgress();
+  public void setFocusProgress(float);
+  public float getFocusProgress();
 }
 
 -keep class com.android.systemui.recents.views.TaskViewHeader {

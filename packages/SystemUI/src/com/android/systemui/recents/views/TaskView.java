@@ -80,21 +80,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     TaskViewCallbacks mCb;
 
     // Focus animation
-    float mHighlightProgress;
-    Paint mHighlightPaint = new Paint();
-    int mHighlightColor = 0xff009688;
-    int mHighlightAlpha = 0x50;
-    static Interpolator sHighlightInInterpolator = new OvershootInterpolator(2);
-    static Interpolator sHighlightInRadiusInterpolator = new DecelerateInterpolator();
-    static Interpolator sHighlightOutInterpolator = new DecelerateInterpolator();
-    ObjectAnimator mHighlightAnimator;
-    static long sHighlightInDurationMs = 350;
-    static long sHighlightOutDurationMs = 200;
-    float mHighlightInCircleRadiusProgress;
-    int mHighlightInFillAlpha;
-    int mHighlightInCircleAlpha;
-    int mHighlightOutFillAlpha;
-    boolean mHighlightAnimatorWasTriggered;
+    float mFocusProgress;
+    Paint mFocusPaint = new Paint();
+    int mFocusColor = 0xff009688;
+    int mFocusAlpha = 0x50;
+    static Interpolator sFocusInInterpolator = new OvershootInterpolator(2);
+    static Interpolator sFocusInRadiusInterpolator = new DecelerateInterpolator();
+    static Interpolator sFocusOutInterpolator = new DecelerateInterpolator();
+    ObjectAnimator mFocusAnimator;
+    static long sFocusInDurationMs = 350;
+    static long sFocusOutDurationMs = 200;
+    float mFocusInCircleRadiusProgress;
+    int mFocusInFillAlpha;
+    int mFocusInCircleAlpha;
+    int mFocusOutFillAlpha;
+    boolean mFocusAnimatorWasTriggered;
 
     // Optimizations
     ValueAnimator.AnimatorUpdateListener mUpdateDimListener =
@@ -130,17 +130,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
         setOutlineProvider(mViewBounds);
 
-        mHighlightAnimator = ObjectAnimator.ofFloat(this, "highlightProgress", 1f);
-        mHighlightAnimator.addListener(new AnimatorListenerAdapter() {
+        mFocusAnimator = ObjectAnimator.ofFloat(this, "focusProgress", 1f);
+        mFocusAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animator) {
-                mHighlightAnimatorWasTriggered = true;
+                mFocusAnimatorWasTriggered = true;
             }
         });
 
-        mHighlightColor =
+        mFocusColor =
                 context.getResources().getColor(R.color.status_bar_recents_highlight_color);
-        mHighlightPaint.setColor(mHighlightColor);
+        mFocusPaint.setColor(mFocusColor);
     }
 
     /** Set callback */
@@ -559,44 +559,46 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     public void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
-        if (mHighlightAnimatorWasTriggered) {
+        if (mFocusAnimatorWasTriggered) {
             if (mIsFocused) {
                 final int x = getWidth() / 2;
                 final int y = getHeight() / 2;
                 final float hypot = (float) Math.hypot(x, y);
-                final float radius = hypot * mHighlightInCircleRadiusProgress;
+                final float radius = hypot * mFocusInCircleRadiusProgress;
 
-                mHighlightPaint.setAlpha(mHighlightInFillAlpha);
-                canvas.drawRect(0, 0, getWidth(), getHeight(), mHighlightPaint);
+                mFocusPaint.setAlpha(mFocusInFillAlpha);
+                canvas.drawRect(0, 0, getWidth(), getHeight(), mFocusPaint);
 
-                mHighlightPaint.setAlpha(mHighlightInCircleAlpha);
-                canvas.drawCircle(x, y, radius, mHighlightPaint);
+                mFocusPaint.setAlpha(mFocusInCircleAlpha);
+                canvas.drawCircle(x, y, radius, mFocusPaint);
             } else {
-                mHighlightPaint.setAlpha(mHighlightOutFillAlpha);
-                canvas.drawRect(0, 0, getWidth(), getHeight(), mHighlightPaint);
+                mFocusPaint.setAlpha(mFocusOutFillAlpha);
+                canvas.drawRect(0, 0, getWidth(), getHeight(), mFocusPaint);
             }
         }
     }
 
-    public void setHighlightProgress(float progress) {
-        mHighlightProgress = progress;
+    /** Sets the current focus animation progress. Used by the property animator. */
+    public void setFocusProgress(float progress) {
+        mFocusProgress = progress;
         if (mIsFocused) {
-            final float interpolatedProgress = sHighlightInInterpolator.getInterpolation(progress);
-            mHighlightInCircleRadiusProgress =
-                    0.5f + sHighlightInRadiusInterpolator.getInterpolation(progress);
-            mHighlightInCircleAlpha = (int) (mHighlightAlpha * interpolatedProgress);
-            mHighlightInFillAlpha =
-                    (mHighlightAlpha / 4) + (int) ((mHighlightAlpha / 2) * interpolatedProgress);
+            final float interpolatedProgress = sFocusInInterpolator.getInterpolation(progress);
+            mFocusInCircleRadiusProgress =
+                    0.5f + sFocusInRadiusInterpolator.getInterpolation(progress);
+            mFocusInCircleAlpha = (int) (mFocusAlpha * interpolatedProgress);
+            mFocusInFillAlpha =
+                    (mFocusAlpha / 4) + (int) ((mFocusAlpha / 2) * interpolatedProgress);
         } else {
-            final float interpolatedProgress = sHighlightOutInterpolator.getInterpolation(progress);
-            mHighlightOutFillAlpha = (int) (mHighlightAlpha * (1 - interpolatedProgress));
+            final float interpolatedProgress = sFocusOutInterpolator.getInterpolation(progress);
+            mFocusOutFillAlpha = (int) (mFocusAlpha * (1 - interpolatedProgress));
         }
 
         invalidate();
     }
 
-    public float getHighlightProgress() {
-        return mHighlightProgress;
+    /** Returns the current focus animation progress. */
+    public float getFocusProgress() {
+        return mFocusProgress;
     }
 
     /** Sets the current task progress. */
@@ -692,13 +694,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         invalidate();
     }
 
+    /** Performs the focus animation for alt-tab traversal. */
     private void performFocusAnimation() {
         if (mFocusAnimationsEnabled) {
             // Focus the header bar
             mHeaderView.onTaskViewFocusChanged(true);
 
-            mHighlightAnimator.setDuration(sHighlightInDurationMs);
-            mHighlightAnimator.start();
+            mFocusAnimator.setDuration(sFocusInDurationMs);
+            mFocusAnimator.start();
         }
     }
 
@@ -715,8 +718,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Un-focus the header bar
             mHeaderView.onTaskViewFocusChanged(false);
 
-            mHighlightAnimator.setDuration(sHighlightOutDurationMs);
-            mHighlightAnimator.start();
+            mFocusAnimator.setDuration(sFocusOutDurationMs);
+            mFocusAnimator.start();
         }
 
         // Update the thumbnail alpha with the focus
@@ -756,10 +759,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
     }
 
+    /** Disables focus animations and resets focus state. */
     void disableFocusAnimations() {
         mFocusAnimationsEnabled = false;
         mIsFocused = false;
-        mHighlightAnimatorWasTriggered = false;
+        mFocusAnimatorWasTriggered = false;
     }
 
     public void disableLayersForOneFrame() {

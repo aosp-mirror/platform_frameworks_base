@@ -343,10 +343,11 @@ public class TaskViewHeader extends FrameLayout {
         setLayerType(LAYER_TYPE_NONE, null);
     }
 
+    /** Sets the focus animation progress. Used by the property animator. */
     public void setFocusProgress(float progress) {
         mFocusProgress = progress;
         final ArgbEvaluator colorEvaluator = new ArgbEvaluator();
-        int desaturatedColor = calculateDesaurateColor(mBackgroundColor);
+        int desaturatedColor = calculateDesauratedColor(mBackgroundColor);
         int color = (Integer) colorEvaluator.evaluate(progress, mBackgroundColor,
                 mIsFocused ? desaturatedColor : mTask.colorPrimary);
         mBackgroundColorDrawable.setColor(color);
@@ -355,7 +356,13 @@ public class TaskViewHeader extends FrameLayout {
         TaskViewHeader.this.setTranslationZ((mIsFocused ? progress : (1 - progress)) * 4);
     }
 
-    private int calculateDesaurateColor(int saturatedColor) {
+    /** Returns the current focus animation progress. */
+    public float getFocusProgress() {
+        return mFocusProgress;
+    }
+
+    /** Returns a desaturated color value for a given color. */
+    private int calculateDesauratedColor(int saturatedColor) {
         final float red = 0.2126f * Color.red(saturatedColor);
         final float green = 0.7152f * Color.green(saturatedColor);
         final float blue = 0.0722f * Color.blue(saturatedColor);
@@ -364,22 +371,18 @@ public class TaskViewHeader extends FrameLayout {
         return Color.argb(255, sum, sum, sum);
     }
 
-    public float getFocusProgress() {
-        return mFocusProgress;
-    }
-
     /** Notifies the associated TaskView has been focused. */
     void onTaskViewFocusChanged(final boolean focused) {
         mIsFocused = focused;
 
         mFocusAnimator.setDuration(
                 mIsFocused ?
-                        TaskView.sHighlightInDurationMs :
-                        TaskView.sHighlightOutDurationMs);
+                        TaskView.sFocusInDurationMs :
+                        TaskView.sFocusOutDurationMs);
         mFocusAnimator.setInterpolator(
                 mIsFocused ?
-                        TaskView.sHighlightInRadiusInterpolator :
-                        TaskView.sHighlightOutInterpolator);
+                        TaskView.sFocusInRadiusInterpolator :
+                        TaskView.sFocusOutInterpolator);
         mFocusAnimator.start();
     }
 }
