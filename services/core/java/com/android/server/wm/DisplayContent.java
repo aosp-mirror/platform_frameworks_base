@@ -291,16 +291,18 @@ class DisplayContent {
             final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
-                // We need to use the visible frame on the window for any touch-related tests.
-                // Can't use the task's bounds because the original task bounds might be adjusted
-                // to fit the content frame. For example, the presence of the IME adjusting the
+                final WindowState win = task.getTopVisibleAppMainWindow();
+                if (win == null) {
+                    continue;
+                }
+                // We need to use the task's dim bounds (which is derived from the visible
+                // bounds of its apps windows) for any touch-related tests. Can't use
+                // the task's original bounds because it might be adjusted to fit the
+                // content frame. For example, the presence of the IME adjusting the
                 // windows frames when the app window is the IME target.
-                final WindowState win = task.getTopAppMainWindow();
-                if (win != null) {
-                    win.getVisibleBounds(mTmpRect);
-                    if (mTmpRect.contains(x, y)) {
-                        return task.mTaskId;
-                    }
+                task.getDimBounds(mTmpRect);
+                if (mTmpRect.contains(x, y)) {
+                    return task.mTaskId;
                 }
             }
         }
@@ -308,10 +310,10 @@ class DisplayContent {
     }
 
     /**
-     * Find the window whose outside touch area (for resizing) (x, y) falls within.
+     * Find the task whose outside touch area (for resizing) (x, y) falls within.
      * Returns null if the touch doesn't fall into a resizing area.
      */
-    WindowState findWindowForControlPoint(int x, int y) {
+    Task findTaskForControlPoint(int x, int y) {
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
@@ -325,24 +327,22 @@ class DisplayContent {
                     return null;
                 }
 
-                // We need to use the visible frame on the window for any touch-related
-                // tests. Can't use the task's bounds because the original task bounds
-                // might be adjusted to fit the content frame. (One example is when the
-                // task is put to top-left quadrant, the actual visible frame would not
-                // start at (0,0) after it's adjusted for the status bar.)
-                final WindowState win = task.getTopAppMainWindow();
-                if (win != null) {
-                    win.getVisibleBounds(mTmpRect);
-                    mTmpRect.inset(-delta, -delta);
-                    if (mTmpRect.contains(x, y)) {
-                        mTmpRect.inset(delta, delta);
-                        if (!mTmpRect.contains(x, y)) {
-                            return win;
-                        }
-                        // User touched inside the task. No need to look further,
-                        // focus transfer will be handled in ACTION_UP.
-                        return null;
+                // We need to use the task's dim bounds (which is derived from the visible
+                // bounds of its apps windows) for any touch-related tests. Can't use
+                // the task's original bounds because it might be adjusted to fit the
+                // content frame. One example is when the task is put to top-left quadrant,
+                // the actual visible area would not start at (0,0) after it's adjusted
+                // for the status bar.
+                task.getDimBounds(mTmpRect);
+                mTmpRect.inset(-delta, -delta);
+                if (mTmpRect.contains(x, y)) {
+                    mTmpRect.inset(delta, delta);
+                    if (!mTmpRect.contains(x, y)) {
+                        return task;
                     }
+                    // User touched inside the task. No need to look further,
+                    // focus transfer will be handled in ACTION_UP.
+                    return null;
                 }
             }
         }
@@ -351,12 +351,18 @@ class DisplayContent {
 
     void setTouchExcludeRegion(Task focusedTask) {
         mTouchExcludeRegion.set(mBaseDisplayRect);
-        WindowList windows = getWindowList();
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-        for (int i = windows.size() - 1; i >= 0; --i) {
-            final WindowState win = windows.get(i);
-            final Task task = win.getTask();
-            if (win.isVisibleLw() && task != null) {
+        boolean addBackFocusedTask = false;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            TaskStack stack = mStacks.get(stackNdx);
+            final ArrayList<Task> tasks = stack.getTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                final Task task = tasks.get(taskNdx);
+                final WindowState win = task.getTopVisibleAppMainWindow();
+                if (win == null) {
+                    continue;
+                }
+
                 /**
                  * Exclusion region is the region that TapDetector doesn't care about.
                  * Here we want to remove all non-focused tasks from the exclusion region.
@@ -368,13 +374,17 @@ class DisplayContent {
                  */
                 final boolean isFreeformed = task.inFreeformWorkspace();
                 if (task != focusedTask || isFreeformed) {
-                    mTmpRect.set(win.mVisibleFrame);
-                    mTmpRect.intersect(win.mVisibleInsets);
-                    /**
-                     * If the task is freeformed, enlarge the area to account for outside
-                     * touch area for resize.
-                     */
+                    task.getDimBounds(mTmpRect);
                     if (isFreeformed) {
+                        // If we're removing a freeform, focused app from the exclusion region,
+                        // we need to add back its touchable frame later. Remember the touchable
+                        // frame now.
+                        if (task == focusedTask) {
+                            addBackFocusedTask = true;
+                            mTmpRect2.set(mTmpRect);
+                        }
+                        // If the task is freeformed, enlarge the area to account for outside
+                        // touch area for resize.
                         mTmpRect.inset(-delta, -delta);
                         // Intersect with display content rect. If we have system decor (status bar/
                         // navigation bar), we want to exclude that from the tap detection.
@@ -385,16 +395,13 @@ class DisplayContent {
                     }
                     mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
                 }
-                /**
-                 * If we removed the focused task above, add it back and only leave its
-                 * outside touch area in the exclusion. TapDectector is not interested in
-                 * any touch inside the focused task itself.
-                 */
-                if (task == focusedTask && isFreeformed) {
-                    mTmpRect.inset(delta, delta);
-                    mTouchExcludeRegion.op(mTmpRect, Region.Op.UNION);
-                }
             }
+        }
+        // If we removed the focused task above, add it back and only leave its
+        // outside touch area in the exclusion. TapDectector is not interested in
+        // any touch inside the focused task itself.
+        if (addBackFocusedTask) {
+            mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
         }
         if (mTapDetector != null) {
             mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);

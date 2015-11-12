@@ -284,7 +284,12 @@ class Task implements DimLayer.DimLayerUser {
     boolean getMaxVisibleBounds(Rect out) {
         boolean foundTop = false;
         for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final WindowState win = mAppTokens.get(i).findMainWindow();
+            final AppWindowToken token = mAppTokens.get(i);
+            // skip hidden (or about to hide) apps
+            if (token.mIsExiting || token.clientHidden || token.hiddenRequested) {
+                continue;
+            }
+            final WindowState win = token.findMainWindow();
             if (win == null) {
                 continue;
             }
@@ -413,14 +418,20 @@ class Task implements DimLayer.DimLayerUser {
         return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
     }
 
-    WindowState getTopAppMainWindow() {
-        final int tokensCount = mAppTokens.size();
-        return tokensCount > 0 ? mAppTokens.get(tokensCount - 1).findMainWindow() : null;
+    WindowState getTopVisibleAppMainWindow() {
+        final AppWindowToken token = getTopVisibleAppToken();
+        return token != null ? token.findMainWindow() : null;
     }
 
-    AppWindowToken getTopAppWindowToken() {
-        final int tokensCount = mAppTokens.size();
-        return tokensCount > 0 ? mAppTokens.get(tokensCount - 1) : null;
+    AppWindowToken getTopVisibleAppToken() {
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = mAppTokens.get(i);
+            // skip hidden (or about to hide) apps
+            if (!token.mIsExiting && !token.clientHidden && !token.hiddenRequested) {
+                return token;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -7069,15 +7069,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void startResizingTask(DisplayContent displayContent, int startX, int startY) {
-        WindowState win = null;
+        Task task = null;
         synchronized (mWindowMap) {
-            win = displayContent.findWindowForControlPoint(startX, startY);
-            if (win == null || !startPositioningLocked(win, true /*resize*/, startX, startY)) {
+            task = displayContent.findTaskForControlPoint(startX, startY);
+            if (task == null || !startPositioningLocked(
+                    task.getTopVisibleAppMainWindow(), true /*resize*/, startX, startY)) {
                 return;
             }
         }
         try {
-            mActivityManager.setFocusedTask(win.getTask().mTaskId);
+            mActivityManager.setFocusedTask(task.mTaskId);
         } catch(RemoteException e) {}
     }
 

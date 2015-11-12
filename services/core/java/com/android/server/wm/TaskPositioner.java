@@ -332,30 +332,34 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                 + ", {" + startX + ", " + startY + "}");
         }
         mCtrlType = CTRL_NONE;
+        mTask = win.getTask();
+        mStartDragX = startX;
+        mStartDragY = startY;
+
+        // Use the dim bounds, not the original task bounds. The cursor
+        // movement should be calculated relative to the visible bounds.
+        // Also, use the dim bounds of the task which accounts for
+        // multiple app windows. Don't use any bounds from win itself as it
+        // may not be the same size as the task.
+        mTask.getDimBounds(mTmpRect);
+
         if (resize) {
-            final Rect visibleFrame = win.mVisibleFrame;
-            if (startX < visibleFrame.left) {
+            if (startX < mTmpRect.left) {
                 mCtrlType |= CTRL_LEFT;
             }
-            if (startX > visibleFrame.right) {
+            if (startX > mTmpRect.right) {
                 mCtrlType |= CTRL_RIGHT;
             }
-            if (startY < visibleFrame.top) {
+            if (startY < mTmpRect.top) {
                 mCtrlType |= CTRL_TOP;
             }
-            if (startY > visibleFrame.bottom) {
+            if (startY > mTmpRect.bottom) {
                 mCtrlType |= CTRL_BOTTOM;
             }
             mResizing = true;
         }
 
-        mTask = win.getTask();
-        mStartDragX = startX;
-        mStartDragY = startY;
-
-        // Use the visible bounds, not the original task bounds. The cursor
-        // movement should be calculated relative to the visible bounds.
-        mWindowOriginalBounds.set(win.mVisibleFrame);
+        mWindowOriginalBounds.set(mTmpRect);
     }
 
     private void endDragLocked() {
