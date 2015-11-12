@@ -25,8 +25,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
+import android.hardware.display.DisplayManager;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -262,9 +264,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     private void updateDisplayInfo() {
-        DisplayMetrics info = mContext.getResources().getDisplayMetrics();
-        mDisplayWidth = info.widthPixels;
-        mDisplayHeight = info.heightPixels;
+        final DisplayManager displayManager =
+                (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+        Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        final DisplayInfo info = new DisplayInfo();
+        display.getDisplayInfo(info);
+        mDisplayWidth = info.logicalWidth;
+        mDisplayHeight = info.logicalHeight;
     }
 
     private int calculatePosition(int touchX, int touchY) {
