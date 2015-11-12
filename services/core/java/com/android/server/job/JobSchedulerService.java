@@ -51,6 +51,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
@@ -127,6 +129,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     IBatteryStats mBatteryStats;
     PowerManager mPowerManager;
+    DeviceIdleController.LocalService mLocalDeviceIdleController;
 
     /**
      * Set to true once we are allowed to run third party apps.
@@ -137,6 +140,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      * True when in device idle mode, so we don't want to schedule any jobs.
      */
     boolean mDeviceIdleMode;
+
+    /**
+     * What we last reported to DeviceIdleController about wheter we are active.
+     */
+    boolean mReportedActive;
 
     /**
      * Cleans up outstanding jobs when a package is removed. Even if it's being replaced later we
@@ -268,6 +276,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             mPendingJobs.remove(cancelled);
             // Cancel if running.
             stopJobOnServiceContextLocked(cancelled);
+            reportActive();
         }
     }
 
@@ -299,8 +308,35 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } else {
                     // When coming out of idle, allow thing to start back up.
+                    if (rocking) {
+                        if (mLocalDeviceIdleController != null) {
+                            if (!mReportedActive) {
+                                mReportedActive = true;
+                                mLocalDeviceIdleController.setJobsActive(true);
+                            }
+                        }
+                    }
                     mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
                 }
+            }
+        }
+    }
+
+    void reportActive() {
+        boolean active = false;
+        if (mPendingJobs.size() <= 0) {
+            for (int i=0; i<mActiveServices.size(); i++) {
+                JobServiceContext jsc = mActiveServices.get(i);
+                if (!jsc.isAvailable()) {
+                    active = true;
+                    break;
+                }
+            }
+        }
+        if (mLocalDeviceIdleController != null) {
+            if (mReportedActive != active) {
+                mReportedActive = active;
+                mLocalDeviceIdleController.setJobsActive(active);
             }
         }
     }
@@ -354,6 +390,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mReadyToRock = true;
                 mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                         BatteryStats.SERVICE_NAME));
+                mLocalDeviceIdleController
+                        = LocalServices.getService(DeviceIdleController.LocalService.class);
                 // Create the "runners".
                 for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
                     mActiveServices.add(
@@ -623,6 +661,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     stopJobOnServiceContextLocked(job);
                 }
             }
+            reportActive();
             if (DEBUG) {
                 final int queuedJobs = mPendingJobs.size();
                 if (queuedJobs == 0) {
@@ -685,6 +724,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Not running anything.");
                 }
             }
+            reportActive();
             if (DEBUG) {
                 Slog.d(TAG, "idle=" + idleCount + " connectivity=" +
                 connectivityCount + " charging=" + chargingCount + " tot=" +
@@ -766,6 +806,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         it.remove();
                     }
                 }
+                reportActive();
             }
         }
     }
@@ -948,6 +989,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print("mReadyToRock="); pw.println(mReadyToRock);
             pw.print("mDeviceIdleMode="); pw.println(mDeviceIdleMode);
+            pw.print("mReportedActive="); pw.println(mReportedActive);
         }
         pw.println();
     }

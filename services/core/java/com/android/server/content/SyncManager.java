@@ -84,6 +84,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.EndPoint;
@@ -207,6 +209,7 @@ public class SyncManager {
     volatile private boolean mDataConnectionIsConnected = false;
     volatile private boolean mStorageIsLow = false;
     volatile private boolean mDeviceIsIdle = false;
+    volatile private boolean mReportedSyncActive = false;
 
     private final NotificationManager mNotificationMgr;
     private AlarmManager mAlarmService = null;
@@ -267,6 +270,12 @@ public class SyncManager {
                         SyncStorageEngine.EndPoint.USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL,
                         null /* any sync */);
             } else {
+                if (mLocalDeviceIdleController != null) {
+                    if (!mReportedSyncActive) {
+                        mReportedSyncActive = true;
+                        mLocalDeviceIdleController.setSyncActive(true);
+                    }
+                }
                 sendCheckAlarmsMessage();
             }
         }
@@ -292,6 +301,7 @@ public class SyncManager {
     };
 
     private final PowerManager mPowerManager;
+    DeviceIdleController.LocalService mLocalDeviceIdleController;
 
     // Use this as a random offset to seed all periodic syncs.
     private int mSyncRandomOffsetMillis;
@@ -1470,6 +1480,7 @@ public class SyncManager {
         }
         pw.print("memory low: "); pw.println(mStorageIsLow);
         pw.print("device idle: "); pw.println(mDeviceIsIdle);
+        pw.print("reported active: "); pw.println(mReportedSyncActive);
 
         final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
 
@@ -2544,6 +2555,7 @@ public class SyncManager {
                 if (isLoggable) {
                     Log.v(TAG, "maybeStartNextSync: no data connection, skipping");
                 }
+                setSyncActive(false);
                 return Long.MAX_VALUE;
             }
 
@@ -2551,6 +2563,7 @@ public class SyncManager {
                 if (isLoggable) {
                     Log.v(TAG, "maybeStartNextSync: memory low, skipping");
                 }
+                setSyncActive(false);
                 return Long.MAX_VALUE;
             }
 
@@ -2558,6 +2571,7 @@ public class SyncManager {
                 if (isLoggable) {
                     Log.v(TAG, "maybeStartNextSync: device idle, skipping");
                 }
+                setSyncActive(false);
                 return Long.MAX_VALUE;
             }
 
@@ -2567,6 +2581,7 @@ public class SyncManager {
                 if (isLoggable) {
                     Log.v(TAG, "maybeStartNextSync: accounts not known, skipping");
                 }
+                setSyncActive(false);
                 return Long.MAX_VALUE;
             }
 
@@ -2772,7 +2787,23 @@ public class SyncManager {
                 dispatchSyncOperation(candidate);
             }
 
+            setSyncActive(mActiveSyncContexts.size() > 0);
+
             return nextReadyToRunTime;
+        }
+
+        void setSyncActive(boolean active) {
+            if (mLocalDeviceIdleController == null) {
+                mLocalDeviceIdleController
+                        = LocalServices.getService(DeviceIdleController.LocalService.class);
+            }
+            if (mLocalDeviceIdleController != null) {
+                if (mReportedSyncActive != active) {
+                    mReportedSyncActive = active;
+                    mLocalDeviceIdleController.setSyncActive(active);
+                }
+            }
+
         }
 
         private boolean isSyncNotUsingNetworkH(ActiveSyncContext activeSyncContext) {

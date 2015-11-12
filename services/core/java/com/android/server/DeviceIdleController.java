@@ -48,6 +48,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
@@ -196,6 +197,12 @@ public class DeviceIdleController extends SystemService
     private long mNextIdleDelay;
     private long mNextLightAlarmTime;
 
+    private int mActiveIdleOpCount;
+    private IBinder mDownloadServiceActive;
+    private boolean mSyncActive;
+    private boolean mJobsActive;
+    private boolean mAlarmsActive;
+
     public final AtomicFile mConfigFile;
 
     /**
@@ -282,13 +289,19 @@ public class DeviceIdleController extends SystemService
                 }
             } else if (ACTION_STEP_LIGHT_IDLE_STATE.equals(intent.getAction())) {
                 synchronized (DeviceIdleController.this) {
-                    stepLightIdleStateLocked();
+                    stepLightIdleStateLocked("s:alarm");
                 }
             } else if (ACTION_STEP_IDLE_STATE.equals(intent.getAction())) {
                 synchronized (DeviceIdleController.this) {
-                    stepIdleStateLocked();
+                    stepIdleStateLocked("s:alarm");
                 }
             }
+        }
+    };
+
+    private final BroadcastReceiver mIdleStartedDoneReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            decActiveIdleOps();
         }
     };
 
@@ -733,7 +746,7 @@ public class DeviceIdleController extends SystemService
                 // If we are currently sensing, it is time to move to locating.
                 synchronized (this) {
                     mNotMoving = true;
-                    stepIdleStateLocked();
+                    stepIdleStateLocked("s:stationary");
                 }
             } else if (mState == STATE_LOCATING) {
                 // If we are currently locating, note that we are not moving and step
@@ -741,7 +754,7 @@ public class DeviceIdleController extends SystemService
                 synchronized (this) {
                     mNotMoving = true;
                     if (mLocated) {
-                        stepIdleStateLocked();
+                        stepIdleStateLocked("s:stationary");
                     }
                 }
             }
@@ -804,11 +817,18 @@ public class DeviceIdleController extends SystemService
                     } catch (RemoteException e) {
                     }
                     if (fullChanged) {
-                        getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
+                        incActiveIdleOps();
+                        getContext().sendOrderedBroadcastAsUser(mIdleIntent, UserHandle.ALL,
+                                null, mIdleStartedDoneReceiver, null, 0, null, null);
                     }
                     if (lightChanged) {
-                        getContext().sendBroadcastAsUser(mLightIdleIntent, UserHandle.ALL);
+                        incActiveIdleOps();
+                        getContext().sendOrderedBroadcastAsUser(mLightIdleIntent, UserHandle.ALL,
+                                null, mIdleStartedDoneReceiver, null, 0, null, null);
                     }
+                    // Always start with one active op for the message being sent here.
+                    // Now we we done!
+                    decActiveIdleOps();
                     EventLogTags.writeDeviceIdleOffComplete();
                 } break;
                 case MSG_REPORT_ACTIVE: {
@@ -913,9 +933,21 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public void exitIdle(String reason) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+            getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
             exitIdleInternal(reason);
+        }
+
+        @Override public void downloadServiceActive(IBinder token) {
+            getContext().enforceCallingOrSelfPermission(
+                    "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
+            DeviceIdleController.this.downloadServiceActive(token);
+        }
+
+        @Override public void downloadServiceInactive() {
+            getContext().enforceCallingOrSelfPermission(
+                    "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
+            DeviceIdleController.this.downloadServiceInactive();
         }
 
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -936,6 +968,19 @@ public class DeviceIdleController extends SystemService
 
         public void setNetworkPolicyTempWhitelistCallback(Runnable callback) {
             setNetworkPolicyTempWhitelistCallbackInternal(callback);
+        }
+
+        public void setSyncActive(boolean active) {
+            DeviceIdleController.this.setSyncActive(active);
+        }
+
+        public void setJobsActive(boolean active) {
+            DeviceIdleController.this.setJobsActive(active);
+        }
+
+        // Up-call from alarm manager.
+        public void setAlarmsActive(boolean active) {
+            DeviceIdleController.this.setAlarmsActive(active);
         }
     }
 
@@ -1439,7 +1484,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void stepLightIdleStateLocked() {
+    void stepLightIdleStateLocked(String reason) {
         if (mLightState == LIGHT_STATE_OVERRIDE) {
             // If we are already in full device idle mode, then
             // there is nothing left to do for light mode.
@@ -1455,22 +1500,23 @@ public class DeviceIdleController extends SystemService
                 scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_TIMEOUT);
                 if (DEBUG) Slog.d(TAG, "Moved to LIGHT_STATE_IDLE.");
                 mLightState = LIGHT_STATE_IDLE;
-                EventLogTags.writeDeviceIdleLight(mLightState, "step");
+                EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
                 break;
             case LIGHT_STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
+                mActiveIdleOpCount = 1;
                 scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_PENDING_TIMEOUT);
                 if (DEBUG) Slog.d(TAG,
                         "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
                 mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
-                EventLogTags.writeDeviceIdleLight(mLightState, "step");
+                EventLogTags.writeDeviceIdleLight(mLightState, reason);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 break;
         }
     }
 
-    void stepIdleStateLocked() {
+    void stepIdleStateLocked(String reason) {
         if (DEBUG) Slog.d(TAG, "stepIdleStateLocked: mState=" + mState);
         EventLogTags.writeDeviceIdleStep();
 
@@ -1494,12 +1540,12 @@ public class DeviceIdleController extends SystemService
                 mNextIdleDelay = mConstants.IDLE_TIMEOUT;
                 mState = STATE_IDLE_PENDING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_IDLE_PENDING.");
-                EventLogTags.writeDeviceIdle(mState, "step");
+                EventLogTags.writeDeviceIdle(mState, reason);
                 break;
             case STATE_IDLE_PENDING:
                 mState = STATE_SENSING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE_PENDING to STATE_SENSING.");
-                EventLogTags.writeDeviceIdle(mState, "step");
+                EventLogTags.writeDeviceIdle(mState, reason);
                 scheduleAlarmLocked(mConstants.SENSING_TIMEOUT, false);
                 cancelLocatingLocked();
                 mAnyMotionDetector.checkForAnyMotion();
@@ -1511,7 +1557,7 @@ public class DeviceIdleController extends SystemService
             case STATE_SENSING:
                 mState = STATE_LOCATING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_SENSING to STATE_LOCATING.");
-                EventLogTags.writeDeviceIdle(mState, "step");
+                EventLogTags.writeDeviceIdle(mState, reason);
                 scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT, false);
                 if (mLocationManager != null
                         && mLocationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
@@ -1553,20 +1599,98 @@ public class DeviceIdleController extends SystemService
                     mLightState = LIGHT_STATE_OVERRIDE;
                     cancelLightAlarmLocked();
                 }
-                EventLogTags.writeDeviceIdle(mState, "step");
+                EventLogTags.writeDeviceIdle(mState, reason);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
             case STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
+                mActiveIdleOpCount = 1;
                 scheduleAlarmLocked(mNextIdlePendingDelay, false);
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE to STATE_IDLE_MAINTENANCE. " +
                         "Next alarm in " + mNextIdlePendingDelay + " ms.");
                 mNextIdlePendingDelay = Math.min(mConstants.MAX_IDLE_PENDING_TIMEOUT,
                         (long)(mNextIdlePendingDelay * mConstants.IDLE_PENDING_FACTOR));
                 mState = STATE_IDLE_MAINTENANCE;
-                EventLogTags.writeDeviceIdle(mState, "step");
+                EventLogTags.writeDeviceIdle(mState, reason);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 break;
+        }
+    }
+
+    void incActiveIdleOps() {
+        synchronized (this) {
+            mActiveIdleOpCount++;
+        }
+    }
+
+    void decActiveIdleOps() {
+        synchronized (this) {
+            mActiveIdleOpCount--;
+            if (mActiveIdleOpCount <= 0) {
+                exitMaintenanceEarlyIfNeededLocked();
+            }
+        }
+    }
+
+    void downloadServiceActive(IBinder token) {
+        synchronized (this) {
+            mDownloadServiceActive = token;
+            try {
+                token.linkToDeath(new IBinder.DeathRecipient() {
+                    @Override public void binderDied() {
+                        downloadServiceInactive();
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                mDownloadServiceActive = null;
+            }
+        }
+    }
+
+    void downloadServiceInactive() {
+        synchronized (this) {
+            mDownloadServiceActive = null;
+            exitMaintenanceEarlyIfNeededLocked();
+        }
+    }
+
+    void setSyncActive(boolean active) {
+        synchronized (this) {
+            mSyncActive = active;
+            if (!active) {
+                exitMaintenanceEarlyIfNeededLocked();
+            }
+        }
+    }
+
+    void setJobsActive(boolean active) {
+        synchronized (this) {
+            mJobsActive = active;
+            if (!active) {
+                exitMaintenanceEarlyIfNeededLocked();
+            }
+        }
+    }
+
+    void setAlarmsActive(boolean active) {
+        synchronized (this) {
+            mAlarmsActive = active;
+            if (!active) {
+                exitMaintenanceEarlyIfNeededLocked();
+            }
+        }
+    }
+
+    void exitMaintenanceEarlyIfNeededLocked() {
+        if (mState == STATE_IDLE_MAINTENANCE || mLightState == LIGHT_STATE_IDLE_MAINTENANCE) {
+            if (mActiveIdleOpCount <= 0 && mDownloadServiceActive == null
+                    && !mSyncActive && !mJobsActive && !mAlarmsActive) {
+                if (mState == STATE_IDLE_MAINTENANCE) {
+                    stepIdleStateLocked("s:early");
+                } else {
+                    stepLightIdleStateLocked("s:early");
+                }
+            }
         }
     }
 
@@ -1612,7 +1736,7 @@ public class DeviceIdleController extends SystemService
         }
         mLocated = true;
         if (mNotMoving) {
-            stepIdleStateLocked();
+            stepIdleStateLocked("s:location");
         }
     }
 
@@ -1628,7 +1752,7 @@ public class DeviceIdleController extends SystemService
         }
         mLocated = true;
         if (mNotMoving) {
-            stepIdleStateLocked();
+            stepIdleStateLocked("s:gps");
         }
     }
 
@@ -1933,7 +2057,7 @@ public class DeviceIdleController extends SystemService
                 long token = Binder.clearCallingIdentity();
                 try {
                     exitForceIdleLocked();
-                    stepIdleStateLocked();
+                    stepIdleStateLocked("s:shell");
                     pw.print("Stepped to: ");
                     pw.println(stateToString(mState));
                 } finally {
@@ -1947,7 +2071,7 @@ public class DeviceIdleController extends SystemService
                 long token = Binder.clearCallingIdentity();
                 try {
                     exitForceIdleLocked();
-                    stepLightIdleStateLocked();
+                    stepLightIdleStateLocked("s:shell");
                     pw.print("Stepped to: "); pw.println(lightStateToString(mLightState));
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -1967,7 +2091,7 @@ public class DeviceIdleController extends SystemService
                     becomeInactiveIfAppropriateLocked();
                     int curState = mState;
                     while (curState != STATE_IDLE) {
-                        stepIdleStateLocked();
+                        stepIdleStateLocked("s:shell");
                         if (curState == mState) {
                             pw.print("Unable to go idle; stopped at ");
                             pw.println(stateToString(mState));
@@ -2226,6 +2350,9 @@ public class DeviceIdleController extends SystemService
             pw.println(lightStateToString(mLightState));
             pw.print("  mInactiveTimeout="); TimeUtils.formatDuration(mInactiveTimeout, pw);
             pw.println();
+            if (mActiveIdleOpCount != 0) {
+                pw.print("  mActiveIdleOpCount="); pw.println(mActiveIdleOpCount);
+            }
             if (mNextAlarmTime != 0) {
                 pw.print("  mNextAlarmTime=");
                 TimeUtils.formatDuration(mNextAlarmTime, SystemClock.elapsedRealtime(), pw);
@@ -2245,6 +2372,18 @@ public class DeviceIdleController extends SystemService
                 pw.print("  mNextLightAlarmTime=");
                 TimeUtils.formatDuration(mNextLightAlarmTime, SystemClock.elapsedRealtime(), pw);
                 pw.println();
+            }
+            if (mSyncActive) {
+                pw.print("  mSyncActive="); pw.println(mSyncActive);
+            }
+            if (mJobsActive) {
+                pw.print("  mJobsActive="); pw.println(mJobsActive);
+            }
+            if (mAlarmsActive) {
+                pw.print("  mAlarmsActive="); pw.println(mAlarmsActive);
+            }
+            if (mDownloadServiceActive != null) {
+                pw.print("  mDownloadServiceActive="); pw.println(mDownloadServiceActive);
             }
         }
     }

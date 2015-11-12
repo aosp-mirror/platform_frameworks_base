@@ -115,6 +115,7 @@ class AlarmManagerService extends SystemService {
     final LocalLog mLog = new LocalLog(TAG);
 
     AppOpsManager mAppOps;
+    DeviceIdleController.LocalService mLocalDeviceIdleController;
 
     final Object mLock = new Object();
 
@@ -897,6 +898,8 @@ class AlarmManagerService extends SystemService {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             mConstants.start(getContext().getContentResolver());
             mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
+            mLocalDeviceIdleController
+                    = LocalServices.getService(DeviceIdleController.LocalService.class);
         }
     }
 
@@ -2468,10 +2471,9 @@ class AlarmManagerService extends SystemService {
 
     private class AlarmHandler extends Handler {
         public static final int ALARM_EVENT = 1;
-        public static final int MINUTE_CHANGE_EVENT = 2;
-        public static final int DATE_CHANGE_EVENT = 3;
-        public static final int SEND_NEXT_ALARM_CLOCK_CHANGED = 4;
-        public static final int LISTENER_TIMEOUT = 5;
+        public static final int SEND_NEXT_ALARM_CLOCK_CHANGED = 2;
+        public static final int LISTENER_TIMEOUT = 3;
+        public static final int REPORT_ALARMS_ACTIVE = 4;
         
         public AlarmHandler() {
         }
@@ -2509,6 +2511,12 @@ class AlarmManagerService extends SystemService {
 
                 case LISTENER_TIMEOUT:
                     mDeliveryTracker.alarmTimedOut((IBinder) msg.obj);
+                    break;
+
+                case REPORT_ALARMS_ACTIVE:
+                    if (mLocalDeviceIdleController != null) {
+                        mLocalDeviceIdleController.setAlarmsActive(msg.arg1 != 0);
+                    }
                     break;
 
                 default:
@@ -2740,6 +2748,7 @@ class AlarmManagerService extends SystemService {
             }
             mBroadcastRefCount--;
             if (mBroadcastRefCount == 0) {
+                mHandler.obtainMessage(AlarmHandler.REPORT_ALARMS_ACTIVE, 0).sendToTarget();
                 mWakeLock.release();
                 if (mInFlight.size() > 0) {
                     mLog.w("Finished all dispatches with " + mInFlight.size()
@@ -2873,6 +2882,7 @@ class AlarmManagerService extends SystemService {
                         alarm.type, alarm.statsTag, (alarm.operation == null) ? alarm.uid : -1,
                         true);
                 mWakeLock.acquire();
+                mHandler.obtainMessage(AlarmHandler.REPORT_ALARMS_ACTIVE, 1).sendToTarget();
             }
             final InFlight inflight = new InFlight(AlarmManagerService.this,
                     alarm.operation, alarm.listener, alarm.workSource, alarm.uid,

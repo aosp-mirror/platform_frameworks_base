@@ -35,4 +35,6 @@ interface IDeviceIdleController {
     long addPowerSaveTempWhitelistAppForMms(String name, int userId, String reason);
     long addPowerSaveTempWhitelistAppForSms(String name, int userId, String reason);
     void exitIdle(String reason);
+    void downloadServiceActive(IBinder token);
+    void downloadServiceInactive();
 }
