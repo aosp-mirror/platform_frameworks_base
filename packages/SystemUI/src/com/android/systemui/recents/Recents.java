@@ -742,7 +742,7 @@ public class Recents extends SystemUI
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
 
-        if (sInstanceLoadPlan == null) {
+        if (mTriggeredFromAltTab || sInstanceLoadPlan == null) {
             // Create a new load plan if onPreloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
@@ -762,7 +762,7 @@ public class Recents extends SystemUI
             return;
         }
 
-        if (!sInstanceLoadPlan.hasTasks()) {
+        if (mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
             loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
         }
         ArrayList<TaskStack> stacks = sInstanceLoadPlan.getAllTaskStacks();
