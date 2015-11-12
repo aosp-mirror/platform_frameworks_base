@@ -23,6 +23,7 @@ import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.MockView;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.support.DrawerLayoutUtil;
@@ -126,6 +127,9 @@ public final class BridgeInflater extends LayoutInflater {
             if (view == null) {
                 view = loadCustomView(name, attrs);
             }
+        } catch (InflateException e) {
+            // Don't catch the InflateException below as that results in hiding the real cause.
+            throw e;
         } catch (Exception e) {
             // Wrap the real exception in a ClassNotFoundException, so that the calling method
             // can deal with it.
@@ -154,23 +158,30 @@ public final class BridgeInflater extends LayoutInflater {
                 }
                 ta.recycle();
             }
-            final Object lastContext = mConstructorArgs[0];
-            mConstructorArgs[0] = context;
-            // try to load the class from using the custom view loader
-            try {
-                view = loadCustomView(name, attrs);
-            } catch (Exception e2) {
-                // Wrap the real exception in an InflateException so that the calling
-                // method can deal with it.
-                InflateException exception = new InflateException();
-                if (!e2.getClass().equals(ClassNotFoundException.class)) {
-                    exception.initCause(e2);
-                } else {
-                    exception.initCause(e);
+            if (!(e.getCause() instanceof ClassNotFoundException)) {
+                // There is some unknown inflation exception in inflating a View that was found.
+                view = new MockView(context, attrs);
+                ((MockView) view).setText(name);
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN, e.getMessage(), e, null);
+            } else {
+                final Object lastContext = mConstructorArgs[0];
+                mConstructorArgs[0] = context;
+                // try to load the class from using the custom view loader
+                try {
+                    view = loadCustomView(name, attrs);
+                } catch (Exception e2) {
+                    // Wrap the real exception in an InflateException so that the calling
+                    // method can deal with it.
+                    InflateException exception = new InflateException();
+                    if (!e2.getClass().equals(ClassNotFoundException.class)) {
+                        exception.initCause(e2);
+                    } else {
+                        exception.initCause(e);
+                    }
+                    throw exception;
+                } finally {
+                    mConstructorArgs[0] = lastContext;
                 }
-                throw exception;
-            } finally {
-                mConstructorArgs[0] = lastContext;
             }
         }
 
