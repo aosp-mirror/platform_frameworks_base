@@ -71,9 +71,28 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
     @Override
     public void checkServerTrusted(X509Certificate[] certs, String authType)
             throws CertificateException {
-        List<X509Certificate> trustedChain =
-                mDelegate.checkServerTrusted(certs, authType, (String) null);
+        checkServerTrusted(certs, authType, null);
+    }
+
+    /**
+     * Hostname aware version of {@link #checkServerTrusted(X509Certificate[], String)}.
+     * This interface is used by conscrypt and android.net.http.X509TrustManagerExtensions do not
+     * modify without modifying those callers.
+     */
+    public List<X509Certificate> checkServerTrusted(X509Certificate[] certs, String authType,
+            String host) throws CertificateException {
+        List<X509Certificate> trustedChain = mDelegate.checkServerTrusted(certs, authType, host);
         checkPins(trustedChain);
+        return trustedChain;
+    }
+
+    /**
+     * Check if the provided certificate is a user added certificate authority.
+     * This is required by android.net.http.X509TrustManagerExtensions.
+     */
+    public boolean isUserAddedCertificate(X509Certificate cert) {
+        // TODO: Figure out the right way to handle this, and if it is still even used.
+        return false;
     }
 
     private void checkPins(List<X509Certificate> chain) throws CertificateException {
