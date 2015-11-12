@@ -60,7 +60,7 @@ public final class PrintAttributes implements Parcelable {
     private Margins mMinMargins;
 
     private int mColorMode;
-    private int mDuplexMode = DUPLEX_MODE_NONE;
+    private int mDuplexMode;
 
     PrintAttributes() {
         /* hide constructor */
@@ -403,7 +403,7 @@ public final class PrintAttributes implements Parcelable {
         mResolution = null;
         mMinMargins = null;
         mColorMode = 0;
-        mDuplexMode = DUPLEX_MODE_NONE;
+        mDuplexMode = 0;
     }
 
     /**
@@ -1427,10 +1427,6 @@ public final class PrintAttributes implements Parcelable {
 
         /**
          * Creates a new {@link PrintAttributes} instance.
-         * <p>
-         * If you do not specify a duplex mode, the default
-         * {@link #DUPLEX_MODE_NONE} will be used.
-         * </p>
          *
          * @return The new instance.
          */
