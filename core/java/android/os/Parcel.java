@@ -624,6 +624,32 @@ public final class Parcel {
     }
 
     /**
+     * {@hide}
+     * This will be the new name for writeFileDescriptor, for consistency.
+     **/
+    public final void writeRawFileDescriptor(FileDescriptor val) {
+        nativeWriteFileDescriptor(mNativePtr, val);
+    }
+
+    /**
+     * {@hide}
+     * Write an array of FileDescriptor objects into the Parcel.
+     *
+     * @param value The array of objects to be written.
+     */
+    public final void writeRawFileDescriptorArray(FileDescriptor[] value) {
+        if (value != null) {
+            int N = value.length;
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeRawFileDescriptor(value[i]);
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
      * Write a byte value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
@@ -1699,6 +1725,41 @@ public final class Parcel {
     public final FileDescriptor readRawFileDescriptor() {
         return nativeReadFileDescriptor(mNativePtr);
     }
+
+    /**
+     * {@hide}
+     * Read and return a new array of FileDescriptors from the parcel.
+     * @return the FileDescriptor array, or null if the array is null.
+     **/
+    public final FileDescriptor[] createRawFileDescriptorArray() {
+        int N = readInt();
+        if (N < 0) {
+            return null;
+        }
+        FileDescriptor[] f = new FileDescriptor[N];
+        for (int i = 0; i < N; i++) {
+            f[i] = readRawFileDescriptor();
+        }
+        return f;
+    }
+
+    /**
+     * {@hide}
+     * Read an array of FileDescriptors from a parcel.
+     * The passed array must be exactly the length of the array in the parcel.
+     * @return the FileDescriptor array, or null if the array is null.
+     **/
+    public final void readRawFileDescriptorArray(FileDescriptor[] val) {
+        int N = readInt();
+        if (N == val.length) {
+            for (int i=0; i<N; i++) {
+                val[i] = readRawFileDescriptor();
+            }
+        } else {
+            throw new RuntimeException("bad array lengths");
+        }
+    }
+
 
     /*package*/ static native FileDescriptor openFileDescriptor(String file,
             int mode) throws FileNotFoundException;
