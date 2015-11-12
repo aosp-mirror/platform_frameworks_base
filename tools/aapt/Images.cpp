@@ -106,6 +106,7 @@ static void read_png(const char* imageName,
 
     png_set_error_fn(read_ptr, const_cast<char*>(imageName),
             NULL /* use default errorfn */, log_warning);
+    png_set_option(read_ptr, PNG_SKIP_sRGB_CHECK_PROFILE, PNG_OPTION_ON);
     png_read_info(read_ptr, read_info);
 
     png_get_IHDR(read_ptr, read_info, &outImageInfo->width,
