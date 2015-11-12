@@ -1161,7 +1161,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
             if (frontTv != null) {
                 frontTv.onTaskBound(newFrontMostTask);
-                frontTv.fadeInActionButton(0, getResources().getInteger(
+                frontTv.fadeInActionButton(getResources().getInteger(
                         R.integer.recents_task_enter_from_app_duration));
             }
         }

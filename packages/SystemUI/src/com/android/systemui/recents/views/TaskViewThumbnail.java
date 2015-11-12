@@ -218,13 +218,13 @@ public class TaskViewThumbnail extends View {
     void onFocusChanged(boolean focused) {
         if (focused) {
             if (Float.compare(getAlpha(), 1f) != 0) {
-                startFadeAnimation(1f, 0, 150, null);
+                startFadeAnimation(1f, 150, null);
             }
         } else {
             float taskViewThumbnailAlpha = getResources().getFloat(
                     R.dimen.recents_task_view_thumbnail_alpha);
             if (Float.compare(getAlpha(), taskViewThumbnailAlpha) != 0) {
-                startFadeAnimation(taskViewThumbnailAlpha, 0, 150, null);
+                startFadeAnimation(taskViewThumbnailAlpha, 150, null);
             }
         }
     }
@@ -244,10 +244,10 @@ public class TaskViewThumbnail extends View {
     }
 
     /** Animates this task thumbnail as it enters Recents. */
-    void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
+    void startEnterRecentsAnimation(Runnable postAnimRunnable) {
         float taskViewThumbnailAlpha = getResources().getFloat(
                 R.dimen.recents_task_view_thumbnail_alpha);
-        startFadeAnimation(taskViewThumbnailAlpha, delay,
+        startFadeAnimation(taskViewThumbnailAlpha,
                 getResources().getInteger(R.integer.recents_task_enter_from_app_duration),
                 postAnimRunnable);
     }
@@ -256,14 +256,13 @@ public class TaskViewThumbnail extends View {
     void startLaunchTaskAnimation(Runnable postAnimRunnable) {
         int taskViewExitToAppDuration = mContext.getResources().getInteger(
                 R.integer.recents_task_exit_to_app_duration);
-        startFadeAnimation(1f, 0, taskViewExitToAppDuration, postAnimRunnable);
+        startFadeAnimation(1f, taskViewExitToAppDuration, postAnimRunnable);
     }
 
     /** Starts a new thumbnail alpha animation. */
-    void startFadeAnimation(float finalAlpha, int delay, int duration, final Runnable postAnimRunnable) {
+    void startFadeAnimation(float finalAlpha, int duration, final Runnable postAnimRunnable) {
         Utilities.cancelAnimationWithoutCallbacks(mThumbnailAlphaAnimator);
         mThumbnailAlphaAnimator = ValueAnimator.ofFloat(mThumbnailAlpha, finalAlpha);
-        mThumbnailAlphaAnimator.setStartDelay(delay);
         mThumbnailAlphaAnimator.setDuration(duration);
         mThumbnailAlphaAnimator.setInterpolator(mFastOutSlowInInterpolator);
         mThumbnailAlphaAnimator.addUpdateListener(mThumbnailAlphaUpdateListener);

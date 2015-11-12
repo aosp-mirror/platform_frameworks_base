@@ -40,7 +40,6 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
@@ -70,7 +69,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
  * be called remotely from the system user.
  */
 public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
-        implements ActivityOptions.OnAnimationStartedListener, ActivityOptions.OnAnimationFinishedListener {
+        implements ActivityOptions.OnAnimationFinishedListener {
 
     private final static String TAG = "RecentsImpl";
     private final static boolean DEBUG = false;
@@ -140,7 +139,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     TaskStackListenerImpl mTaskStackListener;
     RecentsAppWidgetHost mAppWidgetHost;
     boolean mBootCompleted;
-    boolean mStartAnimationTriggered;
     boolean mCanReuseTaskStackViews = true;
 
     // Task launching
@@ -613,7 +611,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         final Task toTask = new Task();
         final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
                 topTask.id, toTask);
-        ForegroundThread.getHandler().post(new Runnable() {
+        ForegroundThread.getHandler().postAtFrontOfQueue(new Runnable() {
             @Override
             public void run() {
                 final Bitmap transitionBitmap = drawThumbnailTransitionBitmap(toTask, toTransform);
@@ -635,7 +633,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
                 R.anim.recents_from_unknown_exit,
-                mHandler, this);
+                mHandler, null);
     }
 
     /**
@@ -646,12 +644,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             return ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_search_launcher_enter,
                     R.anim.recents_from_search_launcher_exit,
-                    mHandler, this);
+                    mHandler, null);
         }
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
                 R.anim.recents_from_launcher_exit,
-                mHandler, this);
+                mHandler, null);
     }
 
     /**
@@ -677,7 +675,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
             specs.toArray(specsArray);
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    specsArray, mHandler, this, this);
+                    specsArray, mHandler, null, this);
         } else {
             // Update the destination rect
             Task toTask = new Task();
@@ -688,7 +686,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
             if (thumbnail != null) {
                 return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
                         thumbnail, (int) toTaskRect.left, (int) toTaskRect.top,
-                        (int) toTaskRect.width(), (int) toTaskRect.height(), mHandler, this);
+                        (int) toTaskRect.width(), (int) toTaskRect.height(), mHandler, null);
             }
             // If both the screenshot and thumbnail fails, then just fall back to the default transition
             return getUnknownTransitionActivityOptions();
@@ -841,8 +839,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
               ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
               TaskStackLayoutAlgorithm.VisibilityReport vr) {
-        mStartAnimationTriggered = false;
-
         // Update the configuration based on the launch options
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
@@ -870,16 +866,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
         mCanReuseTaskStackViews = true;
     }
 
-    /**** OnAnimationStartedListener Implementation ****/
-
-    @Override
-    public void onAnimationStarted() {
-        // Notify recents to start the enter animation
-        if (!mStartAnimationTriggered) {
-            mStartAnimationTriggered = true;
-            EventBus.getDefault().post(new EnterRecentsWindowAnimationStartedEvent());
-        }
-    }
+    /**** OnAnimationFinishedListener Implementation ****/
 
     @Override
     public void onAnimationFinished() {

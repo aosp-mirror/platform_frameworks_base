@@ -313,10 +313,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         RecentsActivityLaunchState launchState = config.getLaunchState();
         Resources res = mContext.getResources();
         final TaskViewTransform transform = ctx.currentTaskTransform;
-        final int transitionEnterFromAppDelay = res.getInteger(
-                R.integer.recents_enter_from_app_transition_duration);
-        final int transitionEnterFromHomeDelay = res.getInteger(
-                R.integer.recents_enter_from_home_transition_duration);
         final int taskViewEnterFromAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_app_duration);
         final int taskViewEnterFromHomeDuration = res.getInteger(
@@ -332,25 +328,22 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
                     // Animate the thumbnail alpha before the dim animation (to prevent updating the
                     // hardware layer)
-                    mThumbnailView.startEnterRecentsAnimation(transitionEnterFromAppDelay,
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    animateDimToProgress(0, taskViewEnterFromAppDuration,
-                                            ctx.postAnimationTrigger.decrementOnAnimationEnd());
-                                }
-                            });
+                    mThumbnailView.startEnterRecentsAnimation(new Runnable() {
+                            @Override
+                            public void run() {
+                                animateDimToProgress(taskViewEnterFromAppDuration,
+                                        ctx.postAnimationTrigger.decrementOnAnimationEnd());
+                            }
+                        });
                 } else {
                     // Immediately start the dim animation
-                    animateDimToProgress(transitionEnterFromAppDelay,
-                            taskViewEnterFromAppDuration,
+                    animateDimToProgress(taskViewEnterFromAppDuration,
                             ctx.postAnimationTrigger.decrementOnAnimationEnd());
                 }
                 ctx.postAnimationTrigger.increment();
 
                 // Animate the action button in
-                fadeInActionButton(transitionEnterFromAppDelay,
-                        taskViewEnterFromAppDuration);
+                fadeInActionButton(taskViewEnterFromAppDuration);
             } else {
                 // Animate the task up if it was occluding the launch target
                 if (ctx.currentTaskOccludesLaunchTarget) {
@@ -358,7 +351,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     setAlpha(0f);
                     animate().alpha(1f)
                             .translationY(transform.translationY)
-                            .setStartDelay(transitionEnterFromAppDelay)
                             .setUpdateListener(null)
                             .setInterpolator(mFastOutSlowInInterpolator)
                             .setDuration(taskViewEnterFromHomeDuration)
@@ -377,8 +369,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else if (launchState.launchedFromHome) {
             // Animate the tasks up
             int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
-            int delay = transitionEnterFromHomeDelay +
-                    frontIndex * taskViewEnterFromHomeStaggerDelay;
+            int delay = frontIndex * taskViewEnterFromHomeStaggerDelay;
 
             setScaleX(transform.scale);
             setScaleY(transform.scale);
@@ -404,13 +395,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
     }
 
-    public void fadeInActionButton(int delay, int duration) {
+    public void fadeInActionButton(int duration) {
         // Hide the action button
         mActionButtonView.setAlpha(0f);
 
         // Animate the action button in
         mActionButtonView.animate().alpha(1f)
-                .setStartDelay(delay)
                 .setDuration(duration)
                 .setInterpolator(PhoneStatusBar.ALPHA_IN)
                 .start();
@@ -611,12 +601,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Animates the dim to the task progress. */
-    void animateDimToProgress(int delay, int duration, Animator.AnimatorListener postAnimRunnable) {
+    void animateDimToProgress(int duration, Animator.AnimatorListener postAnimRunnable) {
         // Animate the dim into view as well
         int toDim = getDimFromTaskProgress();
         if (toDim != getDim()) {
             ObjectAnimator anim = ObjectAnimator.ofInt(TaskView.this, "dim", toDim);
-            anim.setStartDelay(delay);
             anim.setDuration(duration);
             if (postAnimRunnable != null) {
                 anim.addListener(postAnimRunnable);

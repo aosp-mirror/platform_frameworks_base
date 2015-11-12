@@ -42,7 +42,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
-import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationStartedEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
@@ -115,29 +115,33 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     });
 
     /**
-     * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
-     * launching Home with some ActivityOptions.  Generally we always launch home when we exit
-     * Recents rather than just finishing the activity since we don't know what is behind Recents in
-     * the task stack.  The only case where we finish() directly is when we are cancelling the full
-     * screen transition from the app.
+     * A common Runnable to finish Recents by launching Home with an animation depending on the
+     * last activity launch state.  Generally we always launch home when we exit Recents rather than
+     * just finishing the activity since we don't know what is behind Recents in the task stack.
      */
     class FinishRecentsRunnable implements Runnable {
         Intent mLaunchIntent;
-        ActivityOptions mLaunchOpts;
 
         /**
-         * Creates a finish runnable that starts the specified intent, using the given
-         * ActivityOptions.
+         * Creates a finish runnable that starts the specified intent.
          */
-        public FinishRecentsRunnable(Intent launchIntent, ActivityOptions opts) {
+        public FinishRecentsRunnable(Intent launchIntent) {
             mLaunchIntent = launchIntent;
-            mLaunchOpts = opts;
         }
 
         @Override
         public void run() {
             try {
-                startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
+                RecentsActivityLaunchState launchState =
+                        Recents.getConfiguration().getLaunchState();
+                ActivityOptions opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
+                        launchState.launchedFromSearchHome ?
+                                R.anim.recents_to_search_launcher_enter :
+                                R.anim.recents_to_launcher_enter,
+                        launchState.launchedFromSearchHome ?
+                                R.anim.recents_to_search_launcher_exit :
+                                R.anim.recents_to_launcher_exit);
+                startActivityAsUser(mLaunchIntent, opts.toBundle(), UserHandle.CURRENT);
             } catch (Exception e) {
                 Log.e(TAG, getString(R.string.recents_launch_error_message, "Home"), e);
             }
@@ -190,18 +194,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (!launchState.launchedWithNoRecentTasks) {
             mRecentsView.setTaskStack(stack);
         }
-
-        // Create the home intent runnable
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent,
-            ActivityOptions.makeCustomAnimation(this,
-                    launchState.launchedFromSearchHome ? R.anim.recents_to_search_launcher_enter :
-                        R.anim.recents_to_launcher_enter,
-                    launchState.launchedFromSearchHome ? R.anim.recents_to_search_launcher_exit :
-                        R.anim.recents_to_launcher_exit));
 
         // Mark the task that is the launch target
         int launchTaskIndexInStack = 0;
@@ -361,6 +353,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
 
+        // Create the home intent runnable
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
+
         // Bind the search app widget when we first start up
         if (!Constants.DebugFlags.App.DisableSearchBar) {
             mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
@@ -396,7 +395,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         boolean wasLaunchedByAm = !launchState.launchedFromHome &&
                 !launchState.launchedFromAppWithThumbnail;
         if (launchState.launchedHasConfigurationChanged || wasLaunchedByAm) {
-            EventBus.getDefault().send(new EnterRecentsWindowAnimationStartedEvent());
+            EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
         }
 
         if (!launchState.launchedHasConfigurationChanged) {
@@ -419,6 +418,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             state.startHidden = false;
             mRecentsView.setStackViewVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public void onEnterAnimationComplete() {
+        super.onEnterAnimationComplete();
+        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
     }
 
     @Override
@@ -603,7 +608,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
-    public final void onBusEvent(EnterRecentsWindowAnimationStartedEvent event) {
+    public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
