@@ -1068,6 +1068,7 @@ public class AudioService extends IAudioService.Stub {
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Master mute %s, user=%d", masterMute, currentUser));
         }
+        setSystemAudioMute(masterMute);
         AudioSystem.setMasterMute(masterMute);
         broadcastMasterMuteStatus(masterMute);
 
