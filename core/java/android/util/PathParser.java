@@ -27,21 +27,21 @@ public class PathParser {
     static final String LOGTAG = PathParser.class.getSimpleName();
 
     /**
-     * @param pathData The string representing a path, the same as "d" string in svg file.
+     * @param pathString The string representing a path, the same as "d" string in svg file.
      * @return the generated Path object.
      */
-    public static Path createPathFromPathData(String pathData) {
-        Path path = new Path();
-        PathDataNode[] nodes = createNodesFromPathData(pathData);
-        if (nodes != null) {
-            try {
-                PathDataNode.nodesToPath(nodes, path);
-            } catch (RuntimeException e) {
-                throw new RuntimeException("Error in parsing " + pathData, e);
-            }
-            return path;
+    public static Path createPathFromPathData(String pathString) {
+        if (pathString == null) {
+            throw new IllegalArgumentException("Path string can not be null.");
         }
-        return null;
+        Path path = new Path();
+        boolean hasValidPathData = nParseStringForPath(path.mNativePath, pathString,
+                pathString.length());
+        if (!hasValidPathData) {
+            throw new IllegalArgumentException("Path string: " + pathString +
+                    " does not contain valid path data");
+        }
+        return path;
     }
 
     /**
@@ -701,4 +701,7 @@ public class PathParser {
             }
         }
     }
+
+    private static native boolean nParseStringForPath(long pathPtr, String pathString,
+            int stringLength);
 }
