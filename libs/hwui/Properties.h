@@ -267,6 +267,8 @@ public:
 
     static float textGamma;
 
+    static int layerPoolSize;
+
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;
     static StencilClipDebug debugStencilClip;

@@ -109,9 +109,11 @@ public:
 
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
             PropSetupCallback propSetupCallback = nullptr) {
+#if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
         DeviceInfo::initialize();
+#endif
 
         sp<RenderNode> node = new RenderNode();
         node->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);

@@ -35,4 +35,7 @@
         static_assert(std::is_standard_layout<Type>::value, \
         #Type " must have standard layout")
 
+#define WARN_UNUSED_RESULT \
+    __attribute__((warn_unused_result))
+
 #endif /* MACROS_H */

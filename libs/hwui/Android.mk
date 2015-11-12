@@ -9,6 +9,7 @@ hwui_src_files := \
     font/Font.cpp \
     renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
+    renderstate/OffscreenBufferPool.cpp \
     renderstate/PixelBufferState.cpp \
     renderstate/RenderState.cpp \
     renderstate/Scissor.cpp \
@@ -216,6 +217,7 @@ LOCAL_SRC_FILES += \
     unit_tests/LayerUpdateQueueTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
     unit_tests/PathParserTests.cpp \
+    unit_tests/OffscreenBufferPoolTests.cpp \
     unit_tests/StringUtilsTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))

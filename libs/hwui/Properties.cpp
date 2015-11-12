@@ -37,6 +37,7 @@ bool Properties::useBufferAge = true;
 bool Properties::enablePartialUpdates = true;
 
 float Properties::textGamma = DEFAULT_TEXT_GAMMA;
+int Properties::layerPoolSize = DEFAULT_LAYER_CACHE_SIZE;
 
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;
@@ -52,10 +53,19 @@ int Properties::overrideSpotShadowStrength = -1;
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
 
+static int property_get_int(const char* key, int defaultValue) {
+    char buf[PROPERTY_VALUE_MAX] = {'\0',};
+
+    if (property_get(key, buf, "") > 0) {
+        return atoi(buf);
+    }
+    return defaultValue;
+}
+
 static float property_get_float(const char* key, float defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {'\0',};
 
-    if (property_get(PROPERTY_PROFILE, buf, "") > 0) {
+    if (property_get(key, buf, "") > 0) {
         return atof(buf);
     }
     return defaultValue;
@@ -114,16 +124,14 @@ bool Properties::load() {
 
     showDirtyRegions = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
 
-    debugLevel = kDebugDisabled;
-    if (property_get(PROPERTY_DEBUG, property, nullptr) > 0) {
-        debugLevel = (DebugLevel) atoi(property);
-    }
+    debugLevel = (DebugLevel) property_get_int(PROPERTY_DEBUG, kDebugDisabled);
 
     skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
     useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
     enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
 
     textGamma = property_get_float(PROPERTY_TEXT_GAMMA, DEFAULT_TEXT_GAMMA);
+    layerPoolSize = MB(property_get_float(PROPERTY_LAYER_CACHE_SIZE, DEFAULT_LAYER_CACHE_SIZE));
 
     return (prevDebugLayersUpdates != debugLayersUpdates)
             || (prevDebugOverdraw != debugOverdraw)

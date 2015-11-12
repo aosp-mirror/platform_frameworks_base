@@ -90,6 +90,8 @@ void RenderState::onGLContextDestroyed() {
     }
 */
 
+    mLayerPool.clear();
+
     // TODO: reset all cached state in state objects
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
     mAssetAtlas.terminate();
@@ -104,6 +106,19 @@ void RenderState::onGLContextDestroyed() {
     mScissor = nullptr;
     delete mStencil;
     mStencil = nullptr;
+}
+
+void RenderState::flush(Caches::FlushMode mode) {
+    switch (mode) {
+        case Caches::FlushMode::Full:
+            // fall through
+        case Caches::FlushMode::Moderate:
+            // fall through
+        case Caches::FlushMode::Layers:
+            mLayerPool.clear();
+            break;
+    }
+    mCaches->flush(mode);
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {

@@ -17,6 +17,14 @@
 #ifndef ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 #define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
+#include "Canvas.h"
+#include "CanvasState.h"
+#include "DisplayList.h"
+#include "RenderNode.h"
+#include "ResourceCache.h"
+#include "SkiaCanvasProxy.h"
+#include "utils/Macros.h"
+
 #include <SkDrawFilter.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
@@ -24,13 +32,6 @@
 #include <SkRegion.h>
 #include <SkTLazy.h>
 #include <cutils/compiler.h>
-
-#include "Canvas.h"
-#include "CanvasState.h"
-#include "DisplayList.h"
-#include "SkiaCanvasProxy.h"
-#include "RenderNode.h"
-#include "ResourceCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -66,7 +67,7 @@ public:
     virtual ~DisplayListCanvas();
 
     void reset(int width, int height);
-    __attribute__((warn_unused_result)) DisplayList* finishRecording();
+    WARN_UNUSED_RESULT DisplayList* finishRecording();
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas state operations

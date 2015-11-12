@@ -29,33 +29,6 @@ class Layer;
 class RenderState;
 
 /**
- * Lightweight alternative to Layer. Owns the persistent state of an offscreen render target, and
- * encompasses enough information to draw it back on screen (minus paint properties, which are held
- * by LayerOp).
- */
-class OffscreenBuffer {
-public:
-    OffscreenBuffer(RenderState& renderState, Caches& caches,
-            uint32_t textureWidth, uint32_t textureHeight,
-            uint32_t viewportWidth, uint32_t viewportHeight);
-    ~OffscreenBuffer();
-
-    // must be called prior to rendering, to construct/update vertex buffer
-    void updateMeshFromRegion();
-
-    RenderState& renderState;
-    uint32_t viewportWidth;
-    uint32_t viewportHeight;
-    Texture texture;
-
-    // Portion of offscreen buffer that has been drawn to. Used to minimize drawing area when
-    // drawing back to screen / parent FBO.
-    Region region;
-    GLsizei elementCount = 0;
-    GLuint vbo = 0;
-};
-
-/**
  * Main rendering manager for a collection of work - one frame + any contained FBOs.
  *
  * Manages frame and FBO lifecycle, binding the GL framebuffer as appropriate. This is the only
@@ -71,10 +44,6 @@ public:
             , mCaches(caches)
             , mOpaque(opaque) {
     }
-
-    static OffscreenBuffer* createOffscreenBuffer(RenderState& renderState,
-            uint32_t width, uint32_t height);
-    static void destroyOffscreenBuffer(OffscreenBuffer*);
 
     RenderState& renderState() { return mRenderState; }
     Caches& caches() { return mCaches; }

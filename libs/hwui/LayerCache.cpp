@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include <GLES2/gl2.h>
+#include "LayerCache.h"
+
+#include "Caches.h"
+#include "Properties.h"
 
 #include <utils/Log.h>
 
-#include "Caches.h"
-#include "LayerCache.h"
-#include "Properties.h"
+#include <GLES2/gl2.h>
 
 namespace android {
 namespace uirenderer {
@@ -29,15 +30,9 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-LayerCache::LayerCache(): mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting layer cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
-    }
-}
+LayerCache::LayerCache()
+        : mSize(0)
+        , mMaxSize(Properties::layerPoolSize) {}
 
 LayerCache::~LayerCache() {
     clear();

@@ -608,12 +608,16 @@ public:
                 && getOutline().getAlpha() != 0.0f;
     }
 
-    bool promotedToLayer() const {
+    bool fitsOnLayer() const {
         const DeviceInfo* deviceInfo = DeviceInfo::get();
         LOG_ALWAYS_FATAL_IF(!deviceInfo, "DeviceInfo uninitialized");
+        return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
+                        && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
+    }
+
+    bool promotedToLayer() const {
         return mLayerProperties.mType == LayerType::None
-                && mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
-                && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize()
+                && fitsOnLayer()
                 && (mComputedFields.mNeedLayerForFunctors
                         || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
                                 && mPrimitiveFields.mAlpha < 1

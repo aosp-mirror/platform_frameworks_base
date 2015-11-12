@@ -21,6 +21,7 @@
 #include "Glop.h"
 #include "renderstate/Blend.h"
 #include "renderstate/MeshState.h"
+#include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/Scissor.h"
 #include "renderstate/Stencil.h"
@@ -55,6 +56,8 @@ class RenderState {
 public:
     void onGLContextCreated();
     void onGLContextDestroyed();
+
+    void flush(Caches::FlushMode flushMode);
 
     void setViewport(GLsizei width, GLsizei height);
     void getViewport(GLsizei* outWidth, GLsizei* outHeight);
@@ -97,6 +100,8 @@ public:
     Scissor& scissor() { return *mScissor; }
     Stencil& stencil() { return *mStencil; }
 
+    OffscreenBufferPool& layerPool() { return mLayerPool; }
+
     void dump();
 
 private:
@@ -115,6 +120,8 @@ private:
     MeshState* mMeshState = nullptr;
     Scissor* mScissor = nullptr;
     Stencil* mStencil = nullptr;
+
+    OffscreenBufferPool mLayerPool;
 
     AssetAtlas mAssetAtlas;
     std::set<Layer*> mActiveLayers;

@@ -20,11 +20,12 @@
 #include "Canvas.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
-#include "utils/LinearAllocator.h"
-#include "utils/NinePatch.h"
 #include "ResourceCache.h"
 #include "SkiaCanvasProxy.h"
 #include "Snapshot.h"
+#include "utils/LinearAllocator.h"
+#include "utils/Macros.h"
+#include "utils/NinePatch.h"
 
 #include <SkDrawFilter.h>
 #include <SkPaint.h>
@@ -49,7 +50,7 @@ public:
     virtual ~RecordingCanvas();
 
     void reset(int width, int height);
-    __attribute__((warn_unused_result)) DisplayList* finishRecording();
+    WARN_UNUSED_RESULT DisplayList* finishRecording();
 
 // ----------------------------------------------------------------------------
 // MISC HWUI OPERATIONS - TODO: CATEGORIZE

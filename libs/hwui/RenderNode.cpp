@@ -248,19 +248,28 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
     }
 }
 
-layer_t* createLayer(RenderState& renderState, uint32_t width, uint32_t height) {
+static layer_t* createLayer(RenderState& renderState, uint32_t width, uint32_t height) {
 #if HWUI_NEW_OPS
-    return BakedOpRenderer::createOffscreenBuffer(renderState, width, height);
+    return renderState.layerPool().get(renderState, width, height);
 #else
     return LayerRenderer::createRenderLayer(renderState, width, height);
 #endif
 }
 
-void destroyLayer(layer_t* layer) {
+static void destroyLayer(layer_t* layer) {
 #if HWUI_NEW_OPS
-    BakedOpRenderer::destroyOffscreenBuffer(layer);
+    RenderState& renderState = layer->renderState;
+    renderState.layerPool().putOrDelete(layer);
 #else
     LayerRenderer::destroyLayer(layer);
+#endif
+}
+
+static bool layerMatchesWidthAndHeight(layer_t* layer, int width, int height) {
+#if HWUI_NEW_OPS
+    return layer->viewportWidth == (uint32_t) width && layer->viewportHeight == (uint32_t)height;
+#else
+    return layer->layer.getWidth() == width && layer->layer.getHeight() == height;
 #endif
 }
 
@@ -278,17 +287,16 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 
     bool transformUpdateNeeded = false;
     if (!mLayer) {
-            mLayer = createLayer(info.canvasContext.getRenderState(), getWidth(), getHeight());
-            damageSelf(info);
-            transformUpdateNeeded = true;
+        mLayer = createLayer(info.canvasContext.getRenderState(), getWidth(), getHeight());
+        damageSelf(info);
+        transformUpdateNeeded = true;
+    } else if (!layerMatchesWidthAndHeight(mLayer, getWidth(), getHeight())) {
 #if HWUI_NEW_OPS
-    } else if (mLayer->viewportWidth != (uint32_t) getWidth()
-            || mLayer->viewportHeight != (uint32_t)getHeight()) {
-        // TODO: allow node's layer to grow larger
-        if ((uint32_t)getWidth() > mLayer->texture.width
-                || (uint32_t)getHeight() > mLayer->texture.height) {
+        RenderState& renderState = mLayer->renderState;
+        if (properties().fitsOnLayer()) {
+            mLayer = renderState.layerPool().resize(mLayer, getWidth(), getHeight());
+        } else {
 #else
-    } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
 #endif
             destroyLayer(mLayer);
