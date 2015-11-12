@@ -1591,7 +1591,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (mPendingConfiguration.seq != 0) {
                     if (DEBUG_CONFIGURATION) Log.v(TAG, "Visible with new config: "
                             + mPendingConfiguration);
-                    updateConfiguration(mPendingConfiguration, !mFirst);
+                    updateConfiguration(new Configuration(mPendingConfiguration), !mFirst);
                     mPendingConfiguration.seq = 0;
                 }
 
