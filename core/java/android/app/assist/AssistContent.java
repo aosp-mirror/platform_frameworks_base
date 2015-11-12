@@ -35,7 +35,9 @@ public class AssistContent implements Parcelable {
      */
     public void setDefaultIntent(Intent intent) {
         mIntent = intent;
-        setWebUri(null);
+        mIsAppProvidedIntent = false;
+        mIsAppProvidedWebUri = false;
+        mUri = null;
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri uri = intent.getData();
             if (uri != null) {
@@ -161,6 +163,7 @@ public class AssistContent implements Parcelable {
         }
         mIsAppProvidedIntent = in.readInt() == 1;
         mExtras = in.readBundle();
+        mIsAppProvidedWebUri = in.readInt() == 1;
     }
 
     void writeToParcelInternal(Parcel dest, int flags) {
@@ -190,6 +193,7 @@ public class AssistContent implements Parcelable {
         }
         dest.writeInt(mIsAppProvidedIntent ? 1 : 0);
         dest.writeBundle(mExtras);
+        dest.writeInt(mIsAppProvidedWebUri ? 1 : 0);
     }
 
     @Override
