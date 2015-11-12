@@ -127,6 +127,9 @@ interface IDevicePolicyManager {
     void clearProfileOwner(in ComponentName who);
     boolean hasUserSetupCompleted();
 
+    boolean setDeviceOwnerLockScreenInfo(in ComponentName who, String deviceOwnerInfo);
+    String getDeviceOwnerLockScreenInfo();
+
     boolean installCaCert(in ComponentName admin, in byte[] certBuffer);
     void uninstallCaCerts(in ComponentName admin, in String[] aliases);
     void enforceCanManageCaCerts(in ComponentName admin);

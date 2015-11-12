@@ -2869,9 +2869,6 @@ public class DevicePolicyManager {
      */
     public boolean setProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName,
             int userHandle) throws IllegalArgumentException {
-        if (admin == null) {
-            throw new NullPointerException("admin cannot be null");
-        }
         if (mService != null) {
             try {
                 if (ownerName == null) {
@@ -2884,6 +2881,42 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Sets the device owner information to be shown on the lock screen.
+     *
+     * <p>If the device owner information is {@code null} or empty then the device owner info is
+     * cleared and the user owner info is shown on the lock screen if it is set.
+     *
+     * @param admin The name of the admin component to check.
+     * @param info Device owner information which will be displayed instead of the user
+     * owner info.
+     * @return Whether the device owner information has been set.
+     */
+    public boolean setDeviceOwnerLockScreenInfo(@NonNull ComponentName admin, String info) {
+        if (mService != null) {
+            try {
+                return mService.setDeviceOwnerLockScreenInfo(admin, info);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed talking with device policy service", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return The device owner information. If it is not set returns {@code null}.
+     */
+    public String getDeviceOwnerLockScreenInfo() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerLockScreenInfo();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed talking with device policy service", re);
+            }
+        }
+        return null;
     }
 
     /**
