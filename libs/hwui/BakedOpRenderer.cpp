@@ -35,11 +35,11 @@ OffscreenBuffer* BakedOpRenderer::startTemporaryLayer(uint32_t width, uint32_t h
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
     OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState, width, height);
-    startRepaintLayer(buffer);
+    startRepaintLayer(buffer, Rect(width, height));
     return buffer;
 }
 
-void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer) {
+void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.offscreenBuffer, "already has layer...");
 
     mRenderTarget.offscreenBuffer = offscreenBuffer;
@@ -55,12 +55,10 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer) {
     LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
             "framebuffer incomplete!");
 
-    // Clear the FBO
-    mRenderState.scissor().setEnabled(false);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // Change the viewport & ortho projection
     setViewport(offscreenBuffer->viewportWidth, offscreenBuffer->viewportHeight);
+
+    clearColorBuffer(repaintRect);
 }
 
 void BakedOpRenderer::endLayer() {
@@ -74,16 +72,13 @@ void BakedOpRenderer::endLayer() {
     mRenderTarget.frameBufferId = -1;
 }
 
-void BakedOpRenderer::startFrame(uint32_t width, uint32_t height) {
+void BakedOpRenderer::startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) {
     mRenderState.bindFramebuffer(0);
     setViewport(width, height);
     mCaches.clearGarbage();
 
     if (!mOpaque) {
-        // TODO: partial invalidate!
-        mRenderState.scissor().setEnabled(false);
-        glClear(GL_COLOR_BUFFER_BIT);
-        mHasDrawn = true;
+        clearColorBuffer(repaintRect);
     }
 }
 
@@ -113,6 +108,20 @@ void BakedOpRenderer::setViewport(uint32_t width, uint32_t height) {
     mRenderState.blend().syncEnabled();
 }
 
+void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
+    if (Rect(mRenderTarget.viewportWidth, mRenderTarget.viewportHeight).contains(rect)) {
+        // Full viewport is being cleared - disable scissor
+        mRenderState.scissor().setEnabled(false);
+    } else {
+        // Requested rect is subset of viewport - scissor to it to avoid over-clearing
+        mRenderState.scissor().setEnabled(true);
+        mRenderState.scissor().set(rect.left, mRenderTarget.viewportHeight - rect.bottom,
+                rect.getWidth(), rect.getHeight());
+    }
+    glClear(GL_COLOR_BUFFER_BIT);
+    if (!mRenderTarget.frameBufferId) mHasDrawn = true;
+}
+
 Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
     Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     if (!texture) {
@@ -136,7 +145,7 @@ void BakedOpRenderer::renderGlop(const BakedOpState& state, const Glop& glop) {
         mRenderTarget.offscreenBuffer->region.orSelf(dirty);
     }
     mRenderState.render(glop, mRenderTarget.orthoMatrix);
-    mHasDrawn = true;
+    if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +226,7 @@ static void renderShadow(BakedOpRenderer& renderer, const BakedOpState& state, f
     paint.setAntiAlias(true); // want to use AlphaVertex
 
     // The caller has made sure casterAlpha > 0.
-    uint8_t ambientShadowAlpha = 128u; //TODO: mAmbientShadowAlpha;
+    uint8_t ambientShadowAlpha = renderer.getLightInfo().ambientShadowAlpha;
     if (CC_UNLIKELY(Properties::overrideAmbientShadowStrength >= 0)) {
         ambientShadowAlpha = Properties::overrideAmbientShadowStrength;
     }
@@ -227,7 +236,7 @@ static void renderShadow(BakedOpRenderer& renderer, const BakedOpState& state, f
                 paint, VertexBufferRenderFlags::ShadowInterp);
     }
 
-    uint8_t spotShadowAlpha = 128u; //TODO: mSpotShadowAlpha;
+    uint8_t spotShadowAlpha = renderer.getLightInfo().spotShadowAlpha;
     if (CC_UNLIKELY(Properties::overrideSpotShadowStrength >= 0)) {
         spotShadowAlpha = Properties::overrideSpotShadowStrength;
     }
@@ -240,12 +249,10 @@ static void renderShadow(BakedOpRenderer& renderer, const BakedOpState& state, f
 
 void BakedOpDispatcher::onShadowOp(BakedOpRenderer& renderer, const ShadowOp& op, const BakedOpState& state) {
     TessellationCache::vertexBuffer_pair_t buffers;
-    Vector3 lightCenter = { 300, 300, 300 }; // TODO!
-    float lightRadius = 150; // TODO!
-
     renderer.caches().tessellationCache.getShadowBuffers(&state.computedState.transform,
             op.localClipRect, op.casterAlpha >= 1.0f, op.casterPath,
-            &op.shadowMatrixXY, &op.shadowMatrixZ, lightCenter, lightRadius,
+            &op.shadowMatrixXY, &op.shadowMatrixZ,
+            op.lightCenter, renderer.getLightInfo().lightRadius,
             buffers);
 
     renderShadow(renderer, state, op.casterAlpha, buffers.first, buffers.second);

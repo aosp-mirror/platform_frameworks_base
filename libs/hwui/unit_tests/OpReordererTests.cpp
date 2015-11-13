@@ -29,6 +29,14 @@ namespace android {
 namespace uirenderer {
 
 LayerUpdateQueue sEmptyLayerUpdateQueue;
+Vector3 sLightCenter = {100, 100, 100};
+
+static std::vector<sp<RenderNode>> createSyncedNodeList(sp<RenderNode>& node) {
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    std::vector<sp<RenderNode>> vec;
+    vec.emplace_back(node);
+    return vec;
+}
 
 /**
  * Virtual class implemented by each test to redirect static operation / state transitions to
@@ -48,13 +56,13 @@ public:
         ADD_FAILURE() << "Layer creation not expected in this test";
         return nullptr;
     }
-    virtual void startRepaintLayer(OffscreenBuffer*) {
+    virtual void startRepaintLayer(OffscreenBuffer*, const Rect& repaintRect) {
         ADD_FAILURE() << "Layer repaint not expected in this test";
     }
     virtual void endLayer() {
         ADD_FAILURE() << "Layer updates not expected in this test";
     }
-    virtual void startFrame(uint32_t width, uint32_t height) {}
+    virtual void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) {}
     virtual void endFrame() {}
 
     // define virtual defaults for direct
@@ -87,7 +95,7 @@ class FailRenderer : public TestRendererBase {};
 TEST(OpReorderer, simple) {
     class SimpleTestRenderer : public TestRendererBase {
     public:
-        void startFrame(uint32_t width, uint32_t height) override {
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
             EXPECT_EQ(0, mIndex++);
             EXPECT_EQ(100u, width);
             EXPECT_EQ(200u, height);
@@ -108,7 +116,7 @@ TEST(OpReorderer, simple) {
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
-    OpReorderer reorderer(100, 200, *dl);
+    OpReorderer reorderer(100, 200, *dl, sLightCenter);
 
     SimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -122,7 +130,7 @@ TEST(OpReorderer, simpleRejection) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
-    OpReorderer reorderer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl, sLightCenter);
 
     FailRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -154,7 +162,7 @@ TEST(OpReorderer, simpleBatching) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl, sLightCenter);
 
     SimpleBatchingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -198,13 +206,8 @@ TEST(OpReorderer, renderNode) {
         canvas.restore();
     });
 
-    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
-
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(parent.get());
-
-    OpReorderer reorderer(sEmptyLayerUpdateQueue,
-            SkRect::MakeWH(200, 200), 200, 200, nodes);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(parent), sLightCenter);
 
     RenderNodeTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -225,13 +228,10 @@ TEST(OpReorderer, clipped) {
         SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
     });
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(node.get());
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue,
             SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
-            200, 200, nodes);
+            200, 200, createSyncedNodeList(node), sLightCenter);
 
     ClippedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -273,7 +273,7 @@ TEST(OpReorderer, saveLayerSimple) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl, sLightCenter);
 
     SaveLayerSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -305,7 +305,7 @@ TEST(OpReorderer, saveLayerNested) {
             int index = mIndex++;
             EXPECT_TRUE(index == 2 || index == 6);
         }
-        void startFrame(uint32_t width, uint32_t height) override {
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
             EXPECT_EQ(7, mIndex++);
         }
         void endFrame() override {
@@ -344,7 +344,7 @@ TEST(OpReorderer, saveLayerNested) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(800, 800, *dl);
+    OpReorderer reorderer(800, 800, *dl, sLightCenter);
 
     SaveLayerNestedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -363,19 +363,21 @@ TEST(OpReorderer, saveLayerContentRejection) {
         canvas.restore();
         canvas.restore();
     });
-    OpReorderer reorderer(200, 200, *dl);
+    OpReorderer reorderer(200, 200, *dl, sLightCenter);
 
     FailRenderer renderer;
     // should see no ops, even within the layer, since the layer should be rejected
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-TEST(OpReorderer, hwLayerSimple) {
+RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
     class HwLayerSimpleTestRenderer : public TestRendererBase {
     public:
-        void startRepaintLayer(OffscreenBuffer* offscreenBuffer) override {
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
             EXPECT_EQ(0, mIndex++);
-            EXPECT_EQ(offscreenBuffer, (OffscreenBuffer*) 0x0124);
+            EXPECT_EQ(100u, offscreenBuffer->viewportWidth);
+            EXPECT_EQ(100u, offscreenBuffer->viewportHeight);
+            EXPECT_EQ(Rect(25, 25, 75, 75), repaintRect);
         }
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             EXPECT_EQ(1, mIndex++);
@@ -389,7 +391,7 @@ TEST(OpReorderer, hwLayerSimple) {
         void endLayer() override {
             EXPECT_EQ(2, mIndex++);
         }
-        void startFrame(uint32_t width, uint32_t height) override {
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
             EXPECT_EQ(3, mIndex++);
         }
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
@@ -405,29 +407,29 @@ TEST(OpReorderer, hwLayerSimple) {
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     }, TestUtils::getHwLayerSetupCallback());
-    OffscreenBuffer** bufferHandle = node->getLayerHandle();
-    *bufferHandle = (OffscreenBuffer*) 0x0124;
+    OffscreenBuffer** layerHandle = node->getLayerHandle();
 
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    // create RenderNode's layer here in same way prepareTree would
+    OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 100, 100);
+    *layerHandle = &layer;
 
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(node.get());
+    auto syncedNodeList = createSyncedNodeList(node);
 
     // only enqueue partial damage
-    LayerUpdateQueue layerUpdateQueue;
+    LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
     layerUpdateQueue.enqueueLayerWithDamage(node.get(), Rect(25, 25, 75, 75));
 
-    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes);
-
+    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            syncedNodeList, sLightCenter);
     HwLayerSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(6, renderer.getIndex());
 
     // clean up layer pointer, so we can safely destruct RenderNode
-    *bufferHandle = nullptr;
+    *layerHandle = nullptr;
 }
 
-TEST(OpReorderer, hwLayerComplex) {
+RENDERTHREAD_TEST(OpReorderer, hwLayerComplex) {
     /* parentLayer { greyRect, saveLayer { childLayer { whiteRect } } } will play back as:
      * - startRepaintLayer(child), rect(grey), endLayer
      * - startTemporaryLayer, drawLayer(child), endLayer
@@ -440,14 +442,16 @@ TEST(OpReorderer, hwLayerComplex) {
             EXPECT_EQ(3, mIndex++); // savelayer first
             return (OffscreenBuffer*)0xabcd;
         }
-        void startRepaintLayer(OffscreenBuffer* offscreenBuffer) override {
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
             int index = mIndex++;
             if (index == 0) {
                 // starting inner layer
-                EXPECT_EQ((OffscreenBuffer*)0x4567, offscreenBuffer);
+                EXPECT_EQ(100u, offscreenBuffer->viewportWidth);
+                EXPECT_EQ(100u, offscreenBuffer->viewportHeight);
             } else if (index == 6) {
                 // starting outer layer
-                EXPECT_EQ((OffscreenBuffer*)0x0123, offscreenBuffer);
+                EXPECT_EQ(200u, offscreenBuffer->viewportWidth);
+                EXPECT_EQ(200u, offscreenBuffer->viewportHeight);
             } else { ADD_FAILURE(); }
         }
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
@@ -464,17 +468,20 @@ TEST(OpReorderer, hwLayerComplex) {
             int index = mIndex++;
             EXPECT_TRUE(index == 2 || index == 5 || index == 9);
         }
-        void startFrame(uint32_t width, uint32_t height) override {
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
             EXPECT_EQ(10, mIndex++);
         }
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            OffscreenBuffer* layer = *op.layerHandle;
             int index = mIndex++;
             if (index == 4) {
-                EXPECT_EQ((OffscreenBuffer*)0x4567, *op.layerHandle);
+                EXPECT_EQ(100u, layer->viewportWidth);
+                EXPECT_EQ(100u, layer->viewportHeight);
             } else if (index == 8) {
                 EXPECT_EQ((OffscreenBuffer*)0xabcd, *op.layerHandle);
             } else if (index == 11) {
-                EXPECT_EQ((OffscreenBuffer*)0x0123, *op.layerHandle);
+                EXPECT_EQ(200u, layer->viewportWidth);
+                EXPECT_EQ(200u, layer->viewportHeight);
             } else { ADD_FAILURE(); }
         }
         void endFrame() override {
@@ -488,7 +495,8 @@ TEST(OpReorderer, hwLayerComplex) {
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     }, TestUtils::getHwLayerSetupCallback());
-    *(child->getLayerHandle()) = (OffscreenBuffer*) 0x4567;
+    OffscreenBuffer childLayer(renderThread.renderState(), Caches::getInstance(), 100, 100);
+    *(child->getLayerHandle()) = &childLayer;
 
     RenderNode* childPtr = child.get();
     auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
@@ -501,18 +509,17 @@ TEST(OpReorderer, hwLayerComplex) {
         canvas.drawRenderNode(childPtr);
         canvas.restore();
     }, TestUtils::getHwLayerSetupCallback());
-    *(parent->getLayerHandle()) = (OffscreenBuffer*) 0x0123;
+    OffscreenBuffer parentLayer(renderThread.renderState(), Caches::getInstance(), 200, 200);
+    *(parent->getLayerHandle()) = &parentLayer;
 
-    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
+    auto syncedList = createSyncedNodeList(parent);
 
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(parent.get());
-
-    LayerUpdateQueue layerUpdateQueue;
+    LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
     layerUpdateQueue.enqueueLayerWithDamage(child.get(), Rect(100, 100));
     layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(200, 200));
 
-    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes);
+    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            syncedList, sLightCenter);
 
     HwLayerComplexTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -561,58 +568,184 @@ TEST(OpReorderer, zReorder) {
         drawOrderedRect(&canvas, 8);
         drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
     });
-    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
-
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(parent.get());
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100, nodes);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+            createSyncedNodeList(parent), sLightCenter);
 
     ZReorderTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
 };
 
+// creates a 100x100 shadow casting node with provided translationZ
+static sp<RenderNode> createWhiteRectShadowCaster(float translationZ) {
+    return TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    }, [translationZ] (RenderProperties& properties) {
+        properties.setTranslationZ(translationZ);
+        properties.mutableOutline().setRoundRect(0, 0, 100, 100, 0.0f, 1.0f);
+        return RenderNode::GENERIC | RenderNode::TRANSLATION_Z;
+    });
+}
+
 TEST(OpReorderer, shadow) {
     class ShadowTestRenderer : public TestRendererBase {
     public:
         void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
             EXPECT_EQ(0, mIndex++);
+            EXPECT_FLOAT_EQ(1.0f, op.casterAlpha);
+            EXPECT_TRUE(op.casterPath->isRect(nullptr));
+            EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), op.shadowMatrixXY);
+
+            Matrix4 expectedZ;
+            expectedZ.loadTranslate(0, 0, 5);
+            EXPECT_MATRIX_APPROX_EQ(expectedZ, op.shadowMatrixZ);
         }
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             EXPECT_EQ(1, mIndex++);
         }
     };
 
-    sp<RenderNode> caster = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
-            [](RecordingCanvas& canvas) {
-        SkPaint paint;
-        paint.setColor(SK_ColorWHITE);
-        canvas.drawRect(0, 0, 100, 100, paint);
-    }, [] (RenderProperties& properties) {
-        properties.setTranslationZ(5.0f);
-        properties.mutableOutline().setRoundRect(0, 0, 100, 100, 5, 1.0f);
-        return RenderNode::GENERIC | RenderNode::TRANSLATION_Z;
-    });
     sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
-            [&caster] (RecordingCanvas& canvas) {
+            [] (RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
-        canvas.drawRenderNode(caster.get());
+        canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
     });
 
-    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
-
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(parent.get());
-
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(parent), sLightCenter);
 
     ShadowTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2, renderer.getIndex());
 }
 
-static void testProperty(
-        TestUtils::PropSetupCallback propSetupCallback,
+TEST(OpReorderer, shadowSaveLayer) {
+    class ShadowSaveLayerTestRenderer : public TestRendererBase {
+    public:
+        OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(0, mIndex++);
+            return nullptr;
+        }
+        void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            EXPECT_FLOAT_EQ(50, op.lightCenter.x);
+            EXPECT_FLOAT_EQ(40, op.lightCenter.y);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void endLayer() override {
+            EXPECT_EQ(3, mIndex++);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(4, mIndex++);
+        }
+    };
+
+    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+            [] (RecordingCanvas& canvas) {
+        // save/restore outside of reorderBarrier, so they don't get moved out of place
+        canvas.translate(20, 10);
+        int count = canvas.saveLayerAlpha(30, 50, 130, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.insertReorderBarrier(true);
+        canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
+        canvas.insertReorderBarrier(false);
+        canvas.restoreToCount(count);
+    });
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(parent), (Vector3) { 100, 100, 100 });
+
+    ShadowSaveLayerTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(5, renderer.getIndex());
+}
+
+RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
+    class ShadowHwLayerTestRenderer : public TestRendererBase {
+    public:
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
+            EXPECT_EQ(0, mIndex++);
+        }
+        void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            EXPECT_FLOAT_EQ(50, op.lightCenter.x);
+            EXPECT_FLOAT_EQ(40, op.lightCenter.y);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void endLayer() override {
+            EXPECT_EQ(3, mIndex++);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(4, mIndex++);
+        }
+    };
+
+    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(50, 60, 150, 160,
+            [] (RecordingCanvas& canvas) {
+        canvas.insertReorderBarrier(true);
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.translate(20, 10);
+        canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
+        canvas.restore();
+    }, TestUtils::getHwLayerSetupCallback());
+    OffscreenBuffer** layerHandle = parent->getLayerHandle();
+
+    // create RenderNode's layer here in same way prepareTree would, setting windowTransform
+    OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 100, 100);
+    Matrix4 windowTransform;
+    windowTransform.loadTranslate(50, 60, 0); // total transform of layer's origin
+    layer.setWindowTransform(windowTransform);
+    *layerHandle = &layer;
+
+    auto syncedList = createSyncedNodeList(parent);
+    LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
+    layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(100, 100));
+    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            syncedList, (Vector3) { 100, 100, 100 });
+
+    ShadowHwLayerTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(5, renderer.getIndex());
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    *layerHandle = nullptr;
+}
+
+TEST(OpReorderer, shadowLayering) {
+    class ShadowLayeringTestRenderer : public TestRendererBase {
+    public:
+        void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 0 || index == 1);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 2 || index == 3);
+        }
+    };
+    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+            [] (RecordingCanvas& canvas) {
+        canvas.insertReorderBarrier(true);
+        canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
+        canvas.drawRenderNode(createWhiteRectShadowCaster(5.0001f).get());
+    });
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(parent), sLightCenter);
+
+    ShadowLayeringTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
+
+static void testProperty(TestUtils::PropSetupCallback propSetupCallback,
         std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
     class PropertyTestRenderer : public TestRendererBase {
     public:
@@ -630,13 +763,9 @@ static void testProperty(
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     }, propSetupCallback);
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
 
-    std::vector< sp<RenderNode> > nodes;
-    nodes.push_back(node.get());
-
-    OpReorderer reorderer(sEmptyLayerUpdateQueue,
-            SkRect::MakeWH(100, 100), 200, 200, nodes);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
 
     PropertyTestRenderer renderer(opValidateCallback);
     reorderer.replayBakedOps<TestDispatcher>(renderer);

@@ -206,7 +206,9 @@ LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_STATIC_LIBRARIES := libhwui_static_null_gpu
-LOCAL_CFLAGS := $(hwui_cflags)
+LOCAL_CFLAGS := \
+        $(hwui_cflags) \
+        -DHWUI_NULL_GPU
 
 LOCAL_SRC_FILES += \
     unit_tests/CanvasStateTests.cpp \

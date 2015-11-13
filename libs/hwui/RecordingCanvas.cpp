@@ -156,7 +156,7 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
 
     snapshot.flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
     snapshot.initializeViewport(untransformedBounds.getWidth(), untransformedBounds.getHeight());
-    snapshot.resetTransform(-untransformedBounds.left, -untransformedBounds.top, 0.0f);
+    snapshot.transform->loadTranslate(-untransformedBounds.left, -untransformedBounds.top, 0.0f);
 
     Rect clip = layerBounds;
     clip.translate(-untransformedBounds.left, -untransformedBounds.top);

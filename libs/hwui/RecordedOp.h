@@ -17,10 +17,11 @@
 #ifndef ANDROID_HWUI_RECORDED_OP_H
 #define ANDROID_HWUI_RECORDED_OP_H
 
-#include "utils/LinearAllocator.h"
-#include "Rect.h"
 #include "Matrix.h"
+#include "Rect.h"
 #include "RenderNode.h"
+#include "utils/LinearAllocator.h"
+#include "Vector.h"
 
 #include "SkXfermode.h"
 
@@ -116,15 +117,17 @@ struct RectOp : RecordedOp {
  * Uses invalid/empty bounds and matrix since ShadowOp bounds aren't known at defer time,
  * and are resolved dynamically, and transform isn't needed.
  *
- * State construction handles these properties specially.
+ * State construction handles these properties specially, ignoring matrix/bounds.
  */
 struct ShadowOp : RecordedOp {
-    ShadowOp(const RenderNodeOp& casterOp, float casterAlpha, const SkPath* casterPath, const Rect& clipRect)
+    ShadowOp(const RenderNodeOp& casterOp, float casterAlpha, const SkPath* casterPath,
+            const Rect& clipRect, const Vector3& lightCenter)
             : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), clipRect, nullptr)
             , shadowMatrixXY(casterOp.localMatrix)
             , shadowMatrixZ(casterOp.localMatrix)
             , casterAlpha(casterAlpha)
-            , casterPath(casterPath) {
+            , casterPath(casterPath)
+            , lightCenter(lightCenter) {
         const RenderNode& node = *casterOp.renderNode;
         node.applyViewPropertyTransforms(shadowMatrixXY, false);
         node.applyViewPropertyTransforms(shadowMatrixZ, true);
@@ -133,6 +136,7 @@ struct ShadowOp : RecordedOp {
     Matrix4 shadowMatrixZ;
     const float casterAlpha;
     const SkPath* casterPath;
+    const Vector3 lightCenter;
 };
 
 struct SimpleRectsOp : RecordedOp { // Filled, no AA (TODO: better name?)

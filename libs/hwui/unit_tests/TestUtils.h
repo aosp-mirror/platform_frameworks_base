@@ -45,6 +45,20 @@ namespace uirenderer {
             && MathUtils::areEqual(a.right, b.right) \
             && MathUtils::areEqual(a.bottom, b.bottom));
 
+/**
+ * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
+ * (for e.g. accessing its RenderState)
+ */
+#define RENDERTHREAD_TEST(test_case_name, test_name) \
+    class test_case_name##_##test_name##_RenderThreadTest { \
+    public: \
+        static void doTheThing(renderthread::RenderThread& renderThread); \
+    }; \
+    TEST(test_case_name, test_name) { \
+        TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing); \
+    }; \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
+
 class TestUtils {
 public:
     class SignalingDtor {

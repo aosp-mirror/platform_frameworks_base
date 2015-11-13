@@ -39,27 +39,39 @@ class RenderState;
  */
 class BakedOpRenderer {
 public:
-    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque)
+    /**
+     * Position agnostic shadow lighting info. Used with all shadow ops in scene.
+     */
+    struct LightInfo {
+        float lightRadius = 0;
+        uint8_t ambientShadowAlpha = 0;
+        uint8_t spotShadowAlpha = 0;
+    };
+
+    BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque, const LightInfo& lightInfo)
             : mRenderState(renderState)
             , mCaches(caches)
-            , mOpaque(opaque) {
+            , mOpaque(opaque)
+            , mLightInfo(lightInfo) {
     }
 
     RenderState& renderState() { return mRenderState; }
     Caches& caches() { return mCaches; }
 
-    void startFrame(uint32_t width, uint32_t height);
+    void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect);
     void endFrame();
     OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height);
-    void startRepaintLayer(OffscreenBuffer* offscreenBuffer);
+    void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect);
     void endLayer();
 
     Texture* getTexture(const SkBitmap* bitmap);
+    const LightInfo& getLightInfo() { return mLightInfo; }
 
     void renderGlop(const BakedOpState& state, const Glop& glop);
     bool didDraw() { return mHasDrawn; }
 private:
     void setViewport(uint32_t width, uint32_t height);
+    void clearColorBuffer(const Rect& clearRect);
 
     RenderState& mRenderState;
     Caches& mCaches;
@@ -75,6 +87,8 @@ private:
         uint32_t viewportHeight = 0;
         Matrix4 orthoMatrix;
     } mRenderTarget;
+
+    const LightInfo mLightInfo;
 };
 
 /**
