@@ -1310,7 +1310,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         RecentsTaskLoader.getInstance().loadTaskData(task);
 
         // If the doze trigger has already fired, then update the state for this task view
-        if (mConfig.multiStackEnabled || mUIDozeTrigger.hasTriggered()) {
+        if (mConfig.launchedWithAltTab ||
+                mConfig.multiStackEnabled || mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
         }
 

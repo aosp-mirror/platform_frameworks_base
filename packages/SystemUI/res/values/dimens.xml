@@ -244,6 +244,9 @@
     <!-- The height of the search bar space. -->
     <dimen name="recents_search_bar_space_height">64dp</dimen>
 
+    <!-- Size of border for focus state -->
+    <dimen name="recents_border_size">6dip</dimen>
+
     <!-- The side padding for the task stack as a percentage of the width. -->
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.03333</item>
 
