@@ -353,7 +353,7 @@ public class TaskViewHeader extends FrameLayout {
         mBackgroundColorDrawable.setColor(color);
         mBackgroundColor = color;
 
-        TaskViewHeader.this.setTranslationZ((mIsFocused ? progress : (1 - progress)) * 4);
+        TaskViewHeader.this.setTranslationZ((mIsFocused ? progress : (1 - progress)) * 1);
     }
 
     /** Returns the current focus animation progress. */

@@ -30,7 +30,6 @@ import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -85,8 +84,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     Paint mFocusPaint = new Paint();
     int mFocusColor = 0xff009688;
     int mFocusAlpha = 0x40;
-    int mFocusBorderAlpha = 0xde;
-    static Interpolator sFocusInInterpolator = new OvershootInterpolator(2);
+    int mFocusBorderAlpha;
+    static Interpolator sFocusInInterpolator = new DecelerateInterpolator(3f);
     static Interpolator sFocusInRadiusInterpolator = new DecelerateInterpolator();
     static Interpolator sFocusOutInterpolator = new DecelerateInterpolator();
     ObjectAnimator mFocusAnimator;
@@ -562,7 +561,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
     public void dispatchDraw(Canvas canvas) {
-        if (mIsFocused && mFocusAnimatorWasTriggered) {
+        if (mFocusAnimatorWasTriggered) {
             canvas.save(Canvas.CLIP_SAVE_FLAG);
             mFocusPaint.setAlpha(mFocusBorderAlpha);
             canvas.clipRect(-mFocusBorderSize, -mFocusBorderSize,
@@ -599,17 +598,26 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Sets the current focus animation progress. Used by the property animator. */
     public void setFocusProgress(float progress) {
         mFocusProgress = progress;
+
         if (mIsFocused) {
             final float interpolatedProgress = sFocusInInterpolator.getInterpolation(progress);
+
             mFocusInCircleRadiusProgress =
                     0.5f + sFocusInRadiusInterpolator.getInterpolation(progress);
-            mFocusInCircleAlpha = (int) (mFocusAlpha * interpolatedProgress);
+            mFocusInCircleAlpha =
+                    (int) (mFocusAlpha * interpolatedProgress);
             mFocusInFillAlpha =
-                    (mFocusAlpha / 4) + (int) ((mFocusAlpha / 2) * interpolatedProgress);
-            mFocusBorderAlpha = mFocusAlpha + (int) ((mFocusAlpha * 1.5f) * interpolatedProgress);
+                    Math.min((mFocusAlpha / 4) +
+                            (int) ((mFocusAlpha / 2) * interpolatedProgress), 255);
+            mFocusBorderAlpha =
+                    Math.min(mFocusAlpha + (int) (mFocusAlpha * 3f * interpolatedProgress), 255);
         } else {
             final float interpolatedProgress = sFocusOutInterpolator.getInterpolation(progress);
-            mFocusOutFillAlpha = (int) (mFocusAlpha * (1 - interpolatedProgress));
+
+            mFocusOutFillAlpha =
+                    (int) (mFocusAlpha * (1 - interpolatedProgress));
+            mFocusBorderAlpha =
+                    Math.min((int) (mFocusAlpha * 4f * (1 - interpolatedProgress)), 255);
         }
 
         invalidate();
