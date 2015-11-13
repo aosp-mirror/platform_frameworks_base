@@ -1240,30 +1240,54 @@ public abstract class Drawable {
      */
     public static abstract class ConstantState {
         /**
-         * Create a new drawable without supplying resources the caller
-         * is running in.  Note that using this means the density-dependent
-         * drawables (like bitmaps) will not be able to update their target
-         * density correctly. One should use {@link #newDrawable(Resources)}
-         * instead to provide a resource.
+         * Creates a new Drawable instance from its constant state.
+         * <p>
+         * <strong>Note:</strong> Using this method means density-dependent
+         * properties, such as pixel dimensions or bitmap images, will not be
+         * updated to match the density of the target display. To ensure
+         * correct scaling, use {@link #newDrawable(Resources)} instead to
+         * provide an appropriate Resources object.
+         *
+         * @return a new drawable object based on this constant state
+         * @see {@link #newDrawable(Resources)}
          */
+        @NonNull
         public abstract Drawable newDrawable();
 
         /**
-         * Create a new Drawable instance from its constant state.  This
-         * must be implemented for drawables that change based on the target
-         * density of their caller (that is depending on whether it is
-         * in compatibility mode).
+         * Creates a new Drawable instance from its constant state using the
+         * specified resources. This method should be implemented for drawables
+         * that have density-dependent properties.
+         * <p>
+         * The default implementation for this method calls through to
+         * {@link #newDrawable()}.
+         *
+         * @param res the resources of the context in which the drawable will
+         *            be displayed
+         * @return a new drawable object based on this constant state
          */
-        public Drawable newDrawable(Resources res) {
+        @NonNull
+        public Drawable newDrawable(@Nullable Resources res) {
             return newDrawable();
         }
 
         /**
-         * Create a new Drawable instance from its constant state. This must be
-         * implemented for drawables that can have a theme applied.
+         * Creates a new Drawable instance from its constant state using the
+         * specified resources and theme. This method should be implemented for
+         * drawables that have theme-dependent properties.
+         * <p>
+         * The default implementation for this method calls through to
+         * {@link #newDrawable(Resources)}.
+         *
+         * @param res the resources of the context in which the drawable will
+         *            be displayed
+         * @param theme the theme of the context in which the drawable will be
+         *              displayed
+         * @return a new drawable object based on this constant state
          */
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return newDrawable(null);
+        @NonNull
+        public Drawable newDrawable(@Nullable Resources res, @Nullable Theme theme) {
+            return newDrawable(res);
         }
 
         /**
