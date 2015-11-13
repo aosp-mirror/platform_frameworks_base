@@ -71,6 +71,11 @@ import java.util.Map;
 @VisibleForTesting
 class MtpDatabase {
     private final MtpDatabaseInternal mDatabase;
+
+    /**
+     * Mapping mode for roots/documents where we start adding child documents.
+     * Methods operate the state needs to be synchronized.
+     */
     private final Map<String, Integer> mMappingMode = new HashMap<>();
 
     @VisibleForTesting
@@ -78,23 +83,49 @@ class MtpDatabase {
         mDatabase = new MtpDatabaseInternal(context);
     }
 
+    /**
+     * Closes the database.
+     */
     @VisibleForTesting
+    void close() {
+        mDatabase.close();
+    }
+
+    /**
+     * {@link MtpDatabaseInternal#queryRoots}
+     */
     Cursor queryRoots(String[] columnNames) {
         return mDatabase.queryRoots(columnNames);
     }
 
+    /**
+     * {@link MtpDatabaseInternal#queryRootDocuments}
+     */
     @VisibleForTesting
     Cursor queryRootDocuments(String[] columnNames) {
         return mDatabase.queryRootDocuments(columnNames);
     }
 
+    /**
+     * {@link MtpDatabaseInternal#queryChildDocuments}
+     */
     @VisibleForTesting
     Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
         return mDatabase.queryChildDocuments(columnNames, parentDocumentId);
     }
 
-    @VisibleForTesting
-    void startAddingRootDocuments(int deviceId) {
+    /**
+     * {@link MtpDatabaseInternal#removeDeviceRows}
+     */
+    void removeDeviceRows(int deviceId) {
+        mDatabase.removeDeviceRows(deviceId);
+    }
+
+    /**
+     * Invokes {@link MtpDatabaseInternal#startAddingDocuments} for root documents.
+     * @param deviceId Device ID.
+     */
+    synchronized void startAddingRootDocuments(int deviceId) {
         final String mappingStateKey = getRootDocumentsMappingStateKey(deviceId);
         if (mMappingMode.containsKey(mappingStateKey)) {
             throw new Error("Mapping for the root has already started.");
@@ -105,8 +136,12 @@ class MtpDatabase {
                         SELECTION_ROOT_DOCUMENTS, Integer.toString(deviceId)));
     }
 
+    /**
+     * Invokes {@link MtpDatabaseInternal#startAddingDocuments} for child of specific documents.
+     * @param parentDocumentId Document ID for parent document.
+     */
     @VisibleForTesting
-    void startAddingChildDocuments(String parentDocumentId) {
+    synchronized void startAddingChildDocuments(String parentDocumentId) {
         final String mappingStateKey = getChildDocumentsMappingStateKey(parentDocumentId);
         if (mMappingMode.containsKey(mappingStateKey)) {
             throw new Error("Mapping for the root has already started.");
@@ -116,20 +151,18 @@ class MtpDatabase {
                 mDatabase.startAddingDocuments(SELECTION_CHILD_DOCUMENTS, parentDocumentId));
     }
 
-    @VisibleForTesting
-    void putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
+    /**
+     * Puts root information to database.
+     * @param deviceId Device ID
+     * @param resources Resources required to localize root name.
+     * @param roots List of root information.
+     * @return If roots are added or removed from the database.
+     */
+    synchronized boolean putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
         mDatabase.beginTransaction();
         try {
-            final ContentValues[] valuesList = new ContentValues[roots.length];
-            for (int i = 0; i < roots.length; i++) {
-                if (roots[i].mDeviceId != deviceId) {
-                    throw new IllegalArgumentException();
-                }
-                valuesList[i] = new ContentValues();
-                getRootDocumentValues(valuesList[i], resources, roots[i]);
-            }
-            boolean heuristic;
-            String mapColumn;
+            final boolean heuristic;
+            final String mapColumn;
             switch (mMappingMode.get(getRootDocumentsMappingStateKey(deviceId))) {
                 case MAP_BY_MTP_IDENTIFIER:
                     heuristic = false;
@@ -142,7 +175,15 @@ class MtpDatabase {
                 default:
                     throw new Error("Unexpected map mode.");
             }
-            final long[] documentIds = mDatabase.putDocuments(
+            final ContentValues[] valuesList = new ContentValues[roots.length];
+            for (int i = 0; i < roots.length; i++) {
+                if (roots[i].mDeviceId != deviceId) {
+                    throw new IllegalArgumentException();
+                }
+                valuesList[i] = new ContentValues();
+                getRootDocumentValues(valuesList[i], resources, roots[i]);
+            }
+            final boolean changed = mDatabase.putDocuments(
                     valuesList,
                     SELECTION_ROOT_DOCUMENTS,
                     Integer.toString(deviceId),
@@ -152,33 +193,38 @@ class MtpDatabase {
             int i = 0;
             for (final MtpRoot root : roots) {
                 // Use the same value for the root ID and the corresponding document ID.
-                values.put(Root.COLUMN_ROOT_ID, documentIds[i++]);
                 values.put(
-                        Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
+                        Root.COLUMN_ROOT_ID,
+                        valuesList[i++].getAsString(Document.COLUMN_DOCUMENT_ID));
+                values.put(
+                        Root.COLUMN_FLAGS,
+                        Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
                 values.put(Root.COLUMN_AVAILABLE_BYTES, root.mFreeSpace);
                 values.put(Root.COLUMN_CAPACITY_BYTES, root.mMaxCapacity);
                 values.put(Root.COLUMN_MIME_TYPES, "");
                 mDatabase.putRootExtra(values);
             }
             mDatabase.setTransactionSuccessful();
+            return changed;
         } finally {
             mDatabase.endTransaction();
         }
     }
 
+    /**
+     * Puts document information to database.
+     * @param deviceId Device ID
+     * @param parentId Parent document ID.
+     * @param documents List of document information.
+     */
     @VisibleForTesting
-    void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents) {
-        final ContentValues[] valuesList = new ContentValues[documents.length];
-        for (int i = 0; i < documents.length; i++) {
-            valuesList[i] = new ContentValues();
-            getChildDocumentValues(valuesList[i], deviceId, parentId, documents[i]);
-        }
-        boolean heuristic;
-        String mapColumn;
+    synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents) {
+        final boolean heuristic;
+        final String mapColumn;
         switch (mMappingMode.get(getChildDocumentsMappingStateKey(parentId))) {
             case MAP_BY_MTP_IDENTIFIER:
                 heuristic = false;
-                mapColumn = COLUMN_STORAGE_ID;
+                mapColumn = COLUMN_OBJECT_HANDLE;
                 break;
             case MAP_BY_NAME:
                 heuristic = true;
@@ -187,40 +233,55 @@ class MtpDatabase {
             default:
                 throw new Error("Unexpected map mode.");
         }
+        final ContentValues[] valuesList = new ContentValues[documents.length];
+        for (int i = 0; i < documents.length; i++) {
+            valuesList[i] = new ContentValues();
+            getChildDocumentValues(valuesList[i], deviceId, parentId, documents[i]);
+        }
         mDatabase.putDocuments(
                 valuesList, SELECTION_CHILD_DOCUMENTS, parentId, heuristic, mapColumn);
     }
 
+    /**
+     * Clears mapping between MTP identifier and document/root ID.
+     */
     @VisibleForTesting
-    void clearMapping() {
+    synchronized void clearMapping() {
         mDatabase.clearMapping();
         mMappingMode.clear();
     }
 
-    @VisibleForTesting
-    void stopAddingRootDocuments(int deviceId) {
+    /**
+     * Stops adding root documents.
+     * @param deviceId Device ID.
+     * @return True if new rows are added/removed.
+     */
+    synchronized boolean stopAddingRootDocuments(int deviceId) {
         final String mappingModeKey = getRootDocumentsMappingStateKey(deviceId);
         switch (mMappingMode.get(mappingModeKey)) {
             case MAP_BY_MTP_IDENTIFIER:
-                mDatabase.stopAddingDocuments(
+                mMappingMode.remove(mappingModeKey);
+                return mDatabase.stopAddingDocuments(
                         SELECTION_ROOT_DOCUMENTS,
                         Integer.toString(deviceId),
                         COLUMN_STORAGE_ID);
-                break;
             case MAP_BY_NAME:
-                mDatabase.stopAddingDocuments(
+                mMappingMode.remove(mappingModeKey);
+                return mDatabase.stopAddingDocuments(
                         SELECTION_ROOT_DOCUMENTS,
                         Integer.toString(deviceId),
                         Document.COLUMN_DISPLAY_NAME);
-                break;
             default:
                 throw new Error("Unexpected mapping state.");
         }
-        mMappingMode.remove(mappingModeKey);
     }
 
+    /**
+     * Stops adding documents under the parent.
+     * @param parentId Document ID of the parent.
+     */
     @VisibleForTesting
-    void stopAddingChildDocuments(String parentId) {
+    synchronized void stopAddingChildDocuments(String parentId) {
         final String mappingModeKey = getChildDocumentsMappingStateKey(parentId);
         switch (mMappingMode.get(mappingModeKey)) {
             case MAP_BY_MTP_IDENTIFIER:
@@ -303,11 +364,19 @@ class MtpDatabase {
         values.put(Document.COLUMN_SIZE, info.getCompressedSize());
     }
 
-    private String getRootDocumentsMappingStateKey(int deviceId) {
+    /**
+     * @param deviceId Device ID.
+     * @return Key for {@link #mMappingMode}.
+     */
+    private static String getRootDocumentsMappingStateKey(int deviceId) {
         return "RootDocuments/" + deviceId;
     }
 
-    private String getChildDocumentsMappingStateKey(String parentDocumentId) {
+    /**
+     * @param parentDocumentId Document ID for the parent document.
+     * @return Key for {@link #mMappingMode}.
+     */
+    private static String getChildDocumentsMappingStateKey(String parentDocumentId) {
         return "ChildDocuments/" + parentDocumentId;
     }
 }
