@@ -25,7 +25,6 @@
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-#include "renderthread/DirtyHistory.h"
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
@@ -148,8 +147,6 @@ private:
     FrameInfoVisualizer mProfiler;
 
     std::set<RenderNode*> mPrefetechedLayers;
-
-    DirtyHistory mDirtyHistory;
 };
 
 } /* namespace renderthread */
