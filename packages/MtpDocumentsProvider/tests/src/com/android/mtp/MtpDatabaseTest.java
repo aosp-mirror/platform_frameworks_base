@@ -23,15 +23,14 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 @SmallTest
 public class MtpDatabaseTest extends AndroidTestCase {
     private final String[] COLUMN_NAMES = new String[] {
         DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-        MtpDatabase.COLUMN_DEVICE_ID,
-        MtpDatabase.COLUMN_STORAGE_ID,
-        MtpDatabase.COLUMN_OBJECT_HANDLE,
+        MtpDatabaseConstants.COLUMN_DEVICE_ID,
+        MtpDatabaseConstants.COLUMN_STORAGE_ID,
+        MtpDatabaseConstants.COLUMN_OBJECT_HANDLE,
         DocumentsContract.Document.COLUMN_MIME_TYPE,
         DocumentsContract.Document.COLUMN_DISPLAY_NAME,
         DocumentsContract.Document.COLUMN_SUMMARY,
@@ -42,11 +41,6 @@ public class MtpDatabaseTest extends AndroidTestCase {
     };
 
     private final TestResources resources = new TestResources();
-
-    @Override
-    public void tearDown() {
-        MtpDatabase.deleteDatabase(getContext());
-    }
 
     public void testPutRootDocuments() throws Exception {
         final MtpDatabase database = new MtpDatabase(getContext());
@@ -211,7 +205,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         final MtpDatabase database = new MtpDatabase(getContext());
         final String[] columns = new String[] {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                MtpDatabase.COLUMN_STORAGE_ID,
+                MtpDatabaseConstants.COLUMN_STORAGE_ID,
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME
         };
         final String[] rootColumns = new String[] {
@@ -350,7 +344,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         final MtpDatabase database = new MtpDatabase(getContext());
         final String[] columns = new String[] {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                MtpDatabase.COLUMN_OBJECT_HANDLE,
+                MtpDatabaseConstants.COLUMN_OBJECT_HANDLE,
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME
         };
         database.startAddingChildDocuments("parentId");
@@ -424,7 +418,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         final MtpDatabase database = new MtpDatabase(getContext());
         final String[] columns = new String[] {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                MtpDatabase.COLUMN_STORAGE_ID,
+                MtpDatabaseConstants.COLUMN_STORAGE_ID,
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME
         };
         final String[] rootColumns = new String[] {
@@ -510,7 +504,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         final MtpDatabase database = new MtpDatabase(getContext());
         final String[] columns = new String[] {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                MtpDatabase.COLUMN_OBJECT_HANDLE
+                MtpDatabaseConstants.COLUMN_OBJECT_HANDLE
         };
 
         database.startAddingChildDocuments("parentId1");
@@ -555,7 +549,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         final MtpDatabase database = new MtpDatabase(getContext());
         final String[] columns = new String[] {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                MtpDatabase.COLUMN_STORAGE_ID,
+                MtpDatabaseConstants.COLUMN_STORAGE_ID,
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME
         };
         final String[] rootColumns = new String[] {
@@ -604,7 +598,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         final MtpDatabase database = new MtpDatabase(getContext());
         final String[] columns = new String[] {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                MtpDatabase.COLUMN_STORAGE_ID,
+                MtpDatabaseConstants.COLUMN_STORAGE_ID,
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME
         };
         final String[] rootColumns = new String[] {
@@ -669,7 +663,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         {
             final String[] columns = new String[] {
                     DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                    MtpDatabase.COLUMN_STORAGE_ID,
+                    MtpDatabaseConstants.COLUMN_STORAGE_ID,
                     DocumentsContract.Document.COLUMN_DISPLAY_NAME
             };
             final Cursor cursor = database.queryRootDocuments(columns);
