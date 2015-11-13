@@ -67,7 +67,7 @@ public class WindowAnimator {
     private final WindowSurfacePlacer mWindowPlacerLocked;
 
     /** Is any window animating? */
-    boolean mAnimating;
+    private boolean mAnimating;
 
     /** Is any app window animating? */
     boolean mAppWindowAnimating;
@@ -168,7 +168,8 @@ public class WindowAnimator {
                     appAnimator.wasAnimating = appAnimator.animating;
                     if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
                         appAnimator.animating = true;
-                        mAnimating = mAppWindowAnimating = true;
+                        setAnimating(true);
+                        mAppWindowAnimating = true;
                     } else if (appAnimator.wasAnimating) {
                         // stopped animating, do one more pass through the layout
                         setAppLayoutChanges(appAnimator,
@@ -186,7 +187,8 @@ public class WindowAnimator {
                 final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
                 appAnimator.wasAnimating = appAnimator.animating;
                 if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
-                    mAnimating = mAppWindowAnimating = true;
+                    setAnimating(true);
+                    mAppWindowAnimating = true;
                 } else if (appAnimator.wasAnimating) {
                     // stopped animating, do one more pass through the layout
                     setAppLayoutChanges(appAnimator,
@@ -282,7 +284,7 @@ public class WindowAnimator {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
                 winAnimator.mWasAnimating = nowAnimating;
-                mAnimating |= nowAnimating;
+                orAnimating(nowAnimating);
 
                 if (DEBUG_WALLPAPER) {
                     Slog.v(TAG, win + ": wasAnimating=" + wasAnimating +
@@ -546,7 +548,7 @@ public class WindowAnimator {
                         }
                     }
                 }
-                mAnimating = true;
+                setAnimating(true);
             }
 
             // If this window's app token is running a detached wallpaper
@@ -617,7 +619,7 @@ public class WindowAnimator {
 
                             // We can now show all of the drawn windows!
                             if (!mService.mOpeningApps.contains(wtoken)) {
-                                mAnimating |= appAnimator.showAllWindowsLocked();
+                                orAnimating(appAnimator.showAllWindowsLocked());
                             }
                         }
                     }
@@ -636,7 +638,7 @@ public class WindowAnimator {
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         boolean wasAnimating = mAnimating;
-        mAnimating = false;
+        setAnimating(false);
         mAppWindowAnimating = false;
         if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
@@ -657,7 +659,7 @@ public class WindowAnimator {
                         displayAnimator.mScreenRotationAnimation;
                 if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
                     if (screenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
-                        mAnimating = true;
+                        setAnimating(true);
                     } else {
                         mBulkUpdateParams |= SET_UPDATE_ROTATION;
                         screenRotationAnimation.kill();
@@ -697,7 +699,7 @@ public class WindowAnimator {
                     screenRotationAnimation.updateSurfacesInTransaction();
                 }
 
-                mAnimating |= mService.getDisplayContentLocked(displayId).animateDimLayers();
+                orAnimating(mService.getDisplayContentLocked(displayId).animateDimLayers());
 
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (mService.mAccessibilityController != null
@@ -919,5 +921,17 @@ public class WindowAnimator {
 
     private class DisplayContentsAnimator {
         ScreenRotationAnimation mScreenRotationAnimation = null;
+    }
+
+    boolean isAnimating() {
+        return mAnimating;
+    }
+
+    void setAnimating(boolean animating) {
+        mAnimating = animating;
+    }
+
+    void orAnimating(boolean animating) {
+        mAnimating |= animating;
     }
 }

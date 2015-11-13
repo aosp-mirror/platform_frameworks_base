@@ -1084,7 +1084,7 @@ class WindowStateAnimator {
         } else if (w.mDecorFrame.isEmpty()) {
             // Windows without policy decor aren't cropped.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
-        } else if (w.mAttrs.type == LayoutParams.TYPE_WALLPAPER && mAnimator.mAnimating) {
+        } else if (w.mAttrs.type == LayoutParams.TYPE_WALLPAPER && mAnimator.isAnimating()) {
             // If we're animating, the wallpaper crop should only be updated at the end of the
             // animation.
             mTmpClipRect.set(w.mSystemDecorRect);
@@ -1124,12 +1124,8 @@ class WindowStateAnimator {
         // The clip rect was generated assuming (0,0) as the window origin,
         // so we need to translate to match the actual surface coordinates.
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
-        // We don't want to clip to stack bounds windows that are currently doing entrance
-        // animation for docked window, otherwise the animating window will be suddenly cut off.
 
-        if (!(mAnimator.mAnimating && w.inDockedWorkspace())) {
-            adjustCropToStackBounds(w, clipRect, isFreeformResizing);
-        }
+        adjustCropToStackBounds(w, clipRect, isFreeformResizing);
 
         w.transformFromScreenToSurfaceSpace(clipRect);
 
@@ -1142,31 +1138,40 @@ class WindowStateAnimator {
     private void adjustCropToStackBounds(WindowState w, Rect clipRect, boolean isFreeformResizing) {
         final AppWindowToken appToken = w.mAppToken;
         final Task task = w.getTask();
-        // We don't apply the the stack bounds to the window that is being replaced, because it was
-        // living in a different stack. If we suddenly crop it to the new stack bounds, it might
-        // get cut off. We don't want it to happen, so we let it ignore the stack bounds until it
-        // gets removed. The window that will replace it will abide them.
-        if (task != null && appToken.mCropWindowsToStack && !appToken.mWillReplaceWindow) {
-            TaskStack stack = task.mStack;
-            stack.getDimBounds(mTmpStackBounds);
-            // When we resize we use the big surface approach, which means we can't trust the
-            // window frame bounds anymore. Instead, the window will be placed at 0, 0, but to avoid
-            // hardcoding it, we use surface coordinates.
-            final int frameX = isFreeformResizing ? (int) mSurfaceController.getX() :
-                    w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
-            final int frameY = isFreeformResizing ? (int) mSurfaceController.getY() :
-                    w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
-            // We need to do some acrobatics with surface position, because their clip region is
-            // relative to the inside of the surface, but the stack bounds aren't.
-            clipRect.left = Math.max(0,
-                    Math.max(mTmpStackBounds.left, frameX + clipRect.left) - frameX);
-            clipRect.top = Math.max(0,
-                    Math.max(mTmpStackBounds.top, frameY + clipRect.top) - frameY);
-            clipRect.right = Math.max(0,
-                    Math.min(mTmpStackBounds.right, frameX + clipRect.right) - frameX);
-            clipRect.bottom = Math.max(0,
-                    Math.min(mTmpStackBounds.bottom, frameY + clipRect.bottom) - frameY);
+        if (task == null || !appToken.mCropWindowsToStack) {
+            return;
         }
+
+        // We don't apply the stack bounds crop if:
+        // 1. The window is currently animating docked mode, otherwise the animating window will be
+        // suddenly cut off.
+        // 2. The window that is being replaced during animation, because it was living in a
+        // different stack. If we suddenly crop it to the new stack bounds, it might get cut off.
+        // We don't want it to happen, so we let it ignore the stack bounds until it gets removed.
+        // The window that will replace it will abide them.
+        if (isAnimating() && (appToken.mWillReplaceWindow || w.inDockedWorkspace())) {
+            return;
+        }
+
+        final TaskStack stack = task.mStack;
+        stack.getDimBounds(mTmpStackBounds);
+        // When we resize we use the big surface approach, which means we can't trust the
+        // window frame bounds anymore. Instead, the window will be placed at 0, 0, but to avoid
+        // hardcoding it, we use surface coordinates.
+        final int frameX = isFreeformResizing ? (int) mSurfaceController.getX() :
+                w.mFrame.left + mWin.mXOffset - w.getAttrs().surfaceInsets.left;
+        final int frameY = isFreeformResizing ? (int) mSurfaceController.getY() :
+                w.mFrame.top + mWin.mYOffset - w.getAttrs().surfaceInsets.top;
+        // We need to do some acrobatics with surface position, because their clip region is
+        // relative to the inside of the surface, but the stack bounds aren't.
+        clipRect.left = Math.max(0,
+                Math.max(mTmpStackBounds.left, frameX + clipRect.left) - frameX);
+        clipRect.top = Math.max(0,
+                Math.max(mTmpStackBounds.top, frameY + clipRect.top) - frameY);
+        clipRect.right = Math.max(0,
+                Math.min(mTmpStackBounds.right, frameX + clipRect.right) - frameX);
+        clipRect.bottom = Math.max(0,
+                Math.min(mTmpStackBounds.bottom, frameY + clipRect.bottom) - frameY);
     }
 
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
