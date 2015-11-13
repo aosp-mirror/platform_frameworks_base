@@ -26,7 +26,6 @@
     <color name="notification_panel_solid_background">#ff000000</color>
     <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
     <color name="status_bar_recents_app_label_color">#ffffffff</color>
-    <color name="status_bar_recents_focus_color">#ff009688</color>
     <drawable name="status_bar_notification_row_background_color">#ff090909</drawable>
     <color name="notification_list_shadow_top">#80000000</color>
     <drawable name="recents_callout_line">#99ffffff</drawable>
@@ -57,6 +56,8 @@
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
 
+    <!-- The focus color for a task. -->
+    <color name="recents_focus_color">#ff009688</color>
     <!-- The default recents task bar background color. -->
     <color name="recents_task_bar_default_background_color">#ffe6e6e6</color>
     <!-- The recents task bar light text color to be drawn on top of dark backgrounds. -->

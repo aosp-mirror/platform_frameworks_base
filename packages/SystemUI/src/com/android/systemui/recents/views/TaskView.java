@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.*;
+import android.graphics.Bitmap.Config;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityManager;
 import android.view.View;
@@ -83,7 +84,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     float mFocusProgress;
     Paint mFocusPaint = new Paint();
     int mFocusColor = 0xff009688;
-    int mFocusAlpha = 0x50;
+    int mFocusAlpha = 0x40;
+    int mFocusBorderAlpha = 0xde;
     static Interpolator sFocusInInterpolator = new OvershootInterpolator(2);
     static Interpolator sFocusInRadiusInterpolator = new DecelerateInterpolator();
     static Interpolator sFocusOutInterpolator = new DecelerateInterpolator();
@@ -95,6 +97,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     int mFocusInCircleAlpha;
     int mFocusOutFillAlpha;
     boolean mFocusAnimatorWasTriggered;
+    int mFocusBorderSize;
 
     // Optimizations
     ValueAnimator.AnimatorUpdateListener mUpdateDimListener =
@@ -139,8 +142,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         });
 
         mFocusColor =
-                context.getResources().getColor(R.color.status_bar_recents_focus_color);
+                context.getResources().getColor(R.color.recents_focus_color);
         mFocusPaint.setColor(mFocusColor);
+        mFocusBorderSize =
+                context.getResources().getDimensionPixelSize(R.dimen.recents_border_size);
     }
 
     /** Set callback */
@@ -557,6 +562,19 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
     public void dispatchDraw(Canvas canvas) {
+        if (mIsFocused && mFocusAnimatorWasTriggered) {
+            canvas.save(Canvas.CLIP_SAVE_FLAG);
+            mFocusPaint.setAlpha(mFocusBorderAlpha);
+            canvas.clipRect(-mFocusBorderSize, -mFocusBorderSize,
+                    getWidth() + mFocusBorderSize, getHeight() + mFocusBorderSize,
+                    Region.Op.REPLACE);
+            canvas.drawRoundRect(-mFocusBorderSize, -mFocusBorderSize,
+                    getWidth() + mFocusBorderSize, getHeight() + mFocusBorderSize,
+                    mConfig.taskViewRoundedCornerRadiusPx,
+                    mConfig.taskViewRoundedCornerRadiusPx, mFocusPaint);
+            canvas.restore();
+        }
+
         super.dispatchDraw(canvas);
 
         if (mFocusAnimatorWasTriggered) {
@@ -588,6 +606,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mFocusInCircleAlpha = (int) (mFocusAlpha * interpolatedProgress);
             mFocusInFillAlpha =
                     (mFocusAlpha / 4) + (int) ((mFocusAlpha / 2) * interpolatedProgress);
+            mFocusBorderAlpha = mFocusAlpha + (int) ((mFocusAlpha * 1.5f) * interpolatedProgress);
         } else {
             final float interpolatedProgress = sFocusOutInterpolator.getInterpolation(progress);
             mFocusOutFillAlpha = (int) (mFocusAlpha * (1 - interpolatedProgress));
