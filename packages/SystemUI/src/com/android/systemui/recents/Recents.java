@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -193,6 +194,12 @@ public class Recents extends SystemUI
      */
     @Override
     public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (proxyToOverridePackage(ACTION_SHOW_RECENTS)) {
             return;
         }
@@ -222,6 +229,12 @@ public class Recents extends SystemUI
      */
     @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (proxyToOverridePackage(ACTION_HIDE_RECENTS)) {
             return;
         }
@@ -251,6 +264,12 @@ public class Recents extends SystemUI
      */
     @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (proxyToOverridePackage(ACTION_TOGGLE_RECENTS)) {
             return;
         }
@@ -280,6 +299,12 @@ public class Recents extends SystemUI
      */
     @Override
     public void preloadRecents() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.preloadRecents();
@@ -302,6 +327,12 @@ public class Recents extends SystemUI
 
     @Override
     public void cancelPreloadingRecents() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.cancelPreloadingRecents();
@@ -329,11 +360,23 @@ public class Recents extends SystemUI
 
     @Override
     public void showNextAffiliatedTask() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         mImpl.showNextAffiliatedTask();
     }
 
     @Override
     public void showPrevAffiliatedTask() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         mImpl.showPrevAffiliatedTask();
     }
 
@@ -453,6 +496,14 @@ public class Recents extends SystemUI
             r.run();
         }
         mOnConnectRunnables.clear();
+    }
+
+    /**
+     * @return whether this device is provisioned.
+     */
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
     /**
