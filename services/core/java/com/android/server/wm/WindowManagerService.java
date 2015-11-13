@@ -7688,7 +7688,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         // Since we're holding both mWindowMap and mAnimator we don't need to
                         // hold mAnimator.mLayoutToAnim.
-                        if (mAnimator.mAnimating || mAnimationScheduled) {
+                        if (mAnimator.isAnimating() || mAnimationScheduled) {
                             // If we are animating, don't do the gc now but
                             // delay a bit so we don't interrupt the animation.
                             sendEmptyMessageDelayed(H.FORCE_GC, 2000);

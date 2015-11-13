@@ -542,11 +542,8 @@ class WindowSurfacePlacer {
 
         mService.scheduleAnimationLocked();
 
-        if (DEBUG_WINDOW_TRACE) {
-            Slog.e(TAG,
-                    "performSurfacePlacementInner exit: animating="
-                            + mService.mAnimator.mAnimating);
-        }
+        if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
+                "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
     }
 
     private void applySurfaceChangesTransaction(boolean recoveringMemory, int numDisplays,
@@ -1184,7 +1181,7 @@ class WindowSurfacePlacer {
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
             SurfaceControl.openTransaction();
             try {
-                mService.mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+                mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
             } finally {
                 SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
@@ -1467,7 +1464,7 @@ class WindowSurfacePlacer {
                     appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
                 }
                 mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
-                mService.mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+                mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
             }
         }
     }
