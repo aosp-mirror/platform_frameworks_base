@@ -1338,7 +1338,12 @@ final class ActivityStack {
             return topHomeActivity == null || !topHomeActivity.isHomeActivity();
         }
 
-        final int belowFocusedIndex = mStacks.indexOf(focusedStack) - 1;
+        // Find the first stack below focused stack that actually got something visible.
+        int belowFocusedIndex = mStacks.indexOf(focusedStack) - 1;
+        while (belowFocusedIndex >= 0 &&
+                mStacks.get(belowFocusedIndex).topRunningActivityLocked() == null) {
+            belowFocusedIndex--;
+        }
         if ((focusedStackId == DOCKED_STACK_ID || focusedStackId == PINNED_STACK_ID)
                 && stackIndex == belowFocusedIndex) {
             // Stacks directly behind the docked or pinned stack are always visible.
