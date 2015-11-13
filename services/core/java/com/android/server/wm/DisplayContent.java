@@ -55,17 +55,6 @@ class DisplayContent {
      * from mDisplayWindows; */
     private final WindowList mWindows = new WindowList();
 
-    // This protects the following display size properties, so that
-    // getDisplaySize() doesn't need to acquire the global lock.  This is
-    // needed because the window manager sometimes needs to use ActivityThread
-    // while it has its global state locked (for example to load animation
-    // resources), but the ActivityThread also needs get the current display
-    // size sometimes when it has its package lock held.
-    //
-    // These will only be modified with both mWindowMap and mDisplaySizeLock
-    // held (in that order) so the window manager doesn't need to acquire this
-    // lock when needing these values in its normal operation.
-    final Object mDisplaySizeLock = new Object();
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mInitialDisplayDensity = 0;
@@ -202,18 +191,16 @@ class DisplayContent {
     }
 
     void initializeDisplayBaseInfo() {
-        synchronized(mDisplaySizeLock) {
-            // Bootstrap the default logical display from the display manager.
-            final DisplayInfo newDisplayInfo =
-                    mService.mDisplayManagerInternal.getDisplayInfo(mDisplayId);
-            if (newDisplayInfo != null) {
-                mDisplayInfo.copyFrom(newDisplayInfo);
-            }
-            mBaseDisplayWidth = mInitialDisplayWidth = mDisplayInfo.logicalWidth;
-            mBaseDisplayHeight = mInitialDisplayHeight = mDisplayInfo.logicalHeight;
-            mBaseDisplayDensity = mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
-            mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
+        // Bootstrap the default logical display from the display manager.
+        final DisplayInfo newDisplayInfo =
+                mService.mDisplayManagerInternal.getDisplayInfo(mDisplayId);
+        if (newDisplayInfo != null) {
+            mDisplayInfo.copyFrom(newDisplayInfo);
         }
+        mBaseDisplayWidth = mInitialDisplayWidth = mDisplayInfo.logicalWidth;
+        mBaseDisplayHeight = mInitialDisplayHeight = mDisplayInfo.logicalHeight;
+        mBaseDisplayDensity = mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
+        mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
     }
 
     void getLogicalDisplayRect(Rect out) {

@@ -6908,27 +6908,25 @@ public class WindowManagerService extends IWindowManager.Stub
         final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
         final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayInfo.rotation = mRotation;
-            displayInfo.logicalWidth = dw;
-            displayInfo.logicalHeight = dh;
-            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
-            displayInfo.appWidth = appWidth;
-            displayInfo.appHeight = appHeight;
-            displayInfo.getLogicalMetrics(mRealDisplayMetrics,
-                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
-            displayInfo.getAppMetrics(mDisplayMetrics);
-            if (displayContent.mDisplayScalingDisabled) {
-                displayInfo.flags |= Display.FLAG_SCALING_DISABLED;
-            } else {
-                displayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
-            }
-
-            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
-                    displayContent.getDisplayId(), displayInfo);
-
-            displayContent.mBaseDisplayRect.set(0, 0, dw, dh);
+        displayInfo.rotation = mRotation;
+        displayInfo.logicalWidth = dw;
+        displayInfo.logicalHeight = dh;
+        displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
+        displayInfo.appWidth = appWidth;
+        displayInfo.appHeight = appHeight;
+        displayInfo.getLogicalMetrics(mRealDisplayMetrics,
+                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        displayInfo.getAppMetrics(mDisplayMetrics);
+        if (displayContent.mDisplayScalingDisabled) {
+            displayInfo.flags |= Display.FLAG_SCALING_DISABLED;
+        } else {
+            displayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
         }
+
+        mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
+                displayContent.getDisplayId(), displayInfo);
+
+        displayContent.mBaseDisplayRect.set(0, 0, dw, dh);
         if (false) {
             Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
         }
@@ -8060,10 +8058,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
-                synchronized(displayContent.mDisplaySizeLock) {
-                    size.x = displayContent.mInitialDisplayWidth;
-                    size.y = displayContent.mInitialDisplayHeight;
-                }
+                size.x = displayContent.mInitialDisplayWidth;
+                size.y = displayContent.mInitialDisplayHeight;
             }
         }
     }
@@ -8073,10 +8069,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
-                synchronized(displayContent.mDisplaySizeLock) {
-                    size.x = displayContent.mBaseDisplayWidth;
-                    size.y = displayContent.mBaseDisplayHeight;
-                }
+                size.x = displayContent.mBaseDisplayWidth;
+                size.y = displayContent.mBaseDisplayHeight;
             }
         }
     }
@@ -8145,13 +8139,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void setForcedDisplayScalingModeLocked(DisplayContent displayContent,
-            int mode) {
+    private void setForcedDisplayScalingModeLocked(DisplayContent displayContent, int mode) {
         Slog.i(TAG, "Using display scaling mode: " + (mode == 0 ? "auto" : "off"));
-
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayContent.mDisplayScalingDisabled = (mode != 0);
-        }
+        displayContent.mDisplayScalingDisabled = (mode != 0);
         reconfigureDisplayLocked(displayContent);
     }
 
@@ -8169,13 +8159,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     width = Integer.parseInt(sizeStr.substring(0, pos));
                     height = Integer.parseInt(sizeStr.substring(pos+1));
-                    synchronized(displayContent.mDisplaySizeLock) {
-                        if (displayContent.mBaseDisplayWidth != width
-                                || displayContent.mBaseDisplayHeight != height) {
-                            Slog.i(TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
-                            displayContent.mBaseDisplayWidth = width;
-                            displayContent.mBaseDisplayHeight = height;
-                        }
+                    if (displayContent.mBaseDisplayWidth != width
+                            || displayContent.mBaseDisplayHeight != height) {
+                        Slog.i(TAG, "FORCED DISPLAY SIZE: " + width + "x" + height);
+                        displayContent.mBaseDisplayWidth = width;
+                        displayContent.mBaseDisplayHeight = height;
                     }
                 } catch (NumberFormatException ex) {
                 }
@@ -8192,11 +8180,9 @@ public class WindowManagerService extends IWindowManager.Stub
             int density;
             try {
                 density = Integer.parseInt(densityStr);
-                synchronized(displayContent.mDisplaySizeLock) {
-                    if (displayContent.mBaseDisplayDensity != density) {
-                        Slog.i(TAG, "FORCED DISPLAY DENSITY: " + density);
-                        displayContent.mBaseDisplayDensity = density;
-                    }
+                if (displayContent.mBaseDisplayDensity != density) {
+                    Slog.i(TAG, "FORCED DISPLAY DENSITY: " + density);
+                    displayContent.mBaseDisplayDensity = density;
                 }
             } catch (NumberFormatException ex) {
             }
@@ -8206,21 +8192,16 @@ public class WindowManagerService extends IWindowManager.Stub
         int mode = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SCALING_FORCE, 0);
         if (mode != 0) {
-            synchronized(displayContent.mDisplaySizeLock) {
-                Slog.i(TAG, "FORCED DISPLAY SCALING DISABLED");
-                displayContent.mDisplayScalingDisabled = true;
-            }
+            Slog.i(TAG, "FORCED DISPLAY SCALING DISABLED");
+            displayContent.mDisplayScalingDisabled = true;
         }
     }
 
     // displayContent must not be null
     private void setForcedDisplaySizeLocked(DisplayContent displayContent, int width, int height) {
         Slog.i(TAG, "Using new display size: " + width + "x" + height);
-
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayContent.mBaseDisplayWidth = width;
-            displayContent.mBaseDisplayHeight = height;
-        }
+        displayContent.mBaseDisplayWidth = width;
+        displayContent.mBaseDisplayHeight = height;
         reconfigureDisplayLocked(displayContent);
     }
 
@@ -8256,9 +8237,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
-                synchronized(displayContent.mDisplaySizeLock) {
-                    return displayContent.mInitialDisplayDensity;
-                }
+                return displayContent.mInitialDisplayDensity;
             }
         }
         return -1;
@@ -8269,9 +8248,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
-                synchronized(displayContent.mDisplaySizeLock) {
-                    return displayContent.mBaseDisplayDensity;
-                }
+                return displayContent.mBaseDisplayDensity;
             }
         }
         return -1;
@@ -8306,10 +8283,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // displayContent must not be null
     private void setForcedDisplayDensityLocked(DisplayContent displayContent, int density) {
         Slog.i(TAG, "Using new display density: " + density);
-
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayContent.mBaseDisplayDensity = density;
-        }
+        displayContent.mBaseDisplayDensity = density;
         reconfigureDisplayLocked(displayContent);
     }
 
@@ -8400,12 +8374,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private void setOverscanLocked(DisplayContent displayContent,
             int left, int top, int right, int bottom) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        synchronized (displayContent.mDisplaySizeLock) {
-            displayInfo.overscanLeft = left;
-            displayInfo.overscanTop = top;
-            displayInfo.overscanRight = right;
-            displayInfo.overscanBottom = bottom;
-        }
+        displayInfo.overscanLeft = left;
+        displayInfo.overscanTop = top;
+        displayInfo.overscanRight = right;
+        displayInfo.overscanBottom = bottom;
 
         mDisplaySettings.setOverscanLocked(displayInfo.uniqueId, displayInfo.name, left, top,
                 right, bottom);
@@ -9992,14 +9964,11 @@ public class WindowManagerService extends IWindowManager.Stub
         DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Rect rect = new Rect();
         mDisplaySettings.getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
-        synchronized (displayContent.mDisplaySizeLock) {
-            displayInfo.overscanLeft = rect.left;
-            displayInfo.overscanTop = rect.top;
-            displayInfo.overscanRight = rect.right;
-            displayInfo.overscanBottom = rect.bottom;
-            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
-                    displayId, displayInfo);
-        }
+        displayInfo.overscanLeft = rect.left;
+        displayInfo.overscanTop = rect.top;
+        displayInfo.overscanRight = rect.right;
+        displayInfo.overscanBottom = rect.bottom;
+        mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId, displayInfo);
         configureDisplayPolicyLocked(displayContent);
 
         // TODO: Create an input channel for each display with touch capability.
