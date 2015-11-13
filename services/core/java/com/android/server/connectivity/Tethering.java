@@ -1353,18 +1353,9 @@ public class Tethering extends BaseNetworkObserver {
                     if (iface != null) {
                         String[] dnsServers = mDefaultDnsServers;
                         Collection<InetAddress> dnses = linkProperties.getDnsServers();
-                        if (dnses != null) {
-                            // we currently only handle IPv4
-                            ArrayList<InetAddress> v4Dnses =
-                                    new ArrayList<InetAddress>(dnses.size());
-                            for (InetAddress dnsAddress : dnses) {
-                                if (dnsAddress instanceof Inet4Address) {
-                                    v4Dnses.add(dnsAddress);
-                                }
-                            }
-                            if (v4Dnses.size() > 0) {
-                                dnsServers = NetworkUtils.makeStrings(v4Dnses);
-                            }
+                        if (dnses != null && !dnses.isEmpty()) {
+                            // TODO: remove this invocation of NetworkUtils.makeStrings().
+                            dnsServers = NetworkUtils.makeStrings(dnses);
                         }
                         try {
                             Network network = getConnectivityManager().getNetworkForType(upType);
