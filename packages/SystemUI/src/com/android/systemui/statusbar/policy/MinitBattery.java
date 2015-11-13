@@ -14,17 +14,11 @@ limitations under the License.*/
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -32,7 +26,6 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
-import android.os.Environment;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -40,105 +33,51 @@ import android.widget.ImageView;
 
 import java.io.File;
 
+import com.android.systemui.statusbar.policy.MinitBatteryController.MinitSettings;
+import com.android.systemui.statusbar.policy.MinitBatteryController.MinitState;
+import com.android.systemui.statusbar.policy.MinitBatteryController.ResourceManager;
+
 public class MinitBattery extends ImageView {
-    public interface OnMinitBatterySetupListener {
-        public boolean onSetupComplete(boolean completedSuccessfully);
+    private static final String TAG = MinitBattery.class.getSimpleName();
+    private static final boolean DEBUG = true;
+
+    public interface OnMinitBatteryErrorListener {
+        public void onError();
     }
-    private class ResourceManager {
-        private Context mResourceContext;
-        private Resources mRes;
-        private boolean mResExsist = false;
 
-        public ResourceManager(Context context) {
-
-            try {
-                mResourceContext = context.createPackageContext(
-                        "com.three.minit.batteryresources", Context.CONTEXT_IGNORE_SECURITY);
-                mRes = mResourceContext.getResources();
-                mResExsist = true;
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @SuppressWarnings("deprecation")
-        public Drawable getDrawable(String name) {
-            return mRes.getDrawable(getResourceId(name, "drawable"));
-        }
-
-        public int getResourceId(String name, String type) {
-
-            return mRes.getIdentifier(name, type,
-                    mResourceContext.getPackageName());
-        }
-
-        public boolean ResourcesExsist() {
-            return mResExsist;
-        }
-
-    }
-    private String mBatteryIconsLoaction;
-    private String mDownloadBatteryIconsLoaction;
-    private File mFile;
+    private ResourceManager mRM;
     private int mLevel;
     private int mStatus;
     private Paint mPaint;
-    private int mTextColor = Color.WHITE;
-    private int mTextSize = 30;
-    private int mBatteryColor = Color.WHITE;
-    private int mBatteryMidColor = 0xFFFFC400;
-    private int mBatteryLowColor = 0xFFDE2904;
-
-    private int mMidLevel = 50, mLowLevel = 20;
-
-    private boolean mSetup = false;
-    private OnMinitBatterySetupListener mListener;
     private Typeface mTypeface;
-    private boolean mIsColorable = false;
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)) {
-                mLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-                mStatus = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
-                        BatteryManager.BATTERY_STATUS_UNKNOWN);
-            } else if (intent.getAction().equals(
-                    "com.three.minit.BATTERY_TYPE_CHANGED")) {
-            }
+    private MinitSettings mSettings;
 
-            getSettings();
-            updateImageView();
-        }
-    };
-    private ResourceManager mRM;
-    private int mChargeAnim = 0;
-    private int mBatteryType = 8;
-
-    private int mWorkingType = 0;
+    private OnMinitBatteryErrorListener mListener;
 
     public MinitBattery(Context context) {
         super(context);
-        init(context);
     }
 
     public MinitBattery(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
     }
 
     public MinitBattery(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context);
     }
 
     private void applyColorFilter() {
-        if (mIsColorable) {
-            if (mLevel >= mMidLevel && mLevel >= mLowLevel) {
-                setColorFilter(mBatteryColor, PorterDuff.Mode.MULTIPLY);
-            } else if (mLevel < mMidLevel && mLevel > mLowLevel) {
-                setColorFilter(mBatteryMidColor, PorterDuff.Mode.MULTIPLY);
-            } else if (mLevel < mLowLevel) {
-                setColorFilter(mBatteryLowColor, PorterDuff.Mode.MULTIPLY);
+        if (mSettings.mIsColorable) {
+            if (mLevel >= mSettings.mMidLevel && mLevel >= mSettings.mLowLevel) {
+                setColorFilter(mSettings.mBatteryColor,
+                        PorterDuff.Mode.MULTIPLY);
+            } else if (mLevel < mSettings.mMidLevel
+                    && mLevel > mSettings.mLowLevel) {
+                setColorFilter(mSettings.mBatteryMidColor,
+                        PorterDuff.Mode.MULTIPLY);
+            } else if (mLevel < mSettings.mLowLevel) {
+                setColorFilter(mSettings.mBatteryLowColor,
+                        PorterDuff.Mode.MULTIPLY);
             }
         } else {
             setColorFilter(-1, PorterDuff.Mode.MULTIPLY);
@@ -148,7 +87,7 @@ public class MinitBattery extends ImageView {
     private AnimationDrawable getChargingAnimation(int level) {
         AnimationDrawable ad = new AnimationDrawable();
 
-        switch (mChargeAnim) {
+        switch (mSettings.mChargeAnim) {
             case 0:
                 ad.addFrame(getChargingDrawable(level), 1500);
                 ad.addFrame(getNormalDrawable(level), 500);
@@ -193,13 +132,13 @@ public class MinitBattery extends ImageView {
     private Drawable getChargingDrawable(int level) {
         Drawable drawable = null;
 
-        switch (mWorkingType) {
+        switch (mSettings.mWorkingType) {
             case 0:// Offline
                 drawable = getDefaultBattery(level, true);
                 break;
 
             case 1:// Downloaded
-                File f = new File(mDownloadBatteryIconsLoaction
+                File f = new File(mSettings.mDownloadBatteryIconsLoaction
                         + "stat_sys_battery_charge_" + String.valueOf(level)
                         + ".png");
 
@@ -212,10 +151,9 @@ public class MinitBattery extends ImageView {
                 break;
 
             case 2:// Folder
-                File fi = new File(mBatteryIconsLoaction,
+                File fi = new File(MinitSettings.mBatteryIconsLocation,
                         "stat_sys_battery_charge_anim" + String.valueOf(level)
-                                + ".png"
-                        );
+                                + ".png");
 
                 if (fi.exists()) {
                     drawable = Drawable.createFromPath(fi.getAbsolutePath());
@@ -230,31 +168,37 @@ public class MinitBattery extends ImageView {
     }
 
     private Drawable getDefaultBattery(int level, boolean charge) {
+        if (!mRM.resourcesExists()) {
+            dispatchError();
+            // we've done all we possibly can. This should be
+            // impossible but let's catch it and handle it gracefully
+            throw new Resources.NotFoundException();
+        }
         Drawable d = null;
 
         if (charge)
-            d = mRM.getDrawable("battery_" + String.valueOf(mBatteryType)
-                    + "_charge_anim" + String.valueOf(level));
+            d = mRM.getDrawable("battery_"
+                    + String.valueOf(mSettings.mBatteryType) + "_charge_anim"
+                    + String.valueOf(level));
         else
-            d = mRM.getDrawable("battery_" + String.valueOf(mBatteryType)
-                    + "_" + String.valueOf(level));
-
+            d = mRM.getDrawable("battery_"
+                    + String.valueOf(mSettings.mBatteryType) + "_"
+                    + String.valueOf(level));
 
         setBatterySize(null, d);
         return d;
-
     }
 
     private Drawable getNormalDrawable(int level) {
         Drawable drawable = null;
 
-        switch (mWorkingType) {
+        switch (mSettings.mWorkingType) {
             case 0:// Offline
                 drawable = getDefaultBattery(level, false);
                 break;
 
             case 1:// Downloaded
-                File f = new File(mDownloadBatteryIconsLoaction
+                File f = new File(mSettings.mDownloadBatteryIconsLoaction
                         + "stat_sys_battery_" + String.valueOf(level) + ".png");
 
                 if (f.exists()) {
@@ -266,8 +210,8 @@ public class MinitBattery extends ImageView {
                 break;
 
             case 2:// Folder
-                File fi = new File(mBatteryIconsLoaction, "stat_sys_battery_"
-                        + String.valueOf(level) + ".png");
+                File fi = new File(MinitSettings.mBatteryIconsLocation,
+                        "stat_sys_battery_" + String.valueOf(level) + ".png");
 
                 if (fi.exists()) {
                     drawable = Drawable.createFromPath(fi.getAbsolutePath());
@@ -281,105 +225,43 @@ public class MinitBattery extends ImageView {
         return drawable;
     }
 
-    private String getSaveLocation(Context context) {
-        String t = Settings.System.getString(context.getContentResolver(), "save_loc");
+    public void updateSettings(MinitState state, MinitSettings settings) {
+        mSettings = settings;
+        mPaint.setColor(mSettings.mTextColor);
+        mPaint.setTextSize(mSettings.mTextSize);
 
-        if (t != null) {
-            return t + "/3Minit Downloads/BatteryIcons/";
+        if (state == MinitState.SETUP) {
+            invalidate();
+            setVisibility(mSettings.mVisible ? View.VISIBLE : View.GONE);
         } else {
-            return Environment.getExternalStorageDirectory().getPath()
-                    + "/3Minit Downloads/BatteryIcons/";
-        }
-    }
-
-    private void getSettings() {
-        ContentResolver cr = getContext().getContentResolver();
-        mDownloadBatteryIconsLoaction = getSaveLocation(getContext());
-        mChargeAnim = Settings.System.getInt(cr, "minit_anim_type", 0);
-        mBatteryType = Settings.System.getInt(cr, "minit_battery_type", 8);
-        mWorkingType = Settings.System.getInt(cr, "minit_working_type", 0);
-        mIsColorable = Settings.System.getInt(cr, "minit_colorable", 0) == 1;
-        mBatteryColor = Settings.System.getInt(cr, "minit_battery_color", mBatteryColor);
-        mBatteryMidColor = Settings.System.getInt(cr, "minit_battery_mid_color", mBatteryMidColor);
-        mBatteryLowColor = Settings.System.getInt(cr, "minit_battery_low_color", mBatteryLowColor);
-        mMidLevel = Settings.System.getInt(cr, "minit_mid_level", mMidLevel);
-        mLowLevel = Settings.System.getInt(cr, "minit_low_level", mLowLevel);
-        mTextSize = Settings.System.getInt(cr, "minit_battery_text_size", 30);
-        mTextColor = Settings.System.getInt(cr, "minit_battery_text_color", mTextColor);
-
-        mPaint.setColor(mTextColor);
-        mPaint.setTextSize(mTextSize);
-
-        invalidate();
-
-        if (Settings.System.getInt(cr, "minit_battery_visible", 1) == 1)
-            setVisibility(View.VISIBLE);
-        else
             setVisibility(View.GONE);
+        }
     }
 
-    private void init(Context context) {
-        mLevel = 0;
-        mStatus = 0;
+    public void updateBattery(int status, int level) {
+        mStatus = status;
+        mLevel = level;
+    }
 
+    public void updateImage() {
+        // if we fail here, it will be catastrophic
+        // better to shut down and try again
         try {
-
-            mRM = new ResourceManager(context);
-
-            if (!mRM.ResourcesExsist()) {
-                if (mListener != null)
-                    mListener.onSetupComplete(false);
-
-                mSetup = false;
-                setVisibility(View.GONE);
-                return;
-            } else {
-                if (mListener != null)
-                    mListener.onSetupComplete(true);
-                mSetup = true;
-            }
-
-            mBatteryIconsLoaction = Environment.getExternalStorageDirectory()
-                    .getAbsolutePath() + File.separator + "3MinitBatteryIcons";
-            mFile = new File(mBatteryIconsLoaction);
-            mFile.mkdirs();
-
-            mDownloadBatteryIconsLoaction = getSaveLocation(context);
-
-            mPaint = new Paint();
-            mPaint.setColor(mTextColor);
-            mPaint.setTextSize(mTextSize);
-            mPaint.setTypeface(mTypeface);
-            mPaint.setTextAlign(Paint.Align.CENTER);
-            mPaint.setStyle(Paint.Style.FILL);
-
-            getSettings();
+            updateImageView();
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public boolean isSetup() {
-        return mSetup;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (mSetup) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            filter.addAction("com.three.minit.BATTERY_TYPE_CHANGED");
-            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-            getContext().registerReceiver(mReceiver, filter);
+            dispatchError();
         }
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        getContext().unregisterReceiver(mReceiver);
+    public void init(Context context, ResourceManager rm, MinitSettings settings) {
+        mRM = rm;
+        mSettings = settings;
+        mPaint = new Paint();
+        mPaint.setColor(mSettings.mTextColor);
+        mPaint.setTextSize(mSettings.mTextSize);
+        mPaint.setTypeface(mTypeface);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -387,9 +269,10 @@ public class MinitBattery extends ImageView {
         super.onDraw(canvas);
 
         int xPos = (canvas.getWidth() / 2);
-        int yPos = (int) ((canvas.getHeight() / 2) - ((mPaint.descent() + mPaint.ascent()) / 2));
+        int yPos = (int) ((canvas.getHeight() / 2) - ((mPaint.descent() + mPaint
+                .ascent()) / 2));
 
-        if (mIsColorable && mPaint != null) {
+        if (mSettings.mIsColorable && mPaint != null) {
             canvas.drawText(String.valueOf(mLevel), xPos, yPos, mPaint);
         }
     }
@@ -401,8 +284,7 @@ public class MinitBattery extends ImageView {
         Bitmap b = null;
 
         if (file != null) {
-            b = BitmapFactory.decodeFile(file.getAbsolutePath(),
-                    options);
+            b = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         }
 
         if (drawable != null) {
@@ -432,8 +314,22 @@ public class MinitBattery extends ImageView {
         setLayoutParams(this.getLayoutParams());
     }
 
-    public void setOnMinitBatterySetupListener(OnMinitBatterySetupListener listener) {
-        mListener = listener;
+    public void setOnMinitBatteryErrorListener(
+            OnMinitBatteryErrorListener listener) {
+        if (listener != null) {
+            mListener = listener;
+        }
+    }
+
+    public void removeOnMinitBatteryErrorListener(
+            OnMinitBatteryErrorListener listener) {
+        mListener = null;
+    }
+
+    private void dispatchError() {
+        if (mListener != null) {
+            mListener.onError();
+        }
     }
 
     private void updateImageView() {
@@ -451,8 +347,6 @@ public class MinitBattery extends ImageView {
                 setImageDrawable(getNormalDrawable(mLevel));
                 break;
         }
-
         applyColorFilter();
-
     }
 }
