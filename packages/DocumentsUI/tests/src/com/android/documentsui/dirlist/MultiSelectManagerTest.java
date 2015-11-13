@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.documentsui.TestInputEvent;
-import com.android.documentsui.dirlist.MultiSelectManager;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
 import org.mockito.Mockito;
@@ -49,11 +48,13 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     private MultiSelectManager mManager;
     private TestAdapter mAdapter;
     private TestCallback mCallback;
+    private TestSelectionEnvironment mEnv;
 
     public void setUp() throws Exception {
         mAdapter = new TestAdapter(items);
         mCallback = new TestCallback();
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_MULTIPLE);
+        mEnv = new TestSelectionEnvironment();
+        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_MULTIPLE);
         mManager.addCallback(mCallback);
     }
 
@@ -171,7 +172,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode() {
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         tap(13);
@@ -179,11 +180,19 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode_ShiftTap() {
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(13);
         shiftTap(20);
         assertSelection(20);
+    }
+
+    public void testSingleSelectMode_ShiftDoesNotExtendSelection() {
+        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager.addCallback(mCallback);
+        longPress(20);
+        keyToPosition(22, true);
+        assertSelection(22);
     }
 
     public void testProvisionalSelection() {
@@ -233,6 +242,10 @@ public class MultiSelectManagerTest extends AndroidTestCase {
 
     private void shiftClick(int position) {
         mManager.onSingleTapUp(TestInputEvent.shiftClick(position));
+    }
+
+    private void keyToPosition(int position, boolean shift) {
+        mManager.attemptChangePosition(position, shift);
     }
 
     private void assertSelected(int... expected) {
@@ -290,11 +303,8 @@ public class MultiSelectManagerTest extends AndroidTestCase {
 
     private static final class TestHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public View view;
-        public String string;
         public TestHolder(View view) {
             super(view);
-            this.view = view;
         }
     }
 

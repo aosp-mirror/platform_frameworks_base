@@ -41,10 +41,9 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.android.documentsui.Events;
-import com.android.documentsui.R;
 import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
+import com.android.documentsui.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,9 +87,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @param mode Selection mode
      */
     public MultiSelectManager(final RecyclerView recyclerView, int mode) {
-        this(recyclerView.getAdapter(), mode);
-
-        mEnvironment = new RuntimeSelectionEnvironment(recyclerView);
+        this(recyclerView.getAdapter(), new RuntimeSelectionEnvironment(recyclerView), mode);
 
         if (mode == MODE_MULTIPLE) {
             mBandManager = new BandController();
@@ -137,15 +134,14 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
     /**
      * Constructs a new instance with {@code adapter} and {@code helper}.
+     * @param runtimeSelectionEnvironment
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(Adapter<?> adapter, int mode) {
-        checkNotNull(adapter, "'adapter' cannot be null.");
-
+    MultiSelectManager(Adapter<?> adapter, SelectionEnvironment environment, int mode) {
+        mAdapter = checkNotNull(adapter, "'adapter' cannot be null.");
+        mEnvironment = checkNotNull(environment, "'environment' cannot be null.");
         mSingleSelect = mode == MODE_SINGLE;
-
-        mAdapter = adapter;
 
         mAdapter.registerAdapterDataObserver(
                 new AdapterDataObserver() {
@@ -880,7 +876,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         void focusItem(int position);
     }
 
-    /** RvFacade implementation backed by good ol' RecyclerView. */
+    /** Recycler view facade implementation backed by good ol' RecyclerView. */
     private static final class RuntimeSelectionEnvironment implements SelectionEnvironment {
 
         private final RecyclerView mView;
@@ -1960,11 +1956,50 @@ public final class MultiSelectManager implements View.OnKeyListener {
             return false;
         }
 
-        int target = RecyclerView.NO_POSITION;
+        // Here we unpack information from the event and pass it to an more
+        // easily tested method....basically eliminating the need to synthesize
+        // events and views and so on in our tests.
+        int position = findTargetPosition(view, keyCode);
+        if (position == RecyclerView.NO_POSITION) {
+            // If there is no valid navigation target, don't handle the keypress.
+            return false;
+        }
+
+        return attemptChangePosition(position, event.isShiftPressed());
+    }
+
+    @VisibleForTesting
+    boolean attemptChangePosition(int targetPosition, boolean isShiftPressed) {
+        // Focus the new file.
+        mEnvironment.focusItem(targetPosition);
+
+        if (isShiftPressed) {
+            if (!hasSelection()) {
+                // If there is no selection, start a selection when the user presses shift-arrow.
+                toggleSelection(targetPosition);
+            } else if (!mSingleSelect) {
+                mRanger.snapSelection(targetPosition);
+                notifySelectionChanged();
+            } else {
+                // We're in single select and have an existing selection.
+                // Our best guess as to what the user would expect is to advance the selection.
+                clearSelection();
+                toggleSelection(targetPosition);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns the adapter position that the key combo is targeted at.
+     */
+    private int findTargetPosition(View view, int keyCode) {
+        int position = RecyclerView.NO_POSITION;
         if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
-            target = 0;
+            position = 0;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
-            target = mAdapter.getItemCount() - 1;
+            position = mAdapter.getItemCount() - 1;
         } else {
             // Find a navigation target based on the arrow key that the user pressed.  Ignore
             // navigation targets that aren't items in the recycler view.
@@ -1988,30 +2023,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 // TargetView can be null, for example, if the user pressed <down> at the bottom of
                 // the list.
                 if (targetView != null) {
-                    target = mEnvironment.getAdapterPositionForChildView(targetView);
+                    position = mEnvironment.getAdapterPositionForChildView(targetView);
                 }
             }
         }
-
-        if (target == RecyclerView.NO_POSITION) {
-            // If there is no valid navigation target, don't handle the keypress.
-            return false;
-        }
-
-        // Focus the new file.
-        mEnvironment.focusItem(target);
-
-        if (event.isShiftPressed()) {
-            if (!hasSelection()) {
-                // If there is no selection, start a selection when the user presses shift-arrow.
-                toggleSelection(mEnvironment.getAdapterPositionForChildView(view));
-            }
-
-            mRanger.snapSelection(target);
-            notifySelectionChanged();
-        }
-
-        return true;
+        return position;
     }
-
 }
