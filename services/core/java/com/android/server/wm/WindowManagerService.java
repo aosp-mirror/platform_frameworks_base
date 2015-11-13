@@ -2725,6 +2725,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             }
 
+            final int oldSurfaceResizeGeneration = winAnimator.mSurfaceResizeGeneration;
+
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags&WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
             configChanged = updateOrientationFromAppTokensLocked(false);
@@ -2736,6 +2738,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
+            }
+            if (winAnimator.mSurfaceResizeGeneration != oldSurfaceResizeGeneration) {
+                result |= WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED;
             }
             outFrame.set(win.mCompatFrame);
             outOverscanInsets.set(win.mOverscanInsets);

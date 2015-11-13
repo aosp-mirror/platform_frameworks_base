@@ -77,6 +77,11 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_DRAG_RESIZING = 0x8;
 
     /**
+     * The window manager has changed the size of the surface from the last call.
+     */
+    public static final int RELAYOUT_RES_SURFACE_RESIZED = 0x10;
+
+    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.

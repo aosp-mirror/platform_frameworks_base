@@ -1638,6 +1638,8 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean stableInsetsChanged = !mPendingStableInsets.equals(
                         mAttachInfo.mStableInsets);
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
+                final boolean surfaceSizeChanged = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
                 if (contentInsetsChanged) {
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
@@ -1723,10 +1725,20 @@ public final class ViewRootImpl implements ViewParent,
                             mAttachInfo.mHardwareRenderer.isEnabled()) {
                         mAttachInfo.mHardwareRenderer.destroy();
                     }
-                } else if (surfaceGenerationId != mSurface.getGenerationId() &&
-                        mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
+                } else if ((surfaceGenerationId != mSurface.getGenerationId()
+                        || surfaceSizeChanged)
+                        && mSurfaceHolder == null
+                        && mAttachInfo.mHardwareRenderer != null) {
                     mFullRedrawNeeded = true;
                     try {
+                        // Need to do updateSurface (which leads to CanvasContext::setSurface and
+                        // re-create the EGLSurface) if either the Surface changed (as indicated by
+                        // generation id), or WindowManager changed the surface size. The latter is
+                        // because on some chips, changing the consumer side's BufferQueue size may
+                        // not take effect immediately unless we create a new EGLSurface.
+                        // Note that frame size change doesn't always imply surface size change (eg.
+                        // drag resizing uses fullscreen surface), need to check surfaceSizeChanged
+                        // flag from WindowManager.
                         mAttachInfo.mHardwareRenderer.updateSurface(mSurface);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
