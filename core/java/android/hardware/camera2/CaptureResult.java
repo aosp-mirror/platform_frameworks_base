@@ -3292,6 +3292,69 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Long>("android.sensor.rollingShutterSkew", long.class);
 
     /**
+     * <p>A per-frame dynamic black level offset for each of the color filter
+     * arrangement (CFA) mosaic channels.</p>
+     * <p>Camera sensor black levels may vary dramatically for different
+     * capture settings (e.g. {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}). The fixed black
+     * level reported by {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} may be too
+     * inaccurate to represent the actual value on a per-frame basis. The
+     * camera device internal pipeline relies on reliable black level values
+     * to process the raw images appropriately. To get the best image
+     * quality, the camera device may choose to estimate the per frame black
+     * level values either based on optically shielded black regions
+     * ({@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions}) or its internal model.</p>
+     * <p>This key reports the camera device estimated per-frame zero light
+     * value for each of the CFA mosaic channels in the camera sensor. The
+     * {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} may only represent a coarse
+     * approximation of the actual black level values. This value is the
+     * black level used in camera device internal image processing pipeline
+     * and generally more accurate than the fixed black level values.
+     * However, since they are estimated values by the camera device, they
+     * may not be as accurate as the black level values calculated from the
+     * optical black pixels reported by {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions}.</p>
+     * <p>The values are given in the same order as channels listed for the CFA
+     * layout key (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}), i.e. the
+     * nth value given corresponds to the black level offset for the nth
+     * color channel listed in the CFA.</p>
+     * <p>This key will be available if {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} is
+     * available or the camera device advertises this key via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureRequestKeys }.</p>
+     * <p><b>Range of valid values:</b><br>
+     * &gt;= 0 for each.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_DYNAMIC_BLACK_LEVEL =
+            new Key<android.hardware.camera2.params.BlackLevelPattern>("android.sensor.dynamicBlackLevel", android.hardware.camera2.params.BlackLevelPattern.class);
+
+    /**
+     * <p>Maximum raw value output by sensor for this frame.</p>
+     * <p>Since the android.sensor.blackLevel may change for different
+     * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}), the white
+     * level will change accordingly. This key is similar to
+     * {@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}, but specifies the camera device
+     * estimated white level for each frame.</p>
+     * <p>This key will be available if {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} is
+     * available or the camera device advertises this key via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureRequestKeys }.</p>
+     * <p><b>Range of valid values:</b><br>
+     * &gt;= 0</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<Integer> SENSOR_DYNAMIC_WHITE_LEVEL =
+            new Key<Integer>("android.sensor.dynamicWhiteLevel", int.class);
+
+    /**
      * <p>Quality of lens shading correction applied
      * to the image data.</p>
      * <p>When set to OFF mode, no lens shading correction will be applied by the
