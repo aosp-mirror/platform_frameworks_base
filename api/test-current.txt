@@ -7976,6 +7976,7 @@ package android.content {
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
     field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
+    field public static final java.lang.String HARDWARE_PROPERTIES_SERVICE = "hardwareproperties";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String JOB_SCHEDULER_SERVICE = "jobscheduler";
@@ -27654,6 +27655,14 @@ package android.os {
     method public final synchronized android.os.CountDownTimer start();
   }
 
+  public final class CpuUsageInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getActive();
+    method public long getTotal();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.CpuUsageInfo> CREATOR;
+  }
+
   public class DeadObjectException extends android.os.RemoteException {
     ctor public DeadObjectException();
     ctor public DeadObjectException(java.lang.String);
@@ -27904,6 +27913,18 @@ package android.os {
     method protected void onLooperPrepared();
     method public boolean quit();
     method public boolean quitSafely();
+  }
+
+  public class HardwarePropertiesManager {
+    method public android.os.CpuUsageInfo[] getCpuUsages();
+    method public float[] getDeviceTemperatures(int);
+    method public float[] getFanSpeeds();
+    field public static final int DEVICE_TEMPERATURE_BATTERY = 2; // 0x2
+    field public static final int DEVICE_TEMPERATURE_CPU = 0; // 0x0
+    field public static final int DEVICE_TEMPERATURE_GPU = 1; // 0x1
+  }
+
+  public static abstract class HardwarePropertiesManager.DeviceTemperatureType implements java.lang.annotation.Annotation {
   }
 
   public abstract interface IBinder {

@@ -175,7 +175,8 @@ LOCAL_SRC_FILES:= \
     com_android_internal_net_NetworkStatsFactory.cpp \
     com_android_internal_os_Zygote.cpp \
     com_android_internal_util_VirtualRefBasePtr.cpp \
-    com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp
+    com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp \
+    android_os_HardwarePropertiesManager.cpp
 
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
