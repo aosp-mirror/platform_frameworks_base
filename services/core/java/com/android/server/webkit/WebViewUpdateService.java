@@ -54,6 +54,15 @@ public class WebViewUpdateService extends SystemService {
                 @Override
                 public void onReceive(Context context, Intent intent) {
 
+                    // When a package is replaced we will receive two intents, one representing the
+                    // removal of the old package and one representing the addition of the new
+                    // package. We here ignore the intent representing the removed package to make
+                    // sure we don't change WebView provider twice.
+                    if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)
+                            && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
+                        return;
+                    }
+
                     for (String packageName : WebViewFactory.getWebViewPackageNames()) {
                         String webviewPackage = "package:" + packageName;
 
@@ -73,7 +82,8 @@ public class WebViewUpdateService extends SystemService {
                 }
         };
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         getContext().registerReceiver(mWebViewUpdatedReceiver, filter);
 
