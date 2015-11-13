@@ -3340,6 +3340,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
+        if (task.stack != null && task.stack.mStackId == stackId) {
+            // You are already in the right stack silly...
+            Slog.i(TAG, "moveTaskToStack: taskId=" + taskId + " already in stackId=" + stackId);
+            return;
+        }
+
         final ActivityRecord topActivity = task.getTopActivity();
         if (StackId.preserveWindowOnTaskMove(stackId) && topActivity != null) {
             // We are about to relaunch the activity because its configuration changed due to
@@ -3356,15 +3362,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            resizeTaskLocked(task, stack.mBounds,
-                    RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
             resizeTaskLocked(task, task.mLastNonFullscreenBounds,
                     RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-            resizeTaskLocked(task, stack.mBounds,
-                    RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with
