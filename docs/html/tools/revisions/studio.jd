@@ -42,6 +42,59 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.5.0</a> <em>(November 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+    <li>Added new Memory Monitor analysis abilities to Android Monitor. When you view an HPROF file
+      captured from this monitor, the display is now more helpful so you can more quickly locate
+      problems, such as memory leaks. To use this monitor, click <strong>Android Monitor</strong> at
+      the bottom of the main window. In Android Monitor, click the <strong>Memory</strong> tab. While
+      the monitor is running, click the <strong>Dump Java Heap</strong> icon, and then click
+      <strong>Captures</strong> in the main window and double-click the file to view it. (The
+      Android Device Monitor can't be running at the same time as Android Monitor.)</li>
+    <li>Added new deep link and app link support. The Code Editor can automatically create an
+      intent filter for deep linking in the <code>AndroidManifest.xml</code> file. It can also
+      generate code to help you integrate with the
+      <a href="http://developers.google.com/app-indexing/android/publish" class="external-link">App Indexing API</a>
+      in an activity in a Java file. A deep link testing feature
+      helps you verify that a specified deep link can launch an app. In the <strong>General</strong>
+      tab of the <em>Run/Debug Configurations</em> dialog, you can specify deep link launch
+      options. You can also test App Indexing API calls in an activity by using the Android Monitor
+      <strong>logcat</strong> display. The Android <code>lint</code> tool now has warnings for
+      certain issues involving deep links and the App Indexing API.
+    </li>
+     <li>Added the ability to use short names when code-completing custom views in the Code Editor.
+    </li>
+    <li>Added support for more {@link android.graphics.drawable.VectorDrawable} elements to
+      <a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a>
+      for backward-compatibility. Vector Asset Studio can use these elements to convert vector
+      drawables into PNG raster images to use with Android 4.4 (API level 20) and lower.
+    </li>
+    <li>Added new <code>lint</code> checks for Android TV and Android Auto to give you
+      immediate, actionable feedback in Android Studio, along with several quick fixes. For example,
+      for Android TV, it can report and provide a quick fix for permissions, unsupported hardware,
+      <code>uses-feature</code> element, and missing banner issues. For Android Auto, it can
+      validate the correct usage in the descriptor file referred from your
+      <code>AndroidManifest.xml</code> file, report if there isn't an intent filter for the
+      <code>MediaBrowserService</code> class, and identify certain voice actions issues.
+      </li>
+    <li>Added new <code>lint</code> checks for insecure broadcast receivers,
+    <code>SSLCertificateSocketFactory</code> and <code>HostnameVerifier</code> class uses, and
+    <code>File.setReadable()</code> and <code>File.setWritable()</code> calls. It also detects
+    invalid manifest resource lookups, especially for resources that vary by configuration.
+    </li>
+    <li>Fixed a number of stability issues.
+    </li>
+  </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.4.1</a> <em>(October 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -72,7 +125,7 @@ Android Studio, as denoted by revision number. </p>
     <a href="http://b.android.com/187665">Issue: 187665</a>
     </li>
   </ul>
-  </div>
+</div>
 </div>
 
 
