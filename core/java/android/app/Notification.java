@@ -3135,7 +3135,7 @@ public class Notification implements Parcelable
         private void bindNotificationHeader(RemoteViews contentView) {
             bindSmallIcon(contentView);
             bindHeaderAppName(contentView);
-            bindHeaderSubText(contentView, mN.extras.getCharSequence(EXTRA_SUB_TEXT));
+            bindHeaderSubText(contentView);
             bindHeaderChronometerAndTime(contentView);
             bindExpandButton(contentView);
         }
@@ -3160,7 +3160,12 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindHeaderSubText(RemoteViews contentView, CharSequence subText) {
+        private void bindHeaderSubText(RemoteViews contentView) {
+            CharSequence subText = mN.extras.getCharSequence(EXTRA_SUB_TEXT);
+            if (subText == null && mStyle != null && mStyle.mSummaryTextSet
+                    && mStyle.hasSummaryInHeader()) {
+                subText = mStyle.mSummaryText;
+            }
             if (subText != null) {
                 // TODO: Remove the span entirely to only have the string with propper formating.
                 contentView.setTextViewText(R.id.header_sub_text, processLegacyText(subText));
@@ -3593,12 +3598,6 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.line1, View.VISIBLE);
             }
 
-            final CharSequence overflowText = mSummaryTextSet ? mSummaryText : null;
-            final CharSequence subText = mBuilder.mN.extras.getCharSequence(EXTRA_SUB_TEXT);
-            if (overflowText != null && !overflowText.equals(subText)) {
-                mBuilder.bindHeaderSubText(contentView, overflowText);
-            }
-
             // Clear text in case we use the line to show the profile badge.
             contentView.setTextViewText(com.android.internal.R.id.text, "");
             contentView.setViewVisibility(com.android.internal.R.id.line3, View.GONE);
@@ -3690,6 +3689,14 @@ public class Notification implements Parcelable
          *         style hides the progress bar
          */
         protected boolean hasProgress() {
+            return true;
+        }
+
+        /**
+         * @hide
+         * @return Whether we should put the summary be put into the notification header
+         */
+        public boolean hasSummaryInHeader() {
             return true;
         }
     }
@@ -3799,7 +3806,10 @@ public class Notification implements Parcelable
             }
 
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
-
+            if (mSummaryTextSet) {
+                contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(mSummaryText));
+                contentView.setViewVisibility(R.id.line3, View.VISIBLE);
+            }
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;
             }
@@ -3837,6 +3847,14 @@ public class Notification implements Parcelable
                 mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
             }
             mPicture = extras.getParcelable(EXTRA_PICTURE);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean hasSummaryInHeader() {
+            return false;
         }
     }
 
