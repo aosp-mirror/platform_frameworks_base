@@ -3021,18 +3021,19 @@ public class PackageManagerService extends IPackageManager.Stub {
      * purposefully done before acquiring {@link #mPackages} lock.
      */
     private int augmentFlagsForUser(int flags, int userId) {
-        if (SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false)) {
+        if (StorageManager.isFileBasedEncryptionEnabled()) {
             final IMountService mount = IMountService.Stub
-                    .asInterface(ServiceManager.getService(Context.STORAGE_SERVICE));
+                    .asInterface(ServiceManager.getService("mount"));
             if (mount == null) {
                 // We must be early in boot, so the best we can do is assume the
                 // user is fully running.
+                Slog.w(TAG, "Early during boot, assuming not encrypted");
                 return flags;
             }
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mount.isUserKeyUnlocked(userId)) {
-                    flags |= PackageManager.FLAG_USER_RUNNING_WITH_AMNESIA;
+                    flags |= PackageManager.MATCH_ENCRYPTION_AWARE_ONLY;
                 }
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -6302,22 +6303,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private int createDataDirsLI(String volumeUuid, String packageName, int uid, String seinfo) {
-        int[] users = sUserManager.getUserIds();
+    private void createDataDirsLI(String volumeUuid, String packageName, int uid, String seinfo)
+            throws PackageManagerException {
         int res = mInstaller.install(volumeUuid, packageName, uid, uid, seinfo);
-        if (res < 0) {
-            return res;
+        if (res != 0) {
+            throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                    "Failed to install " + packageName + ": " + res);
         }
+
+        final int[] users = sUserManager.getUserIds();
         for (int user : users) {
             if (user != 0) {
                 res = mInstaller.createUserData(volumeUuid, packageName,
                         UserHandle.getUid(user, uid), user, seinfo);
-                if (res < 0) {
-                    return res;
+                if (res != 0) {
+                    throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                            "Failed to createUserData " + packageName + ": " + res);
                 }
             }
         }
-        return res;
     }
 
     private int removeDataDirsLI(String volumeUuid, String packageName) {
@@ -6887,18 +6891,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     + pkg.applicationInfo.uid + "; old data erased";
                             reportSettingsProblem(Log.WARN, msg);
                             recovered = true;
-
-                            // And now re-install the app.
-                            ret = createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
-                                    pkg.applicationInfo.seinfo);
-                            if (ret == -1) {
-                                // Ack should not happen!
-                                msg = prefix + pkg.packageName
-                                        + " could not have data directory re-created after delete.";
-                                reportSettingsProblem(Log.WARN, msg);
-                                throw new PackageManagerException(
-                                        INSTALL_FAILED_INSUFFICIENT_STORAGE, msg);
-                            }
                         }
                         if (!recovered) {
                             mHasSystemUidErrors = true;
@@ -6931,6 +6923,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
 
+                // Ensure that directories are prepared
+                createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
+                        pkg.applicationInfo.seinfo);
+
                 if (mShouldRestoreconData) {
                     Slog.i(TAG, "SELinux relabeling of " + pkg.packageName + " issued.");
                     mInstaller.restoreconData(pkg.volumeUuid, pkg.packageName,
@@ -6941,14 +6937,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
                         Log.v(TAG, "Want this data dir: " + dataPath);
                 }
-                //invoke installer to do the actual installation
-                int ret = createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
+                createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
                         pkg.applicationInfo.seinfo);
-                if (ret < 0) {
-                    // Error from installer
-                    throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                            "Unable to create data dirs [errorCode=" + ret + "]");
-                }
             }
 
             // Get all of our default paths setup

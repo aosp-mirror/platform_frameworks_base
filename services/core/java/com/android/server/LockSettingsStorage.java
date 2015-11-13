@@ -389,7 +389,7 @@ class LockSettingsStorage {
 
     private int getUserParentOrSelfId(int userId) {
         // Device supports per user encryption, so lock is applied to the given user.
-        if (mContext.getSystemService(StorageManager.class).isPerUserEncryptionEnabled()) {
+        if (StorageManager.isFileBasedEncryptionEnabled()) {
             return userId;
         }
         // Device uses Block Based Encryption, and the parent user's lock is used for the whole

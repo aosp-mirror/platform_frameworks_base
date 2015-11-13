@@ -65,6 +65,7 @@ import android.util.ArrayMap;
 import android.view.IWindowManager;
 
 import com.android.internal.os.BaseCommand;
+import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
@@ -152,6 +153,7 @@ public class Am extends BaseCommand {
                 "       am to-app-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
+                "       am unlock-user <USER_ID> [TOKEN_HEX]\n" +
                 "       am stop-user [-w] <USER_ID>\n" +
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
@@ -411,6 +413,8 @@ public class Am extends BaseCommand {
             runSwitchUser();
         } else if (op.equals("start-user")) {
             runStartUserInBackground();
+        } else if (op.equals("unlock-user")) {
+            runUnlockUser();
         } else if (op.equals("stop-user")) {
             runStopUser();
         } else if (op.equals("stack")) {
@@ -1083,6 +1087,21 @@ public class Am extends BaseCommand {
             System.out.println("Success: user started");
         } else {
             System.err.println("Error: could not start user");
+        }
+    }
+
+    private void runUnlockUser() throws Exception {
+        int userId = Integer.parseInt(nextArgRequired());
+        String tokenHex = nextArg();
+        byte[] token = null;
+        if (tokenHex != null) {
+            token = HexDump.hexStringToByteArray(tokenHex);
+        }
+        boolean success = mAm.unlockUser(userId, token);
+        if (success) {
+            System.out.println("Success: user unlocked");
+        } else {
+            System.err.println("Error: could not unlock user");
         }
     }
 

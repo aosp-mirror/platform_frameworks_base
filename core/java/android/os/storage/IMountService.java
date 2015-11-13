@@ -1301,23 +1301,6 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public boolean isPerUserEncryptionEnabled() throws RemoteException {
-                Parcel _data = Parcel.obtain();
-                Parcel _reply = Parcel.obtain();
-                boolean _result;
-                try {
-                    _data.writeInterfaceToken(DESCRIPTOR);
-                    mRemote.transact(Stub.TRANSACTION_isPerUserEncryptionEnabled, _data, _reply, 0);
-                    _reply.readException();
-                    _result = 0 != _reply.readInt();
-                } finally {
-                    _reply.recycle();
-                    _data.recycle();
-                }
-                return _result;
-            }
-
-            @Override
             public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -1459,7 +1442,6 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_prepareUserStorage = IBinder.FIRST_CALL_TRANSACTION + 66;
 
-        static final int TRANSACTION_isPerUserEncryptionEnabled = IBinder.FIRST_CALL_TRANSACTION + 67;
         static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 68;
 
         static final int TRANSACTION_mountAppFuse = IBinder.FIRST_CALL_TRANSACTION + 69;
@@ -2074,13 +2056,6 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
-                case TRANSACTION_isPerUserEncryptionEnabled: {
-                    data.enforceInterface(DESCRIPTOR);
-                    boolean result = isPerUserEncryptionEnabled();
-                    reply.writeNoException();
-                    reply.writeInt(result ? 1 : 0);
-                    return true;
-                }
                 case TRANSACTION_mountAppFuse: {
                     data.enforceInterface(DESCRIPTOR);
                     String name = data.readString();
@@ -2410,8 +2385,6 @@ public interface IMountService extends IInterface {
 
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber)
             throws RemoteException;
-
-    public boolean isPerUserEncryptionEnabled() throws RemoteException;
 
     public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException;
 }

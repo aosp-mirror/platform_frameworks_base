@@ -3852,7 +3852,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceCrossUserPermission(userHandle);
         // Managed Profile password can only be changed when per user encryption is present.
-        if (!mContext.getSystemService(StorageManager.class).isPerUserEncryptionEnabled()) {
+        if (!StorageManager.isFileBasedEncryptionEnabled()) {
             enforceNotManagedProfile(userHandle, "set the active password");
         }
 

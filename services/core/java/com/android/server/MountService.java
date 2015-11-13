@@ -1904,16 +1904,18 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
-        synchronized (mLock) {
-            if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
-                mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
-            }
-            if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
-                // TODO: persist through vold and reboot
-            }
+        if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
+            final boolean emulateFbe = (flags & StorageManager.DEBUG_EMULATE_FBE) != 0;
+            SystemProperties.set(StorageManager.PROP_EMULATE_FBE, Boolean.toString(emulateFbe));
+        }
 
-            writeSettingsLocked();
-            mHandler.obtainMessage(H_RESET).sendToTarget();
+        if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
+            synchronized (mLock) {
+                mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
+
+                writeSettingsLocked();
+                mHandler.obtainMessage(H_RESET).sendToTarget();
+            }
         }
     }
 
@@ -2738,7 +2740,7 @@ class MountService extends IMountService.Stub
 
     @Override
     public boolean isUserKeyUnlocked(int userId) {
-        if (SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false)) {
+        if (StorageManager.isFileBasedEncryptionEnabled()) {
             synchronized (mLock) {
                 return ArrayUtils.contains(mUnlockedUsers, userId);
             }
@@ -2758,14 +2760,6 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
-    }
-
-    @Override
-    public boolean isPerUserEncryptionEnabled() {
-        // TODO: switch this over to a single property; currently using two to
-        // handle the emulated case
-        return "file".equals(SystemProperties.get("ro.crypto.type", "none"))
-                || SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false);
     }
 
     @Override

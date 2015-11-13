@@ -240,16 +240,15 @@ public abstract class PackageManager {
     public static final int GET_ENCRYPTION_UNAWARE_COMPONENTS = 0x00040000;
 
     /**
-     * {@link PackageInfo} flag: return components as if the given user is
-     * running with amnesia. This typically limits the component to only those
-     * marked as {@link ComponentInfo#encryptionAware}, unless
+     * {@link PackageInfo} flag: return components that are marked as
+     * {@link ComponentInfo#encryptionAware}, unless
      * {@link #GET_ENCRYPTION_UNAWARE_COMPONENTS} is also specified.
      * <p>
      * This flag is for internal use only.
      *
      * @hide
      */
-    public static final int FLAG_USER_RUNNING_WITH_AMNESIA = 0x00080000;
+    public static final int MATCH_ENCRYPTION_AWARE_ONLY = 0x00080000;
 
     /**
      * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
