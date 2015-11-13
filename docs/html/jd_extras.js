@@ -17,6 +17,72 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
  /* TODO Remove standard resources from here, such as below
  */
   {
+    "title":"Measure your app’s user acquisition channels",
+    "titleFriendly":"",
+    "summary":"Get details on how to use the Developer Console User Acquisitions reports to discover where your users come from.",
+    "url":"https://support.google.com/googleplay/android-developer/answer/6263332",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Set up native app install banners in Chrome",
+    "titleFriendly":"",
+    "summary":"Get the details you need to add your native app or game to your site’s web app manifest file.",
+    "url":"https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android#native",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Optimize your store listing pages with experiments",
+    "titleFriendly":"",
+    "summary":"You can run experiments to find the most effective graphics and localized text for your app.",
+    "url":"https://support.google.com/googleplay/android-developer/answer/6227309",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Content Experiments for Mobile Apps",
+    "titleFriendly":"",
+    "summary":"Google Analytics Content Experiments allows you to test multiple variations of a given web page.",
+    "url":"https://support.google.com/tagmanager/answer/6003007",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"Store Listing Experiments for Google Play",
+    "titleFriendly":"",
+    "summary":"Learn how to use Google Play’s new store listing optimization feature to get more installs of your app.",
+    "url":"https://www.youtube.com/watch?v=B6ydLpkhq04",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Use alpha/beta testing & staged rollouts",
+    "titleFriendly":"",
+    "summary":"Using the Google Play Developer Console, you can choose groups of users to test different versions of your app.",
+    "url":"https://support.google.com/googleplay/android-developer/answer/3131213",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
     "title":"Quizlet Developer Story",
     "titleFriendly":"",
     "summary":"Quizlet is an extremely popular online learning tool for students. See how they optimized for the classroom with Android and the power of Google Play for Education.",
@@ -553,15 +619,47 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "title":"Google Play Game Services",
     "titleFriendly":"",
-    "summary":"Tools to offer a better game experience.",
-    "url":"google/play-services/games.html",
+    "summary":"Make your games social with Google Play game services. Add achievements, leaderboards, real-time multiplayer, and other popular features using the Google Play game services SDK.",
+    "url":"https://developers.google.com/games/services/",
     "group":"",
     "keywords": ["games","play games"],
     "tags": [],
     "image":"images/google/gps-play_games_logo.png",
     "type":"google"
   },
-
+  {
+    "title":"Get Started with Analytics",
+    "titleFriendly":"",
+    "summary":"Get advanced insight into how players discover and play your games.",
+    "url":"distribute/analyze/start.html",
+    "group":"",
+    "keywords": ["analytics"],
+    "tags": [],
+    "image": "images/cards/analytics-mobile_2x.jpg",
+    "type": "distribute"
+  },
+  {
+    "title":"Build VR with Google Cardboard",
+    "titleFriendly":"",
+    "summary":"Turn any phone into a virtual reality headset with a Cardboard viewer and experiment with adding virtual reality to your games with the Cardboard SDK.",
+    "url":"distribute/googleplay/cardboard.html",
+    "group":"",
+    "keywords": ["cardboard"],
+    "tags": [],
+    "image":"images/cards/card-cardboard_2x.png",
+    "type": "distribute"
+  },
+  {
+    "title":"Monetize your apps intelligently",
+    "titleFriendly":"",
+    "summary":"Generate revenue from your free games with ads tailored to match your game's look and feel.",
+    "url":"http://www.google.com/admob/",
+    "group":"",
+    "keywords": ["AdMob"],
+    "tags": [],
+    "image":"images/cards/admob-analytics_2x.png",
+    "type": "distribute"
+  },
   {
     "lang": "en",
     "group": "",
@@ -577,7 +675,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "blog",
     "titleFriendly": ""
   },
-
   {
     "lang": "en",
     "group": "",

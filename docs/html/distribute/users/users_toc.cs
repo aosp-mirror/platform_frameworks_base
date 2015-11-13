@@ -47,6 +47,26 @@
         </a>
     </div>
   </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/experiments.html">
+          <span class="en">Increase installs with Store Listing Experiments</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/banners.html">
+          <span class="en">Add an App Install Banner On Your Mobile Website</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/user-acquisition.html">
+          <span class="en">Understand Where Your Users Come From</span>
+        </a>
+    </div>
+  </li>
+
 </ul>
 
 
