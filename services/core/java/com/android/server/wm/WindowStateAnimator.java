@@ -99,6 +99,7 @@ class WindowStateAnimator {
      * we must tell them application to resize (and thus redraw itself).
      */
     boolean mSurfaceResized;
+    int mSurfaceResizeGeneration;
     WindowSurfaceController mSurfaceController;
     private WindowSurfaceController mPendingDestroySurface;
 
@@ -1183,6 +1184,7 @@ class WindowStateAnimator {
                 recoveringMemory);
 
         if (mSurfaceResized) {
+            mSurfaceResizeGeneration++;
             mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
             w.applyDimLayerIfNeeded();
