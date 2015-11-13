@@ -21,6 +21,7 @@
 #include <SkRect.h>
 #include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
+#include <set>
 
 namespace android {
 namespace uirenderer {
@@ -37,6 +38,8 @@ public:
 
     bool hasEglContext();
 
+    bool hasEglExtension(const char* extension) const;
+
     EGLSurface createSurface(EGLNativeWindowType window);
     void destroySurface(EGLSurface surface);
 
@@ -45,11 +48,13 @@ public:
     bool isCurrent(EGLSurface surface) { return mCurrentSurface == surface; }
     // Returns true if the current surface changed, false if it was already current
     bool makeCurrent(EGLSurface surface, EGLint* errOut = nullptr);
-    void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
+    void beginFrame(EGLSurface surface, EGLint* width, EGLint* height, EGLint* framebufferAge);
     bool swapBuffers(EGLSurface surface, const SkRect& dirty, EGLint width, EGLint height);
 
     // Returns true iff the surface is now preserving buffers.
     bool setPreserveBuffer(EGLSurface surface, bool preserve);
+
+    bool useBufferAgeExt();
 
     void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
 
@@ -63,9 +68,11 @@ private:
     ~EglManager();
 
     void createPBufferSurface();
-    void loadConfig();
+    void loadConfig(bool useBufferAgeExt);
     void createContext();
     void initAtlas();
+
+    void findExtensions(const char* extensions, std::set<std::string>& list) const;
 
     RenderThread& mRenderThread;
 
@@ -77,11 +84,15 @@ private:
     const bool mAllowPreserveBuffer;
     bool mCanSetPreserveBuffer;
 
+    bool mHasBufferAgeExt;
+
     EGLSurface mCurrentSurface;
 
     sp<GraphicBuffer> mAtlasBuffer;
     int64_t* mAtlasMap;
     size_t mAtlasMapSize;
+
+    std::set<std::string> mEglExtensionList;
 };
 
 } /* namespace renderthread */

@@ -98,6 +98,9 @@ void CanvasContext::swapBuffers(const SkRect& dirty, EGLint width, EGLint height
         setSurface(nullptr);
     }
     mHaveNewSurface = false;
+    if (mEglManager.useBufferAgeExt()) {
+        mDirtyHistory.prepend(Rect(dirty));
+    }
 }
 
 void CanvasContext::requireSurface() {
@@ -227,6 +230,8 @@ void CanvasContext::draw() {
             "drawRenderNode called on a context with no canvas or surface!");
 
     SkRect dirty;
+    bool useBufferAgeExt = mEglManager.useBufferAgeExt();
+    Rect patchedDirty;
     mDamageAccumulator.finish(&dirty);
 
     // TODO: Re-enable after figuring out cause of b/22592975
@@ -237,12 +242,18 @@ void CanvasContext::draw() {
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
-    EGLint width, height;
-    mEglManager.beginFrame(mEglSurface, &width, &height);
+    EGLint width, height, framebufferAge;
+    mEglManager.beginFrame(mEglSurface, &width, &height, &framebufferAge);
+
+    if (useBufferAgeExt && mHaveNewSurface) {
+        mDirtyHistory.clear();
+    }
+
     if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
         mCanvas->setViewport(width, height);
         dirty.setEmpty();
     } else if (!mBufferPreserved || mHaveNewSurface) {
+        mDirtyHistory.clear();
         dirty.setEmpty();
     } else {
         if (!dirty.isEmpty() && !dirty.intersect(0, 0, width, height)) {
@@ -253,9 +264,14 @@ void CanvasContext::draw() {
         profiler().unionDirty(&dirty);
     }
 
-    if (!dirty.isEmpty()) {
-        mCanvas->prepareDirty(dirty.fLeft, dirty.fTop,
-                dirty.fRight, dirty.fBottom, mOpaque);
+    patchedDirty = dirty;
+    if (useBufferAgeExt && !dirty.isEmpty()) {
+        patchedDirty = mDirtyHistory.unionWith(Rect(dirty), framebufferAge-1);
+    }
+
+    if (!patchedDirty.isEmpty()) {
+        mCanvas->prepareDirty(patchedDirty.left, patchedDirty.top,
+                patchedDirty.right, patchedDirty.bottom, mOpaque);
     } else {
         mCanvas->prepare(mOpaque);
     }
