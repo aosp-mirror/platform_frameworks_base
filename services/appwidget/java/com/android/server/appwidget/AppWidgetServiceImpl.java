@@ -79,10 +79,11 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
-
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
+
 import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -1954,8 +1955,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (period < MIN_UPDATE_PERIOD) {
                     period = MIN_UPDATE_PERIOD;
                 }
-                mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() + period, period, provider.broadcast);
+                final long oldId = Binder.clearCallingIdentity();
+                try {
+                    mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + period, period, provider.broadcast);
+                } finally {
+                    Binder.restoreCallingIdentity(oldId);
+                }
             }
         }
     }
