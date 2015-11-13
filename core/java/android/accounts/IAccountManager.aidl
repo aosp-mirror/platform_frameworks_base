@@ -88,4 +88,7 @@ interface IAccountManager {
         String authTokenType, in String[] requiredFeatures, boolean expectActivityLaunch,
         in Bundle options);
 
+    /* Update credentials in two steps. */
+    void startUpdateCredentialsSession(in IAccountManagerResponse response, in Account account,
+        String authTokenType, boolean expectActivityLaunch, in Bundle options);
 }
