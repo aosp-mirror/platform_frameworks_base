@@ -1662,7 +1662,16 @@ public class DevicePolicyManager {
      * Force a new device unlock password (the password needed to access the
      * entire device, not for individual accounts) on the user.  This takes
      * effect immediately.
-     * The given password must be sufficient for the
+     *
+     * <p>Calling this from a managed profile that shares the password with the owner profile
+     * will throw a security exception.
+     *
+     * <p><em>Note: This API has been limited as of {@link android.os.Build.VERSION_CODES#N} for
+     * device admins that are not device owner and not profile owner.
+     * The password can now only be changed if there is currently no password set.  Device owner
+     * and profile owner can still do this.</em>
+     *
+     * <p>The given password must be sufficient for the
      * current password quality and length constraints as returned by
      * {@link #getPasswordQuality(ComponentName)} and
      * {@link #getPasswordMinimumLength(ComponentName)}; if it does not meet
@@ -1672,19 +1681,20 @@ public class DevicePolicyManager {
      * the currently active quality will be increased to match.
      *
      * <p>Calling with a null or empty password will clear any existing PIN,
-     * pattern or password if the current password constraints allow it.
+     * pattern or password if the current password constraints allow it. <em>Note: This will not
+     * work in {@link android.os.Build.VERSION_CODES#N} and later for device admins that are not
+     * device owner and not profile owner.  Once set, the password cannot be changed to null or
+     * empty, except by device owner or profile owner.</em>
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
-     * <p>Calling this from a managed profile will throw a security exception.
-     *
      * @param password The new password for the user. Null or empty clears the password.
      * @param flags May be 0 or combination of {@link #RESET_PASSWORD_REQUIRE_ENTRY} and
      *              {@link #RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
      * @return Returns true if the password was applied, or false if it is
-     * not acceptable for the current constraints.
+     * not acceptable for the current constraints or if the user has not been decrypted yet.
      */
     public boolean resetPassword(String password, int flags) {
         if (mService != null) {
@@ -1792,7 +1802,7 @@ public class DevicePolicyManager {
     public void wipeData(int flags) {
         if (mService != null) {
             try {
-                mService.wipeData(flags, myUserId());
+                mService.wipeData(flags);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2668,14 +2678,14 @@ public class DevicePolicyManager {
      * does *not* check weather the device owner is actually running on the current user.
      */
     public boolean isDeviceOwnerApp(String packageName) {
-        if (mService != null) {
-            try {
-                return mService.isDeviceOwnerPackage(packageName);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
+        if (packageName == null) {
+            return false;
         }
-        return false;
+        final ComponentName deviceOwner = getDeviceOwnerComponent();
+        if (deviceOwner == null) {
+            return false;
+        }
+        return packageName.equals(deviceOwner.getPackageName());
     }
 
     /**

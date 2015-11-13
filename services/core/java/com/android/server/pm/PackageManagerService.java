@@ -12770,8 +12770,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
             if (dpm != null) {
+                final ComponentName deviceOwnerComponentName = dpm.getDeviceOwner();
+                final String deviceOwnerPackageName = deviceOwnerComponentName == null ? null
+                        : deviceOwnerComponentName.getPackageName();
                 // Does the package contains the device owner?
-                if (dpm.isDeviceOwnerPackage(packageName)) {
+                // TODO Do we have to do it even if userId != UserHandle.USER_ALL?  Otherwise,
+                // this check is probably not needed, since DO should be registered as a device
+                // admin on some user too. (Original bug for this: b/17657954)
+                if (packageName.equals(deviceOwnerPackageName)) {
                     return true;
                 }
                 // Does it contain a device admin for any user?
