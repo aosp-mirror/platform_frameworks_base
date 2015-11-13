@@ -48,6 +48,7 @@ struct LinkOptions {
     std::string outputPath;
     std::string manifestPath;
     std::vector<std::string> includePaths;
+    std::vector<std::string> overlayFiles;
     Maybe<std::string> generateJavaClassPath;
     std::vector<std::string> extraJavaPackages;
     Maybe<std::string> generateProguardRulesPath;
@@ -88,9 +89,11 @@ struct LinkContext : public IAaptContext {
     }
 };
 
-struct LinkCommand {
-    LinkOptions mOptions;
-    LinkContext mContext;
+class LinkCommand {
+public:
+    LinkCommand(const LinkOptions& options) :
+            mOptions(options), mContext(), mFinalTable() {
+    }
 
     std::string buildResourceFileName(const ResourceFile& resFile) {
         std::stringstream out;
@@ -117,8 +120,7 @@ struct LinkCommand {
         AssetManagerSymbolTableBuilder builder;
         for (const std::string& path : mOptions.includePaths) {
             if (mOptions.verbose) {
-                mContext.getDiagnostics()->note(
-                        DiagMessage(Source{ path }) << "loading include path");
+                mContext.getDiagnostics()->note(DiagMessage(path) << "loading include path");
             }
 
             std::unique_ptr<android::AssetManager> assetManager =
@@ -126,7 +128,7 @@ struct LinkCommand {
             int32_t cookie = 0;
             if (!assetManager->addAssetPath(android::String8(path.data(), path.size()), &cookie)) {
                 mContext.getDiagnostics()->error(
-                        DiagMessage(Source{ path }) << "failed to load include path");
+                        DiagMessage(path) << "failed to load include path");
                 return {};
             }
             builder.add(std::move(assetManager));
@@ -141,12 +143,12 @@ struct LinkCommand {
         std::string errorStr;
         Maybe<android::FileMap> map = file::mmapPath(input, &errorStr);
         if (!map) {
-            mContext.getDiagnostics()->error(DiagMessage(Source{ input }) << errorStr);
+            mContext.getDiagnostics()->error(DiagMessage(input) << errorStr);
             return {};
         }
 
         std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-        BinaryResourceParser parser(&mContext, table.get(), Source{ input },
+        BinaryResourceParser parser(&mContext, table.get(), Source(input),
                                     map.value().getDataPtr(), map.value().getDataLength());
         if (!parser.parse()) {
             return {};
@@ -160,11 +162,11 @@ struct LinkCommand {
     std::unique_ptr<XmlResource> loadXml(const std::string& path) {
         std::ifstream fin(path, std::ifstream::binary);
         if (!fin) {
-            mContext.getDiagnostics()->error(DiagMessage(Source{ path }) << strerror(errno));
+            mContext.getDiagnostics()->error(DiagMessage(path) << strerror(errno));
             return {};
         }
 
-        return xml::inflate(&fin, mContext.getDiagnostics(), Source{ path });
+        return xml::inflate(&fin, mContext.getDiagnostics(), Source(path));
     }
 
     /**
@@ -255,9 +257,9 @@ struct LinkCommand {
         return {};
     }
 
-    bool verifyNoExternalPackages(ResourceTable* table) {
+    bool verifyNoExternalPackages() {
         bool error = false;
-        for (const auto& package : table->packages) {
+        for (const auto& package : mFinalTable.packages) {
             if (mContext.getCompilationPackage() != package->name ||
                     !package->id || package->id.value() != mContext.getPackageId()) {
                 // We have a package that is not related to the one we're building!
@@ -401,6 +403,103 @@ struct LinkCommand {
         return true;
     }
 
+    bool mergeStaticLibrary(const std::string& input) {
+        // TODO(adamlesinski): Load resources from a static library APK and merge the table into
+        // TableMerger.
+        mContext.getDiagnostics()->warn(DiagMessage()
+                                        << "linking static libraries not supported yet: "
+                                        << input);
+        return true;
+    }
+
+    bool mergeResourceTable(const std::string& input, bool override) {
+        if (mOptions.verbose) {
+            mContext.getDiagnostics()->note(DiagMessage() << "linking " << input);
+        }
+
+        std::unique_ptr<ResourceTable> table = loadTable(input);
+        if (!table) {
+            return false;
+        }
+
+        if (!mTableMerger->merge(Source(input), table.get(), override)) {
+            return false;
+        }
+        return true;
+    }
+
+    bool mergeCompiledFile(const std::string& input, ResourceFile&& file, bool override) {
+        if (file.name.package.empty()) {
+            file.name.package = mContext.getCompilationPackage().toString();
+        }
+
+        ResourceNameRef resName = file.name;
+
+        Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(file.name);
+        if (mangledName) {
+            resName = mangledName.value();
+        }
+
+        std::function<int(Value*,Value*)> resolver;
+        if (override) {
+            resolver = [](Value* a, Value* b) -> int {
+                int result = ResourceTable::resolveValueCollision(a, b);
+                if (result == 0) {
+                    // Always accept the new value if it would normally conflict (override).
+                    result = 1;
+                }
+                return result;
+            };
+        } else {
+            // Otherwise use the default resolution.
+            resolver = ResourceTable::resolveValueCollision;
+        }
+
+        // Add this file to the table.
+        if (!mFinalTable.addFileReference(resName, file.config, file.source,
+                                          util::utf8ToUtf16(buildResourceFileName(file)),
+                                          resolver, mContext.getDiagnostics())) {
+            return false;
+        }
+
+        // Add the exports of this file to the table.
+        for (SourcedResourceName& exportedSymbol : file.exportedSymbols) {
+            if (exportedSymbol.name.package.empty()) {
+                exportedSymbol.name.package = mContext.getCompilationPackage().toString();
+            }
+
+            ResourceNameRef resName = exportedSymbol.name;
+
+            Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(
+                    exportedSymbol.name);
+            if (mangledName) {
+                resName = mangledName.value();
+            }
+
+            std::unique_ptr<Id> id = util::make_unique<Id>();
+            id->setSource(file.source.withLine(exportedSymbol.line));
+            bool result = mFinalTable.addResourceAllowMangled(resName, {}, std::move(id),
+                    mContext.getDiagnostics());
+            if (!result) {
+                return false;
+            }
+        }
+
+        mFilesToProcess[resName.toResourceName()] = FileToProcess{ Source(input), std::move(file) };
+        return true;
+    }
+
+    bool processFile(const std::string& input, bool override) {
+        if (util::stringEndsWith<char>(input, ".apk")) {
+            return mergeStaticLibrary(input);
+        } else if (util::stringEndsWith<char>(input, ".arsc.flat")) {
+            return mergeResourceTable(input, override);
+        } else if (Maybe<ResourceFile> maybeF = loadFileExportHeader(input)) {
+            return mergeCompiledFile(input, std::move(maybeF.value()), override);
+        }
+        return false;
+    }
+
     int run(const std::vector<std::string>& inputFiles) {
         // Load the AndroidManifest.xml
         std::unique_ptr<XmlResource> manifestXml = loadXml(mOptions.manifestPath);
@@ -438,82 +537,25 @@ struct LinkCommand {
             return 1;
         }
 
+        mTableMerger = util::make_unique<TableMerger>(&mContext, &mFinalTable);
+
         if (mOptions.verbose) {
             mContext.getDiagnostics()->note(
                     DiagMessage() << "linking package '" << mContext.mCompilationPackage << "' "
                                   << "with package ID " << std::hex << (int) mContext.mPackageId);
         }
 
-        ResourceTable mergedTable;
-        TableMerger tableMerger(&mContext, &mergedTable);
-
-        struct FilesToProcess {
-            Source source;
-            ResourceFile file;
-        };
-
         bool error = false;
-        std::queue<FilesToProcess> filesToProcess;
+
         for (const std::string& input : inputFiles) {
-            if (util::stringEndsWith<char>(input, ".apk")) {
-                // TODO(adamlesinski): Load resources from a static library APK
-                //                     Merge the table into TableMerger.
+            if (!processFile(input, false)) {
+                error = true;
+            }
+        }
 
-            } else if (util::stringEndsWith<char>(input, ".arsc.flat")) {
-                if (mOptions.verbose) {
-                    mContext.getDiagnostics()->note(DiagMessage() << "linking " << input);
-                }
-
-                std::unique_ptr<ResourceTable> table = loadTable(input);
-                if (!table) {
-                    return 1;
-                }
-
-                if (!tableMerger.merge(Source(input), table.get())) {
-                    return 1;
-                }
-
-            } else {
-                // Extract the exported IDs here so we can build the resource table.
-                if (Maybe<ResourceFile> maybeF = loadFileExportHeader(input)) {
-                    ResourceFile& f = maybeF.value();
-
-                    if (f.name.package.empty()) {
-                        f.name.package = mContext.getCompilationPackage().toString();
-                    }
-
-                    Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(f.name);
-
-                    // Add this file to the table.
-                    if (!mergedTable.addFileReference(mangledName ? mangledName.value() : f.name,
-                                                      f.config, f.source,
-                                                      util::utf8ToUtf16(buildResourceFileName(f)),
-                                                      mContext.getDiagnostics())) {
-                        error = true;
-                    }
-
-                    // Add the exports of this file to the table.
-                    for (SourcedResourceName& exportedSymbol : f.exportedSymbols) {
-                        if (exportedSymbol.name.package.empty()) {
-                            exportedSymbol.name.package = mContext.getCompilationPackage()
-                                    .toString();
-                        }
-
-                        Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(
-                                exportedSymbol.name);
-                        std::unique_ptr<Id> id = util::make_unique<Id>();
-                        id->setSource(f.source.withLine(exportedSymbol.line));
-                        if (!mergedTable.addResourceAllowMangled(
-                                mangledName ? mangledName.value() : exportedSymbol.name,
-                                {}, std::move(id), mContext.getDiagnostics())) {
-                            error = true;
-                        }
-                    }
-
-                    filesToProcess.push(FilesToProcess{ Source(input), std::move(f) });
-                } else {
-                    return 1;
-                }
+        for (const std::string& input : mOptions.overlayFiles) {
+            if (!processFile(input, true)) {
+                error = true;
             }
         }
 
@@ -522,13 +564,13 @@ struct LinkCommand {
             return 1;
         }
 
-        if (!verifyNoExternalPackages(&mergedTable)) {
+        if (!verifyNoExternalPackages()) {
             return 1;
         }
 
         if (!mOptions.staticLib) {
             PrivateAttributeMover mover;
-            if (!mover.consume(&mContext, &mergedTable)) {
+            if (!mover.consume(&mContext, &mFinalTable)) {
                 mContext.getDiagnostics()->error(
                         DiagMessage() << "failed moving private attributes");
                 return 1;
@@ -537,22 +579,22 @@ struct LinkCommand {
 
         {
             IdAssigner idAssigner;
-            if (!idAssigner.consume(&mContext, &mergedTable)) {
+            if (!idAssigner.consume(&mContext, &mFinalTable)) {
                 mContext.getDiagnostics()->error(DiagMessage() << "failed assigning IDs");
                 return 1;
             }
         }
 
-        mContext.mNameMangler = util::make_unique<NameMangler>(
-                NameManglerPolicy{ mContext.mCompilationPackage, tableMerger.getMergedPackages() });
+        mContext.mNameMangler = util::make_unique<NameMangler>(NameManglerPolicy{
+                mContext.mCompilationPackage, mTableMerger->getMergedPackages() });
         mContext.mSymbols = JoinedSymbolTableBuilder()
-                .addSymbolTable(util::make_unique<SymbolTableWrapper>(&mergedTable))
+                .addSymbolTable(util::make_unique<SymbolTableWrapper>(&mFinalTable))
                 .addSymbolTable(std::move(mContext.mSymbols))
                 .build();
 
         {
             ReferenceLinker linker;
-            if (!linker.consume(&mContext, &mergedTable)) {
+            if (!linker.consume(&mContext, &mFinalTable)) {
                 mContext.getDiagnostics()->error(DiagMessage() << "failed linking references");
                 return 1;
             }
@@ -598,20 +640,20 @@ struct LinkCommand {
             }
         }
 
-        for (; !filesToProcess.empty(); filesToProcess.pop()) {
-            FilesToProcess& f = filesToProcess.front();
-            if (f.file.name.type != ResourceType::kRaw &&
-                    util::stringEndsWith<char>(f.source.path, ".xml.flat")) {
+        for (auto& pair : mFilesToProcess) {
+            FileToProcess& file = pair.second;
+            if (file.file.name.type != ResourceType::kRaw &&
+                    util::stringEndsWith<char>(file.source.path, ".xml.flat")) {
                 if (mOptions.verbose) {
-                    mContext.getDiagnostics()->note(DiagMessage() << "linking " << f.source.path);
+                    mContext.getDiagnostics()->note(DiagMessage() << "linking " << file.source.path);
                 }
 
-                std::unique_ptr<XmlResource> xmlRes = loadBinaryXmlSkipFileExport(f.source.path);
+                std::unique_ptr<XmlResource> xmlRes = loadBinaryXmlSkipFileExport(file.source.path);
                 if (!xmlRes) {
                     return 1;
                 }
 
-                xmlRes->file = std::move(f.file);
+                xmlRes->file = std::move(file.file);
 
                 XmlReferenceLinker xmlLinker;
                 if (xmlLinker.consume(&mContext, xmlRes.get())) {
@@ -631,7 +673,7 @@ struct LinkCommand {
                     }
 
                     if (!mOptions.noAutoVersion) {
-                        Maybe<ResourceTable::SearchResult> result = mergedTable.findResource(
+                        Maybe<ResourceTable::SearchResult> result = mFinalTable.findResource(
                                 xmlRes->file.name);
                         for (int sdkLevel : xmlLinker.getSdkLevels()) {
                             if (sdkLevel > xmlRes->file.config.sdkVersion &&
@@ -639,7 +681,7 @@ struct LinkCommand {
                                                                     xmlRes->file.config,
                                                                     sdkLevel)) {
                                 xmlRes->file.config.sdkVersion = sdkLevel;
-                                if (!mergedTable.addFileReference(xmlRes->file.name,
+                                if (!mFinalTable.addFileReference(xmlRes->file.name,
                                                                   xmlRes->file.config,
                                                                   xmlRes->file.source,
                                                                   util::utf8ToUtf16(
@@ -662,10 +704,11 @@ struct LinkCommand {
                 }
             } else {
                 if (mOptions.verbose) {
-                    mContext.getDiagnostics()->note(DiagMessage() << "copying " << f.source.path);
+                    mContext.getDiagnostics()->note(DiagMessage() << "copying "
+                                                    << file.source.path);
                 }
 
-                if (!copyFileToArchive(f.source.path, buildResourceFileName(f.file), 0,
+                if (!copyFileToArchive(file.source.path, buildResourceFileName(file.file), 0,
                                        archiveWriter.get())) {
                     error = true;
                 }
@@ -679,13 +722,13 @@ struct LinkCommand {
 
         if (!mOptions.noAutoVersion) {
             AutoVersioner versioner;
-            if (!versioner.consume(&mContext, &mergedTable)) {
+            if (!versioner.consume(&mContext, &mFinalTable)) {
                 mContext.getDiagnostics()->error(DiagMessage() << "failed versioning styles");
                 return 1;
             }
         }
 
-        if (!flattenTable(&mergedTable, archiveWriter.get())) {
+        if (!flattenTable(&mFinalTable, archiveWriter.get())) {
             mContext.getDiagnostics()->error(DiagMessage() << "failed to write resources.arsc");
             return 1;
         }
@@ -704,7 +747,7 @@ struct LinkCommand {
                 // to the original package, and private and public symbols to the private package.
 
                 options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
-                if (!writeJavaFile(&mergedTable, mContext.getCompilationPackage(),
+                if (!writeJavaFile(&mFinalTable, mContext.getCompilationPackage(),
                                    mContext.getCompilationPackage(), options)) {
                     return 1;
                 }
@@ -713,12 +756,12 @@ struct LinkCommand {
                 outputPackage = mOptions.privateSymbols.value();
             }
 
-            if (!writeJavaFile(&mergedTable, actualPackage, outputPackage, options)) {
+            if (!writeJavaFile(&mFinalTable, actualPackage, outputPackage, options)) {
                 return 1;
             }
 
             for (std::string& extraPackage : mOptions.extraJavaPackages) {
-                if (!writeJavaFile(&mergedTable, actualPackage, util::utf8ToUtf16(extraPackage),
+                if (!writeJavaFile(&mFinalTable, actualPackage, util::utf8ToUtf16(extraPackage),
                                    options)) {
                     return 1;
                 }
@@ -732,10 +775,10 @@ struct LinkCommand {
         }
 
         if (mOptions.verbose) {
-            Debug::printTable(&mergedTable);
-            for (; !tableMerger.getFileMergeQueue()->empty();
-                    tableMerger.getFileMergeQueue()->pop()) {
-                const FileToMerge& f = tableMerger.getFileMergeQueue()->front();
+            Debug::printTable(&mFinalTable);
+            for (; !mTableMerger->getFileMergeQueue()->empty();
+                    mTableMerger->getFileMergeQueue()->pop()) {
+                const FileToMerge& f = mTableMerger->getFileMergeQueue()->front();
                 mContext.getDiagnostics()->note(
                         DiagMessage() << f.srcPath << " -> " << f.dstPath << " from (0x"
                                       << std::hex << (uintptr_t) f.srcTable << std::dec);
@@ -744,6 +787,18 @@ struct LinkCommand {
 
         return 0;
     }
+
+private:
+    LinkOptions mOptions;
+    LinkContext mContext;
+    ResourceTable mFinalTable;
+    std::unique_ptr<TableMerger> mTableMerger;
+
+    struct FileToProcess {
+        Source source;
+        ResourceFile file;
+    };
+    std::map<ResourceName, FileToProcess> mFilesToProcess;
 };
 
 int link(const std::vector<StringPiece>& args) {
@@ -755,6 +810,9 @@ int link(const std::vector<StringPiece>& args) {
             .requiredFlag("--manifest", "Path to the Android manifest to build",
                           &options.manifestPath)
             .optionalFlagList("-I", "Adds an Android APK to link against", &options.includePaths)
+            .optionalFlagList("-R", "Compilation unit to link, using `overlay` semantics. "
+                              "The last conflicting resource given takes precedence.",
+                              &options.overlayFiles)
             .optionalFlag("--java", "Directory in which to generate R.java",
                           &options.generateJavaClassPath)
             .optionalFlag("--proguard", "Output file for generated Proguard rules",
@@ -794,7 +852,7 @@ int link(const std::vector<StringPiece>& args) {
         options.targetSdkVersionDefault = util::utf8ToUtf16(targetSdkVersion.value());
     }
 
-    LinkCommand cmd = { options };
+    LinkCommand cmd(options);
     return cmd.run(flags.getArgs());
 }
 

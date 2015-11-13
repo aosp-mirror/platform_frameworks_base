@@ -63,7 +63,7 @@ public:
     /**
      * Merges resources from the same or empty package. This is for local sources.
      */
-    bool merge(const Source& src, ResourceTable* table);
+    bool merge(const Source& src, ResourceTable* table, bool overrideExisting);
 
     /**
      * Merges resources from the given package, mangling the name. This is for static libraries.
@@ -79,7 +79,7 @@ private:
     std::queue<FileToMerge> mFilesToMerge;
 
     bool doMerge(const Source& src, ResourceTable* srcTable, ResourceTablePackage* srcPackage,
-                 const bool manglePackage);
+                 const bool manglePackage, const bool overrideExisting);
 
     std::unique_ptr<Value> cloneAndMangle(ResourceTable* table, const std::u16string& package,
                                           Value* value);

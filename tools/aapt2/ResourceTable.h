@@ -163,7 +163,12 @@ public:
                      IDiagnostics* diag);
 
     bool addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
-                          const Source& source, const StringPiece16& path, IDiagnostics* diag);
+                          const Source& source, const StringPiece16& path,
+                          IDiagnostics* diag);
+
+    bool addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
+                          const Source& source, const StringPiece16& path,
+                          std::function<int(Value*,Value*)> conflictResolver, IDiagnostics* diag);
 
     /**
      * Same as addResource, but doesn't verify the validity of the name. This is used
@@ -221,9 +226,14 @@ public:
 private:
     ResourceTablePackage* findOrCreatePackage(const StringPiece16& name);
 
-    bool addResourceImpl(const ResourceNameRef& name, ResourceId resId,
-                         const ConfigDescription& config, std::unique_ptr<Value> value,
-                         const char16_t* validChars, IDiagnostics* diag);
+    bool addResourceImpl(const ResourceNameRef& name,
+                         ResourceId resId,
+                         const ConfigDescription& config,
+                         std::unique_ptr<Value> value,
+                         const char16_t* validChars,
+                         std::function<int(Value*,Value*)> conflictResolver,
+                         IDiagnostics* diag);
+
     bool setSymbolStateImpl(const ResourceNameRef& name, ResourceId resId,
                             const Symbol& symbol, const char16_t* validChars, IDiagnostics* diag);
 };
