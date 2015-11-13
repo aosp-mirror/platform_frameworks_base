@@ -23,7 +23,6 @@ LOCAL_SRC_FILES := \
     renderthread/RenderTask.cpp \
     renderthread/RenderThread.cpp \
     renderthread/TimeLord.cpp \
-    renderthread/DirtyHistory.cpp \
     thread/TaskManager.cpp \
     utils/Blur.cpp \
     utils/GLUtils.cpp \
