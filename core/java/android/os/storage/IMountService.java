@@ -21,7 +21,11 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
+
+import java.io.FileDescriptor;
 
 /**
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
@@ -1312,6 +1316,25 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            @Override
+            public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                ParcelFileDescriptor _result = null;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(name);
+                    mRemote.transact(Stub.TRANSACTION_mountAppFuse, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.<ParcelFileDescriptor>readParcelable(
+                            ClassLoader.getSystemClassLoader());
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -1438,6 +1461,8 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_isPerUserEncryptionEnabled = IBinder.FIRST_CALL_TRANSACTION + 67;
         static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 68;
+
+        static final int TRANSACTION_mountAppFuse = IBinder.FIRST_CALL_TRANSACTION + 69;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -2056,6 +2081,14 @@ public interface IMountService extends IInterface {
                     reply.writeInt(result ? 1 : 0);
                     return true;
                 }
+                case TRANSACTION_mountAppFuse: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String name = data.readString();
+                    ParcelFileDescriptor fd = mountAppFuse(name);
+                    reply.writeNoException();
+                    reply.writeParcelable(fd, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -2379,4 +2412,6 @@ public interface IMountService extends IInterface {
             throws RemoteException;
 
     public boolean isPerUserEncryptionEnabled() throws RemoteException;
+
+    public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException;
 }

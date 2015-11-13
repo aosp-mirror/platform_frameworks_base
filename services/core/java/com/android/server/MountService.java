@@ -56,6 +56,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -2765,6 +2766,12 @@ class MountService extends IMountService.Stub
         // handle the emulated case
         return "file".equals(SystemProperties.get("ro.crypto.type", "none"))
                 || SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false);
+    }
+
+    @Override
+    public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
+        // TODO: Invoke vold to mount app fuse.
+        throw new UnsupportedOperationException();
     }
 
     @Override
