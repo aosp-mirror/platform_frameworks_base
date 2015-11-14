@@ -300,7 +300,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                 sendFinish = false;
                             }
                         } catch (RuntimeException e) {
-                            Slog.w(TAG, "Unable to send startActivity intent", e);
+                            Slog.w(TAG, "Unable to send broadcast intent", e);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
