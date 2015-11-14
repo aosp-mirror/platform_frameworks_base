@@ -78,6 +78,30 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 23.0.2</a> <em>(November 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <ul>
+      <li>Improved the merging performance of the <code>dx</code> tool.</li>
+      <li>Fixed issues in the <a href="{@docRoot}guide/topics/renderscript/compute.html">RenderScript</a>
+        compiler for Windows.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 23.0.1</a> <em>(October 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixed issues in the RenderScript tools.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 23.0.0</a> <em>(August 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
