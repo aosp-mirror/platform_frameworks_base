@@ -443,30 +443,18 @@ public final class InputMethodManager {
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_UNBIND " + sequence);
                     }
-                    boolean startInput = false;
+                    final boolean startInput;
                     synchronized (mH) {
-                        if (mBindSequence == sequence) {
-                            if (false) {
-                                // XXX the server has already unbound!
-                                if (mCurMethod != null && mCurrentTextBoxAttribute != null) {
-                                    try {
-                                        mCurMethod.finishInput();
-                                    } catch (RemoteException e) {
-                                        Log.w(TAG, "IME died: " + mCurId, e);
-                                    }
-                                }
-                            }
-                            clearBindingLocked();
-                            
-                            // If we were actively using the last input method, then
-                            // we would like to re-connect to the next input method.
-                            if (mServedView != null && mServedView.isFocused()) {
-                                mServedConnecting = true;
-                            }
-                            if (mActive) {
-                                startInput = true;
-                            }
+                        if (mBindSequence != sequence) {
+                            return;
                         }
+                        clearBindingLocked();
+                        // If we were actively using the last input method, then
+                        // we would like to re-connect to the next input method.
+                        if (mServedView != null && mServedView.isFocused()) {
+                            mServedConnecting = true;
+                        }
+                        startInput = mActive;
                     }
                     if (startInput) {
                         startInputInner(null, 0, 0, 0);
