@@ -97,20 +97,21 @@ public class AndroidKeyStoreProvider extends Provider {
      */
     public static void install() {
         Provider[] providers = Security.getProviders();
-        int bcProviderPosition = -1;
-        for (int position = 0; position < providers.length; position++) {
-            Provider provider = providers[position];
+        int bcProviderIndex = -1;
+        for (int i = 0; i < providers.length; i++) {
+            Provider provider = providers[i];
             if ("BC".equals(provider.getName())) {
-                bcProviderPosition = position;
+                bcProviderIndex = i;
                 break;
             }
         }
 
         Security.addProvider(new AndroidKeyStoreProvider());
         Provider workaroundProvider = new AndroidKeyStoreBCWorkaroundProvider();
-        if (bcProviderPosition != -1) {
+        if (bcProviderIndex != -1) {
             // Bouncy Castle provider found -- install the workaround provider above it.
-            Security.insertProviderAt(workaroundProvider, bcProviderPosition);
+            // insertProviderAt uses 1-based positions.
+            Security.insertProviderAt(workaroundProvider, bcProviderIndex + 1);
         } else {
             // Bouncy Castle provider not found -- install the workaround provider at lowest
             // priority.
