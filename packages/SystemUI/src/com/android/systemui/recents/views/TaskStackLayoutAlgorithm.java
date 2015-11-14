@@ -201,7 +201,7 @@ public class TaskStackLayoutAlgorithm {
                 taskStackBounds.right - widthPadding,
                 taskStackBounds.bottom);
         // Anchor the task rect to the top-center of the non-freeform stack rect
-        int size = Math.min(mStackRect.width(), mStackRect.height() - mStackBottomOffset);
+        int size = mStackRect.width();
         mTaskRect.set(mStackRect.left, mStackRect.top,
                 mStackRect.left + size, mStackRect.top + size);
         mCurrentStackRect = ssp.hasFreeformWorkspaceSupport() ? mFreeformStackRect : mStackRect;
