@@ -1,9 +1,9 @@
 #
 # Audio Package 10 - Mako
-# 
+#
 # Include this file in a product makefile to include these audio files
 #
-# 
+#
 
 LOCAL_PATH:= frameworks/base/data/sounds
 
@@ -23,6 +23,7 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/effects/ogg/KeypressInvalid_48k.ogg:system/media/audio/ui/KeypressInvalid.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressReturn_48k.ogg:system/media/audio/ui/KeypressReturn.ogg \
 	$(LOCAL_PATH)/effects/material/ogg/VideoRecord_48k.ogg:system/media/audio/ui/VideoRecord.ogg \
+	$(LOCAL_PATH)/effects/material/ogg/VideoStop_48k.ogg:system/media/audio/ui/VideoStop.ogg \
 	$(LOCAL_PATH)/effects/material/ogg/camera_click_48k.ogg:system/media/audio/ui/camera_click.ogg \
 	$(LOCAL_PATH)/effects/ogg/camera_focus.ogg:system/media/audio/ui/camera_focus.ogg \
 	$(LOCAL_PATH)/effects/material/ogg/LowBattery_48k.ogg:system/media/audio/ui/LowBattery.ogg \

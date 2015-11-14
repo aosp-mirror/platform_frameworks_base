@@ -13,7 +13,7 @@ NOTIFICATION_FILES := Ariel Ceres Carme Elara Europa Iapetus Io Rhea Salacia Tit
 RINGTONE_FILES := Callisto Dione Ganymede Luna Oberon Phobos Sedna Titania Triton Umbriel
 EFFECT_FILES := Effect_Tick KeypressReturn KeypressInvalid KeypressDelete KeypressSpacebar KeypressStandard \
 	camera_focus Dock Undock Lock Unlock Trusted
-MATERIAL_EFFECT_FILES := camera_click VideoRecord LowBattery WirelessChargingStarted
+MATERIAL_EFFECT_FILES := camera_click VideoRecord LowBattery WirelessChargingStarted VideoStop
 
 PRODUCT_COPY_FILES += $(foreach fn,$(ALARM_FILES),\
 	$(LOCAL_PATH)/alarms/ogg/$(fn).ogg:system/media/audio/alarms/$(fn).ogg)
