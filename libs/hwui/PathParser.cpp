@@ -18,6 +18,7 @@
 
 #include "jni.h"
 
+#include <errno.h>
 #include <utils/Log.h>
 #include <sstream>
 #include <stdlib.h>
@@ -97,14 +98,31 @@ static void extract(int* outEndPosition, bool* outEndWithNegOrDot, const char* s
     *outEndPosition = currentIndex;
 }
 
+static float parseFloat(PathParser::ParseResult* result, const char* startPtr, size_t expectedLength) {
+    char* endPtr = NULL;
+    float currentValue = strtof(startPtr, &endPtr);
+    if ((currentValue == HUGE_VALF || currentValue == -HUGE_VALF) && errno == ERANGE) {
+        result->failureOccurred = true;
+        result->failureMessage = "Float out of range:  ";
+        result->failureMessage.append(startPtr, expectedLength);
+    }
+    if (currentValue == 0 && endPtr == startPtr) {
+        // No conversion is done.
+        result->failureOccurred = true;
+        result->failureMessage = "Float format error when parsing: ";
+        result->failureMessage.append(startPtr, expectedLength);
+    }
+    return currentValue;
+}
+
 /**
-* Parse the floats in the string.
-* This is an optimized version of parseFloat(s.split(",|\\s"));
-*
-* @param s the string containing a command and list of floats
-* @return array of floats
-*/
-static void getFloats(std::vector<float>* outPoints, const char* pathStr, int start, int end) {
+ * Parse the floats in the string.
+ *
+ * @param s the string containing a command and list of floats
+ * @return true on success
+ */
+static void getFloats(std::vector<float>* outPoints, PathParser::ParseResult* result,
+        const char* pathStr, int start, int end) {
 
     if (pathStr[start] == 'z' || pathStr[start] == 'Z') {
         return;
@@ -120,7 +138,12 @@ static void getFloats(std::vector<float>* outPoints, const char* pathStr, int st
         extract(&endPosition, &endWithNegOrDot, pathStr, startPosition, end);
 
         if (startPosition < endPosition) {
-            outPoints->push_back(strtof(&pathStr[startPosition], NULL));
+            float currentValue = parseFloat(result, &pathStr[startPosition],
+                    end - startPosition);
+            if (result->failureOccurred) {
+                return;
+            }
+            outPoints->push_back(currentValue);
         }
 
         if (endWithNegOrDot) {
@@ -130,10 +153,14 @@ static void getFloats(std::vector<float>* outPoints, const char* pathStr, int st
             startPosition = endPosition + 1;
         }
     }
+    return;
 }
 
-void PathParser::getPathDataFromString(PathData* data, const char* pathStr, size_t strLen) {
+void PathParser::getPathDataFromString(PathData* data, ParseResult* result,
+        const char* pathStr, size_t strLen) {
     if (pathStr == NULL) {
+        result->failureOccurred = true;
+        result->failureMessage = "Path string cannot be NULL.";
         return;
     }
 
@@ -143,7 +170,10 @@ void PathParser::getPathDataFromString(PathData* data, const char* pathStr, size
     while (end < strLen) {
         end = nextStart(pathStr, strLen, end);
         std::vector<float> points;
-        getFloats(&points, pathStr, start, end);
+        getFloats(&points, result, pathStr, start, end);
+        if (result->failureOccurred) {
+            return;
+        }
         data->verbs.push_back(pathStr[start]);
         data->verbSizes.push_back(points.size());
         data->points.insert(data->points.end(), points.begin(), points.end());
@@ -151,16 +181,11 @@ void PathParser::getPathDataFromString(PathData* data, const char* pathStr, size
         end++;
     }
 
-    if ((end - start) == 1 && pathStr[start] != '\0') {
+    if ((end - start) == 1 && start < strLen) {
         data->verbs.push_back(pathStr[start]);
         data->verbSizes.push_back(0);
     }
-
-    int i = 0;
-    while(pathStr[i] != '\0') {
-       i++;
-    }
-
+    return;
 }
 
 void PathParser::dump(const PathData& data) {
@@ -169,6 +194,7 @@ void PathParser::dump(const PathData& data) {
     for (size_t i = 0; i < data.verbs.size(); i++) {
         std::ostringstream os;
         os << data.verbs[i];
+        os << ", verb size: " << data.verbSizes[i];
         for (size_t j = 0; j < data.verbSizes[i]; j++) {
             os << " " << data.points[start + j];
         }
@@ -183,16 +209,20 @@ void PathParser::dump(const PathData& data) {
     ALOGD("points are : %s", os.str().c_str());
 }
 
-bool PathParser::parseStringForSkPath(SkPath* skPath, const char* pathStr, size_t strLen) {
+void PathParser::parseStringForSkPath(SkPath* skPath, ParseResult* result, const char* pathStr, size_t strLen) {
     PathData pathData;
-    getPathDataFromString(&pathData, pathStr, strLen);
-
+    getPathDataFromString(&pathData, result, pathStr, strLen);
+    if (result->failureOccurred) {
+        return;
+    }
     // Check if there is valid data coming out of parsing the string.
     if (pathData.verbs.size() == 0) {
-        return false;
+        result->failureOccurred = true;
+        result->failureMessage = "No verbs found in the string for pathData";
+        return;
     }
     VectorDrawablePath::verbsToPath(skPath, &pathData);
-    return true;
+    return;
 }
 
 }; // namespace uirenderer

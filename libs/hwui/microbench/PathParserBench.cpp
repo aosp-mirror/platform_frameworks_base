@@ -28,9 +28,10 @@ void BM_PathParser_parseStringPath::Run(int iter) {
     const char* pathString = "M 1 1 m 2 2, l 3 3 L 3 3 H 4 h4 V5 v5, Q6 6 6 6 q 6 6 6 6t 7 7 T 7 7 C 8 8 8 8 8 8 c 8 8 8 8 8 8 S 9 9 9 9 s 9 9 9 9 A 10 10 0 1 1 10 10 a 10 10 0 1 1 10 10";
     SkPath skPath;
     size_t length = strlen(pathString);
+    PathParser::ParseResult result;
     StartBenchmarkTiming();
     for (int i = 0; i < iter; i++) {
-        PathParser::parseStringForSkPath(&skPath, pathString, length);
+        PathParser::parseStringForSkPath(&skPath, &result, pathString, length);
     }
     StopBenchmarkTiming();
 }

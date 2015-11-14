@@ -37,8 +37,11 @@ public:
 };
 
 VectorDrawablePath::VectorDrawablePath(const char* pathStr, size_t strLength) {
-    PathParser::getPathDataFromString(&mData, pathStr, strLength);
-    verbsToPath(&mSkPath, &mData);
+    PathParser::ParseResult result;
+    PathParser::getPathDataFromString(&mData, &result, pathStr, strLength);
+    if (!result.failureOccurred) {
+        verbsToPath(&mSkPath, &mData);
+    }
 }
 
 VectorDrawablePath::VectorDrawablePath(const PathData& data) {
@@ -80,7 +83,7 @@ void VectorDrawablePath::verbsToPath(SkPath* outPath, const PathData* data) {
     for (unsigned int i = 0; i < data->verbs.size(); i++) {
         size_t verbSize = data->verbSizes[i];
         resolver.addCommand(outPath, previousCommand, data->verbs[i], &data->points, start,
-                start + verbSize - 1u);
+                start + verbSize);
         previousCommand = data->verbs[i];
         start += verbSize;
     }
@@ -254,7 +257,7 @@ static void drawArc(SkPath* p,
     arcToBezier(p, cx, cy, a, b, x0, y0, thetaD, eta0, sweep);
 }
 
-
+// Use the given verb, and points in the range [start, end) to insert a command into the SkPath.
 void PathResolver::addCommand(SkPath* outPath, char previousCmd,
         char cmd, const std::vector<float>* points, size_t start, size_t end) {
 
@@ -305,7 +308,7 @@ void PathResolver::addCommand(SkPath* outPath, char previousCmd,
         break;
     }
 
-    for (unsigned int k = start; k <= end; k += incr) {
+    for (unsigned int k = start; k < end; k += incr) {
         switch (cmd) {
         case 'm': // moveto - Start a new sub-path (relative)
             currentX += points->at(k + 0);

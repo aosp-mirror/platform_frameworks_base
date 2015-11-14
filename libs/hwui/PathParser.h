@@ -23,17 +23,25 @@
 #include <android/log.h>
 #include <cutils/compiler.h>
 
+#include <string>
+
 namespace android {
 namespace uirenderer {
 
+
 class PathParser {
 public:
+    struct ANDROID_API ParseResult {
+        bool failureOccurred = false;
+        std::string failureMessage;
+    };
     /**
      * Parse the string literal and create a Skia Path. Return true on success.
      */
-    ANDROID_API static bool parseStringForSkPath(SkPath* outPath, const char* pathStr,
-            size_t strLength);
-    static void getPathDataFromString(PathData* outData, const char* pathStr, size_t strLength);
+    ANDROID_API static void parseStringForSkPath(SkPath* outPath, ParseResult* result,
+            const char* pathStr, size_t strLength);
+    static void getPathDataFromString(PathData* outData, ParseResult* result,
+            const char* pathStr, size_t strLength);
     static void dump(const PathData& data);
 };
 
