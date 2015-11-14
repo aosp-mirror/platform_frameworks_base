@@ -99,7 +99,11 @@ class WindowStateAnimator {
      * we must tell them application to resize (and thus redraw itself).
      */
     boolean mSurfaceResized;
-    int mSurfaceResizeGeneration;
+    /**
+     * Whether we should inform the client on next relayoutWindow that
+     * the surface has been resized since last time.
+     */
+    boolean mReportSurfaceResized;
     WindowSurfaceController mSurfaceController;
     private WindowSurfaceController mPendingDestroySurface;
 
@@ -497,7 +501,7 @@ class WindowStateAnimator {
         }
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
-                Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
+                Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + mWin + " in "
                         + mSurfaceController);
             if (DEBUG_STARTING_WINDOW && startingWindow) {
                 Slog.v(TAG, "Draw state now committed in " + mWin);
@@ -529,7 +533,7 @@ class WindowStateAnimator {
                 mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = performShowLocked();
         }
-        if (mDestroyPreservedSurfaceUponRedraw && result) {
+        if (mDestroyPreservedSurfaceUponRedraw) {
             mService.mDestroyPreservedSurface.add(mWin);
         }
         return result;
@@ -1189,7 +1193,7 @@ class WindowStateAnimator {
                 recoveringMemory);
 
         if (mSurfaceResized) {
-            mSurfaceResizeGeneration++;
+            mReportSurfaceResized = true;
             mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
             w.applyDimLayerIfNeeded();
@@ -1418,7 +1422,7 @@ class WindowStateAnimator {
             // Force the show in the next prepareSurfaceLocked() call.
             mLastAlpha = -1;
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
-                Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + this);
+                Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + mWin);
             mDrawState = HAS_DRAWN;
             mService.scheduleAnimationLocked();
 
