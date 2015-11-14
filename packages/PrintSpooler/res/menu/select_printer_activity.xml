@@ -19,7 +19,7 @@
     <item
         android:id="@+id/action_search"
         android:title="@string/search"
-        android:icon="@*android:drawable/ic_search"
+        android:icon="@*android:drawable/ic_search_api_material"
         android:actionViewClass="android.widget.SearchView"
         android:showAsAction="ifRoom|collapseActionView"
         android:alphabeticShortcut="f"
@@ -29,7 +29,7 @@
     <item
         android:id="@+id/action_add_printer"
         android:title="@string/print_add_printer"
-        android:icon="@*android:drawable/create_contact"
+        android:icon="@drawable/ic_add"
         android:showAsAction="ifRoom"
         android:alphabeticShortcut="a">
     </item>
