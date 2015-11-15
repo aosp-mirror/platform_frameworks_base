@@ -9,7 +9,7 @@ android_app {
         "telephony-common",
         "ims-common",
     ],
-    static_libs: ["junit"],
+    static_libs: ["junit", "org.lineageos.platform.internal"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
