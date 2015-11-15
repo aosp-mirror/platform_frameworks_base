@@ -37,6 +37,10 @@ import java.util.ArrayList;
 public class AppWindowAnimator {
     static final String TAG = "AppWindowAnimator";
 
+    private static final int PROLONG_ANIMATION_DISABLED = 0;
+    static final int PROLONG_ANIMATION_AT_END = 1;
+    static final int PROLONG_ANIMATION_AT_START = 2;
+
     final AppWindowToken mAppToken;
     final WindowManagerService mService;
     final WindowAnimator mAnimator;
@@ -85,7 +89,7 @@ public class AppWindowAnimator {
     // If true when the animation hits the last frame, it will keep running on that last frame.
     // This is used to synchronize animation with Recents and we wait for Recents to tell us to
     // finish or for a new animation be set as fail-safe mechanism.
-    private boolean mProlongAnimation;
+    private int mProlongAnimation;
     // Whether the prolong animation can be removed when animation is set. The purpose of this is
     // that if recents doesn't tell us to remove the prolonged animation, we will get rid of it
     // when new animation is set.
@@ -142,7 +146,7 @@ public class AppWindowAnimator {
             anim.setBackgroundColor(0);
         }
         if (mClearProlongedAnimation) {
-            mProlongAnimation = false;
+            mProlongAnimation = PROLONG_ANIMATION_DISABLED;
         } else {
             mClearProlongedAnimation = true;
         }
@@ -266,6 +270,10 @@ public class AppWindowAnimator {
             return false;
         }
         transformation.clear();
+        if (mProlongAnimation == PROLONG_ANIMATION_AT_START) {
+            animation.setStartTime(currentTime);
+            currentTime += 1;
+        }
         boolean hasMoreFrames = animation.getTransformation(currentTime, transformation);
         if (!hasMoreFrames) {
             if (deferThumbnailDestruction && !deferFinalFrameCleanup) {
@@ -278,7 +286,7 @@ public class AppWindowAnimator {
                         "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
                         ", xform=" + transformation + ", mProlongAnimation=" + mProlongAnimation);
                 deferFinalFrameCleanup = false;
-                if (mProlongAnimation) {
+                if (mProlongAnimation == PROLONG_ANIMATION_AT_END) {
                     hasMoreFrames = true;
                 } else {
                     animation = null;
@@ -434,13 +442,13 @@ public class AppWindowAnimator {
         }
     }
 
-    void startProlongAnimation() {
-        mProlongAnimation = true;
+    void startProlongAnimation(int prolongType) {
+        mProlongAnimation = prolongType;
         mClearProlongedAnimation = false;
     }
 
     void endProlongedAnimation() {
-        mProlongAnimation = false;
+        mProlongAnimation = PROLONG_ANIMATION_DISABLED;
     }
 
     // This is an animation that does nothing: it just immediately finishes

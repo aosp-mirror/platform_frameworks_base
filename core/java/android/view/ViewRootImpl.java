@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.app.ActivityManagerNative;
@@ -37,7 +39,6 @@ import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
@@ -74,7 +75,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.WindowCallbacks;
 import android.widget.Scroller;
 
 import com.android.internal.R;
@@ -176,6 +176,11 @@ public final class ViewRootImpl implements ViewParent,
 
     int mViewVisibility;
     boolean mAppVisible = true;
+    // For recents to freeform transition we need to keep drawing after the app receives information
+    // that it became invisible. This will ignore that information and depend on the decor view
+    // visibility to control drawing. The decor view visibility will get adjusted when the app get
+    // stopped and that's when the app will stop drawing further frames.
+    private boolean mForceDecorViewVisibility = false;
     int mOrigWindowType = -1;
 
     /** Whether the window had focus during the most recent traversal. */
@@ -561,6 +566,8 @@ public final class ViewRootImpl implements ViewParent,
                         & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
                     mInputChannel = new InputChannel();
                 }
+                mForceDecorViewVisibility = (mWindowAttributes.privateFlags
+                        & PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY) != 0;
                 try {
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
@@ -1063,7 +1070,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     int getHostVisibility() {
-        return mAppVisible ? mView.getVisibility() : View.GONE;
+        return (mAppVisible || mForceDecorViewVisibility) ? mView.getVisibility() : View.GONE;
     }
 
     /**
@@ -1568,7 +1575,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean insetsPending = false;
         int relayoutResult = 0;
 
-        boolean isViewVisible = viewVisibility == View.VISIBLE;
+        final boolean isViewVisible = viewVisibility == View.VISIBLE;
         if (mFirst || windowShouldResize || insetsChanged ||
                 viewVisibilityChanged || params != null) {
 
@@ -2471,8 +2478,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (callbacks != null) {
                     for (SurfaceHolder.Callback c : callbacks) {
                         if (c instanceof SurfaceHolder.Callback2) {
-                            ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
-                                    mSurfaceHolder);
+                            ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(mSurfaceHolder);
                         }
                     }
                 }

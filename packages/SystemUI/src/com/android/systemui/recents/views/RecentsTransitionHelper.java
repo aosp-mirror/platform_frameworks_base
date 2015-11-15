@@ -27,12 +27,12 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
@@ -106,6 +106,7 @@ public class RecentsTransitionHelper {
                     // If we are launching into another task, cancel the previous task's
                     // window transition
                     EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
+                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
 
                     if (lockToTask) {
                         // Request screen pinning after the animation runs
@@ -116,7 +117,12 @@ public class RecentsTransitionHelper {
         } else {
             // This is only the case if the task is not on screen (scrolled offscreen for example)
             transitionFuture = null;
-            animStartedListener = null;
+            animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
+                @Override
+                public void onAnimationStarted() {
+                    EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
+                }
+            };
         }
 
         if (taskView == null) {

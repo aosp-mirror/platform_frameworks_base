@@ -68,8 +68,8 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
  * An implementation of the Recents component for the current user.  For secondary users, this can
  * be called remotely from the system user.
  */
-public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub
-        implements ActivityOptions.OnAnimationFinishedListener {
+public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
+        ActivityOptions.OnAnimationFinishedListener {
 
     private final static String TAG = "RecentsImpl";
     private final static boolean DEBUG = false;
