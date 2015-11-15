@@ -366,7 +366,15 @@ public final class LoadedApk {
                     }
                 }
 
-                final String lib = TextUtils.join(File.pathSeparator, libPaths);
+                if (mApplicationInfo.isSystemApp()) {
+                    // Add path to system libraries to libPaths;
+                    // Access to system libs should be limited
+                    // to bundled applications; this is why updated
+                    // system apps are not included.
+                    libPaths.add(System.getProperty("java.library.path"));
+                }
+
+                final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
 
                 /*
                  * With all the combination done (if necessary, actually
@@ -374,14 +382,17 @@ public final class LoadedApk {
                  */
 
                 if (ActivityThread.localLOGV)
-                    Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + lib);
+                    Slog.v(ActivityThread.TAG, "Class path: " + zip +
+                            ", JNI path: " + librarySearchPath);
 
                 // Temporarily disable logging of disk reads on the Looper thread
                 // as this is early and necessary.
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
 
-                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, lib,
-                        mBaseClassLoader);
+                String libraryPermittedPath = mAppDir + File.pathSeparator + mDataDir;
+
+                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, librarySearchPath,
+                        libraryPermittedPath, mBaseClassLoader);
 
                 StrictMode.setThreadPolicy(oldPolicy);
             } else {
