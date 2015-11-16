@@ -458,7 +458,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             mReleaseOnExpandFinish = false;
         } else {
             for (NotificationData.Entry entry : mEntriesToRemoveAfterExpand) {
-                removeHeadsUpEntry(entry);
+                if (isHeadsUp(entry.key)) {
+                    // Maybe the heads-up was removed already
+                    removeHeadsUpEntry(entry);
+                }
             }
         }
         mEntriesToRemoveAfterExpand.clear();
@@ -596,6 +599,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                 postTime = Math.max(postTime, currentTime);
             }
             removeAutoRemovalCallbacks();
+            if (mEntriesToRemoveAfterExpand.contains(entry)) {
+                mEntriesToRemoveAfterExpand.remove(entry);
+            }
             if (!hasFullScreenIntent(entry) && !mRemoteInputActive) {
                 long finishTime = postTime + mHeadsUpNotificationDecay;
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
