@@ -484,7 +484,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int PRIVATE_FLAG_AUTOPLAY = 1<<6;
+    public static final int PRIVATE_FLAG_AUTOPLAY = 1 << 7;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
