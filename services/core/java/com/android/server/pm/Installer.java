@@ -31,6 +31,19 @@ import com.android.server.SystemService;
 public final class Installer extends SystemService {
     private static final String TAG = "Installer";
 
+    /* ***************************************************************************
+     * IMPORTANT: These values are passed to native code. Keep them in sync with
+     * frameworks/native/cmds/installd/installd.h
+     * **************************************************************************/
+    /** Application should be visible to everyone */
+    public static final int DEXOPT_PUBLIC       = 1 << 1;
+    /** Application wants to run in VM safe mode */
+    public static final int DEXOPT_SAFEMODE     = 1 << 2;
+    /** Application wants to allow debugging of its code */
+    public static final int DEXOPT_DEBUGGABLE   = 1 << 3;
+    /** The system boot has finished */
+    public static final int DEXOPT_BOOTCOMPLETE = 1 << 4;
+
     private final InstallerConnection mInstaller;
 
     public Installer(Context context) {
@@ -75,39 +88,24 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
-    public int dexopt(String apkPath, int uid, boolean isPublic,
-            String instructionSet, int dexoptNeeded) {
-        return dexopt(apkPath, uid, isPublic, instructionSet, dexoptNeeded, true);
-    }
-
-    public int dexopt(String apkPath, int uid, boolean isPublic,
-            String instructionSet, int dexoptNeeded, boolean bootComplete) {
+    public int dexopt(String apkPath, int uid, String instructionSet,
+            int dexoptNeeded, int dexFlags) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
 
-        return mInstaller.dexopt(apkPath, uid, isPublic, instructionSet, dexoptNeeded,
-                bootComplete);
+        return mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags);
     }
 
-    public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, int dexoptNeeded, boolean vmSafeMode,
-            boolean debuggable, @Nullable String outputPath) {
-        return dexopt(apkPath, uid, isPublic, pkgName, instructionSet, dexoptNeeded, vmSafeMode,
-                debuggable, outputPath, true);
-    }
-
-    public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, int dexoptNeeded, boolean vmSafeMode,
-            boolean debuggable, @Nullable String outputPath, boolean bootComplete) {
+    public int dexopt(String apkPath, int uid, String pkgName, String instructionSet,
+            int dexoptNeeded, @Nullable String outputPath, int dexFlags) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
-        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName,
-                instructionSet, dexoptNeeded, vmSafeMode,
-                debuggable, outputPath, bootComplete);
+        return mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
+                outputPath, dexFlags);
     }
 
     public int idmap(String targetApkPath, String overlayApkPath, int uid) {
