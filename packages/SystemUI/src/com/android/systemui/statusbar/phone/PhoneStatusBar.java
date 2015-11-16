@@ -617,7 +617,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
     private HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>> mTmpChildOrderMap
             = new HashMap<>();
-    private HashSet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new HashSet<>();
     private RankingMap mLatestRankingMap;
     private boolean mNoAnimationOnNextBarModeChange;
     private FalsingManager mFalsingManager;
