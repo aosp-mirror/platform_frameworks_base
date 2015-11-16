@@ -84,10 +84,10 @@ public class NotificationGroupManager {
             // the close future. See b/23676310 for reference.
             return;
         }
-        if (notif.isGroupSummary()) {
-            group.summary = null;
-        } else {
+        if (notif.isGroupChild()) {
             group.children.remove(removed);
+        } else {
+            group.summary = null;
         }
         if (group.children.isEmpty()) {
             if (group.summary == null) {
@@ -107,16 +107,16 @@ public class NotificationGroupManager {
             group = new NotificationGroup();
             mGroupMap.put(groupKey, group);
         }
-        if (notif.isGroupSummary()) {
+        if (notif.isGroupChild()) {
+            group.children.add(added);
+            if (group.summary != null && group.children.size() == 1 && !group.expanded) {
+                group.summary.row.updateNotificationHeader();
+            }
+        } else {
             group.summary = added;
             group.expanded = added.row.areChildrenExpanded();
             if (!group.children.isEmpty()) {
                 mListener.onGroupCreatedFromChildren(group);
-            }
-        } else {
-            group.children.add(added);
-            if (group.summary != null && group.children.size() == 1 && !group.expanded) {
-                group.summary.row.updateNotificationHeader();
             }
         }
     }
@@ -169,7 +169,7 @@ public class NotificationGroupManager {
      * @return whether a given notification is a summary in a group which has children
      */
     public boolean isSummaryOfGroup(StatusBarNotification sbn) {
-        if (sbn.getNotification().isGroupChild()) {
+        if (!sbn.getNotification().isGroupSummary()) {
             return false;
         }
         NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
