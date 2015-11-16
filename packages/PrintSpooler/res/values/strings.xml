@@ -49,6 +49,9 @@
     <!-- Label of the page selection widget. [CHAR LIMIT=20] -->
     <string name="label_pages">Pages</string>
 
+    <!-- Label of the destination widget. [CHAR LIMIT=20] -->
+    <string name="destination_default_text">Select a printer</string>
+
     <!-- Template for the all pages option in the page selection widget. [CHAR LIMIT=20] -->
     <string name="template_all_pages">All <xliff:g id="page_count" example="100">%1$s</xliff:g></string>
 

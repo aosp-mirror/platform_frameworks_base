@@ -64,6 +64,7 @@ import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -124,6 +125,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
 
     private static final String FRAGMENT_TAG = "FRAGMENT_TAG";
+
+    private static final String HAS_PRINTED_PREF = "has_printed";
 
     private static final int ORIENTATION_PORTRAIT = 0;
     private static final int ORIENTATION_LANDSCAPE = 1;
@@ -187,6 +190,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private Spinner mDestinationSpinner;
     private DestinationAdapter mDestinationSpinnerAdapter;
+    private boolean mShowDestinationPrompt;
 
     private Spinner mMediaSizeSpinner;
     private ArrayAdapter<SpinnerItem<MediaSize>> mMediaSizeSpinnerAdapter;
@@ -1093,6 +1097,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         updateOptionsUi();
         addCurrentPrinterToHistory();
+        setUserPrinted();
 
         PageRange[] selectedPages = computeSelectedPages();
         if (!Arrays.equals(mSelectedPages, selectedPages)) {
@@ -1195,6 +1200,29 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Print button
         mPrintButton = (ImageView) findViewById(R.id.print_button);
         mPrintButton.setOnClickListener(clickListener);
+
+        // Special prompt instead of destination spinner for the first time the user printed
+        if (!hasUserEverPrinted()) {
+            mShowDestinationPrompt = true;
+
+            mSummaryCopies.setEnabled(false);
+            mSummaryPaperSize.setEnabled(false);
+
+            mDestinationSpinner.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    mShowDestinationPrompt = false;
+                    mSummaryCopies.setEnabled(true);
+                    mSummaryPaperSize.setEnabled(true);
+                    updateOptionsUi();
+
+                    mDestinationSpinner.setOnTouchListener(null);
+                    mDestinationSpinnerAdapter.notifyDataSetChanged();
+
+                    return false;
+                }
+            });
+        }
     }
 
     /**
@@ -1332,6 +1360,22 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE;
     }
 
+    /**
+     * Disable all options UI elements, beside the {@link #mDestinationSpinner}
+     */
+    private void disableOptionsUi() {
+        mCopiesEditText.setEnabled(false);
+        mCopiesEditText.setFocusable(false);
+        mMediaSizeSpinner.setEnabled(false);
+        mColorModeSpinner.setEnabled(false);
+        mDuplexModeSpinner.setEnabled(false);
+        mOrientationSpinner.setEnabled(false);
+        mRangeOptionsSpinner.setEnabled(false);
+        mPageRangeEditText.setEnabled(false);
+        mPrintButton.setVisibility(View.GONE);
+        mMoreOptionsButton.setEnabled(false);
+    }
+
     void updateOptionsUi() {
         // Always update the summary.
         updateSummary();
@@ -1346,32 +1390,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             if (mState != STATE_PRINTER_UNAVAILABLE) {
                 mDestinationSpinner.setEnabled(false);
             }
-            mCopiesEditText.setEnabled(false);
-            mCopiesEditText.setFocusable(false);
-            mMediaSizeSpinner.setEnabled(false);
-            mColorModeSpinner.setEnabled(false);
-            mDuplexModeSpinner.setEnabled(false);
-            mOrientationSpinner.setEnabled(false);
-            mRangeOptionsSpinner.setEnabled(false);
-            mPageRangeEditText.setEnabled(false);
-            mPrintButton.setVisibility(View.GONE);
-            mMoreOptionsButton.setEnabled(false);
+            disableOptionsUi();
             return;
         }
 
         // If no current printer, or it has no capabilities, or it is not
         // available, we disable all print options except the destination.
         if (mCurrentPrinter == null || !canPrint(mCurrentPrinter)) {
-            mCopiesEditText.setEnabled(false);
-            mCopiesEditText.setFocusable(false);
-            mMediaSizeSpinner.setEnabled(false);
-            mColorModeSpinner.setEnabled(false);
-            mDuplexModeSpinner.setEnabled(false);
-            mOrientationSpinner.setEnabled(false);
-            mRangeOptionsSpinner.setEnabled(false);
-            mPageRangeEditText.setEnabled(false);
-            mPrintButton.setVisibility(View.GONE);
-            mMoreOptionsButton.setEnabled(false);
+            disableOptionsUi();
             return;
         }
 
@@ -1679,6 +1705,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mCopiesEditText.setText(MIN_COPIES_STRING);
             mCopiesEditText.requestFocus();
         }
+
+        if (mShowDestinationPrompt) {
+            disableOptionsUi();
+        }
     }
 
     private void updateSummary() {
@@ -1980,6 +2010,32 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
     }
 
+
+    /**
+     * Check if the user has ever printed a document
+     *
+     * @return true iff the user has ever printed a document
+     */
+    private boolean hasUserEverPrinted() {
+        SharedPreferences preferences = getSharedPreferences(HAS_PRINTED_PREF, MODE_PRIVATE);
+
+        return preferences.getBoolean(HAS_PRINTED_PREF, false);
+    }
+
+    /**
+     * Remember that the user printed a document
+     */
+    private void setUserPrinted() {
+        SharedPreferences preferences = getSharedPreferences(HAS_PRINTED_PREF, MODE_PRIVATE);
+
+        if (!preferences.getBoolean(HAS_PRINTED_PREF, false)) {
+            SharedPreferences.Editor edit = preferences.edit();
+
+            edit.putBoolean(HAS_PRINTED_PREF, true);
+            edit.apply();
+        }
+    }
+
     private final class DestinationAdapter extends BaseAdapter
             implements PrinterRegistry.OnPrintersChangeListener {
         private final List<PrinterHolder> mPrinterHolders = new ArrayList<>();
@@ -1987,6 +2043,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         private final PrinterHolder mFakePdfPrinterHolder;
 
         private boolean mHistoricalPrintersLoaded;
+
+        /**
+         * Has the {@link #mDestinationSpinner} ever used a view from printer_dropdown_prompt
+         */
+        private boolean hadPromptView;
 
         public DestinationAdapter() {
             mHistoricalPrintersLoaded = mPrinterRegistry.areHistoricalPrintersLoaded();
@@ -2098,9 +2159,20 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = getLayoutInflater().inflate(
-                        R.layout.printer_dropdown_item, parent, false);
+            if (mShowDestinationPrompt) {
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(
+                            R.layout.printer_dropdown_prompt, parent, false);
+                    hadPromptView = true;
+                }
+
+                return convertView;
+            } else {
+                // We don't know if we got an recyled printer_dropdown_prompt, hence do not use it
+                if (hadPromptView || convertView == null) {
+                    convertView = getLayoutInflater().inflate(
+                            R.layout.printer_dropdown_item, parent, false);
+                }
             }
 
             CharSequence title = null;
