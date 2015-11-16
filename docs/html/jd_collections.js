@@ -16,10 +16,10 @@ var RESOURCE_COLLECTIONS = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=0r36OJaeMo4",
-      "http://www.youtube.com/watch?v=1Iw7Tg_afKk",
-      "http://www.youtube.com/watch?v=TieksFvD-7o",
-      "http://www.youtube.com/watch?v=MCoh4Pxs_ok"
+      "http://www.youtube.com/watch?v=yJisuP94lHU",
+      "http://www.youtube.com/watch?v=rcU7VEs1hiE",
+      "http://www.youtube.com/watch?v=JFlX9rW7Epc",
+      "http://www.youtube.com/watch?v=4CqXCkcN_d4"
     ]
   },
   "index/multiscreen": {
@@ -187,10 +187,10 @@ var RESOURCE_COLLECTIONS = {
   "distribute/landing/carousel": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=QDM52bblwlg",
-      "https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-      "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-      "https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "distribute/googleplay/guide.html",
+    "http://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "http://www.youtube.com/watch?v=yJisuP94lHU",
     ]
   },
   "distribute/landing/googleplay": {
@@ -308,6 +308,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/edu/about.html",
       "distribute/googleplay/cast.html",
       "distribute/googleplay/cardboard.html",
+      "distribute/googleplay/guide.html"
     ]
   },
   "distribute/googleplay/gpfw": {
@@ -1441,12 +1442,6 @@ var RESOURCE_COLLECTIONS = {
       "training/wearables/ui/index.html"
     ]
   },
-  "play_dev_guide": {
-    "title": "",
-    "resources": [
-      "shareables/distribute/play_dev_guide_secrets_en.pdf"
-    ]
-  },
   "design/auto/auto_ui_guidelines": {
     "title": "",
     "resources": [
@@ -1643,9 +1638,9 @@ var RESOURCE_COLLECTIONS = {
   "marshmallow/landing/resources": {
     "title": "",
     "resources": [
+       "about/versions/marshmallow/android-6.0-changes.html",
        "about/versions/marshmallow/android-6.0.html",
-       "about/versions/marshmallow/samples.html",
-       "https://developers.google.com/android/nexus/images"
+       "about/versions/marshmallow/samples.html"
     ]
   },
   "marshmallow/landing/videos": {
@@ -1675,7 +1670,8 @@ var RESOURCE_COLLECTIONS = {
       "training/monitoring-device-state/doze-standby.html",
       "training/app-links/index.html",
       "training/articles/assistant.html",
-      "training/testing/performance.html"
+      "training/testing/performance.html",
+      "https://developers.google.com/android/nexus/images"
     ]
   },
 }
