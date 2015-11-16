@@ -21275,10 +21275,13 @@ package android.net.wifi {
     method public void writeToParcel(android.os.Parcel, int);
     field public int band;
     field public android.net.wifi.WifiScanner.ChannelSpec[] channels;
+    field public int exponent;
+    field public int maxPeriodInMs;
     field public int maxScansToCache;
     field public int numBssidsPerScan;
     field public int periodInMs;
     field public int reportEvents;
+    field public int stepCount;
   }
 
   public static abstract interface WifiScanner.WifiChangeListener implements android.net.wifi.WifiScanner.ActionListener {
