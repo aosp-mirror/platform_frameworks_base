@@ -21,10 +21,10 @@
 #include "renderstate/OffscreenBufferPool.h"
 #include "utils/FatVector.h"
 #include "utils/PaintUtils.h"
+#include "utils/TraceUtils.h"
 
 #include <SkCanvas.h>
 #include <SkPathOps.h>
-#include <utils/Trace.h>
 #include <utils/TypeHelpers.h>
 
 namespace android {
@@ -331,13 +331,15 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
         RenderNode* layerNode = layers.entries()[i].renderNode;
         const Rect& layerDamage = layers.entries()[i].damage;
 
-        saveForLayer(layerNode->getWidth(), layerNode->getHeight(),
-                layerDamage, nullptr, layerNode);
-        mCanvasState.writableSnapshot()->setClip(
-                layerDamage.left, layerDamage.top, layerDamage.right, layerDamage.bottom);
+        // map current light center into RenderNode's coordinate space
+        Vector3 lightCenter = mCanvasState.currentSnapshot()->getRelativeLightCenter();
+        layerNode->getLayer()->inverseTransformInWindow.mapPoint3d(lightCenter);
+
+        saveForLayer(layerNode->getWidth(), layerNode->getHeight(), 0, 0,
+                layerDamage, lightCenter, nullptr, layerNode);
 
         if (layerNode->getDisplayList()) {
-            deferImpl(*(layerNode->getDisplayList()));
+            deferDisplayList(*(layerNode->getDisplayList()));
         }
         restoreForLayer();
     }
@@ -363,7 +365,7 @@ OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayLis
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             0, 0, viewportWidth, viewportHeight, lightCenter);
 
-    deferImpl(displayList);
+    deferDisplayList(displayList);
 }
 
 void OpReorderer::onViewportInitialized() {}
@@ -371,18 +373,99 @@ void OpReorderer::onViewportInitialized() {}
 void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
 
 void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
-    if (node.applyViewProperties(mCanvasState, mAllocator)) {
-        // not rejected so render
+    const RenderProperties& properties = node.properties();
+    const Outline& outline = properties.getOutline();
+    if (properties.getAlpha() <= 0
+            || (outline.getShouldClip() && outline.isEmpty())
+            || properties.getScaleX() == 0
+            || properties.getScaleY() == 0) {
+        return; // rejected
+    }
+
+    if (properties.getLeft() != 0 || properties.getTop() != 0) {
+        mCanvasState.translate(properties.getLeft(), properties.getTop());
+    }
+    if (properties.getStaticMatrix()) {
+        mCanvasState.concatMatrix(*properties.getStaticMatrix());
+    } else if (properties.getAnimationMatrix()) {
+        mCanvasState.concatMatrix(*properties.getAnimationMatrix());
+    }
+    if (properties.hasTransformMatrix()) {
+        if (properties.isTransformTranslateOnly()) {
+            mCanvasState.translate(properties.getTranslationX(), properties.getTranslationY());
+        } else {
+            mCanvasState.concatMatrix(*properties.getTransformMatrix());
+        }
+    }
+
+    const int width = properties.getWidth();
+    const int height = properties.getHeight();
+
+    Rect saveLayerBounds; // will be set to non-empty if saveLayer needed
+    const bool isLayer = properties.effectiveLayerType() != LayerType::None;
+    int clipFlags = properties.getClippingFlags();
+    if (properties.getAlpha() < 1) {
+        if (isLayer) {
+            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+        }
+        if (CC_LIKELY(isLayer || !properties.getHasOverlappingRendering())) {
+            // simply scale rendering content's alpha
+            mCanvasState.scaleAlpha(properties.getAlpha());
+        } else {
+            // schedule saveLayer by initializing saveLayerBounds
+            saveLayerBounds.set(0, 0, width, height);
+            if (clipFlags) {
+                properties.getClippingRectForFlags(clipFlags, &saveLayerBounds);
+                clipFlags = 0; // all clipping done by savelayer
+            }
+        }
+
+        if (CC_UNLIKELY(ATRACE_ENABLED() && properties.promotedToLayer())) {
+            // pretend alpha always causes savelayer to warn about
+            // performance problem affecting old versions
+            ATRACE_FORMAT("%s alpha caused saveLayer %dx%d", node.getName(), width, height);
+        }
+    }
+    if (clipFlags) {
+        Rect clipRect;
+        properties.getClippingRectForFlags(clipFlags, &clipRect);
+        mCanvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
+                SkRegion::kIntersect_Op);
+    }
+
+    if (properties.getRevealClip().willClip()) {
+        Rect bounds;
+        properties.getRevealClip().getBounds(&bounds);
+        mCanvasState.setClippingRoundRect(mAllocator,
+                bounds, properties.getRevealClip().getRadius());
+    } else if (properties.getOutline().willClip()) {
+        mCanvasState.setClippingOutline(mAllocator, &(properties.getOutline()));
+    }
+
+    if (!mCanvasState.quickRejectConservative(0, 0, width, height)) {
+        // not rejected, so defer render as either Layer, or direct (possibly wrapped in saveLayer)
         if (node.getLayer()) {
             // HW layer
             LayerOp* drawLayerOp = new (mAllocator) LayerOp(node);
             BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
             if (bakedOpState) {
-                // Layer will be drawn into parent layer (which is now current, since we popped mLayerStack)
+                // Node's layer already deferred, schedule it to render into parent layer
                 currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Bitmap);
             }
+        } else if (CC_UNLIKELY(!saveLayerBounds.isEmpty())) {
+            // draw DisplayList contents within temporary, since persisted layer could not be used.
+            // (temp layers are clipped to viewport, since they don't persist offscreen content)
+            SkPaint saveLayerPaint;
+            saveLayerPaint.setAlpha(properties.getAlpha());
+            onBeginLayerOp(*new (mAllocator) BeginLayerOp(
+                    saveLayerBounds,
+                    Matrix4::identity(),
+                    saveLayerBounds,
+                    &saveLayerPaint));
+            deferDisplayList(*(node.getDisplayList()));
+            onEndLayerOp(*new (mAllocator) EndLayerOp());
         } else {
-            deferImpl(*(node.getDisplayList()));
+            deferDisplayList(*(node.getDisplayList()));
         }
     }
 }
@@ -535,7 +618,7 @@ void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
  */
 #define OP_RECEIVER(Type) \
         [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.on##Type(static_cast<const Type&>(op)); },
-void OpReorderer::deferImpl(const DisplayList& displayList) {
+void OpReorderer::deferDisplayList(const DisplayList& displayList) {
     static std::function<void(OpReorderer& reorderer, const RecordedOp&)> receivers[] = {
         MAP_OPS(OP_RECEIVER)
     };
@@ -600,34 +683,21 @@ void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
     currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
 }
 
-void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight, const Rect& repaintRect,
+void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
+        float contentTranslateX, float contentTranslateY,
+        const Rect& repaintRect,
+        const Vector3& lightCenter,
         const BeginLayerOp* beginLayerOp, RenderNode* renderNode) {
-
-    auto previous = mCanvasState.currentSnapshot();
     mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
-    mCanvasState.writableSnapshot()->transform->loadIdentity();
     mCanvasState.writableSnapshot()->initializeViewport(layerWidth, layerHeight);
     mCanvasState.writableSnapshot()->roundRectClipState = nullptr;
-
-    Vector3 lightCenter = previous->getRelativeLightCenter();
-    if (renderNode) {
-        Matrix4& inverse = renderNode->getLayer()->inverseTransformInWindow;
-        inverse.mapPoint3d(lightCenter);
-    } else {
-        // Combine all transforms used to present saveLayer content:
-        // parent content transform * canvas transform * bounds offset
-        Matrix4 contentTransform(*previous->transform);
-        contentTransform.multiply(beginLayerOp->localMatrix);
-        contentTransform.translate(beginLayerOp->unmappedBounds.left, beginLayerOp->unmappedBounds.top);
-
-        // inverse the total transform, to map light center into layer-relative space
-        Matrix4 inverse;
-        inverse.loadInverse(contentTransform);
-        inverse.mapPoint3d(lightCenter);
-    }
     mCanvasState.writableSnapshot()->setRelativeLightCenter(lightCenter);
+    mCanvasState.writableSnapshot()->transform->loadTranslate(
+            contentTranslateX, contentTranslateY, 0);
+    mCanvasState.writableSnapshot()->setClip(
+            repaintRect.left, repaintRect.top, repaintRect.right, repaintRect.bottom);
 
-    // create a new layer, and push its index on the stack
+    // create a new layer repaint, and push its index on the stack
     mLayerStack.push_back(mLayerReorderers.size());
     mLayerReorderers.emplace_back(layerWidth, layerHeight, repaintRect, beginLayerOp, renderNode);
 }
@@ -640,9 +710,48 @@ void OpReorderer::restoreForLayer() {
 
 // TODO: test rejection at defer time, where the bounds become empty
 void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
-    const uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
-    const uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
-    saveForLayer(layerWidth, layerHeight, Rect(layerWidth, layerHeight), &op, nullptr);
+    uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
+    uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
+
+    auto previous = mCanvasState.currentSnapshot();
+    Vector3 lightCenter = previous->getRelativeLightCenter();
+
+    // Combine all transforms used to present saveLayer content:
+    // parent content transform * canvas transform * bounds offset
+    Matrix4 contentTransform(*previous->transform);
+    contentTransform.multiply(op.localMatrix);
+    contentTransform.translate(op.unmappedBounds.left, op.unmappedBounds.top);
+
+    Matrix4 inverseContentTransform;
+    inverseContentTransform.loadInverse(contentTransform);
+
+    // map the light center into layer-relative space
+    inverseContentTransform.mapPoint3d(lightCenter);
+
+    // Clip bounds of temporary layer to parent's clip rect, so:
+    Rect saveLayerBounds(layerWidth, layerHeight);
+    //     1) transform Rect(width, height) into parent's space
+    //        note: left/top offsets put in contentTransform above
+    contentTransform.mapRect(saveLayerBounds);
+    //     2) intersect with parent's clip
+    saveLayerBounds.doIntersect(previous->getRenderTargetClip());
+    //     3) and transform back
+    inverseContentTransform.mapRect(saveLayerBounds);
+    saveLayerBounds.doIntersect(Rect(layerWidth, layerHeight));
+    saveLayerBounds.roundOut();
+
+    // if bounds are reduced, will clip the layer's area by reducing required bounds...
+    layerWidth = saveLayerBounds.getWidth();
+    layerHeight = saveLayerBounds.getHeight();
+    // ...and shifting drawing content to account for left/top side clipping
+    float contentTranslateX = -saveLayerBounds.left;
+    float contentTranslateY = -saveLayerBounds.top;
+
+    saveForLayer(layerWidth, layerHeight,
+            contentTranslateX, contentTranslateY,
+            Rect(layerWidth, layerHeight),
+            lightCenter,
+            &op, nullptr);
 }
 
 void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {

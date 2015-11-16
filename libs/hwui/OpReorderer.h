@@ -190,7 +190,10 @@ private:
         Positive
     };
     void saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
-            const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
+            float contentTranslateX, float contentTranslateY,
+            const Rect& repaintRect,
+            const Vector3& lightCenter,
+            const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
     void restoreForLayer();
 
     LayerReorderer& currentLayer() { return mLayerReorderers[mLayerStack.back()]; }
@@ -204,7 +207,7 @@ private:
 
     void deferShadow(const RenderNodeOp& casterOp);
 
-    void deferImpl(const DisplayList& displayList);
+    void deferDisplayList(const DisplayList& displayList);
 
     template <typename V>
     void defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes);

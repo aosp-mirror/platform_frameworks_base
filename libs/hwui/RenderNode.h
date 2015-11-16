@@ -187,9 +187,6 @@ public:
 
     AnimatorManager& animators() { return mAnimatorManager; }
 
-    // Returns false if the properties dictate the subtree contained in this RenderNode won't render
-    bool applyViewProperties(CanvasState& canvasState, LinearAllocator& allocator) const;
-
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false) const;
 
     bool nothingToDraw() const {

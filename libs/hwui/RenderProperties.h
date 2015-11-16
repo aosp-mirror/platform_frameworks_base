@@ -610,7 +610,6 @@ public:
 
     bool fitsOnLayer() const {
         const DeviceInfo* deviceInfo = DeviceInfo::get();
-        LOG_ALWAYS_FATAL_IF(!deviceInfo, "DeviceInfo uninitialized");
         return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
                         && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
     }
