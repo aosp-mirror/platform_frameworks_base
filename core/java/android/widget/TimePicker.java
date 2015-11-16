@@ -100,7 +100,7 @@ public class TimePicker extends FrameLayout {
      * @see #getHour()
      */
     public void setHour(int hour) {
-        mDelegate.setCurrentHour(hour);
+        mDelegate.setHour(hour);
     }
 
     /**
@@ -110,7 +110,7 @@ public class TimePicker extends FrameLayout {
      * @see #setHour(int)
      */
     public int getHour() {
-        return mDelegate.getCurrentHour();
+        return mDelegate.getHour();
     }
 
     /**
@@ -120,7 +120,7 @@ public class TimePicker extends FrameLayout {
      * @see #getMinute()
      */
     public void setMinute(int minute) {
-        mDelegate.setCurrentMinute(minute);
+        mDelegate.setMinute(minute);
     }
 
     /**
@@ -130,7 +130,7 @@ public class TimePicker extends FrameLayout {
      * @see #setMinute(int)
      */
     public int getMinute() {
-        return mDelegate.getCurrentMinute();
+        return mDelegate.getMinute();
     }
 
     /**
@@ -150,7 +150,7 @@ public class TimePicker extends FrameLayout {
     @NonNull
     @Deprecated
     public Integer getCurrentHour() {
-        return mDelegate.getCurrentHour();
+        return mDelegate.getHour();
     }
 
     /**
@@ -160,7 +160,7 @@ public class TimePicker extends FrameLayout {
      */
     @Deprecated
     public void setCurrentMinute(@NonNull Integer currentMinute) {
-        mDelegate.setCurrentMinute(currentMinute);
+        mDelegate.setMinute(currentMinute);
     }
 
     /**
@@ -170,7 +170,7 @@ public class TimePicker extends FrameLayout {
     @NonNull
     @Deprecated
     public Integer getCurrentMinute() {
-        return mDelegate.getCurrentMinute();
+        return mDelegate.getMinute();
     }
 
     /**
@@ -186,7 +186,7 @@ public class TimePicker extends FrameLayout {
             return;
         }
 
-        mDelegate.setIs24HourView(is24HourView);
+        mDelegate.setIs24Hour(is24HourView);
     }
 
     /**
@@ -195,7 +195,7 @@ public class TimePicker extends FrameLayout {
      * @see #setIs24HourView(Boolean)
      */
     public boolean is24HourView() {
-        return mDelegate.is24HourView();
+        return mDelegate.is24Hour();
     }
 
     /**
@@ -205,16 +205,6 @@ public class TimePicker extends FrameLayout {
      */
     public void setOnTimeChangedListener(OnTimeChangedListener onTimeChangedListener) {
         mDelegate.setOnTimeChangedListener(onTimeChangedListener);
-    }
-
-    /**
-     * Sets the callback that indicates the current time is valid.
-     *
-     * @param callback the callback, may be null
-     * @hide
-     */
-    public void setValidationCallback(@Nullable ValidationCallback callback) {
-        mDelegate.setValidationCallback(callback);
     }
 
     @Override
@@ -231,12 +221,6 @@ public class TimePicker extends FrameLayout {
     @Override
     public int getBaseline() {
         return mDelegate.getBaseline();
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDelegate.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -269,40 +253,27 @@ public class TimePicker extends FrameLayout {
      * for the real behavior.
      */
     interface TimePickerDelegate {
-        void setCurrentHour(int currentHour);
-        int getCurrentHour();
+        void setHour(int hour);
+        int getHour();
 
-        void setCurrentMinute(int currentMinute);
-        int getCurrentMinute();
+        void setMinute(int minute);
+        int getMinute();
 
-        void setIs24HourView(boolean is24HourView);
-        boolean is24HourView();
+        void setIs24Hour(boolean is24Hour);
+        boolean is24Hour();
 
         void setOnTimeChangedListener(OnTimeChangedListener onTimeChangedListener);
-        void setValidationCallback(ValidationCallback callback);
 
         void setEnabled(boolean enabled);
         boolean isEnabled();
 
         int getBaseline();
 
-        void onConfigurationChanged(Configuration newConfig);
-
         Parcelable onSaveInstanceState(Parcelable superState);
         void onRestoreInstanceState(Parcelable state);
 
         boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event);
         void onPopulateAccessibilityEvent(AccessibilityEvent event);
-    }
-
-    /**
-     * A callback interface for updating input validity when the TimePicker
-     * when included into a Dialog.
-     *
-     * @hide
-     */
-    public static interface ValidationCallback {
-        void onValidationChanged(boolean valid);
     }
 
     static String[] getAmPmStrings(Context context) {
@@ -319,43 +290,16 @@ public class TimePicker extends FrameLayout {
      * An abstract class which can be used as a start for TimePicker implementations
      */
     abstract static class AbstractTimePickerDelegate implements TimePickerDelegate {
-        // The delegator
-        protected TimePicker mDelegator;
+        protected final TimePicker mDelegator;
+        protected final Context mContext;
+        protected final Locale mLocale;
 
-        // The context
-        protected Context mContext;
-
-        // The current locale
-        protected Locale mCurrentLocale;
-
-        // Callbacks
         protected OnTimeChangedListener mOnTimeChangedListener;
-        protected ValidationCallback mValidationCallback;
 
-        public AbstractTimePickerDelegate(TimePicker delegator, Context context) {
+        public AbstractTimePickerDelegate(@NonNull TimePicker delegator, @NonNull Context context) {
             mDelegator = delegator;
             mContext = context;
-
-            // initialization based on locale
-            setCurrentLocale(Locale.getDefault());
-        }
-
-        public void setCurrentLocale(Locale locale) {
-            if (locale.equals(mCurrentLocale)) {
-                return;
-            }
-            mCurrentLocale = locale;
-        }
-
-        @Override
-        public void setValidationCallback(ValidationCallback callback) {
-            mValidationCallback = callback;
-        }
-
-        protected void onValidationChanged(boolean valid) {
-            if (mValidationCallback != null) {
-                mValidationCallback.onValidationChanged(valid);
-            }
+            mLocale = context.getResources().getConfiguration().locale;
         }
     }
 }
