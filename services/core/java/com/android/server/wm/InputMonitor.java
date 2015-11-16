@@ -171,10 +171,10 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
     private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
             final WindowState child, int flags, final int type, final boolean isVisible,
-            final boolean hasFocus, final boolean hasWallpaper, DisplayContent displayContent) {
+            final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
-        flags = child.getTouchableRegion(inputWindowHandle.touchableRegion, flags, this);
+        flags = child.getTouchableRegion(inputWindowHandle.touchableRegion, flags);
         inputWindowHandle.layoutParamsFlags = flags;
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
@@ -308,8 +308,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     mService.mDragState.sendDragStartedIfNeededLw(child);
                 }
 
-                addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible, hasFocus,
-                        hasWallpaper, displayContent);
+                addInputWindowHandleLw(
+                        inputWindowHandle, child, flags, type, isVisible, hasFocus, hasWallpaper);
             }
         }
 
