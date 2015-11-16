@@ -20,11 +20,13 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.SparseBooleanArray;
 import android.view.View;
 
 import com.android.documentsui.dirlist.MultiSelectManager.GridModel;
 
+@SmallTest
 public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
     private static final int VIEW_PADDING_PX = 5;

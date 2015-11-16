@@ -18,6 +18,7 @@ package com.android.documentsui.dirlist;
 
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SmallTest
 public class MultiSelectManagerTest extends AndroidTestCase {
 
     private static final List<String> items;
@@ -162,7 +164,6 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         shiftTap(14);
         assertRangeSelection(14, 17);
     }
-
 
     public void testSingleTapUp_ShiftReversesSelectionDirection() {
         longPress(7);

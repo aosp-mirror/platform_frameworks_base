@@ -32,6 +32,8 @@ import android.provider.DocumentsContract.Document;
 import android.test.MoreAsserts;
 import android.test.ServiceTestCase;
 import android.test.mock.MockContentResolver;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -52,6 +54,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+@MediumTest
 public class CopyTest extends ServiceTestCase<CopyService> {
 
     public CopyTest() {
@@ -89,9 +92,6 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         super.tearDown();
     }
 
-    /**
-     * Test copying a single file.
-     */
     public void testCopyFile() throws Exception {
         String srcPath = "/test0.txt";
         Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
@@ -131,9 +131,6 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         MoreAsserts.assertEquals("Moved file contents differ", testContent.getBytes(), dstContent);
     }
 
-    /**
-     * Test copying multiple files.
-     */
     public void testCopyMultipleFiles() throws Exception {
         String testContent[] = {
                 "The five boxing wizards jump quickly",
