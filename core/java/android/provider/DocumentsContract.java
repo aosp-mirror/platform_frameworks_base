@@ -233,6 +233,7 @@ public final class DocumentsContract {
          * @see #FLAG_SUPPORTS_TYPED_DOCUMENT
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
+         * @see #FLAG_VIRTUAL_DOCUMENT
          */
         public static final String COLUMN_FLAGS = "flags";
 
@@ -354,6 +355,17 @@ public final class DocumentsContract {
          *      android.os.CancellationSignal)
          */
         public static final int FLAG_SUPPORTS_TYPED_DOCUMENT = 1 << 9;
+
+        /**
+         * Flag indicating that a document is virtual, and doesn't have byte
+         * representation in the MIME type specified as {@link #COLUMN_MIME_TYPE}.
+         *
+         * @see #COLUMN_FLAGS
+         * @see #COLUMN_MIME_TYPE
+         * @see DocumentsProvider#openTypedDocument(String, String, Bundle,
+         *      android.os.CancellationSignal)
+         */
+        public static final int FLAG_VIRTUAL_DOCUMENT = 1 << 10;
 
         /**
          * Flag indicating that document titles should be hidden when viewing

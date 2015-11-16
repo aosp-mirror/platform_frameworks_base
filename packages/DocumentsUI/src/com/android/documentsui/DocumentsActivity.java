@@ -172,6 +172,11 @@ public class DocumentsActivity extends BaseActivity {
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
+        if (state.action == ACTION_OPEN || state.action == ACTION_GET_CONTENT
+                || state.action == ACTION_CREATE) {
+            state.openableOnly = intent.hasCategory(Intent.CATEGORY_OPENABLE);
+        }
+
         if (state.action == ACTION_PICK_COPY_DESTINATION) {
             state.directoryCopy = intent.getBooleanExtra(
                     Shared.EXTRA_DIRECTORY_COPY, false);

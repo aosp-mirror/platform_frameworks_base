@@ -660,8 +660,7 @@ public class DirectoryFragment extends Fragment {
                 checkNotNull(cursor, "Cursor cannot be null.");
                 final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-                return mTuner.canSelectType(docMimeType)
-                        && mTuner.isDocumentEnabled(docMimeType, docFlags);
+                return mTuner.canSelectType(docMimeType, docFlags);
             }
             return true;
         }

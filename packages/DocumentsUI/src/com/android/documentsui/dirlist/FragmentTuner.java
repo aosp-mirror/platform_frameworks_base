@@ -63,7 +63,7 @@ public abstract class FragmentTuner {
     // Subtly different from isDocumentEnabled. The reason may be illuminated as follows.
     // A folder is enabled such that it may be double clicked, even in settings
     // when the folder itself cannot be selected. This may also be true of container types.
-    public boolean canSelectType(String docMimeType) {
+    public boolean canSelectType(String docMimeType, int docFlags) {
         return true;
     }
 
@@ -85,31 +85,44 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public boolean canSelectType(String docMimeType) {
-            switch (mState.action) {
-                case ACTION_OPEN:
-                case ACTION_CREATE:
-                case ACTION_GET_CONTENT:
-                    return !isDirectory(docMimeType);
-                case ACTION_OPEN_TREE:
-                    // In this case nothing *ever* is selectable...the expected user behavior is
-                    // they navigate *into* a folder, then click a confirmation button indicating
-                    // that the current directory is the directory they are picking.
-                    return false;
+        public boolean canSelectType(String docMimeType, int docFlags) {
+            if (!isDocumentEnabled(docMimeType, docFlags)) {
+                return false;
             }
+
+            if (isDirectory(docMimeType)) {
+                return false;
+            }
+
+            if (mState.action == ACTION_OPEN_TREE) {
+                // In this case nothing *ever* is selectable...the expected user behavior is
+                // they navigate *into* a folder, then click a confirmation button indicating
+                // that the current directory is the directory they are picking.
+                return false;
+            }
+
             return true;
         }
 
         @Override
         public boolean isDocumentEnabled(String docMimeType, int docFlags) {
-            // Directories are always enabled
+            // Directories are always enabled.
             if (isDirectory(docMimeType)) {
                 return true;
             }
 
-            // Read-only files are disabled when creating
-            if (mState.action == ACTION_CREATE && (docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
-                return false;
+            switch (mState.action) {
+                case ACTION_CREATE:
+                    // Read-only files are disabled when creating.
+                    if ((docFlags & Document.FLAG_SUPPORTS_WRITE) == 0) {
+                        return false;
+                    }
+                case ACTION_OPEN:
+                case ACTION_GET_CONTENT:
+                    final boolean isVirtual = (docFlags & Document.FLAG_VIRTUAL_DOCUMENT) != 0;
+                    if (isVirtual && mState.openableOnly) {
+                        return false;
+                    }
             }
 
             return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);

@@ -52,6 +52,7 @@ public class State implements android.os.Parcelable {
     public boolean stackTouched;
     public boolean restored;
     public boolean directoryCopy;
+    public boolean openableOnly;
     /** Transfer mode for file copy/move operations. */
     public int transferMode;
 
@@ -119,6 +120,7 @@ public class State implements android.os.Parcelable {
         out.writeMap(dirState);
         out.writeList(selectedDocumentsForCopy);
         out.writeList(excludedAuthorities);
+        out.writeInt(openableOnly ? 1 : 0);
     }
 
     public static final Creator<State> CREATOR = new Creator<State>() {
@@ -142,6 +144,7 @@ public class State implements android.os.Parcelable {
             in.readMap(state.dirState, null);
             in.readList(state.selectedDocumentsForCopy, null);
             in.readList(state.excludedAuthorities, null);
+            state.openableOnly = in.readInt() != 0;
             return state;
         }
 

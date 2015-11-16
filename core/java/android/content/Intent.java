@@ -2956,8 +2956,8 @@ public class Intent implements Parcelable, Cloneable {
      * multiple selection), then you can specify {@link #EXTRA_ALLOW_MULTIPLE}
      * to indicate this.
      * <p>
-     * Callers must include {@link #CATEGORY_OPENABLE} in the Intent so that
-     * returned URIs can be opened with
+     * Callers must include {@link #CATEGORY_OPENABLE} in the Intent to obtain
+     * URIs that can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
      * Output: The URI of the item that was picked, returned in
@@ -2992,8 +2992,8 @@ public class Intent implements Parcelable, Cloneable {
      * Callers can provide an initial display name through {@link #EXTRA_TITLE},
      * but the user may change this value before creating the file.
      * <p>
-     * Callers must include {@link #CATEGORY_OPENABLE} in the Intent so that
-     * returned URIs can be opened with
+     * Callers must include {@link #CATEGORY_OPENABLE} in the Intent to obtain
+     * URIs that can be opened with
      * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
      * Output: The URI of the item that was created. This must be a
