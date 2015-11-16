@@ -229,11 +229,12 @@ public:
     private:
         friend class Tokenizer<Char>;
 
-        iterator(BasicStringPiece<Char> s, Char sep, BasicStringPiece<Char> tok);
+        iterator(BasicStringPiece<Char> s, Char sep, BasicStringPiece<Char> tok, bool end);
 
-        BasicStringPiece<Char> str;
-        Char separator;
-        BasicStringPiece<Char> token;
+        BasicStringPiece<Char> mStr;
+        Char mSeparator;
+        BasicStringPiece<Char> mToken;
+        bool mEnd;
     };
 
     Tokenizer(BasicStringPiece<Char> str, Char sep);
@@ -252,36 +253,38 @@ inline Tokenizer<Char> tokenize(BasicStringPiece<Char> str, Char sep) {
 
 template <typename Char>
 typename Tokenizer<Char>::iterator& Tokenizer<Char>::iterator::operator++() {
-    const Char* start = token.end();
-    const Char* end = str.end();
+    const Char* start = mToken.end();
+    const Char* end = mStr.end();
     if (start == end) {
-        token.assign(token.end(), 0);
+        mEnd = true;
+        mToken.assign(mToken.end(), 0);
         return *this;
     }
 
     start += 1;
     const Char* current = start;
     while (current != end) {
-        if (*current == separator) {
-            token.assign(start, current - start);
+        if (*current == mSeparator) {
+            mToken.assign(start, current - start);
             return *this;
         }
         ++current;
     }
-    token.assign(start, end - start);
+    mToken.assign(start, end - start);
     return *this;
 }
 
 template <typename Char>
 inline BasicStringPiece<Char> Tokenizer<Char>::iterator::operator*() {
-    return token;
+    return mToken;
 }
 
 template <typename Char>
 inline bool Tokenizer<Char>::iterator::operator==(const iterator& rhs) const {
     // We check equality here a bit differently.
     // We need to know that the addresses are the same.
-    return token.begin() == rhs.token.begin() && token.end() == rhs.token.end();
+    return mToken.begin() == rhs.mToken.begin() && mToken.end() == rhs.mToken.end() &&
+            mEnd == rhs.mEnd;
 }
 
 template <typename Char>
@@ -291,8 +294,8 @@ inline bool Tokenizer<Char>::iterator::operator!=(const iterator& rhs) const {
 
 template <typename Char>
 inline Tokenizer<Char>::iterator::iterator(BasicStringPiece<Char> s, Char sep,
-                                           BasicStringPiece<Char> tok) :
-        str(s), separator(sep), token(tok) {
+                                           BasicStringPiece<Char> tok, bool end) :
+        mStr(s), mSeparator(sep), mToken(tok), mEnd(end) {
 }
 
 template <typename Char>
@@ -307,8 +310,8 @@ inline typename Tokenizer<Char>::iterator Tokenizer<Char>::end() {
 
 template <typename Char>
 inline Tokenizer<Char>::Tokenizer(BasicStringPiece<Char> str, Char sep) :
-        mBegin(++iterator(str, sep, BasicStringPiece<Char>(str.begin() - 1, 0))),
-        mEnd(str, sep, BasicStringPiece<Char>(str.end(), 0)) {
+        mBegin(++iterator(str, sep, BasicStringPiece<Char>(str.begin() - 1, 0), false)),
+        mEnd(str, sep, BasicStringPiece<Char>(str.end(), 0), true) {
 }
 
 inline uint16_t hostToDevice16(uint16_t value) {

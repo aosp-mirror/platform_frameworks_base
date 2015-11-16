@@ -101,6 +101,15 @@ TEST(UtilTest, TokenizeInput) {
     ASSERT_EQ(tokenizer.end(), iter);
 }
 
+TEST(UtilTest, TokenizeEmptyString) {
+    auto tokenizer = util::tokenize(StringPiece16(u""), u'|');
+    auto iter = tokenizer.begin();
+    ASSERT_NE(tokenizer.end(), iter);
+    ASSERT_EQ(StringPiece16(), *iter);
+    ++iter;
+    ASSERT_EQ(tokenizer.end(), iter);
+}
+
 TEST(UtilTest, TokenizeAtEnd) {
     auto tokenizer = util::tokenize(StringPiece16(u"one."), u'.');
     auto iter = tokenizer.begin();
