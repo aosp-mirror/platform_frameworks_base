@@ -1956,8 +1956,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
-            sUserManager = new UserManagerService(context, this,
-                    mInstallLock, mPackages);
+            sUserManager = new UserManagerService(context, this, mPackages);
 
             // Propagate permission configuration in to package manager.
             ArrayMap<String, SystemConfig.PermissionEntry> permConfig
@@ -16353,23 +16352,26 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /** Called by UserManagerService */
-    void cleanUpUserLILPw(UserManagerService userManager, int userHandle) {
-        mDirtyUsers.remove(userHandle);
-        mSettings.removeUserLPw(userHandle);
-        mPendingBroadcasts.remove(userHandle);
-        if (mInstaller != null) {
-            // Technically, we shouldn't be doing this with the package lock
-            // held.  However, this is very rare, and there is already so much
-            // other disk I/O going on, that we'll let it slide for now.
-            final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                final String volumeUuid = vol.getFsUuid();
-                if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
-                mInstaller.removeUserDataDirs(volumeUuid, userHandle);
+    void cleanUpUser(UserManagerService userManager, int userHandle) {
+        synchronized (mPackages) {
+            mDirtyUsers.remove(userHandle);
+            mUserNeedsBadging.delete(userHandle);
+            mSettings.removeUserLPw(userHandle);
+            mPendingBroadcasts.remove(userHandle);
+        }
+        synchronized (mInstallLock) {
+            if (mInstaller != null) {
+                final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                    final String volumeUuid = vol.getFsUuid();
+                    if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
+                    mInstaller.removeUserDataDirs(volumeUuid, userHandle);
+                }
+            }
+            synchronized (mPackages) {
+                removeUnusedPackagesLILPw(userManager, userHandle);
             }
         }
-        mUserNeedsBadging.delete(userHandle);
-        removeUnusedPackagesLILPw(userManager, userHandle);
     }
 
     /**
@@ -16419,12 +16421,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /** Called by UserManagerService */
-    void createNewUserLILPw(int userHandle) {
+    void createNewUser(int userHandle) {
         if (mInstaller != null) {
-            mInstaller.createUserConfig(userHandle);
-            mSettings.createNewUserLILPw(this, mInstaller, userHandle);
-            applyFactoryDefaultBrowserLPw(userHandle);
-            primeDomainVerificationsLPw(userHandle);
+            synchronized (mInstallLock) {
+                synchronized (mPackages) {
+                    mInstaller.createUserConfig(userHandle);
+                    mSettings.createNewUserLILPw(this, mInstaller, userHandle);
+                }
+            }
+            synchronized (mPackages) {
+                applyFactoryDefaultBrowserLPw(userHandle);
+                primeDomainVerificationsLPw(userHandle);
+            }
         }
     }
 
