@@ -109,8 +109,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // to capture touch events in that area.
     static final int RESIZE_HANDLE_WIDTH_IN_DP = 30;
 
-    static final boolean BOUNDS_FOR_TOUCH = true;
-
     static final int DRAG_RESIZE_MODE_FREEFORM = 0;
     static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
 

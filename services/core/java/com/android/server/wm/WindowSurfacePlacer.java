@@ -17,7 +17,6 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG;
 import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT_REPEATS;
@@ -57,7 +56,6 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -679,20 +677,17 @@ class WindowSurfacePlacer {
                 final WindowStateAnimator winAnimator = w.mWinAnimator;
 
                 // If the window has moved due to its containing content frame changing, then
-                // notify the listeners and optionally animate it.
+                // notify the listeners and optionally animate it. Simply checking a change of
+                // position is not enough, because being move due to dock divider is not a trigger
+                // for animation.
                 if (w.hasMoved()) {
                     // Frame has moved, containing content frame has also moved, and we're not
                     // currently animating... let's do something.
                     final int left = w.mFrame.left;
                     final int top = w.mFrame.top;
-                    if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0) {
-                        Animation a = AnimationUtils.loadAnimation(mService.mContext,
-                                com.android.internal.R.anim.window_move_from_decor);
-                        winAnimator.setAnimation(a);
-                        winAnimator.mAnimDw = w.mLastFrame.left - left;
-                        winAnimator.mAnimDh = w.mLastFrame.top - top;
-                        winAnimator.mAnimateMove = true;
-                        winAnimator.mAnimatingMove = true;
+                    if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                            && !w.isDragResizing()) {
+                        winAnimator.setMoveAnimation(left, top);
                     }
 
                     //TODO (multidisplay): Accessibility supported only for the default display.
