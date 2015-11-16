@@ -1006,6 +1006,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         // is disposed.
         int dupFd = dup(blob.fd());
         if (dupFd < 0) {
+            ALOGE("Error allocating dup fd. Error:%d", errno);
             blob.release();
             SkSafeUnref(ctable);
             doThrowRE(env, "Could not allocate dup blob fd.");
