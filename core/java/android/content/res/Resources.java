@@ -48,7 +48,6 @@ import android.icu.text.PluralRules;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Trace;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LocaleList;
@@ -68,7 +67,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 /**
@@ -120,9 +118,6 @@ public class Resources {
     private static final LongSparseArray<android.content.res.ConstantState<ColorStateList>>
             sPreloadedColorStateLists = new LongSparseArray<>();
 
-    private static final String CACHE_NOT_THEMED = "";
-    private static final String CACHE_NULL_THEME = "null_theme";
-
     // Pool of TypedArrays targeted to this Resources object.
     final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
 
@@ -130,10 +125,11 @@ public class Resources {
     static Resources mSystem = null;
 
     private static boolean sPreloaded;
-    private static int sPreloadedDensity;
+
+    /** Lock object used to protect access to caches and configuration. */
+    private final Object mAccessLock = new Object();
 
     // These are protected by mAccessLock.
-    private final Object mAccessLock = new Object();
     private final Configuration mTmpConfig = new Configuration();
     private final DrawableCache mDrawableCache = new DrawableCache(this);
     private final DrawableCache mColorDrawableCache = new DrawableCache(this);
@@ -147,7 +143,12 @@ public class Resources {
     /** Used to inflate drawable objects from XML. */
     private DrawableInflater mDrawableInflater;
 
+    /** Lock object used to protect access to {@link #mTmpValue}. */
+    private final Object mTmpValueLock = new Object();
+
+    /** Single-item pool used to minimize TypedValue allocations. */
     private TypedValue mTmpValue = new TypedValue();
+
     private boolean mPreloading;
 
     private int mLastCachedXmlBlockIndex = -1;
@@ -248,6 +249,10 @@ public class Resources {
 
         public NotFoundException(String name) {
             super(name);
+        }
+
+        public NotFoundException(String name, Exception cause) {
+            super(name, cause);
         }
     }
 
@@ -621,18 +626,15 @@ public class Resources {
      * @see #getDimensionPixelSize
      */
     public float getDimension(@DimenRes int id) throws NotFoundException {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type == TypedValue.TYPE_DIMENSION) {
                 return TypedValue.complexToDimension(value.data, mMetrics);
             }
-            throw new NotFoundException(
-                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
 
@@ -656,19 +658,15 @@ public class Resources {
      * @see #getDimensionPixelSize
      */
     public int getDimensionPixelOffset(@DimenRes int id) throws NotFoundException {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type == TypedValue.TYPE_DIMENSION) {
-                return TypedValue.complexToDimensionPixelOffset(
-                        value.data, mMetrics);
+                return TypedValue.complexToDimensionPixelOffset(value.data, mMetrics);
             }
-            throw new NotFoundException(
-                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
 
@@ -693,19 +691,15 @@ public class Resources {
      * @see #getDimensionPixelOffset
      */
     public int getDimensionPixelSize(@DimenRes int id) throws NotFoundException {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type == TypedValue.TYPE_DIMENSION) {
-                return TypedValue.complexToDimensionPixelSize(
-                        value.data, mMetrics);
+                return TypedValue.complexToDimensionPixelSize(value.data, mMetrics);
             }
-            throw new NotFoundException(
-                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
 
@@ -727,18 +721,15 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
     public float getFraction(@FractionRes int id, int base, int pbase) {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type == TypedValue.TYPE_FRACTION) {
                 return TypedValue.complexToFraction(value.data, base, pbase);
             }
-            throw new NotFoundException(
-                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
     
@@ -801,24 +792,14 @@ public class Resources {
      *         not exist.
      */
     @Nullable
-    public Drawable getDrawable(@DrawableRes int id, @Nullable Theme theme) throws NotFoundException {
-        TypedValue value;
-        synchronized (mAccessLock) {
-            value = mTmpValue;
-            if (value == null) {
-                value = new TypedValue();
-            } else {
-                mTmpValue = null;
-            }
-            getValue(id, value, true);
+    public Drawable getDrawable(@DrawableRes int id, @Nullable Theme theme)
+            throws NotFoundException {
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
+            return loadDrawable(value, id, theme);
+        } finally {
+            releaseTempTypedValue(value);
         }
-        final Drawable res = loadDrawable(value, id, theme);
-        synchronized (mAccessLock) {
-            if (mTmpValue == null) {
-                mTmpValue = value;
-            }
-        }
-        return res;
     }
 
     /**
@@ -849,7 +830,8 @@ public class Resources {
      */
     @Deprecated
     @Nullable
-    public Drawable getDrawableForDensity(@DrawableRes int id, int density) throws NotFoundException {
+    public Drawable getDrawableForDensity(@DrawableRes int id, int density)
+            throws NotFoundException {
         return getDrawableForDensity(id, density, null);
     }
 
@@ -869,14 +851,8 @@ public class Resources {
      */
     @Nullable
     public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
-        TypedValue value;
-        synchronized (mAccessLock) {
-            value = mTmpValue;
-            if (value == null) {
-                value = new TypedValue();
-            } else {
-                mTmpValue = null;
-            }
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             getValueForDensity(id, density, value, true);
 
             /*
@@ -893,15 +869,11 @@ public class Resources {
                     value.density = (value.density * mMetrics.densityDpi) / density;
                 }
             }
-        }
 
-        final Drawable res = loadDrawable(value, id, theme);
-        synchronized (mAccessLock) {
-            if (mTmpValue == null) {
-                mTmpValue = value;
-            }
+            return loadDrawable(value, id, theme);
+        } finally {
+            releaseTempTypedValue(value);
         }
-        return res;
     }
 
     /**
@@ -963,33 +935,21 @@ public class Resources {
      */
     @ColorInt
     public int getColor(@ColorRes int id, @Nullable Theme theme) throws NotFoundException {
-        TypedValue value;
-        synchronized (mAccessLock) {
-            value = mTmpValue;
-            if (value == null) {
-                value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type >= TypedValue.TYPE_FIRST_INT
                     && value.type <= TypedValue.TYPE_LAST_INT) {
-                mTmpValue = value;
                 return value.data;
             } else if (value.type != TypedValue.TYPE_STRING) {
-                throw new NotFoundException(
-                        "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                                + Integer.toHexString(value.type) + " is not valid");
+                throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                        + " type #0x" + Integer.toHexString(value.type) + " is not valid");
             }
-            mTmpValue = null;
-        }
 
-        final ColorStateList csl = loadColorStateList(value, id, theme);
-        synchronized (mAccessLock) {
-            if (mTmpValue == null) {
-                mTmpValue = value;
-            }
+            final ColorStateList csl = loadColorStateList(value, id, theme);
+            return csl.getDefaultColor();
+        } finally {
+            releaseTempTypedValue(value);
         }
-
-        return csl.getDefaultColor();
     }
 
     /**
@@ -1043,25 +1003,12 @@ public class Resources {
     @Nullable
     public ColorStateList getColorStateList(@ColorRes int id, @Nullable Theme theme)
             throws NotFoundException {
-        TypedValue value;
-        synchronized (mAccessLock) {
-            value = mTmpValue;
-            if (value == null) {
-                value = new TypedValue();
-            } else {
-                mTmpValue = null;
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
+            return loadColorStateList(value, id, theme);
+        } finally {
+            releaseTempTypedValue(value);
         }
-
-        final ColorStateList res = loadColorStateList(value, id, theme);
-        synchronized (mAccessLock) {
-            if (mTmpValue == null) {
-                mTmpValue = value;
-            }
-        }
-
-        return res;
     }
 
     /**
@@ -1078,19 +1025,16 @@ public class Resources {
      * @return Returns the boolean value contained in the resource.
      */
     public boolean getBoolean(@BoolRes int id) throws NotFoundException {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type >= TypedValue.TYPE_FIRST_INT
-                && value.type <= TypedValue.TYPE_LAST_INT) {
+                    && value.type <= TypedValue.TYPE_LAST_INT) {
                 return value.data != 0;
             }
-            throw new NotFoundException(
-                "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
 
@@ -1106,19 +1050,16 @@ public class Resources {
      * @return Returns the integer value contained in the resource.
      */
     public int getInteger(@IntegerRes int id) throws NotFoundException {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type >= TypedValue.TYPE_FIRST_INT
-                && value.type <= TypedValue.TYPE_LAST_INT) {
+                    && value.type <= TypedValue.TYPE_LAST_INT) {
                 return value.data;
             }
-            throw new NotFoundException(
-                "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
 
@@ -1136,17 +1077,15 @@ public class Resources {
      * @hide Pending API council approval.
      */
     public float getFloat(int id) {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type == TypedValue.TYPE_FLOAT) {
                 return value.getFloat();
             }
-            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
 
@@ -1238,22 +1177,60 @@ public class Resources {
      * 
      */
     public InputStream openRawResource(@RawRes int id) throws NotFoundException {
-        TypedValue value;
-        synchronized (mAccessLock) {
-            value = mTmpValue;
-            if (value == null) {
-                value = new TypedValue();
-            } else {
+        final TypedValue value = obtainTempTypedValue();
+        try {
+            return openRawResource(id, value);
+        } finally {
+            releaseTempTypedValue(value);
+        }
+    }
+
+    /**
+     * Returns a TypedValue populated with data for the specified resource ID
+     * that's suitable for temporary use. The obtained TypedValue should be
+     * released using {@link #releaseTempTypedValue(TypedValue)}.
+     *
+     * @param id the resource ID for which data should be obtained
+     * @return a populated typed value suitable for temporary use
+     */
+    private TypedValue obtainTempTypedValue(@AnyRes int id) {
+        final TypedValue value = obtainTempTypedValue();
+        getValue(id, value, true);
+        return value;
+    }
+
+    /**
+     * Returns a TypedValue suitable for temporary use. The obtained TypedValue
+     * should be released using {@link #releaseTempTypedValue(TypedValue)}.
+     *
+     * @return a typed value suitable for temporary use
+     */
+    private TypedValue obtainTempTypedValue() {
+        TypedValue tmpValue = null;
+        synchronized (mTmpValueLock) {
+            if (mTmpValue != null) {
+                tmpValue = mTmpValue;
                 mTmpValue = null;
             }
         }
-        InputStream res = openRawResource(id, value);
-        synchronized (mAccessLock) {
+        if (tmpValue == null) {
+            return new TypedValue();
+        }
+        return tmpValue;
+    }
+
+    /**
+     * Returns a TypedValue to the pool. After calling this method, the
+     * specified TypedValue should no longer be accessed.
+     *
+     * @param value the typed value to return to the pool
+     */
+    private void releaseTempTypedValue(TypedValue value) {
+        synchronized (mTmpValueLock) {
             if (mTmpValue == null) {
                 mTmpValue = value;
             }
         }
-        return res;
     }
 
     /**
@@ -1307,32 +1284,14 @@ public class Resources {
      */
     public AssetFileDescriptor openRawResourceFd(@RawRes int id)
             throws NotFoundException {
-        TypedValue value;
-        synchronized (mAccessLock) {
-            value = mTmpValue;
-            if (value == null) {
-                value = new TypedValue();
-            } else {
-                mTmpValue = null;
-            }
-            getValue(id, value, true);
-        }
+        final TypedValue value = obtainTempTypedValue(id);
         try {
-            return mAssets.openNonAssetFd(
-                value.assetCookie, value.string.toString());
+            return mAssets.openNonAssetFd(value.assetCookie, value.string.toString());
         } catch (Exception e) {
-            NotFoundException rnf = new NotFoundException(
-                "File " + value.string.toString()
-                + " from drawable resource ID #0x"
-                + Integer.toHexString(id));
-            rnf.initCause(e);
-            throw rnf;
+            throw new NotFoundException("File " + value.string.toString() + " from drawable "
+                    + "resource ID #0x" + Integer.toHexString(id), e);
         } finally {
-            synchronized (mAccessLock) {
-                if (mTmpValue == null) {
-                    mTmpValue = value;
-                }
-            }
+            releaseTempTypedValue(value);
         }
     }
 
@@ -2015,8 +1974,8 @@ public class Resources {
                     Build.VERSION.RESOURCES_SDK_INT);
 
             if (DEBUG_CONFIG) {
-                Slog.i(TAG, "**** Updating config of " + this + ": final config is " + mConfiguration
-                        + " final compat is " + mCompatibilityInfo);
+                Slog.i(TAG, "**** Updating config of " + this + ": final config is "
+                        + mConfiguration + " final compat is " + mCompatibilityInfo);
             }
 
             mDrawableCache.onConfigurationChange(configChanges);
@@ -2402,8 +2361,7 @@ public class Resources {
             }
             sPreloaded = true;
             mPreloading = true;
-            sPreloadedDensity = DisplayMetrics.DENSITY_DEVICE;
-            mConfiguration.densityDpi = sPreloadedDensity;
+            mConfiguration.densityDpi = DisplayMetrics.DENSITY_DEVICE;
             updateConfiguration(null, null);
         }
     }
@@ -2740,19 +2698,16 @@ public class Resources {
 
     /*package*/ XmlResourceParser loadXmlResourceParser(int id, String type)
             throws NotFoundException {
-        synchronized (mAccessLock) {
-            TypedValue value = mTmpValue;
-            if (value == null) {
-                mTmpValue = value = new TypedValue();
-            }
-            getValue(id, value, true);
+        final TypedValue value = obtainTempTypedValue(id);
+        try {
             if (value.type == TypedValue.TYPE_STRING) {
                 return loadXmlResourceParser(value.string.toString(), id,
                         value.assetCookie, type);
             }
-            throw new NotFoundException(
-                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+            throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+        } finally {
+            releaseTempTypedValue(value);
         }
     }
     
