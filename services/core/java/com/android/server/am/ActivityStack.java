@@ -1418,19 +1418,9 @@ final class ActivityStack {
         if (top == null) {
             return;
         }
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                "ensureActivitiesVisible behind " + top
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
-
-        if (mTranslucentActivityWaiting != top) {
-            mUndrawnActivitiesBelowTopTranslucent.clear();
-            if (mTranslucentActivityWaiting != null) {
-                // Call the callback with a timeout indication.
-                notifyActivityDrawnLocked(null);
-                mTranslucentActivityWaiting = null;
-            }
-            mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
-        }
+        checkTranslucentActivityWaiting(top);
 
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
@@ -1458,7 +1448,6 @@ final class ActivityStack {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                             "Make visible? " + r + " finishing=" + r.finishing
                             + " state=" + r.state);
-
                     // First: if this is not the current activity being started, make
                     // sure it matches the current configuration.
                     if (r != starting) {
@@ -1466,143 +1455,28 @@ final class ActivityStack {
                     }
 
                     if (r.app == null || r.app.thread == null) {
-                        // We need to make sure the app is running if it's the top, or it is
-                        // just made visible from invisible.
-                        // If the app is already visible, it must have died while it was visible.
-                        // In this case, we'll show the dead window but will not restart the app.
-                        // Otherwise we could end up thrashing.
-                        if (r == top || !r.visible) {
-                            // This activity needs to be visible, but isn't even running...
-                            // get it started and resume if no other stack in this stack is resumed.
-                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                    "Start and freeze screen for " + r);
-                            if (r != starting) {
-                                r.startFreezingScreenLocked(r.app, configChanges);
-                            }
-                            if (!r.visible || r.mLaunchTaskBehind) {
-                                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                        "Starting and making visible: " + r);
-                                setVisible(r, true);
-                            }
-                            if (r != starting) {
-                                mStackSupervisor.startSpecificActivityLocked(
-                                        r, noStackActivityResumed, false);
-                                if (activityNdx >= activities.size()) {
-                                    // Record may be removed if its process needs to restart.
-                                    activityNdx = activities.size() - 1;
-                                } else {
-                                    noStackActivityResumed = false;
-                                }
+                        if (makeVisibleAndRestartIfNeeded(starting, configChanges, top,
+                                noStackActivityResumed, r)) {
+                            if (activityNdx >= activities.size()) {
+                                // Record may be removed if its process needs to restart.
+                                activityNdx = activities.size() - 1;
+                            } else {
+                                noStackActivityResumed = false;
                             }
                         }
                     } else if (r.visible) {
-                        // If this activity is already visible, then there is nothing
-                        // else to do here.
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                "Skipping: already visible at " + r);
-                        r.stopFreezingScreenLocked(false);
-                        try {
-                            if (r.returningOptions != null) {
-                                r.app.thread.scheduleOnNewActivityOptions(r.appToken,
-                                        r.returningOptions);
-                            }
-                        } catch(RemoteException e) {
-                        }
-                        if (r.state == ActivityState.RESUMED) {
+                        if (alreadyVisible(r)) {
                             noStackActivityResumed = false;
                         }
                     } else {
-                        // This activity is not currently visible, but is running.
-                        // Tell it to become visible.
-                        r.visible = true;
-                        if (r.state != ActivityState.RESUMED && r != starting) {
-                            // If this activity is paused, tell it
-                            // to now show its window.
-                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                    "Making visible and scheduling visibility: " + r);
-                            try {
-                                if (mTranslucentActivityWaiting != null) {
-                                    r.updateOptionsLocked(r.returningOptions);
-                                    mUndrawnActivitiesBelowTopTranslucent.add(r);
-                                }
-                                setVisible(r, true);
-                                r.sleeping = false;
-                                r.app.pendingUiClean = true;
-                                r.app.thread.scheduleWindowVisibility(r.appToken, true);
-                                r.stopFreezingScreenLocked(false);
-                            } catch (Exception e) {
-                                // Just skip on any failure; we'll make it
-                                // visible when it next restarts.
-                                Slog.w(TAG, "Exception thrown making visibile: "
-                                        + r.intent.getComponent(), e);
-                            }
-                        }
+                        becomeVisible(starting, r);
                     }
-
                     // Aggregate current change flags.
                     configChanges |= r.configChangeFlags;
-
-                    if (r.fullscreen) {
-                        // At this point, nothing else needs to be shown in this task.
-                        behindFullscreenActivity = true;
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
-                                + " stackInvisible=" + stackInvisible
-                                + " behindFullscreenActivity=" + behindFullscreenActivity);
-                    } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
-                        behindFullscreenActivity = true;
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r
-                                + " stackInvisible=" + stackInvisible
-                                + " behindFullscreenActivity=" + behindFullscreenActivity);
-                    }
+                    behindFullscreenActivity = updateBehindFullscreen(stackInvisible,
+                            behindFullscreenActivity, task, r);
                 } else {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                            "Make invisible? " + r + " finishing=" + r.finishing
-                            + " state=" + r.state + " stackInvisible=" + stackInvisible
-                            + " behindFullscreenActivity=" + behindFullscreenActivity);
-                    // Now for any activities that aren't visible to the user, make
-                    // sure they no longer are keeping the screen frozen.
-                    if (r.visible) {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r);
-                        try {
-                            setVisible(r, false);
-                            switch (r.state) {
-                                case STOPPING:
-                                case STOPPED:
-                                    if (r.app != null && r.app.thread != null) {
-                                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                                "Scheduling invisibility: " + r);
-                                        r.app.thread.scheduleWindowVisibility(r.appToken, false);
-                                    }
-                                    break;
-
-                                case INITIALIZING:
-                                case RESUMED:
-                                case PAUSING:
-                                case PAUSED:
-                                    // This case created for transitioning activities from
-                                    // translucent to opaque {@link Activity#convertToOpaque}.
-                                    if (getVisibleBehindActivity() == r) {
-                                        releaseBackgroundResources(r);
-                                    } else {
-                                        if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                                            mStackSupervisor.mStoppingActivities.add(r);
-                                        }
-                                        mStackSupervisor.scheduleIdleLocked();
-                                    }
-                                    break;
-
-                                default:
-                                    break;
-                            }
-                        } catch (Exception e) {
-                            // Just skip on any failure; we'll make it
-                            // visible when it next restarts.
-                            Slog.w(TAG, "Exception thrown making hidden: "
-                                    + r.intent.getComponent(), e);
-                        }
-                    } else {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + r);
-                    }
+                    becomeInvisible(stackInvisible, behindFullscreenActivity, r);
                 }
             }
             if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -1618,6 +1492,147 @@ final class ActivityStack {
             // Nothing is getting drawn or everything was already visible, don't wait for timeout.
             notifyActivityDrawnLocked(null);
         }
+    }
+
+    private void checkTranslucentActivityWaiting(ActivityRecord top) {
+        if (mTranslucentActivityWaiting != top) {
+            mUndrawnActivitiesBelowTopTranslucent.clear();
+            if (mTranslucentActivityWaiting != null) {
+                // Call the callback with a timeout indication.
+                notifyActivityDrawnLocked(null);
+                mTranslucentActivityWaiting = null;
+            }
+            mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
+        }
+    }
+
+    private boolean makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
+            ActivityRecord top, boolean noStackActivityResumed, ActivityRecord r) {
+        // We need to make sure the app is running if it's the top, or it is just made visible from
+        // invisible. If the app is already visible, it must have died while it was visible. In this
+        // case, we'll show the dead window but will not restart the app. Otherwise we could end up
+        // thrashing.
+        if (r == top || !r.visible) {
+            // This activity needs to be visible, but isn't even running...
+            // get it started and resume if no other stack in this stack is resumed.
+            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
+            if (r != starting) {
+                r.startFreezingScreenLocked(r.app, configChanges);
+            }
+            if (!r.visible || r.mLaunchTaskBehind) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
+                setVisible(r, true);
+            }
+            if (r != starting) {
+                mStackSupervisor.startSpecificActivityLocked(r, noStackActivityResumed, false);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void becomeInvisible(boolean stackInvisible, boolean behindFullscreenActivity,
+            ActivityRecord r) {
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r + " finishing="
+                + r.finishing + " state=" + r.state + " stackInvisible=" + stackInvisible
+                + " behindFullscreenActivity=" + behindFullscreenActivity);
+        if (!r.visible) {
+            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + r);
+            return;
+        }
+        // Now for any activities that aren't visible to the user, make sure they no longer are
+        // keeping the screen frozen.
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r);
+        try {
+            setVisible(r, false);
+            switch (r.state) {
+                case STOPPING:
+                case STOPPED:
+                    if (r.app != null && r.app.thread != null) {
+                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
+                                "Scheduling invisibility: " + r);
+                        r.app.thread.scheduleWindowVisibility(r.appToken, false);
+                    }
+                    break;
+
+                case INITIALIZING:
+                case RESUMED:
+                case PAUSING:
+                case PAUSED:
+                    // This case created for transitioning activities from
+                    // translucent to opaque {@link Activity#convertToOpaque}.
+                    if (getVisibleBehindActivity() == r) {
+                        releaseBackgroundResources(r);
+                    } else {
+                        if (!mStackSupervisor.mStoppingActivities.contains(r)) {
+                            mStackSupervisor.mStoppingActivities.add(r);
+                        }
+                        mStackSupervisor.scheduleIdleLocked();
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            // Just skip on any failure; we'll make it visible when it next restarts.
+            Slog.w(TAG, "Exception thrown making hidden: " + r.intent.getComponent(), e);
+        }
+    }
+
+    private boolean updateBehindFullscreen(boolean stackInvisible, boolean behindFullscreenActivity,
+            TaskRecord task, ActivityRecord r) {
+        if (r.fullscreen) {
+            // At this point, nothing else needs to be shown in this task.
+            behindFullscreenActivity = true;
+            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
+                    + " stackInvisible=" + stackInvisible
+                    + " behindFullscreenActivity=" + behindFullscreenActivity);
+        } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
+            behindFullscreenActivity = true;
+            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r
+                    + " stackInvisible=" + stackInvisible
+                    + " behindFullscreenActivity=" + behindFullscreenActivity);
+        }
+        return behindFullscreenActivity;
+    }
+
+    private void becomeVisible(ActivityRecord starting, ActivityRecord r) {
+        // This activity is not currently visible, but is running. Tell it to become visible.
+        r.visible = true;
+        if (r.state != ActivityState.RESUMED && r != starting) {
+            // If this activity is paused, tell it to now show its window.
+            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
+                    "Making visible and scheduling visibility: " + r);
+            try {
+                if (mTranslucentActivityWaiting != null) {
+                    r.updateOptionsLocked(r.returningOptions);
+                    mUndrawnActivitiesBelowTopTranslucent.add(r);
+                }
+                setVisible(r, true);
+                r.sleeping = false;
+                r.app.pendingUiClean = true;
+                r.app.thread.scheduleWindowVisibility(r.appToken, true);
+                r.stopFreezingScreenLocked(false);
+            } catch (Exception e) {
+                // Just skip on any failure; we'll make it
+                // visible when it next restarts.
+                Slog.w(TAG, "Exception thrown making visibile: " + r.intent.getComponent(), e);
+            }
+        }
+    }
+
+    private boolean alreadyVisible(ActivityRecord r) {
+        // If this activity is already visible, then there is nothing else to do here.
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Skipping: already visible at " + r);
+        r.stopFreezingScreenLocked(false);
+        try {
+            if (r.returningOptions != null) {
+                r.app.thread.scheduleOnNewActivityOptions(r.appToken, r.returningOptions);
+            }
+        } catch(RemoteException e) {
+        }
+        return r.state == ActivityState.RESUMED;
     }
 
     void convertActivityToTranslucent(ActivityRecord r) {
