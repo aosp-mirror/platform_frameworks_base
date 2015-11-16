@@ -19,7 +19,6 @@ package android.widget;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Parcel;
@@ -89,7 +88,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private boolean mAllowAutoAdvance;
     private int mInitialHourOfDay;
     private int mInitialMinute;
-    private boolean mIs24HourView;
+    private boolean mIs24Hour;
     private boolean mIsAmPmAtStart;
 
     // Accessibility strings.
@@ -200,19 +199,19 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         mAllowAutoAdvance = true;
 
         // Updates mHourFormat variables used below.
-        updateHourFormat(mCurrentLocale, mIs24HourView);
+        updateHourFormat(mLocale, mIs24Hour);
 
         // Update hour text field.
         final int minHour = mHourFormatStartsAtZero ? 0 : 1;
-        final int maxHour = (mIs24HourView ? 23 : 11) + minHour;
+        final int maxHour = (mIs24Hour ? 23 : 11) + minHour;
         mHourView.setRange(minHour, maxHour);
         mHourView.setShowLeadingZeroes(mHourFormatShowLeadingZero);
 
         // Initialize with current time.
-        mTempCalendar = Calendar.getInstance(mCurrentLocale);
+        mTempCalendar = Calendar.getInstance(mLocale);
         final int currentHour = mTempCalendar.get(Calendar.HOUR_OF_DAY);
         final int currentMinute = mTempCalendar.get(Calendar.MINUTE);
-        initialize(currentHour, currentMinute, mIs24HourView, HOUR_INDEX);
+        initialize(currentHour, currentMinute, mIs24Hour, HOUR_INDEX);
     }
 
     /**
@@ -333,7 +332,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private void initialize(int hourOfDay, int minute, boolean is24HourView, int index) {
         mInitialHourOfDay = hourOfDay;
         mInitialMinute = minute;
-        mIs24HourView = is24HourView;
+        mIs24Hour = is24HourView;
         updateUI(index);
     }
 
@@ -352,17 +351,16 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     private void updateRadialPicker(int index) {
-        mRadialTimePickerView.initialize(mInitialHourOfDay, mInitialMinute, mIs24HourView);
+        mRadialTimePickerView.initialize(mInitialHourOfDay, mInitialMinute, mIs24Hour);
         setCurrentItemShowing(index, false, true);
     }
 
     private void updateHeaderAmPm() {
-
-        if (mIs24HourView) {
+        if (mIs24Hour) {
             mAmPmLayout.setVisibility(View.GONE);
         } else {
             // Ensure that AM/PM layout is in the correct position.
-            final String dateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale, "hm");
+            final String dateTimePattern = DateFormat.getBestDateTimePattern(mLocale, "hm");
             final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
             setAmPmAtStart(isAmPmAtStart);
 
@@ -395,35 +393,32 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * Set the current hour.
      */
     @Override
-    public void setCurrentHour(int currentHour) {
-        if (mInitialHourOfDay == currentHour) {
-            return;
+    public void setHour(int hour) {
+        if (mInitialHourOfDay != hour) {
+            mInitialHourOfDay = hour;
+            updateHeaderHour(hour, true);
+            updateHeaderAmPm();
+            mRadialTimePickerView.setCurrentHour(hour);
+            mRadialTimePickerView.setAmOrPm(mInitialHourOfDay < 12 ? AM : PM);
+            mDelegator.invalidate();
+            onTimeChanged();
         }
-        mInitialHourOfDay = currentHour;
-        updateHeaderHour(currentHour, true);
-        updateHeaderAmPm();
-        mRadialTimePickerView.setCurrentHour(currentHour);
-        mRadialTimePickerView.setAmOrPm(mInitialHourOfDay < 12 ? AM : PM);
-        mDelegator.invalidate();
-        onTimeChanged();
     }
 
     /**
-     * @return The current hour in the range (0-23).
+     * @return the current hour in the range (0-23)
      */
     @Override
-    public int getCurrentHour() {
-        int currentHour = mRadialTimePickerView.getCurrentHour();
-        if (mIs24HourView) {
+    public int getHour() {
+        final int currentHour = mRadialTimePickerView.getCurrentHour();
+        if (mIs24Hour) {
             return currentHour;
+        }
+
+        if (mRadialTimePickerView.getAmOrPm() == PM) {
+            return (currentHour % HOURS_IN_HALF_DAY) + HOURS_IN_HALF_DAY;
         } else {
-            switch(mRadialTimePickerView.getAmOrPm()) {
-                case PM:
-                    return (currentHour % HOURS_IN_HALF_DAY) + HOURS_IN_HALF_DAY;
-                case AM:
-                default:
-                    return currentHour % HOURS_IN_HALF_DAY;
-            }
+            return currentHour % HOURS_IN_HALF_DAY;
         }
     }
 
@@ -431,48 +426,48 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * Set the current minute (0-59).
      */
     @Override
-    public void setCurrentMinute(int currentMinute) {
-        if (mInitialMinute == currentMinute) {
-            return;
+    public void setMinute(int minute) {
+        if (mInitialMinute != minute) {
+            mInitialMinute = minute;
+            updateHeaderMinute(minute, true);
+            mRadialTimePickerView.setCurrentMinute(minute);
+            mDelegator.invalidate();
+            onTimeChanged();
         }
-        mInitialMinute = currentMinute;
-        updateHeaderMinute(currentMinute, true);
-        mRadialTimePickerView.setCurrentMinute(currentMinute);
-        mDelegator.invalidate();
-        onTimeChanged();
     }
 
     /**
      * @return The current minute.
      */
     @Override
-    public int getCurrentMinute() {
+    public int getMinute() {
         return mRadialTimePickerView.getCurrentMinute();
     }
 
     /**
-     * Set whether in 24 hour or AM/PM mode.
+     * Sets whether time is displayed in 24-hour mode or 12-hour mode with
+     * AM/PM indicators.
      *
-     * @param is24HourView True = 24 hour mode. False = AM/PM.
+     * @param is24Hour {@code true} to display time in 24-hour mode or
+     *        {@code false} for 12-hour mode with AM/PM
      */
-    @Override
-    public void setIs24HourView(boolean is24HourView) {
-        if (is24HourView == mIs24HourView) {
-            return;
+    public void setIs24Hour(boolean is24Hour) {
+        if (mIs24Hour != is24Hour) {
+            mIs24Hour = is24Hour;
+            mInitialHourOfDay = getHour();
+
+            updateUI(mRadialTimePickerView.getCurrentItemShowing());
         }
-
-        mIs24HourView = is24HourView;
-        mInitialHourOfDay = getCurrentHour();
-
-        updateUI(mRadialTimePickerView.getCurrentItemShowing());
     }
 
     /**
-     * @return true if this is in 24 hour view else false.
+     * @return {@code true} if time is displayed in 24-hour mode, or
+     *         {@code false} if time is displayed in 12-hour mode with AM/PM
+     *         indicators
      */
     @Override
-    public boolean is24HourView() {
-        return mIs24HourView;
+    public boolean is24Hour() {
+        return mIs24Hour;
     }
 
     @Override
@@ -502,14 +497,9 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        updateUI(mRadialTimePickerView.getCurrentItemShowing());
-    }
-
-    @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
-        return new SavedState(superState, getCurrentHour(), getCurrentMinute(),
-                is24HourView(), getCurrentItemShowing());
+        return new SavedState(superState, getHour(), getMinute(),
+                is24Hour(), getCurrentItemShowing());
     }
 
     @Override
@@ -517,12 +507,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         final SavedState ss = (SavedState) state;
         initialize(ss.getHour(), ss.getMinute(), ss.is24HourMode(), ss.getCurrentItemShowing());
         mRadialTimePickerView.invalidate();
-    }
-
-    @Override
-    public void setCurrentLocale(Locale locale) {
-        super.setCurrentLocale(locale);
-        mTempCalendar = Calendar.getInstance(locale);
     }
 
     @Override
@@ -534,13 +518,13 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         int flags = DateUtils.FORMAT_SHOW_TIME;
-        if (mIs24HourView) {
+        if (mIs24Hour) {
             flags |= DateUtils.FORMAT_24HOUR;
         } else {
             flags |= DateUtils.FORMAT_12HOUR;
         }
-        mTempCalendar.set(Calendar.HOUR_OF_DAY, getCurrentHour());
-        mTempCalendar.set(Calendar.MINUTE, getCurrentMinute());
+        mTempCalendar.set(Calendar.HOUR_OF_DAY, getHour());
+        mTempCalendar.set(Calendar.MINUTE, getMinute());
         String selectedDate = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDate);
@@ -559,8 +543,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private void onTimeChanged() {
         mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnTimeChangedListener != null) {
-            mOnTimeChangedListener.onTimeChanged(mDelegator,
-                    getCurrentHour(), getCurrentMinute());
+            mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
         }
     }
 
@@ -666,7 +649,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         }
 
         if (mOnTimeChangedListener != null) {
-            mOnTimeChangedListener.onTimeChanged(mDelegator, getCurrentHour(), getCurrentMinute());
+            mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
         }
     }
 
@@ -677,14 +660,14 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @return a localized hour number
      */
     private int getLocalizedHour(int hourOfDay) {
-        if (!mIs24HourView) {
+        if (!mIs24Hour) {
             // Convert to hour-of-am-pm.
             hourOfDay %= 12;
         }
 
         if (!mHourFormatStartsAtZero && hourOfDay == 0) {
             // Convert to clock-hour (either of-day or of-am-pm).
-            hourOfDay = mIs24HourView ? 24 : 12;
+            hourOfDay = mIs24Hour ? 24 : 12;
         }
 
         return hourOfDay;
@@ -716,8 +699,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * separator as the character which is just after the hour marker in the returned pattern.
      */
     private void updateHeaderSeparator() {
-        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
-                (mIs24HourView) ? "Hm" : "hm");
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mLocale,
+                (mIs24Hour) ? "Hm" : "hm");
         final String separatorText;
         // See http://www.unicode.org/reports/tr35/tr35-dates.html for hour formats
         final char[] hourFormats = {'H', 'h', 'K', 'k'};
@@ -819,14 +802,14 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private final Runnable mCommitHour = new Runnable() {
         @Override
         public void run() {
-            setCurrentHour(mHourView.getValue());
+            setHour(mHourView.getValue());
         }
     };
 
     private final Runnable mCommitMinute = new Runnable() {
         @Override
         public void run() {
-            setCurrentMinute(mMinuteView.getValue());
+            setMinute(mMinuteView.getValue());
         }
     };
 
