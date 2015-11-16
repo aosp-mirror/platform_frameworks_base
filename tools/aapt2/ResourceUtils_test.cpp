@@ -90,6 +90,26 @@ TEST(ResourceUtilsTest, FailToParseAutoCreateNonIdReference) {
                                                   &privateRef));
 }
 
+TEST(ResourceUtilsTest, ParseAttributeReferences) {
+    EXPECT_TRUE(ResourceUtils::isAttributeReference(u"?android"));
+    EXPECT_TRUE(ResourceUtils::isAttributeReference(u"?android:foo"));
+    EXPECT_TRUE(ResourceUtils::isAttributeReference(u"?attr/foo"));
+    EXPECT_TRUE(ResourceUtils::isAttributeReference(u"?android:attr/foo"));
+}
+
+TEST(ResourceUtilsTest, FailParseIncompleteReference) {
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?style/foo"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?android:style/foo"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?android:"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?android:attr/"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?:attr/"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?:attr/foo"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?:/"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?:/foo"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?attr/"));
+    EXPECT_FALSE(ResourceUtils::isAttributeReference(u"?/foo"));
+}
+
 TEST(ResourceUtilsTest, ParseStyleParentReference) {
     const ResourceName kAndroidStyleFooName = { u"android", ResourceType::kStyle, u"foo" };
     const ResourceName kStyleFooName = { {}, ResourceType::kStyle, u"foo" };

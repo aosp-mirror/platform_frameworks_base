@@ -23,22 +23,28 @@
 namespace aapt {
 namespace ResourceUtils {
 
-void extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
+bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
                          StringPiece16* outType, StringPiece16* outEntry) {
+    bool hasPackageSeparator = false;
+    bool hasTypeSeparator = false;
     const char16_t* start = str.data();
     const char16_t* end = start + str.size();
     const char16_t* current = start;
     while (current != end) {
         if (outType->size() == 0 && *current == u'/') {
+            hasTypeSeparator = true;
             outType->assign(start, current - start);
             start = current + 1;
         } else if (outPackage->size() == 0 && *current == u':') {
+            hasPackageSeparator = true;
             outPackage->assign(start, current - start);
             start = current + 1;
         }
         current++;
     }
     outEntry->assign(start, end - start);
+
+    return !(hasPackageSeparator && outPackage->empty()) && !(hasTypeSeparator && outType->empty());
 }
 
 bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* outCreate,
@@ -62,11 +68,17 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* 
         StringPiece16 package;
         StringPiece16 type;
         StringPiece16 entry;
-        extractResourceName(trimmedStr.substr(offset, trimmedStr.size() - offset), &package, &type,
-                            &entry);
+        if (!extractResourceName(trimmedStr.substr(offset, trimmedStr.size() - offset),
+                                 &package, &type, &entry)) {
+            return false;
+        }
 
         const ResourceType* parsedType = parseResourceType(type);
         if (!parsedType) {
+            return false;
+        }
+
+        if (entry.empty()) {
             return false;
         }
 
@@ -74,14 +86,16 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* 
             return false;
         }
 
-        if (outRef != nullptr) {
+        if (outRef) {
             outRef->package = package;
             outRef->type = *parsedType;
             outRef->entry = entry;
         }
+
         if (outCreate) {
             *outCreate = create;
         }
+
         if (outPrivate) {
             *outPrivate = priv;
         }
@@ -104,18 +118,31 @@ bool tryParseAttributeReference(const StringPiece16& str, ResourceNameRef* outRe
         StringPiece16 package;
         StringPiece16 type;
         StringPiece16 entry;
-        extractResourceName(trimmedStr.substr(1, trimmedStr.size() - 1), &package, &type, &entry);
+        if (!extractResourceName(trimmedStr.substr(1, trimmedStr.size() - 1),
+                                 &package, &type, &entry)) {
+            return false;
+        }
 
         if (!type.empty() && type != u"attr") {
             return false;
         }
 
-        outRef->package = package;
-        outRef->type = ResourceType::kAttr;
-        outRef->entry = entry;
+        if (entry.empty()) {
+            return false;
+        }
+
+        if (outRef) {
+            outRef->package = package;
+            outRef->type = ResourceType::kAttr;
+            outRef->entry = entry;
+        }
         return true;
     }
     return false;
+}
+
+bool isAttributeReference(const StringPiece16& str) {
+    return tryParseAttributeReference(str, nullptr);
 }
 
 /*
