@@ -42,9 +42,7 @@ struct levels_t {
 static levels_t levels;
 
 static jboolean isLoggable(const char* tag, jint level) {
-    return __android_log_is_loggable(level, tag,
-                                     ANDROID_LOG_INFO |
-                                     ANDROID_LOGGABLE_FLAG_NOT_WITHIN_SIGNAL);
+    return __android_log_is_loggable(level, tag, ANDROID_LOG_INFO);
 }
 
 static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring tag, jint level)
