@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.mtp.MtpObjectInfo;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 
@@ -79,8 +80,8 @@ class MtpDatabase {
     private final Map<String, Integer> mMappingMode = new HashMap<>();
 
     @VisibleForTesting
-    MtpDatabase(Context context, boolean inMemory) {
-        mDatabase = new MtpDatabaseInternal(context, inMemory);
+    MtpDatabase(Context context, int flags) {
+        mDatabase = new MtpDatabaseInternal(context, flags);
     }
 
     /**
@@ -111,7 +112,29 @@ class MtpDatabase {
      */
     @VisibleForTesting
     Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
-        return mDatabase.queryChildDocuments(columnNames, parentDocumentId);
+        return queryChildDocuments(columnNames, parentDocumentId, false);
+    }
+
+    @VisibleForTesting
+    Cursor queryChildDocuments(String[] columnNames, String parentDocumentId, boolean useOldId) {
+        final String[] newColumnNames = new String[columnNames.length];
+
+        // TODO: Temporary replace document ID with old format.
+        for (int i = 0; i < columnNames.length; i++) {
+            if (useOldId && DocumentsContract.Document.COLUMN_DOCUMENT_ID.equals(columnNames[i])) {
+                newColumnNames[i] = COLUMN_DEVICE_ID + " || '_' || " + COLUMN_STORAGE_ID +
+                        " || '_' || IFNULL(" + COLUMN_OBJECT_HANDLE + ",0) AS " +
+                        DocumentsContract.Document.COLUMN_DOCUMENT_ID;
+            } else {
+                newColumnNames[i] = columnNames[i];
+            }
+        }
+
+        return mDatabase.queryChildDocuments(newColumnNames, parentDocumentId);
+    }
+
+    Identifier createIdentifier(String parentDocumentId) {
+        return mDatabase.createIdentifier(parentDocumentId);
     }
 
     /**
@@ -193,9 +216,13 @@ class MtpDatabase {
             int i = 0;
             for (final MtpRoot root : roots) {
                 // Use the same value for the root ID and the corresponding document ID.
-                values.put(
-                        Root.COLUMN_ROOT_ID,
-                        valuesList[i++].getAsString(Document.COLUMN_DOCUMENT_ID));
+                final String documentId = valuesList[i++].getAsString(Document.COLUMN_DOCUMENT_ID);
+                // If it fails to insert/update documents, the document ID will be set with -1.
+                // In this case we don't insert/update root extra information neither.
+                if (documentId == null) {
+                    continue;
+                }
+                values.put(Root.COLUMN_ROOT_ID, documentId);
                 values.put(
                         Root.COLUMN_FLAGS,
                         Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);

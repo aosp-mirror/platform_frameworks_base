@@ -78,7 +78,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
-        mDatabase = new MtpDatabase(getContext(), false);
+        mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
         return true;
     }
@@ -155,7 +155,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
-        final Identifier parentIdentifier = Identifier.createFromDocumentId(parentDocumentId);
+        final Identifier parentIdentifier = mDatabase.createIdentifier(parentDocumentId);
         try {
             return getDocumentLoader(parentIdentifier).queryChildDocuments(
                     projection, parentIdentifier);
@@ -255,7 +255,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     void openDevice(int deviceId) throws IOException {
         mMtpManager.openDevice(deviceId);
-        mDeviceToolkits.put(deviceId, new DeviceToolkit(mMtpManager, mResolver));
+        mDeviceToolkits.put(deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
         mRootScanner.scanNow();
     }
 
@@ -318,9 +318,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         public final PipeManager mPipeManager;
         public final DocumentLoader mDocumentLoader;
 
-        public DeviceToolkit(MtpManager manager, ContentResolver resolver) {
+        public DeviceToolkit(MtpManager manager, ContentResolver resolver, MtpDatabase database) {
             mPipeManager = new PipeManager();
-            mDocumentLoader = new DocumentLoader(manager, resolver);
+            mDocumentLoader = new DocumentLoader(manager, resolver, database);
         }
     }
 }

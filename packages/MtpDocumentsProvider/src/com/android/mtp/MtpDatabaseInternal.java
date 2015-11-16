@@ -23,6 +23,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.provider.DocumentsContract.Document;
@@ -35,8 +36,11 @@ import java.util.Objects;
  */
 class MtpDatabaseInternal {
     private static class OpenHelper extends SQLiteOpenHelper {
-        public OpenHelper(Context context, boolean inMemory) {
-            super(context, inMemory ? null : DATABASE_NAME, null, DATABASE_VERSION);
+        public OpenHelper(Context context, int flags) {
+            super(context,
+                  flags == FLAG_DATABASE_IN_MEMORY ? null : DATABASE_NAME,
+                  null,
+                  DATABASE_VERSION);
         }
 
         @Override
@@ -54,8 +58,8 @@ class MtpDatabaseInternal {
 
     private final SQLiteDatabase mDatabase;
 
-    MtpDatabaseInternal(Context context, boolean inMemory) {
-        final OpenHelper helper = new OpenHelper(context, inMemory);
+    MtpDatabaseInternal(Context context, int flags) {
+        final OpenHelper helper = new OpenHelper(context, flags);
         mDatabase = helper.getWritableDatabase();
     }
 
@@ -122,6 +126,64 @@ class MtpDatabaseInternal {
     }
 
     /**
+     * Gets identifier from document ID.
+     * @param documentId Document ID.
+     * @return Identifier.
+     */
+    Identifier createIdentifier(String documentId) {
+        // Currently documentId is old format.
+        final Identifier oldIdentifier = Identifier.createFromDocumentId(documentId);
+        final String selection;
+        final String[] args;
+        if (oldIdentifier.mObjectHandle == CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
+            selection = COLUMN_DEVICE_ID + "= ? AND " +
+                    COLUMN_ROW_STATE + " IN (?, ?) AND " +
+                    COLUMN_STORAGE_ID + "= ? AND " +
+                    COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
+            args = strings(
+                    oldIdentifier.mDeviceId,
+                    ROW_STATE_VALID,
+                    ROW_STATE_INVALIDATED,
+                    oldIdentifier.mStorageId);
+        } else {
+            selection = COLUMN_DEVICE_ID + "= ? AND " +
+                    COLUMN_ROW_STATE + " IN (?, ?) AND " +
+                    COLUMN_STORAGE_ID + "= ? AND " +
+                    COLUMN_OBJECT_HANDLE + " = ?";
+            args = strings(
+                    oldIdentifier.mDeviceId,
+                    ROW_STATE_VALID,
+                    ROW_STATE_INVALIDATED,
+                    oldIdentifier.mStorageId,
+                    oldIdentifier.mObjectHandle);
+        }
+
+        final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(Document.COLUMN_DOCUMENT_ID),
+                selection,
+                args,
+                null,
+                null,
+                null,
+                "1");
+        try {
+            if (cursor.getCount() == 0) {
+                return oldIdentifier;
+            } else {
+                cursor.moveToNext();
+                return new Identifier(
+                        oldIdentifier.mDeviceId,
+                        oldIdentifier.mStorageId,
+                        oldIdentifier.mObjectHandle,
+                        cursor.getString(0));
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /**
      * Starts adding new documents.
      * The methods decides mapping mode depends on if all documents under the given parent have MTP
      * identifier or not. If all the documents have MTP identifier, it uses the identifier to find
@@ -164,7 +226,7 @@ class MtpDatabaseInternal {
      * {@link #stopAddingDocuments(String, String, String)} turns the pending rows into 'valid'
      * rows. If the methods adds rows to database, it updates valueList with correct document ID.
      *
-     * @param valuesList Values that are stored in the database.
+     * @param valuesList Values for documents to be stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param arg Argument for selection SQL.
      * @param heuristic Whether the mapping mode is heuristic.
@@ -191,23 +253,32 @@ class MtpDatabaseInternal {
                         null,
                         null,
                         "1");
-                final long rowId;
-                if (candidateCursor.getCount() == 0) {
-                    rowId = mDatabase.insert(TABLE_DOCUMENTS, null, values);
-                    added = true;
-                } else if (!heuristic) {
-                    candidateCursor.moveToNext();
-                    final String documentId = candidateCursor.getString(0);
-                    rowId = mDatabase.update(
-                            TABLE_DOCUMENTS, values, SELECTION_DOCUMENT_ID, strings(documentId));
-                } else {
-                    values.put(COLUMN_ROW_STATE, ROW_STATE_PENDING);
-                    rowId = mDatabase.insert(TABLE_DOCUMENTS, null, values);
+                try {
+                    final long rowId;
+                    if (candidateCursor.getCount() == 0) {
+                        rowId = mDatabase.insert(TABLE_DOCUMENTS, null, values);
+                        if (rowId == -1) {
+                            throw new SQLiteException("Failed to put a document into database.");
+                        }
+                        added = true;
+                    } else if (!heuristic) {
+                        candidateCursor.moveToNext();
+                        final String documentId = candidateCursor.getString(0);
+                        rowId = mDatabase.update(
+                                TABLE_DOCUMENTS,
+                                values,
+                                SELECTION_DOCUMENT_ID,
+                                strings(documentId));
+                    } else {
+                        values.put(COLUMN_ROW_STATE, ROW_STATE_PENDING);
+                        rowId = mDatabase.insert(TABLE_DOCUMENTS, null, values);
+                    }
+                    // Document ID is a primary integer key of the table. So the returned row
+                    // IDs should be same with the document ID.
+                    values.put(Document.COLUMN_DOCUMENT_ID, rowId);
+                } finally {
+                    candidateCursor.close();
                 }
-                // Document ID is a primary integer key of the table. So the returned row
-                // IDs should be same with the document ID.
-                values.put(Document.COLUMN_DOCUMENT_ID, rowId);
-                candidateCursor.close();
             }
 
             mDatabase.setTransactionSuccessful();

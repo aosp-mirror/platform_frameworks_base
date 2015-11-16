@@ -23,6 +23,7 @@ class Identifier {
     final int mDeviceId;
     final int mStorageId;
     final int mObjectHandle;
+    final String mDocumentId;
 
     static Identifier createFromRootId(String rootId) {
         final String[] components = rootId.split("_");
@@ -45,9 +46,14 @@ class Identifier {
     }
 
     Identifier(int deviceId, int storageId, int objectHandle) {
+        this(deviceId, storageId, objectHandle, null);
+    }
+
+    Identifier(int deviceId, int storageId, int objectHandle, String documentId) {
         mDeviceId = deviceId;
         mStorageId = storageId;
         mObjectHandle = objectHandle;
+        mDocumentId = documentId;
     }
 
     // TODO: Make the ID persistent.
