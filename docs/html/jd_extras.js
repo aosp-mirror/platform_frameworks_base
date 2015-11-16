@@ -633,13 +633,13 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "lang": "en",
     "group": "",
-    "tags": [],
+    "tags": ["devices", "nexus", "testing"],
     "url": "https://developers.google.com/android/nexus/images",
     "timestamp": 1194884220000,
     "image": "images/cards/card-download_16-9_2x.png",
-    "title": "System Images",
-    "summary": "Download system images for Marshmallow.",
-    "keywords": [],
+    "title": "Factory Images for Nexus Devices",
+    "summary": "System image files for Android 6.0 and other Android releases.",
+    "keywords": ["nexus, downloads"],
     "type": "support",
     "titleFriendly": ""
   },
@@ -1978,15 +1978,15 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "lang": "en",
     "group": "",
-    "tags": [],
-    "url": "shareables/distribute/play_dev_guide_secrets_en.pdf",
-    "timestamp": null,
-    "image": "distribute/images/play_dev_guide_b.jpg",
+    "tags": ["play,protips"],
+    "url": "shareables/distribute/secrets_play/v2/web/secrets_to_app_success_v2_en.pdf",
+    "timestamp": 1447437450,
+    "image": "images/distribute/secrets_v2_banner.jpg",
     "title": "The Secrets to App Success on Google Play",
-    "summary": "A guide to useful features, tips, and best practices that will help you grow a successful app business on Google Play.",
-    "keywords": ["distribute"],
-    "type": "PDF DOWNLOAD (11MB)",
-    "titleFriendly": ""
+    "summary": "Get the updated guide full of useful features, tips, and best practices that will help you grow a successful app or game business on Google Play.",
+    "keywords": ["secrets, success, play, google"],
+    "type": "Book",
+    "category": "distribute"
   },
   {
     "lang": "en",
@@ -3636,16 +3636,72 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags":["io15","android", "googleplay","games"],
     "keywords":["Google I/O","google play","games"],
     "type":"youtube"
-  }
+  },
+  {
+    "url":"http://www.youtube.com/watch?v=yJisuP94lHU",
+    "image": "images/distribute/hero-playtime-opener.jpg",
+    "title": "Playtime 2015: Innovation happens everywhere",
+    "type":"Video",
+    "tags":["googleplay"],
+    "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
+  },
+{
+    "url":"http://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "image": "images/distribute/hero-acquisition-devbyte.jpg",
+    "title": "User acquisition and tracking on Google Play",
+    "type" : "Video",
+    "tags" : "users,googleplay,googleio",
+    "summary": "Learn how to get new users, using Universal app campaigns directly within the Google Play Developer Console to increase your installs from ads, and find out how your acquisition channels perform.",
+  },
 ]);
 
 var CAROUSEL_OVERRIDE = {
+  "distribute/googleplay/guide.html": {
+    "image": "images/distribute/hero-secrets-to-app-success.jpg",
+    "title": "The Secrets to App Success on Google Play",
+    "summary": "Get the updated guide full of useful features, tips, and best practices that will help you grow a successful app or game business on Google Play.",
+  },
   "about/versions/lollipop.html": {
     "image": "images/home/hero-lollipop_2x.png",
     "heroColor": "#263238",
     "heroInvert": true,
     "title": "Android 5.0 Lollipop",
     "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
+  },
+  "http://www.youtube.com/watch?v=yJisuP94lHU": {
+    "url":"https://www.youtube.com/watch?v=yJisuP94lHU&index=1&list=PLWz5rJ2EKKc_QRBk7Zkl5uGjR1He7vG-w",
+    "image": "images/distribute/hero-playtime-opener.jpg",
+    "title": "Playtime 2015: Innovation happens everywhere",
+    "type":"youtube",
+    "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
+  },
+  "http://www.youtube.com/watch?v=rcU7VEs1hiE": {
+    "url":"http://www.youtube.com/watch?v=rcU7VEs1hiE&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-rogervoice-story.jpg",
+    "title": "RogerVoice uses beta testing to launch on Android first",
+    "type" : "youtube",
+    "summary": "RogerVoice helps people who are hearing impaired make phone calls through voice recognition and text captions. Hear how they used material design and beta testing to create a UI that's accessible and intuitive to navigate.",
+  },
+  "http://www.youtube.com/watch?v=JFlX9rW7Epc": {
+    "url":"http://www.youtube.com/watch?v=JFlX9rW7Epc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-domain-story.jpg",
+    "title": "Domain increases installs by 44% with Material Design",
+    "type" : "youtube",
+    "summary": "Learn how Domain, a premier real-estate portal in Australia, drastically improved their Google Play app reviews, ratings and downloads by investing in their Android app experience.",
+  },
+  "http://www.youtube.com/watch?v=4CqXCkcN_d4": {
+    "url":"http://www.youtube.com/watch?v=4CqXCkcN_d4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-dots-story.jpg",
+    "title": "Dots increases installs with Store Listing Experiments",
+    "type" : "youtube",
+    "summary": "Hear how US-founded game developer, Dots, used the Store Listing Experiments feature in the Google Play Developer Console to test what icon, graphics, and text worked the best at converting visitors to installs.",
+  },
+  "http://www.youtube.com/watch?v=JrR6o5tYMWQ": {
+    "url":"http://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "image": "images/distribute/hero-acquisition-devbyte.jpg",
+    "title": "User acquisition and tracking on Google Play",
+    "type" : "youtube",
+    "summary": "Learn how to get new users, using Universal app campaigns directly within the Google Play Developer Console to increase your installs from ads, and find out how your acquisition channels perform.",
   },
   "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
     "url":"http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
@@ -3669,12 +3725,6 @@ var CAROUSEL_OVERRIDE = {
     "image": "images/distribute/hero-ginlemon.jpg",
     "title": "How GinLemon is breaking through with Google Play",
     "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy.",
-  },
-  "distribute/googleplay/guide.html": {
-    "heroColor": "#fcb94e",
-    "image": "images/distribute/hero-g-play-guidebooks_2x.png",
-    "title": "Finding success on Google Play",
-    "summary": "We’ve created a downloadable guide to help you find success with your app or game business on Google Play. In it, you’ll find features, tips, and best practices to help you build an effective strategy.",
   },
   "http://www.youtube.com/watch?v=0r36OJaeMo4": {
     "url":"http://www.youtube.com/watch?v=0r36OJaeMo4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
