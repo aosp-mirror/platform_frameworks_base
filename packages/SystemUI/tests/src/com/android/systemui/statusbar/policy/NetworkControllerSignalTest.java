@@ -29,6 +29,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.settingslib.net.MobileDataControllerImpl;
 import com.android.systemui.R;
 
 import org.mockito.ArgumentCaptor;

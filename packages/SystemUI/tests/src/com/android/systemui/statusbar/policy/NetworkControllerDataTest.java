@@ -4,6 +4,7 @@ import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.settingslib.net.MobileDataControllerImpl;
 import org.mockito.Mockito;
 
 @SmallTest

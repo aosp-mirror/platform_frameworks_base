@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -39,10 +37,10 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.settingslib.net.MobileDataController;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 
@@ -57,9 +55,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+
 /** Platform implementation of the network controller. **/
 public class NetworkControllerImpl extends BroadcastReceiver
-        implements NetworkController, DemoMode {
+        implements NetworkController, DemoMode, MobileDataController.NetworkNameProvider {
     // debug
     static final String TAG = "NetworkController";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -94,7 +94,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // SIM for most actions.  This may be null if there aren't any SIMs around.
     private MobileSignalController mDefaultSignalController;
     private final AccessPointControllerImpl mAccessPoints;
-    private final MobileDataControllerImpl mMobileDataController;
+    private final MobileDataController mMobileDataController;
 
     private boolean mInetCondition; // Used for Logging and demo.
 
@@ -139,7 +139,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
                 new CallbackHandler(),
                 new AccessPointControllerImpl(context, bgLooper),
-                new MobileDataControllerImpl(context),
+                new MobileDataController(context),
                 new SubscriptionDefaults());
         mReceiverHandler.post(mRegisterListeners);
     }
@@ -150,7 +150,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             SubscriptionManager subManager, Config config, Looper bgLooper,
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
-            MobileDataControllerImpl mobileDataController,
+            MobileDataController mobileDataController,
             SubscriptionDefaults defaultsHandler) {
         mContext = context;
         mConfig = config;
@@ -174,7 +174,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mMobileDataController = mobileDataController;
         mMobileDataController.setNetworkController(this);
         // TODO: Find a way to move this into MobileDataController.
-        mMobileDataController.setCallback(new MobileDataControllerImpl.Callback() {
+        mMobileDataController.setCallback(new MobileDataController.Callback() {
             @Override
             public void onMobileDataEnabled(boolean enabled) {
                 mCallbackHandler.setMobileDataEnabled(enabled);
