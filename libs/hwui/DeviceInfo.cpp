@@ -40,7 +40,6 @@ void DeviceInfo::initialize() {
 }
 
 void DeviceInfo::load() {
-    mExtensions.load();
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }
 
