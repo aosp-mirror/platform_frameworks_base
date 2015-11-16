@@ -3810,6 +3810,13 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(mSummaryText));
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             }
+            int imageMinHeight = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_big_picture_content_min_height_with_picture);
+            // We need to make space for the right image, so we're enforcing a minheight if there
+            // is a picture.
+            int minHeight = (mBuilder.mN.mLargeIcon == null) ? 0 : imageMinHeight;
+            contentView.setInt(R.id.notification_main_column, "setMinimumHeight", minHeight);
+
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;
             }
