@@ -239,9 +239,7 @@ public class LockdownVpnTracker {
             throw new RuntimeException("Problem setting firewall rules", e);
         }
 
-        synchronized (mStateLock) {
-            handleStateChangedLocked();
-        }
+        handleStateChangedLocked();
     }
 
     public void shutdown() {
