@@ -608,15 +608,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
       kEMIntFast,
       kEMJitCompiler,
     } executionMode = kEMDefault;
-    char profilePeriod[sizeof("-Xprofile-period:")-1 + PROPERTY_VALUE_MAX];
-    char profileDuration[sizeof("-Xprofile-duration:")-1 + PROPERTY_VALUE_MAX];
-    char profileInterval[sizeof("-Xprofile-interval:")-1 + PROPERTY_VALUE_MAX];
-    char profileBackoff[sizeof("-Xprofile-backoff:")-1 + PROPERTY_VALUE_MAX];
-    char profileTopKThreshold[sizeof("-Xprofile-top-k-threshold:")-1 + PROPERTY_VALUE_MAX];
-    char profileTopKChangeThreshold[sizeof("-Xprofile-top-k-change-threshold:")-1 +
-                                    PROPERTY_VALUE_MAX];
-    char profileType[sizeof("-Xprofile-type:")-1 + PROPERTY_VALUE_MAX];
-    char profileMaxStackDepth[sizeof("-Xprofile-max-stack-depth:")-1 + PROPERTY_VALUE_MAX];
     char localeOption[sizeof("-Duser.locale=") + PROPERTY_VALUE_MAX];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
@@ -834,60 +825,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         strncat(localeOption, locale.c_str(), PROPERTY_VALUE_MAX);
         addOption(localeOption);
     }
-
-    /*
-     * Set profiler options
-     */
-    // Whether or not the profiler should be enabled.
-    property_get("dalvik.vm.profiler", propBuf, "0");
-    if (propBuf[0] == '1') {
-        addOption("-Xenable-profiler");
-    }
-
-    // Whether the profile should start upon app startup or be delayed by some random offset
-    // (in seconds) that is bound between 0 and a fixed value.
-    property_get("dalvik.vm.profile.start-immed", propBuf, "0");
-    if (propBuf[0] == '1') {
-        addOption("-Xprofile-start-immediately");
-    }
-
-    // Number of seconds during profile runs.
-    parseRuntimeOption("dalvik.vm.profile.period-secs", profilePeriod, "-Xprofile-period:");
-
-    // Length of each profile run (seconds).
-    parseRuntimeOption("dalvik.vm.profile.duration-secs",
-                       profileDuration,
-                       "-Xprofile-duration:");
-
-    // Polling interval during profile run (microseconds).
-    parseRuntimeOption("dalvik.vm.profile.interval-us", profileInterval, "-Xprofile-interval:");
-
-    // Coefficient for period backoff.  The the period is multiplied
-    // by this value after each profile run.
-    parseRuntimeOption("dalvik.vm.profile.backoff-coeff", profileBackoff, "-Xprofile-backoff:");
-
-    // Top K% of samples that are considered relevant when
-    // deciding if the app should be recompiled.
-    parseRuntimeOption("dalvik.vm.profile.top-k-thr",
-                       profileTopKThreshold,
-                       "-Xprofile-top-k-threshold:");
-
-    // The threshold after which a change in the structure of the
-    // top K% profiled samples becomes significant and triggers
-    // recompilation. A change in profile is considered
-    // significant if X% (top-k-change-threshold) of the top K%
-    // (top-k-threshold property) samples has changed.
-    parseRuntimeOption("dalvik.vm.profile.top-k-ch-thr",
-                       profileTopKChangeThreshold,
-                       "-Xprofile-top-k-change-threshold:");
-
-    // Type of profile data.
-    parseRuntimeOption("dalvik.vm.profiler.type", profileType, "-Xprofile-type:");
-
-    // Depth of bounded stack data
-    parseRuntimeOption("dalvik.vm.profile.stack-depth",
-                       profileMaxStackDepth,
-                       "-Xprofile-max-stack-depth:");
 
     // Trace files are stored in /data/misc/trace which is writable only in debug mode.
     property_get("ro.debuggable", propBuf, "0");
