@@ -19,21 +19,7 @@ package com.android.server.devicepolicy;
 import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.OwnersTestable;
 
 import android.content.ComponentName;
-import android.content.pm.UserInfo;
 import android.os.UserHandle;
-import android.os.UserManager;
-import android.util.Log;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for the DeviceOwner object that saves & loads device and policy owner information.

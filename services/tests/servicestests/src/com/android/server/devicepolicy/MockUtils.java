@@ -17,8 +17,12 @@ package com.android.server.devicepolicy;
 
 import com.google.common.base.Objects;
 
+import com.android.internal.util.Preconditions;
+import com.android.server.pm.UserRestrictionsUtils;
+
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.UserHandle;
 
 import org.hamcrest.BaseMatcher;
@@ -76,5 +80,38 @@ public class MockUtils {
             }
         };
         return Mockito.argThat(m);
+    }
+
+    public static Bundle checkUserRestrictions(String... keys) {
+        final Bundle expected = DpmTestUtils.newRestrictions(Preconditions.checkNotNull(keys));
+        final Matcher<Bundle> m = new BaseMatcher<Bundle>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item == null) return false;
+                return UserRestrictionsUtils.areEqual((Bundle) item, expected);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("User restrictions=" + getRestrictionsAsString(expected));
+            }
+        };
+        return Mockito.argThat(m);
+    }
+
+    private static String getRestrictionsAsString(Bundle b) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("[");
+
+        if (b != null) {
+            String sep = "";
+            for (String key : b.keySet()) {
+                sb.append(sep);
+                sep = ",";
+                sb.append(key);
+            }
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

@@ -25,12 +25,8 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.content.pm.PackageInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Pair;
@@ -50,6 +46,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -768,21 +765,42 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.getUserRestrictions(admin1)
         );
 
-        dpm.addUserRestriction(admin1, UserManager.DISALLOW_SMS);
+        reset(mContext.userManagerInternal);
+
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_ADD_USER)
+                );
+        reset(mContext.userManagerInternal);
+
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_OUTGOING_CALLS),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_ADD_USER)
+        );
+        reset(mContext.userManagerInternal);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_SMS, UserManager.DISALLOW_OUTGOING_CALLS),
+                        UserManager.DISALLOW_ADD_USER, UserManager.DISALLOW_OUTGOING_CALLS),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions()
         );
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_SMS, UserManager.DISALLOW_OUTGOING_CALLS),
+                        UserManager.DISALLOW_ADD_USER, UserManager.DISALLOW_OUTGOING_CALLS),
                 dpm.getUserRestrictions(admin1)
         );
 
-        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_SMS);
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_OUTGOING_CALLS),
+                MockUtils.checkUserRestrictions()
+        );
+        reset(mContext.userManagerInternal);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(UserManager.DISALLOW_OUTGOING_CALLS),
@@ -794,6 +812,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions()
+        );
+        reset(mContext.userManagerInternal);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
@@ -804,7 +828,68 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.getUserRestrictions(admin1)
         );
 
-        // TODO Check inner calls.
+        // DISALLOW_ADJUST_VOLUME and DISALLOW_UNMUTE_MICROPHONE are PO restrictions, but when
+        // DO sets them, the scope is global.
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADJUST_VOLUME);
+        reset(mContext.userManagerInternal);
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_ADJUST_VOLUME,
+                        UserManager.DISALLOW_UNMUTE_MICROPHONE)
+        );
+        reset(mContext.userManagerInternal);
+
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_ADJUST_VOLUME);
+        dpm.clearUserRestriction(admin1, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+
+
+        // More tests.
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_ADD_USER)
+        );
+        reset(mContext.userManagerInternal);
+
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_FUN);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_FUN,
+                        UserManager.DISALLOW_ADD_USER)
+        );
+        reset(mContext.userManagerInternal);
+
+        dpm.setCameraDisabled(admin1, true);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                // DISALLOW_CAMERA will be applied to both local and global.
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_CAMERA),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_FUN,
+                        UserManager.DISALLOW_CAMERA, UserManager.DISALLOW_ADD_USER)
+        );
+        reset(mContext.userManagerInternal);
+
+        // Set up another DA and let it disable camera.  Now DISALLOW_CAMERA will only be applied
+        // locally.
+        dpm.setCameraDisabled(admin1, false);
+        reset(mContext.userManagerInternal);
+
+        setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin2, /* replace =*/ false, UserHandle.USER_SYSTEM);
+        dpm.setCameraDisabled(admin2, true);
+
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                // DISALLOW_CAMERA will be applied to both local and global.
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_CAMERA),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_FUN,
+                        UserManager.DISALLOW_ADD_USER)
+        );
+        reset(mContext.userManagerInternal);
         // TODO Make sure restrictions are written to the file.
     }
 
@@ -818,7 +903,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES),
+                isNull(Bundle.class)
+        );
+        reset(mContext.userManagerInternal);
+
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                        UserManager.DISALLOW_OUTGOING_CALLS),
+                isNull(Bundle.class)
+        );
+        reset(mContext.userManagerInternal);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
@@ -837,7 +936,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_OUTGOING_CALLS),
+                isNull(Bundle.class)
+        );
+        reset(mContext.userManagerInternal);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
@@ -854,6 +958,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
 
         dpm.clearUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(),
+                isNull(Bundle.class)
+        );
+        reset(mContext.userManagerInternal);
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(),
@@ -865,69 +975,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.getUserRestrictions(admin1)
         );
 
-        // TODO Check inner calls.
+        // DISALLOW_ADJUST_VOLUME and DISALLOW_UNMUTE_MICROPHONE can be set by PO too, even
+        // though when DO sets them they'll be applied globally.
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADJUST_VOLUME);
+        reset(mContext.userManagerInternal);
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_ADJUST_VOLUME,
+                        UserManager.DISALLOW_UNMUTE_MICROPHONE),
+                isNull(Bundle.class)
+        );
+        reset(mContext.userManagerInternal);
+
+        dpm.setCameraDisabled(admin1, true);
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(DpmMockContext.CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(UserManager.DISALLOW_CAMERA,
+                        UserManager.DISALLOW_ADJUST_VOLUME,
+                        UserManager.DISALLOW_UNMUTE_MICROPHONE),
+                isNull(Bundle.class)
+        );
+        reset(mContext.userManagerInternal);
+
         // TODO Make sure restrictions are written to the file.
-    }
-
-    public void testGetComposedUserRestrictions_noDoNoPo() throws Exception {
-        final Bundle in = DpmTestUtils.newRestrictions(UserManager.DISALLOW_OUTGOING_CALLS);
-
-        Bundle actual = dpms.mLocalService.getComposedUserRestrictions(
-                UserHandle.USER_SYSTEM, in);
-        assertTrue(in == actual);
-
-        actual = dpms.mLocalService.getComposedUserRestrictions(
-                DpmMockContext.CALLER_USER_HANDLE, in);
-        assertTrue(in == actual);
-    }
-
-    public void testGetComposedUserRestrictions() throws Exception {
-        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
-        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
-
-        // First, set DO.
-
-        // Call from a process on the system user.
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-
-        // Make sure admin1 is installed on system user.
-        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
-
-        // Call.
-        dpm.setActiveAdmin(admin1, /* replace =*/ false, UserHandle.USER_SYSTEM);
-        assertTrue(dpm.setDeviceOwner(admin1, "owner-name",
-                UserHandle.USER_SYSTEM));
-
-        dpm.addUserRestriction(admin1, "rest1");
-        dpm.addUserRestriction(admin1, "rest2");
-
-        // Set PO on CALLER_USER_HANDLE.
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-
-        setAsProfileOwner(admin2);
-
-        dpm.addUserRestriction(admin2, "restA");
-        dpm.addUserRestriction(admin2, "restB");
-
-        final Bundle in = DpmTestUtils.newRestrictions("abc");
-
-        Bundle actual = dpms.mLocalService.getComposedUserRestrictions(
-                UserHandle.USER_SYSTEM, in);
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions("abc", "rest1", "rest2"),
-                actual);
-
-        actual = dpms.mLocalService.getComposedUserRestrictions(
-                DpmMockContext.CALLER_USER_HANDLE, in);
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions("abc", "rest1", "rest2", "restA", "restB"),
-                actual);
-
-        actual = dpms.mLocalService.getComposedUserRestrictions(
-                DpmMockContext.CALLER_USER_HANDLE + 1, in);
-        DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions("abc", "rest1", "rest2"),
-                actual);
     }
 }

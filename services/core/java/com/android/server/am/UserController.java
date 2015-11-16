@@ -519,6 +519,9 @@ final class UserController {
                 }
 
                 if (uss.mState == UserState.STATE_BOOTING) {
+                    // Let user manager propagate user restrictions to other services.
+                    getUserManager().onBeforeStartUser(userId);
+
                     // Booting up a new user, need to tell system services about it.
                     // Note that this is on the same handler as scheduling of broadcasts,
                     // which is important because it needs to go first.
