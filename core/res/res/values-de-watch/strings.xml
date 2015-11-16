@@ -21,4 +21,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="android_upgrading_apk" msgid="1090732262010398759">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> von <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="permgrouplab_sensors" msgid="202675452368612754">"Sensoren"</string>
 </resources>
