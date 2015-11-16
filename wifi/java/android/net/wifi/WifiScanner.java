@@ -168,6 +168,22 @@ public class WifiScanner {
          * to wake up at fixed interval
          */
         public int maxScansToCache;
+        /**
+         * if maxPeriodInMs is non zero or different than period, then this bucket is
+         * an exponential backoff bucket and the scan period will grow exponentially
+         * as per formula: actual_period(N) = period ^ (N/(step_count+1))
+         * to a maximum period of max_period.
+         */
+        public int maxPeriodInMs;
+        /**
+         * for exponential back off bucket: multiplier: new_period=old_period*exponent
+         */
+        public int exponent;
+        /**
+         * for exponential back off bucket, number of scans performed at a given
+         * period and until the exponent is applied
+         */
+        public int stepCount;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -181,6 +197,9 @@ public class WifiScanner {
             dest.writeInt(reportEvents);
             dest.writeInt(numBssidsPerScan);
             dest.writeInt(maxScansToCache);
+            dest.writeInt(maxPeriodInMs);
+            dest.writeInt(exponent);
+            dest.writeInt(stepCount);
 
             if (channels != null) {
                 dest.writeInt(channels.length);
@@ -206,6 +225,9 @@ public class WifiScanner {
                         settings.reportEvents = in.readInt();
                         settings.numBssidsPerScan = in.readInt();
                         settings.maxScansToCache = in.readInt();
+                        settings.maxPeriodInMs = in.readInt();
+                        settings.exponent = in.readInt();
+                        settings.stepCount = in.readInt();
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
