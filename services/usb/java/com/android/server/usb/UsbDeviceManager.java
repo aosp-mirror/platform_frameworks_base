@@ -332,9 +332,11 @@ public class UsbDeviceManager {
                 // Restore default functions.
                 mCurrentFunctions = SystemProperties.get(USB_CONFIG_PROPERTY,
                         UsbManager.USB_FUNCTION_NONE);
-                if (UsbManager.USB_FUNCTION_NONE.equals(mCurrentFunctions)) {
-                    mCurrentFunctions = UsbManager.USB_FUNCTION_MTP;
+                // HACK START FOR DEVICES WITHOUT SUPPORT MTP, WATCH ONLY, DO NOT MERGE BACK TO AOSP
+                if (UsbManager.USB_FUNCTION_MTP.equals(mCurrentFunctions)) {
+                    mCurrentFunctions = UsbManager.USB_FUNCTION_NONE;
                 }
+                // HACK ENDS (mkwan@ added 2015-11-16)
                 mCurrentFunctionsApplied = mCurrentFunctions.equals(
                         SystemProperties.get(USB_STATE_PROPERTY));
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
@@ -838,9 +840,11 @@ public class UsbDeviceManager {
         private String getDefaultFunctions() {
             String func = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY,
                     UsbManager.USB_FUNCTION_NONE);
-            if (UsbManager.USB_FUNCTION_NONE.equals(func)) {
-                func = UsbManager.USB_FUNCTION_MTP;
+            // HACK START FOR DEVICES WITHOUT SUPPORT MTP, WATCH ONLY, DO NOT MERGE BACK TO AOSP
+            if (UsbManager.USB_FUNCTION_MTP.equals(func)) {
+                func = UsbManager.USB_FUNCTION_NONE;
             }
+            // HACK ENDS (mkwan@ added 2015-11-16)
             return func;
         }
 
