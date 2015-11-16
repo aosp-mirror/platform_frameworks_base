@@ -948,8 +948,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // Launch the last PendingIntent we had with priority
                 int userId = ActivityManager.getCurrentUser();
                 UserRecord user = mUserRecords.get(userId);
-                if (user.mLastMediaButtonReceiver != null
-                        || user.mRestoredMediaButtonReceiver != null) {
+                if (user != null && (user.mLastMediaButtonReceiver != null
+                        || user.mRestoredMediaButtonReceiver != null)) {
                     if (DEBUG) {
                         Log.d(TAG, "Sending media key to last known PendingIntent "
                                 + user.mLastMediaButtonReceiver + " or restored Intent "
