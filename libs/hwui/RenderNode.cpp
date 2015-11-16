@@ -326,15 +326,11 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         return;
     }
 
-    if (transformUpdateNeeded) {
+    if (transformUpdateNeeded && mLayer) {
         // update the transform in window of the layer to reset its origin wrt light source position
         Matrix4 windowTransform;
         info.damageAccumulator->computeCurrentTransform(&windowTransform);
-#if HWUI_NEW_OPS
-        // TODO: update layer transform (perhaps as part of enqueueLayerWithDamage)
-#else
         mLayer->setWindowTransform(windowTransform);
-#endif
     }
 
 #if HWUI_NEW_OPS

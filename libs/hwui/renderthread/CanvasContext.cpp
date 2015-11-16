@@ -31,7 +31,6 @@
 #include "utils/TimeUtils.h"
 
 #if HWUI_NEW_OPS
-#include "BakedOpRenderer.h"
 #include "OpReorderer.h"
 #endif
 
@@ -150,13 +149,23 @@ bool CanvasContext::pauseSurface(ANativeWindow* window) {
 // TODO: don't pass viewport size, it's automatic via EGL
 void CanvasContext::setup(int width, int height, float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
+#if HWUI_NEW_OPS
+    mLightInfo.lightRadius = lightRadius;
+    mLightInfo.ambientShadowAlpha = ambientShadowAlpha;
+    mLightInfo.spotShadowAlpha = spotShadowAlpha;
+#else
     if (!mCanvas) return;
     mCanvas->initLight(lightRadius, ambientShadowAlpha, spotShadowAlpha);
+#endif
 }
 
 void CanvasContext::setLightCenter(const Vector3& lightCenter) {
+#if HWUI_NEW_OPS
+    mLightCenter = lightCenter;
+#else
     if (!mCanvas) return;
     mCanvas->setLightCenter(lightCenter);
+#endif
 }
 
 void CanvasContext::setOpaque(bool opaque) {
@@ -340,9 +349,11 @@ void CanvasContext::draw() {
     mEglManager.damageFrame(frame, dirty);
 
 #if HWUI_NEW_OPS
-    OpReorderer reorderer(mLayerUpdateQueue, dirty, frame.width(), frame.height(), mRenderNodes);
+    OpReorderer reorderer(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
+            mRenderNodes, mLightCenter);
     mLayerUpdateQueue.clear();
-    BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(), mOpaque);
+    BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(),
+            mOpaque, mLightInfo);
     // TODO: profiler().draw(mCanvas);
     reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
 
@@ -576,8 +587,12 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("unsupported");
+#else
     mCanvas->markLayersAsBuildLayers();
     mCanvas->flushLayerUpdates();
+#endif
 
     node->incStrong(nullptr);
     mPrefetechedLayers.insert(node);

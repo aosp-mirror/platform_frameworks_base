@@ -48,7 +48,7 @@ BENCHMARK_NO_ARG(BM_OpReorderer_defer);
 void BM_OpReorderer_defer::Run(int iters) {
     StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        OpReorderer reorderer(200, 200, *sReorderingDisplayList);
+        OpReorderer reorderer(200, 200, *sReorderingDisplayList, (Vector3) { 100, 100, 100 });
         MicroBench::DoNotOptimize(&reorderer);
     }
     StopBenchmarkTiming();
@@ -59,11 +59,13 @@ void BM_OpReorderer_deferAndRender::Run(int iters) {
     TestUtils::runOnRenderThread([this, iters](renderthread::RenderThread& thread) {
         RenderState& renderState = thread.renderState();
         Caches& caches = Caches::getInstance();
+        BakedOpRenderer::LightInfo lightInfo = { 50.0f, 128, 128 };
+
         StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
-            OpReorderer reorderer(200, 200, *sReorderingDisplayList);
+            OpReorderer reorderer(200, 200, *sReorderingDisplayList, (Vector3) { 100, 100, 100 });
 
-            BakedOpRenderer renderer(caches, renderState, true);
+            BakedOpRenderer renderer(caches, renderState, true, lightInfo);
             reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
             MicroBench::DoNotOptimize(&renderer);
         }

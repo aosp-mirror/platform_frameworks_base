@@ -34,6 +34,11 @@ class RenderState;
  * Lightweight alternative to Layer. Owns the persistent state of an offscreen render target, and
  * encompasses enough information to draw it back on screen (minus paint properties, which are held
  * by LayerOp).
+ *
+ * Has two distinct sizes - viewportWidth/viewportHeight describe content area,
+ * texture.width/.height are actual allocated texture size. Texture will tend to be larger than the
+ * viewport bounds, since textures are always allocated with width / height as a multiple of 64, for
+ * the purpose of improving reuse.
  */
 class OffscreenBuffer {
 public:
@@ -44,11 +49,17 @@ public:
     // must be called prior to rendering, to construct/update vertex buffer
     void updateMeshFromRegion();
 
+    // Set by RenderNode for HW layers, TODO for clipped saveLayers
+    void setWindowTransform(const Matrix4& transform) {
+        inverseTransformInWindow.loadInverse(transform);
+    }
+
     static uint32_t computeIdealDimension(uint32_t dimension);
 
     uint32_t getSizeInBytes() { return texture.width * texture.height * 4; }
 
     RenderState& renderState;
+
     uint32_t viewportWidth;
     uint32_t viewportHeight;
     Texture texture;
@@ -56,6 +67,10 @@ public:
     // Portion of layer that has been drawn to. Used to minimize drawing area when
     // drawing back to screen / parent FBO.
     Region region;
+
+    Matrix4 inverseTransformInWindow;
+
+    // vbo / size of mesh
     GLsizei elementCount = 0;
     GLuint vbo = 0;
 };

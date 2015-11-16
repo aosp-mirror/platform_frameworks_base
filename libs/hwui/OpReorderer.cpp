@@ -18,6 +18,7 @@
 
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
+#include "renderstate/OffscreenBufferPool.h"
 #include "utils/FatVector.h"
 #include "utils/PaintUtils.h"
 
@@ -33,8 +34,8 @@ class BatchBase {
 
 public:
     BatchBase(batchid_t batchId, BakedOpState* op, bool merging)
-        : mBatchId(batchId)
-        , mMerging(merging) {
+            : mBatchId(batchId)
+            , mMerging(merging) {
         mBounds = op->computedState.clippedBounds;
         mOps.push_back(op);
     }
@@ -207,9 +208,10 @@ private:
 };
 
 OpReorderer::LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
-        const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
+        const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
         : width(width)
         , height(height)
+        , repaintRect(repaintRect)
         , offscreenBuffer(renderNode ? renderNode->getLayer() : nullptr)
         , beginLayerOp(beginLayerOp)
         , renderNode(renderNode) {}
@@ -309,15 +311,19 @@ void OpReorderer::LayerReorderer::dump() const {
 
 OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
-        const std::vector< sp<RenderNode> >& nodes)
+        const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter)
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
-    mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
-    mLayerStack.push_back(0);
 
+    mLayerReorderers.reserve(layers.entries().size());
+    mLayerStack.reserve(layers.entries().size());
+
+    // Prepare to defer Fbo0
+    mLayerReorderers.emplace_back(viewportWidth, viewportHeight, Rect(clip));
+    mLayerStack.push_back(0);
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
-            Vector3());
+            lightCenter);
 
     // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
     // updated in the order they're passed in (mLayerReorderers are issued to Renderer in reverse)
@@ -325,7 +331,8 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
         RenderNode* layerNode = layers.entries()[i].renderNode;
         const Rect& layerDamage = layers.entries()[i].damage;
 
-        saveForLayer(layerNode->getWidth(), layerNode->getHeight(), nullptr, layerNode);
+        saveForLayer(layerNode->getWidth(), layerNode->getHeight(),
+                layerDamage, nullptr, layerNode);
         mCanvasState.writableSnapshot()->setClip(
                 layerDamage.left, layerDamage.top, layerDamage.right, layerDamage.bottom);
 
@@ -345,14 +352,17 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
     }
 }
 
-OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList)
+OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList,
+        const Vector3& lightCenter)
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
-    mLayerReorderers.emplace_back(viewportWidth, viewportHeight);
+    // Prepare to defer Fbo0
+    mLayerReorderers.emplace_back(viewportWidth, viewportHeight,
+            Rect(viewportWidth, viewportHeight));
     mLayerStack.push_back(0);
-
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
-            0, 0, viewportWidth, viewportHeight, Vector3());
+            0, 0, viewportWidth, viewportHeight, lightCenter);
+
     deferImpl(displayList);
 }
 
@@ -508,7 +518,8 @@ void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
     }
 
     ShadowOp* shadowOp = new (mAllocator) ShadowOp(casterNodeOp, casterAlpha, casterPath,
-            mCanvasState.getLocalClipBounds());
+            mCanvasState.getLocalClipBounds(),
+            mCanvasState.currentSnapshot()->getRelativeLightCenter());
     BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
             mAllocator, *mCanvasState.currentSnapshot(), shadowOp);
     if (CC_LIKELY(bakedOpState)) {
@@ -589,17 +600,36 @@ void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
     currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
 }
 
-void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
+void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight, const Rect& repaintRect,
         const BeginLayerOp* beginLayerOp, RenderNode* renderNode) {
 
+    auto previous = mCanvasState.currentSnapshot();
     mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
     mCanvasState.writableSnapshot()->transform->loadIdentity();
     mCanvasState.writableSnapshot()->initializeViewport(layerWidth, layerHeight);
     mCanvasState.writableSnapshot()->roundRectClipState = nullptr;
 
+    Vector3 lightCenter = previous->getRelativeLightCenter();
+    if (renderNode) {
+        Matrix4& inverse = renderNode->getLayer()->inverseTransformInWindow;
+        inverse.mapPoint3d(lightCenter);
+    } else {
+        // Combine all transforms used to present saveLayer content:
+        // parent content transform * canvas transform * bounds offset
+        Matrix4 contentTransform(*previous->transform);
+        contentTransform.multiply(beginLayerOp->localMatrix);
+        contentTransform.translate(beginLayerOp->unmappedBounds.left, beginLayerOp->unmappedBounds.top);
+
+        // inverse the total transform, to map light center into layer-relative space
+        Matrix4 inverse;
+        inverse.loadInverse(contentTransform);
+        inverse.mapPoint3d(lightCenter);
+    }
+    mCanvasState.writableSnapshot()->setRelativeLightCenter(lightCenter);
+
     // create a new layer, and push its index on the stack
     mLayerStack.push_back(mLayerReorderers.size());
-    mLayerReorderers.emplace_back(layerWidth, layerHeight, beginLayerOp, renderNode);
+    mLayerReorderers.emplace_back(layerWidth, layerHeight, repaintRect, beginLayerOp, renderNode);
 }
 
 void OpReorderer::restoreForLayer() {
@@ -612,7 +642,7 @@ void OpReorderer::restoreForLayer() {
 void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
     const uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
     const uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
-    saveForLayer(layerWidth, layerHeight, &op, nullptr);
+    saveForLayer(layerWidth, layerHeight, Rect(layerWidth, layerHeight), &op, nullptr);
 }
 
 void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {

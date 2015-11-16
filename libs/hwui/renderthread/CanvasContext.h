@@ -27,6 +27,10 @@
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 
+#if HWUI_NEW_OPS
+#include "BakedOpRenderer.h"
+#endif
+
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkBitmap.h>
@@ -165,6 +169,11 @@ private:
 
     bool mOpaque;
     OpenGLRenderer* mCanvas = nullptr;
+#if HWUI_NEW_OPS
+    BakedOpRenderer::LightInfo mLightInfo;
+    Vector3 mLightCenter = { 0, 0, 0 };
+#endif
+
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
     LayerUpdateQueue mLayerUpdateQueue;

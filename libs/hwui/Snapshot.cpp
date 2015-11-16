@@ -130,6 +130,9 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Snapshot::resetTransform(float x, float y, float z) {
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("not supported - light center managed differently");
+#else
     // before resetting, map current light pos with inverse of current transform
     Vector3 center = mRelativeLightCenter;
     mat4 inverse;
@@ -139,6 +142,7 @@ void Snapshot::resetTransform(float x, float y, float z) {
 
     transform = &mTransformRoot;
     transform->loadTranslate(x, y, z);
+#endif
 }
 
 void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {

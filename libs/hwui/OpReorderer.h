@@ -67,13 +67,13 @@ class OpReorderer : public CanvasStateClient {
     class LayerReorderer {
     public:
         // Create LayerReorderer for Fbo0
-        LayerReorderer(uint32_t width, uint32_t height)
-                : LayerReorderer(width, height, nullptr, nullptr) {};
+        LayerReorderer(uint32_t width, uint32_t height, const Rect& repaintRect)
+                : LayerReorderer(width, height, repaintRect, nullptr, nullptr) {};
 
         // Create LayerReorderer for an offscreen layer, where beginLayerOp is present for a
         // saveLayer, renderNode is present for a HW layer.
         LayerReorderer(uint32_t width, uint32_t height,
-                const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
+                const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
 
         // iterate back toward target to see if anything drawn since should overlap the new op
         // if no target, merging ops still iterate to find similar batch to insert after
@@ -101,6 +101,7 @@ class OpReorderer : public CanvasStateClient {
 
         const uint32_t width;
         const uint32_t height;
+        const Rect repaintRect;
         OffscreenBuffer* offscreenBuffer;
         const BeginLayerOp* beginLayerOp;
         const RenderNode* renderNode;
@@ -116,14 +117,15 @@ class OpReorderer : public CanvasStateClient {
 
         // Maps batch ids to the most recent *non-merging* batch of that id
         OpBatch* mBatchLookup[OpBatchType::Count] = { nullptr };
-
     };
+
 public:
     OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
-            const std::vector< sp<RenderNode> >& nodes);
+            const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter);
 
-    OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList);
+    OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList,
+            const Vector3& lightCenter);
 
     virtual ~OpReorderer() {}
 
@@ -153,7 +155,7 @@ public:
             LayerReorderer& layer = mLayerReorderers[i];
             if (layer.renderNode) {
                 // cached HW layer - can't skip layer if empty
-                renderer.startRepaintLayer(layer.offscreenBuffer);
+                renderer.startRepaintLayer(layer.offscreenBuffer, layer.repaintRect);
                 layer.replayBakedOpsImpl((void*)&renderer, receivers);
                 renderer.endLayer();
             } else if (!layer.empty()) { // save layer - skip entire layer if empty
@@ -164,7 +166,7 @@ public:
         }
 
         const LayerReorderer& fbo0 = mLayerReorderers[0];
-        renderer.startFrame(fbo0.width, fbo0.height);
+        renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
         fbo0.replayBakedOpsImpl((void*)&renderer, receivers);
         renderer.endFrame();
     }
@@ -188,7 +190,7 @@ private:
         Positive
     };
     void saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
-            const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
+            const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
     void restoreForLayer();
 
     LayerReorderer& currentLayer() { return mLayerReorderers[mLayerStack.back()]; }
