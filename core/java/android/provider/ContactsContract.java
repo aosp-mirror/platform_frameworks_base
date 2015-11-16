@@ -1640,6 +1640,14 @@ public final class ContactsContract {
                 CONTENT_URI, "filter");
 
         /**
+         * It supports the same semantics as {@link #CONTENT_FILTER_URI} and returns the same
+         * columns. If there is a corp profile linked to the current profile, it will query corp
+         * profile, otherwise it will return null.
+         */
+        public static final Uri CORP_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                CORP_CONTENT_URI, "filter");
+
+        /**
          * The content:// style URI for this table joined with useful data from
          * {@link ContactsContract.Data}, filtered to include only starred contacts
          * and the most frequently contacted contacts.
