@@ -79,7 +79,6 @@ bool Caches::init() {
 }
 
 void Caches::initExtensions() {
-    mExtensions.load();
     if (mExtensions.hasDebugMarker()) {
         eventMark = glInsertEventMarkerEXT;
 

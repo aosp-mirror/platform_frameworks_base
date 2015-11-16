@@ -31,7 +31,7 @@ namespace uirenderer {
 
 class Extensions {
 public:
-    void load();
+    Extensions();
 
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
