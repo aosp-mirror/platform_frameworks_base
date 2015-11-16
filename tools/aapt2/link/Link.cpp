@@ -50,7 +50,7 @@ struct LinkOptions {
     std::vector<std::string> includePaths;
     std::vector<std::string> overlayFiles;
     Maybe<std::string> generateJavaClassPath;
-    std::vector<std::string> extraJavaPackages;
+    std::set<std::string> extraJavaPackages;
     Maybe<std::string> generateProguardRulesPath;
     bool noAutoVersion = false;
     bool staticLib = false;
@@ -485,7 +485,7 @@ public:
             }
         }
 
-        mFilesToProcess[resName.toResourceName()] = FileToProcess{ Source(input), std::move(file) };
+        mFilesToProcess.insert(FileToProcess{ std::move(file), Source(input) });
         return true;
     }
 
@@ -640,8 +640,7 @@ public:
             }
         }
 
-        for (auto& pair : mFilesToProcess) {
-            FileToProcess& file = pair.second;
+        for (const FileToProcess& file : mFilesToProcess) {
             if (file.file.name.type != ResourceType::kRaw &&
                     util::stringEndsWith<char>(file.source.path, ".xml.flat")) {
                 if (mOptions.verbose) {
@@ -760,7 +759,7 @@ public:
                 return 1;
             }
 
-            for (std::string& extraPackage : mOptions.extraJavaPackages) {
+            for (const std::string& extraPackage : mOptions.extraJavaPackages) {
                 if (!writeJavaFile(&mFinalTable, actualPackage, util::utf8ToUtf16(extraPackage),
                                    options)) {
                     return 1;
@@ -795,16 +794,24 @@ private:
     std::unique_ptr<TableMerger> mTableMerger;
 
     struct FileToProcess {
-        Source source;
         ResourceFile file;
+        Source source;
     };
-    std::map<ResourceName, FileToProcess> mFilesToProcess;
+
+    struct FileToProcessComparator {
+        bool operator()(const FileToProcess& a, const FileToProcess& b) {
+            return std::tie(a.file.name, a.file.config) < std::tie(b.file.name, b.file.config);
+        }
+    };
+
+    std::set<FileToProcess, FileToProcessComparator> mFilesToProcess;
 };
 
 int link(const std::vector<StringPiece>& args) {
     LinkOptions options;
     Maybe<std::string> privateSymbolsPackage;
     Maybe<std::string> minSdkVersion, targetSdkVersion;
+    std::vector<std::string> extraJavaPackages;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
@@ -833,7 +840,7 @@ int link(const std::vector<StringPiece>& args) {
                           "If not specified, public and private symbols will use the application's "
                           "package name", &privateSymbolsPackage)
             .optionalFlagList("--extra-packages", "Generate the same R.java but with different "
-                              "package names", &options.extraJavaPackages)
+                              "package names", &extraJavaPackages)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
@@ -850,6 +857,14 @@ int link(const std::vector<StringPiece>& args) {
 
     if (targetSdkVersion) {
         options.targetSdkVersionDefault = util::utf8ToUtf16(targetSdkVersion.value());
+    }
+
+    // Populate the set of extra packages for which to generate R.java.
+    for (std::string& extraPackage : extraJavaPackages) {
+        // A given package can actually be a colon separated list of packages.
+        for (StringPiece package : util::split(extraPackage, ':')) {
+            options.extraJavaPackages.insert(package.toString());
+        }
     }
 
     LinkCommand cmd(options);
