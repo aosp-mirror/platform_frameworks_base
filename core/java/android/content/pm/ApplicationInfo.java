@@ -479,6 +479,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_ENCRYPTION_AWARE = 1 << 6;
 
     /**
+     * Value for {@link #privateFlags}: set to {@code true} if the application
+     * is AutoPlay.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_AUTOPLAY = 1<<6;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */
@@ -1044,6 +1052,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isEncryptionAware() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isAutoPlayApp() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_AUTOPLAY) != 0;
     }
 
     /**

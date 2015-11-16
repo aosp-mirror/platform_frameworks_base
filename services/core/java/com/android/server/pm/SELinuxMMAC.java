@@ -103,6 +103,9 @@ public final class SELinuxMMAC {
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
 
+    // Append autoplay to existing seinfo label
+    private static final String AUTOPLAY_APP_STR = ":autoplayapp";
+
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
      * label apps. The loaded mac_permissions.xml file is determined by the
@@ -315,6 +318,9 @@ public final class SELinuxMMAC {
                 }
             }
         }
+
+        if (pkg.applicationInfo.isAutoPlayApp())
+            pkg.applicationInfo.seinfo += AUTOPLAY_APP_STR;
 
         if (pkg.applicationInfo.isPrivilegedApp())
             pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
