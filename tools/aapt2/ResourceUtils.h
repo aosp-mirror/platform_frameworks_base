@@ -34,8 +34,9 @@ namespace ResourceUtils {
  *
  * where the package can be empty. Validation must be performed on each
  * individual extracted piece to verify that the pieces are valid.
+ * Returns false if there was no package but a ':' was present.
  */
-void extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
+bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
                          StringPiece16* outType, StringPiece16* outEntry);
 
 /*
@@ -54,10 +55,15 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outReference,
 bool isReference(const StringPiece16& str);
 
 /*
- * Returns true if the string was parsed as an attribute reference (?[package:]type/name),
+ * Returns true if the string was parsed as an attribute reference (?[package:][type/]name),
  * with `outReference` set to the parsed reference.
  */
 bool tryParseAttributeReference(const StringPiece16& str, ResourceNameRef* outReference);
+
+/**
+ * Returns true if the string is in the form of an attribute reference(?[package:][type/]name).
+ */
+bool isAttributeReference(const StringPiece16& str);
 
 /**
  * Returns true if the value is a boolean, putting the result in `outValue`.
