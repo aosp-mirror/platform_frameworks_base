@@ -110,8 +110,8 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"通信サービスはありません。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"機内モード"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"端末を再起動するにはパターンが必要です。"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"端末を再起動するにはPINが必要です。"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"端末を再起動した時にはパターンが必要です。"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"端末を再起動した時にはPINが必要です。"</string>
     <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"端末を再起動した時にはパスワードが必要です。"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"セキュリティを強化するため、パターンが必要です。"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"セキュリティを強化するため、PINが必要です。"</string>
