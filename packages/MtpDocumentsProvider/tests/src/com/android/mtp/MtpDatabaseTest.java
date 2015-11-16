@@ -86,7 +86,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
                     Root.COLUMN_ICON,
                     Root.COLUMN_TITLE,
                     Root.COLUMN_SUMMARY,
-                    Root.COLUMN_DOCUMENT_ID,
+                    Root.COLUMN_DOCUMENT_ID + "_",
                     Root.COLUMN_AVAILABLE_BYTES,
                     Root.COLUMN_CAPACITY_BYTES
             });

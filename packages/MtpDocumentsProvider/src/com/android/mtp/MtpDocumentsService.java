@@ -79,9 +79,13 @@ public class MtpDocumentsService extends Service {
     @Override
     public void onDestroy() {
         final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
-        provider.closeAllDevices();
         unregisterReceiver(mReceiver);
         mReceiver = null;
+        try {
+            provider.close();
+        } catch (InterruptedException e) {
+            Log.e(MtpDocumentsProvider.TAG, e.getMessage());
+        }
         super.onDestroy();
     }
 

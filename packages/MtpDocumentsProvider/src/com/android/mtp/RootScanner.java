@@ -1,14 +1,13 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 final class RootScanner {
     /**
@@ -28,18 +27,28 @@ final class RootScanner {
     private final static long SHORT_POLLING_TIMES = 10;
 
     final ContentResolver mResolver;
+    final Resources mResources;
     final MtpManager mManager;
-    MtpRoot[] mLastRoots = new MtpRoot[0];
+    final MtpDatabase mDatabase;
+    boolean mClosed = false;
     int mPollingCount;
-    boolean mHasBackgroundTask = false;
+    Thread mBackgroundThread;
 
-    RootScanner(ContentResolver resolver, MtpManager manager) {
+    RootScanner(
+            ContentResolver resolver,
+            Resources resources,
+            MtpManager manager,
+            MtpDatabase database) {
         mResolver = resolver;
+        mResources = resources;
         mManager = manager;
+        mDatabase = database;
     }
 
-    synchronized MtpRoot[] getRoots() {
-        return mLastRoots;
+    void notifyChange() {
+        final Uri uri =
+                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
+        mResolver.notifyChange(uri, null, false);
     }
 
     /**
@@ -47,26 +56,29 @@ final class RootScanner {
      * If the background thread has already gone, it restarts another background thread.
      */
     synchronized void scanNow() {
+        if (mClosed) {
+            return;
+        }
         mPollingCount = 0;
-        if (!mHasBackgroundTask) {
-            mHasBackgroundTask = true;
-            new BackgroundLoaderThread().start();
+        if (mBackgroundThread == null) {
+            mBackgroundThread = new BackgroundLoaderThread();
+            mBackgroundThread.start();
         } else {
             notify();
         }
     }
 
-    private MtpRoot[] createRoots(int[] deviceIds) {
-        final ArrayList<MtpRoot> roots = new ArrayList<>();
-        for (final int deviceId : deviceIds) {
-            try {
-                roots.addAll(Arrays.asList(mManager.getRoots(deviceId)));
-            } catch (IOException error) {
-                // Skip device that return error.
-                Log.d(MtpDocumentsProvider.TAG, error.getMessage());
+    void close() throws InterruptedException {
+        Thread thread;
+        synchronized (this) {
+            mClosed = true;
+            thread = mBackgroundThread;
+            if (mBackgroundThread == null) {
+                return;
             }
+            notify();
         }
-        return roots.toArray(new MtpRoot[roots.size()]);
+        thread.join();
     }
 
     private final class BackgroundLoaderThread extends Thread {
@@ -74,17 +86,27 @@ final class RootScanner {
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             synchronized (RootScanner.this) {
-                while (true) {
+                while (!mClosed) {
                     final int[] deviceIds = mManager.getOpenedDeviceIds();
-                    final MtpRoot[] newRoots = createRoots(deviceIds);
-                    if (!Arrays.equals(mLastRoots, newRoots)) {
-                        final Uri uri =
-                                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
-                        mResolver.notifyChange(uri, null, false);
-                        mLastRoots = newRoots;
-                    }
                     if (deviceIds.length == 0) {
                         break;
+                    }
+                    boolean changed = false;
+                    for (int deviceId : deviceIds) {
+                        try {
+                            mDatabase.startAddingRootDocuments(deviceId);
+                            changed = mDatabase.putRootDocuments(
+                                    deviceId, mResources, mManager.getRoots(deviceId)) || changed;
+                            changed = mDatabase.stopAddingRootDocuments(deviceId) || changed;
+                        } catch (IOException exp) {
+                            // The error may happen on the device. We would like to continue getting
+                            // roots for other devices.
+                            Log.e(MtpDocumentsProvider.TAG, exp.getMessage());
+                            continue;
+                        }
+                    }
+                    if (changed) {
+                        notifyChange();
                     }
                     mPollingCount++;
                     try {
@@ -99,7 +121,7 @@ final class RootScanner {
                     }
                 }
 
-                mHasBackgroundTask = false;
+                mBackgroundThread = null;
             }
         }
     }

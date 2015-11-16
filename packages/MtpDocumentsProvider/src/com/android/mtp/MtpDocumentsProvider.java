@@ -62,6 +62,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private Map<Integer, DeviceToolkit> mDeviceToolkits;
     private RootScanner mRootScanner;
     private Resources mResources;
+    private MtpDatabase mDatabase;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -77,17 +78,23 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
-        mRootScanner = new RootScanner(mResolver, mMtpManager);
+        mDatabase = new MtpDatabase(getContext());
+        mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
         return true;
     }
 
     @VisibleForTesting
-    void onCreateForTesting(Resources resources, MtpManager mtpManager, ContentResolver resolver) {
+    void onCreateForTesting(
+            Resources resources,
+            MtpManager mtpManager,
+            ContentResolver resolver,
+            MtpDatabase database) {
         mResources = resources;
         mMtpManager = mtpManager;
         mResolver = resolver;
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
-        mRootScanner = new RootScanner(mResolver, mMtpManager);
+        mDatabase = database;
+        mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
     }
 
     @Override
@@ -95,17 +102,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_ROOT_PROJECTION;
         }
-        final MatrixCursor cursor = new MatrixCursor(projection);
-        final MtpRoot[] roots = mRootScanner.getRoots();
-        for (final MtpRoot root : roots) {
-            final Identifier rootIdentifier = new Identifier(root.mDeviceId, root.mStorageId);
-            final MatrixCursor.RowBuilder builder = cursor.newRow();
-            builder.add(Root.COLUMN_ROOT_ID, rootIdentifier.toRootId());
-            builder.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
-            builder.add(Root.COLUMN_TITLE, root.getRootName(mResources));
-            builder.add(Root.COLUMN_DOCUMENT_ID, rootIdentifier.toDocumentId());
-            builder.add(Root.COLUMN_AVAILABLE_BYTES , root.mFreeSpace);
-        }
+        final Cursor cursor = mDatabase.queryRoots(projection);
         cursor.setNotificationUri(
                 mResolver, DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY));
         return cursor;
@@ -266,14 +263,16 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         // TODO: Flush the device before closing (if not closed externally).
         getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
         mDeviceToolkits.remove(deviceId);
+        mDatabase.removeDeviceRows(deviceId);
         mMtpManager.closeDevice(deviceId);
-        mRootScanner.scanNow();
+        mRootScanner.notifyChange();
     }
 
-    void closeAllDevices() {
+    void close() throws InterruptedException {
         boolean closed = false;
         for (int deviceId : mMtpManager.getOpenedDeviceIds()) {
             try {
+                mDatabase.removeDeviceRows(deviceId);
                 mMtpManager.closeDevice(deviceId);
                 getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
                 closed = true;
@@ -282,8 +281,10 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             }
         }
         if (closed) {
-            mRootScanner.scanNow();
+            mRootScanner.notifyChange();
         }
+        mRootScanner.close();
+        mDatabase.close();
     }
 
     boolean hasOpenedDevices() {

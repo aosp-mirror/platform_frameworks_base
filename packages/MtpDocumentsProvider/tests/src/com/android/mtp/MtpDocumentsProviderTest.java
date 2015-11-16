@@ -36,13 +36,24 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     private MtpDocumentsProvider mProvider;
     private TestMtpManager mMtpManager;
     private final TestResources mResources = new TestResources();
+    private MtpDatabase mDatabase;
 
     @Override
     public void setUp() throws IOException {
         mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
-        mProvider.onCreateForTesting(mResources, mMtpManager, mResolver);
+        mDatabase = new MtpDatabase(getContext());
+        mProvider.onCreateForTesting(mResources, mMtpManager, mResolver, mDatabase);
+    }
+
+    @Override
+    public void tearDown() {
+        try {
+            mProvider.close();
+        } catch (InterruptedException e) {
+            fail();
+        }
     }
 
     public void testOpenAndCloseDevice() throws Exception {
@@ -96,26 +107,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mResolver.waitForNotification(ROOTS_URI, 1);
     }
 
-    public void testCloseAllDevices() throws Exception {
-        mMtpManager.addValidDevice(0);
-        mMtpManager.setRoots(0, new MtpRoot[] {
-                new MtpRoot(
-                        0 /* deviceId */,
-                        1 /* storageId */,
-                        "Device A" /* device model name */,
-                        "Storage A" /* volume description */,
-                        1024 /* free space */,
-                        2048 /* total space */,
-                        "" /* no volume identifier */)
-        });
-        mProvider.closeAllDevices();
-        mProvider.openDevice(0);
-        mResolver.waitForNotification(ROOTS_URI, 1);
-
-        mProvider.closeAllDevices();
-        mResolver.waitForNotification(ROOTS_URI, 2);
-    }
-
     public void testQueryRoots() throws Exception {
         mMtpManager.addValidDevice(0);
         mMtpManager.addValidDevice(1);
@@ -146,7 +137,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("0_1", cursor.getString(0));
+            assertEquals("1", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
@@ -162,20 +153,13 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
             cursor.moveToNext();
-            assertEquals("1_1", cursor.getString(0));
+            assertEquals("2", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);
             assertEquals("Device B Storage B", cursor.getString(3));
             assertEquals("1_1_0", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
-        }
-
-        {
-            mProvider.closeAllDevices();
-            mResolver.waitForNotification(ROOTS_URI, 3);
-            final Cursor cursor = mProvider.queryRoots(null);
-            assertEquals(0, cursor.getCount());
         }
     }
 
@@ -201,7 +185,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("1_1", cursor.getString(0));
+            assertEquals("1", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             // TODO: Add storage icon for MTP devices.
             assertTrue(cursor.isNull(2) /* icon */);

@@ -59,6 +59,15 @@ class MtpDatabaseInternal {
         mDatabase = helper.getWritableDatabase();
     }
 
+    void close() {
+        mDatabase.close();
+    }
+
+    /**
+     * Queries roots information.
+     * @param columnNames Column names defined in {@link android.provider.DocumentsContract.Root}.
+     * @return Database cursor.
+     */
     Cursor queryRoots(String[] columnNames) {
         return mDatabase.query(
                 VIEW_ROOTS,
@@ -70,6 +79,12 @@ class MtpDatabaseInternal {
                 null);
     }
 
+    /**
+     * Queries root documents information.
+     * @param columnNames Column names defined in
+     *     {@link android.provider.DocumentsContract.Document}.
+     * @return Database cursor.
+     */
     Cursor queryRootDocuments(String[] columnNames) {
         return mDatabase.query(
                 TABLE_DOCUMENTS,
@@ -81,6 +96,12 @@ class MtpDatabaseInternal {
                 null);
     }
 
+    /**
+     * Queries documents information.
+     * @param columnNames Column names defined in
+     *     {@link android.provider.DocumentsContract.Document}.
+     * @return Database cursor.
+     */
     Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
         return mDatabase.query(
                 TABLE_DOCUMENTS,
@@ -90,6 +111,14 @@ class MtpDatabaseInternal {
                 null,
                 null,
                 null);
+    }
+
+    /**
+     * Remove all rows belong to a device.
+     * @param deviceId Device ID.
+     */
+    void removeDeviceRows(int deviceId) {
+        deleteDocumentsAndRoots(COLUMN_DEVICE_ID + "=?", strings(deviceId));
     }
 
     /**
@@ -133,24 +162,23 @@ class MtpDatabaseInternal {
      * existing rows with the new values. If the mapping mode is heuristic, it adds some new rows as
      * 'pending' state when that rows may be corresponding to existing 'invalidated' rows. Then
      * {@link #stopAddingDocuments(String, String, String)} turns the pending rows into 'valid'
-     * rows.
+     * rows. If the methods adds rows to database, it updates valueList with correct document ID.
      *
      * @param valuesList Values that are stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param arg Argument for selection SQL.
      * @param heuristic Whether the mapping mode is heuristic.
-     * @return List of Document ID inserted to the table.
+     * @return Whether the method adds new rows.
      */
-    long[] putDocuments(
+    boolean putDocuments(
             ContentValues[] valuesList,
             String selection,
             String arg,
             boolean heuristic,
             String mappingKey) {
+        boolean added = false;
         mDatabase.beginTransaction();
         try {
-            final long[] documentIds = new long[valuesList.length];
-            int i = 0;
             for (final ContentValues values : valuesList) {
                 final Cursor candidateCursor = mDatabase.query(
                         TABLE_DOCUMENTS,
@@ -166,6 +194,7 @@ class MtpDatabaseInternal {
                 final long rowId;
                 if (candidateCursor.getCount() == 0) {
                     rowId = mDatabase.insert(TABLE_DOCUMENTS, null, values);
+                    added = true;
                 } else if (!heuristic) {
                     candidateCursor.moveToNext();
                     final String documentId = candidateCursor.getString(0);
@@ -177,17 +206,21 @@ class MtpDatabaseInternal {
                 }
                 // Document ID is a primary integer key of the table. So the returned row
                 // IDs should be same with the document ID.
-                documentIds[i++] = rowId;
+                values.put(Document.COLUMN_DOCUMENT_ID, rowId);
                 candidateCursor.close();
             }
 
             mDatabase.setTransactionSuccessful();
-            return documentIds;
+            return added;
         } finally {
             mDatabase.endTransaction();
         }
     }
 
+    /**
+     * Puts extra information for root documents.
+     * @param values Values containing extra information.
+     */
     void putRootExtra(ContentValues values) {
         mDatabase.replace(TABLE_ROOT_EXTRA, null, values);
     }
@@ -199,8 +232,9 @@ class MtpDatabaseInternal {
      * @param selection Query to select rows for resolving.
      * @param arg Argument for selection SQL.
      * @param groupKey Column name used to find corresponding rows.
+     * @return Whether the methods adds or removed visible rows.
      */
-    void stopAddingDocuments(String selection, String arg, String groupKey) {
+    boolean stopAddingDocuments(String selection, String arg, String groupKey) {
         mDatabase.beginTransaction();
         try {
             // Get 1-to-1 mapping of invalidated document and pending document.
@@ -265,22 +299,29 @@ class MtpDatabaseInternal {
             }
             mergingCursor.close();
 
+            boolean changed = false;
+
             // Delete all invalidated rows that cannot be mapped.
-            deleteDocumentsAndRoots(
+            if (deleteDocumentsAndRoots(
                     COLUMN_ROW_STATE + " = ? AND " + selection,
-                    strings(ROW_STATE_INVALIDATED, arg));
+                    strings(ROW_STATE_INVALIDATED, arg))) {
+                changed = true;
+            }
 
             // The database cannot find old document ID for the pending rows.
             // Turn the all pending rows into valid state, which means the rows become to be
             // valid with new document ID.
             values.clear();
             values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
-            mDatabase.update(
+            if (mDatabase.update(
                     TABLE_DOCUMENTS,
                     values,
                     COLUMN_ROW_STATE + " = ? AND " + selection,
-                    strings(ROW_STATE_PENDING, arg));
+                    strings(ROW_STATE_PENDING, arg)) != 0) {
+                changed = true;
+            }
             mDatabase.setTransactionSuccessful();
+            return changed;
         } finally {
             mDatabase.endTransaction();
         }
@@ -307,14 +348,23 @@ class MtpDatabaseInternal {
         }
     }
 
+    /**
+     * {@link android.database.sqlite.SQLiteDatabase#beginTransaction()}
+     */
     void beginTransaction() {
         mDatabase.beginTransaction();
     }
 
+    /**
+     * {@link android.database.sqlite.SQLiteDatabase#setTransactionSuccessful()}
+     */
     void setTransactionSuccessful() {
         mDatabase.setTransactionSuccessful();
     }
 
+    /**
+     * {@link android.database.sqlite.SQLiteDatabase#endTransaction()}
+     */
     void endTransaction() {
         mDatabase.endTransaction();
     }
@@ -323,11 +373,13 @@ class MtpDatabaseInternal {
      * Deletes a document, and its root information if the document is a root document.
      * @param selection Query to select documents.
      * @param args Arguments for selection.
+     * @return Whether the method deletes rows.
      */
-    private void deleteDocumentsAndRoots(String selection, String[] args) {
+    private boolean deleteDocumentsAndRoots(String selection, String[] args) {
         mDatabase.beginTransaction();
         try {
-            mDatabase.delete(
+            int deleted = 0;
+            deleted += mDatabase.delete(
                     TABLE_ROOT_EXTRA,
                     Root.COLUMN_ROOT_ID + " IN (" + SQLiteQueryBuilder.buildQueryString(
                             false,
@@ -339,8 +391,9 @@ class MtpDatabaseInternal {
                             null,
                             null) + ")",
                     args);
-            mDatabase.delete(TABLE_DOCUMENTS, selection, args);
+            deleted += mDatabase.delete(TABLE_DOCUMENTS, selection, args);
             mDatabase.setTransactionSuccessful();
+            return deleted != 0;
         } finally {
             mDatabase.endTransaction();
         }
