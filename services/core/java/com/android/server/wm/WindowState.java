@@ -16,11 +16,57 @@
 
 package com.android.server.wm;
 
+import com.android.server.input.InputWindowHandle;
+
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Matrix;
+import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.Region;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
+import android.os.SystemClock;
+import android.os.Trace;
+import android.os.UserHandle;
+import android.os.WorkSource;
+import android.util.DisplayMetrics;
+import android.util.Slog;
+import android.util.TimeUtils;
+import android.view.Display;
+import android.view.DisplayInfo;
+import android.view.Gravity;
+import android.view.IApplicationToken;
+import android.view.IWindow;
+import android.view.IWindowFocusObserver;
+import android.view.IWindowId;
+import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
@@ -36,8 +82,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
@@ -45,47 +89,6 @@ import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-
-import android.app.ActivityManager;
-import android.app.AppOpsManager;
-import android.graphics.Point;
-import android.os.PowerManager;
-import android.os.RemoteCallbackList;
-import android.os.SystemClock;
-import android.os.Trace;
-import android.os.WorkSource;
-import android.util.DisplayMetrics;
-import android.util.TimeUtils;
-import android.view.Display;
-import android.view.IWindowFocusObserver;
-import android.view.IWindowId;
-
-import com.android.server.input.InputWindowHandle;
-
-import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Matrix;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.graphics.Region;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.util.Slog;
-import android.view.DisplayInfo;
-import android.view.Gravity;
-import android.view.IApplicationToken;
-import android.view.IWindow;
-import android.view.InputChannel;
-import android.view.InputEvent;
-import android.view.InputEventReceiver;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
 
 class WindowList extends ArrayList<WindowState> {
 }
@@ -1410,12 +1413,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null && mAppToken.mTask != null && mAppToken.mTask.inDockedWorkspace();
     }
 
-    int getTouchableRegion(Region region, int flags, InputMonitor inputMonitor) {
-        final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)) == 0;
+    int getTouchableRegion(Region region, int flags) {
+        final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
         if (modal && mAppToken != null) {
             // Limit the outer touch to the activity stack region.
-            flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            flags |= FLAG_NOT_TOUCH_MODAL;
             // If this is a modal window we need to dismiss it if it's not full screen and the
             // touch happens outside of the frame that displays the content. This means we
             // need to intercept touches outside of that window. The dim layer user
@@ -1436,6 +1438,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mTmpRect.inset(-delta, -delta);
             }
             region.set(mTmpRect);
+            cropRegionToStackBoundsIfNeeded(region);
         } else {
             // Not modal or full screen modal
             getTouchableRegion(region);
@@ -1771,26 +1774,41 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 frame.right - inset.right, frame.bottom - inset.bottom);
     }
 
-    public void getTouchableRegion(Region outRegion) {
+    void getTouchableRegion(Region outRegion) {
         final Rect frame = mFrame;
         switch (mTouchableInsets) {
             default:
-            case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
+            case TOUCHABLE_INSETS_FRAME:
                 outRegion.set(frame);
                 break;
-            case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
+            case TOUCHABLE_INSETS_CONTENT:
                 applyInsets(outRegion, frame, mGivenContentInsets);
                 break;
-            case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
+            case TOUCHABLE_INSETS_VISIBLE:
                 applyInsets(outRegion, frame, mGivenVisibleInsets);
                 break;
-            case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION: {
+            case TOUCHABLE_INSETS_REGION: {
                 final Region givenTouchableRegion = mGivenTouchableRegion;
                 outRegion.set(givenTouchableRegion);
                 outRegion.translate(frame.left, frame.top);
                 break;
             }
         }
+        cropRegionToStackBoundsIfNeeded(outRegion);
+    }
+
+    void cropRegionToStackBoundsIfNeeded(Region region) {
+        if (mAppToken == null || !mAppToken.mCropWindowsToStack) {
+            return;
+        }
+
+        final TaskStack stack = getStack();
+        if (stack == null) {
+            return;
+        }
+
+        stack.getDimBounds(mTmpRect);
+        region.op(mTmpRect, Region.Op.INTERSECT);
     }
 
     WindowList getWindowList() {
