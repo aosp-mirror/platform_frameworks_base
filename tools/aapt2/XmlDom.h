@@ -215,10 +215,13 @@ public:
         for (auto iter = mPackageDecls.rbegin(); iter != rend; ++iter) {
             if (name.package == iter->prefix) {
                 if (iter->package.empty()) {
-                    return ResourceName{ localPackage.toString(), name.type, name.entry };
-                } else {
+                    if (localPackage != name.package) {
+                        return ResourceName{ localPackage.toString(), name.type, name.entry };
+                    }
+                } else if (iter->package != name.package) {
                     return ResourceName{ iter->package, name.type, name.entry };
                 }
+                break;
             }
         }
         return {};
