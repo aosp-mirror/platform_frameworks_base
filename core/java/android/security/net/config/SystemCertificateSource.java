@@ -18,29 +18,20 @@ package android.security.net.config;
 
 import android.os.Environment;
 import android.os.UserHandle;
-import android.util.ArraySet;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Set;
-import libcore.io.IoUtils;
 
 /**
  * {@link CertificateSource} based on the system trusted CA store.
  * @hide
  */
-public class SystemCertificateSource implements CertificateSource {
+public final class SystemCertificateSource extends DirectoryCertificateSource {
     private static final SystemCertificateSource INSTANCE = new SystemCertificateSource();
-    private Set<X509Certificate> mSystemCerts = null;
-    private final Object mLock = new Object();
+    private final File mUserRemovedCaDir;
 
     private SystemCertificateSource() {
+        super(new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts"));
+        File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
+        mUserRemovedCaDir = new File(configDir, "cacerts-removed");
     }
 
     public static SystemCertificateSource getInstance() {
@@ -48,54 +39,7 @@ public class SystemCertificateSource implements CertificateSource {
     }
 
     @Override
-    public Set<X509Certificate> getCertificates() {
-        // TODO: loading all of these is wasteful, we should instead use a keystore style API.
-        synchronized (mLock) {
-            if (mSystemCerts != null) {
-                return mSystemCerts;
-            }
-            CertificateFactory certFactory;
-            try {
-                certFactory = CertificateFactory.getInstance("X.509");
-            } catch (CertificateException e) {
-                throw new RuntimeException("Failed to obtain X.509 CertificateFactory", e);
-            }
-
-            final String ANDROID_ROOT = System.getenv("ANDROID_ROOT");
-            final File systemCaDir = new File(ANDROID_ROOT + "/etc/security/cacerts");
-            final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
-            final File userRemovedCaDir = new File(configDir, "cacerts-removed");
-            // Sanity check
-            if (!systemCaDir.isDirectory()) {
-                throw new AssertionError(systemCaDir + " is not a directory");
-            }
-
-            Set<X509Certificate> systemCerts = new ArraySet<X509Certificate>();
-            for (String caFile : systemCaDir.list()) {
-                // Skip any CAs in the user's deleted directory.
-                if (new File(userRemovedCaDir, caFile).exists()) {
-                    continue;
-                }
-                InputStream is = null;
-                try {
-                    is = new BufferedInputStream(
-                            new FileInputStream(new File(systemCaDir, caFile)));
-                    systemCerts.add((X509Certificate) certFactory.generateCertificate(is));
-                } catch (CertificateException | IOException e) {
-                    // Don't rethrow to be consistent with conscrypt's cert loading code.
-                    continue;
-                } finally {
-                    IoUtils.closeQuietly(is);
-                }
-            }
-            mSystemCerts = systemCerts;
-            return mSystemCerts;
-        }
-    }
-
-    public void onCertificateStorageChange() {
-        synchronized (mLock) {
-            mSystemCerts = null;
-        }
+    protected boolean isCertMarkedAsRemoved(String caFile) {
+        return new File(mUserRemovedCaDir, caFile).exists();
     }
 }

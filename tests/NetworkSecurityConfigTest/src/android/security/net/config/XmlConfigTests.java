@@ -402,4 +402,22 @@ public class XmlConfigTests extends AndroidTestCase {
         context.init(null, tms, null);
         TestUtils.assertConnectionSucceeds(context, "android.com" , 443);
     }
+
+    public void testDebugDedup() throws Exception {
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.override_dedup, true);
+        ApplicationConfig appConfig = new ApplicationConfig(source);
+        assertTrue(appConfig.hasPerDomainConfigs());
+        // Check android.com.
+        NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
+        PinSet pinSet = config.getPins();
+        assertFalse(pinSet.pins.isEmpty());
+        // Check that all TrustAnchors come from the override pins debug source.
+        for (TrustAnchor anchor : config.getTrustAnchors()) {
+            assertTrue(anchor.overridesPins);
+        }
+        // Try connections.
+        SSLContext context = TestUtils.getSSLContext(source);
+        TestUtils.assertConnectionSucceeds(context, "android.com", 443);
+        TestUtils.assertUrlConnectionSucceeds(context, "android.com", 443);
+    }
 }

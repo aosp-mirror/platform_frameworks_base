@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +54,19 @@ public final class NetworkSecurityConfig {
         mHstsEnforced = hstsEnforced;
         mPins = pins;
         mCertificatesEntryRefs = certificatesEntryRefs;
+        // Sort the certificates entry refs so that all entries that override pins come before
+        // non-override pin entries. This allows us to handle the case where a certificate is in
+        // multiple entry refs by returning the certificate from the first entry ref.
+        Collections.sort(mCertificatesEntryRefs, new Comparator<CertificatesEntryRef>() {
+            @Override
+            public int compare(CertificatesEntryRef lhs, CertificatesEntryRef rhs) {
+                if (lhs.overridesPins()) {
+                    return rhs.overridesPins() ? 0 : -1;
+                } else {
+                    return rhs.overridesPins() ? 1 : 0;
+                }
+            }
+        });
     }
 
     public Set<TrustAnchor> getTrustAnchors() {
@@ -63,14 +77,15 @@ public final class NetworkSecurityConfig {
             // Merge trust anchors based on the X509Certificate.
             // If we see the same certificate in two TrustAnchors, one with overridesPins and one
             // without, the one with overridesPins wins.
+            // Because mCertificatesEntryRefs is sorted with all overridesPins anchors coming first
+            // this can be simplified to just using the first occurrence of a certificate.
             Map<X509Certificate, TrustAnchor> anchorMap = new ArrayMap<>();
             for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
                 Set<TrustAnchor> anchors = ref.getTrustAnchors();
                 for (TrustAnchor anchor : anchors) {
-                    if (anchor.overridesPins) {
-                        anchorMap.put(anchor.certificate, anchor);
-                    } else if (!anchorMap.containsKey(anchor.certificate)) {
-                        anchorMap.put(anchor.certificate, anchor);
+                    X509Certificate cert = anchor.certificate;
+                    if (!anchorMap.containsKey(cert)) {
+                        anchorMap.put(cert, anchor);
                     }
                 }
             }
@@ -106,6 +121,17 @@ public final class NetworkSecurityConfig {
         synchronized (mAnchorsLock) {
             mAnchors = null;
         }
+    }
+
+    /** @hide */
+    public TrustAnchor findTrustAnchorBySubjectAndPublicKey(X509Certificate cert) {
+        for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
+            TrustAnchor anchor = ref.findBySubjectAndPublicKey(cert);
+            if (anchor != null) {
+                return anchor;
+            }
+        }
+        return null;
     }
 
     /**
