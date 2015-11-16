@@ -304,6 +304,11 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
         return false;
     }
 
+    // There can be multiple packages in a table, so
+    // clear the type and key pool in case they were set from a previous package.
+    mTypePool.uninit();
+    mKeyPool.uninit();
+
     ResChunkPullParser parser(getChunkData(&packageHeader->header),
                               getChunkDataLen(&packageHeader->header));
     while (ResChunkPullParser::isGoodEvent(parser.next())) {

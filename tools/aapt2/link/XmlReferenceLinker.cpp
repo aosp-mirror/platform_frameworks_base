@@ -33,6 +33,7 @@ class XmlReferenceLinkerVisitor : public xml::PackageAwareVisitor {
 private:
     IAaptContext* mContext;
     ISymbolTable* mSymbols;
+    Source mSource;
     std::set<int>* mSdkLevelsFound;
     ReferenceLinkerVisitor mReferenceLinkerVisitor;
     bool mError = false;
@@ -40,13 +41,14 @@ private:
 public:
     using xml::PackageAwareVisitor::visit;
 
-    XmlReferenceLinkerVisitor(IAaptContext* context, ISymbolTable* symbols,
+    XmlReferenceLinkerVisitor(IAaptContext* context, ISymbolTable* symbols, const Source& source,
                               std::set<int>* sdkLevelsFound) :
-            mContext(context), mSymbols(symbols), mSdkLevelsFound(sdkLevelsFound),
+            mContext(context), mSymbols(symbols), mSource(source), mSdkLevelsFound(sdkLevelsFound),
             mReferenceLinkerVisitor(context, symbols, this) {
     }
 
     void visit(xml::Element* el) override {
+        const Source source = mSource.withLine(el->lineNumber);
         for (xml::Attribute& attr : el->attributes) {
             Maybe<std::u16string> maybePackage =
                     util::extractPackageFromNamespace(attr.namespaceUri);
@@ -76,15 +78,16 @@ public:
                             !(attribute->typeMask & android::ResTable_map::TYPE_STRING)) {
                         // We won't be able to encode this as a string.
                         mContext->getDiagnostics()->error(
-                                DiagMessage() << "'" << attr.value << "' "
-                                              << "is incompatible with attribute "
-                                              << package << ":" << attr.name << " " << *attribute);
+                                DiagMessage(source) << "'" << attr.value << "' "
+                                                    << "is incompatible with attribute "
+                                                    << package << ":" << attr.name << " "
+                                                    << *attribute);
                         mError = true;
                     }
                 } else {
-                    mContext->getDiagnostics()->error(
-                            DiagMessage() << "attribute '" << package << ":" << attr.name
-                                          << "' was not found");
+                    mContext->getDiagnostics()->error(DiagMessage(source)
+                                                      << "attribute '" << package << ":"
+                                                      << attr.name << "' was not found");
                     mError = true;
 
                 }
@@ -95,6 +98,7 @@ public:
 
             if (attr.compiledValue) {
                 // With a compiledValue, we must resolve the reference and assign it an ID.
+                attr.compiledValue->setSource(source);
                 attr.compiledValue->accept(&mReferenceLinkerVisitor);
             }
         }
@@ -123,7 +127,8 @@ public:
 
 bool XmlReferenceLinker::consume(IAaptContext* context, XmlResource* resource) {
     mSdkLevelsFound.clear();
-    XmlReferenceLinkerVisitor visitor(context, context->getExternalSymbols(), &mSdkLevelsFound);
+    XmlReferenceLinkerVisitor visitor(context, context->getExternalSymbols(), resource->file.source,
+                                      &mSdkLevelsFound);
     if (resource->root) {
         resource->root->accept(&visitor);
         return !visitor.hasError();

@@ -80,7 +80,7 @@ public:
                 return;
             }
 
-            DiagMessage errorMsg;
+            DiagMessage errorMsg(reference->getSource());
             errorMsg << "reference to " << reference->name.value();
             if (realName) {
                 errorMsg << " (aka " << realName.value() << ")";
@@ -92,7 +92,7 @@ public:
         }
 
         if (!mSymbols->findById(reference->id.value())) {
-            mContext->getDiagnostics()->error(DiagMessage()
+            mContext->getDiagnostics()->error(DiagMessage(reference->getSource())
                                               << "reference to " << reference->id.value()
                                               << " was not found");
             mError = true;

@@ -77,16 +77,8 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
 }
 
 
-static std::shared_ptr<ISymbolTable::Symbol> lookupIdInTable(const android::ResTable& table,
-                                                             ResourceId id) {
-    android::Res_value val = {};
-    ssize_t block = table.getResource(id.id, &val, true);
-    if (block >= 0) {
-        std::shared_ptr<ISymbolTable::Symbol> s = std::make_shared<ISymbolTable::Symbol>();
-        s->id = id;
-        return s;
-    }
-
+static std::shared_ptr<ISymbolTable::Symbol> lookupAttributeInTable(const android::ResTable& table,
+                                                                    ResourceId id) {
     // Try as a bag.
     const android::ResTable::bag_entry* entry;
     ssize_t count = table.lockBag(id.id, &entry);
@@ -148,14 +140,23 @@ const ISymbolTable::Symbol* AssetManagerSymbolTableBuilder::AssetManagerSymbolTa
     for (const auto& asset : mAssets) {
         const android::ResTable& table = asset->getResources(false);
         StringPiece16 typeStr = toString(name.type);
+        uint32_t typeSpecFlags = 0;
         ResourceId resId = table.identifierForName(name.entry.data(), name.entry.size(),
                                                    typeStr.data(), typeStr.size(),
-                                                   name.package.data(), name.package.size());
+                                                   name.package.data(), name.package.size(),
+                                                   &typeSpecFlags);
         if (!resId.isValid()) {
             continue;
         }
 
-        std::shared_ptr<Symbol> s = lookupIdInTable(table, resId);
+        std::shared_ptr<Symbol> s;
+        if (name.type == ResourceType::kAttr) {
+            s = lookupAttributeInTable(table, resId);
+        } else {
+            s = std::make_shared<Symbol>();
+            s->id = resId;
+        }
+
         if (s) {
             mCache.put(name, s);
             return s.get();
@@ -173,7 +174,28 @@ const ISymbolTable::Symbol* AssetManagerSymbolTableBuilder::AssetManagerSymbolTa
     for (const auto& asset : mAssets) {
         const android::ResTable& table = asset->getResources(false);
 
-        std::shared_ptr<Symbol> s = lookupIdInTable(table, id);
+        android::ResTable::resource_name name;
+        if (!table.getResourceName(id.id, true, &name)) {
+            continue;
+        }
+
+        bool isAttr = false;
+        if (name.type) {
+            if (const ResourceType* t = parseResourceType(StringPiece16(name.type, name.typeLen))) {
+                isAttr = (*t == ResourceType::kAttr);
+            }
+        } else if (name.type8) {
+            isAttr = (StringPiece(name.type8, name.typeLen) == "attr");
+        }
+
+        std::shared_ptr<Symbol> s;
+        if (isAttr) {
+            s = lookupAttributeInTable(table, id);
+        } else {
+            s = std::make_shared<Symbol>();
+            s->id = id;
+        }
+
         if (s) {
             mIdCache.put(id, s);
             return s.get();
