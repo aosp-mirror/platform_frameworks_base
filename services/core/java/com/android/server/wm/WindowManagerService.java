@@ -2077,7 +2077,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void prepareWindowReplacementTransition(AppWindowToken atoken) {
-        if (atoken == null || !atoken.mWillReplaceWindow || !atoken.mAnimateReplacingWindow) {
+        if (atoken == null || !atoken.mWillReplaceWindow) {
             return;
         }
         atoken.allDrawn = false;
@@ -8585,8 +8585,7 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (wtoken != null) {
                 winAnimator.mAnimLayer =
                         w.mLayer + wtoken.mAppAnimator.animLayerAdjustment;
-                if (wtoken.mWillReplaceWindow && wtoken.mAnimateReplacingWindow &&
-                        wtoken.mReplacingWindow != w) {
+                if (wtoken.mWillReplaceWindow && wtoken.mReplacingWindow != w) {
                     // We know that we will be animating a relaunching window in the near future,
                     // which will receive a z-order increase. We want the replaced window to
                     // immediately receive the same treatment, e.g. to be above the dock divider.
@@ -10126,9 +10125,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * Hint to a token that its activity will relaunch, which will trigger removal and addition of
      * a window.
      * @param token Application token for which the activity will be relaunched.
-     * @param animate Whether to animate the addition of the new window.
      */
-    public void setReplacingWindow(IBinder token, boolean animate) {
+    public void setReplacingWindow(IBinder token) {
         synchronized (mWindowMap) {
             AppWindowToken appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null) {
@@ -10139,7 +10137,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " as replacing window.");
             appWindowToken.mWillReplaceWindow = true;
             appWindowToken.mHasReplacedWindow = false;
-            appWindowToken.mAnimateReplacingWindow = animate;
+
+            // Set-up dummy animation so we can start treating windows associated with this token
+            // like they are in transition before the new app window is ready for us to run the
+            // real transition animation.
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "setReplacingWindow() Setting dummy animation on: " + appWindowToken);
+            appWindowToken.mAppAnimator.setDummyAnimation();
         }
     }
 

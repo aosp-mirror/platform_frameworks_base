@@ -3354,11 +3354,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // preserve the old window until the new one is drawn. This prevents having a gap
             // between the removal and addition, in which no window is visible. We also want the
             // entrance of the new window to be properly animated.
-            mWindowManager.setReplacingWindow(topActivity.appToken, true /* animate */);
+            mWindowManager.setReplacingWindow(topActivity.appToken);
         }
-        final ActivityStack stack =
-                moveTaskToStackUncheckedLocked(task, stackId, toTop, forceFocus,
-                        "moveTaskToStack:" + reason);
+        final ActivityStack stack = moveTaskToStackUncheckedLocked(
+                task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {

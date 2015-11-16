@@ -128,8 +128,6 @@ class AppWindowToken extends WindowToken {
     boolean mWillReplaceWindow;
     // If true, the replaced window was already requested to be removed.
     boolean mReplacingRemoveRequested;
-    // Whether the replacement of the window should trigger app transition animation.
-    boolean mAnimateReplacingWindow;
     // If not null, the window that will be used to replace the old one. This is being set when
     // the window is added and unset when this window reports its first draw.
     WindowState mReplacingWindow;
