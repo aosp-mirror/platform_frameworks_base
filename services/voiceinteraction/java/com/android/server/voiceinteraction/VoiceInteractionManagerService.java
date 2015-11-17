@@ -362,7 +362,6 @@ public class VoiceInteractionManagerService extends SystemService {
                             }
                         } catch (PackageManager.NameNotFoundException e) {
                             Slog.w(TAG, "Failure looking up interaction service " + comp);
-                        } catch (RemoteException e) {
                         }
                     }
                 }

@@ -116,7 +116,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
-        } catch (RemoteException|PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Voice interaction service not found: " + service, e);
             mInfo = null;
             mSessionComponentName = null;
