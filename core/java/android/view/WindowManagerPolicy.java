@@ -623,14 +623,16 @@ public interface WindowManagerPolicy {
      * decorations that can never be removed.  That is, system bar or
      * button bar.
      */
-    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation);
+    public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation,
+            int uiMode);
 
     /**
      * Return the display height available after excluding any screen
      * decorations that can never be removed.  That is, system bar or
      * button bar.
      */
-    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation);
+    public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation,
+            int uiMode);
 
     /**
      * Return the available screen width that we should report for the
@@ -638,7 +640,8 @@ public interface WindowManagerPolicy {
      * {@link #getNonDecorDisplayWidth(int, int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
-    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation);
+    public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation,
+            int uiMode);
 
     /**
      * Return the available screen height that we should report for the
@@ -646,7 +649,8 @@ public interface WindowManagerPolicy {
      * {@link #getNonDecorDisplayHeight(int, int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
-    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation);
+    public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation,
+            int uiMode);
 
     /**
      * Return whether the given window is forcibly hiding all windows except windows with
@@ -861,11 +865,11 @@ public interface WindowManagerPolicy {
      * @param isDefaultDisplay true if window is on {@link Display#DEFAULT_DISPLAY}.
      * @param displayWidth The current full width of the screen.
      * @param displayHeight The current full height of the screen.
-     * @param displayRotation The current rotation being applied to the base
-     * window.
+     * @param displayRotation The current rotation being applied to the base window.
+     * @param uiMode The current uiMode in configuration.
      */
     public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
-                              int displayRotation);
+                              int displayRotation, int uiMode);
 
     /**
      * Returns the bottom-most layer of the system decor, above which no policy decor should
