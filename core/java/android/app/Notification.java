@@ -1466,10 +1466,10 @@ public class Notification implements Parcelable
                 };
     }
 
-    private Topic[] topics;
+    private Topic topic;
 
-    public Topic[] getTopics() {
-        return topics;
+    public Topic getTopic() {
+        return topic;
     }
 
     /**
@@ -1599,7 +1599,9 @@ public class Notification implements Parcelable
 
         color = parcel.readInt();
 
-        topics = parcel.createTypedArray(Topic.CREATOR); // may be null
+        if (parcel.readInt() != 0) {
+            topic = Topic.CREATOR.createFromParcel(parcel);
+        }
     }
 
     @Override
@@ -1700,11 +1702,8 @@ public class Notification implements Parcelable
 
         that.color = this.color;
 
-        if (this.topics != null) {
-            that.topics = new Topic[this.topics.length];
-            for(int i=0; i<this.topics.length; i++) {
-                that.topics[i] = this.topics[i].clone();
-            }
+        if (this.topic != null) {
+            that.topic = this.topic.clone();
         }
 
         if (!heavy) {
@@ -1878,7 +1877,12 @@ public class Notification implements Parcelable
 
         parcel.writeInt(color);
 
-        parcel.writeTypedArray(topics, 0); // null ok
+        if (topic != null) {
+            parcel.writeInt(1);
+            topic.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
     }
 
     /**
@@ -2008,17 +2012,9 @@ public class Notification implements Parcelable
             sb.append(" publicVersion=");
             sb.append(publicVersion.toString());
         }
-        if (topics != null) {
-            sb.append("topics=[");
-            int N = topics.length;
-            if (N > 0) {
-                for (int i = 0; i < N-1; i++) {
-                    sb.append(topics[i]);
-                    sb.append(',');
-                }
-                sb.append(topics[N-1]);
-            }
-            sb.append("]");
+        if (topic != null) {
+            sb.append("topic=");
+            sb.append(topic.toString());
         }
         sb.append(")");
         return sb.toString();
@@ -2136,7 +2132,6 @@ public class Notification implements Parcelable
         private ArrayList<String> mPersonList = new ArrayList<String>();
         private NotificationColorUtil mColorUtil;
         private boolean mColorUtilInited = false;
-        private List<Topic> mTopics = new ArrayList<>();
 
         /**
          * The user that built the notification originally.
@@ -2185,10 +2180,6 @@ public class Notification implements Parcelable
 
                 if (mN.extras.containsKey(EXTRA_PEOPLE)) {
                     Collections.addAll(mPersonList, mN.extras.getStringArray(EXTRA_PEOPLE));
-                }
-
-                if (mN.getTopics() != null) {
-                    Collections.addAll(mTopics, mN.getTopics());
                 }
 
                 String templateClass = mN.extras.getString(EXTRA_TEMPLATE);
@@ -2962,15 +2953,15 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Add a topic to this notification. Topics are typically displayed in Notification
+         * Sets the topic of this notification. Topics are typically displayed in Notification
          * settings.
          * <p>
          * Every topic must have an id and a textual label.
          *
          * @param topic The topic to add.
          */
-        public Builder addTopic(Topic topic) {
-            mTopics.add(topic);
+        public Builder setTopic(Topic topic) {
+            mN.topic = topic;
             return this;
         }
 
@@ -3451,10 +3442,6 @@ public class Notification implements Parcelable
             if (!mPersonList.isEmpty()) {
                 mN.extras.putStringArray(EXTRA_PEOPLE,
                         mPersonList.toArray(new String[mPersonList.size()]));
-            }
-            if (mTopics.size() > 0) {
-                mN.topics = new Topic[mTopics.size()];
-                mTopics.toArray(mN.topics);
             }
             return mN;
         }

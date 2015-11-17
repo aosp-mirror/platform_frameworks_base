@@ -4795,7 +4795,7 @@ package android.app {
     method public android.graphics.drawable.Icon getLargeIcon();
     method public android.graphics.drawable.Icon getSmallIcon();
     method public java.lang.String getSortKey();
-    method public android.app.Notification.Topic[] getTopics();
+    method public android.app.Notification.Topic getTopic();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.media.AudioAttributes AUDIO_ATTRIBUTES_DEFAULT;
     field public static final java.lang.String CATEGORY_ALARM = "alarm";
@@ -4960,7 +4960,6 @@ package android.app {
     method public android.app.Notification.Builder addAction(android.app.Notification.Action);
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Builder addPerson(java.lang.String);
-    method public android.app.Notification.Builder addTopic(android.app.Notification.Topic);
     method public android.app.Notification build();
     method public android.app.Notification.Builder extend(android.app.Notification.Extender);
     method public android.os.Bundle getExtras();
@@ -5009,6 +5008,7 @@ package android.app {
     method public android.app.Notification.Builder setSubText(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
     method public deprecated android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
+    method public android.app.Notification.Builder setTopic(android.app.Notification.Topic);
     method public android.app.Notification.Builder setUsesChronometer(boolean);
     method public android.app.Notification.Builder setVibrate(long[]);
     method public android.app.Notification.Builder setVisibility(int);
