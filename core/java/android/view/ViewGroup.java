@@ -5114,10 +5114,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     transformMatrix = childMatrix;
                 }
                 transformMatrix.mapRect(boundingRect);
-                dirty.set((int) (boundingRect.left - 0.5f),
-                        (int) (boundingRect.top - 0.5f),
-                        (int) (boundingRect.right + 0.5f),
-                        (int) (boundingRect.bottom + 0.5f));
+                dirty.set((int) Math.floor(boundingRect.left),
+                        (int) Math.floor(boundingRect.top),
+                        (int) Math.ceil(boundingRect.right),
+                        (int) Math.ceil(boundingRect.bottom));
             }
 
             do {
@@ -5154,10 +5154,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         RectF boundingRect = attachInfo.mTmpTransformRect;
                         boundingRect.set(dirty);
                         m.mapRect(boundingRect);
-                        dirty.set((int) (boundingRect.left - 0.5f),
-                                (int) (boundingRect.top - 0.5f),
-                                (int) (boundingRect.right + 0.5f),
-                                (int) (boundingRect.bottom + 0.5f));
+                        dirty.set((int) Math.floor(boundingRect.left),
+                                (int) Math.floor(boundingRect.top),
+                                (int) Math.ceil(boundingRect.right),
+                                (int) Math.ceil(boundingRect.bottom));
                     }
                 }
             } while (parent != null);
@@ -5457,8 +5457,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 position[0] = offset.x;
                 position[1] = offset.y;
                 child.getMatrix().mapPoints(position);
-                offset.x = (int) (position[0] + 0.5f);
-                offset.y = (int) (position[1] + 0.5f);
+                offset.x = Math.round(position[0]);
+                offset.y = Math.round(position[1]);
             }
             offset.x += dx;
             offset.y += dy;
@@ -5485,8 +5485,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             rectIsVisible = rect.intersect(mClipBounds.left, mClipBounds.top, mClipBounds.right,
                     mClipBounds.bottom);
         }
-        r.set((int) (rect.left + 0.5f), (int) (rect.top + 0.5f), (int) (rect.right + 0.5f),
-                (int) (rect.bottom + 0.5f));
+        r.set((int) Math.floor(rect.left), (int) Math.floor(rect.top),
+                (int) Math.ceil(rect.right), (int) Math.ceil(rect.bottom));
         if (rectIsVisible && mParent != null) {
             rectIsVisible = mParent.getChildVisibleRect(this, r, offset);
         }

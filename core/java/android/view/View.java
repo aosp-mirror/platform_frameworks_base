@@ -6329,8 +6329,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         position.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
 
-        outRect.set((int) (position.left + 0.5f), (int) (position.top + 0.5f),
-                (int) (position.right + 0.5f), (int) (position.bottom + 0.5f));
+        outRect.set(Math.round(position.left), Math.round(position.top),
+                Math.round(position.right), Math.round(position.bottom));
     }
 
     /**
@@ -18548,8 +18548,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             position[1] -= vr.mCurScrollY;
         }
 
-        inOutLocation[0] = (int) (position[0] + 0.5f);
-        inOutLocation[1] = (int) (position[1] + 0.5f);
+        inOutLocation[0] = Math.round(position[0]);
+        inOutLocation[1] = Math.round(position[1]);
     }
 
     /**
