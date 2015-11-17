@@ -1321,7 +1321,7 @@ public class VectorDrawable extends Drawable {
      * Common Path information for clip path and normal path.
      */
     private static abstract class VPath implements VObject {
-        protected PathParser.PathDataNode[] mNodes = null;
+        protected PathParser.PathData mPathData = null;
         String mPathName;
         int mChangingConfigurations;
 
@@ -1332,7 +1332,7 @@ public class VectorDrawable extends Drawable {
         public VPath(VPath copy) {
             mPathName = copy.mPathName;
             mChangingConfigurations = copy.mChangingConfigurations;
-            mNodes = PathParser.deepCopyNodes(copy.mNodes);
+            mPathData = copy.mPathData == null ? null : new PathParser.PathData(copy.mPathData);
         }
 
         public String getPathName() {
@@ -1345,18 +1345,14 @@ public class VectorDrawable extends Drawable {
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
         @SuppressWarnings("unused")
-        public PathParser.PathDataNode[] getPathData() {
-            return mNodes;
+        public PathParser.PathData getPathData() {
+            return mPathData;
         }
 
+        // TODO: Move the PathEvaluator and this setter and the getter above into native.
         @SuppressWarnings("unused")
-        public void setPathData(PathParser.PathDataNode[] nodes) {
-            if (!PathParser.canMorph(mNodes, nodes)) {
-                // This should not happen in the middle of animation.
-                mNodes = PathParser.deepCopyNodes(nodes);
-            } else {
-                PathParser.updateNodes(mNodes, nodes);
-            }
+        public void setPathData(PathParser.PathData pathData) {
+            mPathData.setPathData(pathData);
         }
 
         @Override
@@ -1392,8 +1388,8 @@ public class VectorDrawable extends Drawable {
          * @param outPath the output path
          */
         protected void toPath(TempState temp, Path outPath) {
-            if (mNodes != null) {
-                PathParser.PathDataNode.nodesToPath(mNodes, outPath);
+            if (mPathData != null) {
+                PathParser.createPathFromPathData(outPath, mPathData);
             }
         }
 
@@ -1488,9 +1484,9 @@ public class VectorDrawable extends Drawable {
                 mPathName = pathName;
             }
 
-            final String pathData = a.getString(R.styleable.VectorDrawableClipPath_pathData);
-            if (pathData != null) {
-                mNodes = PathParser.createNodesFromPathData(pathData);
+            final String pathDataString = a.getString(R.styleable.VectorDrawableClipPath_pathData);
+            if (pathDataString != null) {
+                mPathData = new PathParser.PathData(pathDataString);
             }
         }
 
@@ -1719,9 +1715,9 @@ public class VectorDrawable extends Drawable {
                 mPathName = pathName;
             }
 
-            final String pathData = a.getString(R.styleable.VectorDrawablePath_pathData);
-            if (pathData != null) {
-                mNodes = PathParser.createNodesFromPathData(pathData);
+            final String pathString = a.getString(R.styleable.VectorDrawablePath_pathData);
+            if (pathString != null) {
+                mPathData = new PathParser.PathData(pathString);
             }
 
             final ColorStateList fillColors = a.getColorStateList(

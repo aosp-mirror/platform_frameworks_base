@@ -17,7 +17,8 @@
 #include <gtest/gtest.h>
 
 #include "PathParser.h"
-#include "VectorDrawablePath.h"
+#include "utils/MathUtils.h"
+#include "utils/VectorDrawableUtils.h"
 
 #include <functional>
 
@@ -177,6 +178,10 @@ const StringPath sStringPaths[] = {
     {"1-2e34567", false}
 };
 
+static bool hasSameVerbs(const PathData& from, const PathData& to) {
+    return from.verbs == to.verbs && from.verbSizes == to.verbSizes;
+}
+
 TEST(PathParser, parseStringForData) {
     for (TestData testData: sTestDataSet) {
         PathParser::ParseResult result;
@@ -197,12 +202,12 @@ TEST(PathParser, parseStringForData) {
     }
 }
 
-TEST(PathParser, createSkPathFromPathData) {
+TEST(VectorDrawableUtils, createSkPathFromPathData) {
     for (TestData testData: sTestDataSet) {
         SkPath expectedPath;
         testData.skPathLamda(&expectedPath);
         SkPath actualPath;
-        VectorDrawablePath::verbsToPath(&actualPath, &testData.pathData);
+        VectorDrawableUtils::verbsToPath(&actualPath, testData.pathData);
         EXPECT_EQ(expectedPath, actualPath);
     }
 }
@@ -229,6 +234,56 @@ TEST(PathParser, parseStringForSkPath) {
         EXPECT_EQ(stringPath.isValid, !result.failureOccurred);
     }
 }
+
+TEST(VectorDrawableUtils, morphPathData) {
+    for (TestData fromData: sTestDataSet) {
+        for (TestData toData: sTestDataSet) {
+            bool canMorph = VectorDrawableUtils::canMorph(fromData.pathData, toData.pathData);
+            if (fromData.pathData == toData.pathData) {
+                EXPECT_TRUE(canMorph);
+            } else {
+                bool expectedToMorph = hasSameVerbs(fromData.pathData, toData.pathData);
+                EXPECT_EQ(expectedToMorph, canMorph);
+            }
+        }
+    }
+}
+
+TEST(VectorDrawableUtils, interpolatePathData) {
+    // Interpolate path data with itself and every other path data
+    for (TestData fromData: sTestDataSet) {
+        for (TestData toData: sTestDataSet) {
+            PathData outData;
+            bool success = VectorDrawableUtils::interpolatePathData(&outData, fromData.pathData,
+                    toData.pathData, 0.5);
+            bool expectedToMorph = hasSameVerbs(fromData.pathData, toData.pathData);
+            EXPECT_EQ(expectedToMorph, success);
+        }
+    }
+
+    float fractions[] = {0, 0.00001, 0.28, 0.5, 0.7777, 0.9999999, 1};
+    // Now try to interpolate with a slightly modified version of self and expect success
+    for (TestData fromData : sTestDataSet) {
+        PathData toPathData = fromData.pathData;
+        for (size_t i = 0; i < toPathData.points.size(); i++) {
+            toPathData.points[i]++;
+        }
+        const PathData& fromPathData = fromData.pathData;
+        PathData outData;
+        // Interpolate the two path data with different fractions
+        for (float fraction : fractions) {
+            bool success = VectorDrawableUtils::interpolatePathData(
+                    &outData, fromPathData, toPathData, fraction);
+            EXPECT_TRUE(success);
+            for (size_t i = 0; i < outData.points.size(); i++) {
+                float expectedResult = fromPathData.points[i] * (1.0 - fraction) +
+                        toPathData.points[i] * fraction;
+                EXPECT_TRUE(MathUtils::areEqual(expectedResult, outData.points[i]));
+            }
+        }
+    }
+}
+
 
 }; // namespace uirenderer
 }; // namespace android

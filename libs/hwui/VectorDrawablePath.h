@@ -17,15 +17,14 @@
 #ifndef ANDROID_HWUI_VPATH_H
 #define ANDROID_HWUI_VPATH_H
 
+#include <cutils/compiler.h>
 #include "SkPath.h"
 #include <vector>
 
 namespace android {
 namespace uirenderer {
 
-
-
-struct PathData {
+struct ANDROID_API PathData {
     // TODO: Try using FatVector instead of std::vector and do a micro benchmark on the performance
     // difference.
     std::vector<char> verbs;
@@ -44,9 +43,7 @@ public:
     VectorDrawablePath(const char* path, size_t strLength);
     bool canMorph(const PathData& path);
     bool canMorph(const VectorDrawablePath& path);
-    static void verbsToPath(SkPath* outPath, const PathData* data);
-    static void interpolatePaths(PathData* outPathData, const PathData* from, const PathData* to,
-            float fraction);
+
 private:
     PathData mData;
     SkPath mSkPath;

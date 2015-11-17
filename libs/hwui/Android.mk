@@ -29,6 +29,7 @@ hwui_src_files := \
     utils/NinePatchImpl.cpp \
     utils/StringUtils.cpp \
     utils/TestWindowContext.cpp \
+    utils/VectorDrawableUtils.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
@@ -218,7 +219,7 @@ LOCAL_SRC_FILES += \
     unit_tests/FatVectorTests.cpp \
     unit_tests/LayerUpdateQueueTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
-    unit_tests/PathParserTests.cpp \
+    unit_tests/VectorDrawableTests.cpp \
     unit_tests/OffscreenBufferPoolTests.cpp \
     unit_tests/StringUtilsTests.cpp
 
