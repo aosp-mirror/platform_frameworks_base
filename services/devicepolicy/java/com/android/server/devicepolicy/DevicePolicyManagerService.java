@@ -6706,11 +6706,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isProvisioningAllowed(String action) {
-        if (mOwners.hasDeviceOwner()) {
-            return false;
-        }
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE.equals(action)) {
+            if (mOwners.hasDeviceOwner()) {
+                if (!mInjector.userManagerIsSplitSystemUser()) {
+                    // Only split-system-user systems support managed-profiles in combination with
+                    // device-owner.
+                    return false;
+                }
+                if (mOwners.getDeviceOwnerUserId() != UserHandle.USER_SYSTEM) {
+                    // Only system device-owner supports managed-profiles. Non-system device-owner
+                    // doesn't.
+                    return false;
+                }
+                if (callingUserId == UserHandle.USER_SYSTEM) {
+                    // Managed-profiles cannot be setup on the system user, only regular users.
+                    return false;
+                }
+            }
+            if (getProfileOwner(callingUserId) != null) {
+                // Managed user cannot have a managed profile.
+                return false;
+            }
             try {
                 if (!mIPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS)) {
                     return false;
@@ -6730,7 +6747,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE.equals(action)) {
             return isDeviceOwnerProvisioningAllowed(callingUserId);
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_USER.equals(action)) {
-            if (!UserManager.isSplitSystemUser()) {
+            if (!mInjector.userManagerIsSplitSystemUser()) {
                 // ACTION_PROVISION_MANAGED_USER only supported on split-user systems.
                 return false;
             }
@@ -6739,7 +6756,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return true;
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE.equals(action)) {
-            if (!UserManager.isSplitSystemUser()) {
+            if (!mInjector.userManagerIsSplitSystemUser()) {
                 // ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE only supported on split-user systems.
                 return false;
             }
@@ -6749,6 +6766,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isDeviceOwnerProvisioningAllowed(int callingUserId) {
+        if (mOwners.hasDeviceOwner()) {
+            return false;
+        }
         if (getProfileOwner(callingUserId) != null) {
             return false;
         }
