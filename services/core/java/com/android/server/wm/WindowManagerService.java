@@ -50,8 +50,6 @@ import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
-import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
-
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;

@@ -22,7 +22,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
-import static com.android.server.wm.WindowState.BOUNDS_FOR_TOUCH;
 
 import android.app.ActivityManager.StackId;
 import android.graphics.Rect;

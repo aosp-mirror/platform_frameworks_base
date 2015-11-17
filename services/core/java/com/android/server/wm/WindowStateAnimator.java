@@ -44,7 +44,6 @@ import android.graphics.Region;
 import android.os.Debug;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.Surface.OutOfResourcesException;
@@ -124,16 +123,12 @@ class WindowStateAnimator {
     Rect mLastClipRect = new Rect();
     Rect mTmpStackBounds = new Rect();
 
-    // Used to save animation distances between the time they are calculated and when they are
-    // used.
-    int mAnimDw;
-    int mAnimDh;
+    // Used to save animation distances between the time they are calculated and when they are used.
+    private int mAnimDx;
+    private int mAnimDy;
 
     /** Is the next animation to be started a window move animation? */
-    boolean mAnimateMove = false;
-
-    /** Are we currently running a window move animation? */
-    boolean mAnimatingMove = false;
+    private boolean mAnimateMove = false;
 
     float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
     float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
@@ -198,8 +193,8 @@ class WindowStateAnimator {
         final DisplayContent displayContent = win.getDisplayContent();
         if (displayContent != null) {
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            mAnimDw = displayInfo.appWidth;
-            mAnimDh = displayInfo.appHeight;
+            mAnimDx = displayInfo.appWidth;
+            mAnimDy = displayInfo.appHeight;
         } else {
             Slog.w(TAG, "WindowStateAnimator ctor: Display has been removed");
             // This is checked on return and dealt with.
@@ -299,19 +294,19 @@ class WindowStateAnimator {
                         TAG, "Starting animation in " + this +
                         " @ " + currentTime + ": ww=" + mWin.mFrame.width() +
                         " wh=" + mWin.mFrame.height() +
-                        " dw=" + mAnimDw + " dh=" + mAnimDh +
+                        " dx=" + mAnimDx + " dy=" + mAnimDy +
                         " scale=" + mService.getWindowAnimationScaleLocked());
                     final DisplayInfo displayInfo = displayContent.getDisplayInfo();
                     if (mAnimateMove) {
                         mAnimateMove = false;
                         mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
-                                mAnimDw, mAnimDh);
+                                mAnimDx, mAnimDy);
                     } else {
                         mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
                                 displayInfo.appWidth, displayInfo.appHeight);
                     }
-                    mAnimDw = displayInfo.appWidth;
-                    mAnimDh = displayInfo.appHeight;
+                    mAnimDx = displayInfo.appWidth;
+                    mAnimDy = displayInfo.appHeight;
                     mAnimation.setStartTime(mAnimationStartTime != -1
                             ? mAnimationStartTime
                             : currentTime);
@@ -368,7 +363,6 @@ class WindowStateAnimator {
 
         mAnimating = false;
         mKeyguardGoingAwayAnimation = false;
-        mAnimatingMove = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();
@@ -773,7 +767,14 @@ class WindowStateAnimator {
                         mPendingDestroySurface = mSurfaceController;
                     }
                 } else {
-                    WindowManagerService.logSurface(mWin, "DESTROY", null);
+                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                        RuntimeException e = null;
+                        if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                            e = new RuntimeException();
+                            e.fillInStackTrace();
+                        }
+                        WindowManagerService.logSurface(mWin, "DESTROY", null);
+                    }
                     destroySurface();
                 }
                 // Don't hide wallpaper if we're deferring the surface destroy
@@ -1606,7 +1607,7 @@ class WindowStateAnimator {
         fadeOut.setDuration(fadeDuration);
         fadeOut.setStartOffset(elapsed);
         newAnimation.addAnimation(fadeOut);
-        newAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(), mAnimDw, mAnimDh);
+        newAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(), mAnimDx, mAnimDy);
         mAnimation = newAnimation;
     }
 
@@ -1679,5 +1680,14 @@ class WindowStateAnimator {
     void destroySurface() {
         mSurfaceController.destroyInTransaction();
         mSurfaceController = null;
+    }
+
+    void setMoveAnimation(int left, int top) {
+        final Animation a = AnimationUtils.loadAnimation(mContext,
+                com.android.internal.R.anim.window_move_from_decor);
+        setAnimation(a);
+        mAnimDx = mWin.mLastFrame.left - left;
+        mAnimDy = mWin.mLastFrame.top - top;
+        mAnimateMove = true;
     }
 }
