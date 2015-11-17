@@ -16,13 +16,10 @@
 
 package com.android.internal.policy;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.UserHandle;
@@ -60,7 +57,6 @@ import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.DecorContentParent;
-import com.android.internal.widget.NonClientDecorView;
 import com.android.internal.widget.SwipeDismissLayout;
 
 import android.app.ActivityManager;
@@ -72,7 +68,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
@@ -149,15 +144,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // view is requested, so we need to force the recreating without introducing an infinite loop.
     private boolean mForceDecorInstall = false;
 
-    // This is the non client decor view for the window, containing the caption and window control
-    // buttons. The visibility of this decor depends on the workspace and the window type.
-    // If the window type does not require such a view, this member might be null.
-    NonClientDecorView mNonClientDecorView;
-
-    // The non client decor needs to adapt to the used workspace. Since querying and changing the
-    // workspace is expensive, this is the workspace value the window is currently set up for.
-    int mWorkspaceId;
-
     // This is the view in which the window contents are placed. It is either
     // mDecor itself, or a child of mDecor where the contents go.
     ViewGroup mContentParent;
@@ -220,12 +206,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private ProgressBar mHorizontalProgressBar;
 
-    private int mBackgroundResource = 0;
-    private int mBackgroundFallbackResource = 0;
+    int mBackgroundResource = 0;
+    int mBackgroundFallbackResource = 0;
 
     private Drawable mBackgroundDrawable;
 
-    private boolean mLoadEleveation = true;
+    private boolean mLoadElevation = true;
     private float mElevation;
 
     /** Whether window content should be clipped to the background outline. */
@@ -305,7 +291,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (preservedWindow != null) {
             mDecor = (DecorView) preservedWindow.getDecorView();
             mElevation = preservedWindow.getElevation();
-            mLoadEleveation = false;
+            mLoadElevation = false;
             mForceDecorInstall = true;
             // If we're preserving window, carry over the app token from the preserved
             // window, as we'll be skipping the addView in handleResumeActivity(), and
@@ -478,15 +464,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
+    @Override
     public void clearContentView() {
-        if (mNonClientDecorView != null) {
-            if (mNonClientDecorView.getChildCount() > 1) {
-                mNonClientDecorView.removeViewAt(1);
-            }
-        } else {
-            // This window doesn't have non client decor, so we need to just remove the children
-            // of the decor view.
-            mDecor.removeAllViews();
+        if (mDecor != null) {
+            mDecor.clearContentView();
         }
     }
 
@@ -700,15 +681,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
         }
-        if (mNonClientDecorView != null) {
-            int workspaceId = getWorkspaceId();
-            if (mWorkspaceId != workspaceId) {
-                mWorkspaceId = workspaceId;
-                // We might have to change the kind of surface before we do anything else.
-                mNonClientDecorView.phoneWindowUpdated(StackId.hasWindowDecor(mWorkspaceId),
-                        StackId.hasWindowShadow(mWorkspaceId));
-                mDecor.enableNonClientDecor(StackId.hasWindowDecor(workspaceId));
-            }
+        if (mDecor != null) {
+            mDecor.onConfigurationChanged();
         }
     }
 
@@ -2511,7 +2485,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             + Integer.toHexString(mFrameResource));
                 }
             }
-            if (mLoadEleveation) {
+            if (mLoadElevation) {
                 mElevation = a.getDimension(R.styleable.Window_windowElevation, 0);
             }
             mClipToOutline = a.getBoolean(R.styleable.Window_windowClipToOutline, false);
@@ -2581,19 +2555,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         mDecor.startChanging();
-
-        mNonClientDecorView = createNonClientDecorView();
-        View in = mLayoutInflater.inflate(layoutResource, null);
-        if (mNonClientDecorView != null) {
-            if (mNonClientDecorView.getParent() == null) {
-                decor.addView(mNonClientDecorView,
-                        new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-            }
-            mNonClientDecorView.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-        } else {
-            decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-        }
-        decor.mContentRoot = (ViewGroup) in;
+        final View in = mDecor.onResourcesLoaded(mLayoutInflater, layoutResource);
 
         ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
         if (contentParent == null) {
@@ -2646,50 +2608,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mDecor.finishChanging();
 
         return contentParent;
-    }
-
-    // Free floating overlapping windows require a non client decor with a caption and shadow..
-    private NonClientDecorView createNonClientDecorView() {
-        NonClientDecorView nonClientDecorView = null;
-        for (int i = mDecor.getChildCount() - 1; i >= 0 && nonClientDecorView == null; i--) {
-            View view = mDecor.getChildAt(i);
-            if (view instanceof NonClientDecorView) {
-                // The decor was most likely saved from a relaunch - so reuse it.
-                nonClientDecorView = (NonClientDecorView) view;
-                mDecor.removeViewAt(i);
-            }
-        }
-        final WindowManager.LayoutParams attrs = getAttributes();
-        boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
-                attrs.type == TYPE_APPLICATION;
-        mWorkspaceId = getWorkspaceId();
-        // Only a non floating application window on one of the allowed workspaces can get a non
-        // client decor.
-        if (!isFloating() && isApplication && StackId.isStaticStack(mWorkspaceId)) {
-            // Dependent on the brightness of the used title we either use the
-            // dark or the light button frame.
-            if (nonClientDecorView == null) {
-                Context context = mDecor.getContext();
-                TypedValue value = new TypedValue();
-                context.getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
-                LayoutInflater inflater = mLayoutInflater.from(context);
-                if (Color.luminance(value.data) < 0.5) {
-                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
-                            R.layout.non_client_decor_dark, null);
-                } else {
-                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
-                            R.layout.non_client_decor_light, null);
-                }
-            }
-            nonClientDecorView.setPhoneWindow(this, StackId.hasWindowDecor(mWorkspaceId),
-                    StackId.hasWindowShadow(mWorkspaceId), getResizingBackgroundDrawable(),
-                    mDecor.getContext().getDrawable(R.drawable.non_client_decor_title_focused));
-        }
-        // Tell the decor if it has a visible non client decor.
-        mDecor.enableNonClientDecor(
-                nonClientDecorView != null&& StackId.hasWindowDecor(mWorkspaceId));
-
-        return nonClientDecorView;
     }
 
     /** @hide */
@@ -3819,28 +3737,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mIsStartingWindow = isStartingWindow;
     }
 
-    /**
-     * Returns the Id of the workspace which contains this window.
-     * Note that if no workspace can be determined - which usually means that it was not
-     * created for an activity - the fullscreen workspace ID will be returned.
-     * @return Returns the workspace stack id which contains this window.
-     **/
-    private int getWorkspaceId() {
-        int workspaceId = INVALID_STACK_ID;
-        WindowControllerCallback callback = getWindowControllerCallback();
-        if (callback != null) {
-            try {
-                workspaceId = callback.getWindowStackId();
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to get the workspace ID of a PhoneWindow.");
-            }
-        }
-        if (workspaceId == INVALID_STACK_ID) {
-            return FULLSCREEN_WORKSPACE_STACK_ID;
-        }
-        return workspaceId;
-    }
-
     @Override
     public void setTheme(int resid) {
         mTheme = resid;
@@ -3850,32 +3746,5 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 context.setTheme(resid);
             }
         }
-    }
-
-    /**
-     * Returns the color used to fill areas the app has not rendered content to yet when the user
-     * is resizing the window of an activity in multi-window mode.
-     * */
-    private Drawable getResizingBackgroundDrawable() {
-        final Context context = mDecor.getContext();
-
-        if (mBackgroundResource != 0) {
-            final Drawable drawable = context.getDrawable(mBackgroundResource);
-            if (drawable != null) {
-                return drawable;
-            }
-        }
-
-        if (mBackgroundFallbackResource != 0) {
-            final Drawable fallbackDrawable = context.getDrawable(mBackgroundFallbackResource);
-            if (fallbackDrawable != null) {
-                return fallbackDrawable;
-            }
-        }
-
-        // We shouldn't really get here as the background fallback should be always available since
-        // it is defaulted by the system.
-        Log.w(TAG, "Failed to find background drawable for PhoneWindow=" + this);
-        return null;
     }
 }

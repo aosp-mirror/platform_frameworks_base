@@ -208,7 +208,7 @@ public class NonClientDecorView extends LinearLayout
      * @param showDecor True if the decor should be shown.
      * @param windowHasShadow True when the window should show a shadow.
      **/
-    public void phoneWindowUpdated(boolean showDecor, boolean windowHasShadow) {
+    public void onConfigurationChanged(boolean showDecor, boolean windowHasShadow) {
         mShowDecor = showDecor;
         updateCaptionVisibility();
         if (windowHasShadow != mWindowHasShadow) {
