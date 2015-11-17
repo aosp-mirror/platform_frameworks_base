@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import com.android.tools.layoutlib.create.dataclass.ClassWithNative;
 import com.android.tools.layoutlib.create.dataclass.OuterClass;
 import com.android.tools.layoutlib.create.dataclass.OuterClass.InnerClass;
+import com.android.tools.layoutlib.create.dataclass.OuterClass.StaticInnerClass;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +57,8 @@ public class DelegateClassAdapterTest {
     private static final String OUTER_CLASS_NAME = OuterClass.class.getCanonicalName();
     private static final String INNER_CLASS_NAME = OuterClass.class.getCanonicalName() + "$" +
                                                    InnerClass.class.getSimpleName();
+    private static final String STATIC_INNER_CLASS_NAME =
+            OuterClass.class.getCanonicalName() + "$" + StaticInnerClass.class.getSimpleName();
 
     @Before
     public void setUp() throws Exception {
@@ -288,6 +291,61 @@ public class DelegateClassAdapterTest {
             };
             cl2.add(OUTER_CLASS_NAME, cwOuter.toByteArray());
             cl2.add(INNER_CLASS_NAME, cwInner.toByteArray());
+            cl2.testModifiedInstance();
+        } catch (Throwable t) {
+            throw dumpGeneratedClass(t, cl2);
+        }
+    }
+
+    @Test
+    public void testDelegateStaticInner() throws Throwable {
+        // We'll delegate the "get" method of both the inner and outer class.
+        HashSet<String> delegateMethods = new HashSet<String>();
+        delegateMethods.add("get");
+
+        // Generate the delegate for the outer class.
+        ClassWriter cwOuter = new ClassWriter(0 /*flags*/);
+        String outerClassName = OUTER_CLASS_NAME.replace('.', '/');
+        DelegateClassAdapter cvOuter = new DelegateClassAdapter(
+                mLog, cwOuter, outerClassName, delegateMethods);
+        ClassReader cr = new ClassReader(OUTER_CLASS_NAME);
+        cr.accept(cvOuter, 0 /* flags */);
+
+        // Generate the delegate for the static inner class.
+        ClassWriter cwInner = new ClassWriter(0 /*flags*/);
+        String innerClassName = STATIC_INNER_CLASS_NAME.replace('.', '/');
+        DelegateClassAdapter cvInner = new DelegateClassAdapter(
+                mLog, cwInner, innerClassName, delegateMethods);
+        cr = new ClassReader(STATIC_INNER_CLASS_NAME);
+        cr.accept(cvInner, 0 /* flags */);
+
+        // Load the generated classes in a different class loader and try them
+        ClassLoader2 cl2 = null;
+        try {
+            cl2 = new ClassLoader2() {
+                @Override
+                public void testModifiedInstance() throws Exception {
+
+                    // Check the outer class
+                    Class<?> outerClazz2 = loadClass(OUTER_CLASS_NAME);
+                    Object o2 = outerClazz2.newInstance();
+                    assertNotNull(o2);
+
+                    // Check the inner class. Since it's not a static inner class, we need
+                    // to use the hidden constructor that takes the outer class as first parameter.
+                    Class<?> innerClazz2 = loadClass(STATIC_INNER_CLASS_NAME);
+                    Constructor<?> innerCons = innerClazz2.getConstructor();
+                    Object i2 = innerCons.newInstance();
+                    assertNotNull(i2);
+
+                    // The original StaticInner.get returns 100+10+20,
+                    // but the delegate makes it return 6+10+20
+                    assertEquals(6+10+20, callGet(i2, 10, 20));
+                    assertEquals(100+10+20, callGet_Original(i2, 10, 20));
+                }
+            };
+            cl2.add(OUTER_CLASS_NAME, cwOuter.toByteArray());
+            cl2.add(STATIC_INNER_CLASS_NAME, cwInner.toByteArray());
             cl2.testModifiedInstance();
         } catch (Throwable t) {
             throw dumpGeneratedClass(t, cl2);
