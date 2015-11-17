@@ -421,7 +421,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     gc.setComposite(AlphaComposite.Src);
 
                     gc.setColor(new Color(0x00000000, true));
-                    gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+                    gc.fillRect(0, 0,
+                            mMeasuredScreenWidth, mMeasuredScreenHeight);
 
                     // done
                     gc.dispose();
