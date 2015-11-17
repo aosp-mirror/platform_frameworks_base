@@ -17,4 +17,7 @@
 
 <resources>
     <color name="resolver_list_bg">@color/white</color>
+    <color name="immersive_cling_bg_color">@color/accent_device_default_light</color>
+    <color name="immersive_cling_text_color">@color/primary_text_default_material_light</color>
+    <color name="immersive_cling_button_text_color">@android:color/white</color>
 </resources>

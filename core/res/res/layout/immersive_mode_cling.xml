@@ -16,7 +16,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorAccent"
+        android:background="@color/immersive_cling_bg_color"
         android:gravity="center_vertical"
         android:paddingBottom="24dp">
 
@@ -47,7 +47,7 @@
                 android:paddingTop="8dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_expand_more_48dp"
-                android:tint="?android:attr/colorAccent"/>
+                android:tint="@color/immersive_cling_bg_color"/>
     </FrameLayout>
 
     <TextView
@@ -59,7 +59,7 @@
             android:paddingStart="48dp"
             android:paddingTop="40dp"
             android:text="@string/immersive_cling_title"
-            android:textColor="@color/primary_text_default_material_light"
+            android:textColor="@color/immersive_cling_text_color"
             android:textSize="24sp" />
 
     <TextView
@@ -71,7 +71,7 @@
             android:paddingStart="48dp"
             android:paddingTop="12.6dp"
             android:text="@string/immersive_cling_description"
-            android:textColor="@color/primary_text_default_material_light"
+            android:textColor="@color/immersive_cling_text_color"
             android:textSize="16sp" />
 
     <Button
@@ -86,7 +86,7 @@
             android:paddingEnd="8dp"
             android:paddingStart="8dp"
             android:text="@string/immersive_cling_positive"
-            android:textColor="@android:color/white"
+            android:textColor="@color/immersive_cling_button_text_color"
             android:textSize="14sp" />
 
 </RelativeLayout>
