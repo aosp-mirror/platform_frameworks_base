@@ -20,6 +20,7 @@ import android.content.Context;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 
 /* A view pool to manage more views than we can visibly handle */
@@ -76,11 +77,10 @@ public class ViewPool<V, T> {
         return v;
     }
 
-    /** Returns an iterator to the list of the views in the pool. */
-    Iterator<V> poolViewIterator() {
-        if (mPool != null) {
-            return mPool.iterator();
-        }
-        return null;
+    /**
+     * Returns the list of views in the pool.
+     */
+    List<V> getViews() {
+        return mPool;
     }
 }

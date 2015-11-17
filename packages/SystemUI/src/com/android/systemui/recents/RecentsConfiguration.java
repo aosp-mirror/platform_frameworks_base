@@ -154,7 +154,7 @@ public class RecentsConfiguration {
             int swInset = getInsetToSmallestWidth(windowBounds.right - windowBounds.left);
             int top = searchBarBounds.isEmpty() ? topInset : 0;
             taskStackBounds.set(windowBounds.left + swInset, searchBarBounds.bottom + top,
-                    windowBounds.right - swInset, windowBounds.bottom);
+                    windowBounds.right - swInset - rightInset, windowBounds.bottom);
         }
     }
 

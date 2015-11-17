@@ -114,6 +114,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<>();
     ArrayList<TaskView> mTaskViews = new ArrayList<>();
     List<TaskView> mImmutableTaskViews = new ArrayList<>();
+    List<TaskView> mTmpTaskViews = new ArrayList<>();
     LayoutInflater mInflater;
     boolean mLayersDisabled;
     boolean mTouchExplorationEnabled;
@@ -279,14 +280,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Mark each task view for relayout
-        if (mViewPool != null) {
-            Iterator<TaskView> iter = mViewPool.poolViewIterator();
-            if (iter != null) {
-                while (iter.hasNext()) {
-                    TaskView tv = iter.next();
-                    tv.reset();
-                }
-            }
+        List<TaskView> poolViews = mViewPool.getViews();
+        for (TaskView tv : poolViews) {
+            tv.reset();
         }
 
         // Reset the stack state
@@ -862,10 +858,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Measure each of the TaskViews
-        List<TaskView> taskViews = getTaskViews();
-        int taskViewCount = taskViews.size();
+        mTmpTaskViews.clear();
+        mTmpTaskViews.addAll(getTaskViews());
+        mTmpTaskViews.addAll(mViewPool.getViews());
+        int taskViewCount = mTmpTaskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
-            TaskView tv = taskViews.get(i);
+            TaskView tv = mTmpTaskViews.get(i);
             if (tv.getBackground() != null) {
                 tv.getBackground().getPadding(mTmpRect);
             } else {
@@ -891,10 +889,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         // Layout each of the TaskViews
-        List<TaskView> taskViews = getTaskViews();
-        int taskViewCount = taskViews.size();
+        mTmpTaskViews.clear();
+        mTmpTaskViews.addAll(getTaskViews());
+        mTmpTaskViews.addAll(mViewPool.getViews());
+        int taskViewCount = mTmpTaskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
-            TaskView tv = taskViews.get(i);
+            TaskView tv = mTmpTaskViews.get(i);
             if (tv.getBackground() != null) {
                 tv.getBackground().getPadding(mTmpRect);
             } else {
@@ -911,6 +911,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         if (changed) {
+            if (mStackScroller.isScrollOutOfBounds()) {
+                mStackScroller.boundScroll();
+            }
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
             clipTaskViews(true /* forceUpdate */);
