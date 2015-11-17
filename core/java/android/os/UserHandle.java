@@ -256,6 +256,23 @@ public final class UserHandle implements Parcelable {
         }
     }
 
+    /** @hide */
+    public static int parseUserArg(String arg) {
+        int userId;
+        if ("all".equals(arg)) {
+            userId = UserHandle.USER_ALL;
+        } else if ("current".equals(arg) || "cur".equals(arg)) {
+            userId = UserHandle.USER_CURRENT;
+        } else {
+            try {
+                userId = Integer.parseInt(arg);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Bad user number: " + arg);
+            }
+        }
+        return userId;
+    }
+
     /**
      * Returns the user id of the current process
      * @return user id of the current process

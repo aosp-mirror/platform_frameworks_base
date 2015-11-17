@@ -226,7 +226,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             final int N = a.length;
             boolean printedHeader = false;
             F filter;
-            if (collapseDuplicates) {
+            if (collapseDuplicates && !printFilter) {
                 found.clear();
                 for (int i=0; i<N && (filter=a[i]) != null; i++) {
                     if (packageName != null && !isPackageForFilter(packageName, filter)) {

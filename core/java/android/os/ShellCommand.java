@@ -48,19 +48,35 @@ public abstract class ShellCommand {
     private FastPrintWriter mErrPrintWriter;
     private InputStream mInputStream;
 
-    public int exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) {
+    public void init(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, int firstArgPos) {
         mTarget = target;
         mIn = in;
         mOut = out;
         mErr = err;
         mArgs = args;
-        mResultReceiver = resultReceiver;
-        mCmd = args != null && args.length > 0 ? args[0] : null;
-        mArgPos = 1;
+        mResultReceiver = null;
+        mCmd = null;
+        mArgPos = firstArgPos;
         mCurArgData = null;
         mOutPrintWriter = null;
         mErrPrintWriter = null;
+    }
+
+    public int exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) {
+        String cmd;
+        int start;
+        if (args != null && args.length > 0) {
+            cmd = args[0];
+            start = 1;
+        } else {
+            cmd = null;
+            start = 0;
+        }
+        init(target, in, out, err, args, start);
+        mCmd = cmd;
+        mResultReceiver = resultReceiver;
 
         if (DEBUG) Slog.d(TAG, "Starting command " + mCmd + " on " + mTarget);
         int res = -1;

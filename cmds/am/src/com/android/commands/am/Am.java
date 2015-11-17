@@ -55,6 +55,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -72,6 +73,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -117,7 +119,8 @@ public class Am extends BaseCommand {
 
     @Override
     public void onShowUsage(PrintStream out) {
-        out.println(
+        PrintWriter pw = new PrintWriter(out);
+        pw.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
                 "               [--sampling INTERVAL] [-R COUNT] [-S]\n" +
@@ -337,52 +340,10 @@ public class Am extends BaseCommand {
                 "am send-trim-memory: send a memory trim event to a <PROCESS>.\n" +
                 "\n" +
                 "am get-current-user: returns id of the current foreground user.\n" +
-                "\n" +
-                "<INTENT> specifications include these flags and arguments:\n" +
-                "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
-                "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
-                "    [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
-                "    [--esn <EXTRA_KEY> ...]\n" +
-                "    [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
-                "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
-                "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
-                "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]\n" +
-                "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
-                "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]\n" +
-                "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
-                "        (mutiple extras passed as Integer[])\n" +
-                "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
-                "        (mutiple extras passed as List<Integer>)\n" +
-                "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
-                "        (mutiple extras passed as Long[])\n" +
-                "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
-                "        (mutiple extras passed as List<Long>)\n" +
-                "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
-                "        (mutiple extras passed as Float[])\n" +
-                "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
-                "        (mutiple extras passed as List<Float>)\n" +
-                "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
-                "        (mutiple extras passed as String[]; to embed a comma into a string,\n" +
-                "         escape it using \"\\,\")\n" +
-                "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
-                "        (mutiple extras passed as List<String>; to embed a comma into a string,\n" +
-                "         escape it using \"\\,\")\n" +
-                "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
-                "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
-                "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
-                "    [--include-stopped-packages]\n" +
-                "    [--activity-brought-to-front] [--activity-clear-top]\n" +
-                "    [--activity-clear-when-task-reset] [--activity-exclude-from-recents]\n" +
-                "    [--activity-launched-from-history] [--activity-multiple-task]\n" +
-                "    [--activity-no-animation] [--activity-no-history]\n" +
-                "    [--activity-no-user-action] [--activity-previous-is-top]\n" +
-                "    [--activity-reorder-to-front] [--activity-reset-task-if-needed]\n" +
-                "    [--activity-single-top] [--activity-clear-task]\n" +
-                "    [--activity-task-on-home]\n" +
-                "    [--receiver-registered-only] [--receiver-replace-pending]\n" +
-                "    [--selector]\n" +
-                "    [<URI> | <PACKAGE> | <COMPONENT>]\n"
-                );
+                "\n"
+        );
+        Intent.printIntentArgsHelp(pw, "");
+        pw.flush();
     }
 
     @Override
@@ -486,10 +447,6 @@ public class Am extends BaseCommand {
     }
 
     private Intent makeIntent(int defUser) throws URISyntaxException {
-        Intent intent = new Intent();
-        Intent baseIntent = intent;
-        boolean hasIntentInfo = false;
-
         mStartFlags = 0;
         mWaitOption = false;
         mStopOption = false;
@@ -498,316 +455,38 @@ public class Am extends BaseCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mUserId = defUser;
-        Uri data = null;
-        String type = null;
 
-        String opt;
-        while ((opt=nextOption()) != null) {
-            if (opt.equals("-a")) {
-                intent.setAction(nextArgRequired());
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-d")) {
-                data = Uri.parse(nextArgRequired());
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-t")) {
-                type = nextArgRequired();
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-c")) {
-                intent.addCategory(nextArgRequired());
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-e") || opt.equals("--es")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, value);
-            } else if (opt.equals("--esn")) {
-                String key = nextArgRequired();
-                intent.putExtra(key, (String) null);
-            } else if (opt.equals("--ei")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Integer.decode(value));
-            } else if (opt.equals("--eu")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Uri.parse(value));
-            } else if (opt.equals("--ecn")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                ComponentName cn = ComponentName.unflattenFromString(value);
-                if (cn == null) throw new IllegalArgumentException("Bad component name: " + value);
-                intent.putExtra(key, cn);
-            } else if (opt.equals("--eia")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                int[] list = new int[strings.length];
-                for (int i = 0; i < strings.length; i++) {
-                    list[i] = Integer.decode(strings[i]);
-                }
-                intent.putExtra(key, list);
-            } else if (opt.equals("--eial")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                ArrayList<Integer> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(Integer.decode(strings[i]));
-                }
-                intent.putExtra(key, list);
-            } else if (opt.equals("--el")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Long.valueOf(value));
-            } else if (opt.equals("--ela")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                long[] list = new long[strings.length];
-                for (int i = 0; i < strings.length; i++) {
-                    list[i] = Long.valueOf(strings[i]);
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--elal")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                ArrayList<Long> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(Long.valueOf(strings[i]));
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--ef")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Float.valueOf(value));
-                hasIntentInfo = true;
-            } else if (opt.equals("--efa")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                float[] list = new float[strings.length];
-                for (int i = 0; i < strings.length; i++) {
-                    list[i] = Float.valueOf(strings[i]);
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--efal")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                ArrayList<Float> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(Float.valueOf(strings[i]));
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--esa")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                // Split on commas unless they are preceeded by an escape.
-                // The escape character must be escaped for the string and
-                // again for the regex, thus four escape characters become one.
-                String[] strings = value.split("(?<!\\\\),");
-                intent.putExtra(key, strings);
-                hasIntentInfo = true;
-            } else if (opt.equals("--esal")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                // Split on commas unless they are preceeded by an escape.
-                // The escape character must be escaped for the string and
-                // again for the regex, thus four escape characters become one.
-                String[] strings = value.split("(?<!\\\\),");
-                ArrayList<String> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(strings[i]);
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--ez")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired().toLowerCase();
-                // Boolean.valueOf() results in false for anything that is not "true", which is
-                // error-prone in shell commands
-                boolean arg;
-                if ("true".equals(value) || "t".equals(value)) {
-                    arg = true;
-                } else if ("false".equals(value) || "f".equals(value)) {
-                    arg = false;
+        return Intent.parseCommandArgs(mArgs, new Intent.CommandOptionHandler() {
+            @Override
+            public boolean handleOption(String opt, ShellCommand cmd) {
+                if (opt.equals("-D")) {
+                    mStartFlags |= ActivityManager.START_FLAG_DEBUG;
+                } else if (opt.equals("-W")) {
+                    mWaitOption = true;
+                } else if (opt.equals("-P")) {
+                    mProfileFile = nextArgRequired();
+                    mAutoStop = true;
+                } else if (opt.equals("--start-profiler")) {
+                    mProfileFile = nextArgRequired();
+                    mAutoStop = false;
+                } else if (opt.equals("--sampling")) {
+                    mSamplingInterval = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("-R")) {
+                    mRepeat = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("-S")) {
+                    mStopOption = true;
+                } else if (opt.equals("--track-allocation")) {
+                    mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
+                } else if (opt.equals("--user")) {
+                    mUserId = parseUserArg(nextArgRequired());
+                } else if (opt.equals("--receiver-permission")) {
+                    mReceiverPermission = nextArgRequired();
                 } else {
-                    try {
-                        arg = Integer.decode(value) != 0;
-                    } catch (NumberFormatException ex) {
-                        throw new IllegalArgumentException("Invalid boolean value: " + value);
-                    }
+                    return false;
                 }
-
-                intent.putExtra(key, arg);
-            } else if (opt.equals("-n")) {
-                String str = nextArgRequired();
-                ComponentName cn = ComponentName.unflattenFromString(str);
-                if (cn == null) throw new IllegalArgumentException("Bad component name: " + str);
-                intent.setComponent(cn);
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-p")) {
-                String str = nextArgRequired();
-                intent.setPackage(str);
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-f")) {
-                String str = nextArgRequired();
-                intent.setFlags(Integer.decode(str).intValue());
-            } else if (opt.equals("--grant-read-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            } else if (opt.equals("--grant-write-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            } else if (opt.equals("--grant-persistable-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            } else if (opt.equals("--grant-prefix-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-            } else if (opt.equals("--exclude-stopped-packages")) {
-                intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-            } else if (opt.equals("--include-stopped-packages")) {
-                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            } else if (opt.equals("--debug-log-resolution")) {
-                intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-            } else if (opt.equals("--activity-brought-to-front")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            } else if (opt.equals("--activity-clear-top")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            } else if (opt.equals("--activity-clear-when-task-reset")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-            } else if (opt.equals("--activity-exclude-from-recents")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            } else if (opt.equals("--activity-launched-from-history")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            } else if (opt.equals("--activity-multiple-task")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            } else if (opt.equals("--activity-no-animation")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            } else if (opt.equals("--activity-no-history")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            } else if (opt.equals("--activity-no-user-action")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-            } else if (opt.equals("--activity-previous-is-top")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-            } else if (opt.equals("--activity-reorder-to-front")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            } else if (opt.equals("--activity-reset-task-if-needed")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-            } else if (opt.equals("--activity-single-top")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            } else if (opt.equals("--activity-clear-task")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            } else if (opt.equals("--activity-task-on-home")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-            } else if (opt.equals("--receiver-registered-only")) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            } else if (opt.equals("--receiver-replace-pending")) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            } else if (opt.equals("--selector")) {
-                intent.setDataAndType(data, type);
-                intent = new Intent();
-            } else if (opt.equals("-D")) {
-                mStartFlags |= ActivityManager.START_FLAG_DEBUG;
-            } else if (opt.equals("-W")) {
-                mWaitOption = true;
-            } else if (opt.equals("-P")) {
-                mProfileFile = nextArgRequired();
-                mAutoStop = true;
-            } else if (opt.equals("--start-profiler")) {
-                mProfileFile = nextArgRequired();
-                mAutoStop = false;
-            } else if (opt.equals("--sampling")) {
-                mSamplingInterval = Integer.parseInt(nextArgRequired());
-            } else if (opt.equals("-R")) {
-                mRepeat = Integer.parseInt(nextArgRequired());
-            } else if (opt.equals("-S")) {
-                mStopOption = true;
-            } else if (opt.equals("--track-allocation")) {
-                mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
-            } else if (opt.equals("--user")) {
-                mUserId = parseUserArg(nextArgRequired());
-            } else if (opt.equals("--receiver-permission")) {
-                mReceiverPermission = nextArgRequired();
-            } else {
-                throw new IllegalArgumentException("Unknown option: " + opt);
+                return true;
             }
-        }
-        intent.setDataAndType(data, type);
-
-        final boolean hasSelector = intent != baseIntent;
-        if (hasSelector) {
-            // A selector was specified; fix up.
-            baseIntent.setSelector(intent);
-            intent = baseIntent;
-        }
-
-        String arg = nextArg();
-        baseIntent = null;
-        if (arg == null) {
-            if (hasSelector) {
-                // If a selector has been specified, and no arguments
-                // have been supplied for the main Intent, then we can
-                // assume it is ACTION_MAIN CATEGORY_LAUNCHER; we don't
-                // need to have a component name specified yet, the
-                // selector will take care of that.
-                baseIntent = new Intent(Intent.ACTION_MAIN);
-                baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            }
-        } else if (arg.indexOf(':') >= 0) {
-            // The argument is a URI.  Fully parse it, and use that result
-            // to fill in any data not specified so far.
-            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME
-                    | Intent.URI_ANDROID_APP_SCHEME | Intent.URI_ALLOW_UNSAFE);
-        } else if (arg.indexOf('/') >= 0) {
-            // The argument is a component name.  Build an Intent to launch
-            // it.
-            baseIntent = new Intent(Intent.ACTION_MAIN);
-            baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            baseIntent.setComponent(ComponentName.unflattenFromString(arg));
-        } else {
-            // Assume the argument is a package name.
-            baseIntent = new Intent(Intent.ACTION_MAIN);
-            baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            baseIntent.setPackage(arg);
-        }
-        if (baseIntent != null) {
-            Bundle extras = intent.getExtras();
-            intent.replaceExtras((Bundle)null);
-            Bundle uriExtras = baseIntent.getExtras();
-            baseIntent.replaceExtras((Bundle)null);
-            if (intent.getAction() != null && baseIntent.getCategories() != null) {
-                HashSet<String> cats = new HashSet<String>(baseIntent.getCategories());
-                for (String c : cats) {
-                    baseIntent.removeCategory(c);
-                }
-            }
-            intent.fillIn(baseIntent, Intent.FILL_IN_COMPONENT | Intent.FILL_IN_SELECTOR);
-            if (extras == null) {
-                extras = uriExtras;
-            } else if (uriExtras != null) {
-                uriExtras.putAll(extras);
-                extras = uriExtras;
-            }
-            intent.replaceExtras(extras);
-            hasIntentInfo = true;
-        }
-
-        if (!hasIntentInfo) throw new IllegalArgumentException("No intent supplied");
-        return intent;
+        });
     }
 
     private void runStartService() throws Exception {
