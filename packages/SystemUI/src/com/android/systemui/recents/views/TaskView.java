@@ -240,6 +240,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Resets this view's properties */
     void resetViewProperties() {
+        unsetFocusedTask();
         setDim(0);
         setLayerType(View.LAYER_TYPE_NONE, null);
         TaskViewTransform.reset(this);
