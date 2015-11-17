@@ -26,6 +26,7 @@ import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.NonClientDecorView;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -38,6 +39,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -46,6 +48,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.InputQueue;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -63,6 +66,8 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -72,6 +77,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 class DecorView extends FrameLayout implements RootViewSurfaceTaker {
     private static final String TAG = "DecorView";
@@ -150,6 +157,15 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
 
     private Rect mTempRect;
     private Rect mOutsets = new Rect();
+
+    // This is the non client decor view for the window, containing the caption and window control
+    // buttons. The visibility of this decor depends on the workspace and the window type.
+    // If the window type does not require such a view, this member might be null.
+    NonClientDecorView mNonClientDecorView;
+
+    // The non client decor needs to adapt to the used workspace. Since querying and changing the
+    // workspace is expensive, this is the workspace value the window is currently set up for.
+    int mWorkspaceId;
 
     DecorView(Context context, int featureId, PhoneWindow window) {
         super(context);
@@ -326,7 +342,7 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        if (mHasNonClientDecor && mWindow.mNonClientDecorView.mVisible) {
+        if (mHasNonClientDecor && mNonClientDecorView.mVisible) {
             // Don't dispatch ACTION_DOWN to the non client decor if the window is
             // resizable and the event was (starting) outside the window.
             // Window resizing events should be handled by WindowManager.
@@ -1483,16 +1499,156 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
      * @return Returns true when the window has a shadow created by the non client decor.
      **/
     private boolean windowHasShadow() {
-        return windowHasNonClientDecor() && ActivityManager.StackId
-                .hasWindowShadow(mWindow.mWorkspaceId);
+        return windowHasNonClientDecor() && ActivityManager.StackId.hasWindowShadow(mWorkspaceId);
     }
 
     void setWindow(PhoneWindow phoneWindow) {
         mWindow = phoneWindow;
         Context context = getContext();
         if (context instanceof DecorContext) {
-            DecorContext decorContex = (DecorContext) context;
-            decorContex.setPhoneWindow(mWindow);
+            DecorContext decorContext = (DecorContext) context;
+            decorContext.setPhoneWindow(mWindow);
+        }
+    }
+
+    void onConfigurationChanged() {
+        if (mNonClientDecorView != null) {
+            int workspaceId = getWorkspaceId();
+            if (mWorkspaceId != workspaceId) {
+                mWorkspaceId = workspaceId;
+                // We might have to change the kind of surface before we do anything else.
+                mNonClientDecorView.onConfigurationChanged(
+                        ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
+                        ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
+                enableNonClientDecor(ActivityManager.StackId.hasWindowDecor(workspaceId));
+            }
+        }
+    }
+
+    View onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
+        mNonClientDecorView = createNonClientDecorView(inflater);
+        final View root = inflater.inflate(layoutResource, null);
+        if (mNonClientDecorView != null) {
+            if (mNonClientDecorView.getParent() == null) {
+                addView(mNonClientDecorView,
+                        new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+            }
+            mNonClientDecorView.addView(root,
+                    new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        } else {
+            addView(root, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        }
+        mContentRoot = (ViewGroup) root;
+        return root;
+    }
+
+    // Free floating overlapping windows require a non client decor with a caption and shadow..
+    private NonClientDecorView createNonClientDecorView(LayoutInflater inflater) {
+        NonClientDecorView nonClientDecorView = null;
+        for (int i = getChildCount() - 1; i >= 0 && nonClientDecorView == null; i--) {
+            View view = getChildAt(i);
+            if (view instanceof NonClientDecorView) {
+                // The decor was most likely saved from a relaunch - so reuse it.
+                nonClientDecorView = (NonClientDecorView) view;
+                removeViewAt(i);
+            }
+        }
+        final WindowManager.LayoutParams attrs = mWindow.getAttributes();
+        boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
+                attrs.type == TYPE_APPLICATION;
+        mWorkspaceId = getWorkspaceId();
+        // Only a non floating application window on one of the allowed workspaces can get a non
+        // client decor.
+        if (!mWindow.isFloating()
+                && isApplication
+                && ActivityManager.StackId.isStaticStack(mWorkspaceId)) {
+            // Dependent on the brightness of the used title we either use the
+            // dark or the light button frame.
+            if (nonClientDecorView == null) {
+                Context context = getContext();
+                TypedValue value = new TypedValue();
+                context.getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
+                inflater = inflater.from(context);
+                if (Color.luminance(value.data) < 0.5) {
+                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
+                            R.layout.non_client_decor_dark, null);
+                } else {
+                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
+                            R.layout.non_client_decor_light, null);
+                }
+            }
+            nonClientDecorView.setPhoneWindow(mWindow,
+                    ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
+                    ActivityManager.StackId.hasWindowShadow(mWorkspaceId),
+                    getResizingBackgroundDrawable(),
+                    getContext().getDrawable(R.drawable.non_client_decor_title_focused));
+        }
+        // Tell the decor if it has a visible non client decor.
+        enableNonClientDecor(
+                nonClientDecorView != null && ActivityManager.StackId.hasWindowDecor(mWorkspaceId));
+
+        return nonClientDecorView;
+    }
+
+    /**
+     * Returns the color used to fill areas the app has not rendered content to yet when the user
+     * is resizing the window of an activity in multi-window mode.
+     * */
+    private Drawable getResizingBackgroundDrawable() {
+        final Context context = getContext();
+
+        if (mWindow.mBackgroundResource != 0) {
+            final Drawable drawable = context.getDrawable(mWindow.mBackgroundResource);
+            if (drawable != null) {
+                return drawable;
+            }
+        }
+
+        if (mWindow.mBackgroundFallbackResource != 0) {
+            final Drawable fallbackDrawable =
+                    context.getDrawable(mWindow.mBackgroundFallbackResource);
+            if (fallbackDrawable != null) {
+                return fallbackDrawable;
+            }
+        }
+
+        // We shouldn't really get here as the background fallback should be always available since
+        // it is defaulted by the system.
+        Log.w(TAG, "Failed to find background drawable for PhoneWindow=" + mWindow);
+        return null;
+    }
+
+    /**
+     * Returns the Id of the workspace which contains this window.
+     * Note that if no workspace can be determined - which usually means that it was not
+     * created for an activity - the fullscreen workspace ID will be returned.
+     * @return Returns the workspace stack id which contains this window.
+     **/
+    private int getWorkspaceId() {
+        int workspaceId = INVALID_STACK_ID;
+        final Window.WindowControllerCallback callback = mWindow.getWindowControllerCallback();
+        if (callback != null) {
+            try {
+                workspaceId = callback.getWindowStackId();
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Failed to get the workspace ID of a PhoneWindow.");
+            }
+        }
+        if (workspaceId == INVALID_STACK_ID) {
+            return FULLSCREEN_WORKSPACE_STACK_ID;
+        }
+        return workspaceId;
+    }
+
+    void clearContentView() {
+        if (mNonClientDecorView != null) {
+            if (mNonClientDecorView.getChildCount() > 1) {
+                mNonClientDecorView.removeViewAt(1);
+            }
+        } else {
+            // This window doesn't have non client decor, so we need to just remove the
+            // children of the decor view.
+            removeAllViews();
         }
     }
 
