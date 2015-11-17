@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <utils/LinearAllocator.h>
 
-#include <unit_tests/TestUtils.h>
+#include <utils/TestUtils.h>
 
 using namespace android;
 using namespace android::uirenderer;

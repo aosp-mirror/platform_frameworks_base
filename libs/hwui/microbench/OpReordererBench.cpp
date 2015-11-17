@@ -21,7 +21,7 @@
 #include "OpReorderer.h"
 #include "RecordedOp.h"
 #include "RecordingCanvas.h"
-#include "unit_tests/TestUtils.h"
+#include "utils/TestUtils.h"
 #include "microbench/MicroBench.h"
 
 #include <vector>

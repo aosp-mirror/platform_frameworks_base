@@ -27,14 +27,22 @@
 
 #if HWUI_NEW_OPS
 #include <RecordedOp.h>
+#include <RecordingCanvas.h>
 #else
 #include <DisplayListOp.h>
+#include <DisplayListCanvas.h>
 #endif
 
 #include <memory>
 
 namespace android {
 namespace uirenderer {
+
+#if HWUI_NEW_OPS
+typedef RecordingCanvas TestCanvas;
+#else
+typedef DisplayListCanvas TestCanvas;
+#endif
 
 #define EXPECT_MATRIX_APPROX_EQ(a, b) \
     EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
@@ -97,7 +105,8 @@ public:
 
     static SkBitmap createSkBitmap(int width, int height) {
         SkBitmap bitmap;
-        SkImageInfo info = SkImageInfo::MakeUnknown(width, height);
+        SkImageInfo info = SkImageInfo::Make(width, height,
+                kN32_SkColorType, kPremul_SkAlphaType);
         bitmap.setInfo(info);
         bitmap.allocPixels(info);
         return bitmap;
@@ -111,18 +120,8 @@ public:
         return std::unique_ptr<DisplayList>(canvas.finishRecording());
     }
 
-    typedef std::function<int(RenderProperties&)> PropSetupCallback;
-
-    static PropSetupCallback getHwLayerSetupCallback() {
-        static PropSetupCallback sLayerSetupCallback = [] (RenderProperties& properties) {
-            properties.mutateLayerProperties().setType(LayerType::RenderLayer);
-            return RenderNode::GENERIC;
-        };
-        return sLayerSetupCallback;
-    }
-
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            PropSetupCallback propSetupCallback = nullptr) {
+            std::function<void(RenderProperties& props, TestCanvas& canvas)> setup = nullptr) {
 #if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
@@ -130,25 +129,39 @@ public:
 #endif
 
         sp<RenderNode> node = new RenderNode();
-        node->mutateStagingProperties().setLeftTopRightBottom(left, top, right, bottom);
-        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
-        if (propSetupCallback) {
-            node->setPropertyFieldsDirty(propSetupCallback(node->mutateStagingProperties()));
+        RenderProperties& props = node->mutateStagingProperties();
+        props.setLeftTopRightBottom(left, top, right, bottom);
+        if (setup) {
+            TestCanvas canvas(props.getWidth(), props.getHeight());
+            setup(props, canvas);
+            node->setStagingDisplayList(canvas.finishRecording());
         }
+        node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
     }
 
-    template<class CanvasType>
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(CanvasType& canvas)> canvasCallback,
-            PropSetupCallback propSetupCallback = nullptr) {
-        sp<RenderNode> node = createNode(left, top, right, bottom, propSetupCallback);
+            std::function<void(RenderProperties& props)> setup) {
+        return createNode(left, top, right, bottom,
+                [&setup](RenderProperties& props, TestCanvas& canvas) {
+            setup(props);
+        });
+    }
 
-        auto&& props = node->stagingProperties(); // staging, since not sync'd yet
-        CanvasType canvas(props.getWidth(), props.getHeight());
-        canvasCallback(canvas);
-        node->setStagingDisplayList(canvas.finishRecording());
-        return node;
+    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+            std::function<void(TestCanvas& canvas)> setup) {
+        return createNode(left, top, right, bottom,
+                [&setup](RenderProperties& props, TestCanvas& canvas) {
+            setup(canvas);
+        });
+    }
+
+    static void recordNode(RenderNode& node,
+            std::function<void(TestCanvas&)> contentCallback) {
+       TestCanvas canvas(node.stagingProperties().getWidth(),
+               node.stagingProperties().getHeight());
+       contentCallback(canvas);
+       node.setStagingDisplayList(canvas.finishRecording());
     }
 
     static void syncHierarchyPropertiesAndDisplayList(sp<RenderNode>& node) {
@@ -180,6 +193,9 @@ public:
         TestTask task(rtCallback);
         renderthread::RenderThread::getInstance().queueAndWait(&task);
     }
+
+    static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
+
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         node->syncProperties();

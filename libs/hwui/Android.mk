@@ -30,6 +30,7 @@ hwui_src_files := \
     utils/StringUtils.cpp \
     utils/TestWindowContext.cpp \
     utils/VectorDrawableUtils.cpp \
+    utils/TestUtils.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
@@ -253,8 +254,10 @@ LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 
 LOCAL_SRC_FILES += \
     tests/TestContext.cpp \
-    tests/TreeContentAnimation.cpp \
+    tests/TestSceneRunner.cpp \
     tests/main.cpp
+
+LOCAL_SRC_FILES += $(call all-cpp-files-under, tests/scenes)
 
 include $(BUILD_EXECUTABLE)
 

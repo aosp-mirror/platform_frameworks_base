@@ -23,7 +23,7 @@
 #include "DisplayListCanvas.h"
 #endif
 #include "microbench/MicroBench.h"
-#include "unit_tests/TestUtils.h"
+#include "utils/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;

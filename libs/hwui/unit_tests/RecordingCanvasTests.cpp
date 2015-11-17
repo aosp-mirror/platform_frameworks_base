@@ -18,7 +18,7 @@
 
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
-#include <unit_tests/TestUtils.h>
+#include <utils/TestUtils.h>
 
 namespace android {
 namespace uirenderer {

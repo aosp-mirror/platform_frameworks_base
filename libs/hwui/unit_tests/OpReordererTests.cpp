@@ -21,7 +21,7 @@
 #include <OpReorderer.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
-#include <unit_tests/TestUtils.h>
+#include <utils/TestUtils.h>
 
 #include <unordered_map>
 
@@ -186,14 +186,14 @@ TEST(OpReorderer, renderNode) {
         }
     };
 
-    sp<RenderNode> child = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110, [](RecordingCanvas& canvas) {
+    sp<RenderNode> child = TestUtils::createNode(10, 10, 110, 110, [](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     });
 
     RenderNode* childPtr = child.get();
-    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [childPtr](RecordingCanvas& canvas) {
+    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200, [childPtr](RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
@@ -221,7 +221,7 @@ TEST(OpReorderer, clipped) {
         }
     };
 
-    sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200, [](RecordingCanvas& canvas) {
+    sp<RenderNode> node = TestUtils::createNode(0, 0, 200, 200, [](RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
     });
@@ -396,11 +396,13 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
         }
     };
 
-    sp<RenderNode> node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110, [](RecordingCanvas& canvas) {
+    sp<RenderNode> node = TestUtils::createNode(10, 10, 110, 110,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    }, TestUtils::getHwLayerSetupCallback());
+    });
     OffscreenBuffer** layerHandle = node->getLayerHandle();
 
     // create RenderNode's layer here in same way prepareTree would
@@ -483,18 +485,20 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerComplex) {
         }
     };
 
-    auto child = TestUtils::createNode<RecordingCanvas>(50, 50, 150, 150,
-            [](RecordingCanvas& canvas) {
+    auto child = TestUtils::createNode(50, 50, 150, 150,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    }, TestUtils::getHwLayerSetupCallback());
+    });
     OffscreenBuffer childLayer(renderThread.renderState(), Caches::getInstance(), 100, 100);
     *(child->getLayerHandle()) = &childLayer;
 
     RenderNode* childPtr = child.get();
-    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
-            [childPtr](RecordingCanvas& canvas) {
+    auto parent = TestUtils::createNode(0, 0, 200, 200,
+            [childPtr](RenderProperties& props, RecordingCanvas& canvas) {
+        props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
@@ -502,7 +506,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerComplex) {
         canvas.saveLayerAlpha(50, 50, 150, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRenderNode(childPtr);
         canvas.restore();
-    }, TestUtils::getHwLayerSetupCallback());
+    });
     OffscreenBuffer parentLayer(renderThread.renderState(), Caches::getInstance(), 200, 200);
     *(parent->getLayerHandle()) = &parentLayer;
 
@@ -529,7 +533,7 @@ static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) 
     canvas->drawRect(0, 0, 100, 100, paint);
 }
 static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, float z) {
-    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+    auto node = TestUtils::createNode(0, 0, 100, 100,
             [expectedDrawOrder](RecordingCanvas& canvas) {
         drawOrderedRect(&canvas, expectedDrawOrder);
     });
@@ -546,7 +550,7 @@ TEST(OpReorderer, zReorder) {
         }
     };
 
-    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+    auto parent = TestUtils::createNode(0, 0, 100, 100,
             [](RecordingCanvas& canvas) {
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
         drawOrderedRect(&canvas, 1);
@@ -570,15 +574,13 @@ TEST(OpReorderer, zReorder) {
 
 // creates a 100x100 shadow casting node with provided translationZ
 static sp<RenderNode> createWhiteRectShadowCaster(float translationZ) {
-    return TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
-            [](RecordingCanvas& canvas) {
+    return TestUtils::createNode(0, 0, 100, 100,
+            [translationZ] (RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setTranslationZ(translationZ);
+        properties.mutableOutline().setRoundRect(0, 0, 100, 100, 0.0f, 1.0f);
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    }, [translationZ] (RenderProperties& properties) {
-        properties.setTranslationZ(translationZ);
-        properties.mutableOutline().setRoundRect(0, 0, 100, 100, 0.0f, 1.0f);
-        return RenderNode::GENERIC | RenderNode::TRANSLATION_Z;
     });
 }
 
@@ -600,7 +602,7 @@ TEST(OpReorderer, shadow) {
         }
     };
 
-    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200,
             [] (RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
@@ -636,7 +638,7 @@ TEST(OpReorderer, shadowSaveLayer) {
         }
     };
 
-    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200,
             [] (RecordingCanvas& canvas) {
         // save/restore outside of reorderBarrier, so they don't get moved out of place
         canvas.translate(20, 10);
@@ -676,14 +678,15 @@ RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
         }
     };
 
-    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(50, 60, 150, 160,
-            [] (RecordingCanvas& canvas) {
+    sp<RenderNode> parent = TestUtils::createNode(50, 60, 150, 160,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        props.mutateLayerProperties().setType(LayerType::RenderLayer);
         canvas.insertReorderBarrier(true);
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.translate(20, 10);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
         canvas.restore();
-    }, TestUtils::getHwLayerSetupCallback());
+    });
     OffscreenBuffer** layerHandle = parent->getLayerHandle();
 
     // create RenderNode's layer here in same way prepareTree would, setting windowTransform
@@ -718,7 +721,7 @@ TEST(OpReorderer, shadowLayering) {
             EXPECT_TRUE(index == 2 || index == 3);
         }
     };
-    sp<RenderNode> parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
+    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200,
             [] (RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
@@ -732,7 +735,7 @@ TEST(OpReorderer, shadowLayering) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-static void testProperty(TestUtils::PropSetupCallback propSetupCallback,
+static void testProperty(std::function<void(RenderProperties&)> propSetupCallback,
         std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
     class PropertyTestRenderer : public TestRendererBase {
     public:
@@ -745,11 +748,13 @@ static void testProperty(TestUtils::PropSetupCallback propSetupCallback,
         std::function<void(const RectOp&, const BakedOpState&)> mCallback;
     };
 
-    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 100, 100,
+            [propSetupCallback](RenderProperties& props, RecordingCanvas& canvas) {
+        propSetupCallback(props);
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
-    }, propSetupCallback);
+    });
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
             createSyncedNodeList(node), sLightCenter);
@@ -762,7 +767,6 @@ TEST(OpReorderer, renderPropOverlappingRenderingAlpha) {
     testProperty([](RenderProperties& properties) {
         properties.setAlpha(0.5f);
         properties.setHasOverlappingRendering(false);
-        return RenderNode::ALPHA | RenderNode::GENERIC;
     }, [](const RectOp& op, const BakedOpState& state) {
         EXPECT_EQ(0.5f, state.alpha) << "Alpha should be applied directly to op";
     });
@@ -772,7 +776,6 @@ TEST(OpReorderer, renderPropClipping) {
     testProperty([](RenderProperties& properties) {
         properties.setClipToBounds(true);
         properties.setClipBounds(Rect(10, 20, 300, 400));
-        return RenderNode::GENERIC;
     }, [](const RectOp& op, const BakedOpState& state) {
         EXPECT_EQ(Rect(10, 20, 100, 100), state.computedState.clippedBounds)
                 << "Clip rect should be intersection of node bounds and clip bounds";
@@ -782,7 +785,6 @@ TEST(OpReorderer, renderPropClipping) {
 TEST(OpReorderer, renderPropRevealClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableRevealClip().set(true, 50, 50, 25);
-        return RenderNode::GENERIC;
     }, [](const RectOp& op, const BakedOpState& state) {
         ASSERT_NE(nullptr, state.roundRectClipState);
         EXPECT_TRUE(state.roundRectClipState->highPriority);
@@ -795,7 +797,6 @@ TEST(OpReorderer, renderPropOutlineClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableOutline().setShouldClip(true);
         properties.mutableOutline().setRoundRect(10, 20, 30, 40, 5.0f, 0.5f);
-        return RenderNode::GENERIC;
     }, [](const RectOp& op, const BakedOpState& state) {
         ASSERT_NE(nullptr, state.roundRectClipState);
         EXPECT_FALSE(state.roundRectClipState->highPriority);
@@ -819,9 +820,6 @@ TEST(OpReorderer, renderPropTransform) {
         properties.setTranslationY(20);
         properties.setScaleX(0.5f);
         properties.setScaleY(0.7f);
-        return RenderNode::GENERIC
-                | RenderNode::TRANSLATION_X | RenderNode::TRANSLATION_Y
-                | RenderNode::SCALE_X | RenderNode::SCALE_Y;
     }, [](const RectOp& op, const BakedOpState& state) {
         Matrix4 matrix;
         matrix.loadTranslate(10, 10, 0); // left, top
@@ -857,7 +855,7 @@ struct SaveLayerAlphaData {
  * (for efficiency, and to fit in layer size constraints) based on parent clip.
  */
 void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
-        TestUtils::PropSetupCallback propSetupCallback) {
+        std::function<void(RenderProperties&)> propSetupCallback) {
     class SaveLayerAlphaClipTestRenderer : public TestRendererBase {
     public:
         SaveLayerAlphaClipTestRenderer(SaveLayerAlphaData* outData)
@@ -887,17 +885,16 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
 
     ASSERT_GT(10000, DeviceInfo::get()->maxTextureSize())
             << "Node must be bigger than max texture size to exercise saveLayer codepath";
-    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 10000, 10000, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 10000, 10000,
+            [&propSetupCallback](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setHasOverlappingRendering(true);
+        properties.setAlpha(0.5f); // force saveLayer, since too big for HW layer
+        // apply other properties
+        propSetupCallback(properties);
+
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 10000, 10000, paint);
-    }, [&propSetupCallback](RenderProperties& properties) {
-        properties.setHasOverlappingRendering(true);
-        properties.setAlpha(0.5f); // force saveLayer, since too big for HW layer
-
-        // apply other properties
-        int flags = propSetupCallback(properties);
-        return RenderNode::GENERIC | RenderNode::ALPHA | flags;
     });
     auto nodes = createSyncedNodeList(node); // sync before querying height
 
@@ -914,7 +911,6 @@ TEST(OpReorderer, renderPropSaveLayerAlphaClipBig) {
     testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
         properties.setTranslationX(10); // offset rendering content
         properties.setTranslationY(-2000); // offset rendering content
-        return RenderNode::TRANSLATION_X | RenderNode::TRANSLATION_Y;
     });
     EXPECT_EQ(190u, observedData.layerWidth);
     EXPECT_EQ(200u, observedData.layerHeight);
@@ -937,9 +933,6 @@ TEST(OpReorderer, renderPropSaveLayerAlphaRotate) {
         properties.setPivotX(0);
         properties.setPivotY(0);
         properties.setRotation(45);
-        return RenderNode::GENERIC
-                | RenderNode::TRANSLATION_X | RenderNode::TRANSLATION_Y
-                | RenderNode::ROTATION;
     });
     // ceil(sqrt(2) / 2 * 200) = 142
     EXPECT_EQ(142u, observedData.layerWidth);
@@ -955,7 +948,6 @@ TEST(OpReorderer, renderPropSaveLayerAlphaScale) {
         properties.setPivotY(0);
         properties.setScaleX(2);
         properties.setScaleY(0.5f);
-        return RenderNode::GENERIC | RenderNode::SCALE_X | RenderNode::SCALE_Y;
     });
     EXPECT_EQ(100u, observedData.layerWidth);
     EXPECT_EQ(400u, observedData.layerHeight);

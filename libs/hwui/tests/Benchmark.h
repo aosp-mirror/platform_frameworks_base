@@ -16,6 +16,8 @@
 #ifndef TESTS_BENCHMARK_H
 #define TESTS_BENCHMARK_H
 
+#include "TestScene.h"
+
 #include <string>
 #include <vector>
 
@@ -26,12 +28,17 @@ struct BenchmarkOptions {
     int count;
 };
 
-typedef void (*BenchmarkFunctor)(const BenchmarkOptions&);
+typedef test::TestScene* (*CreateScene)(const BenchmarkOptions&);
+
+template <class T>
+test::TestScene* simpleCreateScene(const BenchmarkOptions&) {
+    return new T();
+}
 
 struct BenchmarkInfo {
     std::string name;
     std::string description;
-    BenchmarkFunctor functor;
+    CreateScene createScene;
 };
 
 class Benchmark {

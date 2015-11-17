@@ -43,6 +43,8 @@ static int gFrameCount = 150;
 static int gRepeatCount = 1;
 static std::vector<BenchmarkInfo> gRunTests;
 
+void run(const BenchmarkInfo& info, const BenchmarkOptions& opts);
+
 static void printHelp() {
     printf("\
 USAGE: hwuitest [OPTIONS] <TESTNAME>\n\
@@ -186,7 +188,7 @@ int main(int argc, char* argv[]) {
     opts.count = gFrameCount;
     for (int i = 0; i < gRepeatCount; i++) {
         for (auto&& test : gRunTests) {
-            test.functor(opts);
+            run(test, opts);
         }
     }
     printf("Success!\n");
