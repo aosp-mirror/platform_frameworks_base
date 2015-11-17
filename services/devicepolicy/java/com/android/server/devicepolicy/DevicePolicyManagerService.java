@@ -2436,6 +2436,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Active device/profile owners must remain active admins.
                 if (isDeviceOwner(adminReceiver, userHandle)
                         || isProfileOwner(adminReceiver, userHandle)) {
+                    Slog.e(LOG_TAG, "Device/profile owner cannot be removed: component=" +
+                            adminReceiver);
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
@@ -3184,7 +3186,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        final int userHandle = UserHandle.getCallingUserId();
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int userHandle = mInjector.userHandleGetCallingUserId();
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -3200,10 +3203,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int quality;
         synchronized (this) {
-            // This api can only be called by an active device admin,
-            // so try to retrieve it to check that the caller is one.
-            final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
-                    DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
+            // If caller has PO (or DO), it can clear the password, so see if that's the case
+            // first.
+            ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
+                    null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
+            if (admin == null) {
+                // Otherwise, make sure the caller has any active admin with the right policy.
+                admin = getActiveAdminForCallerLocked(null,
+                        DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
+            }
+
             final ComponentName adminComponent = admin.info.getComponent();
 
             // As of N, only profile owners and device owners can reset the password.
@@ -3316,7 +3325,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
 
-        int callingUid = mInjector.binderGetCallingUid();
         DevicePolicyData policy = getUserData(userHandle);
         if (policy.mPasswordOwner >= 0 && policy.mPasswordOwner != callingUid) {
             Slog.w(LOG_TAG, "resetPassword: already set by another uid and not entered by user");
