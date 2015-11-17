@@ -76,19 +76,18 @@ public class AppCompatActionBar extends BridgeActionBar {
             Class[] constructorParams = {View.class};
             Object[] constructorArgs = {getDecorContent()};
             LayoutlibCallback callback = params.getLayoutlibCallback();
-            // First try to load the class as was available before appcompat v23.1.1, without
-            // logging warnings.
+
+            // Check if the old action bar class is present.
+            String actionBarClass = WINDOW_ACTION_BAR_CLASS;
             try {
-                mWindowDecorActionBar = callback.loadClass(WINDOW_ACTION_BAR_CLASS,
-                        constructorParams, constructorArgs);
-            } catch (ClassNotFoundException ignore) {
-            }
-            if (mWindowDecorActionBar == null) {
-                // If failed, load the new class, while logging warnings.
-                mWindowDecorActionBar = callback.loadView(WINDOW_ACTION_BAR_CLASS_NEW,
-                        constructorParams, constructorArgs);
+                callback.findClass(actionBarClass);
+            } catch (ClassNotFoundException expected) {
+                // Failed to find the old class, use the newer one.
+                actionBarClass = WINDOW_ACTION_BAR_CLASS_NEW;
             }
 
+            mWindowDecorActionBar = callback.loadView(actionBarClass,
+                    constructorParams, constructorArgs);
             mWindowActionBarClass = mWindowDecorActionBar == null ? null :
                     mWindowDecorActionBar.getClass();
             setupActionBar();
