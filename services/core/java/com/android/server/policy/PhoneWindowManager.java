@@ -5265,11 +5265,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldDispatchInputWhenNonInteractive() {
-        if (mDisplay == null || mDisplay.getState() == Display.STATE_OFF) {
-            return false;
-        }
-        // Send events to keyguard while the screen is on and it's showing.
-        if (isKeyguardShowingAndNotOccluded()) {
+        // Send events to keyguard while the screen is on.
+        if (isKeyguardShowingAndNotOccluded() && mDisplay != null
+                && mDisplay.getState() != Display.STATE_OFF) {
             return true;
         }
 
