@@ -292,6 +292,15 @@ public class NotificationData {
         return NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
+    public boolean shouldSuppressPeek(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & NotificationListenerService.SUPPRESSED_EFFECT_PEEK) != 0;
+        }
+        return false;
+    }
+
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;

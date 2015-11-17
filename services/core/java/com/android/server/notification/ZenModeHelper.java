@@ -138,6 +138,18 @@ public class ZenModeHelper {
         }
     }
 
+    public boolean shouldSuppressLight() {
+        synchronized (mConfig) {
+            return !mConfig.allowLights;
+        }
+    }
+
+    public boolean shouldSuppressPeek() {
+        synchronized (mConfig) {
+            return !mConfig.allowPeek;
+        }
+    }
+
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
     }
@@ -394,11 +406,11 @@ public class ZenModeHelper {
             return;
         }
         pw.printf("allow(calls=%s,callsFrom=%s,repeatCallers=%s,messages=%s,messagesFrom=%s,"
-                + "events=%s,reminders=%s)\n",
+                + "events=%s,reminders=%s,lights=%s,peek=%s)\n",
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
-                config.allowEvents, config.allowReminders);
+                config.allowEvents, config.allowReminders, config.allowLights, config.allowPeek);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();

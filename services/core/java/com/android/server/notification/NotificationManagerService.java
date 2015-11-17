@@ -17,6 +17,8 @@
 package com.android.server.notification;
 
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS;
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -78,7 +80,6 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
-import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
@@ -2511,7 +2512,9 @@ public class NotificationManagerService extends SystemService {
         // light
         // release the light
         boolean wasShowLights = mLights.remove(record.getKey());
-        if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && aboveThreshold) {
+        if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && aboveThreshold
+                && ((record.getSuppressedVisualEffects()
+                & NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS) == 0)) {
             mLights.add(record.getKey());
             updateLightsLocked();
             if (mUseAttentionLight) {
@@ -2701,6 +2704,11 @@ public class NotificationManagerService extends SystemService {
     // let zen mode evaluate this record
     private void applyZenModeLocked(NotificationRecord record) {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
+        if (record.isIntercepted()) {
+            int suppressed = (mZenModeHelper.shouldSuppressLight() ? SUPPRESSED_EFFECT_LIGHTS : 0)
+                    | (mZenModeHelper.shouldSuppressPeek() ? SUPPRESSED_EFFECT_PEEK : 0);
+            record.setSuppressedVisualEffects(suppressed);
+        }
     }
 
     // lock on mNotificationList
@@ -3234,6 +3242,7 @@ public class NotificationManagerService extends SystemService {
         ArrayList<String> keys = new ArrayList<String>(N);
         ArrayList<String> interceptedKeys = new ArrayList<String>(N);
         Bundle visibilityOverrides = new Bundle();
+        Bundle suppressedVisualEffects = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -3242,7 +3251,10 @@ public class NotificationManagerService extends SystemService {
             keys.add(record.sbn.getKey());
             if (record.isIntercepted()) {
                 interceptedKeys.add(record.sbn.getKey());
+
             }
+            suppressedVisualEffects.putInt(
+                    record.sbn.getKey(), record.getSuppressedVisualEffects());
             if (record.getPackageVisibilityOverride()
                     != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE) {
                 visibilityOverrides.putInt(record.sbn.getKey(),
@@ -3264,7 +3276,7 @@ public class NotificationManagerService extends SystemService {
         String[] keysAr = keys.toArray(new String[keys.size()]);
         String[] interceptedKeysAr = interceptedKeys.toArray(new String[interceptedKeys.size()]);
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
-                speedBumpIndex);
+                speedBumpIndex, suppressedVisualEffects);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
