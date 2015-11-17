@@ -1375,7 +1375,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // Now that we successfully installed the package, grant runtime
                             // permissions if requested before broadcasting the install.
                             if ((args.installFlags
-                                    & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0) {
+                                    & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
+                                    && res.pkg.applicationInfo.targetSdkVersion
+                                            >= Build.VERSION_CODES.M) {
                                 grantRequestedRuntimePermissions(res.pkg, args.user.getIdentifier(),
                                         args.installGrantPermissions);
                             }
@@ -3564,6 +3566,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
                     scheduleWriteSettingsLocked();
                 }
+                return;
+            }
+
+            if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                Slog.w(TAG, "Cannot grant runtime permission to a legacy app");
                 return;
             }
 
