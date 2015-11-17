@@ -16,8 +16,6 @@
 
 package com.android.internal.policy;
 
-import com.android.internal.widget.NonClientDecorView;
-
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
@@ -37,7 +35,7 @@ import android.view.View;
  */
 public class BackdropFrameRenderer extends Thread implements Choreographer.FrameCallback {
 
-    private NonClientDecorView mNonClientDecorView;
+    private DecorView mDecorView;
 
     // This is containing the last requested size by a resize command. Note that this size might
     // or might not have been applied to the output already.
@@ -62,12 +60,15 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     // Whether to report when next frame is drawn or not.
     private boolean mReportNextDraw;
 
-    public BackdropFrameRenderer(NonClientDecorView nonClientDecorView,
-            ThreadedRenderer renderer,
-            Rect initialBounds) {
-        mNonClientDecorView = nonClientDecorView;
+    private Drawable mCaptionBackgroundDrawable;
+    private Drawable mResizingBackgroundDrawable;
+
+    public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
+            Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable) {
         setName("ResizeFrame");
+
         mRenderer = renderer;
+        onResourcesLoaded(decorView, resizingBackgroundDrawable, captionBackgroundDrawable);
 
         // Create a render node for the content and frame backdrop
         // which can be resized independently from the content.
@@ -83,6 +84,13 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
 
         // Kick off our draw thread.
         start();
+    }
+
+    void onResourcesLoaded(DecorView decorView, Drawable resizingBackgroundDrawable,
+            Drawable captionBackgroundDrawableDrawable) {
+        mDecorView = decorView;
+        mResizingBackgroundDrawable = resizingBackgroundDrawable;
+        mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
     }
 
     /**
@@ -201,7 +209,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                     mLastYOffset + mLastCaptionHeight + mLastContentHeight);
             // If this was the first call and changeWindowSizeLocked got already called prior
             // to us, we should re-issue a changeWindowSizeLocked now.
-            return firstCall && (mLastCaptionHeight != 0 || !mNonClientDecorView.mShowDecor);
+            return firstCall
+                    && (mLastCaptionHeight != 0 || !mDecorView.mNonClientDecorView.mShowDecor);
         }
     }
 
@@ -221,7 +230,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         // While a configuration change is taking place the view hierarchy might become
         // inaccessible. For that case we remember the previous metrics to avoid flashes.
         // Note that even when there is no visible caption, the caption child will exist.
-        View caption = mNonClientDecorView.getChildAt(0);
+        View caption = mDecorView.mNonClientDecorView.getChildAt(0);
         if (caption != null) {
             final int captionHeight = caption.getHeight();
             // The caption height will probably never dynamically change while we are resizing.
@@ -233,7 +242,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         }
         // Make sure that the other thread has already prepared the render draw calls for the
         // content. If any size is 0, we have to wait for it to be drawn first.
-        if ((mLastCaptionHeight == 0 && mNonClientDecorView.mShowDecor) ||
+        if ((mLastCaptionHeight == 0 && mDecorView.mNonClientDecorView.mShowDecor) ||
                 mLastContentWidth == 0 || mLastContentHeight == 0) {
             return;
         }
@@ -247,15 +256,13 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mFrameAndBackdropNode.setLeftTopRightBottom(left, top, left + width, top + height);
 
         // Draw the caption and content backdrops in to our render node.
-        DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
-        mNonClientDecorView.mCaptionBackgroundDrawable.setBounds(
-                0, 0, left + width, top + mLastCaptionHeight);
-        mNonClientDecorView.mCaptionBackgroundDrawable.draw(canvas);
+        final DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
+        mCaptionBackgroundDrawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
+        mCaptionBackgroundDrawable.draw(canvas);
 
         // The backdrop: clear everything with the background. Clipping is done elsewhere.
-        mNonClientDecorView.mResizingBackgroundDrawable.setBounds(
-                0, mLastCaptionHeight, left + width, top + height);
-        mNonClientDecorView.mResizingBackgroundDrawable.draw(canvas);
+        mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
+        mResizingBackgroundDrawable.draw(canvas);
         mFrameAndBackdropNode.end(canvas);
 
         // We need to render the node explicitly
@@ -264,13 +271,11 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         reportDrawIfNeeded();
     }
 
-    /**
-     * Notify view root that a frame has been drawn by us, if it has requested so.
-     */
+    /** Notify view root that a frame has been drawn by us, if it has requested so. */
     private void reportDrawIfNeeded() {
         if (mReportNextDraw) {
-            if (mNonClientDecorView.isAttachedToWindow()) {
-                mNonClientDecorView.getViewRootImpl().reportDrawFinish();
+            if (mDecorView.isAttachedToWindow()) {
+                mDecorView.getViewRootImpl().reportDrawFinish();
             }
             mReportNextDraw = false;
         }

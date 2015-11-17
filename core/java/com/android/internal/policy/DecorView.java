@@ -52,11 +52,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowCallbacks;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -80,7 +82,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
-class DecorView extends FrameLayout implements RootViewSurfaceTaker {
+/** @hide */
+public class DecorView extends FrameLayout implements RootViewSurfaceTaker, WindowCallbacks {
     private static final String TAG = "DecorView";
 
     private static final boolean SWEEP_OPEN_MENU = false;
@@ -166,6 +169,12 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
     // The non client decor needs to adapt to the used workspace. Since querying and changing the
     // workspace is expensive, this is the workspace value the window is currently set up for.
     int mWorkspaceId;
+
+    private boolean mWindowResizeCallbacksAdded = false;
+
+    public BackdropFrameRenderer mBackdropFrameRenderer = null;
+    private Drawable mResizingBackgroundDrawable;
+    private Drawable mCaptionBackgroundDrawable;
 
     DecorView(Context context, int featureId, PhoneWindow window) {
         super(context);
@@ -1225,6 +1234,17 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
              */
             mWindow.openPanelsAfterRestore();
         }
+
+        if (!mWindowResizeCallbacksAdded) {
+            // If there is no window callback installed there was no window set before. Set it now.
+            // Note that our ViewRootImpl object will not change.
+            getViewRootImpl().addWindowCallbacks(this);
+            mWindowResizeCallbacksAdded = true;
+        } else if (mBackdropFrameRenderer != null) {
+            // We are resizing and this call happened due to a configuration change. Tell the
+            // renderer about it.
+            mBackdropFrameRenderer.onConfigurationChange();
+        }
     }
 
     @Override
@@ -1255,6 +1275,11 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
         PhoneWindow.PanelFeatureState st = mWindow.getPanelState(Window.FEATURE_OPTIONS_PANEL, false);
         if (st != null && st.menu != null && mFeatureId < 0) {
             st.menu.close();
+        }
+
+        if (mWindowResizeCallbacksAdded) {
+            getViewRootImpl().removeWindowCallbacks(this);
+            mWindowResizeCallbacksAdded = false;
         }
     }
 
@@ -1526,6 +1551,16 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
     }
 
     View onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
+        mResizingBackgroundDrawable = getResizingBackgroundDrawable(
+                mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
+        mCaptionBackgroundDrawable =
+                getContext().getDrawable(R.drawable.non_client_decor_title_focused);
+
+        if (mBackdropFrameRenderer != null) {
+            mBackdropFrameRenderer.onResourcesLoaded(
+                    this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable);
+        }
+
         mNonClientDecorView = createNonClientDecorView(inflater);
         final View root = inflater.inflate(layoutResource, null);
         if (mNonClientDecorView != null) {
@@ -1579,9 +1614,7 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
             }
             nonClientDecorView.setPhoneWindow(mWindow,
                     ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
-                    ActivityManager.StackId.hasWindowShadow(mWorkspaceId),
-                    getResizingBackgroundDrawable(),
-                    getContext().getDrawable(R.drawable.non_client_decor_title_focused));
+                    ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
         }
         // Tell the decor if it has a visible non client decor.
         enableNonClientDecor(
@@ -1591,22 +1624,21 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
     }
 
     /**
-     * Returns the color used to fill areas the app has not rendered content to yet when the user
-     * is resizing the window of an activity in multi-window mode.
-     * */
-    private Drawable getResizingBackgroundDrawable() {
+     * Returns the color used to fill areas the app has not rendered content to yet when the
+     * user is resizing the window of an activity in multi-window mode.
+     */
+    private Drawable getResizingBackgroundDrawable(int backgroundRes, int backgroundFallbackRes) {
         final Context context = getContext();
 
-        if (mWindow.mBackgroundResource != 0) {
-            final Drawable drawable = context.getDrawable(mWindow.mBackgroundResource);
+        if (backgroundRes != 0) {
+            final Drawable drawable = context.getDrawable(backgroundRes);
             if (drawable != null) {
                 return drawable;
             }
         }
 
-        if (mWindow.mBackgroundFallbackResource != 0) {
-            final Drawable fallbackDrawable =
-                    context.getDrawable(mWindow.mBackgroundFallbackResource);
+        if (backgroundFallbackRes != 0) {
+            final Drawable fallbackDrawable = context.getDrawable(backgroundFallbackRes);
             if (fallbackDrawable != null) {
                 return fallbackDrawable;
             }
@@ -1649,6 +1681,76 @@ class DecorView extends FrameLayout implements RootViewSurfaceTaker {
             // This window doesn't have non client decor, so we need to just remove the
             // children of the decor view.
             removeAllViews();
+        }
+    }
+
+    @Override
+    public void onWindowSizeIsChanging(Rect newBounds) {
+        if (mBackdropFrameRenderer != null) {
+            mBackdropFrameRenderer.setTargetRect(newBounds);
+        }
+    }
+
+    @Override
+    public void onWindowDragResizeStart(Rect initialBounds) {
+        if (mWindow.isDestroyed()) {
+            // If the owner's window is gone, we should not be able to come here anymore.
+            releaseThreadedRenderer();
+            return;
+        }
+        if (mBackdropFrameRenderer != null) {
+            return;
+        }
+        final ThreadedRenderer renderer = (ThreadedRenderer) getHardwareRenderer();
+        if (renderer != null) {
+            mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
+                    initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable);
+
+            // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
+            // If we want to get the shadow shown while resizing, we would need to elevate a new
+            // element which owns the caption and has the elevation.
+            updateElevation();
+        }
+    }
+
+    @Override
+    public void onWindowDragResizeEnd() {
+        releaseThreadedRenderer();
+    }
+
+    @Override
+    public boolean onContentDrawn(int offsetX, int offsetY, int sizeX, int sizeY) {
+        if (mBackdropFrameRenderer == null) {
+            return false;
+        }
+        return mBackdropFrameRenderer.onContentDrawn(offsetX, offsetY, sizeX, sizeY);
+    }
+
+    @Override
+    public void onRequestDraw(boolean reportNextDraw) {
+        if (mBackdropFrameRenderer != null) {
+            mBackdropFrameRenderer.onRequestDraw(reportNextDraw);
+        } else if (reportNextDraw) {
+            // If render thread is gone, just report immediately.
+            if (isAttachedToWindow()) {
+                getViewRootImpl().reportDrawFinish();
+            }
+        }
+    }
+
+    /** Release the renderer thread which is usually done when the user stops resizing. */
+    private void releaseThreadedRenderer() {
+        if (mBackdropFrameRenderer != null) {
+            mBackdropFrameRenderer.releaseRenderer();
+            mBackdropFrameRenderer = null;
+            // Bring the shadow back.
+            updateElevation();
+        }
+    }
+
+    private void updateElevation() {
+        if (mNonClientDecorView != null) {
+            mNonClientDecorView.updateElevation();
         }
     }
 
