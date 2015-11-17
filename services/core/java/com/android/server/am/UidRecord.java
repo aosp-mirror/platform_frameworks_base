@@ -17,7 +17,9 @@
 package com.android.server.am;
 
 import android.app.ActivityManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.TimeUtils;
 
 /**
  * Overall information about a uid that has actively running processes.
@@ -26,12 +28,20 @@ public final class UidRecord {
     final int uid;
     int curProcState;
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+    long lastBackgroundTime;
+    boolean idle;
     int numProcs;
+
+    static final int CHANGE_PROCSTATE = 0;
+    static final int CHANGE_GONE = 1;
+    static final int CHANGE_GONE_IDLE = 2;
+    static final int CHANGE_IDLE = 3;
+    static final int CHANGE_ACTIVE = 4;
 
     static final class ChangeItem {
         UidRecord uidRecord;
         int uid;
-        boolean gone;
+        int change;
         int processState;
     }
 
@@ -54,9 +64,16 @@ public final class UidRecord {
         UserHandle.formatUid(sb, uid);
         sb.append(' ');
         sb.append(ProcessList.makeProcStateString(curProcState));
-        sb.append(" / ");
+        if (lastBackgroundTime > 0) {
+            sb.append(" bg:");
+            TimeUtils.formatDuration(SystemClock.elapsedRealtime()-lastBackgroundTime, sb);
+        }
+        if (idle) {
+            sb.append(" idle");
+        }
+        sb.append(" procs:");
         sb.append(numProcs);
-        sb.append(" procs}");
+        sb.append("}");
         return sb.toString();
     }
 }

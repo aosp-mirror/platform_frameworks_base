@@ -21,8 +21,10 @@ import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -79,6 +81,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 
+import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
@@ -237,7 +240,7 @@ public class SyncManager {
 
     private final AppIdleMonitor mAppIdleMonitor;
 
-    private BroadcastReceiver mStorageIntentReceiver =
+    private final BroadcastReceiver mStorageIntentReceiver =
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -260,7 +263,7 @@ public class SyncManager {
                 }
             };
 
-    private BroadcastReceiver mDeviceIdleReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mDeviceIdleReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             boolean idle = mPowerManager.isDeviceIdleMode()
                     || mPowerManager.isLightDeviceIdleMode();
@@ -281,7 +284,7 @@ public class SyncManager {
         }
     };
 
-    private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mBootCompleted = true;
@@ -289,7 +292,7 @@ public class SyncManager {
         }
     };
 
-    private BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateRunningAccounts();
@@ -297,6 +300,21 @@ public class SyncManager {
             // Kick off sync for everyone, since this was a radical account change
             scheduleSync(null, UserHandle.USER_ALL, SyncOperation.REASON_ACCOUNTS_UPDATED, null,
                     null, 0 /* no delay */, 0/* no delay */, false);
+        }
+    };
+
+    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+        }
+
+        @Override public void onUidGone(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid) throws RemoteException {
+            cancelSyncsForUid(uid);
         }
     };
 
@@ -504,6 +522,13 @@ public class SyncManager {
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
+        try {
+            ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
+                    ActivityManager.UID_OBSERVER_IDLE);
+        } catch (RemoteException e) {
+            // ignored; both services live in system_server
+        }
+
         if (!factoryTest) {
             mNotificationMgr = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -661,6 +686,26 @@ public class SyncManager {
             Log.d(TAG, "one off sync for: " + cname + " " + extras.toString());
         }
 
+        final android.content.pm.ServiceInfo sinfo;
+        try {
+            sinfo = mContext.getPackageManager().getServiceInfo(cname, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Not scheduling sync " + cname
+                    + " -- can't find service for user " + userId);
+            return;
+        }
+        final int sUid = sinfo.applicationInfo.uid;
+
+        try {
+            if (ActivityManagerNative.getDefault().getAppStartMode(sUid, cname.getPackageName())
+                    == ActivityManager.APP_START_MODE_DISABLED) {
+                Slog.w(TAG, "Not scheduling sync " + sUid + ":" + cname
+                        + " -- package not allowed to start");
+                return;
+            }
+        } catch (RemoteException e) {
+        }
+
         Boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
         if (expedited) {
             runtimeMillis = -1; // this means schedule at the front of the queue
@@ -688,7 +733,7 @@ public class SyncManager {
             }
             return;
         }
-        SyncStorageEngine.EndPoint info = new SyncStorageEngine.EndPoint(cname, userId);
+        SyncStorageEngine.EndPoint info = new SyncStorageEngine.EndPoint(cname, userId, sUid);
         Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(info);
         long delayUntil = mSyncStorageEngine.getDelayUntilTime(info);
         final long backoffTime = backoff != null ? backoff.first : 0;
@@ -702,7 +747,7 @@ public class SyncManager {
                         + ", extras " + extras);
         }
         scheduleSyncOperation(
-                new SyncOperation(cname, userId, uid, source, extras,
+                new SyncOperation(cname, userId, sUid, cname.getPackageName(), uid, source, extras,
                         runtimeMillis /* runtime */,
                         beforeRunTimeMillis /* flextime */,
                         backoffTime,
@@ -837,6 +882,18 @@ public class SyncManager {
                 if (syncAdapterInfo == null) {
                     continue;
                 }
+                final int owningUid = syncAdapterInfo.uid;
+                final String owningPackage = syncAdapterInfo.componentName.getPackageName();
+                try {
+                    if (ActivityManagerNative.getDefault().getAppStartMode(owningUid,
+                            owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
+                        Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
+                                + syncAdapterInfo.componentName
+                                + " -- package not allowed to start");
+                        return;
+                    }
+                } catch (RemoteException e) {
+                }
                 final boolean allowParallelSyncs = syncAdapterInfo.type.allowParallelSyncs();
                 final boolean isAlwaysSyncable = syncAdapterInfo.type.isAlwaysSyncable();
                 if (isSyncable < 0 && isAlwaysSyncable) {
@@ -886,7 +943,8 @@ public class SyncManager {
                                 + ", extras " + newExtras);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account.account, account.userId, reason, source,
+                            new SyncOperation(account.account, account.userId,
+                                    owningUid, owningPackage, reason, source,
                                     authority, newExtras, 0 /* immediate */, 0 /* No flex time*/,
                                     backoffTime, delayUntil, allowParallelSyncs));
                 }
@@ -902,7 +960,8 @@ public class SyncManager {
                                 + ", extras " + extras);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account.account, account.userId, reason, source,
+                            new SyncOperation(account.account, account.userId,
+                                    owningUid, owningPackage, reason, source,
                                     authority, extras, runtimeMillis, beforeRuntimeMillis,
                                     backoffTime, delayUntil, allowParallelSyncs));
                 }
@@ -1304,6 +1363,14 @@ public class SyncManager {
                 }
             }
             if (changed) {
+                sendCheckAlarmsMessage();
+            }
+        }
+    }
+
+    void cancelSyncsForUid(int uid) {
+        synchronized (mSyncQueue) {
+            if (mSyncQueue.removeUidIfNeededLocked(uid)) {
                 sendCheckAlarmsMessage();
             }
         }
@@ -2166,8 +2233,8 @@ public class SyncManager {
         /**
          * Stash any messages that come to the handler before boot is complete or before the device
          * is properly provisioned (i.e. out of set-up wizard).
-         * {@link #onBootCompleted()} and {@link #onDeviceProvisioned(boolean)} both need to come
-         * in before we start syncing.
+         * {@link #onBootCompleted()} and {@link SyncHandler#onDeviceProvisioned} both
+         * need to come in before we start syncing.
          * @param msg Message to dispatch at a later point.
          * @return true if a message was enqueued, false otherwise. This is to avoid losing the
          * message if we manage to acquire the lock but by the time we do boot has completed.
@@ -2503,6 +2570,8 @@ public class SyncManager {
                             }
                             scheduleSyncOperation(
                                     new SyncOperation(target.account, target.userId,
+                                            syncAdapterInfo.uid,
+                                            syncAdapterInfo.componentName.getPackageName(),
                                             SyncOperation.REASON_PERIODIC,
                                             SyncStorageEngine.SOURCE_PERIODIC,
                                             target.provider, extras,
@@ -2513,6 +2582,7 @@ public class SyncManager {
                         } else if (target.target_service) {
                             scheduleSyncOperation(
                                     new SyncOperation(target.service, target.userId,
+                                            target.serviceUid, target.service.getPackageName(),
                                             SyncOperation.REASON_PERIODIC,
                                             SyncStorageEngine.SOURCE_PERIODIC,
                                             extras,
@@ -3145,6 +3215,7 @@ public class SyncManager {
                 if (syncResult != null && syncResult.fullSyncRequested) {
                     scheduleSyncOperation(
                             new SyncOperation(info.account, info.userId,
+                                    syncOperation.owningUid, syncOperation.owningPackage,
                                 syncOperation.reason,
                                 syncOperation.syncSource, info.provider, new Bundle(),
                                 0 /* delay */, 0 /* flex */,
@@ -3155,6 +3226,7 @@ public class SyncManager {
                 if (syncResult != null && syncResult.fullSyncRequested) {
                     scheduleSyncOperation(
                             new SyncOperation(info.service, info.userId,
+                                    syncOperation.owningUid, syncOperation.owningPackage,
                                 syncOperation.reason,
                                 syncOperation.syncSource, new Bundle(),
                                 0 /* delay */, 0 /* flex */,

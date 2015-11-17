@@ -41,8 +41,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
 
-import com.android.server.content.SyncStorageEngine.EndPoint;
-
 public class SyncStorageEngineTest extends AndroidTestCase {
 
     protected Account account1;
@@ -96,7 +94,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         SyncStorageEngine engine = SyncStorageEngine.newTestInstance(
                 new TestContext(mockResolver, getContext()));
         long time0 = 1000;
-        SyncOperation op = new SyncOperation(account, 0,
+        SyncOperation op = new SyncOperation(account, 0, 0, "foo",
                 SyncOperation.REASON_PERIODIC,
                 SyncStorageEngine.SOURCE_LOCAL,
                 authority,
@@ -112,7 +110,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
     @MediumTest
     public void testAppendPending() throws Exception {
         SyncOperation sop = new SyncOperation(account1,
-                DEFAULT_USER,
+                DEFAULT_USER, 0, "foo",
                 SyncOperation.REASON_PERIODIC,
                 SyncStorageEngine.SOURCE_LOCAL, authority1, Bundle.EMPTY,
                 0 /* runtime */, 0 /* flex */, 0 /* backoff */, 0 /* delayuntil */,
@@ -140,19 +138,19 @@ public class SyncStorageEngineTest extends AndroidTestCase {
      */
     public void testWritePendingOperationsLocked() throws Exception {
         SyncOperation sop = new SyncOperation(account1,
-                DEFAULT_USER,
+                DEFAULT_USER, 0, "foo",
                 SyncOperation.REASON_IS_SYNCABLE,
                 SyncStorageEngine.SOURCE_LOCAL, authority1, Bundle.EMPTY,
                 1000L /* runtime */, 57L /* flex */, 0 /* backoff */, 0 /* delayuntil */,
                 true /* expedited */);
         SyncOperation sop1 = new SyncOperation(account2,
-                DEFAULT_USER,
+                DEFAULT_USER, 0, "foo",
                 SyncOperation.REASON_PERIODIC,
                 SyncStorageEngine.SOURCE_LOCAL, authority1, defaultBundle,
                 0 /* runtime */, 0 /* flex */, 20L /* backoff */, 100L /* delayuntil */,
                 false /* expedited */);
         SyncOperation deleted = new SyncOperation(account2,
-                DEFAULT_USER,
+                DEFAULT_USER, 0, "foo",
                 SyncOperation.REASON_SYNC_AUTO,
                 SyncStorageEngine.SOURCE_LOCAL, authority1, Bundle.EMPTY,
                 0 /* runtime */, 0 /* flex */, 20L /* backoff */, 100L /* delayuntil */,
@@ -456,14 +454,14 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         // Test service component read
         List<PeriodicSync> syncs = engine.getPeriodicSyncs(
-                new SyncStorageEngine.EndPoint(syncService1, 0));
+                new SyncStorageEngine.EndPoint(syncService1, 0, 0));
         assertEquals(1, syncs.size());
         assertEquals(true, engine.getIsTargetServiceActive(syncService1, 0));
     }
 
     @SmallTest
     public void testComponentSettings() throws Exception {
-        EndPoint target1 = new EndPoint(syncService1, 0);
+        EndPoint target1 = new EndPoint(syncService1, 0, 0);
         engine.updateOrAddPeriodicSync(target1, dayPoll, dayFuzz, Bundle.EMPTY);
         
         engine.setIsTargetServiceActive(target1.service, 0, true);

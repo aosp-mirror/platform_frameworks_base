@@ -16,16 +16,20 @@
 
 package com.android.server.content;
 
+import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.content.pm.PackageManager;
 import android.content.SyncAdapterType;
 import android.content.SyncAdaptersCache;
 import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import android.util.Slog;
 import com.google.android.collect.Maps;
 
 import java.util.ArrayList;
@@ -74,8 +78,9 @@ public class SyncQueue {
                     continue;
                 }
                 operationToAdd = new SyncOperation(
-                        info.account, info.userId, op.reason, op.syncSource, info.provider,
-                        op.extras,
+                        info.account, info.userId, syncAdapterInfo.uid,
+                        syncAdapterInfo.componentName.getPackageName(), op.reason,
+                        op.syncSource, info.provider, op.extras,
                         op.expedited ? -1 : 0 /* delay */,
                         0 /* flex */,
                         backoff != null ? backoff.first : 0L,
@@ -84,16 +89,24 @@ public class SyncQueue {
                 operationToAdd.pendingOperation = op;
                 add(operationToAdd, op);
             } else if (info.target_service) {
+                android.content.pm.ServiceInfo sinfo;
                 try {
-                    mPackageManager.getServiceInfo(info.service, 0);
+                    sinfo = mPackageManager.getServiceInfo(info.service, info.userId);
                 } catch (PackageManager.NameNotFoundException e) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.w(TAG, "Missing sync service for authority " + op.target);
                     }
                     continue;
                 }
+                if (sinfo == null) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.w(TAG, "Missing sync service for authority " + op.target);
+                    }
+                    continue;
+                }
                 operationToAdd = new SyncOperation(
-                        info.service, info.userId, op.reason, op.syncSource,
+                        info.service, info.userId, sinfo.applicationInfo.uid,
+                        info.service.getPackageName(), op.reason, op.syncSource,
                         op.extras,
                         op.expedited ? -1 : 0 /* delay */,
                         0 /* flex */,
@@ -161,9 +174,38 @@ public class SyncQueue {
                 opsToRemove.add(op);
             }
         }
-            for (SyncOperation op : opsToRemove) {
-                remove(op);
+        for (SyncOperation op : opsToRemove) {
+            remove(op);
+        }
+    }
+
+    public boolean removeUidIfNeededLocked(int uid) {
+        ArrayList<SyncOperation> opsToRemove = null;
+        for (SyncOperation op : mOperationsMap.values()) {
+            if (op.owningUid != uid) {
+                continue;
             }
+            try {
+                if (ActivityManagerNative.getDefault().getAppStartMode(op.owningUid,
+                        op.owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
+                    Slog.w(TAG, "Removing sync " + op.owningUid + ":" + op
+                            + " -- package not allowed to start");
+                    continue;
+                }
+            } catch (RemoteException e) {
+            }
+            if (opsToRemove == null) {
+                opsToRemove = new ArrayList<SyncOperation>();
+            }
+            opsToRemove.add(op);
+        }
+        if (opsToRemove == null) {
+            return false;
+        }
+        for (SyncOperation op : opsToRemove) {
+            remove(op);
+        }
+        return true;
     }
 
     /**

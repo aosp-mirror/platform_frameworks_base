@@ -166,7 +166,7 @@ public class SoundPool {
         updateAppOpsPlayAudio();
         // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
         mAppOpsCallback = new IAppOpsCallback.Stub() {
-            public void opChanged(int op, String packageName) {
+            public void opChanged(int op, int uid, String packageName) {
                 synchronized (mLock) {
                     if (op == AppOpsManager.OP_PLAY_AUDIO) {
                         updateAppOpsPlayAudio();

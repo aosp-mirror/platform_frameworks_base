@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Log;
 
 /**
@@ -62,6 +63,8 @@ public class SyncOperation implements Comparable {
 
     /** Identifying info for the target for this operation. */
     public final SyncStorageEngine.EndPoint target;
+    public final int owningUid;
+    public final String owningPackage;
     /** Why this sync was kicked off. {@link #REASON_NAMES} */
     public final int reason;
     /** Where this sync was initiated. */
@@ -93,25 +96,28 @@ public class SyncOperation implements Comparable {
     /** Whether this sync op was recently skipped due to the app being idle */
     public boolean appIdle;
 
-    public SyncOperation(Account account, int userId, int reason, int source, String provider,
-            Bundle extras, long runTimeFromNow, long flexTime, long backoff,
-            long delayUntil, boolean allowParallelSyncs) {
-        this(new SyncStorageEngine.EndPoint(account, provider, userId),
+    public SyncOperation(Account account, int userId, int owningUid, String owningPackage,
+            int reason, int source, String provider, Bundle extras, long runTimeFromNow,
+            long flexTime, long backoff, long delayUntil, boolean allowParallelSyncs) {
+        this(new SyncStorageEngine.EndPoint(account, provider, userId), owningUid, owningPackage,
                 reason, source, extras, runTimeFromNow, flexTime, backoff, delayUntil,
                 allowParallelSyncs);
     }
 
-    public SyncOperation(ComponentName service, int userId, int reason, int source,
-            Bundle extras, long runTimeFromNow, long flexTime, long backoff,
+    public SyncOperation(ComponentName service, int userId, int owningUid, String owningPackage,
+            int reason, int source, Bundle extras, long runTimeFromNow, long flexTime, long backoff,
             long delayUntil) {
-        this(new SyncStorageEngine.EndPoint(service, userId), reason, source, extras,
-                runTimeFromNow, flexTime, backoff, delayUntil, true /* allowParallelSyncs */);
+        this(new SyncStorageEngine.EndPoint(service, userId, owningUid), owningUid, owningPackage,
+                reason, source, extras, runTimeFromNow, flexTime, backoff, delayUntil,
+                true /* allowParallelSyncs */);
     }
 
-    private SyncOperation(SyncStorageEngine.EndPoint info, int reason, int source, Bundle extras,
-            long runTimeFromNow, long flexTime, long backoff, long delayUntil,
-            boolean allowParallelSyncs) {
+    private SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
+            int reason, int source, Bundle extras, long runTimeFromNow, long flexTime,
+            long backoff, long delayUntil, boolean allowParallelSyncs) {
         this.target = info;
+        this.owningUid = owningUid;
+        this.owningPackage = owningPackage;
         this.reason = reason;
         this.syncSource = source;
         this.extras = new Bundle(extras);
@@ -142,7 +148,8 @@ public class SyncOperation implements Comparable {
 
     /** Used to reschedule a sync at a new point in time. */
     public SyncOperation(SyncOperation other, long newRunTimeFromNow) {
-        this(other.target, other.reason, other.syncSource, new Bundle(other.extras),
+        this(other.target, other.owningUid, other.owningPackage, other.reason, other.syncSource,
+                new Bundle(other.extras),
                 newRunTimeFromNow,
                 0L /* In back-off so no flex */,
                 other.backoff,
@@ -228,6 +235,13 @@ public class SyncOperation implements Comparable {
         }
         sb.append(", reason: ");
         sb.append(reasonToString(pm, reason));
+        if (!useOneLine) {
+            sb.append("\n    ");
+            sb.append("owningUid=");
+            UserHandle.formatUid(sb, owningUid);
+            sb.append(" owningPackage=");
+            sb.append(owningPackage);
+        }
         if (!useOneLine && !extras.keySet().isEmpty()) {
             sb.append("\n    ");
             extrasToStringBuilder(extras, sb);

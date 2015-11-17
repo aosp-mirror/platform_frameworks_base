@@ -237,8 +237,10 @@ public class AppOpsManager {
     public static final int OP_TURN_SCREEN_ON = 61;
     /** @hide Get device accounts. */
     public static final int OP_GET_ACCOUNTS = 62;
+    /** @hide Control whether an application is allowed to run in the background. */
+    public static final int OP_RUN_IN_BACKGROUND = 63;
     /** @hide */
-    public static final int _NUM_OP = 63;
+    public static final int _NUM_OP = 64;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -409,6 +411,7 @@ public class AppOpsManager {
             OP_WRITE_EXTERNAL_STORAGE,
             OP_TURN_SCREEN_ON,
             OP_GET_ACCOUNTS,
+            OP_RUN_IN_BACKGROUND,
     };
 
     /**
@@ -478,7 +481,8 @@ public class AppOpsManager {
             OPSTR_READ_EXTERNAL_STORAGE,
             OPSTR_WRITE_EXTERNAL_STORAGE,
             null,
-            OPSTR_GET_ACCOUNTS
+            OPSTR_GET_ACCOUNTS,
+            null,
     };
 
     /**
@@ -549,6 +553,7 @@ public class AppOpsManager {
             "WRITE_EXTERNAL_STORAGE",
             "TURN_ON_SCREEN",
             "GET_ACCOUNTS",
+            "RUN_IN_BACKGROUND",
     };
 
     /**
@@ -618,7 +623,8 @@ public class AppOpsManager {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             null, // no permission for turning the screen on
-            Manifest.permission.GET_ACCOUNTS
+            Manifest.permission.GET_ACCOUNTS,
+            null, // no permission for running in background
     };
 
     /**
@@ -690,6 +696,7 @@ public class AppOpsManager {
             null, // WRITE_EXTERNAL_STORAGE
             null, // TURN_ON_SCREEN
             null, // GET_ACCOUNTS
+            null, // RUN_IN_BACKGROUND
     };
 
     /**
@@ -760,6 +767,7 @@ public class AppOpsManager {
             false, // WRITE_EXTERNAL_STORAGE
             false, // TURN_ON_SCREEN
             false, // GET_ACCOUNTS
+            false, // RUN_IN_BACKGROUND
     };
 
     /**
@@ -829,6 +837,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,  // OP_TURN_ON_SCREEN
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
     };
 
     /**
@@ -901,7 +910,8 @@ public class AppOpsManager {
             false,
             false,
             false,
-            false
+            false,
+            false,
     };
 
     /**
@@ -1329,7 +1339,7 @@ public class AppOpsManager {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb == null) {
                 cb = new IAppOpsCallback.Stub() {
-                    public void opChanged(int op, String packageName) {
+                    public void opChanged(int op, int uid, String packageName) {
                         if (callback instanceof OnOpChangedInternalListener) {
                             ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
                         }

@@ -27,6 +27,7 @@ import android.content.PeriodicSync;
 import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -42,6 +43,7 @@ import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.ArrayMap;
 import android.util.Xml;
@@ -227,14 +229,16 @@ public class SyncStorageEngine extends Handler {
         public final static EndPoint USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL =
                 new EndPoint(null, null, UserHandle.USER_ALL);
         final ComponentName service;
+        final int serviceUid;           // -1 for "any"
         final Account account;
         final int userId;
         final String provider;
         final boolean target_service;
         final boolean target_provider;
 
-        public EndPoint(ComponentName service, int userId) {
+        public EndPoint(ComponentName service, int userId, int uid) {
             this.service = service;
+            this.serviceUid = uid;
             this.userId = userId;
             this.account = null;
             this.provider = null;
@@ -247,6 +251,7 @@ public class SyncStorageEngine extends Handler {
             this.provider = provider;
             this.userId = userId;
             this.service = null;
+            this.serviceUid = -1;
             this.target_service = false;
             this.target_provider = true;
         }
@@ -264,6 +269,11 @@ public class SyncStorageEngine extends Handler {
                 return false;
             }
             if (target_service && spec.target_service) {
+                if (serviceUid != spec.serviceUid
+                    && serviceUid >= 0
+                    && spec.serviceUid >= 0) {
+                    return false;
+                }
                 return service.equals(spec.service);
             } else if (target_provider && spec.target_provider) {
                 boolean accountsMatch;
@@ -290,8 +300,9 @@ public class SyncStorageEngine extends Handler {
                     .append("/")
                     .append(provider == null ? "ALL PDRS" : provider);
             } else if (target_service) {
-                sb.append(service.getPackageName() + "/")
-                  .append(service.getClassName());
+                service.appendShortString(sb);
+                sb.append(":");
+                UserHandle.formatUid(sb,serviceUid);
             } else {
                 sb.append("invalid target");
             }
@@ -737,7 +748,7 @@ public class SyncStorageEngine extends Handler {
         synchronized (mAuthorities) {
             if (cname != null) {
                 AuthorityInfo authority = getAuthorityLocked(
-                        new EndPoint(cname, userId),
+                        new EndPoint(cname, userId, -1),
                         "get service active");
                 if (authority == null) {
                     return false;
@@ -749,7 +760,7 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void setIsTargetServiceActive(ComponentName cname, int userId, boolean active) {
-        setSyncableStateForEndPoint(new EndPoint(cname, userId), active ?
+        setSyncableStateForEndPoint(new EndPoint(cname, userId, -1), active ?
                 AuthorityInfo.SYNCABLE : AuthorityInfo.NOT_SYNCABLE);
     }
 
@@ -2064,18 +2075,30 @@ public class SyncStorageEngine extends Handler {
                             new Account(accountName, accountType),
                             authorityName, userId);
                 } else {
-                    info = new EndPoint(
-                            new ComponentName(packageName, className),
-                            userId);
+                    final ComponentName cname = new ComponentName(packageName, className);
+                    android.content.pm.ServiceInfo sinfo = null;
+                    try {
+                        sinfo = mContext.getPackageManager().getServiceInfo(cname, userId);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Slog.w(TAG, "Not restoring sync " + cname
+                                + " -- can't find service for user " + userId);
+                    }
+                    if (sinfo != null) {
+                        info = new EndPoint(cname, userId, sinfo.applicationInfo.uid);
+                    } else {
+                        info = null;
+                    }
                 }
-                authority = getOrCreateAuthorityLocked(info, id, false);
-                // If the version is 0 then we are upgrading from a file format that did not
-                // know about periodic syncs. In that case don't clear the list since we
-                // want the default, which is a daily periodic sync.
-                // Otherwise clear out this default list since we will populate it later with
-                // the periodic sync descriptions that are read from the configuration file.
-                if (version > 0) {
-                    authority.periodicSyncs.clear();
+                if (info != null) {
+                    authority = getOrCreateAuthorityLocked(info, id, false);
+                    // If the version is 0 then we are upgrading from a file format that did not
+                    // know about periodic syncs. In that case don't clear the list since we
+                    // want the default, which is a daily periodic sync.
+                    // Otherwise clear out this default list since we will populate it later with
+                    // the periodic sync descriptions that are read from the configuration file.
+                    if (version > 0) {
+                        authority.periodicSyncs.clear();
+                    }
                 }
             }
             if (authority != null) {

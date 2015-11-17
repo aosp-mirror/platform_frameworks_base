@@ -327,11 +327,38 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 16;
 
+    /** @hide Should this process state be considered a background state? */
+    public static final boolean isProcStateBackground(int procState) {
+        return procState >= PROCESS_STATE_BACKUP;
+    }
+
     /** @hide requestType for assist context: only basic information. */
     public static final int ASSIST_CONTEXT_BASIC = 0;
 
     /** @hide requestType for assist context: generate full AssistStructure. */
     public static final int ASSIST_CONTEXT_FULL = 1;
+
+    /** @hide Flag for registerUidObserver: report changes in process state. */
+    public static final int UID_OBSERVER_PROCSTATE = 1<<0;
+
+    /** @hide Flag for registerUidObserver: report uid gone. */
+    public static final int UID_OBSERVER_GONE = 1<<1;
+
+    /** @hide Flag for registerUidObserver: report uid has become idle. */
+    public static final int UID_OBSERVER_IDLE = 1<<2;
+
+    /** @hide Flag for registerUidObserver: report uid has become active. */
+    public static final int UID_OBSERVER_ACTIVE = 1<<3;
+
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: normal free-to-run operation. */
+    public static final int APP_START_MODE_NORMAL = 0;
+
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: delay running until later. */
+    public static final int APP_START_MODE_DELAYED = 1;
+
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: disable/cancel pending
+     * launches. */
+    public static final int APP_START_MODE_DISABLED = 2;
 
     /**
      * Lock task mode is not active.

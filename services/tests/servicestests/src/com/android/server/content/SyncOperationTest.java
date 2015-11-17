@@ -61,7 +61,7 @@ public class SyncOperationTest extends AndroidTestCase {
         b2.putBoolean("b2", true);
 
         SyncOperation op1 = new SyncOperation(account1, 0,
-                1,
+                1, "foo", 0,
                 SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b1,
@@ -73,7 +73,7 @@ public class SyncOperationTest extends AndroidTestCase {
 
         // Same as op1 but different time infos
         SyncOperation op2 = new SyncOperation(account1, 0,
-                1,
+                1, "foo", 0,
                 SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b1,
@@ -85,7 +85,7 @@ public class SyncOperationTest extends AndroidTestCase {
 
         // Same as op1 but different authority
         SyncOperation op3 = new SyncOperation(account1, 0,
-                1,
+                1, "foo", 0,
                 SyncOperation.REASON_PERIODIC,
                 "authority2",
                 b1,
@@ -97,7 +97,7 @@ public class SyncOperationTest extends AndroidTestCase {
 
         // Same as op1 but different account
         SyncOperation op4 = new SyncOperation(account2, 0,
-                1,
+                1, "foo", 0,
                 SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b1,
@@ -109,7 +109,7 @@ public class SyncOperationTest extends AndroidTestCase {
 
         // Same as op1 but different bundle
         SyncOperation op5 = new SyncOperation(account1, 0,
-                1,
+                1, "foo", 0,
                 SyncOperation.REASON_PERIODIC,
                 "authority1",
                 b2,
@@ -131,21 +131,21 @@ public class SyncOperationTest extends AndroidTestCase {
         long soonFlex = 50;
         long after = 1500;
         long afterFlex = 100;
-        SyncOperation op1 = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_PERIODIC,
+        SyncOperation op1 = new SyncOperation(mDummy, 0, 0, "foo", 0, SyncOperation.REASON_PERIODIC,
                 "authority1", mEmpty, soon, soonFlex, mUnimportantLong, mUnimportantLong, true);
 
         // Interval disjoint from and after op1.
-        SyncOperation op2 = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_PERIODIC,
+        SyncOperation op2 = new SyncOperation(mDummy, 0, 0, "foo", 0, SyncOperation.REASON_PERIODIC,
                 "authority1", mEmpty, after, afterFlex, mUnimportantLong, mUnimportantLong, true);
 
         // Interval equivalent to op1, but expedited.
         Bundle b2 = new Bundle();
         b2.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        SyncOperation op3 = new SyncOperation(mDummy, 0, 0, 0,
+        SyncOperation op3 = new SyncOperation(mDummy, 0, 0, "foo", 0, 0,
                 "authority1", b2, -1, soonFlex, mUnimportantLong, mUnimportantLong, true);
 
         // Interval overlaps but not equivalent to op1.
-        SyncOperation op4 = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_PERIODIC,
+        SyncOperation op4 = new SyncOperation(mDummy, 0, 0, "foo", 0, SyncOperation.REASON_PERIODIC,
                 "authority1", mEmpty, soon + 100, soonFlex + 100, mUnimportantLong, mUnimportantLong, true);
 
         assertTrue(op1.compareTo(op2) == -1);
@@ -165,7 +165,8 @@ public class SyncOperationTest extends AndroidTestCase {
 
         Bundle withExpedited = new Bundle();
         withExpedited.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        SyncOperation op = new SyncOperation(mDummy, 0, 0, SyncOperation.REASON_USER_START,
+        SyncOperation op = new SyncOperation(mDummy, 0, 0, "foo", 0,
+                SyncOperation.REASON_USER_START,
                 mAuthority, withExpedited, fiveSecondsFromNow, twoSecondsFlex,
                 eightSeconds /* backoff */, fourSeconds /* delayUntil */, true);
         // Create another sync op to be rerun in 5 minutes.
