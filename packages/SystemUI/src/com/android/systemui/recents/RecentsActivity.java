@@ -37,6 +37,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
@@ -352,6 +353,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
+        getWindow().getAttributes().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 
         // Create the home intent runnable
         Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -645,6 +648,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
         mRecentsView.setStackViewVisibility(View.VISIBLE);
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+    }
+
+    public final void onBusEvent(ExitRecentsWindowFirstAnimationFrameEvent event) {
+        mRecentsView.setStackViewVisibility(View.INVISIBLE);
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
     }
 

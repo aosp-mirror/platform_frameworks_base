@@ -139,7 +139,7 @@ public class AppTransition implements Dump {
     private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
 
     private final Context mContext;
-    private final Handler mH;
+    private final WindowManagerService mService;
 
     private int mNextAppTransition = TRANSIT_UNSET;
 
@@ -208,15 +208,10 @@ public class AppTransition implements Dump {
 
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
     private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
-    private final Object mServiceLock;
-    private final WindowSurfacePlacer mWindowSurfacePlacer;
 
-    AppTransition(Context context, Handler h, Object serviceLock,
-            WindowSurfacePlacer windowSurfacePlacer) {
+    AppTransition(Context context, WindowManagerService service) {
         mContext = context;
-        mH = h;
-        mServiceLock = serviceLock;
-        mWindowSurfacePlacer = windowSurfacePlacer;
+        mService = service;
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -971,7 +966,7 @@ public class AppTransition implements Dump {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    mH.obtainMessage(H.DO_ANIMATION_CALLBACK, callback).sendToTarget();
+                    mService.mH.obtainMessage(H.DO_ANIMATION_CALLBACK, callback).sendToTarget();
                 }
 
                 @Override
@@ -1326,7 +1321,8 @@ public class AppTransition implements Dump {
 
     void postAnimationCallback() {
         if (mNextAppTransitionCallback != null) {
-            mH.sendMessage(mH.obtainMessage(H.DO_ANIMATION_CALLBACK, mNextAppTransitionCallback));
+            mService.mH.sendMessage(mService.mH.obtainMessage(H.DO_ANIMATION_CALLBACK,
+                    mNextAppTransitionCallback));
             mNextAppTransitionCallback = null;
         }
     }
@@ -1478,14 +1474,15 @@ public class AppTransition implements Dump {
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to fetch app transition specs: " + e);
                     }
-                    synchronized (mServiceLock) {
+                    synchronized (mService.mWindowMap) {
                         mNextAppTransitionAnimationsSpecsPending = false;
                         overridePendingAppTransitionMultiThumb(specs,
                                 mNextAppTransitionFutureCallback, null /* finishedCallback */,
                                 mNextAppTransitionScaleUp);
                         mNextAppTransitionFutureCallback = null;
-                        mWindowSurfacePlacer.requestTraversal();
+                        mService.prolongAnimationsFromSpecs(specs, mNextAppTransitionScaleUp);
                     }
+                    mService.requestTraversal();
                 }
             });
         }
@@ -1672,8 +1669,8 @@ public class AppTransition implements Dump {
         }
         boolean prepared = prepare();
         if (isTransitionSet()) {
-            mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
-            mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, APP_TRANSITION_TIMEOUT_MS);
+            mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
+            mService.mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, APP_TRANSITION_TIMEOUT_MS);
         }
         return prepared;
     }

@@ -50,6 +50,9 @@ import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
+import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
+import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
+
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
@@ -909,7 +912,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
-        mAppTransition = new AppTransition(context, mH, mWindowMap, mWindowPlacerLocked);
+        mAppTransition = new AppTransition(context, this);
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         mActivityManager = ActivityManagerNative.getDefault();
@@ -3692,22 +3695,26 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mAppTransition.overridePendingAppTransitionMultiThumb(specs, onAnimationStartedCallback,
                     onAnimationFinishedCallback, scaleUp);
-            if (!scaleUp) {
-                // This is used by freeform to recents windows transition. We need to synchronize
-                // the animation with the appearance of the content of recents, so we will make
-                // animation stay on the last frame a little longer.
-                mTmpTaskIds.clear();
-                for (int i = specs.length - 1; i >= 0; i--) {
-                    mTmpTaskIds.put(specs[i].taskId, 0);
-                }
-                for (final WindowState win : mWindowMap.values()) {
-                    final Task task = win.getTask();
-                    if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1) {
-                        final AppWindowToken appToken = win.mAppToken;
-                        if (appToken != null && appToken.mAppAnimator != null) {
-                            appToken.mAppAnimator.startProlongAnimation();
-                        }
-                    }
+            prolongAnimationsFromSpecs(specs, scaleUp);
+
+        }
+    }
+
+    void prolongAnimationsFromSpecs(AppTransitionAnimationSpec[] specs, boolean scaleUp) {
+        // This is used by freeform <-> recents windows transition. We need to synchronize
+        // the animation with the appearance of the content of recents, so we will make
+        // animation stay on the first or last frame a little longer.
+        mTmpTaskIds.clear();
+        for (int i = specs.length - 1; i >= 0; i--) {
+            mTmpTaskIds.put(specs[i].taskId, 0);
+        }
+        for (final WindowState win : mWindowMap.values()) {
+            final Task task = win.getTask();
+            if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1) {
+                final AppWindowToken appToken = win.mAppToken;
+                if (appToken != null && appToken.mAppAnimator != null) {
+                    appToken.mAppAnimator.startProlongAnimation(scaleUp ?
+                            PROLONG_ANIMATION_AT_START : PROLONG_ANIMATION_AT_END);
                 }
             }
         }

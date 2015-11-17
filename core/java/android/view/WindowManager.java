@@ -118,8 +118,7 @@ public interface WindowManager extends ViewManager {
      */
     public void removeViewImmediate(View view);
 
-    public static class LayoutParams extends ViewGroup.LayoutParams
-            implements Parcelable {
+    public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
          * X position for this window.  With the default gravity it is ignored.
          * When using {@link Gravity#LEFT} or {@link Gravity#START} or {@link Gravity#RIGHT} or
@@ -1149,12 +1148,20 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Flag indicating that the x, y, width, and height members should be
-         * ignored (and thus their previous value preserved). For example 
+         * ignored (and thus their previous value preserved). For example
          * because they are being managed externally through repositionChild.
          *
          * {@hide}
          */
         public static final int PRIVATE_FLAG_PRESERVE_GEOMETRY = 0x00002000;
+
+        /**
+         * Flag that will make window ignore app visibility and instead depend purely on the decor
+         * view visibility for determining window visibility. This is used by recents to keep
+         * drawing after it launches an app.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY = 0x00004000;
 
 
         /**
