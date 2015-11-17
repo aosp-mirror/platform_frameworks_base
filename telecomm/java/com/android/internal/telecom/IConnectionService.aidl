@@ -54,6 +54,8 @@ oneway interface IConnectionService {
 
     void disconnect(String callId);
 
+    void silence(String callId);
+
     void hold(String callId);
 
     void unhold(String callId);
