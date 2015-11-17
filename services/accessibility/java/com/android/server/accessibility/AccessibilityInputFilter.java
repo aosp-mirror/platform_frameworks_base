@@ -21,7 +21,6 @@ import android.os.PowerManager;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 import android.view.Choreographer;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputFilter;
@@ -103,7 +102,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private TouchExplorer mTouchExplorer;
 
-    private ScreenMagnifier mScreenMagnifier;
+    private MagnificationGestureHandler mMagnificationGestureHandler;
 
     private AutoclickController mAutoclickController;
 
@@ -363,14 +362,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0) {
-            mScreenMagnifier = new ScreenMagnifier(mContext, mUserId,
-                    Display.DEFAULT_DISPLAY, mAms);
-            addFirstEventHandler(mScreenMagnifier);
+            mMagnificationGestureHandler = new MagnificationGestureHandler(mContext, mAms);
+            addFirstEventHandler(mMagnificationGestureHandler);
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
-           mKeyboardInterceptor = new KeyboardInterceptor(mAms);
-           addFirstEventHandler(mKeyboardInterceptor);
+            mKeyboardInterceptor = new KeyboardInterceptor(mAms);
+            addFirstEventHandler(mKeyboardInterceptor);
         }
     }
 
@@ -398,9 +396,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mTouchExplorer.onDestroy();
             mTouchExplorer = null;
         }
-        if (mScreenMagnifier != null) {
-            mScreenMagnifier.onDestroy();
-            mScreenMagnifier = null;
+        if (mMagnificationGestureHandler != null) {
+            mMagnificationGestureHandler.onDestroy();
+            mMagnificationGestureHandler = null;
         }
         if (mKeyboardInterceptor != null) {
             mKeyboardInterceptor.onDestroy();

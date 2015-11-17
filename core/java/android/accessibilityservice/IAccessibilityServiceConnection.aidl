@@ -18,6 +18,7 @@ package android.accessibilityservice;
 
 import android.os.Bundle;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.graphics.Region;
 import android.view.MagnificationSpec;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
@@ -63,4 +64,19 @@ interface IAccessibilityServiceConnection {
     boolean performGlobalAction(int action);
 
     oneway void setOnKeyEventResult(boolean handled, int sequence);
+
+    float getMagnificationScale();
+
+    float getMagnificationCenterX();
+
+    float getMagnificationCenterY();
+
+    Region getMagnifiedRegion();
+
+    boolean resetMagnification(boolean animate);
+
+    boolean setMagnificationScaleAndCenter(float scale, float centerX, float centerY,
+        boolean animate);
+
+    void setMagnificationCallbackEnabled(boolean enabled);
 }

@@ -52,6 +52,7 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -10178,7 +10179,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setMagnificationCallbacks(MagnificationCallbacks callbacks) {
+        public void setMagnificationCallbacks(@Nullable MagnificationCallbacks callbacks) {
             synchronized (mWindowMap) {
                 if (mAccessibilityController == null) {
                     mAccessibilityController = new AccessibilityController(

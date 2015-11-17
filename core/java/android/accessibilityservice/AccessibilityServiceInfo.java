@@ -104,6 +104,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 0x00000008;
 
+    /**
+     * Capability: This accessibility service can control display magnification.
+     * @see android.R.styleable#AccessibilityService_canControlMagnification
+     */
+    public static final int CAPABILITY_CAN_CONTROL_MAGNIFICATION = 0x00000010;
+
     private static final SparseArray<CapabilityInfo> sAvailableCapabilityInfos =
             new SparseArray<CapabilityInfo>();
     static {
@@ -123,6 +129,10 @@ public class AccessibilityServiceInfo implements Parcelable {
                 new CapabilityInfo(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
                         R.string.capability_title_canRequestFilterKeyEvents,
                         R.string.capability_desc_canRequestFilterKeyEvents));
+        sAvailableCapabilityInfos.put(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
+                new CapabilityInfo(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
+                        R.string.capability_title_canControlMagnification,
+                        R.string.capability_desc_canControlMagnification));
     }
 
     /**
@@ -501,6 +511,10 @@ public class AccessibilityServiceInfo implements Parcelable {
             if (asAttributes.getBoolean(com.android.internal.R.styleable
                     .AccessibilityService_canRequestFilterKeyEvents, false)) {
                 mCapabilities |= CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
+            }
+            if (asAttributes.getBoolean(com.android.internal.R.styleable
+                    .AccessibilityService_canControlMagnification, false)) {
+                mCapabilities |= CAPABILITY_CAN_CONTROL_MAGNIFICATION;
             }
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
@@ -917,6 +931,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS:
                 return "CAPABILITY_CAN_FILTER_KEY_EVENTS";
+            case CAPABILITY_CAN_CONTROL_MAGNIFICATION:
+                return "CAPABILITY_CAN_CONTROL_MAGNIFICATION";
             default:
                 return "UNKNOWN";
         }

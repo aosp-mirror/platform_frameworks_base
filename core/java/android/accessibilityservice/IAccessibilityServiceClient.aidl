@@ -17,6 +17,7 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.graphics.Region;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.KeyEvent;
@@ -39,4 +40,6 @@ import android.view.KeyEvent;
     void clearAccessibilityCache();
 
     void onKeyEvent(in KeyEvent event, int sequence);
+
+    void onMagnificationChanged(in Region region, float scale, float centerX, float centerY);
 }

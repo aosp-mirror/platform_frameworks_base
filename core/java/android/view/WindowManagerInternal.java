@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -55,9 +56,10 @@ public abstract class WindowManagerInternal {
          * Called when the bounds of the screen content that is magnified changed.
          * Note that not the entire screen is magnified.
          *
-         * @param bounds The bounds.
+         * @param magnifiedBounds the currently magnified region
+         * @param availableBounds the region available for magnification
          */
-        public void onMagnifedBoundsChanged(Region bounds);
+        public void onMagnifiedBoundsChanged(Region magnifiedBounds, Region availableBounds);
 
         /**
          * Called when an application requests a rectangle on the screen to allow
@@ -142,7 +144,7 @@ public abstract class WindowManagerInternal {
      *
      * @param callbacks The callbacks to invoke.
      */
-    public abstract void setMagnificationCallbacks(MagnificationCallbacks callbacks);
+    public abstract void setMagnificationCallbacks(@Nullable MagnificationCallbacks callbacks);
 
     /**
      * Set by the accessibility layer to specify the magnification and panning to

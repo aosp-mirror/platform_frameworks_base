@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,10 @@
 
 package com.android.server.accessibility;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Rect;
-import android.graphics.Region;
-import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.text.TextUtils;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -39,18 +31,12 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
-import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.os.SomeArgs;
-import com.android.server.LocalServices;
-
-import java.util.Locale;
-
 /**
- * This class handles the screen magnification when accessibility is enabled.
+ * This class handles magnification in response to touch events.
+ *
  * The behavior is as follows:
  *
  * 1. Triple tap toggles permanent screen magnification which is magnifying
@@ -88,10 +74,8 @@ import java.util.Locale;
  *
  * 6. The magnification scale will be persisted in settings and in the cloud.
  */
-public final class ScreenMagnifier implements WindowManagerInternal.MagnificationCallbacks,
-        EventStreamTransformation {
-
-    private static final String LOG_TAG = ScreenMagnifier.class.getSimpleName();
+class MagnificationGestureHandler implements EventStreamTransformation {
+    private static final String LOG_TAG = "MagnificationEventHandler";
 
     private static final boolean DEBUG_STATE_TRANSITIONS = false;
     private static final boolean DEBUG_DETECTING = false;
@@ -103,40 +87,19 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     private static final int STATE_VIEWPORT_DRAGGING = 3;
     private static final int STATE_MAGNIFIED_INTERACTION = 4;
 
-    private static final float DEFAULT_MAGNIFICATION_SCALE = 2.0f;
+    private static final float MIN_SCALE = 2.0f;
+    private static final float MAX_SCALE = 5.0f;
 
-    private static final int MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED = 1;
-    private static final int MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED = 2;
-    private static final int MESSAGE_ON_USER_CONTEXT_CHANGED = 3;
-    private static final int MESSAGE_ON_ROTATION_CHANGED = 4;
-
-    private static final int DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE = 1;
-
-    private static final int MY_PID = android.os.Process.myPid();
-
-    private final Rect mTempRect = new Rect();
-    private final Rect mTempRect1 = new Rect();
-
-    private final Context mContext;
-    private final WindowManagerInternal mWindowManager;
     private final MagnificationController mMagnificationController;
-    private final ScreenStateObserver mScreenStateObserver;
-
     private final DetectingStateHandler mDetectingStateHandler;
-    private final MagnifiedContentInteractonStateHandler mMagnifiedContentInteractonStateHandler;
+    private final MagnifiedContentInteractionStateHandler mMagnifiedContentInteractionStateHandler;
     private final StateViewportDraggingHandler mStateViewportDraggingHandler;
-
-    private final int mUserId;
-
-    private final int mTapTimeSlop = ViewConfiguration.getJumpTapTimeout();
-    private final int mMultiTapTimeSlop;
-    private final int mTapDistanceSlop;
-    private final int mMultiTapDistanceSlop;
 
     private EventStreamTransformation mNext;
 
     private int mCurrentState;
     private int mPreviousState;
+
     private boolean mTranslationEnabledBeforePan;
 
     private PointerCoords[] mTempPointerCoords;
@@ -144,189 +107,44 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
 
     private long mDelegatingStateDownTime;
 
-    private boolean mUpdateMagnificationSpecOnNextBoundsChange;
-
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED: {
-                    Region bounds = (Region) message.obj;
-                    handleOnMagnifiedBoundsChanged(bounds);
-                    bounds.recycle();
-                } break;
-                case MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED: {
-                    SomeArgs args = (SomeArgs) message.obj;
-                    final int left = args.argi1;
-                    final int top = args.argi2;
-                    final int right = args.argi3;
-                    final int bottom = args.argi4;
-                    handleOnRectangleOnScreenRequested(left, top, right, bottom);
-                    args.recycle();
-                } break;
-                case MESSAGE_ON_USER_CONTEXT_CHANGED: {
-                    handleOnUserContextChanged();
-                } break;
-                case MESSAGE_ON_ROTATION_CHANGED: {
-                    final int rotation = message.arg1;
-                    handleOnRotationChanged(rotation);
-                } break;
-            }
-        }
-    };
-
-    public ScreenMagnifier(Context context, int userId, int displayId,
-            AccessibilityManagerService service) {
-        mContext = context;
-        mUserId = userId;
-        mWindowManager = LocalServices.getService(WindowManagerInternal.class);
-
-        mMultiTapTimeSlop = ViewConfiguration.getDoubleTapTimeout()
-                + mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screen_magnification_multi_tap_adjustment);
-        mTapDistanceSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mMultiTapDistanceSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
-
-        mDetectingStateHandler = new DetectingStateHandler();
+    public MagnificationGestureHandler(Context context, AccessibilityManagerService ams) {
+        mMagnificationController = ams.getMagnificationController();
+        mDetectingStateHandler = new DetectingStateHandler(context);
         mStateViewportDraggingHandler = new StateViewportDraggingHandler();
-        mMagnifiedContentInteractonStateHandler = new MagnifiedContentInteractonStateHandler(
-                context);
-
-        mMagnificationController = service.getMagnificationController();
-        mScreenStateObserver = new ScreenStateObserver(context, mMagnificationController);
-
-        mWindowManager.setMagnificationCallbacks(this);
+        mMagnifiedContentInteractionStateHandler =
+                new MagnifiedContentInteractionStateHandler(context);
 
         transitionToState(STATE_DETECTING);
     }
 
     @Override
-    public void onMagnifedBoundsChanged(Region bounds) {
-        Region newBounds = Region.obtain(bounds);
-        mHandler.obtainMessage(MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED, newBounds).sendToTarget();
-        if (MY_PID != Binder.getCallingPid()) {
-            bounds.recycle();
-        }
-    }
-
-    private void handleOnMagnifiedBoundsChanged(Region bounds) {
-        // If there was a rotation we have to update the center of the magnified
-        // region since the old offset X/Y may be out of its acceptable range for
-        // the new display width and height.
-        mMagnificationController.setMagnifiedRegion(
-                bounds, mUpdateMagnificationSpecOnNextBoundsChange);
-        mUpdateMagnificationSpecOnNextBoundsChange = false;
-    }
-
-    @Override
-    public void onRectangleOnScreenRequested(int left, int top, int right, int bottom) {
-        SomeArgs args = SomeArgs.obtain();
-        args.argi1 = left;
-        args.argi2 = top;
-        args.argi3 = right;
-        args.argi4 = bottom;
-        mHandler.obtainMessage(MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED, args).sendToTarget();
-    }
-
-    private void handleOnRectangleOnScreenRequested(int left, int top, int right, int bottom) {
-        Rect magnifiedFrame = mTempRect;
-        mMagnificationController.getMagnifiedBounds(magnifiedFrame);
-        if (!magnifiedFrame.intersects(left, top, right, bottom)) {
-            return;
-        }
-        Rect magnifFrameInScreenCoords = mTempRect1;
-        getMagnifiedFrameInContentCoords(magnifFrameInScreenCoords);
-        final float scrollX;
-        final float scrollY;
-        if (right - left > magnifFrameInScreenCoords.width()) {
-            final int direction = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault());
-            if (direction == View.LAYOUT_DIRECTION_LTR) {
-                scrollX = left - magnifFrameInScreenCoords.left;
-            } else {
-                scrollX = right - magnifFrameInScreenCoords.right;
-            }
-        } else if (left < magnifFrameInScreenCoords.left) {
-            scrollX = left - magnifFrameInScreenCoords.left;
-        } else if (right > magnifFrameInScreenCoords.right) {
-            scrollX = right - magnifFrameInScreenCoords.right;
-        } else {
-            scrollX = 0;
-        }
-        if (bottom - top > magnifFrameInScreenCoords.height()) {
-            scrollY = top - magnifFrameInScreenCoords.top;
-        } else if (top < magnifFrameInScreenCoords.top) {
-            scrollY = top - magnifFrameInScreenCoords.top;
-        } else if (bottom > magnifFrameInScreenCoords.bottom) {
-            scrollY = bottom - magnifFrameInScreenCoords.bottom;
-        } else {
-            scrollY = 0;
-        }
-        final float scale = mMagnificationController.getScale();
-        mMagnificationController.offsetMagnifiedRegionCenter(scrollX * scale, scrollY * scale);
-    }
-
-    @Override
-    public void onRotationChanged(int rotation) {
-        mHandler.obtainMessage(MESSAGE_ON_ROTATION_CHANGED, rotation, 0).sendToTarget();
-    }
-
-    private void handleOnRotationChanged(int rotation) {
-        resetMagnificationIfNeeded();
-        if (mMagnificationController.isMagnifying()) {
-            mUpdateMagnificationSpecOnNextBoundsChange = true;
-        }
-    }
-
-    @Override
-    public void onUserContextChanged() {
-        mHandler.sendEmptyMessage(MESSAGE_ON_USER_CONTEXT_CHANGED);
-    }
-
-    private void handleOnUserContextChanged() {
-        resetMagnificationIfNeeded();
-    }
-
-    private void getMagnifiedFrameInContentCoords(Rect rect) {
-        final float scale = mMagnificationController.getSentScale();
-        final float offsetX = mMagnificationController.getSentOffsetX();
-        final float offsetY = mMagnificationController.getSentOffsetY();
-        mMagnificationController.getMagnifiedBounds(rect);
-        rect.offset((int) -offsetX, (int) -offsetY);
-        rect.scale(1.0f / scale);
-    }
-
-    private void resetMagnificationIfNeeded() {
-        if (mMagnificationController.isMagnifying()
-                && isScreenMagnificationAutoUpdateEnabled(mContext)) {
-            mMagnificationController.reset(true);
-        }
-    }
-
-    @Override
-    public void onMotionEvent(MotionEvent event, MotionEvent rawEvent,
-            int policyFlags) {
+    public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (!event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
             if (mNext != null) {
                 mNext.onMotionEvent(event, rawEvent, policyFlags);
             }
             return;
         }
-        mMagnifiedContentInteractonStateHandler.onMotionEvent(event);
+        mMagnifiedContentInteractionStateHandler.onMotionEvent(event, rawEvent, policyFlags);
         switch (mCurrentState) {
             case STATE_DELEGATING: {
                 handleMotionEventStateDelegating(event, rawEvent, policyFlags);
-            } break;
+            }
+            break;
             case STATE_DETECTING: {
                 mDetectingStateHandler.onMotionEvent(event, rawEvent, policyFlags);
-            } break;
+            }
+            break;
             case STATE_VIEWPORT_DRAGGING: {
-                mStateViewportDraggingHandler.onMotionEvent(event, policyFlags);
-            } break;
+                mStateViewportDraggingHandler.onMotionEvent(event, rawEvent, policyFlags);
+            }
+            break;
             case STATE_MAGNIFIED_INTERACTION: {
                 // mMagnifiedContentInteractonStateHandler handles events only
                 // if this is the current state since it uses ScaleGestureDetecotr
                 // and a GestureDetector which need well formed event stream.
-            } break;
+            }
+            break;
             default: {
                 throw new IllegalStateException("Unknown state: " + mCurrentState);
             }
@@ -336,7 +154,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     @Override
     public void onKeyEvent(KeyEvent event, int policyFlags) {
         if (mNext != null) {
-          mNext.onKeyEvent(event, policyFlags);
+            mNext.onKeyEvent(event, policyFlags);
         }
     }
 
@@ -366,15 +184,13 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     @Override
     public void onDestroy() {
         clear();
-        mScreenStateObserver.destroy();
-        mWindowManager.setMagnificationCallbacks(null);
     }
 
     private void clear() {
         mCurrentState = STATE_DETECTING;
         mDetectingStateHandler.clear();
         mStateViewportDraggingHandler.clear();
-        mMagnifiedContentInteractonStateHandler.clear();
+        mMagnifiedContentInteractionStateHandler.clear();
     }
 
     private void handleMotionEventStateDelegating(MotionEvent event,
@@ -382,12 +198,14 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 mDelegatingStateDownTime = event.getDownTime();
-            } break;
+            }
+            break;
             case MotionEvent.ACTION_UP: {
                 if (mDetectingStateHandler.mDelayedEventQueue == null) {
                     transitionToState(STATE_DETECTING);
                 }
-            } break;
+            }
+            break;
         }
         if (mNext != null) {
             // If the event is within the magnified portion of the screen we have
@@ -402,7 +220,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                 final float scaledOffsetY = mMagnificationController.getOffsetY();
                 final int pointerCount = event.getPointerCount();
                 PointerCoords[] coords = getTempPointerCoordsWithMinSize(pointerCount);
-                PointerProperties[] properties = getTempPointerPropertiesWithMinSize(pointerCount);
+                PointerProperties[] properties = getTempPointerPropertiesWithMinSize(
+                        pointerCount);
                 for (int i = 0; i < pointerCount; i++) {
                     event.getPointerCoords(i, coords[i]);
                     coords[i].x = (coords[i].x - scaledOffsetX) / scale;
@@ -441,12 +260,14 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     }
 
     private PointerProperties[] getTempPointerPropertiesWithMinSize(int size) {
-        final int oldSize = (mTempPointerProperties != null) ? mTempPointerProperties.length : 0;
+        final int oldSize = (mTempPointerProperties != null) ? mTempPointerProperties.length
+                : 0;
         if (oldSize < size) {
             PointerProperties[] oldTempPointerProperties = mTempPointerProperties;
             mTempPointerProperties = new PointerProperties[size];
             if (oldTempPointerProperties != null) {
-                System.arraycopy(oldTempPointerProperties, 0, mTempPointerProperties, 0, oldSize);
+                System.arraycopy(oldTempPointerProperties, 0, mTempPointerProperties, 0,
+                        oldSize);
             }
         }
         for (int i = oldSize; i < size; i++) {
@@ -460,16 +281,20 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             switch (state) {
                 case STATE_DELEGATING: {
                     Slog.i(LOG_TAG, "mCurrentState: STATE_DELEGATING");
-                } break;
+                }
+                break;
                 case STATE_DETECTING: {
                     Slog.i(LOG_TAG, "mCurrentState: STATE_DETECTING");
-                } break;
+                }
+                break;
                 case STATE_VIEWPORT_DRAGGING: {
                     Slog.i(LOG_TAG, "mCurrentState: STATE_VIEWPORT_DRAGGING");
-                } break;
+                }
+                break;
                 case STATE_MAGNIFIED_INTERACTION: {
                     Slog.i(LOG_TAG, "mCurrentState: STATE_MAGNIFIED_INTERACTION");
-                } break;
+                }
+                break;
                 default: {
                     throw new IllegalArgumentException("Unknown state: " + state);
                 }
@@ -479,20 +304,30 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         mCurrentState = state;
     }
 
-    private final class MagnifiedContentInteractonStateHandler
-            extends SimpleOnGestureListener implements OnScaleGestureListener {
-        private static final float MIN_SCALE = 1.3f;
-        private static final float MAX_SCALE = 5.0f;
+    private interface MotionEventHandler {
+
+        void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags);
+
+        void clear();
+    }
+
+    /**
+     * This class determines if the user is performing a scale or pan gesture.
+     */
+    private final class MagnifiedContentInteractionStateHandler extends SimpleOnGestureListener
+            implements OnScaleGestureListener, MotionEventHandler {
 
         private final ScaleGestureDetector mScaleGestureDetector;
+
         private final GestureDetector mGestureDetector;
 
         private final float mScalingThreshold;
 
         private float mInitialScaleFactor = -1;
+
         private boolean mScaling;
 
-        public MagnifiedContentInteractonStateHandler(Context context) {
+        public MagnifiedContentInteractionStateHandler(Context context) {
             final TypedValue scaleValue = new TypedValue();
             context.getResources().getValue(
                     com.android.internal.R.dimen.config_screen_magnification_scaling_threshold,
@@ -503,7 +338,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             mGestureDetector = new GestureDetector(context, this);
         }
 
-        public void onMotionEvent(MotionEvent event) {
+        @Override
+        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             mScaleGestureDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
             if (mCurrentState != STATE_MAGNIFIED_INTERACTION) {
@@ -511,11 +347,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             }
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                 clear();
-                final float scale = Math.min(Math.max(mMagnificationController.getScale(),
-                        MIN_SCALE), MAX_SCALE);
-                if (scale != getPersistedScale()) {
-                    persistScale(scale);
-                }
+                mMagnificationController.persistScale();
                 if (mPreviousState == STATE_VIEWPORT_DRAGGING) {
                     transitionToState(STATE_VIEWPORT_DRAGGING);
                 } else {
@@ -552,14 +384,29 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                 }
                 return false;
             }
-            final float newScale = mMagnificationController.getScale()
-                    * detector.getScaleFactor();
-            final float normalizedNewScale = Math.min(Math.max(newScale, MIN_SCALE), MAX_SCALE);
-            if (DEBUG_SCALING) {
-                Slog.i(LOG_TAG, "normalizedNewScale: " + normalizedNewScale);
+
+            final float initialScale = mMagnificationController.getScale();
+            final float targetScale = initialScale * detector.getScaleFactor();
+
+            // Don't allow a gesture to move the user further outside the
+            // desired bounds for gesture-controlled scaling.
+            final float scale;
+            if (targetScale > MAX_SCALE && targetScale > initialScale) {
+                // The target scale is too big and getting bigger.
+                scale = MAX_SCALE;
+            } else if (targetScale < MIN_SCALE && targetScale < initialScale) {
+                // The target scale is too small and getting smaller.
+                scale = MIN_SCALE;
+            } else {
+                // The target scale may be outside our bounds, but at least
+                // it's moving in the right direction. This avoids a "jump" if
+                // we're at odds with some other service's desired bounds.
+                scale = targetScale;
             }
-            mMagnificationController.setScale(normalizedNewScale, detector.getFocusX(),
-                    detector.getFocusY(), false);
+
+            final float pivotX = detector.getFocusX();
+            final float pivotY = detector.getFocusY();
+            mMagnificationController.setScale(scale, pivotX, pivotY, false);
             return true;
         }
 
@@ -573,16 +420,24 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             clear();
         }
 
-        private void clear() {
+        @Override
+        public void clear() {
             mInitialScaleFactor = -1;
             mScaling = false;
         }
     }
 
-    private final class StateViewportDraggingHandler {
+    /**
+     * This class handles motion events when the event dispatcher has
+     * determined that the user is performing a single-finger drag of the
+     * magnification viewport.
+     */
+    private final class StateViewportDraggingHandler implements MotionEventHandler {
+
         private boolean mLastMoveOutsideMagnifiedRegion;
 
-        private void onMotionEvent(MotionEvent event, int policyFlags) {
+        @Override
+        public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             final int action = event.getActionMasked();
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
@@ -591,7 +446,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     clear();
                     transitionToState(STATE_MAGNIFIED_INTERACTION);
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_MOVE: {
                     if (event.getPointerCount() != 1) {
                         throw new IllegalStateException("Should have one pointer down.");
@@ -601,35 +457,43 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     if (mMagnificationController.magnifiedRegionContains(eventX, eventY)) {
                         if (mLastMoveOutsideMagnifiedRegion) {
                             mLastMoveOutsideMagnifiedRegion = false;
-                            mMagnificationController.setMagnifiedRegionCenter(eventX,
+                            mMagnificationController.setCenter(eventX,
                                     eventY, true);
                         } else {
-                            mMagnificationController.setMagnifiedRegionCenter(eventX,
+                            mMagnificationController.setCenter(eventX,
                                     eventY, false);
                         }
                     } else {
                         mLastMoveOutsideMagnifiedRegion = true;
                     }
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_UP: {
                     if (!mTranslationEnabledBeforePan) {
                         mMagnificationController.reset(true);
                     }
                     clear();
                     transitionToState(STATE_DETECTING);
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_POINTER_UP: {
-                    throw new IllegalArgumentException("Unexpected event type: ACTION_POINTER_UP");
+                    throw new IllegalArgumentException(
+                            "Unexpected event type: ACTION_POINTER_UP");
                 }
             }
         }
 
+        @Override
         public void clear() {
             mLastMoveOutsideMagnifiedRegion = false;
         }
     }
 
-    private final class DetectingStateHandler {
+    /**
+     * This class handles motion events when the event dispatch has not yet
+     * determined what the user is doing. It watches for various tap events.
+     */
+    private final class DetectingStateHandler implements MotionEventHandler {
 
         private static final int MESSAGE_ON_ACTION_TAP_AND_HOLD = 1;
 
@@ -637,11 +501,29 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
 
         private static final int ACTION_TAP_COUNT = 3;
 
+        private final int mTapTimeSlop = ViewConfiguration.getJumpTapTimeout();
+
+        private final int mMultiTapTimeSlop;
+
+        private final int mTapDistanceSlop;
+
+        private final int mMultiTapDistanceSlop;
+
         private MotionEventInfo mDelayedEventQueue;
 
         private MotionEvent mLastDownEvent;
+
         private MotionEvent mLastTapUpEvent;
+
         private int mTapCount;
+
+        public DetectingStateHandler(Context context) {
+            mMultiTapTimeSlop = ViewConfiguration.getDoubleTapTimeout()
+                    + context.getResources().getInteger(
+                    com.android.internal.R.integer.config_screen_magnification_multi_tap_adjustment);
+            mTapDistanceSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+            mMultiTapDistanceSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
+        }
 
         private final Handler mHandler = new Handler() {
             @Override
@@ -652,12 +534,14 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                         MotionEvent event = (MotionEvent) message.obj;
                         final int policyFlags = message.arg1;
                         onActionTapAndHold(event, policyFlags);
-                    } break;
+                    }
+                    break;
                     case MESSAGE_TRANSITION_TO_DELEGATING_STATE: {
                         transitionToState(STATE_DELEGATING);
                         sendDelayedMotionEvents();
                         clear();
-                    } break;
+                    }
+                    break;
                     default: {
                         throw new IllegalArgumentException("Unknown message type: " + type);
                     }
@@ -665,6 +549,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             }
         };
 
+        @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             cacheDelayedMotionEvent(event, rawEvent, policyFlags);
             final int action = event.getActionMasked();
@@ -678,7 +563,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     }
                     if (mTapCount == ACTION_TAP_COUNT - 1 && mLastDownEvent != null
                             && GestureUtils.isMultiTap(mLastDownEvent, event,
-                                    mMultiTapTimeSlop, mMultiTapDistanceSlop, 0)) {
+                            mMultiTapTimeSlop, mMultiTapDistanceSlop, 0)) {
                         Message message = mHandler.obtainMessage(MESSAGE_ON_ACTION_TAP_AND_HOLD,
                                 policyFlags, 0, event);
                         mHandler.sendMessageDelayed(message,
@@ -690,7 +575,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     }
                     clearLastDownEvent();
                     mLastDownEvent = MotionEvent.obtain(event);
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     if (mMagnificationController.isMagnifying()) {
                         transitionToState(STATE_MAGNIFIED_INTERACTION);
@@ -698,7 +584,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     } else {
                         transitionToDelegatingStateAndClear();
                     }
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_MOVE: {
                     if (mLastDownEvent != null && mTapCount < ACTION_TAP_COUNT - 1) {
                         final double distance = GestureUtils.computeDistance(mLastDownEvent,
@@ -707,7 +594,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                             transitionToDelegatingStateAndClear();
                         }
                     }
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_UP: {
                     if (mLastDownEvent == null) {
                         return;
@@ -715,8 +603,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
                     if (!mMagnificationController.magnifiedRegionContains(
                             event.getX(), event.getY())) {
-                         transitionToDelegatingStateAndClear();
-                         return;
+                        transitionToDelegatingStateAndClear();
+                        return;
                     }
                     if (!GestureUtils.isTap(mLastDownEvent, event, mTapTimeSlop,
                             mTapDistanceSlop, 0)) {
@@ -739,13 +627,16 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     }
                     clearLastTapUpEvent();
                     mLastTapUpEvent = MotionEvent.obtain(event);
-                } break;
+                }
+                break;
                 case MotionEvent.ACTION_POINTER_UP: {
                     /* do nothing */
-                } break;
+                }
+                break;
             }
         }
 
+        @Override
         public void clear() {
             mHandler.removeMessages(MESSAGE_ON_ACTION_TAP_AND_HOLD);
             mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
@@ -792,7 +683,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             while (mDelayedEventQueue != null) {
                 MotionEventInfo info = mDelayedEventQueue;
                 mDelayedEventQueue = info.mNext;
-                ScreenMagnifier.this.onMotionEvent(info.mEvent, info.mRawEvent,
+                MagnificationGestureHandler.this.onMotionEvent(info.mEvent, info.mRawEvent,
                         info.mPolicyFlags);
                 info.recycle();
             }
@@ -816,9 +707,11 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             if (DEBUG_DETECTING) {
                 Slog.i(LOG_TAG, "onActionTap()");
             }
+
             if (!mMagnificationController.isMagnifying()) {
-                mMagnificationController.setScaleAndMagnifiedRegionCenter(getPersistedScale(),
-                        up.getX(), up.getY(), true);
+                final float targetScale = mMagnificationController.getPersistedScale();
+                final float scale = MathUtils.constrain(targetScale, MIN_SCALE, MAX_SCALE);
+                mMagnificationController.setScaleAndCenter(scale, up.getX(), up.getY(), true);
             } else {
                 mMagnificationController.reset(true);
             }
@@ -828,35 +721,16 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             if (DEBUG_DETECTING) {
                 Slog.i(LOG_TAG, "onActionTapAndHold()");
             }
+
             clear();
             mTranslationEnabledBeforePan = mMagnificationController.isMagnifying();
-            mMagnificationController.setScaleAndMagnifiedRegionCenter(getPersistedScale(),
-                    down.getX(), down.getY(), true);
+
+            final float targetScale = mMagnificationController.getPersistedScale();
+            final float scale = MathUtils.constrain(targetScale, MIN_SCALE, MAX_SCALE);
+            mMagnificationController.setScaleAndCenter(scale, down.getX(), down.getY(), true);
+
             transitionToState(STATE_VIEWPORT_DRAGGING);
         }
-    }
-
-    private void persistScale(final float scale) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                Settings.Secure.putFloatForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale, mUserId);
-                return null;
-            }
-        }.execute();
-    }
-
-    private float getPersistedScale() {
-        return Settings.Secure.getFloatForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-                DEFAULT_MAGNIFICATION_SCALE, mUserId);
-    }
-
-    private static boolean isScreenMagnificationAutoUpdateEnabled(Context context) {
-        return (Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
-                DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE) == 1);
     }
 
     private static final class MotionEventInfo {
@@ -864,14 +738,19 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         private static final int MAX_POOL_SIZE = 10;
 
         private static final Object sLock = new Object();
+
         private static MotionEventInfo sPool;
+
         private static int sPoolSize;
 
         private MotionEventInfo mNext;
+
         private boolean mInPool;
 
         public MotionEvent mEvent;
+
         public MotionEvent mRawEvent;
+
         public int mPolicyFlags;
 
         public static MotionEventInfo obtain(MotionEvent event, MotionEvent rawEvent,
@@ -920,49 +799,6 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
             mRawEvent.recycle();
             mRawEvent = null;
             mPolicyFlags = 0;
-        }
-    }
-
-    private final class ScreenStateObserver extends BroadcastReceiver {
-        private static final int MESSAGE_ON_SCREEN_STATE_CHANGE = 1;
-
-        private final Context mContext;
-        private final MagnificationController mMagnificationController;
-
-        private final Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                 switch (message.what) {
-                    case MESSAGE_ON_SCREEN_STATE_CHANGE: {
-                        String action = (String) message.obj;
-                        handleOnScreenStateChange(action);
-                    } break;
-                }
-            }
-        };
-
-        public ScreenStateObserver(Context context,
-                MagnificationController magnificationController) {
-            mContext = context;
-            mMagnificationController = magnificationController;
-            mContext.registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-        }
-
-        public void destroy() {
-            mContext.unregisterReceiver(this);
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mHandler.obtainMessage(MESSAGE_ON_SCREEN_STATE_CHANGE,
-                    intent.getAction()).sendToTarget();
-        }
-
-        private void handleOnScreenStateChange(String action) {
-            if (mMagnificationController.isMagnifying()
-                    && isScreenMagnificationAutoUpdateEnabled(mContext)) {
-                mMagnificationController.reset(false);
-            }
         }
     }
 }

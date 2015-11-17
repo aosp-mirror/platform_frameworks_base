@@ -17,14 +17,19 @@
 package android.accessibilityservice;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Region;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -36,7 +41,10 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * An accessibility service runs in the background and receives callbacks by the system
@@ -373,6 +381,8 @@ public abstract class AccessibilityService extends Service {
         public void init(int connectionId, IBinder windowToken);
         public boolean onGesture(int gestureId);
         public boolean onKeyEvent(KeyEvent event);
+        public void onMagnificationChanged(@NonNull Region region,
+                float scale, float centerX, float centerY);
     }
 
     private int mConnectionId;
@@ -382,6 +392,8 @@ public abstract class AccessibilityService extends Service {
     private IBinder mWindowToken;
 
     private WindowManager mWindowManager;
+
+    private MagnificationController mMagnificationController;
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -394,6 +406,20 @@ public abstract class AccessibilityService extends Service {
      * Callback for interrupting the accessibility feedback.
      */
     public abstract void onInterrupt();
+
+    /**
+     * Dispatches service connection to internal components first, then the
+     * client code.
+     */
+    private void dispatchServiceConnected() {
+        if (mMagnificationController != null) {
+            mMagnificationController.onServiceConnected();
+        }
+
+        // The client gets to handle service connection last, after we've set
+        // up any state upon which their code may rely.
+        onServiceConnected();
+    }
 
     /**
      * This method is a part of the {@link AccessibilityService} lifecycle and is
@@ -510,6 +536,385 @@ public abstract class AccessibilityService extends Service {
      */
     public AccessibilityNodeInfo getRootInActiveWindow() {
         return AccessibilityInteractionClient.getInstance().getRootInActiveWindow(mConnectionId);
+    }
+
+    /**
+     * Returns the magnification controller, which may be used to query and
+     * modify the state of display magnification.
+     * <p>
+     * <strong>Note:</strong> In order to control magnification, your service
+     * must declare the capability by setting the
+     * {@link android.R.styleable#AccessibilityService_canControlMagnification}
+     * property in its meta-data. For more information, see
+     * {@link #SERVICE_META_DATA}.
+     *
+     * @return the magnification controller
+     */
+    @NonNull
+    public final MagnificationController getMagnificationController() {
+        if (mMagnificationController == null) {
+            mMagnificationController = new MagnificationController(this);
+        }
+        return mMagnificationController;
+    }
+
+    private void onMagnificationChanged(@NonNull Region region, float scale,
+            float centerX, float centerY) {
+        if (mMagnificationController != null) {
+            mMagnificationController.dispatchMagnificationChanged(
+                    region, scale, centerX, centerY);
+        }
+    }
+
+    /**
+     * Used to control and query the state of display magnification.
+     */
+    public static final class MagnificationController {
+        private final AccessibilityService mService;
+
+        /**
+         * Map of listeners to their handlers. Lazily created when adding the
+         * first magnification listener.
+         */
+        private ArrayMap<OnMagnificationChangedListener, Handler> mListeners;
+
+        MagnificationController(@NonNull AccessibilityService service) {
+            mService = service;
+        }
+
+        /**
+         * Called when the service is connected.
+         */
+        void onServiceConnected() {
+            if (mListeners != null && !mListeners.isEmpty()) {
+                setMagnificationCallbackEnabled(true);
+            }
+        }
+
+        /**
+         * Adds the specified change listener to the list of magnification
+         * change listeners. The callback will occur on the service's main
+         * thread.
+         *
+         * @param listener the listener to add, must be non-{@code null}
+         */
+        public void addListener(@NonNull OnMagnificationChangedListener listener) {
+            addListener(listener, null);
+        }
+
+        /**
+         * Adds the specified change listener to the list of magnification
+         * change listeners. The callback will occur on the specified
+         * {@link Handler}'s thread, or on the service's main thread if the
+         * handler is {@code null}.
+         *
+         * @param listener the listener to add, must be non-null
+         * @param handler the handler on which the callback should execute, or
+         *        {@code null} to execute on the service's main thread
+         */
+        public void addListener(@NonNull OnMagnificationChangedListener listener,
+                @Nullable Handler handler) {
+            if (mListeners == null) {
+                mListeners = new ArrayMap<>();
+            }
+
+            final boolean shouldEnableCallback = mListeners.isEmpty();
+            mListeners.put(listener, handler);
+
+            if (shouldEnableCallback) {
+                // This may fail if the service is not connected yet, but if we
+                // still have listeners when it connects then we can try again.
+                setMagnificationCallbackEnabled(true);
+            }
+        }
+
+        /**
+         * Removes all instances of the specified change listener from the list
+         * of magnification change listeners.
+         *
+         * @param listener the listener to remove, must be non-null
+         * @return {@code true} if at least one instance of the listener was
+         *         removed
+         */
+        public boolean removeListener(@NonNull OnMagnificationChangedListener listener) {
+            if (mListeners == null) {
+                return false;
+            }
+
+            final int keyIndex = mListeners.indexOfKey(listener);
+            final boolean hasKey = keyIndex >= 0;
+            if (hasKey) {
+                mListeners.removeAt(keyIndex);
+            }
+
+            if (hasKey && mListeners.isEmpty()) {
+                // We just removed the last listener, so we don't need
+                // callbacks from the service anymore.
+                setMagnificationCallbackEnabled(false);
+            }
+
+            return hasKey;
+        }
+
+        private void setMagnificationCallbackEnabled(boolean enabled) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    connection.setMagnificationCallbackEnabled(enabled);
+                } catch (RemoteException re) {
+                    throw new RuntimeException(re);
+                }
+            }
+        }
+
+        /**
+         * Dispatches magnification changes to any registered listeners. This
+         * should be called on the service's main thread.
+         */
+        void dispatchMagnificationChanged(final @NonNull Region region, final float scale,
+                final float centerX, final float centerY) {
+            if (mListeners == null || mListeners.isEmpty()) {
+                Slog.d(LOG_TAG, "Received magnification changed "
+                        + "callback with no listeners registered!");
+                setMagnificationCallbackEnabled(false);
+                return;
+            }
+
+            // Listeners may remove themselves. Perform a shallow copy to avoid
+            // concurrent modification.
+            final ArrayMap<OnMagnificationChangedListener, Handler> entries =
+                    new ArrayMap<>(mListeners);
+
+            for (int i = 0, count = entries.size(); i < count; i++) {
+                final OnMagnificationChangedListener listener = entries.keyAt(i);
+                final Handler handler = entries.valueAt(i);
+                if (handler != null) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onMagnificationChanged(MagnificationController.this,
+                                    region, scale, centerX, centerY);
+                        }
+                    });
+                } else {
+                    // We're already on the main thread, just run the listener.
+                    listener.onMagnificationChanged(this, region, scale, centerX, centerY);
+                }
+            }
+        }
+
+        /**
+         * Returns the current magnification scale.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will
+         * return a default value of {@code 1.0f}.
+         *
+         * @return the current magnification scale
+         */
+        public float getScale() {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getMagnificationScale();
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to obtain scale", re);
+                }
+            }
+            return 1.0f;
+        }
+
+        /**
+         * Returns the unscaled screen-relative X coordinate of the focal
+         * center of the magnified region. This is the point around which
+         * zooming occurs and is guaranteed to lie within the magnified
+         * region.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will
+         * return a default value of {@code 0.0f}.
+         *
+         * @return the unscaled screen-relative X coordinate of the center of
+         *         the magnified region
+         */
+        public float getCenterX() {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getMagnificationCenterX();
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to obtain center X", re);
+                }
+            }
+            return 0.0f;
+        }
+
+        /**
+         * Returns the unscaled screen-relative Y coordinate of the focal
+         * center of the magnified region. This is the point around which
+         * zooming occurs and is guaranteed to lie within the magnified
+         * region.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will
+         * return a default value of {@code 0.0f}.
+         *
+         * @return the unscaled screen-relative Y coordinate of the center of
+         *         the magnified region
+         */
+        public float getCenterY() {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getMagnificationCenterY();
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to obtain center Y", re);
+                }
+            }
+            return 0.0f;
+        }
+
+        /**
+         * Returns the region of the screen currently being magnified. If
+         * magnification is not enabled, the returned region will be empty.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will
+         * return an empty region.
+         *
+         * @return the screen-relative bounds of the magnified region
+         */
+        @NonNull
+        public Region getMagnifiedRegion() {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getMagnifiedRegion();
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to obtain magnified region", re);
+                }
+            }
+            return Region.obtain();
+        }
+
+        /**
+         * Resets magnification scale and center to their default (e.g. no
+         * magnification) values.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will have
+         * no effect and return {@code false}.
+         *
+         * @param animate {@code true} to animate from the current scale and
+         *                center or {@code false} to reset the scale and center
+         *                immediately
+         * @return {@code true} on success, {@code false} on failure
+         */
+        public boolean reset(boolean animate) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.resetMagnification(animate);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to reset", re);
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Sets the magnification scale.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will have
+         * no effect and return {@code false}.
+         *
+         * @param scale the magnification scale to set, must be >= 1 and <= 5
+         * @param animate {@code true} to animate from the current scale or
+         *                {@code false} to set the scale immediately
+         * @return {@code true} on success, {@code false} on failure
+         */
+        public boolean setScale(float scale, boolean animate) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.setMagnificationScaleAndCenter(
+                            scale, Float.NaN, Float.NaN, animate);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to set scale", re);
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Sets the center of the magnified viewport.
+         * <p>
+         * <strong>Note:</strong> If the service is not yet connected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been
+         * called) or the service has been disconnected, this method will have
+         * no effect and return {@code false}.
+         *
+         * @param centerX the unscaled screen-relative X coordinate on which to
+         *                center the viewport
+         * @param centerY the unscaled screen-relative Y coordinate on which to
+         *                center the viewport
+         * @param animate {@code true} to animate from the current viewport
+         *                center or {@code false} to set the center immediately
+         * @return {@code true} on success, {@code false} on failure
+         */
+        public boolean setCenter(float centerX, float centerY, boolean animate) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.setMagnificationScaleAndCenter(
+                            Float.NaN, centerX, centerY, animate);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to set center", re);
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Listener for changes in the state of magnification.
+         */
+        public interface OnMagnificationChangedListener {
+            /**
+             * Called when the magnified region, scale, or center changes.
+             *
+             * @param controller the magnification controller
+             * @param region the new magnified region, may be empty if
+             *               magnification is not enabled (e.g. scale is 1)
+             * @param scale the new scale
+             * @param centerX the new X coordinate around which magnification is focused
+             * @param centerY the new Y coordinate around which magnification is focused
+             */
+            void onMagnificationChanged(@NonNull MagnificationController controller,
+                    @NonNull Region region, float scale, float centerX, float centerY);
+        }
     }
 
     /**
@@ -645,7 +1050,7 @@ public abstract class AccessibilityService extends Service {
         return new IAccessibilityServiceClientWrapper(this, getMainLooper(), new Callbacks() {
             @Override
             public void onServiceConnected() {
-                AccessibilityService.this.onServiceConnected();
+                AccessibilityService.this.dispatchServiceConnected();
             }
 
             @Override
@@ -678,6 +1083,12 @@ public abstract class AccessibilityService extends Service {
             public boolean onKeyEvent(KeyEvent event) {
                 return AccessibilityService.this.onKeyEvent(event);
             }
+
+            @Override
+            public void onMagnificationChanged(@NonNull Region region,
+                    float scale, float centerX, float centerY) {
+                AccessibilityService.this.onMagnificationChanged(region, scale, centerX, centerY);
+            }
         });
     }
 
@@ -695,6 +1106,7 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_ON_GESTURE = 4;
         private static final int DO_CLEAR_ACCESSIBILITY_CACHE = 5;
         private static final int DO_ON_KEY_EVENT = 6;
+        private static final int DO_ON_MAGNIFICATION_CHANGED = 7;
 
         private final HandlerCaller mCaller;
 
@@ -738,6 +1150,18 @@ public abstract class AccessibilityService extends Service {
         @Override
         public void onKeyEvent(KeyEvent event, int sequence) {
             Message message = mCaller.obtainMessageIO(DO_ON_KEY_EVENT, sequence, event);
+            mCaller.sendMessage(message);
+        }
+
+        public void onMagnificationChanged(@NonNull Region region,
+                float scale, float centerX, float centerY) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = region;
+            args.arg2 = scale;
+            args.arg3 = centerX;
+            args.arg4 = centerY;
+
+            final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
             mCaller.sendMessage(message);
         }
 
@@ -814,6 +1238,15 @@ public abstract class AccessibilityService extends Service {
                             /* ignore - best effort */
                         }
                     }
+                } return;
+
+                case DO_ON_MAGNIFICATION_CHANGED: {
+                    final SomeArgs args = (SomeArgs) message.obj;
+                    final Region region = (Region) args.arg1;
+                    final float scale = (float) args.arg2;
+                    final float centerX = (float) args.arg3;
+                    final float centerY = (float) args.arg4;
+                    mCallback.onMagnificationChanged(region, scale, centerX, centerY);
                 } return;
 
                 default :

@@ -409,6 +409,7 @@ final class AccessibilityController {
 
             private final Region mMagnifiedBounds = new Region();
             private final Region mOldMagnifiedBounds = new Region();
+            private final Region mOldAvailableBounds = new Region();
 
             private final Path mCircularPath;
 
@@ -537,29 +538,39 @@ final class AccessibilityController {
                         screenWidth - mDrawBorderInset, screenHeight - mDrawBorderInset,
                         Region.Op.INTERSECT);
 
-                if (!mOldMagnifiedBounds.equals(magnifiedBounds)) {
-                    Region bounds = Region.obtain();
-                    bounds.set(magnifiedBounds);
-                    mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_MAGNIFIED_BOUNDS_CHANGED,
-                            bounds).sendToTarget();
+                final boolean magnifiedChanged = !mOldMagnifiedBounds.equals(magnifiedBounds);
+                final boolean availableChanged = !mOldAvailableBounds.equals(availableBounds);
+                if (magnifiedChanged || availableChanged) {
+                    if (magnifiedChanged) {
+                        mWindow.setBounds(magnifiedBounds);
+                        Rect dirtyRect = mTempRect1;
+                        if (mFullRedrawNeeded) {
+                            mFullRedrawNeeded = false;
+                            dirtyRect.set(mDrawBorderInset, mDrawBorderInset,
+                                    screenWidth - mDrawBorderInset,
+                                    screenHeight - mDrawBorderInset);
+                            mWindow.invalidate(dirtyRect);
+                        } else {
+                            Region dirtyRegion = mTempRegion3;
+                            dirtyRegion.set(magnifiedBounds);
+                            dirtyRegion.op(mOldMagnifiedBounds, Region.Op.UNION);
+                            dirtyRegion.op(nonMagnifiedBounds, Region.Op.INTERSECT);
+                            dirtyRegion.getBounds(dirtyRect);
+                            mWindow.invalidate(dirtyRect);
+                        }
 
-                    mWindow.setBounds(magnifiedBounds);
-                    Rect dirtyRect = mTempRect1;
-                    if (mFullRedrawNeeded) {
-                        mFullRedrawNeeded = false;
-                        dirtyRect.set(mDrawBorderInset, mDrawBorderInset,
-                                screenWidth - mDrawBorderInset, screenHeight - mDrawBorderInset);
-                        mWindow.invalidate(dirtyRect);
-                    } else {
-                        Region dirtyRegion = mTempRegion3;
-                        dirtyRegion.set(magnifiedBounds);
-                        dirtyRegion.op(mOldMagnifiedBounds, Region.Op.UNION);
-                        dirtyRegion.op(nonMagnifiedBounds, Region.Op.INTERSECT);
-                        dirtyRegion.getBounds(dirtyRect);
-                        mWindow.invalidate(dirtyRect);
+                        mOldMagnifiedBounds.set(magnifiedBounds);
                     }
 
-                    mOldMagnifiedBounds.set(magnifiedBounds);
+                    if (availableChanged) {
+                        mOldAvailableBounds.set(availableBounds);
+                    }
+
+                    final SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = Region.obtain(magnifiedBounds);
+                    args.arg2 = Region.obtain(availableBounds);
+                    mHandler.obtainMessage(
+                            MyHandler.MESSAGE_NOTIFY_MAGNIFIED_BOUNDS_CHANGED, args).sendToTarget();
                 }
             }
 
@@ -867,9 +878,12 @@ final class AccessibilityController {
             public void handleMessage(Message message) {
                 switch (message.what) {
                     case MESSAGE_NOTIFY_MAGNIFIED_BOUNDS_CHANGED: {
-                        Region bounds = (Region) message.obj;
-                        mCallbacks.onMagnifedBoundsChanged(bounds);
-                        bounds.recycle();
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        final Region magnifiedBounds = (Region) args.arg1;
+                        final Region availableBounds = (Region) args.arg2;
+                        mCallbacks.onMagnifiedBoundsChanged(magnifiedBounds, availableBounds);
+                        magnifiedBounds.recycle();
+                        availableBounds.recycle();
                     } break;
 
                     case MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED: {

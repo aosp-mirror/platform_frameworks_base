@@ -28,10 +28,21 @@ import android.util.Pools.SynchronizedPool;
 public class MagnificationSpec implements Parcelable {
     private static final int MAX_POOL_SIZE = 20;
     private static final SynchronizedPool<MagnificationSpec> sPool =
-            new SynchronizedPool<MagnificationSpec>(MAX_POOL_SIZE);
+            new SynchronizedPool<>(MAX_POOL_SIZE);
 
+    /** The magnification scaling factor. */
     public float scale = 1.0f;
+
+    /**
+     * The X coordinate, in unscaled screen-relative pixels, around which
+     * magnification is focused.
+     */
     public float offsetX;
+
+    /**
+     * The Y coordinate, in unscaled screen-relative pixels, around which
+     * magnification is focused.
+     */
     public float offsetY;
 
     private MagnificationSpec() {
@@ -75,6 +86,12 @@ public class MagnificationSpec implements Parcelable {
        offsetY = 0.0f;
     }
 
+    public void setTo(MagnificationSpec other) {
+        scale = other.scale;
+        offsetX = other.offsetX;
+        offsetY = other.offsetY;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -86,6 +103,28 @@ public class MagnificationSpec implements Parcelable {
         parcel.writeFloat(offsetX);
         parcel.writeFloat(offsetY);
         recycle();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
+        final MagnificationSpec s = (MagnificationSpec) other;
+        return scale == s.scale && offsetX == s.offsetX && offsetY == s.offsetY;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (scale != +0.0f ? Float.floatToIntBits(scale) : 0);
+        result = 31 * result + (offsetX != +0.0f ? Float.floatToIntBits(offsetX) : 0);
+        result = 31 * result + (offsetY != +0.0f ? Float.floatToIntBits(offsetY) : 0);
+        return result;
     }
 
     @Override

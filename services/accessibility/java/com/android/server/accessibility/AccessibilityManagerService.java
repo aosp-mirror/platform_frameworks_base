@@ -23,6 +23,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.annotation.NonNull;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -90,6 +91,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.LocalServices;
 
@@ -180,6 +182,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final MainHandler mMainHandler;
 
     private MagnificationController mMagnificationController;
+
+    private boolean mUnregisterMagnificationOnReset;
 
     private InteractionBridge mInteractionBridge;
 
@@ -762,6 +766,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
+     * Called by the MagnificationController when the state of display
+     * magnification changes.
+     *
+     * @param region the new magnified region, may be empty if
+     *               magnification is not enabled (e.g. scale is 1)
+     * @param scale the new scale
+     * @param centerX the new screen-relative center X coordinate
+     * @param centerY the new screen-relative center Y coordinate
+     */
+    void notifyMagnificationChanged(@NonNull Region region,
+            float scale, float centerX, float centerY) {
+        synchronized (mLock) {
+            notifyMagnificationChangedLocked(region, scale, centerX, centerY);
+
+            if (mUnregisterMagnificationOnReset && scale == 1.0f) {
+                mUnregisterMagnificationOnReset = false;
+                mMagnificationController.unregister();
+            }
+        }
+    }
+
+    /**
      * Gets a point within the accessibility focused node where we can send down
      * and up events to perform a click.
      *
@@ -939,6 +965,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             Service service = state.mBoundServices.get(i);
             service.notifyClearAccessibilityNodeInfoCache();
+        }
+    }
+
+    private void notifyMagnificationChangedLocked(@NonNull Region region,
+            float scale, float centerX, float centerY) {
+        final UserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            final Service service = state.mBoundServices.get(i);
+            service.notifyMagnificationChanged(region, scale, centerX, centerY);
         }
     }
 
@@ -1363,6 +1398,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    /**
+     * Called when any property of the user state has changed.
+     *
+     * @param userState the new user state
+     */
     private void onUserStateChangedLocked(UserState userState) {
         // TODO: Remove this hack
         mInitialized = true;
@@ -1374,6 +1414,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateTouchExplorationLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayColorAdjustmentSettingsLocked(userState);
+        updateMagnificationLocked(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
     }
@@ -1663,6 +1704,44 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         DisplayAdjustmentUtils.applyAdjustments(mContext, userState.mUserId);
     }
 
+    private void updateMagnificationLocked(UserState userState) {
+        final int userId = userState.mUserId;
+        if (userId == mCurrentUserId && mMagnificationController != null) {
+            if (userHasMagnificationServicesLocked(userState)) {
+                mMagnificationController.setUserId(userState.mUserId);
+            } else {
+                // If the user no longer has any magnification-controlling
+                // services and is not using magnification gestures, then
+                // reset the state to normal.
+                if (!userState.mIsDisplayMagnificationEnabled
+                        && mMagnificationController.resetIfNeeded(true)) {
+                    // Animations are still running, so wait until we receive a
+                    // callback verifying that we've reset magnification.
+                    mUnregisterMagnificationOnReset = true;
+                } else {
+                    mUnregisterMagnificationOnReset = false;
+                    mMagnificationController.unregister();
+                    mMagnificationController = null;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns whether the specified user has any services that are capable of
+     * controlling magnification.
+     */
+    private boolean userHasMagnificationServicesLocked(UserState userState) {
+        final List<Service> services = userState.mBoundServices;
+        for (int i = 0, count = services.size(); i < count; i++) {
+            final Service service = services.get(i);
+            if (mSecurityPolicy.canControlMagnification(service)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
         IBinder windowToken = mGlobalWindowTokens.get(windowId);
         if (windowToken == null) {
@@ -1938,10 +2017,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     MagnificationController getMagnificationController() {
-        if (mMagnificationController == null) {
-            mMagnificationController = new MagnificationController(mContext, this);
+        synchronized (mLock) {
+            if (mMagnificationController == null) {
+                mMagnificationController = new MagnificationController(mContext, this);
+                mMagnificationController.register();
+                mMagnificationController.setUserId(mCurrentUserId);
+            }
+            return mMagnificationController;
         }
-        return mMagnificationController;
     }
 
     /**
@@ -2625,6 +2708,149 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         @Override
+        public float getMagnificationScale() {
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.USER_CURRENT);
+                if (resolvedUserId != mCurrentUserId) {
+                    return 1.0f;
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return getMagnificationController().getScale();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public Region getMagnifiedRegion() {
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.USER_CURRENT);
+                if (resolvedUserId != mCurrentUserId) {
+                    return Region.obtain();
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final Region region = Region.obtain();
+                getMagnificationController().getMagnifiedRegion(region);
+                return region;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public float getMagnificationCenterX() {
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.USER_CURRENT);
+                if (resolvedUserId != mCurrentUserId) {
+                    return 0.0f;
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return getMagnificationController().getCenterX();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public float getMagnificationCenterY() {
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.USER_CURRENT);
+                if (resolvedUserId != mCurrentUserId) {
+                    return 0.0f;
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return getMagnificationController().getCenterY();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public boolean resetMagnification(boolean animate) {
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.USER_CURRENT);
+                if (resolvedUserId != mCurrentUserId) {
+                    return false;
+                }
+                final boolean permissionGranted = mSecurityPolicy.canControlMagnification(this);
+                if (!permissionGranted) {
+                    return false;
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return getMagnificationController().reset(animate);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public boolean setMagnificationScaleAndCenter(float scale, float centerX, float centerY,
+                boolean animate) {
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.USER_CURRENT);
+                if (resolvedUserId != mCurrentUserId) {
+                    return false;
+                }
+                final boolean permissionGranted = mSecurityPolicy.canControlMagnification(this);
+                if (!permissionGranted) {
+                    return false;
+                }
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return getMagnificationController().setScaleAndCenter(
+                        scale, centerX, centerY, animate);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setMagnificationCallbackEnabled(boolean enabled) {
+            mInvocationHandler.setMagnificationCallbackEnabled(enabled);
+        }
+
+        @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
             synchronized (mLock) {
@@ -2819,6 +3045,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     InvocationHandler.MSG_CLEAR_ACCESSIBILITY_CACHE);
         }
 
+        public void notifyMagnificationChanged(@NonNull Region region,
+                float scale, float centerX, float centerY) {
+            mInvocationHandler.notifyMagnificationChanged(region, scale, centerX, centerY);
+        }
+
+        /**
+         * Called by the invocation handler to notify the service that the
+         * state of magnification has changed.
+         */
+        private void notifyMagnificationChangedInternal(@NonNull Region region,
+                float scale, float centerX, float centerY) {
+            final IAccessibilityServiceClient listener;
+            synchronized (mLock) {
+                listener = mServiceInterface;
+            }
+            if (listener != null) {
+                try {
+                    listener.onMagnificationChanged(region, scale, centerX, centerY);
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error sending magnification changes to " + mService, re);
+                }
+            }
+        }
+
         private void notifyGestureInternal(int gestureId) {
             final IAccessibilityServiceClient listener;
             synchronized (mLock) {
@@ -2959,6 +3209,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public static final int MSG_CLEAR_ACCESSIBILITY_CACHE = 3;
             public static final int MSG_ON_KEY_EVENT_TIMEOUT = 4;
 
+            private static final int MSG_ON_MAGNIFICATION_CHANGED = 5;
+
+            private boolean mIsMagnificationCallbackEnabled = false;
+
             public InvocationHandler(Looper looper) {
                 super(looper, null, true);
             }
@@ -2987,10 +3241,40 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         setOnKeyEventResult(false, eventState.sequence);
                     } break;
 
+                    case MSG_ON_MAGNIFICATION_CHANGED: {
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        final Region region = (Region) args.arg1;
+                        final float scale = (float) args.arg2;
+                        final float centerX = (float) args.arg3;
+                        final float centerY = (float) args.arg4;
+                        notifyMagnificationChangedInternal(region, scale, centerX, centerY);
+                    } break;
+
                     default: {
                         throw new IllegalArgumentException("Unknown message: " + type);
                     }
                 }
+            }
+
+            public void notifyMagnificationChanged(@NonNull Region region, float scale,
+                    float centerX, float centerY) {
+                if (!mIsMagnificationCallbackEnabled) {
+                    // Callback is disabled, don't bother packing args.
+                    return;
+                }
+
+                final SomeArgs args = SomeArgs.obtain();
+                args.arg1 = region;
+                args.arg2 = scale;
+                args.arg3 = centerX;
+                args.arg4 = centerY;
+
+                final Message msg = obtainMessage(MSG_ON_MAGNIFICATION_CHANGED, args);
+                msg.sendToTarget();
+            }
+
+            public void setMagnificationCallbackEnabled(boolean enabled) {
+                mIsMagnificationCallbackEnabled = enabled;
             }
         }
 
@@ -3658,6 +3942,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean canRetrieveWindowContentLocked(Service service) {
             return (service.mAccessibilityServiceInfo.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
+        }
+
+        public boolean canControlMagnification(Service service) {
+            return (service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_CONTROL_MAGNIFICATION) != 0;
         }
 
         private int resolveProfileParentLocked(int userId) {

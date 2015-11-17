@@ -332,6 +332,7 @@ package android {
     field public static final int calendarTextColor = 16843931; // 0x101049b
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
+    field public static final int canControlMagnification = 16844040; // 0x1010508
     field public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
     field public static final int canRequestFilterKeyEvents = 16843737; // 0x10103d9
     field public static final int canRequestTouchExplorationMode = 16843735; // 0x10103d7
@@ -2619,6 +2620,7 @@ package android.accessibilityservice {
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
+    method public final android.accessibilityservice.AccessibilityService.MagnificationController getMagnificationController();
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
@@ -2656,6 +2658,23 @@ package android.accessibilityservice {
     field public static final java.lang.String SERVICE_META_DATA = "android.accessibilityservice";
   }
 
+  public static final class AccessibilityService.MagnificationController {
+    method public void addListener(android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener);
+    method public void addListener(android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener, android.os.Handler);
+    method public float getCenterX();
+    method public float getCenterY();
+    method public android.graphics.Region getMagnifiedRegion();
+    method public float getScale();
+    method public boolean removeListener(android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener);
+    method public boolean reset(boolean);
+    method public boolean setCenter(float, float, boolean);
+    method public boolean setScale(float, boolean);
+  }
+
+  public static abstract interface AccessibilityService.MagnificationController.OnMagnificationChangedListener {
+    method public abstract void onMagnificationChanged(android.accessibilityservice.AccessibilityService.MagnificationController, android.graphics.Region, float, float, float);
+  }
+
   public class AccessibilityServiceInfo implements android.os.Parcelable {
     ctor public AccessibilityServiceInfo();
     method public static java.lang.String capabilityToString(int);
@@ -2670,6 +2689,7 @@ package android.accessibilityservice {
     method public java.lang.String getSettingsActivityName();
     method public java.lang.String loadDescription(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CAN_CONTROL_MAGNIFICATION = 16; // 0x10
     field public static final int CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 4; // 0x4
     field public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 8; // 0x8
     field public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 2; // 0x2

@@ -613,6 +613,12 @@
     <string name="capability_desc_canRequestFilterKeyEvents">Includes personal data such as credit
         card numbers and passwords.</string>
 
+    <!-- Title for the capability of an accessibility service to control display magnification. -->
+    <string name="capability_title_canControlMagnification">Control display magnification</string>
+    <!-- Description for the capability of an accessibility service to control display magnification. -->
+    <string name="capability_desc_canControlMagnification">Control the display\'s zoom level and
+        positioning.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

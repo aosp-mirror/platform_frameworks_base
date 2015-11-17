@@ -21,9 +21,11 @@ import android.accessibilityservice.AccessibilityService.IAccessibilityServiceCl
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.Region;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1019,6 +1021,12 @@ public final class UiAutomation {
                 @Override
                 public boolean onKeyEvent(KeyEvent event) {
                     return false;
+                }
+
+                @Override
+                public void onMagnificationChanged(@NonNull Region region,
+                        float scale, float centerX, float centerY) {
+                    /* do nothing */
                 }
             });
         }
