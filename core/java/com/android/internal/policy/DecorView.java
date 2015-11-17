@@ -1551,6 +1551,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     View onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
+        mWorkspaceId = getWorkspaceId();
+
         mResizingBackgroundDrawable = getResizingBackgroundDrawable(
                 mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
         mCaptionBackgroundDrawable =
@@ -1591,12 +1593,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
         boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
-        mWorkspaceId = getWorkspaceId();
         // Only a non floating application window on one of the allowed workspaces can get a non
         // client decor.
-        if (!mWindow.isFloating()
-                && isApplication
-                && ActivityManager.StackId.isStaticStack(mWorkspaceId)) {
+        final boolean hasNonClientDecor = ActivityManager.StackId.hasWindowDecor(mWorkspaceId);
+        if (!mWindow.isFloating() && isApplication && hasNonClientDecor) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (nonClientDecorView == null) {
@@ -1615,11 +1615,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             nonClientDecorView.setPhoneWindow(mWindow,
                     ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
                     ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
+        } else {
+            nonClientDecorView = null;
         }
-        // Tell the decor if it has a visible non client decor.
-        enableNonClientDecor(
-                nonClientDecorView != null && ActivityManager.StackId.hasWindowDecor(mWorkspaceId));
 
+        // Tell the decor if it has a visible non client decor.
+        enableNonClientDecor(nonClientDecorView != null && hasNonClientDecor);
         return nonClientDecorView;
     }
 
@@ -1752,6 +1753,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mNonClientDecorView != null) {
             mNonClientDecorView.updateElevation();
         }
+    }
+
+    boolean isShowingCaption() {
+        return mNonClientDecorView != null && mNonClientDecorView.isShowingDecor();
+    }
+
+    int getCaptionHeight() {
+        return isShowingCaption() ? mNonClientDecorView.getDecorCaptionHeight() : 0;
     }
 
     private static class ColorViewState {

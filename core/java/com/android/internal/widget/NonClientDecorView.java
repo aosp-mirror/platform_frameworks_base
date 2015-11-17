@@ -68,7 +68,7 @@ public class NonClientDecorView extends LinearLayout
     private final int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
     private PhoneWindow mOwner = null;
     private boolean mWindowHasShadow = false;
-    public boolean mShowDecor = false;
+    private boolean mShowDecor = false;
 
     // True if the window is being dragged.
     private boolean mDragging = false;
@@ -297,5 +297,14 @@ public class NonClientDecorView extends LinearLayout
                 Log.e(TAG, "Cannot change task workspace.");
             }
         }
+    }
+
+    public boolean isShowingDecor() {
+        return mShowDecor;
+    }
+
+    public int getDecorCaptionHeight() {
+        final View caption = getChildAt(0);
+        return (caption != null) ? caption.getHeight() : 0;
     }
 }
