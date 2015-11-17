@@ -2,6 +2,7 @@ package com.android.mtp;
 
 import android.content.ContentResolver;
 import android.content.res.Resources;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Process;
 import android.provider.DocumentsContract;
@@ -93,16 +94,17 @@ final class RootScanner {
                     }
                     boolean changed = false;
                     for (int deviceId : deviceIds) {
+                        mDatabase.startAddingRootDocuments(deviceId);
                         try {
-                            mDatabase.startAddingRootDocuments(deviceId);
                             changed = mDatabase.putRootDocuments(
                                     deviceId, mResources, mManager.getRoots(deviceId)) || changed;
-                            changed = mDatabase.stopAddingRootDocuments(deviceId) || changed;
-                        } catch (IOException exp) {
+                        } catch (IOException|SQLiteException exp) {
                             // The error may happen on the device. We would like to continue getting
                             // roots for other devices.
                             Log.e(MtpDocumentsProvider.TAG, exp.getMessage());
                             continue;
+                        } finally {
+                            changed = mDatabase.stopAddingRootDocuments(deviceId) || changed;
                         }
                     }
                     if (changed) {

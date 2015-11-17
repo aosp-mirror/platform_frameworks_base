@@ -18,7 +18,7 @@ package com.android.mtp;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.database.MatrixCursor;
+import android.database.sqlite.SQLiteException;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +26,7 @@ import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -44,12 +45,14 @@ class DocumentLoader {
 
     private final MtpManager mMtpManager;
     private final ContentResolver mResolver;
+    private final MtpDatabase mDatabase;
     private final TaskList mTaskList = new TaskList();
     private boolean mHasBackgroundThread = false;
 
-    DocumentLoader(MtpManager mtpManager, ContentResolver resolver) {
+    DocumentLoader(MtpManager mtpManager, ContentResolver resolver, MtpDatabase database) {
         mMtpManager = mtpManager;
         mResolver = resolver;
+        mDatabase = database;
     }
 
     private static MtpObjectInfo[] loadDocuments(MtpManager manager, int deviceId, int[] handles)
@@ -65,13 +68,17 @@ class DocumentLoader {
             throws IOException {
         LoaderTask task = mTaskList.findTask(parent);
         if (task == null) {
+            if (parent.mDocumentId == null) {
+                throw new FileNotFoundException("Parent not found.");
+            }
+
             int parentHandle = parent.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
             // getObjectHandles if we would like to obtain children under the root.
             if (parentHandle == CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
                 parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
             }
-            task = new LoaderTask(parent, mMtpManager.getObjectHandles(
+            task = new LoaderTask(mDatabase, parent, mMtpManager.getObjectHandles(
                     parent.mDeviceId, parent.mStorageId, parentHandle));
             task.fillDocuments(loadDocuments(
                     mMtpManager,
@@ -83,11 +90,10 @@ class DocumentLoader {
         }
 
         mTaskList.addFirst(task);
-        if (!task.completed() && !mHasBackgroundThread) {
+        if (task.getState() == LoaderTask.STATE_LOADING && !mHasBackgroundThread) {
             mHasBackgroundThread = true;
             new BackgroundLoaderThread().start();
         }
-
         return task.createCursor(mResolver, columnNames);
     }
 
@@ -120,26 +126,20 @@ class DocumentLoader {
                     deviceId = task.mIdentifier.mDeviceId;
                     handles = task.getUnloadedObjectHandles(NUM_LOADING_ENTRIES);
                 }
-                MtpObjectInfo[] objectInfos;
+
                 try {
-                    objectInfos = loadDocuments(mMtpManager, deviceId, handles);
-                } catch (IOException exception) {
-                    objectInfos = null;
-                    Log.d(MtpDocumentsProvider.TAG, exception.getMessage());
-                }
-                synchronized (DocumentLoader.this) {
-                    if (objectInfos != null) {
-                        task.fillDocuments(objectInfos);
-                        final boolean shouldNotify =
-                                task.mLastNotified.getTime() <
-                                new Date().getTime() - NOTIFY_PERIOD_MS ||
-                                task.completed();
-                        if (shouldNotify) {
-                            task.notify(mResolver);
-                        }
-                    } else {
-                        mTaskList.remove(task);
+                    final MtpObjectInfo[] objectInfos =
+                            loadDocuments(mMtpManager, deviceId, handles);
+                    task.fillDocuments(objectInfos);
+                    final boolean shouldNotify =
+                            task.mLastNotified.getTime() <
+                            new Date().getTime() - NOTIFY_PERIOD_MS ||
+                            task.getState() != LoaderTask.STATE_LOADING;
+                    if (shouldNotify) {
+                        task.notify(mResolver);
                     }
+                } catch (IOException exception) {
+                    task.setError(exception);
                 }
             }
         }
@@ -156,7 +156,7 @@ class DocumentLoader {
 
         LoaderTask findRunningTask() {
             for (int i = 0; i < size(); i++) {
-                if (!get(i).completed())
+                if (get(i).getState() == LoaderTask.STATE_LOADING)
                     return get(i);
             }
             return null;
@@ -165,7 +165,7 @@ class DocumentLoader {
         void clearCompletedTasks() {
             int i = 0;
             while (i < size()) {
-                if (get(i).completed()) {
+                if (get(i).getState() == LoaderTask.STATE_COMPLETED) {
                     remove(i);
                 } else {
                     i++;
@@ -186,36 +186,51 @@ class DocumentLoader {
     }
 
     private static class LoaderTask {
+        static final int STATE_LOADING = 0;
+        static final int STATE_COMPLETED = 1;
+        static final int STATE_ERROR = 2;
+
+        final MtpDatabase mDatabase;
         final Identifier mIdentifier;
         final int[] mObjectHandles;
-        final MtpObjectInfo[] mObjectInfos;
         Date mLastNotified;
         int mNumLoaded;
+        Exception mError;
 
-        LoaderTask(Identifier identifier, int[] objectHandles) {
+        LoaderTask(MtpDatabase database, Identifier identifier, int[] objectHandles) {
+            mDatabase = database;
             mIdentifier = identifier;
             mObjectHandles = objectHandles;
-            mObjectInfos = new MtpObjectInfo[mObjectHandles.length];
             mNumLoaded = 0;
             mLastNotified = new Date();
         }
 
-        Cursor createCursor(ContentResolver resolver, String[] columnNames) {
-            final MatrixCursor cursor = new MatrixCursor(columnNames);
-            final Identifier rootIdentifier = new Identifier(
-                    mIdentifier.mDeviceId, mIdentifier.mStorageId);
-            for (int i = 0; i < mNumLoaded; i++) {
-                CursorHelper.addToCursor(mObjectInfos[i], rootIdentifier, cursor.newRow());
-            }
+        Cursor createCursor(ContentResolver resolver, String[] columnNames) throws IOException {
             final Bundle extras = new Bundle();
-            extras.putBoolean(DocumentsContract.EXTRA_LOADING, !completed());
+            switch (getState()) {
+                case STATE_LOADING:
+                    extras.putBoolean(DocumentsContract.EXTRA_LOADING, true);
+                    break;
+                case STATE_ERROR:
+                    throw new IOException(mError);
+            }
+
+            final Cursor cursor = mDatabase.queryChildDocuments(
+                    columnNames, mIdentifier.mDocumentId, /* use old ID format */ true);
             cursor.setNotificationUri(resolver, createUri());
             cursor.respond(extras);
+
             return cursor;
         }
 
-        boolean completed() {
-            return mNumLoaded == mObjectInfos.length;
+        int getState() {
+            if (mError != null) {
+                return STATE_ERROR;
+            } else if (mNumLoaded == mObjectHandles.length) {
+                return STATE_COMPLETED;
+            } else {
+                return STATE_LOADING;
+            }
         }
 
         int[] getUnloadedObjectHandles(int count) {
@@ -230,9 +245,32 @@ class DocumentLoader {
             mLastNotified = new Date();
         }
 
-        void fillDocuments(MtpObjectInfo[] objectInfos) {
-            for (int i = 0; i < objectInfos.length; i++) {
-                mObjectInfos[mNumLoaded++] = objectInfos[i];
+        void fillDocuments(MtpObjectInfo[] objectInfoList) {
+            if (objectInfoList.length == 0 || getState() != STATE_LOADING) {
+                return;
+            }
+            if (mNumLoaded == 0) {
+                mDatabase.startAddingChildDocuments(mIdentifier.mDocumentId);
+            }
+            try {
+                mDatabase.putChildDocuments(
+                        mIdentifier.mDeviceId, mIdentifier.mDocumentId, objectInfoList);
+                mNumLoaded += objectInfoList.length;
+            } catch (SQLiteException exp) {
+                mError = exp;
+                mNumLoaded = 0;
+            }
+            if (getState() != STATE_LOADING) {
+                mDatabase.stopAddingChildDocuments(mIdentifier.mDocumentId);
+            }
+        }
+
+        void setError(Exception message) {
+            final int lastState = getState();
+            mError = message;
+            mNumLoaded = 0;
+            if (lastState == STATE_LOADING) {
+                mDatabase.stopAddingChildDocuments(mIdentifier.mDocumentId);
             }
         }
 

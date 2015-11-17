@@ -45,7 +45,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
     @Override
     public void setUp() {
-        mDatabase = new MtpDatabase(getContext(), true);
+        mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
         mProvider = new MtpDocumentsProvider();
-        mDatabase = new MtpDatabase(getContext(), true);
+        mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mProvider.onCreateForTesting(mResources, mMtpManager, mResolver, mDatabase);
     }
 
@@ -200,6 +200,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mProvider.openDevice(0);
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
+                .setStorageId(1)
                 .setFormat(MtpConstants.FORMAT_EXIF_JPEG)
                 .setName("image.jpg")
                 .setDateModified(1422716400000L)
@@ -210,6 +211,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(1, cursor.getCount());
 
         cursor.moveToNext();
+
         assertEquals("0_1_2", cursor.getString(0));
         assertEquals("image/jpeg", cursor.getString(1));
         assertEquals("image.jpg", cursor.getString(2));
@@ -227,6 +229,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mProvider.openDevice(0);
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(2)
+                .setStorageId(1)
                 .setFormat(MtpConstants.FORMAT_ASSOCIATION)
                 .setName("directory")
                 .setDateModified(1422716400000L)
@@ -276,6 +279,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
+
+        mDatabase.startAddingRootDocuments(0);
+        mDatabase.putRootDocuments(0, mResources, new MtpRoot[] {
+                new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "")
+        });
+        mDatabase.stopAddingRootDocuments(0);
 
         mMtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
                 .setObjectHandle(1)

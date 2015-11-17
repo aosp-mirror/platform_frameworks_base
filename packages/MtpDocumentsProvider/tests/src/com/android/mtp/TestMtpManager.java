@@ -96,7 +96,7 @@ public class TestMtpManager extends MtpManager {
         if (mRoots.containsKey(deviceId)) {
             return mRoots.get(deviceId);
         } else {
-            throw new IOException("getRoots error");
+            throw new IOException("getRoots error: " + Integer.toString(deviceId));
         }
     }
 

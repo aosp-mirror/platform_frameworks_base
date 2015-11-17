@@ -31,16 +31,28 @@ import java.util.concurrent.CountDownLatch;
 
 @MediumTest
 public class DocumentLoaderTest extends AndroidTestCase {
+    private MtpDatabase mDatabase;
     private BlockableTestMtpManager mManager;
     private TestContentResolver mResolver;
     private DocumentLoader mLoader;
-    final private Identifier mParentIdentifier = new Identifier(0, 0, 0);
+    final private Identifier mParentIdentifier = new Identifier(0, 0, 0, "1");
 
     @Override
     public void setUp() {
+        mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mDatabase.startAddingRootDocuments(0);
+        mDatabase.putRootDocuments(0, new TestResources(), new MtpRoot[] {
+                new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "")
+        });
+        mDatabase.stopAddingRootDocuments(0);
         mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
-        mLoader = new DocumentLoader(mManager, mResolver);
+        mLoader = new DocumentLoader(mManager, mResolver, mDatabase);
+    }
+
+    @Override
+    public void tearDown() {
+        mDatabase.close();
     }
 
     public void testBasic() throws Exception {
@@ -87,6 +99,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
             childDocuments[i] = objectHandle;
             manager.setObjectInfo(0, new MtpObjectInfo.Builder()
                     .setObjectHandle(objectHandle)
+                    .setName(Integer.toString(i))
                     .build());
         }
         manager.setObjectHandles(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, childDocuments);
