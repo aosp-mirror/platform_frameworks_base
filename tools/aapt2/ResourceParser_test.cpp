@@ -18,9 +18,8 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "XmlPullParser.h"
-
 #include "test/Context.h"
+#include "xml/XmlPullParser.h"
 
 #include <gtest/gtest.h>
 #include <sstream>
@@ -36,7 +35,7 @@ TEST(ResourceParserSingleTest, FailToParseWithNoRootResourcesElement) {
     input << "<attr name=\"foo\"/>" << std::endl;
     ResourceTable table;
     ResourceParser parser(context->getDiagnostics(), &table, Source{ "test" }, {});
-    XmlPullParser xmlParser(input);
+    xml::XmlPullParser xmlParser(input);
     ASSERT_FALSE(parser.parse(&xmlParser));
 }
 
@@ -56,7 +55,7 @@ struct ResourceParserTest : public ::testing::Test {
         parserOptions.product = product;
         ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, {},
                               parserOptions);
-        XmlPullParser xmlParser(input);
+        xml::XmlPullParser xmlParser(input);
         if (parser.parse(&xmlParser)) {
             return ::testing::AssertionSuccess();
         }
@@ -358,6 +357,25 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
 
     EXPECT_EQ(test::parseNameOrDie(u"@attr/bar"), styleable->entries[0].name.value());
     EXPECT_EQ(test::parseNameOrDie(u"@attr/bat"), styleable->entries[1].name.value());
+}
+
+TEST_F(ResourceParserTest, ParsePrivateAttributesDeclareStyleable) {
+    std::string input = "<declare-styleable name=\"foo\" xmlns:privAndroid=\"http://schemas.android.com/apk/prv/res/android\">\n"
+                        "  <attr name=\"*android:bar\" />\n"
+                        "  <attr name=\"privAndroid:bat\" />\n"
+                        "</declare-styleable>";
+    ASSERT_TRUE(testParse(input));
+    Styleable* styleable = test::getValue<Styleable>(&mTable, u"@styleable/foo");
+    ASSERT_NE(nullptr, styleable);
+    ASSERT_EQ(2u, styleable->entries.size());
+
+    EXPECT_TRUE(styleable->entries[0].privateReference);
+    AAPT_ASSERT_TRUE(styleable->entries[0].name);
+    EXPECT_EQ(std::u16string(u"android"), styleable->entries[0].name.value().package);
+
+    EXPECT_TRUE(styleable->entries[1].privateReference);
+    AAPT_ASSERT_TRUE(styleable->entries[1].name);
+    EXPECT_EQ(std::u16string(u"android"), styleable->entries[1].name.value().package);
 }
 
 TEST_F(ResourceParserTest, ParseArray) {

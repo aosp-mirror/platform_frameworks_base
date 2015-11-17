@@ -15,10 +15,9 @@
  */
 
 #include "ResourceUtils.h"
-#include "XmlDom.h"
-
 #include "link/ManifestFixer.h"
 #include "util/Util.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 
@@ -63,7 +62,7 @@ static bool fixUsesSdk(IAaptContext* context, const Source& source, xml::Element
     return true;
 }
 
-bool ManifestFixer::consume(IAaptContext* context, XmlResource* doc) {
+bool ManifestFixer::consume(IAaptContext* context, xml::XmlResource* doc) {
     xml::Element* root = xml::findRootElement(doc->root.get());
     if (!root || !root->namespaceUri.empty() || root->name != u"manifest") {
         context->getDiagnostics()->error(DiagMessage(doc->file.source)

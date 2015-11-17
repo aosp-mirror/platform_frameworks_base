@@ -15,6 +15,7 @@
  */
 
 #include "ResourceUtils.h"
+#include "flatten/ResourceTypeExtensions.h"
 #include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
@@ -47,6 +48,42 @@ bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
     return !(hasPackageSeparator && outPackage->empty()) && !(hasTypeSeparator && outType->empty());
 }
 
+bool parseResourceName(const StringPiece16& str, ResourceNameRef* outRef, bool* outPrivate) {
+    size_t offset = 0;
+    bool priv = false;
+    if (str.data()[0] == u'*') {
+        priv = true;
+        offset = 1;
+    }
+
+    StringPiece16 package;
+    StringPiece16 type;
+    StringPiece16 entry;
+    if (!extractResourceName(str.substr(offset, str.size() - offset), &package, &type, &entry)) {
+        return false;
+    }
+
+    const ResourceType* parsedType = parseResourceType(type);
+    if (!parsedType) {
+        return false;
+    }
+
+    if (entry.empty()) {
+        return false;
+    }
+
+    if (outRef) {
+        outRef->package = package;
+        outRef->type = *parsedType;
+        outRef->entry = entry;
+    }
+
+    if (outPrivate) {
+        *outPrivate = priv;
+    }
+    return true;
+}
+
 bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* outCreate,
                        bool* outPrivate) {
     StringPiece16 trimmedStr(util::trimWhitespace(str));
@@ -61,35 +98,24 @@ bool tryParseReference(const StringPiece16& str, ResourceNameRef* outRef, bool* 
         if (trimmedStr.data()[1] == u'+') {
             create = true;
             offset += 1;
-        } else if (trimmedStr.data()[1] == u'*') {
-            priv = true;
-            offset += 1;
         }
-        StringPiece16 package;
-        StringPiece16 type;
-        StringPiece16 entry;
-        if (!extractResourceName(trimmedStr.substr(offset, trimmedStr.size() - offset),
-                                 &package, &type, &entry)) {
+
+        ResourceNameRef name;
+        if (!parseResourceName(trimmedStr.substr(offset, trimmedStr.size() - offset),
+                               &name, &priv)) {
             return false;
         }
 
-        const ResourceType* parsedType = parseResourceType(type);
-        if (!parsedType) {
+        if (create && priv) {
             return false;
         }
 
-        if (entry.empty()) {
-            return false;
-        }
-
-        if (create && *parsedType != ResourceType::kId) {
+        if (create && name.type != ResourceType::kId) {
             return false;
         }
 
         if (outRef) {
-            outRef->package = package;
-            outRef->type = *parsedType;
-            outRef->entry = entry;
+            *outRef = name;
         }
 
         if (outCreate) {

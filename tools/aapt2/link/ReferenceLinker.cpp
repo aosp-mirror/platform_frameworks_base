@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+#include "ReferenceLinker.h"
+
 #include "Diagnostics.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "util/Util.h"
 #include "ValueVisitor.h"
-
 #include "link/Linkers.h"
-#include "link/ReferenceLinkerVisitor.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
+#include "util/Util.h"
+#include "xml/XmlUtil.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <cassert>
@@ -41,51 +42,14 @@ namespace {
  *
  * NOTE: All of the entries in the ResourceTable must be assigned IDs.
  */
-class StyleAndReferenceLinkerVisitor : public ValueVisitor {
+class ReferenceLinkerVisitor : public ValueVisitor {
 private:
-    ReferenceLinkerVisitor mReferenceVisitor;
     IAaptContext* mContext;
     ISymbolTable* mSymbols;
-    IPackageDeclStack* mPackageDecls;
+    xml::IPackageDeclStack* mPackageDecls;
     StringPool* mStringPool;
+    CallSite* mCallSite;
     bool mError = false;
-
-    const ISymbolTable::Symbol* findAttributeSymbol(Reference* reference) {
-        assert(reference);
-        assert(reference->name || reference->id);
-
-        if (reference->name) {
-            // Transform the package name if it is an alias.
-            Maybe<ResourceName> realName = mPackageDecls->transformPackage(
-                    reference->name.value(), mContext->getCompilationPackage());
-
-            // Mangle the reference name if it should be mangled.
-            Maybe<ResourceName> mangledName = mContext->getNameMangler()->mangleName(
-                    realName ? realName.value() : reference->name.value());
-
-            const ISymbolTable::Symbol* s = nullptr;
-            if (mangledName) {
-                s = mSymbols->findByName(mangledName.value());
-            } else if (realName) {
-                s = mSymbols->findByName(realName.value());
-            } else {
-                s = mSymbols->findByName(reference->name.value());
-            }
-
-            if (s && s->attribute) {
-                return s;
-            }
-        }
-
-        if (reference->id) {
-            if (const ISymbolTable::Symbol* s = mSymbols->findById(reference->id.value())) {
-                if (s->attribute) {
-                    return s;
-                }
-            }
-        }
-        return nullptr;
-    }
 
     /**
      * Transform a RawString value into a more specific, appropriate value, based on the
@@ -94,8 +58,8 @@ private:
     std::unique_ptr<Item> parseValueWithAttribute(std::unique_ptr<Item> value,
                                                   const Attribute* attr) {
         if (RawString* rawString = valueCast<RawString>(value.get())) {
-            std::unique_ptr<Item> transformed = ResourceUtils::parseItemForAttribute(
-                    *rawString->value, attr);
+            std::unique_ptr<Item> transformed =
+                    ResourceUtils::parseItemForAttribute(*rawString->value, attr);
 
             // If we could not parse as any specific type, try a basic STRING.
             if (!transformed && (attr->typeMask & android::ResTable_map::TYPE_STRING)) {
@@ -163,14 +127,16 @@ private:
 public:
     using ValueVisitor::visit;
 
-    StyleAndReferenceLinkerVisitor(IAaptContext* context, ISymbolTable* symbols,
-                                   StringPool* stringPool, IPackageDeclStack* decl) :
-            mReferenceVisitor(context, symbols, decl), mContext(context), mSymbols(symbols),
-            mPackageDecls(decl), mStringPool(stringPool) {
+    ReferenceLinkerVisitor(IAaptContext* context, ISymbolTable* symbols, StringPool* stringPool,
+                           xml::IPackageDeclStack* decl,CallSite* callSite) :
+            mContext(context), mSymbols(symbols), mPackageDecls(decl), mStringPool(stringPool),
+            mCallSite(callSite) {
     }
 
-    void visit(Reference* reference) override {
-        mReferenceVisitor.visit(reference);
+    void visit(Reference* ref) override {
+        if (!ReferenceLinker::linkReference(ref, mContext, mSymbols, mPackageDecls, mCallSite)) {
+            mError = true;
+        }
     }
 
     /**
@@ -184,13 +150,26 @@ public:
         }
 
         for (Style::Entry& entry : style->entries) {
-            if (const ISymbolTable::Symbol* s = findAttributeSymbol(&entry.key)) {
+            std::string errStr;
+
+            // Transform the attribute reference so that it is using the fully qualified package
+            // name. This will also mark the reference as being able to see private resources if
+            // there was a '*' in the reference or if the package came from the private namespace.
+            Reference transformedReference = entry.key;
+            transformReferenceFromNamespace(mPackageDecls, mContext->getCompilationPackage(),
+                                            &transformedReference);
+
+            // Find the attribute in the symbol table and check if it is visible from this callsite.
+            const ISymbolTable::Symbol* symbol = ReferenceLinker::resolveAttributeCheckVisibility(
+                    transformedReference, mContext->getNameMangler(), mSymbols, mCallSite, &errStr);
+            if (symbol) {
                 // Assign our style key the correct ID.
-                entry.key.id = s->id;
+                entry.key.id = symbol->id;
 
                 // Try to convert the value to a more specific, typed value based on the
                 // attribute it is set to.
-                entry.value = parseValueWithAttribute(std::move(entry.value), s->attribute.get());
+                entry.value = parseValueWithAttribute(std::move(entry.value),
+                                                      symbol->attribute.get());
 
                 // Link/resolve the final value (mostly if it's a reference).
                 entry.value->accept(this);
@@ -201,13 +180,13 @@ public:
                 entry.value->flatten(&val);
 
                 // Always allow references.
-                const uint32_t typeMask = s->attribute->typeMask |
+                const uint32_t typeMask = symbol->attribute->typeMask |
                         android::ResTable_map::TYPE_REFERENCE;
 
                 if (!(typeMask & ResourceUtils::androidTypeToAttributeTypeMask(val.dataType))) {
                     // The actual type of this item is incompatible with the attribute.
                     DiagMessage msg(style->getSource());
-                    buildAttributeMismatchMessage(&msg, s->attribute.get(), entry.value.get());
+                    buildAttributeMismatchMessage(&msg, symbol->attribute.get(), entry.value.get());
                     mContext->getDiagnostics()->error(msg);
                     mError = true;
                 }
@@ -219,23 +198,151 @@ public:
                 } else {
                     msg << entry.key.id.value();
                 }
-                msg << "' not found";
+                msg << "' " << errStr;
                 mContext->getDiagnostics()->error(msg);
+                mContext->getDiagnostics()->note(DiagMessage(style->getSource()) << entry.key);
                 mError = true;
             }
         }
     }
 
-    inline bool hasError() {
-        return mError || mReferenceVisitor.hasError();
+    bool hasError() {
+        return mError;
     }
 };
 
-struct EmptyDeclStack : public IPackageDeclStack {
-    Maybe<ResourceName> transformPackage(const ResourceName& name,
-                                         const StringPiece16& localPackage) const override {
-        if (name.package.empty()) {
-            return ResourceName{ localPackage.toString(), name.type, name.entry };
+} // namespace
+
+/**
+ * The symbol is visible if it is public, or if the reference to it is requesting private access
+ * or if the callsite comes from the same package.
+ */
+bool ReferenceLinker::isSymbolVisible(const ISymbolTable::Symbol& symbol, const Reference& ref,
+                                      const CallSite& callSite) {
+    if (!symbol.isPublic && !ref.privateReference) {
+        if (ref.name) {
+            return callSite.resource.package == ref.name.value().package;
+        } else if (ref.id) {
+            return ref.id.value().packageId() == symbol.id.packageId();
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+const ISymbolTable::Symbol* ReferenceLinker::resolveSymbol(const Reference& reference,
+                                                           NameMangler* mangler,
+                                                           ISymbolTable* symbols) {
+    if (reference.name) {
+        Maybe<ResourceName> mangled = mangler->mangleName(reference.name.value());
+        return symbols->findByName(mangled ? mangled.value() : reference.name.value());
+    } else if (reference.id) {
+        return symbols->findById(reference.id.value());
+    } else {
+        return nullptr;
+    }
+}
+
+const ISymbolTable::Symbol* ReferenceLinker::resolveSymbolCheckVisibility(
+        const Reference& reference, NameMangler* nameMangler, ISymbolTable* symbols,
+        CallSite* callSite, std::string* outError) {
+    const ISymbolTable::Symbol* symbol = resolveSymbol(reference, nameMangler, symbols);
+    if (!symbol) {
+        std::stringstream errStr;
+        errStr << "not found";
+        if (outError) *outError = errStr.str();
+        return nullptr;
+    }
+
+    if (!isSymbolVisible(*symbol, reference, *callSite)) {
+        std::stringstream errStr;
+        errStr << "is private";
+        if (outError) *outError = errStr.str();
+        return nullptr;
+    }
+    return symbol;
+}
+
+const ISymbolTable::Symbol* ReferenceLinker::resolveAttributeCheckVisibility(
+        const Reference& reference, NameMangler* nameMangler, ISymbolTable* symbols,
+        CallSite* callSite, std::string* outError) {
+    const ISymbolTable::Symbol* symbol = resolveSymbolCheckVisibility(reference, nameMangler,
+                                                                      symbols, callSite,
+                                                                      outError);
+    if (!symbol) {
+        return nullptr;
+    }
+
+    if (!symbol->attribute) {
+        std::stringstream errStr;
+        errStr << "is not an attribute";
+        if (outError) *outError = errStr.str();
+        return nullptr;
+    }
+    return symbol;
+}
+
+Maybe<xml::AaptAttribute> ReferenceLinker::compileXmlAttribute(const Reference& reference,
+                                                               NameMangler* nameMangler,
+                                                               ISymbolTable* symbols,
+                                                               CallSite* callSite,
+                                                               std::string* outError) {
+    const ISymbolTable::Symbol* symbol = resolveSymbol(reference, nameMangler, symbols);
+    if (!symbol) {
+        return {};
+    }
+
+    if (!symbol->attribute) {
+        std::stringstream errStr;
+        errStr << "is not an attribute";
+        if (outError) *outError = errStr.str();
+        return {};
+    }
+    return xml::AaptAttribute{ symbol->id, *symbol->attribute };
+}
+
+bool ReferenceLinker::linkReference(Reference* reference, IAaptContext* context,
+                                    ISymbolTable* symbols, xml::IPackageDeclStack* decls,
+                                    CallSite* callSite) {
+    assert(reference);
+    assert(reference->name || reference->id);
+
+    Reference transformedReference = *reference;
+    transformReferenceFromNamespace(decls, context->getCompilationPackage(),
+                                    &transformedReference);
+
+    std::string errStr;
+    const ISymbolTable::Symbol* s = resolveSymbolCheckVisibility(
+            transformedReference, context->getNameMangler(), symbols, callSite, &errStr);
+    if (s) {
+        reference->id = s->id;
+        return true;
+    }
+
+    DiagMessage errorMsg(reference->getSource());
+    errorMsg << "resource ";
+    if (reference->name) {
+        errorMsg << reference->name.value();
+        if (transformedReference.name.value() != reference->name.value()) {
+            errorMsg << " (aka " << transformedReference.name.value() << ")";
+        }
+    } else {
+        errorMsg << reference->id.value();
+    }
+
+    errorMsg << " " << errStr;
+    context->getDiagnostics()->error(errorMsg);
+    return false;
+}
+
+namespace {
+
+struct EmptyDeclStack : public xml::IPackageDeclStack {
+    Maybe<xml::ExtractedPackage> transformPackageAlias(
+            const StringPiece16& alias, const StringPiece16& localPackage) const override {
+        if (alias.empty()) {
+            return xml::ExtractedPackage{ localPackage.toString(), true /* private */ };
         }
         return {};
     }
@@ -259,14 +366,16 @@ bool ReferenceLinker::consume(IAaptContext* context, ResourceTable* table) {
                     error = true;
                 }
 
+                CallSite callSite = { ResourceNameRef(package->name, type->type, entry->name) };
+                ReferenceLinkerVisitor visitor(context, context->getExternalSymbols(),
+                                               &table->stringPool, &declStack, &callSite);
+
                 for (auto& configValue : entry->values) {
-                    StyleAndReferenceLinkerVisitor visitor(context,
-                                                           context->getExternalSymbols(),
-                                                           &table->stringPool, &declStack);
                     configValue.value->accept(&visitor);
-                    if (visitor.hasError()) {
-                        error = true;
-                    }
+                }
+
+                if (visitor.hasError()) {
+                    error = true;
                 }
             }
         }

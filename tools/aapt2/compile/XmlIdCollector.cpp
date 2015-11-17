@@ -16,9 +16,8 @@
 
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "XmlDom.h"
-
 #include "compile/XmlIdCollector.h"
+#include "xml/XmlDom.h"
 
 #include <algorithm>
 #include <vector>
@@ -61,7 +60,7 @@ struct IdCollector : public xml::Visitor {
 
 } // namespace
 
-bool XmlIdCollector::consume(IAaptContext* context, XmlResource* xmlRes) {
+bool XmlIdCollector::consume(IAaptContext* context, xml::XmlResource* xmlRes) {
     xmlRes->file.exportedSymbols.clear();
     IdCollector collector(&xmlRes->file.exportedSymbols);
     xmlRes->root->accept(&collector);

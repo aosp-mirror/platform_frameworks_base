@@ -49,25 +49,13 @@ struct IResourceTableConsumer {
 };
 
 namespace xml {
-struct Node;
+struct XmlResource;
 }
-
-struct XmlResource {
-    ResourceFile file;
-    std::unique_ptr<xml::Node> root;
-};
 
 struct IXmlResourceConsumer {
     virtual ~IXmlResourceConsumer() = default;
 
-    virtual bool consume(IAaptContext* context, XmlResource* resource) = 0;
-};
-
-struct IPackageDeclStack {
-    virtual ~IPackageDeclStack() = default;
-
-    virtual Maybe<ResourceName> transformPackage(const ResourceName& name,
-                                                 const StringPiece16& localPackage) const = 0;
+    virtual bool consume(IAaptContext* context, xml::XmlResource* resource) = 0;
 };
 
 } // namespace aapt

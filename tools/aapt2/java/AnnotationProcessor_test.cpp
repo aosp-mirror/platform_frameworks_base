@@ -17,12 +17,10 @@
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
-#include "XmlPullParser.h"
-
 #include "java/AnnotationProcessor.h"
-
 #include "test/Builders.h"
 #include "test/Context.h"
+#include "xml/XmlPullParser.h"
 
 #include <gtest/gtest.h>
 
@@ -42,7 +40,7 @@ struct AnnotationProcessorTest : public ::testing::Test {
                               options);
         std::stringstream in;
         in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
-        XmlPullParser xmlParser(in);
+        xml::XmlPullParser xmlParser(in);
         if (parser.parse(&xmlParser)) {
             return ::testing::AssertionSuccess();
         }

@@ -19,9 +19,6 @@
 #include "Flags.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
-#include "XmlDom.h"
-#include "XmlPullParser.h"
-
 #include "compile/IdAssigner.h"
 #include "compile/Png.h"
 #include "compile/XmlIdCollector.h"
@@ -31,6 +28,8 @@
 #include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
+#include "xml/XmlDom.h"
+#include "xml/XmlPullParser.h"
 
 #include <fstream>
 #include <string>
@@ -131,7 +130,7 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
 
 
         // Parse the values file from XML.
-        XmlPullParser xmlParser(fin);
+        xml::XmlPullParser xmlParser(fin);
 
         ResourceParserOptions parserOptions;
         parserOptions.product = options.product;
@@ -191,7 +190,7 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
 static bool compileXml(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& pathData, const std::string& outputPath) {
 
-    std::unique_ptr<XmlResource> xmlRes;
+    std::unique_ptr<xml::XmlResource> xmlRes;
 
     {
         std::ifstream fin(pathData.source.path, std::ifstream::binary);

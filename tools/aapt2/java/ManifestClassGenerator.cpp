@@ -15,12 +15,11 @@
  */
 
 #include "Source.h"
-#include "XmlDom.h"
-
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinitionWriter.h"
 #include "java/ManifestClassGenerator.h"
 #include "util/Maybe.h"
+#include "xml/XmlDom.h"
 
 #include <algorithm>
 
@@ -80,7 +79,7 @@ static bool writeSymbol(IDiagnostics* diag, ClassDefinitionWriter* outClassDef, 
 }
 
 bool ManifestClassGenerator::generate(IDiagnostics* diag, const StringPiece16& package,
-                                      XmlResource* res, std::ostream* out) {
+                                      xml::XmlResource* res, std::ostream* out) {
     xml::Element* el = xml::findRootElement(res->root.get());
     if (!el) {
         return false;

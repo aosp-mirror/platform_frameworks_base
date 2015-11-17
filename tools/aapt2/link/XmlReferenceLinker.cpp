@@ -17,51 +17,91 @@
 #include "Diagnostics.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
-#include "XmlDom.h"
-
 #include "link/Linkers.h"
-#include "link/ReferenceLinkerVisitor.h"
+#include "link/ReferenceLinker.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "util/Util.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 
 namespace {
 
-class XmlReferenceLinkerVisitor : public xml::PackageAwareVisitor {
+/**
+ * Visits all references (including parents of styles, references in styles, arrays, etc) and
+ * links their symbolic name to their Resource ID, performing mangling and package aliasing
+ * as needed.
+ */
+class ReferenceVisitor : public ValueVisitor {
+private:
+    IAaptContext* mContext;
+    ISymbolTable* mSymbols;
+    xml::IPackageDeclStack* mDecls;
+    CallSite* mCallSite;
+    bool mError;
+
+public:
+    using ValueVisitor::visit;
+
+    ReferenceVisitor(IAaptContext* context, ISymbolTable* symbols, xml::IPackageDeclStack* decls,
+                     CallSite* callSite) :
+             mContext(context), mSymbols(symbols), mDecls(decls), mCallSite(callSite),
+             mError(false) {
+    }
+
+    void visit(Reference* ref) override {
+        if (!ReferenceLinker::linkReference(ref, mContext, mSymbols, mDecls, mCallSite)) {
+            mError = true;
+        }
+    }
+
+    bool hasError() const {
+        return mError;
+    }
+};
+
+/**
+ * Visits each xml Element and compiles the attributes within.
+ */
+class XmlVisitor : public xml::PackageAwareVisitor {
 private:
     IAaptContext* mContext;
     ISymbolTable* mSymbols;
     Source mSource;
     std::set<int>* mSdkLevelsFound;
-    ReferenceLinkerVisitor mReferenceLinkerVisitor;
+    CallSite* mCallSite;
+    ReferenceVisitor mReferenceVisitor;
     bool mError = false;
 
 public:
     using xml::PackageAwareVisitor::visit;
 
-    XmlReferenceLinkerVisitor(IAaptContext* context, ISymbolTable* symbols, const Source& source,
-                              std::set<int>* sdkLevelsFound) :
+    XmlVisitor(IAaptContext* context, ISymbolTable* symbols, const Source& source,
+               std::set<int>* sdkLevelsFound, CallSite* callSite) :
             mContext(context), mSymbols(symbols), mSource(source), mSdkLevelsFound(sdkLevelsFound),
-            mReferenceLinkerVisitor(context, symbols, this) {
+            mCallSite(callSite), mReferenceVisitor(context, symbols, this, callSite) {
     }
 
     void visit(xml::Element* el) override {
         const Source source = mSource.withLine(el->lineNumber);
         for (xml::Attribute& attr : el->attributes) {
-            Maybe<std::u16string> maybePackage =
-                    util::extractPackageFromNamespace(attr.namespaceUri);
+            Maybe<xml::ExtractedPackage> maybePackage =
+                    xml::extractPackageFromNamespace(attr.namespaceUri);
             if (maybePackage) {
                 // There is a valid package name for this attribute. We will look this up.
-                StringPiece16 package = maybePackage.value();
+                StringPiece16 package = maybePackage.value().package;
                 if (package.empty()) {
                     // Empty package means the 'current' or 'local' package.
                     package = mContext->getCompilationPackage();
                 }
 
-                attr.compiledAttribute = compileAttribute(
-                        ResourceName{ package.toString(), ResourceType::kAttr, attr.name });
+                Reference attrRef(ResourceNameRef(package, ResourceType::kAttr, attr.name));
+                attrRef.privateReference = maybePackage.value().privateNamespace;
+
+                std::string errStr;
+                attr.compiledAttribute = ReferenceLinker::compileXmlAttribute(
+                        attrRef, mContext->getNameMangler(), mSymbols, mCallSite, &errStr);
 
                 // Convert the string value into a compiled Value if this is a valid attribute.
                 if (attr.compiledAttribute) {
@@ -87,7 +127,7 @@ public:
                 } else {
                     mContext->getDiagnostics()->error(DiagMessage(source)
                                                       << "attribute '" << package << ":"
-                                                      << attr.name << "' was not found");
+                                                      << attr.name << "' " << errStr);
                     mError = true;
 
                 }
@@ -99,7 +139,7 @@ public:
             if (attr.compiledValue) {
                 // With a compiledValue, we must resolve the reference and assign it an ID.
                 attr.compiledValue->setSource(source);
-                attr.compiledValue->accept(&mReferenceLinkerVisitor);
+                attr.compiledValue->accept(&mReferenceVisitor);
             }
         }
 
@@ -107,28 +147,18 @@ public:
         xml::PackageAwareVisitor::visit(el);
     }
 
-    Maybe<xml::AaptAttribute> compileAttribute(const ResourceName& name) {
-        Maybe<ResourceName> mangledName = mContext->getNameMangler()->mangleName(name);
-        if (const ISymbolTable::Symbol* symbol = mSymbols->findByName(
-                mangledName ? mangledName.value() : name)) {
-            if (symbol->attribute) {
-                return xml::AaptAttribute{ symbol->id, *symbol->attribute };
-            }
-        }
-        return {};
-    }
-
-    inline bool hasError() {
-        return mError || mReferenceLinkerVisitor.hasError();
+    bool hasError() {
+        return mError || mReferenceVisitor.hasError();
     }
 };
 
 } // namespace
 
-bool XmlReferenceLinker::consume(IAaptContext* context, XmlResource* resource) {
+bool XmlReferenceLinker::consume(IAaptContext* context, xml::XmlResource* resource) {
     mSdkLevelsFound.clear();
-    XmlReferenceLinkerVisitor visitor(context, context->getExternalSymbols(), resource->file.source,
-                                      &mSdkLevelsFound);
+    CallSite callSite = { resource->file.name };
+    XmlVisitor visitor(context, context->getExternalSymbols(), resource->file.source,
+                       &mSdkLevelsFound, &callSite);
     if (resource->root) {
         resource->root->accept(&visitor);
         return !visitor.hasError();

@@ -17,11 +17,11 @@
 #ifndef AAPT_XML_PULL_PARSER_H
 #define AAPT_XML_PULL_PARSER_H
 
-#include "util/Maybe.h"
 #include "Resource.h"
-#include "util/StringPiece.h"
-
 #include "process/IResourceTableConsumer.h"
+#include "util/Maybe.h"
+#include "util/StringPiece.h"
+#include "xml/XmlUtil.h"
 
 #include <algorithm>
 #include <expat.h>
@@ -33,6 +33,7 @@
 #include <vector>
 
 namespace aapt {
+namespace xml {
 
 class XmlPullParser : public IPackageDeclStack {
 public:
@@ -60,7 +61,7 @@ public:
     static bool isGoodEvent(Event event);
 
     XmlPullParser(std::istream& in);
-    virtual ~XmlPullParser();
+    ~XmlPullParser();
 
     /**
      * Returns the current event that is being processed.
@@ -95,6 +96,13 @@ public:
     const std::u16string& getNamespacePrefix() const;
     const std::u16string& getNamespaceUri() const;
 
+    //
+    // These are available for StartElement and EndElement.
+    //
+
+    const std::u16string& getElementNamespace() const;
+    const std::u16string& getElementName() const;
+
     /*
      * Uses the current stack of namespaces to resolve the package. Eg:
      * xmlns:app = "http://schemas.android.com/apk/res/com.android.app"
@@ -106,17 +114,8 @@ public:
      * If xmlns:app="http://schemas.android.com/apk/res-auto", then
      * 'package' will be set to 'defaultPackage'.
      */
-    //
-
-    //
-    // These are available for StartElement and EndElement.
-    //
-
-    const std::u16string& getElementNamespace() const;
-    const std::u16string& getElementName() const;
-
-    Maybe<ResourceName> transformPackage(const ResourceName& name,
-                                         const StringPiece16& localPackage) const override;
+    Maybe<ExtractedPackage> transformPackageAlias(
+            const StringPiece16& alias, const StringPiece16& localPackage) const override;
 
     //
     // Remaining methods are for retrieving information about attributes
@@ -169,8 +168,24 @@ private:
     const std::u16string mEmpty;
     size_t mDepth;
     std::stack<std::u16string> mNamespaceUris;
-    std::vector<std::pair<std::u16string, std::u16string>> mPackageAliases;
+
+    struct PackageDecl {
+        std::u16string prefix;
+        ExtractedPackage package;
+    };
+    std::vector<PackageDecl> mPackageAliases;
 };
+
+/**
+ * Finds the attribute in the current element within the global namespace.
+ */
+Maybe<StringPiece16> findAttribute(const XmlPullParser* parser, const StringPiece16& name);
+
+/**
+ * Finds the attribute in the current element within the global namespace. The attribute's value
+ * must not be the empty string.
+ */
+Maybe<StringPiece16> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece16& name);
 
 //
 // Implementation
@@ -277,6 +292,7 @@ inline XmlPullParser::const_iterator XmlPullParser::findAttribute(StringPiece16 
     return endIter;
 }
 
+} // namespace xml
 } // namespace aapt
 
 #endif // AAPT_XML_PULL_PARSER_H

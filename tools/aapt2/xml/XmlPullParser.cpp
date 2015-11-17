@@ -16,12 +16,14 @@
 
 #include "util/Maybe.h"
 #include "util/Util.h"
-#include "XmlPullParser.h"
+#include "xml/XmlPullParser.h"
+#include "xml/XmlUtil.h"
 
 #include <iostream>
 #include <string>
 
 namespace aapt {
+namespace xml {
 
 constexpr char kXmlNamespaceSep = 1;
 
@@ -72,14 +74,14 @@ XmlPullParser::Event XmlPullParser::next() {
     // Record namespace prefixes and package names so that we can do our own
     // handling of references that use namespace aliases.
     if (event == Event::kStartNamespace || event == Event::kEndNamespace) {
-        Maybe<std::u16string> result = util::extractPackageFromNamespace(getNamespaceUri());
+        Maybe<ExtractedPackage> result = extractPackageFromNamespace(getNamespaceUri());
         if (event == Event::kStartNamespace) {
             if (result) {
-                mPackageAliases.emplace_back(getNamespacePrefix(), result.value());
+                mPackageAliases.emplace_back(
+                        PackageDecl{ getNamespacePrefix(), std::move(result.value()) });
             }
         } else {
             if (result) {
-                assert(mPackageAliases.back().second == result.value());
                 mPackageAliases.pop_back();
             }
         }
@@ -131,20 +133,20 @@ const std::u16string& XmlPullParser::getNamespaceUri() const {
     return mEventQueue.front().data2;
 }
 
-Maybe<ResourceName> XmlPullParser::transformPackage(
-        const ResourceName& name, const StringPiece16& localPackage) const {
-    if (name.package.empty()) {
-        return ResourceName{ localPackage.toString(), name.type, name.entry };
+Maybe<ExtractedPackage> XmlPullParser::transformPackageAlias(
+        const StringPiece16& alias, const StringPiece16& localPackage) const {
+    if (alias.empty()) {
+        return ExtractedPackage{ localPackage.toString(), false /* private */ };
     }
 
     const auto endIter = mPackageAliases.rend();
     for (auto iter = mPackageAliases.rbegin(); iter != endIter; ++iter) {
-        if (name.package == iter->first) {
-            if (iter->second.empty()) {
-                return ResourceName{ localPackage.toString(), name.type, name.entry };
-            } else {
-                return ResourceName{ iter->second, name.type, name.entry };
+        if (alias == iter->prefix) {
+            if (iter->package.package.empty()) {
+                return ExtractedPackage{ localPackage.toString(),
+                                         iter->package.privateNamespace };
             }
+            return iter->package;
         }
     }
     return {};
@@ -283,4 +285,24 @@ void XMLCALL XmlPullParser::commentDataHandler(void* userData, const char* comme
     });
 }
 
+Maybe<StringPiece16> findAttribute(const XmlPullParser* parser, const StringPiece16& name) {
+    auto iter = parser->findAttribute(u"", name);
+    if (iter != parser->endAttributes()) {
+        return StringPiece16(util::trimWhitespace(iter->value));
+    }
+    return {};
+}
+
+Maybe<StringPiece16> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece16& name) {
+    auto iter = parser->findAttribute(u"", name);
+    if (iter != parser->endAttributes()) {
+        StringPiece16 trimmed = util::trimWhitespace(iter->value);
+        if (!trimmed.empty()) {
+            return trimmed;
+        }
+    }
+    return {};
+}
+
+} // namespace xml
 } // namespace aapt

@@ -19,35 +19,14 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-#include "XmlPullParser.h"
-
 #include "util/Util.h"
+#include "xml/XmlPullParser.h"
 
 #include <sstream>
 
 namespace aapt {
 
 constexpr const char16_t* sXliffNamespaceUri = u"urn:oasis:names:tc:xliff:document:1.2";
-
-static Maybe<StringPiece16> findAttribute(XmlPullParser* parser, const StringPiece16& name) {
-    auto iter = parser->findAttribute(u"", name);
-    if (iter != parser->endAttributes()) {
-        return StringPiece16(util::trimWhitespace(iter->value));
-    }
-    return {};
-}
-
-static Maybe<StringPiece16> findNonEmptyAttribute(XmlPullParser* parser,
-                                                  const StringPiece16& name) {
-    auto iter = parser->findAttribute(u"", name);
-    if (iter != parser->endAttributes()) {
-        StringPiece16 trimmed = util::trimWhitespace(iter->value);
-        if (!trimmed.empty()) {
-            return trimmed;
-        }
-    }
-    return {};
-}
 
 /**
  * Returns true if the element is <skip> or <eat-comment> and can be safely ignored.
@@ -65,7 +44,7 @@ ResourceParser::ResourceParser(IDiagnostics* diag, ResourceTable* table, const S
 /**
  * Build a string from XML that converts nested elements into Span objects.
  */
-bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* outRawString,
+bool ResourceParser::flattenXmlSubtree(xml::XmlPullParser* parser, std::u16string* outRawString,
                                        StyleString* outStyleString) {
     std::vector<Span> spanStack;
 
@@ -74,9 +53,9 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
     outStyleString->spans.clear();
     util::StringBuilder builder;
     size_t depth = 1;
-    while (XmlPullParser::isGoodEvent(parser->next())) {
-        const XmlPullParser::Event event = parser->getEvent();
-        if (event == XmlPullParser::Event::kEndElement) {
+    while (xml::XmlPullParser::isGoodEvent(parser->next())) {
+        const xml::XmlPullParser::Event event = parser->getEvent();
+        if (event == xml::XmlPullParser::Event::kEndElement) {
             if (!parser->getElementNamespace().empty()) {
                 // We already warned and skipped the start element, so just skip here too
                 continue;
@@ -91,11 +70,11 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
             outStyleString->spans.push_back(spanStack.back());
             spanStack.pop_back();
 
-        } else if (event == XmlPullParser::Event::kText) {
+        } else if (event == xml::XmlPullParser::Event::kText) {
             outRawString->append(parser->getText());
             builder.append(parser->getText());
 
-        } else if (event == XmlPullParser::Event::kStartElement) {
+        } else if (event == xml::XmlPullParser::Event::kStartElement) {
             if (!parser->getElementNamespace().empty()) {
                 if (parser->getElementNamespace() != sXliffNamespaceUri) {
                     // Only warn if this isn't an xliff namespace.
@@ -128,7 +107,7 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
                 spanStack.push_back(Span{ spanName, static_cast<uint32_t>(builder.str().size()) });
             }
 
-        } else if (event == XmlPullParser::Event::kComment) {
+        } else if (event == xml::XmlPullParser::Event::kComment) {
             // Skip
         } else {
             assert(false);
@@ -140,11 +119,11 @@ bool ResourceParser::flattenXmlSubtree(XmlPullParser* parser, std::u16string* ou
     return !error;
 }
 
-bool ResourceParser::parse(XmlPullParser* parser) {
+bool ResourceParser::parse(xml::XmlPullParser* parser) {
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Skip comments and text.
             continue;
         }
@@ -159,7 +138,7 @@ bool ResourceParser::parse(XmlPullParser* parser) {
         break;
     };
 
-    if (parser->getEvent() == XmlPullParser::Event::kBadDocument) {
+    if (parser->getEvent() == xml::XmlPullParser::Event::kBadDocument) {
         mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                      << "xml parser error: " << parser->getLastError());
         return false;
@@ -167,10 +146,11 @@ bool ResourceParser::parse(XmlPullParser* parser) {
     return !error;
 }
 
-static bool shouldStripResource(XmlPullParser* parser, const Maybe<std::u16string> productToMatch) {
-    assert(parser->getEvent() == XmlPullParser::Event::kStartElement);
+static bool shouldStripResource(const xml::XmlPullParser* parser,
+                                const Maybe<std::u16string> productToMatch) {
+    assert(parser->getEvent() == xml::XmlPullParser::Event::kStartElement);
 
-    if (Maybe<StringPiece16> maybeProduct = findNonEmptyAttribute(parser, u"product")) {
+    if (Maybe<StringPiece16> maybeProduct = xml::findNonEmptyAttribute(parser, u"product")) {
         if (!productToMatch) {
             if (maybeProduct.value() != u"default" && maybeProduct.value() != u"phone") {
                 // We didn't specify a product and this is not a default product, so skip.
@@ -229,20 +209,20 @@ static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& c
     return !error;
 }
 
-bool ResourceParser::parseResources(XmlPullParser* parser) {
+bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
     std::set<ResourceName> strippedResources;
 
     bool error = false;
     std::u16string comment;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        const XmlPullParser::Event event = parser->getEvent();
-        if (event == XmlPullParser::Event::kComment) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        const xml::XmlPullParser::Event event = parser->getEvent();
+        if (event == xml::XmlPullParser::Event::kComment) {
             comment = parser->getComment();
             continue;
         }
 
-        if (event == XmlPullParser::Event::kText) {
+        if (event == xml::XmlPullParser::Event::kText) {
             if (!util::trimWhitespace(parser->getText()).empty()) {
                 mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                              << "plain text not allowed here");
@@ -251,7 +231,7 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
             continue;
         }
 
-        assert(event == XmlPullParser::Event::kStartElement);
+        assert(event == xml::XmlPullParser::Event::kStartElement);
 
         if (!parser->getElementNamespace().empty()) {
             // Skip unknown namespace.
@@ -266,7 +246,7 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
 
         if (elementName == u"item") {
             // Items simply have their type encoded in the type attribute.
-            if (Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type")) {
+            if (Maybe<StringPiece16> maybeType = xml::findNonEmptyAttribute(parser, u"type")) {
                 elementName = maybeType.value().toString();
             } else {
                 mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
@@ -280,7 +260,7 @@ bool ResourceParser::parseResources(XmlPullParser* parser) {
         parsedResource.source = mSource.withLine(parser->getLineNumber());
         parsedResource.comment = std::move(comment);
 
-        if (Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name")) {
+        if (Maybe<StringPiece16> maybeName = xml::findNonEmptyAttribute(parser, u"name")) {
             parsedResource.name.entry = maybeName.value().toString();
 
         } else if (elementName != u"public-group") {
@@ -403,7 +383,7 @@ enum {
  * an Item. If allowRawValue is false, nullptr is returned in this
  * case.
  */
-std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, const uint32_t typeMask,
+std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser, const uint32_t typeMask,
                                                const bool allowRawValue) {
     const size_t beginXmlLine = parser->getLineNumber();
 
@@ -432,10 +412,7 @@ std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, const uint
     if (processedItem) {
         // Fix up the reference.
         if (Reference* ref = valueCast<Reference>(processedItem.get())) {
-            if (Maybe<ResourceName> transformedName =
-                    parser->transformPackage(ref->name.value(), u"")) {
-                ref->name = std::move(transformedName);
-            }
+            transformReferenceFromNamespace(parser, u"", ref);
         }
         return processedItem;
     }
@@ -456,11 +433,11 @@ std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, const uint
     return {};
 }
 
-bool ResourceParser::parseString(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseString(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
     bool formatted = true;
-    if (Maybe<StringPiece16> formattedAttr = findAttribute(parser, u"formatted")) {
+    if (Maybe<StringPiece16> formattedAttr = xml::findAttribute(parser, u"formatted")) {
         if (!ResourceUtils::tryParseBool(formattedAttr.value(), &formatted)) {
             mDiag->error(DiagMessage(source) << "invalid value for 'formatted'. Must be a boolean");
             return false;
@@ -468,7 +445,7 @@ bool ResourceParser::parseString(XmlPullParser* parser, ParsedResource* outResou
     }
 
     bool translateable = mOptions.translatable;
-    if (Maybe<StringPiece16> translateableAttr = findAttribute(parser, u"translatable")) {
+    if (Maybe<StringPiece16> translateableAttr = xml::findAttribute(parser, u"translatable")) {
         if (!ResourceUtils::tryParseBool(translateableAttr.value(), &translateable)) {
             mDiag->error(DiagMessage(source)
                          << "invalid value for 'translatable'. Must be a boolean");
@@ -495,7 +472,7 @@ bool ResourceParser::parseString(XmlPullParser* parser, ParsedResource* outResou
     return true;
 }
 
-bool ResourceParser::parseColor(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseColor(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
     outResource->value = parseXml(parser, android::ResTable_map::TYPE_COLOR, kNoRawString);
@@ -506,7 +483,7 @@ bool ResourceParser::parseColor(XmlPullParser* parser, ParsedResource* outResour
     return true;
 }
 
-bool ResourceParser::parsePrimitive(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parsePrimitive(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
     uint32_t typeMask = 0;
@@ -540,10 +517,10 @@ bool ResourceParser::parsePrimitive(XmlPullParser* parser, ParsedResource* outRe
     return true;
 }
 
-bool ResourceParser::parsePublic(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parsePublic(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
-    Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type");
+    Maybe<StringPiece16> maybeType = xml::findNonEmptyAttribute(parser, u"type");
     if (!maybeType) {
         mDiag->error(DiagMessage(source) << "<public> must have a 'type' attribute");
         return false;
@@ -558,7 +535,7 @@ bool ResourceParser::parsePublic(XmlPullParser* parser, ParsedResource* outResou
 
     outResource->name.type = *parsedType;
 
-    if (Maybe<StringPiece16> maybeId = findNonEmptyAttribute(parser, u"id")) {
+    if (Maybe<StringPiece16> maybeId = xml::findNonEmptyAttribute(parser, u"id")) {
         android::Res_value val;
         bool result = android::ResTable::stringToInt(maybeId.value().data(),
                                                      maybeId.value().size(), &val);
@@ -580,10 +557,10 @@ bool ResourceParser::parsePublic(XmlPullParser* parser, ParsedResource* outResou
     return true;
 }
 
-bool ResourceParser::parsePublicGroup(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parsePublicGroup(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
-    Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type");
+    Maybe<StringPiece16> maybeType = xml::findNonEmptyAttribute(parser, u"type");
     if (!maybeType) {
         mDiag->error(DiagMessage(source) << "<public-group> must have a 'type' attribute");
         return false;
@@ -596,7 +573,7 @@ bool ResourceParser::parsePublicGroup(XmlPullParser* parser, ParsedResource* out
         return false;
     }
 
-    Maybe<StringPiece16> maybeId = findNonEmptyAttribute(parser, u"first-id");
+    Maybe<StringPiece16> maybeId = xml::findNonEmptyAttribute(parser, u"first-id");
     if (!maybeId) {
         mDiag->error(DiagMessage(source) << "<public-group> must have a 'first-id' attribute");
         return false;
@@ -615,11 +592,11 @@ bool ResourceParser::parsePublicGroup(XmlPullParser* parser, ParsedResource* out
     std::u16string comment;
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() == XmlPullParser::Event::kComment) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() == xml::XmlPullParser::Event::kComment) {
             comment = util::trimWhitespace(parser->getComment()).toString();
             continue;
-        } else if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+        } else if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Skip text.
             continue;
         }
@@ -628,20 +605,20 @@ bool ResourceParser::parsePublicGroup(XmlPullParser* parser, ParsedResource* out
         const std::u16string& elementNamespace = parser->getElementNamespace();
         const std::u16string& elementName = parser->getElementName();
         if (elementNamespace.empty() && elementName == u"public") {
-            Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name");
+            Maybe<StringPiece16> maybeName = xml::findNonEmptyAttribute(parser, u"name");
             if (!maybeName) {
                 mDiag->error(DiagMessage(itemSource) << "<public> must have a 'name' attribute");
                 error = true;
                 continue;
             }
 
-            if (findNonEmptyAttribute(parser, u"id")) {
+            if (xml::findNonEmptyAttribute(parser, u"id")) {
                 mDiag->error(DiagMessage(itemSource) << "'id' is ignored within <public-group>");
                 error = true;
                 continue;
             }
 
-            if (findNonEmptyAttribute(parser, u"type")) {
+            if (xml::findNonEmptyAttribute(parser, u"type")) {
                 mDiag->error(DiagMessage(itemSource) << "'type' is ignored within <public-group>");
                 error = true;
                 continue;
@@ -666,10 +643,10 @@ bool ResourceParser::parsePublicGroup(XmlPullParser* parser, ParsedResource* out
     return !error;
 }
 
-bool ResourceParser::parseSymbol(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseSymbol(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
-    Maybe<StringPiece16> maybeType = findNonEmptyAttribute(parser, u"type");
+    Maybe<StringPiece16> maybeType = xml::findNonEmptyAttribute(parser, u"type");
     if (!maybeType) {
         mDiag->error(DiagMessage(source) << "<" << parser->getElementName() << "> must have a "
                      "'type' attribute");
@@ -715,35 +692,22 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
     return mask;
 }
 
-
-
-bool ResourceParser::parseAttr(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseAttr(xml::XmlPullParser* parser, ParsedResource* outResource) {
     outResource->source = mSource.withLine(parser->getLineNumber());
     return parseAttrImpl(parser, outResource, false);
 }
 
-bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outResource, bool weak) {
+bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* outResource,
+                                   bool weak) {
     uint32_t typeMask = 0;
 
-    Maybe<StringPiece16> maybeFormat = findAttribute(parser, u"format");
+    Maybe<StringPiece16> maybeFormat = xml::findAttribute(parser, u"format");
     if (maybeFormat) {
         typeMask = parseFormatAttribute(maybeFormat.value());
         if (typeMask == 0) {
             mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                          << "invalid attribute format '" << maybeFormat.value() << "'");
             return false;
-        }
-    }
-
-    // If this is a declaration, the package name may be in the name. Separate these out.
-    // Eg. <attr name="android:text" />
-    // No format attribute is allowed.
-    if (weak && !maybeFormat) {
-        StringPiece16 package, type, name;
-        ResourceUtils::extractResourceName(outResource->name.entry, &package, &type, &name);
-        if (type.empty() && !package.empty()) {
-            outResource->name.package = package.toString();
-            outResource->name.entry = name.toString();
         }
     }
 
@@ -758,11 +722,11 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
     std::u16string comment;
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() == XmlPullParser::Event::kComment) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() == xml::XmlPullParser::Event::kComment) {
             comment = util::trimWhitespace(parser->getComment()).toString();
             continue;
-        } else if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+        } else if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Skip text.
             continue;
         }
@@ -834,17 +798,17 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
     return true;
 }
 
-Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(XmlPullParser* parser,
+Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(xml::XmlPullParser* parser,
                                                              const StringPiece16& tag) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
-    Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name");
+    Maybe<StringPiece16> maybeName = xml::findNonEmptyAttribute(parser, u"name");
     if (!maybeName) {
         mDiag->error(DiagMessage(source) << "no attribute 'name' found for tag <" << tag << ">");
         return {};
     }
 
-    Maybe<StringPiece16> maybeValue = findNonEmptyAttribute(parser, u"value");
+    Maybe<StringPiece16> maybeValue = xml::findNonEmptyAttribute(parser, u"value");
     if (!maybeValue) {
         mDiag->error(DiagMessage(source) << "no attribute 'value' found for tag <" << tag << ">");
         return {};
@@ -863,11 +827,18 @@ Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(XmlPullParser* pars
             val.data };
 }
 
-static Maybe<ResourceName> parseXmlAttributeName(StringPiece16 str) {
+static Maybe<Reference> parseXmlAttributeName(StringPiece16 str) {
     str = util::trimWhitespace(str);
-    const char16_t* const start = str.data();
+    const char16_t* start = str.data();
     const char16_t* const end = start + str.size();
     const char16_t* p = start;
+
+    Reference ref;
+    if (p != end && *p == u'*') {
+        ref.privateReference = true;
+        start++;
+        p++;
+    }
 
     StringPiece16 package;
     StringPiece16 name;
@@ -880,28 +851,27 @@ static Maybe<ResourceName> parseXmlAttributeName(StringPiece16 str) {
         p++;
     }
 
-    return ResourceName(package.toString(), ResourceType::kAttr,
+    ref.name = ResourceName(package.toString(), ResourceType::kAttr,
                         name.empty() ? str.toString() : name.toString());
+    return Maybe<Reference>(std::move(ref));
 }
 
-bool ResourceParser::parseStyleItem(XmlPullParser* parser, Style* style) {
+bool ResourceParser::parseStyleItem(xml::XmlPullParser* parser, Style* style) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
-    Maybe<StringPiece16> maybeName = findNonEmptyAttribute(parser, u"name");
+    Maybe<StringPiece16> maybeName = xml::findNonEmptyAttribute(parser, u"name");
     if (!maybeName) {
         mDiag->error(DiagMessage(source) << "<item> must have a 'name' attribute");
         return false;
     }
 
-    Maybe<ResourceName> maybeKey = parseXmlAttributeName(maybeName.value());
+    Maybe<Reference> maybeKey = parseXmlAttributeName(maybeName.value());
     if (!maybeKey) {
         mDiag->error(DiagMessage(source) << "invalid attribute name '" << maybeName.value() << "'");
         return false;
     }
 
-    if (Maybe<ResourceName> transformedName = parser->transformPackage(maybeKey.value(), u"")) {
-        maybeKey = std::move(transformedName);
-    }
+    transformReferenceFromNamespace(parser, u"", &maybeKey.value());
 
     std::unique_ptr<Item> value = parseXml(parser, 0, kAllowRawString);
     if (!value) {
@@ -909,15 +879,15 @@ bool ResourceParser::parseStyleItem(XmlPullParser* parser, Style* style) {
         return false;
     }
 
-    style->entries.push_back(Style::Entry{ Reference(maybeKey.value()), std::move(value) });
+    style->entries.push_back(Style::Entry{ std::move(maybeKey.value()), std::move(value) });
     return true;
 }
 
-bool ResourceParser::parseStyle(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseStyle(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Style> style = util::make_unique<Style>();
 
-    Maybe<StringPiece16> maybeParent = findAttribute(parser, u"parent");
+    Maybe<StringPiece16> maybeParent = xml::findAttribute(parser, u"parent");
     if (maybeParent) {
         // If the parent is empty, we don't have a parent, but we also don't infer either.
         if (!maybeParent.value().empty()) {
@@ -928,10 +898,9 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, ParsedResource* outResour
                 return false;
             }
 
-            if (Maybe<ResourceName> transformedName =
-                    parser->transformPackage(style->parent.value().name.value(), u"")) {
-                style->parent.value().name = std::move(transformedName);
-            }
+            // Transform the namespace prefix to the actual package name, and mark the reference as
+            // private if appropriate.
+            transformReferenceFromNamespace(parser, u"", &style->parent.value());
         }
 
     } else {
@@ -940,15 +909,15 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, ParsedResource* outResour
         size_t pos = styleName.find_last_of(u'.');
         if (pos != std::string::npos) {
             style->parentInferred = true;
-            style->parent = Reference(
-                    ResourceName({}, ResourceType::kStyle, styleName.substr(0, pos)));
+            style->parent = Reference(ResourceName({}, ResourceType::kStyle,
+                                                   styleName.substr(0, pos)));
         }
     }
 
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Skip text and comments.
             continue;
         }
@@ -973,15 +942,15 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, ParsedResource* outResour
     return true;
 }
 
-bool ResourceParser::parseArray(XmlPullParser* parser, ParsedResource* outResource,
+bool ResourceParser::parseArray(xml::XmlPullParser* parser, ParsedResource* outResource,
                                 uint32_t typeMask) {
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Array> array = util::make_unique<Array>();
 
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Skip text and comments.
             continue;
         }
@@ -1014,14 +983,14 @@ bool ResourceParser::parseArray(XmlPullParser* parser, ParsedResource* outResour
     return true;
 }
 
-bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parsePlural(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
 
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Skip text and comments.
             continue;
         }
@@ -1030,16 +999,15 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
         const std::u16string& elementNamespace = parser->getElementNamespace();
         const std::u16string& elementName = parser->getElementName();
         if (elementNamespace.empty() && elementName == u"item") {
-            const auto endAttrIter = parser->endAttributes();
-            auto attrIter = parser->findAttribute(u"", u"quantity");
-            if (attrIter == endAttrIter || attrIter->value.empty()) {
+            Maybe<StringPiece16> maybeQuantity = xml::findNonEmptyAttribute(parser, u"quantity");
+            if (!maybeQuantity) {
                 mDiag->error(DiagMessage(itemSource) << "<item> in <plurals> requires attribute "
                              << "'quantity'");
                 error = true;
                 continue;
             }
 
-            StringPiece16 trimmedQuantity = util::trimWhitespace(attrIter->value);
+            StringPiece16 trimmedQuantity = util::trimWhitespace(maybeQuantity.value());
             size_t index = 0;
             if (trimmedQuantity == u"zero") {
                 index = Plural::Zero;
@@ -1089,7 +1057,7 @@ bool ResourceParser::parsePlural(XmlPullParser* parser, ParsedResource* outResou
     return true;
 }
 
-bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
     std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
 
@@ -1099,11 +1067,11 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource
     std::u16string comment;
     bool error = false;
     const size_t depth = parser->getDepth();
-    while (XmlPullParser::nextChildNode(parser, depth)) {
-        if (parser->getEvent() == XmlPullParser::Event::kComment) {
+    while (xml::XmlPullParser::nextChildNode(parser, depth)) {
+        if (parser->getEvent() == xml::XmlPullParser::Event::kComment) {
             comment = util::trimWhitespace(parser->getComment()).toString();
             continue;
-        } else if (parser->getEvent() != XmlPullParser::Event::kStartElement) {
+        } else if (parser->getEvent() != xml::XmlPullParser::Event::kStartElement) {
             // Ignore text.
             continue;
         }
@@ -1112,17 +1080,29 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource
         const std::u16string& elementNamespace = parser->getElementNamespace();
         const std::u16string& elementName = parser->getElementName();
         if (elementNamespace.empty() && elementName == u"attr") {
-            const auto endAttrIter = parser->endAttributes();
-            auto attrIter = parser->findAttribute(u"", u"name");
-            if (attrIter == endAttrIter || attrIter->value.empty()) {
+            Maybe<StringPiece16> maybeName = xml::findNonEmptyAttribute(parser, u"name");
+            if (!maybeName) {
                 mDiag->error(DiagMessage(itemSource) << "<attr> tag must have a 'name' attribute");
                 error = true;
                 continue;
             }
 
+            // If this is a declaration, the package name may be in the name. Separate these out.
+            // Eg. <attr name="android:text" />
+            Maybe<Reference> maybeRef = parseXmlAttributeName(maybeName.value());
+            if (!maybeRef) {
+                mDiag->error(DiagMessage(itemSource) << "<attr> tag has invalid name '"
+                             << maybeName.value() << "'");
+                error = true;
+                continue;
+            }
+
+            Reference& childRef = maybeRef.value();
+            xml::transformReferenceFromNamespace(parser, u"", &childRef);
+
             // Create the ParsedResource that will add the attribute to the table.
             ParsedResource childResource;
-            childResource.name = ResourceName({}, ResourceType::kAttr, attrIter->value);
+            childResource.name = childRef.name.value();
             childResource.source = itemSource;
             childResource.comment = std::move(comment);
 
@@ -1132,7 +1112,6 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser, ParsedResource
             }
 
             // Create the reference to this attribute.
-            Reference childRef(childResource.name);
             childRef.setComment(childResource.comment);
             childRef.setSource(itemSource);
             styleable->entries.push_back(std::move(childRef));

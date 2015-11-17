@@ -135,8 +135,19 @@ private:
     std::unique_ptr<SymbolTable> mSymbolTable = util::make_unique<SymbolTable>();
 
 public:
+    StaticSymbolTableBuilder& addPublicSymbol(const StringPiece16& name, ResourceId id,
+                                              std::unique_ptr<Attribute> attr = {}) {
+        std::unique_ptr<ISymbolTable::Symbol> symbol = util::make_unique<ISymbolTable::Symbol>(
+                id, std::move(attr));
+        symbol->isPublic = true;
+        mSymbolTable->mNameMap[parseNameOrDie(name)] = symbol.get();
+        mSymbolTable->mIdMap[id] = symbol.get();
+        mSymbolTable->mSymbols.push_back(std::move(symbol));
+        return *this;
+    }
+
     StaticSymbolTableBuilder& addSymbol(const StringPiece16& name, ResourceId id,
-                                  std::unique_ptr<Attribute> attr = {}) {
+                                        std::unique_ptr<Attribute> attr = {}) {
         std::unique_ptr<ISymbolTable::Symbol> symbol = util::make_unique<ISymbolTable::Symbol>(
                 id, std::move(attr));
         mSymbolTable->mNameMap[parseNameOrDie(name)] = symbol.get();

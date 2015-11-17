@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-#include "XmlDom.h"
-
 #include "java/ProguardRules.h"
 #include "util/Util.h"
+#include "xml/XmlDom.h"
 
 #include <memory>
 #include <string>
@@ -40,11 +39,11 @@ public:
 
     virtual void visit(xml::Element* node) override {
         if (!node->namespaceUri.empty()) {
-            Maybe<std::u16string> maybePackage = util::extractPackageFromNamespace(
+            Maybe<xml::ExtractedPackage> maybePackage = xml::extractPackageFromNamespace(
                     node->namespaceUri);
             if (maybePackage) {
                 // This is a custom view, let's figure out the class name from this.
-                std::u16string package = maybePackage.value() + u"." + node->name;
+                std::u16string package = maybePackage.value().package + u"." + node->name;
                 if (util::isJavaClassName(package)) {
                     addClass(node->lineNumber, package);
                 }
@@ -185,7 +184,8 @@ struct ManifestVisitor : public BaseVisitor {
     std::u16string mPackage;
 };
 
-bool collectProguardRulesForManifest(const Source& source, XmlResource* res, KeepSet* keepSet) {
+bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res,
+                                     KeepSet* keepSet) {
     ManifestVisitor visitor(source, keepSet);
     if (res->root) {
         res->root->accept(&visitor);
@@ -194,7 +194,7 @@ bool collectProguardRulesForManifest(const Source& source, XmlResource* res, Kee
     return false;
 }
 
-bool collectProguardRules(const Source& source, XmlResource* res, KeepSet* keepSet) {
+bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keepSet) {
     if (!res->root) {
         return false;
     }

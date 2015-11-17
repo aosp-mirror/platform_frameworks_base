@@ -57,7 +57,7 @@ public:
 private:
     // Helper method to retrieve the symbol name for a given table offset specified
     // as a pointer.
-    bool getSymbol(const void* data, ResourceNameRef* outSymbol);
+    Maybe<Reference> getSymbol(const void* data);
 
     bool parseTable(const android::ResChunk_header* chunk);
     bool parseSymbolTable(const android::ResChunk_header* chunk);

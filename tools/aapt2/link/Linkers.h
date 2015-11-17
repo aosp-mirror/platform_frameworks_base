@@ -17,7 +17,9 @@
 #ifndef AAPT_LINKER_LINKERS_H
 #define AAPT_LINKER_LINKERS_H
 
+#include "Resource.h"
 #include "process/IResourceTableConsumer.h"
+#include "xml/XmlDom.h"
 
 #include <set>
 
@@ -26,6 +28,14 @@ namespace aapt {
 class ResourceTable;
 struct ResourceEntry;
 struct ConfigDescription;
+
+/**
+ * Defines the location in which a value exists. This determines visibility of other
+ * package's private symbols.
+ */
+struct CallSite {
+    ResourceNameRef resource;
+};
 
 /**
  * Determines whether a versioned resource should be created. If a versioned resource already
@@ -39,7 +49,7 @@ struct AutoVersioner : public IResourceTableConsumer {
 };
 
 struct XmlAutoVersioner : public IXmlResourceConsumer {
-    bool consume(IAaptContext* context, XmlResource* resource) override;
+    bool consume(IAaptContext* context, xml::XmlResource* resource) override;
 };
 
 /**
@@ -69,15 +79,6 @@ struct PrivateAttributeMover : public IResourceTableConsumer {
 };
 
 /**
- * Resolves all references to resources in the ResourceTable and assigns them IDs.
- * The ResourceTable must already have IDs assigned to each resource.
- * Once the ResourceTable is processed by this linker, it is ready to be flattened.
- */
-struct ReferenceLinker : public IResourceTableConsumer {
-    bool consume(IAaptContext* context, ResourceTable* table) override;
-};
-
-/**
  * Resolves attributes in the XmlResource and compiles string values to resource values.
  * Once an XmlResource is processed by this linker, it is ready to be flattened.
  */
@@ -86,7 +87,7 @@ private:
     std::set<int> mSdkLevelsFound;
 
 public:
-    bool consume(IAaptContext* context, XmlResource* resource) override;
+    bool consume(IAaptContext* context, xml::XmlResource* resource) override;
 
     /**
      * Once the XmlResource has been consumed, this returns the various SDK levels in which

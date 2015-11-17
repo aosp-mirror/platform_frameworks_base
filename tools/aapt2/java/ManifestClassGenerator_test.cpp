@@ -15,7 +15,6 @@
  */
 
 #include "java/ManifestClassGenerator.h"
-
 #include "test/Builders.h"
 #include "test/Context.h"
 
@@ -25,7 +24,7 @@ namespace aapt {
 
 TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-    std::unique_ptr<XmlResource> manifest = test::buildXmlDom(R"EOF(
+    std::unique_ptr<xml::XmlResource> manifest = test::buildXmlDom(R"EOF(
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
           <permission android:name="android.permission.ACCESS_INTERNET" />
           <permission android:name="android.DO_DANGEROUS_THINGS" />
@@ -75,7 +74,7 @@ TEST(ManifestClassGeneratorTest, NameIsProperlyGeneratedFromSymbol) {
 
 TEST(ManifestClassGeneratorTest, CommentsAndAnnotationsArePresent) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
-    std::unique_ptr<XmlResource> manifest = test::buildXmlDom(R"EOF(
+    std::unique_ptr<xml::XmlResource> manifest = test::buildXmlDom(R"EOF(
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
           <!-- Required to access the internet.
                Added in API 1. -->

@@ -22,11 +22,9 @@
 #include "ResourceValues.h"
 #include "util/StringPiece.h"
 #include "util/Util.h"
-
-#include "process/IResourceTableConsumer.h"
+#include "xml/XmlUtil.h"
 
 #include <istream>
-#include <expat.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -34,19 +32,7 @@
 namespace aapt {
 namespace xml {
 
-constexpr const char16_t* kSchemaAndroid = u"http://schemas.android.com/apk/res/android";
-
 struct RawVisitor;
-
-/**
- * The type of node. Can be used to downcast to the concrete XML node
- * class.
- */
-enum class NodeType {
-    kNamespace,
-    kElement,
-    kText,
-};
 
 /**
  * Base class for all XML nodes.
@@ -58,9 +44,10 @@ struct Node {
     std::u16string comment;
     std::vector<std::unique_ptr<Node>> children;
 
+    virtual ~Node() = default;
+
     void addChild(std::unique_ptr<Node> child);
     virtual void accept(RawVisitor* visitor) = 0;
-    virtual ~Node() {}
 };
 
 /**
@@ -122,6 +109,14 @@ struct Text : public BaseNode<Text> {
 };
 
 /**
+ * An XML resource with a source, name, and XML tree.
+ */
+struct XmlResource {
+    ResourceFile file;
+    std::unique_ptr<xml::Node> root;
+};
+
+/**
  * Inflates an XML DOM from a text stream, logging errors to the logger.
  * Returns the root node on success, or nullptr on failure.
  */
@@ -134,6 +129,7 @@ std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const
 std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnostics* diag,
                                      const Source& source);
 
+Element* findRootElement(XmlResource* doc);
 Element* findRootElement(Node* node);
 
 /**
@@ -180,7 +176,7 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
 private:
     struct PackageDecl {
         std::u16string prefix;
-        std::u16string package;
+        ExtractedPackage package;
     };
 
     std::vector<PackageDecl> mPackageDecls;
@@ -188,44 +184,9 @@ private:
 public:
     using Visitor::visit;
 
-    void visit(Namespace* ns) override {
-        bool added = false;
-        {
-            Maybe<std::u16string> package = util::extractPackageFromNamespace(ns->namespaceUri);
-            if (package) {
-                mPackageDecls.push_back(PackageDecl{ ns->namespacePrefix, package.value() });
-                added = true;
-            }
-        }
-
-        Visitor::visit(ns);
-
-        if (added) {
-            mPackageDecls.pop_back();
-        }
-    }
-
-    Maybe<ResourceName> transformPackage(const ResourceName& name,
-                                         const StringPiece16& localPackage) const override {
-        if (name.package.empty()) {
-            return ResourceName{ localPackage.toString(), name.type, name.entry };
-        }
-
-        const auto rend = mPackageDecls.rend();
-        for (auto iter = mPackageDecls.rbegin(); iter != rend; ++iter) {
-            if (name.package == iter->prefix) {
-                if (iter->package.empty()) {
-                    if (localPackage != name.package) {
-                        return ResourceName{ localPackage.toString(), name.type, name.entry };
-                    }
-                } else if (iter->package != name.package) {
-                    return ResourceName{ iter->package, name.type, name.entry };
-                }
-                break;
-            }
-        }
-        return {};
-    }
+    void visit(Namespace* ns) override;
+    Maybe<ExtractedPackage> transformPackageAlias(
+            const StringPiece16& alias, const StringPiece16& localPackage) const override;
 };
 
 // Implementations

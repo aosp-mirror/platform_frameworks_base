@@ -18,11 +18,12 @@
 #define AAPT_XMLIDCOLLECTOR_H
 
 #include "process/IResourceTableConsumer.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
 
 struct XmlIdCollector : public IXmlResourceConsumer {
-    bool consume(IAaptContext* context, XmlResource* xmlRes) override;
+    bool consume(IAaptContext* context, xml::XmlResource* xmlRes) override;
 };
 
 } // namespace aapt

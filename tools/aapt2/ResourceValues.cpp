@@ -71,27 +71,23 @@ Reference::Reference(const ResourceId& i, Type type) : id(i), referenceType(type
 }
 
 bool Reference::flatten(android::Res_value* outValue) const {
-    outValue->dataType = (referenceType == Reference::Type::kResource)
-        ? android::Res_value::TYPE_REFERENCE
-        : android::Res_value::TYPE_ATTRIBUTE;
+    outValue->dataType = (referenceType == Reference::Type::kResource) ?
+            android::Res_value::TYPE_REFERENCE : android::Res_value::TYPE_ATTRIBUTE;
     outValue->data = util::hostToDevice32(id ? id.value().id : 0);
     return true;
 }
 
 Reference* Reference::clone(StringPool* /*newPool*/) const {
-    Reference* ref = new Reference();
-    ref->mComment = mComment;
-    ref->mSource = mSource;
-    ref->referenceType = referenceType;
-    ref->name = name;
-    ref->id = id;
-    return ref;
+    return new Reference(*this);
 }
 
 void Reference::print(std::ostream* out) const {
     *out << "(reference) ";
     if (referenceType == Reference::Type::kResource) {
         *out << "@";
+        if (privateReference) {
+            *out << "*";
+        }
     } else {
         *out << "?";
     }
@@ -116,10 +112,7 @@ bool Id::flatten(android::Res_value* out) const {
 }
 
 Id* Id::clone(StringPool* /*newPool*/) const {
-    Id* id = new Id();
-    id->mComment = mComment;
-    id->mSource = mSource;
-    return id;
+    return new Id(*this);
 }
 
 void Id::print(std::ostream* out) const {
@@ -214,10 +207,7 @@ bool BinaryPrimitive::flatten(android::Res_value* outValue) const {
 }
 
 BinaryPrimitive* BinaryPrimitive::clone(StringPool* /*newPool*/) const {
-    BinaryPrimitive* bp = new BinaryPrimitive(value);
-    bp->mComment = mComment;
-    bp->mSource = mSource;
-    return bp;
+    return new BinaryPrimitive(*this);
 }
 
 void BinaryPrimitive::print(std::ostream* out) const {
@@ -255,12 +245,7 @@ bool Attribute::isWeak() const {
 }
 
 Attribute* Attribute::clone(StringPool* /*newPool*/) const {
-    Attribute* attr = new Attribute(weak);
-    attr->mComment = mComment;
-    attr->mSource = mSource;
-    attr->typeMask = typeMask;
-    std::copy(symbols.begin(), symbols.end(), std::back_inserter(attr->symbols));
-    return attr;
+    return new Attribute(*this);
 }
 
 void Attribute::printMask(std::ostream* out) const {
@@ -450,11 +435,7 @@ static ::std::ostream& operator<<(::std::ostream& out, const std::unique_ptr<Ite
 }
 
 Styleable* Styleable::clone(StringPool* /*newPool*/) const {
-    Styleable* styleable = new Styleable();
-    styleable->mComment = mComment;
-    styleable->mSource = mSource;
-    std::copy(entries.begin(), entries.end(), std::back_inserter(styleable->entries));
-    return styleable;
+    return new Styleable(*this);
 }
 
 void Styleable::print(std::ostream* out) const {

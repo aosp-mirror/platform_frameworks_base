@@ -18,6 +18,10 @@
 #define AAPT_LINK_MANIFESTFIXER_H
 
 #include "process/IResourceTableConsumer.h"
+#include "util/Maybe.h"
+#include "xml/XmlDom.h"
+
+#include <string>
 
 namespace aapt {
 
@@ -36,7 +40,7 @@ struct ManifestFixer : public IXmlResourceConsumer {
     ManifestFixer(const ManifestFixerOptions& options) : mOptions(options) {
     }
 
-    bool consume(IAaptContext* context, XmlResource* doc) override;
+    bool consume(IAaptContext* context, xml::XmlResource* doc) override;
 };
 
 } // namespace aapt

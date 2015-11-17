@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "XmlDom.h"
+#include "xml/XmlDom.h"
 
 #include <gtest/gtest.h>
 #include <sstream>
@@ -38,7 +38,7 @@ TEST(XmlDomTest, Inflate) {
 
     const Source source = { "test.xml" };
     StdErrDiagnostics diag;
-    std::unique_ptr<XmlResource> doc = xml::inflate(&in, &diag, source);
+    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, source);
     ASSERT_NE(doc, nullptr);
 
     xml::Namespace* ns = xml::nodeCast<xml::Namespace>(doc->root.get());

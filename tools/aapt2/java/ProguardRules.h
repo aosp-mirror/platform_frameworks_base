@@ -19,8 +19,7 @@
 
 #include "Resource.h"
 #include "Source.h"
-
-#include "process/IResourceTableConsumer.h"
+#include "xml/XmlDom.h"
 
 #include <map>
 #include <ostream>
@@ -47,8 +46,8 @@ private:
     std::map<std::u16string, std::set<Source>> mKeepMethodSet;
 };
 
-bool collectProguardRulesForManifest(const Source& source, XmlResource* res, KeepSet* keepSet);
-bool collectProguardRules(const Source& source, XmlResource* res, KeepSet* keepSet);
+bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
+bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* keepSet);
 
 bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
 
