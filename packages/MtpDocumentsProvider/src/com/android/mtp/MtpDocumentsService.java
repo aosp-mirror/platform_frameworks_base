@@ -67,10 +67,10 @@ public class MtpDocumentsService extends Service {
                 provider.openDevice(device.getDeviceId());
                 return START_STICKY;
             } catch (IOException error) {
-                Log.d(MtpDocumentsProvider.TAG, error.getMessage());
+                Log.e(MtpDocumentsProvider.TAG, error.getMessage());
             }
         } else {
-            Log.d(MtpDocumentsProvider.TAG, "Received unknown intent action.");
+            Log.w(MtpDocumentsProvider.TAG, "Received unknown intent action.");
         }
         stopSelfIfNeeded();
         return Service.START_NOT_STICKY;
@@ -82,7 +82,7 @@ public class MtpDocumentsService extends Service {
         unregisterReceiver(mReceiver);
         mReceiver = null;
         try {
-            provider.close();
+            provider.closeAllDevices();
         } catch (InterruptedException e) {
             Log.e(MtpDocumentsProvider.TAG, e.getMessage());
         }
@@ -105,8 +105,8 @@ public class MtpDocumentsService extends Service {
                 final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
                 try {
                     provider.closeDevice(device.getDeviceId());
-                } catch (IOException error) {
-                    Log.d(MtpDocumentsProvider.TAG, error.getMessage());
+                } catch (IOException | InterruptedException error) {
+                    Log.e(MtpDocumentsProvider.TAG, error.getMessage());
                 }
                 stopSelfIfNeeded();
             }
