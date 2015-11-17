@@ -88,6 +88,7 @@ public class VibratorService extends IVibratorService.Stub
     private SettingsObserver mSettingObserver;
 
     native static boolean vibratorExists();
+    native static void vibratorInit();
     native static void vibratorOn(long milliseconds);
     native static void vibratorOff();
 
@@ -195,6 +196,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     VibratorService(Context context) {
+        vibratorInit();
         // Reset the hardware to a default state, in case this is a runtime
         // restart instead of a fresh boot.
         vibratorOff();
