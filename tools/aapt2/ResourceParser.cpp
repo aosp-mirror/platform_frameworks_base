@@ -747,7 +747,13 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
         }
     }
 
-    std::vector<Attribute::Symbol> items;
+    struct SymbolComparator {
+        bool operator()(const Attribute::Symbol& a, const Attribute::Symbol& b) {
+            return a.symbol.name.value() < b.symbol.name.value();
+        }
+    };
+
+    std::set<Attribute::Symbol, SymbolComparator> items;
 
     std::u16string comment;
     bool error = false;
@@ -785,15 +791,27 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
             }
 
             if (Maybe<Attribute::Symbol> s = parseEnumOrFlagItem(parser, elementName)) {
+                Attribute::Symbol& symbol = s.value();
                 ParsedResource childResource;
-                childResource.name = s.value().symbol.name.value();
+                childResource.name = symbol.symbol.name.value();
                 childResource.source = itemSource;
                 childResource.value = util::make_unique<Id>();
                 outResource->childResources.push_back(std::move(childResource));
 
-                s.value().symbol.setComment(std::move(comment));
-                s.value().symbol.setSource(itemSource);
-                items.push_back(std::move(s.value()));
+                symbol.symbol.setComment(std::move(comment));
+                symbol.symbol.setSource(itemSource);
+
+                auto insertResult = items.insert(std::move(symbol));
+                if (!insertResult.second) {
+                    const Attribute::Symbol& existingSymbol = *insertResult.first;
+                    mDiag->error(DiagMessage(itemSource)
+                                 << "duplicate symbol '" << existingSymbol.symbol.name.value().entry
+                                 << "'");
+
+                    mDiag->note(DiagMessage(existingSymbol.symbol.getSource())
+                                << "first defined here");
+                    error = true;
+                }
             } else {
                 error = true;
             }
@@ -810,7 +828,7 @@ bool ResourceParser::parseAttrImpl(XmlPullParser* parser, ParsedResource* outRes
     }
 
     std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(weak);
-    attr->symbols.swap(items);
+    attr->symbols = std::vector<Attribute::Symbol>(items.begin(), items.end());
     attr->typeMask = typeMask ? typeMask : uint32_t(android::ResTable_map::TYPE_ANY);
     outResource->value = std::move(attr);
     return true;
