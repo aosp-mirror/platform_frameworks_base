@@ -220,6 +220,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller.reset();
 
         mStartEnterAnimationCompleted = false;
+
+        mTouchHandler.reset();
     }
 
     /** Requests that the views be synchronized with the model */
@@ -585,6 +587,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *                            task into view.
      */
     public void focusNextTask(boolean forward) {
+        if (mTouchHandler.isTouching()) {
+            return;
+        }
+
         // Find the next index to focus
         int numTasks = mStack.getTaskCount();
         if (numTasks == 0) return;
