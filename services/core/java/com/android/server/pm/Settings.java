@@ -3861,7 +3861,7 @@ final class Settings {
             if (pkgSetting.getNotLaunched(userId)) {
                 if (pkgSetting.installerPackageName != null) {
                     yucky.sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH,
-                            pkgSetting.name, null,
+                            pkgSetting.name, null, 0,
                             pkgSetting.installerPackageName, null, new int[] {userId});
                 }
                 pkgSetting.setNotLaunched(false, userId);

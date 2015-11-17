@@ -1414,18 +1414,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 }
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    packageName, extras, null, null, firstUsers);
+                                    packageName, extras, 0, null, null, firstUsers);
                             final boolean update = res.removedInfo.removedPackage != null;
                             if (update) {
                                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
                             }
                             sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    packageName, extras, null, null, updateUsers);
+                                    packageName, extras, 0, null, null, updateUsers);
                             if (update) {
                                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                                        packageName, extras, null, null, updateUsers);
+                                        packageName, extras, 0, null, null, updateUsers);
                                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
-                                        null, null, packageName, null, updateUsers);
+                                        null, null, 0, packageName, null, updateUsers);
 
                                 // treat asec-hosted packages like removable media on upgrade
                                 if (res.pkg.isForwardLocked() || isExternal(res.pkg)) {
@@ -9370,8 +9370,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     };
 
-    final void sendPackageBroadcast(final String action, final String pkg,
-            final Bundle extras, final String targetPkg, final IIntentReceiver finishedReceiver,
+    final void sendPackageBroadcast(final String action, final String pkg, final Bundle extras,
+            final int flags, final String targetPkg, final IIntentReceiver finishedReceiver,
             final int[] userIds) {
         mHandler.post(new Runnable() {
             @Override
@@ -9401,7 +9401,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             intent.putExtra(Intent.EXTRA_UID, uid);
                         }
                         intent.putExtra(Intent.EXTRA_USER_HANDLE, id);
-                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
                         if (DEBUG_BROADCASTS) {
                             RuntimeException here = new RuntimeException("here");
                             here.fillInStackTrace();
@@ -9593,7 +9593,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userId, pkgSetting.appId));
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                packageName, extras, null, null, new int[] {userId});
+                packageName, extras, 0, null, null, new int[] {userId});
         try {
             IActivityManager am = ActivityManagerNative.getDefault();
             final boolean isSystem =
@@ -12903,11 +12903,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
 
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                        extras, null, null, null);
+                        extras, 0, null, null, null);
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
-                        extras, null, null, null);
+                        extras, 0, null, null, null);
                 sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null,
-                        null, packageName, null, null);
+                        null, 0, packageName, null, null);
             }
         }
         // Force a gc here.
@@ -12942,14 +12942,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, removedForAllUsers);
             if (removedPackage != null) {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
-                        extras, null, null, removedUsers);
+                        extras, 0, null, null, removedUsers);
                 if (fullRemove && !replacing) {
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED, removedPackage,
-                            extras, null, null, removedUsers);
+                            extras, 0, null, null, removedUsers);
                 }
             }
             if (removedAppId >= 0) {
-                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, null, null,
+                sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, 0, null, null,
                         removedUsers);
             }
         }
@@ -14649,7 +14649,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, null, null,
+        // If this is not reporting a change of the overall package, then only send it
+        // to registered receivers.  We don't want to launch a swath of apps for every
+        // little component state change.
+        final int flags = !componentNames.contains(packageName)
+                ? Intent.FLAG_RECEIVER_REGISTERED_ONLY : 0;
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, flags, null, null,
                 new int[] {UserHandle.getUserId(packageUid)});
     }
 
@@ -15678,7 +15683,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
                     : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-            sendPackageBroadcast(action, null, extras, null, finishedReceiver, null);
+            sendPackageBroadcast(action, null, extras, 0, null, finishedReceiver, null);
         }
     }
 
