@@ -416,6 +416,7 @@ public abstract class Connection extends Conferenceable {
         public void onRingbackRequested(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
         public void onConnectionCapabilitiesChanged(Connection c, int capabilities) {}
+        public void onSupportedAudioRoutesChanged(Connection c, int supportedAudioRoutes) {}
         public void onVideoProviderChanged(
                 Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
@@ -1082,6 +1083,7 @@ public abstract class Connection extends Conferenceable {
     private int mCallerDisplayNamePresentation;
     private boolean mRingbackRequested = false;
     private int mConnectionCapabilities;
+    private int mSupportedAudioRoutes = CallAudioState.ROUTE_ALL;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
@@ -1306,6 +1308,15 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Returns the connection's supported audio routes.
+     *
+     * @hide
+     */
+    public final int getSupportedAudioRoutes() {
+        return mSupportedAudioRoutes;
+    }
+
+    /**
      * Sets the value of the {@link #getAddress()} property.
      *
      * @param address The new address.
@@ -1497,6 +1508,22 @@ public abstract class Connection extends Conferenceable {
             mConnectionCapabilities = connectionCapabilities;
             for (Listener l : mListeners) {
                 l.onConnectionCapabilitiesChanged(this, mConnectionCapabilities);
+            }
+        }
+    }
+
+    /**
+     * Sets the supported audio routes.
+     *
+     * @param supportedAudioRoutes the supported audio routes as a bitmask.
+     *                             See {@link CallAudioState}
+     * @hide
+     */
+    public final void setSupportedAudioRoutes(int supportedAudioRoutes) {
+        if (mSupportedAudioRoutes != supportedAudioRoutes) {
+            mSupportedAudioRoutes = supportedAudioRoutes;
+            for (Listener l : mListeners) {
+                l.onSupportedAudioRoutesChanged(this, mSupportedAudioRoutes);
             }
         }
     }
