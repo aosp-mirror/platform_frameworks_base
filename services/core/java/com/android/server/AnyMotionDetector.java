@@ -38,7 +38,7 @@ public class AnyMotionDetector {
 
     private static final String TAG = "AnyMotionDetector";
 
-    private static final boolean DEBUG = true;  // STOPSHIP
+    private static final boolean DEBUG = false;
 
     /** Stationary status is unknown due to insufficient orientation measurements. */
     public static final int RESULT_UNKNOWN = -1;
