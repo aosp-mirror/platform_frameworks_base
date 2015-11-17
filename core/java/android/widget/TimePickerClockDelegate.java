@@ -198,14 +198,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
         mAllowAutoAdvance = true;
 
-        // Updates mHourFormat variables used below.
-        updateHourFormat(mLocale, mIs24Hour);
-
-        // Update hour text field.
-        final int minHour = mHourFormatStartsAtZero ? 0 : 1;
-        final int maxHour = (mIs24Hour ? 23 : 11) + minHour;
-        mHourView.setRange(minHour, maxHour);
-        mHourView.setShowLeadingZeroes(mHourFormatShowLeadingZero);
+        updateHourFormat();
 
         // Initialize with current time.
         mTempCalendar = Calendar.getInstance(mLocale);
@@ -232,15 +225,14 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     /**
-     * Determines how the hour should be formatted and updates member variables
-     * related to hour formatting.
-     *
-     * @param locale the locale in which the view is displayed
-     * @param is24Hour whether the view is in 24-hour (hour-of-day) mode
+     * Updates hour formatting based on the current locale and 24-hour mode.
+     * <p>
+     * Determines how the hour should be formatted, sets member variables for
+     * leading zero and starting hour, and sets the hour view's presentation.
      */
-    private void updateHourFormat(Locale locale, boolean is24Hour) {
+    private void updateHourFormat() {
         final String bestDateTimePattern = DateFormat.getBestDateTimePattern(
-                locale, is24Hour ? "Hm" : "hm");
+                mLocale, mIs24Hour ? "Hm" : "hm");
         final int lengthPattern = bestDateTimePattern.length();
         boolean showLeadingZero = false;
         char hourFormat = '\0';
@@ -258,6 +250,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
         mHourFormatShowLeadingZero = showLeadingZero;
         mHourFormatStartsAtZero = hourFormat == 'K' || hourFormat == 'H';
+
+        // Update hour text field.
+        final int minHour = mHourFormatStartsAtZero ? 0 : 1;
+        final int maxHour = (mIs24Hour ? 23 : 11) + minHour;
+        mHourView.setRange(minHour, maxHour);
+        mHourView.setShowLeadingZeroes(mHourFormatShowLeadingZero);
     }
 
     private static final CharSequence obtainVerbatim(String text) {
@@ -456,6 +454,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             mIs24Hour = is24Hour;
             mInitialHourOfDay = getHour();
 
+            updateHourFormat();
             updateUI(mRadialTimePickerView.getCurrentItemShowing());
         }
     }
@@ -655,6 +654,10 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
     /**
      * Converts hour-of-day (0-23) time into a localized hour number.
+     * <p>
+     * The localized value may be in the range (0-23), (1-24), (0-11), or
+     * (1-12) depending on the locale. This method does not handle leading
+     * zeroes.
      *
      * @param hourOfDay the hour-of-day (0-23)
      * @return a localized hour number
