@@ -3934,6 +3934,10 @@
     <!-- Lock-to-app unlock password string -->
     <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
+    <!-- Multi-Window strings -->
+    <!-- Warning message when a non-resizeble tasks is docked. -->
+    <string name="dock_non_resizeble_text">App is not resizeable, scroll it with two fingers.</string>
+
     <!-- Notification shown when device owner silently installs a package [CHAR LIMIT=NONE] -->
     <string name="package_installed_device_owner">Installed by your administrator</string>
     <!-- Notification shown when device owner silently updates a package [CHAR LIMIT=NONE] -->

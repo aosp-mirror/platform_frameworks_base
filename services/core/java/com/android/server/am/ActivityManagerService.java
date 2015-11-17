@@ -8809,6 +8809,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (task.mResizeable != resizeable) {
                 task.mResizeable = resizeable;
+                mWindowManager.setTaskResizeable(taskId, resizeable);
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mStackSupervisor.resumeTopActivitiesLocked();
             }
@@ -8827,6 +8828,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
                 }
+                int stackId = task.stack.mStackId;
+                // First, check if this is a non-resizeble task in docked stack or if the task size
+                // is affected by the docked stack changing size. If so, instead of resizing, we
+                // can only scroll the task. No need to update configuration.
+                if (bounds != null && !task.mResizeable
+                        && mStackSupervisor.isStackDockedInEffect(stackId)) {
+                    mWindowManager.scrollTask(task.taskId, bounds);
+                    return;
+                }
+
                 // Place the task in the right stack if it isn't there already based on
                 // the requested bounds.
                 // The stack transition logic is:
@@ -8834,7 +8845,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // - a non-null bounds on a non-freeform (fullscreen OR docked) task moves
                 //   that task to freeform
                 // - otherwise the task is not moved
-                int stackId = task.stack.mStackId;
                 if (!StackId.isTaskResizeAllowed(stackId)) {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
                 }

@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
@@ -71,6 +72,9 @@ class Task implements DimLayer.DimLayerUser {
     private Rect mTmpRect = new Rect();
     // For handling display rotations.
     private Rect mTmpRect2 = new Rect();
+
+    // Whether the task is resizeable
+    private boolean mResizeable;
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
@@ -227,6 +231,14 @@ class Task implements DimLayer.DimLayerUser {
         return boundsChange;
     }
 
+    void setResizeable(boolean resizeable) {
+        mResizeable = resizeable;
+    }
+
+    boolean isResizeable() {
+        return mResizeable;
+    }
+
     boolean resizeLocked(Rect bounds, Configuration configuration, boolean forced) {
         int boundsChanged = setBounds(bounds, configuration);
         if (forced) {
@@ -237,6 +249,45 @@ class Task implements DimLayer.DimLayerUser {
         }
         if ((boundsChanged & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
             resizeWindows();
+        }
+        return true;
+    }
+
+    boolean scrollLocked(Rect bounds) {
+        // shift the task bound if it doesn't fully cover the stack area
+        mStack.getDimBounds(mTmpRect);
+        if (mService.mCurConfiguration.orientation == ORIENTATION_LANDSCAPE) {
+            if (bounds.left > mTmpRect.left) {
+                bounds.left = mTmpRect.left;
+                bounds.right = mTmpRect.left + mBounds.width();
+            } else if (bounds.right < mTmpRect.right) {
+                bounds.left = mTmpRect.right - mBounds.width();
+                bounds.right = mTmpRect.right;
+            }
+        } else {
+            if (bounds.top > mTmpRect.top) {
+                bounds.top = mTmpRect.top;
+                bounds.bottom = mTmpRect.top + mBounds.height();
+            } else if (bounds.bottom < mTmpRect.bottom) {
+                bounds.top = mTmpRect.bottom - mBounds.height();
+                bounds.bottom = mTmpRect.bottom;
+            }
+        }
+
+        if (bounds.equals(mBounds)) {
+            return false;
+        }
+        // Normal setBounds() does not allow non-null bounds for fullscreen apps.
+        // We only change bounds for the scrolling case without change it size,
+        // on resizing path we should still want the validation.
+        mBounds.set(bounds);
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState win = windows.get(winNdx);
+                win.mXOffset = bounds.left;
+                win.mYOffset = bounds.top;
+            }
         }
         return true;
     }
@@ -416,6 +467,19 @@ class Task implements DimLayer.DimLayerUser {
 
     boolean inDockedWorkspace() {
         return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
+    }
+
+    boolean isResizeableByDockedStack() {
+        return mStack != null && getDisplayContent().getDockedStackLocked() != null &&
+                StackId.isTaskResizeableByDockedStack(mStack.mStackId);
+    }
+
+    /**
+     * Whether the task should be treated as if it's docked. Returns true if the task
+     * is currently in docked workspace, or it's side-by-side to a docked task.
+     */
+    boolean isDockedInEffect() {
+        return inDockedWorkspace() || isResizeableByDockedStack();
     }
 
     WindowState getTopVisibleAppMainWindow() {

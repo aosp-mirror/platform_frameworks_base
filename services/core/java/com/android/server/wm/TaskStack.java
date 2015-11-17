@@ -125,7 +125,18 @@ public class TaskStack implements DimLayer.DimLayerUser {
             Configuration config = configs.get(task.mTaskId);
             if (config != null) {
                 Rect bounds = taskBounds.get(task.mTaskId);
-                task.setBounds(bounds, config);
+                if (!task.isResizeable() && task.isDockedInEffect()) {
+                    // This is a non-resizeable task that's docked (or side-by-side to the docked
+                    // stack). It might have been scrolled previously, and after the stack resizing,
+                    // it might no longer fully cover the stack area.
+                    // Save the old bounds and re-apply the scroll. This adjusts the bounds to
+                    // fit the new stack bounds.
+                    task.getBounds(mTmpRect);
+                    task.setBounds(bounds, config);
+                    task.scrollLocked(mTmpRect);
+                } else {
+                    task.setBounds(bounds, config);
+                }
             } else {
                 Slog.wtf(TAG, "No config for task: " + task + ", is there a mismatch with AM?");
             }

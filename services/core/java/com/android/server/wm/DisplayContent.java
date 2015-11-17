@@ -90,6 +90,9 @@ class DisplayContent {
     /** Detect user tapping outside of current focused stack bounds .*/
     Region mTouchExcludeRegion = new Region();
 
+    /** Detect user tapping in a non-resizeable task in docked or fullscreen stack .*/
+    Region mNonResizeableRegion = new Region();
+
     /** Save allocating when calculating rects */
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
@@ -274,7 +277,12 @@ class DisplayContent {
 
     int taskIdFromPoint(int x, int y) {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+            TaskStack stack = mStacks.get(stackNdx);
+            stack.getBounds(mTmpRect);
+            if (!mTmpRect.contains(x, y)) {
+                continue;
+            }
+            final ArrayList<Task> tasks = stack.getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
                 final WindowState win = task.getTopVisibleAppMainWindow();
@@ -339,6 +347,7 @@ class DisplayContent {
         mTouchExcludeRegion.set(mBaseDisplayRect);
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         boolean addBackFocusedTask = false;
+        mNonResizeableRegion.setEmpty();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
             final ArrayList<Task> tasks = stack.getTasks();
@@ -381,6 +390,11 @@ class DisplayContent {
                     }
                     mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
                 }
+                if (task.isDockedInEffect() && !task.isResizeable()) {
+                    stack.getBounds(mTmpRect);
+                    mNonResizeableRegion.op(mTmpRect, Region.Op.UNION);
+                    break;
+                }
             }
         }
         // If we removed the focused task above, add it back and only leave its
@@ -390,7 +404,7 @@ class DisplayContent {
             mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
         }
         if (mTapDetector != null) {
-            mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
+            mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion, mNonResizeableRegion);
         }
     }
 

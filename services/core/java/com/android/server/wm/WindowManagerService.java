@@ -3564,7 +3564,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setFocusTaskRegion() {
+    void setFocusTaskRegionLocked() {
         if (mFocusedApp != null) {
             final Task task = mFocusedApp.mTask;
             final DisplayContent displayContent = task.getDisplayContent();
@@ -3599,7 +3599,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (changed) {
                 mFocusedApp = newFocus;
                 mInputMonitor.setFocusedAppLw(newFocus);
-                setFocusTaskRegion();
+                setFocusTaskRegionLocked();
             }
 
             if (moveFocusNow && changed) {
@@ -4857,6 +4857,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void scrollTask(int taskId, Rect bounds) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                throw new IllegalArgumentException("scrollTask: taskId " + taskId
+                        + " not found.");
+            }
+
+            if (task.scrollLocked(bounds)) {
+                task.getDisplayContent().layoutNeeded = true;
+                mInputMonitor.setUpdateInputWindowsNeededLw();
+                mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
+    }
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
@@ -7073,6 +7088,26 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
+    private void startScrollingTask(DisplayContent displayContent, int startX, int startY) {
+        if (DEBUG_TASK_POSITIONING) Slog.d(TAG,
+                "startScrollingTask: " + "{" + startX + ", " + startY + "}");
+
+        Task task = null;
+        synchronized (mWindowMap) {
+            int taskId = displayContent.taskIdFromPoint(startX, startY);
+            if (taskId >= 0) {
+                task = mTaskIdToTask.get(taskId);
+            }
+            if (task == null || !task.isDockedInEffect() || !startPositioningLocked(
+                    task.getTopVisibleAppMainWindow(), false /*resize*/, startX, startY)) {
+                return;
+            }
+        }
+        try {
+            mActivityManager.setFocusedTask(task.mTaskId);
+        } catch(RemoteException e) {}
+    }
+
     private void startResizingTask(DisplayContent displayContent, int startX, int startY) {
         Task task = null;
         synchronized (mWindowMap) {
@@ -7089,11 +7124,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private boolean startPositioningLocked(
             WindowState win, boolean resize, float startX, float startY) {
-        if (WindowManagerService.DEBUG_TASK_POSITIONING) {
-            Slog.d(TAG, "startPositioningLocked: win=" + win +
-                    ", resize=" + resize + ", {" + startX + ", " + startY + "}");
-        }
-        if (win == null || win.getAppToken() == null || !win.inFreeformWorkspace()) {
+        if (DEBUG_TASK_POSITIONING) Slog.d(TAG, "startPositioningLocked: "
+            + "win=" + win + ", resize=" + resize + ", {" + startX + ", " + startY + "}");
+
+        if (win == null || win.getAppToken() == null) {
             Slog.w(TAG, "startPositioningLocked: Bad window " + win);
             return false;
         }
@@ -7127,7 +7161,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void finishPositioning() {
-        if (WindowManagerService.DEBUG_TASK_POSITIONING) {
+        if (DEBUG_TASK_POSITIONING) {
             Slog.d(TAG, "finishPositioning");
         }
         synchronized (mWindowMap) {
@@ -7340,6 +7374,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent != null) {
                 mAnimator.addDisplayLocked(displayId);
                 displayContent.initializeDisplayBaseInfo();
+                displayContent.mTapDetector.init();
             }
         }
     }
@@ -7404,6 +7439,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int RESIZE_STACK = 43;
         public static final int RESIZE_TASK = 44;
+
+        public static final int TWO_FINGER_SCROLL_START = 45;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -7868,6 +7905,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         } catch (RemoteException e) {
                         }
                     }
+                }
+                break;
+
+                case TWO_FINGER_SCROLL_START: {
+                    startScrollingTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
                 }
                 break;
 
@@ -10138,6 +10180,15 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
             requestTraversal();
+        }
+    }
+
+    public void setTaskResizeable(int taskId, boolean resizeable) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task != null) {
+                task.setResizeable(resizeable);
+            }
         }
     }
 

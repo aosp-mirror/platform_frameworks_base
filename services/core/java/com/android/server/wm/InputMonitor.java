@@ -194,6 +194,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         inputWindowHandle.frameRight = frame.right;
         inputWindowHandle.frameBottom = frame.bottom;
 
+        if (child.isDockedInEffect()) {
+            // Adjust to account for non-resizeable tasks that's scrolled
+            inputWindowHandle.frameLeft += child.mXOffset;
+            inputWindowHandle.frameTop += child.mYOffset;
+            inputWindowHandle.frameRight += child.mXOffset;
+            inputWindowHandle.frameBottom += child.mYOffset;
+        }
+
         if (child.mGlobalScale != 1) {
             // If we are scaling the window, input coordinates need
             // to be inversely scaled to map from what is on screen
@@ -204,7 +212,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         if (DEBUG_INPUT) {
-            Slog.d(WindowManagerService.TAG, "addInputWindowHandle: " + inputWindowHandle);
+            Slog.d(WindowManagerService.TAG, "addInputWindowHandle: "
+                    + child + ", " + inputWindowHandle);
         }
         addInputWindowHandleLw(inputWindowHandle);
     }

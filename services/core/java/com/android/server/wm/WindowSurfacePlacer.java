@@ -514,7 +514,7 @@ class WindowSurfacePlacer {
         if (updateInputWindowsNeeded) {
             mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
-        mService.setFocusTaskRegion();
+        mService.setFocusTaskRegionLocked();
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.

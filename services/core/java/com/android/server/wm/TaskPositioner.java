@@ -337,12 +337,20 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mStartDragX = startX;
         mStartDragY = startY;
 
-        // Use the dim bounds, not the original task bounds. The cursor
-        // movement should be calculated relative to the visible bounds.
-        // Also, use the dim bounds of the task which accounts for
-        // multiple app windows. Don't use any bounds from win itself as it
-        // may not be the same size as the task.
-        mTask.getDimBounds(mTmpRect);
+        if (mTask.isDockedInEffect()) {
+            // If this is a docked task or if task size is affected by docked stack changing size,
+            // we can only be here if the task is not resizeable and we're handling a two-finger
+            // scrolling. Use the original task bounds to position the task, the dim bounds
+            // is cropped and doesn't move.
+            mTask.getBounds(mTmpRect);
+        } else {
+            // Use the dim bounds, not the original task bounds. The cursor
+            // movement should be calculated relative to the visible bounds.
+            // Also, use the dim bounds of the task which accounts for
+            // multiple app windows. Don't use any bounds from win itself as it
+            // may not be the same size as the task.
+            mTask.getDimBounds(mTmpRect);
+        }
 
         if (resize) {
             if (startX < mTmpRect.left) {
@@ -371,7 +379,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     /** Returns true if the move operation should be ended. */
     private boolean notifyMoveLocked(float x, float y) {
         if (DEBUG_TASK_POSITIONING) {
-            Slog.d(TAG, "notifyMoveLw: {" + x + "," + y + "}");
+            Slog.d(TAG, "notifyMoveLocked: {" + x + "," + y + "}");
         }
 
         if (mCtrlType != CTRL_NONE) {
@@ -401,15 +409,45 @@ class TaskPositioner implements DimLayer.DimLayerUser {
 
         // This is a moving operation.
         mTask.mStack.getDimBounds(mTmpRect);
-        mTmpRect.inset(mMinVisibleWidth, mMinVisibleHeight);
-        if (!mTmpRect.contains((int) x, (int) y)) {
-            // We end the moving operation if position is outside the stack bounds.
-            return true;
+
+        // If this is a non-resizeable task put into side-by-side mode, we are
+        // handling a two-finger scrolling action. No need to shrink the bounds.
+        if (!mTask.isDockedInEffect()) {
+            mTmpRect.inset(mMinVisibleWidth, mMinVisibleHeight);
         }
+
+        boolean dragEnded = false;
+        final int nX = (int) x;
+        final int nY = (int) y;
+        if (!mTmpRect.contains(nX, nY)) {
+            // We end the moving operation if position is outside the stack bounds.
+            // In this case we need to clamp the position to stack bounds and calculate
+            // the final window drag bounds.
+            x = Math.min(Math.max(x, mTmpRect.left), mTmpRect.right);
+            y = Math.min(Math.max(y, mTmpRect.top), mTmpRect.bottom);
+            dragEnded = true;
+        }
+
+        updateWindowDragBounds(nX, nY);
+        updateDimLayerVisibility(nX);
+        return dragEnded;
+    }
+
+    private void updateWindowDragBounds(int x, int y) {
         mWindowDragBounds.set(mWindowOriginalBounds);
-        mWindowDragBounds.offset(Math.round(x - mStartDragX), Math.round(y - mStartDragY));
-        updateDimLayerVisibility((int) x);
-        return false;
+        if (mTask.isDockedInEffect()) {
+            // Offset the bounds without clamp, the bounds will be shifted later
+            // by window manager before applying the scrolling.
+            if (mService.mCurConfiguration.orientation == ORIENTATION_LANDSCAPE) {
+                mWindowDragBounds.offset(Math.round(x - mStartDragX), 0);
+            } else {
+                mWindowDragBounds.offset(0, Math.round(y - mStartDragY));
+            }
+        } else {
+            mWindowDragBounds.offset(Math.round(x - mStartDragX), Math.round(y - mStartDragY));
+        }
+        if (DEBUG_TASK_POSITIONING) Slog.d(TAG,
+                "updateWindowDragBounds: " + mWindowDragBounds);
     }
 
     private void updateDimLayerVisibility(int x) {

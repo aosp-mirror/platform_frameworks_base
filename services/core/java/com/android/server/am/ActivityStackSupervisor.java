@@ -34,6 +34,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -120,17 +121,19 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputEvent;
 import android.view.Surface;
+import android.widget.Toast;
+
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService;
-
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -181,6 +184,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
+    static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = FIRST_SUPERVISOR_STACK_MSG + 14;
 
     private static final String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -3011,6 +3015,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
+    /**
+     * Returns if a stack should be treated as if it's docked. Returns true if the stack is
+     * the docked stack itself, or if it's side-by-side to the docked stack.
+     */
+    boolean isStackDockedInEffect(int stackId) {
+        return stackId == DOCKED_STACK_ID ||
+                (StackId.isResizeableByDockedStack(stackId) && getStack(DOCKED_STACK_ID) != null);
+    }
+
     ActivityContainer createVirtualActivityContainer(ActivityRecord parentActivity,
             IActivityContainerCallback callback) {
         ActivityContainer activityContainer =
@@ -3378,6 +3391,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeTopActivitiesLocked();
+
+        if (!task.mResizeable && isStackDockedInEffect(stackId)) {
+            showNonResizeableDockToast();
+        }
     }
 
     boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect bounds) {
@@ -4310,6 +4327,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    void showNonResizeableDockToast() {
+        mHandler.sendEmptyMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST);
+    }
+
     void showLockTaskToast() {
         mLockTaskNotify.showToast(mLockTaskModeState);
     }
@@ -4621,6 +4642,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             handleLaunchTaskBehindCompleteLocked(r);
                         }
                     }
+                } break;
+                case SHOW_NON_RESIZEABLE_DOCK_TOAST: {
+                    final Toast toast = Toast.makeText(
+                            mService.mContext,
+                            mService.mContext.getString(R.string.dock_non_resizeble_text),
+                            Toast.LENGTH_LONG);
+                    toast.show();
                 } break;
             }
         }

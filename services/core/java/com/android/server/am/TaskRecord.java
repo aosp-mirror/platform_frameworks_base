@@ -1271,7 +1271,11 @@ final class TaskRecord {
             mBounds = null;
             mOverrideConfig = Configuration.EMPTY;
         } else {
-            mBounds = new Rect(bounds);
+            if (mBounds == null) {
+                mBounds = new Rect(bounds);
+            } else {
+                mBounds.set(bounds);
+            }
             if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }

@@ -1430,7 +1430,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean inDockedWorkspace() {
-        return mAppToken != null && mAppToken.mTask != null && mAppToken.mTask.inDockedWorkspace();
+        Task task = getTask();
+        return task != null && task.inDockedWorkspace();
+    }
+
+    boolean isDockedInEffect() {
+        Task task = getTask();
+        return task != null && task.isDockedInEffect();
     }
 
     int getTouchableRegion(Region region, int flags) {

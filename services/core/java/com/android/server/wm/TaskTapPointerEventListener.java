@@ -19,7 +19,7 @@ package com.android.server.wm;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.DisplayInfo;
-import android.view.InputDevice;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy.PointerEventListener;
 
@@ -44,6 +44,10 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final Rect mTmpRect = new Rect();
+    private final Region mNonResizeableRegion = new Region();
+    private boolean mTwoFingerScrolling;
+    private boolean mInGestureDetection;
+    private GestureDetector mGestureDetector;
     private int mPointerIconShape = STYLE_NOT_SPECIFIED;
 
     public TaskTapPointerEventListener(WindowManagerService service,
@@ -54,8 +58,18 @@ public class TaskTapPointerEventListener implements PointerEventListener {
         mMotionSlop = (int)(info.logicalDensityDpi * TAP_MOTION_SLOP_INCHES);
     }
 
+    // initialize the object, note this must be done outside WindowManagerService
+    // ctor, otherwise it may cause recursion as some code in GestureDetector ctor
+    // depends on WMS being already created.
+    void init() {
+        mGestureDetector = new GestureDetector(
+                mService.mContext, new TwoFingerScrollListener(), mService.mH);
+    }
+
     @Override
     public void onPointerEvent(MotionEvent motionEvent) {
+        doGestureDetection(motionEvent);
+
         final int action = motionEvent.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
@@ -83,6 +97,9 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                             || Math.abs(motionEvent.getY(index) - mDownY) > mMotionSlop) {
                         mPointerId = -1;
                     }
+                }
+                if (motionEvent.getPointerCount() != 2) {
+                    stopTwoFingerScroll();
                 }
                 break;
             }
@@ -143,14 +160,72 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     }
                     mPointerId = -1;
                 }
+                stopTwoFingerScroll();
                 break;
             }
         }
     }
 
-    void setTouchExcludeRegion(Region newRegion) {
+    private void doGestureDetection(MotionEvent motionEvent) {
+        if (mGestureDetector == null || mNonResizeableRegion.isEmpty()) {
+            return;
+        }
+        final int action = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+        final int x = (int) motionEvent.getX();
+        final int y = (int) motionEvent.getY();
+        final boolean isTouchInside = mNonResizeableRegion.contains(x, y);
+        if (mInGestureDetection || action == MotionEvent.ACTION_DOWN && isTouchInside) {
+            // If we receive the following actions, or the pointer goes out of the area
+            // we're interested in, stop detecting and cancel the current detection.
+            mInGestureDetection = isTouchInside
+                    && action != MotionEvent.ACTION_UP
+                    && action != MotionEvent.ACTION_POINTER_UP
+                    && action != MotionEvent.ACTION_CANCEL;
+            if (mInGestureDetection) {
+                mGestureDetector.onTouchEvent(motionEvent);
+            } else {
+                MotionEvent cancelEvent = motionEvent.copy();
+                cancelEvent.cancel();
+                mGestureDetector.onTouchEvent(cancelEvent);
+                stopTwoFingerScroll();
+            }
+        }
+    }
+
+    private void onTwoFingerScroll(MotionEvent e) {
+        final int x = (int)e.getX(0);
+        final int y = (int)e.getY(0);
+        if (!mTwoFingerScrolling) {
+            mTwoFingerScrolling = true;
+            mService.mH.obtainMessage(
+                    H.TWO_FINGER_SCROLL_START, x, y, mDisplayContent).sendToTarget();
+        }
+    }
+
+    private void stopTwoFingerScroll() {
+        if (mTwoFingerScrolling) {
+            mTwoFingerScrolling = false;
+            mService.mH.obtainMessage(H.FINISH_TASK_POSITIONING).sendToTarget();
+        }
+    }
+
+    private final class TwoFingerScrollListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                float distanceX, float distanceY) {
+            if (e2.getPointerCount() == 2) {
+                onTwoFingerScroll(e2);
+                return true;
+            }
+            stopTwoFingerScroll();
+            return false;
+        }
+    }
+
+    void setTouchExcludeRegion(Region newRegion, Region nonResizeableRegion) {
         synchronized (this) {
            mTouchExcludeRegion.set(newRegion);
+           mNonResizeableRegion.set(nonResizeableRegion);
         }
     }
 }

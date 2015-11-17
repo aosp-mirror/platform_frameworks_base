@@ -4700,6 +4700,7 @@ final class ActivityStack {
                 (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
                 r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
                 bounds, task.mOverrideConfig, !r.isHomeActivity());
+        mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
@@ -4753,6 +4754,7 @@ final class ActivityStack {
         task.updateOverrideConfiguration(bounds);
         mWindowManager.setAppTask(
                 r.appToken, task.taskId, task.getLaunchBounds(), task.mOverrideConfig);
+        mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
