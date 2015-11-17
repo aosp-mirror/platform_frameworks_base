@@ -121,6 +121,7 @@ public final class BatteryService extends SystemService {
     private int mLastBatteryTemperature;
     private boolean mLastBatteryLevelCritical;
     private int mLastMaxChargingCurrent;
+    private int mLastMaxChargingVoltage;
 
     private int mInvalidCharger;
     private int mLastInvalidCharger;
@@ -325,6 +326,7 @@ public final class BatteryService extends SystemService {
                     + ", chargerUsbOnline=" + mBatteryProps.chargerUsbOnline
                     + ", chargerWirelessOnline=" + mBatteryProps.chargerWirelessOnline
                     + ", maxChargingCurrent" + mBatteryProps.maxChargingCurrent
+                    + ", maxChargingVoltage" + mBatteryProps.maxChargingVoltage
                     + ", batteryStatus=" + mBatteryProps.batteryStatus
                     + ", batteryHealth=" + mBatteryProps.batteryHealth
                     + ", batteryPresent=" + mBatteryProps.batteryPresent
@@ -356,6 +358,7 @@ public final class BatteryService extends SystemService {
                 mBatteryProps.batteryVoltage != mLastBatteryVoltage ||
                 mBatteryProps.batteryTemperature != mLastBatteryTemperature ||
                 mBatteryProps.maxChargingCurrent != mLastMaxChargingCurrent ||
+                mBatteryProps.maxChargingVoltage != mLastMaxChargingVoltage ||
                 mInvalidCharger != mLastInvalidCharger)) {
 
             if (mPlugType != mLastPlugType) {
@@ -483,6 +486,7 @@ public final class BatteryService extends SystemService {
             mLastBatteryVoltage = mBatteryProps.batteryVoltage;
             mLastBatteryTemperature = mBatteryProps.batteryTemperature;
             mLastMaxChargingCurrent = mBatteryProps.maxChargingCurrent;
+            mLastMaxChargingVoltage = mBatteryProps.maxChargingVoltage;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
         }
@@ -508,7 +512,7 @@ public final class BatteryService extends SystemService {
         intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryProps.batteryTechnology);
         intent.putExtra(BatteryManager.EXTRA_INVALID_CHARGER, mInvalidCharger);
         intent.putExtra(BatteryManager.EXTRA_MAX_CHARGING_CURRENT, mBatteryProps.maxChargingCurrent);
-
+        intent.putExtra(BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE, mBatteryProps.maxChargingVoltage);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED.  level:" + mBatteryProps.batteryLevel +
                     ", scale:" + BATTERY_SCALE + ", status:" + mBatteryProps.batteryStatus +
@@ -521,7 +525,8 @@ public final class BatteryService extends SystemService {
                     ", USB powered:" + mBatteryProps.chargerUsbOnline +
                     ", Wireless powered:" + mBatteryProps.chargerWirelessOnline +
                     ", icon:" + icon  + ", invalid charger:" + mInvalidCharger +
-                    ", maxChargingCurrent:" + mBatteryProps.maxChargingCurrent);
+                    ", maxChargingCurrent:" + mBatteryProps.maxChargingCurrent +
+                    ", maxChargingVoltage:" + mBatteryProps.maxChargingVoltage);
         }
 
         mHandler.post(new Runnable() {
@@ -627,6 +632,7 @@ public final class BatteryService extends SystemService {
                 pw.println("  USB powered: " + mBatteryProps.chargerUsbOnline);
                 pw.println("  Wireless powered: " + mBatteryProps.chargerWirelessOnline);
                 pw.println("  Max charging current: " + mBatteryProps.maxChargingCurrent);
+                pw.println("  Max charging voltage: " + mBatteryProps.maxChargingVoltage);
                 pw.println("  status: " + mBatteryProps.batteryStatus);
                 pw.println("  health: " + mBatteryProps.batteryHealth);
                 pw.println("  present: " + mBatteryProps.batteryPresent);
