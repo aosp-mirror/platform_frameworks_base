@@ -16,11 +16,14 @@
 
 package android.security.net.config;
 
+import android.util.ArrayMap;
 import android.util.ArraySet;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.net.ssl.X509TrustManager;
@@ -57,12 +60,24 @@ public final class NetworkSecurityConfig {
             if (mAnchors != null) {
                 return mAnchors;
             }
-            Set<TrustAnchor> anchors = new ArraySet<TrustAnchor>();
+            // Merge trust anchors based on the X509Certificate.
+            // If we see the same certificate in two TrustAnchors, one with overridesPins and one
+            // without, the one with overridesPins wins.
+            Map<X509Certificate, TrustAnchor> anchorMap = new ArrayMap<>();
             for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
-                anchors.addAll(ref.getTrustAnchors());
+                Set<TrustAnchor> anchors = ref.getTrustAnchors();
+                for (TrustAnchor anchor : anchors) {
+                    if (anchor.overridesPins) {
+                        anchorMap.put(anchor.certificate, anchor);
+                    } else if (!anchorMap.containsKey(anchor.certificate)) {
+                        anchorMap.put(anchor.certificate, anchor);
+                    }
+                }
             }
+            ArraySet<TrustAnchor> anchors = new ArraySet<TrustAnchor>(anchorMap.size());
+            anchors.addAll(anchorMap.values());
             mAnchors = anchors;
-            return anchors;
+            return mAnchors;
         }
     }
 
