@@ -18,6 +18,7 @@
 #include "Extensions.h"
 
 #include <GLES2/gl2.h>
+#include <log/log.h>
 
 #include <thread>
 #include <mutex>
@@ -29,6 +30,7 @@ static DeviceInfo* sDeviceInfo = nullptr;
 static std::once_flag sInitializedFlag;
 
 const DeviceInfo* DeviceInfo::get() {
+    LOG_ALWAYS_FATAL_IF(!sDeviceInfo, "DeviceInfo not yet initialized.");
     return sDeviceInfo;
 }
 

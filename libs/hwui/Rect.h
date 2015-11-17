@@ -276,7 +276,7 @@ public:
     }
 
     void dump(const char* label = nullptr) const {
-        ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
+        ALOGD("%s[l=%.2f t=%.2f r=%.2f b=%.2f]", label ? label : "Rect", left, top, right, bottom);
     }
 }; // class Rect
 

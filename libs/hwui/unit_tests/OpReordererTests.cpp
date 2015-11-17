@@ -17,10 +17,10 @@
 #include <gtest/gtest.h>
 
 #include <BakedOpState.h>
+#include <LayerUpdateQueue.h>
 #include <OpReorderer.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
-#include <renderthread/CanvasContext.h> // todo: remove
 #include <unit_tests/TestUtils.h>
 
 #include <unordered_map>
@@ -28,8 +28,8 @@
 namespace android {
 namespace uirenderer {
 
-LayerUpdateQueue sEmptyLayerUpdateQueue;
-Vector3 sLightCenter = {100, 100, 100};
+const LayerUpdateQueue sEmptyLayerUpdateQueue;
+const Vector3 sLightCenter = {100, 100, 100};
 
 static std::vector<sp<RenderNode>> createSyncedNodeList(sp<RenderNode>& node) {
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
@@ -79,7 +79,7 @@ protected:
 
 /**
  * Dispatches all static methods to similar formed methods on renderer, which fail by default but
- * are overriden by subclasses per test.
+ * are overridden by subclasses per test.
  */
 class TestDispatcher {
 public:
@@ -117,7 +117,6 @@ TEST(OpReorderer, simple) {
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
     OpReorderer reorderer(100, 200, *dl, sLightCenter);
-
     SimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
@@ -163,7 +162,6 @@ TEST(OpReorderer, simpleBatching) {
     });
 
     OpReorderer reorderer(200, 200, *dl, sLightCenter);
-
     SimpleBatchingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * SIMPLE_BATCHING_LOOPS, renderer.getIndex()); // 2 x loops ops, because no merging (TODO: force no merging)
@@ -208,7 +206,6 @@ TEST(OpReorderer, renderNode) {
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), sLightCenter);
-
     RenderNodeTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
@@ -232,7 +229,6 @@ TEST(OpReorderer, clipped) {
     OpReorderer reorderer(sEmptyLayerUpdateQueue,
             SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
             200, 200, createSyncedNodeList(node), sLightCenter);
-
     ClippedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
@@ -274,7 +270,6 @@ TEST(OpReorderer, saveLayerSimple) {
     });
 
     OpReorderer reorderer(200, 200, *dl, sLightCenter);
-
     SaveLayerSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
@@ -345,7 +340,6 @@ TEST(OpReorderer, saveLayerNested) {
     });
 
     OpReorderer reorderer(800, 800, *dl, sLightCenter);
-
     SaveLayerNestedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
@@ -520,7 +514,6 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerComplex) {
 
     OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             syncedList, sLightCenter);
-
     HwLayerComplexTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(13, renderer.getIndex());
@@ -570,7 +563,6 @@ TEST(OpReorderer, zReorder) {
     });
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
             createSyncedNodeList(parent), sLightCenter);
-
     ZReorderTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
@@ -616,7 +608,6 @@ TEST(OpReorderer, shadow) {
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), sLightCenter);
-
     ShadowTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2, renderer.getIndex());
@@ -658,7 +649,6 @@ TEST(OpReorderer, shadowSaveLayer) {
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), (Vector3) { 100, 100, 100 });
-
     ShadowSaveLayerTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(5, renderer.getIndex());
@@ -708,7 +698,6 @@ RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
     layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(100, 100));
     OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             syncedList, (Vector3) { 100, 100, 100 });
-
     ShadowHwLayerTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(5, renderer.getIndex());
@@ -738,12 +727,10 @@ TEST(OpReorderer, shadowLayering) {
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), sLightCenter);
-
     ShadowLayeringTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
 }
-
 
 static void testProperty(TestUtils::PropSetupCallback propSetupCallback,
         std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
@@ -766,7 +753,6 @@ static void testProperty(TestUtils::PropSetupCallback propSetupCallback,
 
     OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
             createSyncedNodeList(node), sLightCenter);
-
     PropertyTestRenderer renderer(opValidateCallback);
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex()) << "Should have seen one op";
@@ -852,6 +838,129 @@ TEST(OpReorderer, renderPropTransform) {
         EXPECT_MATRIX_APPROX_EQ(matrix, state.computedState.transform)
                 << "Op draw matrix must match expected combination of transformation properties";
     });
+}
+
+struct SaveLayerAlphaData {
+    uint32_t layerWidth = 0;
+    uint32_t layerHeight = 0;
+    Rect rectClippedBounds;
+    Matrix4 rectMatrix;
+};
+/**
+ * Constructs a view to hit the temporary layer alpha property implementation:
+ *     a) 0 < alpha < 1
+ *     b) too big for layer (larger than maxTextureSize)
+ *     c) overlapping rendering content
+ * returning observed data about layer size and content clip/transform.
+ *
+ * Used to validate clipping behavior of temporary layer, where requested layer size is reduced
+ * (for efficiency, and to fit in layer size constraints) based on parent clip.
+ */
+void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
+        TestUtils::PropSetupCallback propSetupCallback) {
+    class SaveLayerAlphaClipTestRenderer : public TestRendererBase {
+    public:
+        SaveLayerAlphaClipTestRenderer(SaveLayerAlphaData* outData)
+                : mOutData(outData) {}
+
+        OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
+            EXPECT_EQ(0, mIndex++);
+            mOutData->layerWidth = width;
+            mOutData->layerHeight = height;
+            return nullptr;
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+
+            mOutData->rectClippedBounds = state.computedState.clippedBounds;
+            mOutData->rectMatrix = state.computedState.transform;
+        }
+        void endLayer() override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(3, mIndex++);
+        }
+    private:
+        SaveLayerAlphaData* mOutData;
+    };
+
+    ASSERT_GT(10000, DeviceInfo::get()->maxTextureSize())
+            << "Node must be bigger than max texture size to exercise saveLayer codepath";
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 10000, 10000, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 10000, 10000, paint);
+    }, [&propSetupCallback](RenderProperties& properties) {
+        properties.setHasOverlappingRendering(true);
+        properties.setAlpha(0.5f); // force saveLayer, since too big for HW layer
+
+        // apply other properties
+        int flags = propSetupCallback(properties);
+        return RenderNode::GENERIC | RenderNode::ALPHA | flags;
+    });
+    auto nodes = createSyncedNodeList(node); // sync before querying height
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes, sLightCenter);
+    SaveLayerAlphaClipTestRenderer renderer(outObservedData);
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+
+    // assert, since output won't be valid if we haven't seen a save layer triggered
+    ASSERT_EQ(4, renderer.getIndex()) << "Test must trigger saveLayer alpha behavior.";
+}
+
+TEST(OpReorderer, renderPropSaveLayerAlphaClipBig) {
+    SaveLayerAlphaData observedData;
+    testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
+        properties.setTranslationX(10); // offset rendering content
+        properties.setTranslationY(-2000); // offset rendering content
+        return RenderNode::TRANSLATION_X | RenderNode::TRANSLATION_Y;
+    });
+    EXPECT_EQ(190u, observedData.layerWidth);
+    EXPECT_EQ(200u, observedData.layerHeight);
+    EXPECT_EQ(Rect(0, 0, 190, 200), observedData.rectClippedBounds)
+            << "expect content to be clipped to screen area";
+    Matrix4 expected;
+    expected.loadTranslate(0, -2000, 0);
+    EXPECT_MATRIX_APPROX_EQ(expected, observedData.rectMatrix)
+            << "expect content to be translated as part of being clipped";
+}
+
+TEST(OpReorderer, renderPropSaveLayerAlphaRotate) {
+    SaveLayerAlphaData observedData;
+    testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
+        // Translate and rotate the view so that the only visible part is the top left corner of
+        // the view. It will form an isoceles right triangle with a long side length of 200 at the
+        // bottom of the viewport.
+        properties.setTranslationX(100);
+        properties.setTranslationY(100);
+        properties.setPivotX(0);
+        properties.setPivotY(0);
+        properties.setRotation(45);
+        return RenderNode::GENERIC
+                | RenderNode::TRANSLATION_X | RenderNode::TRANSLATION_Y
+                | RenderNode::ROTATION;
+    });
+    // ceil(sqrt(2) / 2 * 200) = 142
+    EXPECT_EQ(142u, observedData.layerWidth);
+    EXPECT_EQ(142u, observedData.layerHeight);
+    EXPECT_EQ(Rect(0, 0, 142, 142), observedData.rectClippedBounds);
+    EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), observedData.rectMatrix);
+}
+
+TEST(OpReorderer, renderPropSaveLayerAlphaScale) {
+    SaveLayerAlphaData observedData;
+    testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
+        properties.setPivotX(0);
+        properties.setPivotY(0);
+        properties.setScaleX(2);
+        properties.setScaleY(0.5f);
+        return RenderNode::GENERIC | RenderNode::SCALE_X | RenderNode::SCALE_Y;
+    });
+    EXPECT_EQ(100u, observedData.layerWidth);
+    EXPECT_EQ(400u, observedData.layerHeight);
+    EXPECT_EQ(Rect(0, 0, 100, 400), observedData.rectClippedBounds);
+    EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), observedData.rectMatrix);
 }
 
 } // namespace uirenderer
