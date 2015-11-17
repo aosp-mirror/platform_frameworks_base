@@ -144,4 +144,18 @@ public final class ApplicationConfig {
             return sInstance;
         }
     }
+
+    /** @hide */
+    public static ApplicationConfig getPlatformDefault() {
+        return new ApplicationConfig(new ConfigSource() {
+            @Override
+            public NetworkSecurityConfig getDefaultConfig() {
+                return NetworkSecurityConfig.DEFAULT;
+            }
+            @Override
+            public Set<Pair<Domain, NetworkSecurityConfig>> getPerDomainConfigs() {
+                return null;
+            }
+        });
+    }
 }
