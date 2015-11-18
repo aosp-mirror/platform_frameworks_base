@@ -49,11 +49,9 @@ public class RankingHelper implements RankingConfig {
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
     private static final String ATT_PRIORITY = "priority";
-    private static final String ATT_PEEKABLE = "peekable";
     private static final String ATT_VISIBILITY = "visibility";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
-    private static final boolean DEFAULT_PEEKABLE = true;
     private static final int DEFAULT_VISIBILITY =
             NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
 
@@ -141,7 +139,6 @@ public class RankingHelper implements RankingConfig {
                 if (TAG_PACKAGE.equals(tag)) {
                     int uid = safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
                     int priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                    boolean peekable = safeBool(parser, ATT_PEEKABLE, DEFAULT_PEEKABLE);
                     int vis = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
                     String name = parser.getAttributeValue(null, ATT_NAME);
 
@@ -166,9 +163,6 @@ public class RankingHelper implements RankingConfig {
                         }
                         if (priority != DEFAULT_PRIORITY) {
                             r.priority = priority;
-                        }
-                        if (peekable != DEFAULT_PEEKABLE) {
-                            r.peekable = peekable;
                         }
                         if (vis != DEFAULT_VISIBILITY) {
                             r.visibility = vis;
@@ -200,8 +194,7 @@ public class RankingHelper implements RankingConfig {
         final int N = mRecords.size();
         for (int i = N - 1; i >= 0; i--) {
             final Record r = mRecords.valueAt(i);
-            if (r.priority == DEFAULT_PRIORITY && r.peekable == DEFAULT_PEEKABLE
-                    && r.visibility == DEFAULT_VISIBILITY) {
+            if (r.priority == DEFAULT_PRIORITY && r.visibility == DEFAULT_VISIBILITY) {
                 mRecords.remove(i);
             }
         }
@@ -222,9 +215,6 @@ public class RankingHelper implements RankingConfig {
             out.attribute(null, ATT_NAME, r.pkg);
             if (r.priority != DEFAULT_PRIORITY) {
                 out.attribute(null, ATT_PRIORITY, Integer.toString(r.priority));
-            }
-            if (r.peekable != DEFAULT_PEEKABLE) {
-                out.attribute(null, ATT_PEEKABLE, Boolean.toString(r.peekable));
             }
             if (r.visibility != DEFAULT_VISIBILITY) {
                 out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
@@ -348,22 +338,6 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public boolean getPackagePeekable(String packageName, int uid) {
-        final Record r = mRecords.get(recordKey(packageName, uid));
-        return r != null ? r.peekable : DEFAULT_PEEKABLE;
-    }
-
-    @Override
-    public void setPackagePeekable(String packageName, int uid, boolean peekable) {
-        if (peekable == getPackagePeekable(packageName, uid)) {
-            return;
-        }
-        getOrCreateRecord(packageName, uid).peekable = peekable;
-        removeDefaultRecords();
-        updateConfig();
-    }
-
-    @Override
     public int getPackageVisibilityOverride(String packageName, int uid) {
         final Record r = mRecords.get(recordKey(packageName, uid));
         return r != null ? r.visibility : DEFAULT_VISIBILITY;
@@ -415,10 +389,6 @@ public class RankingHelper implements RankingConfig {
                     pw.print(" priority=");
                     pw.print(Notification.priorityToString(r.priority));
                 }
-                if (r.peekable != DEFAULT_PEEKABLE) {
-                    pw.print(" peekable=");
-                    pw.print(r.peekable);
-                }
                 if (r.visibility != DEFAULT_VISIBILITY) {
                     pw.print(" visibility=");
                     pw.print(Notification.visibilityToString(r.visibility));
@@ -460,7 +430,6 @@ public class RankingHelper implements RankingConfig {
         String pkg;
         int uid = UNKNOWN_UID;
         int priority = DEFAULT_PRIORITY;
-        boolean peekable = DEFAULT_PEEKABLE;
         int visibility = DEFAULT_VISIBILITY;
     }
 

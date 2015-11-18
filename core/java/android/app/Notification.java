@@ -838,13 +838,6 @@ public class Notification implements Parcelable
     public static final String EXTRA_PEOPLE = "android.people";
 
     /**
-     * {@link #extras} key: used to provide hints about the appropriateness of
-     * displaying this notification as a heads-up notification.
-     * @hide
-     */
-    public static final String EXTRA_AS_HEADS_UP = "headsup";
-
-    /**
      * Allow certain system-generated notifications to appear before the device is provisioned.
      * Only available to notifications coming from the android package.
      * @hide
@@ -886,32 +879,6 @@ public class Notification implements Parcelable
      * @hide
      */
     public static final String EXTRA_BUILDER_APPLICATION_INFO = "android.appInfo";
-
-    /**
-     * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
-     * displayed in the heads up space.
-     *
-     * <p>
-     * If this notification has a {@link #fullScreenIntent}, then it will always launch the
-     * full-screen intent when posted.
-     * </p>
-     * @hide
-     */
-    public static final int HEADS_UP_NEVER = 0;
-
-    /**
-     * Default value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification may be
-     * displayed as a heads up.
-     * @hide
-     */
-    public static final int HEADS_UP_ALLOWED = 1;
-
-    /**
-     * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification is a
-     * good candidate for display as a heads up.
-     * @hide
-     */
-    public static final int HEADS_UP_REQUESTED = 2;
 
     private Icon mSmallIcon;
     private Icon mLargeIcon;

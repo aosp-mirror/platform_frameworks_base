@@ -2161,13 +2161,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean isHighPriority = sbn.getScore() >= INTERRUPTION_THRESHOLD;
         boolean isFullscreen = notification.fullScreenIntent != null;
         boolean hasTicker = mHeadsUpTicker && !TextUtils.isEmpty(notification.tickerText);
-        boolean isAllowed = notification.extras.getInt(Notification.EXTRA_AS_HEADS_UP,
-                Notification.HEADS_UP_ALLOWED) != Notification.HEADS_UP_NEVER;
         boolean accessibilityForcesLaunch = isFullscreen
                 && mAccessibilityManager.isTouchExplorationEnabled();
         boolean justLaunchedFullScreenIntent = entry.hasJustLaunchedFullScreenIntent();
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
-                && isAllowed
                 && !accessibilityForcesLaunch
                 && !justLaunchedFullScreenIntent
                 && mPowerManager.isScreenOn()
