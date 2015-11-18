@@ -19978,19 +19978,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.d(VIEW_LOG_TAG, "drag shadow: width=" + shadowSize.x + " height=" + shadowSize.y
                     + " shadowX=" + shadowTouchPoint.x + " shadowY=" + shadowTouchPoint.y);
         }
-        Surface surface = new Surface();
+        if (mAttachInfo.mDragSurface != null) {
+            mAttachInfo.mDragSurface.release();
+        }
+        mAttachInfo.mDragSurface = new Surface();
         try {
             mAttachInfo.mDragToken = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
-                    flags, shadowSize.x, shadowSize.y, surface);
+                    flags, shadowSize.x, shadowSize.y, mAttachInfo.mDragSurface);
             if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token="
-                    + mAttachInfo.mDragToken + " surface=" + surface);
+                    + mAttachInfo.mDragToken + " surface=" + mAttachInfo.mDragSurface);
             if (mAttachInfo.mDragToken != null) {
-                Canvas canvas = surface.lockCanvas(null);
+                Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
                 try {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                     shadowBuilder.onDrawShadow(canvas);
                 } finally {
-                    surface.unlockCanvasAndPost(canvas);
+                    mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
                 }
 
                 final ViewRootImpl root = getViewRootImpl();
@@ -20005,14 +20008,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         shadowSize.x, shadowSize.y,
                         shadowTouchPoint.x, shadowTouchPoint.y, data);
                 if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
-
-                // Off and running!  Release our local surface instance; the drag
-                // shadow surface is now managed by the system process.
-                surface.release();
             }
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
-            surface.destroy();
+            mAttachInfo.mDragSurface.destroy();
+            mAttachInfo.mDragSurface = null;
         }
 
         return okay;
@@ -20048,6 +20048,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttachInfo.mDragToken = null;
         } else {
             Log.e(VIEW_LOG_TAG, "No active drag to cancel");
+        }
+    }
+
+    public final void updateDragShadow(DragShadowBuilder shadowBuilder) {
+        if (ViewDebug.DEBUG_DRAG) {
+            Log.d(VIEW_LOG_TAG, "updateDragShadow");
+        }
+        if (mAttachInfo.mDragToken != null) {
+            try {
+                Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
+                try {
+                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                    shadowBuilder.onDrawShadow(canvas);
+                } finally {
+                    mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
+                }
+            } catch (Exception e) {
+                Log.e(VIEW_LOG_TAG, "Unable to update drag shadow", e);
+            }
+        } else {
+            Log.e(VIEW_LOG_TAG, "No active drag");
         }
     }
 
@@ -22340,6 +22361,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Used to track the identity of the current drag operation.
          */
         IBinder mDragToken;
+
+        /**
+         * The drag shadow surface for the current drag operation.
+         */
+        public Surface mDragSurface;
 
         /**
          * Creates a new set of attachment information with the specified

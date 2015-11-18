@@ -36773,6 +36773,7 @@ package android.view {
     method public void stopNestedScroll();
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable);
+    method public final void updateDragShadow(android.view.View.DragShadowBuilder);
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
