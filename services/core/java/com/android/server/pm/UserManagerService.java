@@ -322,7 +322,7 @@ public class UserManagerService extends IUserManager.Stub {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i);
-                if (ui.isPrimary()) {
+                if (ui.isPrimary() && !mRemovingUserIds.get(ui.id)) {
                     return ui;
                 }
             }
