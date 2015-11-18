@@ -33,6 +33,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.telephony.cdma.EriInfo;
+import com.android.settingslib.net.MobileDataControllerImpl;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;

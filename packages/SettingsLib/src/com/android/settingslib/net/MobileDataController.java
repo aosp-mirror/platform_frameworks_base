@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
-
-import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
-import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
-import static android.telephony.TelephonyManager.SIM_STATE_READY;
-import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
-import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+package com.android.settingslib.net;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -42,7 +35,14 @@ import android.util.Log;
 import java.util.Date;
 import java.util.Locale;
 
-public class MobileDataControllerImpl implements NetworkController.MobileDataController {
+import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
+import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
+import static android.telephony.TelephonyManager.SIM_STATE_READY;
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+
+public class MobileDataController {
     private static final String TAG = "MobileDataController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -60,9 +60,9 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
 
     private INetworkStatsSession mSession;
     private Callback mCallback;
-    private NetworkControllerImpl mNetworkController;
+    private NetworkNameProvider mNetworkController;
 
-    public MobileDataControllerImpl(Context context) {
+    public MobileDataController(Context context) {
         mContext = context;
         mTelephonyManager = TelephonyManager.from(context);
         mConnectivityManager = ConnectivityManager.from(context);
@@ -71,7 +71,7 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
         mPolicyManager = NetworkPolicyManager.from(mContext);
     }
 
-    public void setNetworkController(NetworkControllerImpl networkController) {
+    public void setNetworkController(NetworkNameProvider networkController) {
         mNetworkController = networkController;
     }
 
@@ -161,7 +161,7 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
             } else {
                 usage.warningLevel = DEFAULT_WARNING_LEVEL;
             }
-            if (usage != null) {
+            if (usage != null && mNetworkController != null) {
                 usage.carrier = mNetworkController.getMobileDataNetworkName();
             }
             return usage;
@@ -229,6 +229,18 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
             return DateUtils.formatDateRange(mContext, PERIOD_FORMATTER, start, end, flags, null)
                     .toString();
         }
+    }
+
+    public interface NetworkNameProvider {
+        String getMobileDataNetworkName();
+    }
+
+    public static class DataUsageInfo {
+        public String carrier;
+        public String period;
+        public long limitLevel;
+        public long warningLevel;
+        public long usageLevel;
     }
 
     public interface Callback {
