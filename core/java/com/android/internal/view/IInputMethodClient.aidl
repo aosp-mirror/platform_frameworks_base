@@ -25,7 +25,8 @@ import com.android.internal.view.InputBindResult;
 oneway interface IInputMethodClient {
     void setUsingInputMethod(boolean state);
     void onBindMethod(in InputBindResult res);
-    void onUnbindMethod(int sequence);
+    // unbindReason corresponds to InputMethodClient.UnbindReason.
+    void onUnbindMethod(int sequence, int unbindReason);
     void setActive(boolean active);
     void setUserActionNotificationSequenceNumber(int sequenceNumber);
 }
