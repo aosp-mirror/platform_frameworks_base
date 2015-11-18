@@ -594,7 +594,9 @@ class GlobalScreenshot {
 
         // Setup the animation with the screenshot just taken
         if (mScreenshotAnimation != null) {
-            mScreenshotAnimation.end();
+            if (mScreenshotAnimation.isStarted()) {
+                mScreenshotAnimation.end();
+            }
             mScreenshotAnimation.removeAllListeners();
         }
 
