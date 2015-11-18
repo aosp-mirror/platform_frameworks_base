@@ -470,6 +470,11 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             mActivity = null;
         }
         // Clear the state so that we can't hold any references accidentally and leak memory.
+        clearState();
+    }
+
+    @Override
+    protected void clearState() {
         mHandler = null;
         mSharedElementBundle = null;
         if (mBackgroundAnimator != null) {
@@ -477,7 +482,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             mBackgroundAnimator = null;
         }
         mExitSharedElementBundle = null;
-        clearState();
+        super.clearState();
     }
 
     @Override
