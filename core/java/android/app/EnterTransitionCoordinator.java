@@ -575,14 +575,20 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         setGhostVisibility(View.INVISIBLE);
         mHasStopped = true;
         mIsCanceled = true;
+        clearState();
+        return super.cancelPendingTransitions();
+    }
+
+    @Override
+    protected void clearState() {
+        mSharedElementsBundle = null;
+        mEnterViewsTransition = null;
         mResultReceiver = null;
         if (mBackgroundAnimator != null) {
             mBackgroundAnimator.cancel();
             mBackgroundAnimator = null;
         }
-        mActivity = null;
-        clearState();
-        return super.cancelPendingTransitions();
+        super.clearState();
     }
 
     private void makeOpaque() {
