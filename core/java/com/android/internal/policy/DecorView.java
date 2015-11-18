@@ -25,8 +25,8 @@ import com.android.internal.view.menu.MenuDialogHelper;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
+import com.android.internal.widget.DecorCaptionView;
 import com.android.internal.widget.FloatingToolbar;
-import com.android.internal.widget.NonClientDecorView;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -88,6 +88,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private static final boolean SWEEP_OPEN_MENU = false;
 
+    // The height of a window which has focus in DIP.
+    private final static int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
+    // The height of a window which has not in DIP.
+    private final static int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
+
+    // Cludge to address b/22668382: Set the shadow size to the maximum so that the layer
+    // size calculation takes the shadow size into account. We set the elevation currently
+    // to max until the first layout command has been executed.
+    private boolean mAllowUpdateElevation = false;
+
+    private boolean mElevationAdjustedForStack = false;
+
     int mDefaultOpacity = PixelFormat.OPAQUE;
 
     /** The feature ID of the panel, or -1 if this is the application's DecorView */
@@ -101,8 +113,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private final Rect mFrameOffsets = new Rect();
 
-    // True if a non client area decor exists.
-    private boolean mHasNonClientDecor = false;
+    private boolean mHasCaption = false;
 
     private boolean mChanging;
 
@@ -161,18 +172,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Rect mTempRect;
     private Rect mOutsets = new Rect();
 
-    // This is the non client decor view for the window, containing the caption and window control
+    // This is the caption view for the window, containing the caption and window control
     // buttons. The visibility of this decor depends on the workspace and the window type.
     // If the window type does not require such a view, this member might be null.
-    NonClientDecorView mNonClientDecorView;
+    DecorCaptionView mDecorCaptionView;
 
-    // The non client decor needs to adapt to the used workspace. Since querying and changing the
-    // workspace is expensive, this is the workspace value the window is currently set up for.
-    int mWorkspaceId;
+    // Stack window is currently in. Since querying and changing the stack is expensive,
+    // this is the stack value the window is currently set up for.
+    int mStackId;
 
     private boolean mWindowResizeCallbacksAdded = false;
 
-    public BackdropFrameRenderer mBackdropFrameRenderer = null;
+    BackdropFrameRenderer mBackdropFrameRenderer = null;
     private Drawable mResizingBackgroundDrawable;
     private Drawable mCaptionBackgroundDrawable;
 
@@ -191,7 +202,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         setWindow(window);
     }
 
-    public void setBackgroundFallback(int resId) {
+    void setBackgroundFallback(int resId) {
         mBackgroundFallback.setDrawable(resId != 0 ? getContext().getDrawable(resId) : null);
         setWillNotDraw(getBackground() == null && !mBackgroundFallback.hasFallback());
     }
@@ -351,10 +362,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        if (mHasNonClientDecor && mNonClientDecorView.mVisible) {
-            // Don't dispatch ACTION_DOWN to the non client decor if the window is
-            // resizable and the event was (starting) outside the window.
-            // Window resizing events should be handled by WindowManager.
+        if (mHasCaption && isShowingCaption()) {
+            // Don't dispatch ACTION_DOWN to the captionr if the window is resizable and the event
+            // was (starting) outside the window. Window resizing events should be handled by
+            // WindowManager.
             // TODO: Investigate how to handle the outside touch in window manager
             //       without generating these events.
             //       Currently we receive these because we need to enlarge the window's
@@ -630,6 +641,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mOutsets.top > 0) {
             offsetTopAndBottom(-mOutsets.top);
         }
+
+        // If the application changed its SystemUI metrics, we might also have to adapt
+        // our shadow elevation.
+        updateElevation();
+        mAllowUpdateElevation = true;
     }
 
     @Override
@@ -781,11 +797,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
-    public void startChanging() {
+    void startChanging() {
         mChanging = true;
     }
 
-    public void finishChanging() {
+    void finishChanging() {
         mChanging = false;
         drawableChanged();
     }
@@ -1138,7 +1154,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         invalidate();
 
         int opacity = PixelFormat.OPAQUE;
-        if (windowHasShadow()) {
+        if (ActivityManager.StackId.hasWindowShadow(mStackId)) {
             // If the window has a shadow, it must be translucent.
             opacity = PixelFormat.TRANSLUCENT;
         } else{
@@ -1213,6 +1229,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mFloatingActionMode != null) {
             mFloatingActionMode.onWindowFocusChanged(hasWindowFocus);
         }
+
+        updateElevation();
     }
 
     @Override
@@ -1495,36 +1513,17 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     /**
-     * Informs the decor if a non client decor is attached and visible.
+     * Informs the decor if the caption is attached and visible.
      * @param attachedAndVisible true when the decor is visible.
-     * Note that this will even be called if there is no non client decor.
+     * Note that this will even be called if there is no caption.
      **/
-    void enableNonClientDecor(boolean attachedAndVisible) {
-        if (mHasNonClientDecor != attachedAndVisible) {
-            mHasNonClientDecor = attachedAndVisible;
+    void enableCaption(boolean attachedAndVisible) {
+        if (mHasCaption != attachedAndVisible) {
+            mHasCaption = attachedAndVisible;
             if (getForeground() != null) {
                 drawableChanged();
             }
         }
-    }
-
-    /**
-     * Returns true if the window has a non client decor.
-     * @return If there is a non client decor - even if it is not visible.
-     **/
-    private boolean windowHasNonClientDecor() {
-        return mHasNonClientDecor;
-    }
-
-    /**
-     * Returns true if the Window is free floating and has a shadow (although at some times
-     * it might not be displaying it, e.g. during a resize). Note that non overlapping windows
-     * do not have a shadow since it could not be seen anyways (a small screen / tablet
-     * "tiles" the windows side by side but does not overlap them).
-     * @return Returns true when the window has a shadow created by the non client decor.
-     **/
-    private boolean windowHasShadow() {
-        return windowHasNonClientDecor() && ActivityManager.StackId.hasWindowShadow(mWorkspaceId);
     }
 
     void setWindow(PhoneWindow phoneWindow) {
@@ -1537,91 +1536,89 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     void onConfigurationChanged() {
-        if (mNonClientDecorView != null) {
-            int workspaceId = getWorkspaceId();
-            if (mWorkspaceId != workspaceId) {
-                mWorkspaceId = workspaceId;
+        int workspaceId = getStackId();
+        if (mDecorCaptionView != null) {
+            if (mStackId != workspaceId) {
+                mStackId = workspaceId;
                 // We might have to change the kind of surface before we do anything else.
-                mNonClientDecorView.onConfigurationChanged(
-                        ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
-                        ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
-                enableNonClientDecor(ActivityManager.StackId.hasWindowDecor(workspaceId));
+                mDecorCaptionView.onConfigurationChanged(
+                        ActivityManager.StackId.hasWindowDecor(mStackId));
+                enableCaption(ActivityManager.StackId.hasWindowDecor(workspaceId));
             }
         }
+        initializeElevation();
     }
 
     View onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
-        mWorkspaceId = getWorkspaceId();
+        mStackId = getStackId();
 
         mResizingBackgroundDrawable = getResizingBackgroundDrawable(
                 mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
         mCaptionBackgroundDrawable =
-                getContext().getDrawable(R.drawable.non_client_decor_title_focused);
+                getContext().getDrawable(R.drawable.decor_caption_title_focused);
 
         if (mBackdropFrameRenderer != null) {
             mBackdropFrameRenderer.onResourcesLoaded(
                     this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable);
         }
 
-        mNonClientDecorView = createNonClientDecorView(inflater);
+        mDecorCaptionView = createDecorCaptionView(inflater);
         final View root = inflater.inflate(layoutResource, null);
-        if (mNonClientDecorView != null) {
-            if (mNonClientDecorView.getParent() == null) {
-                addView(mNonClientDecorView,
+        if (mDecorCaptionView != null) {
+            if (mDecorCaptionView.getParent() == null) {
+                addView(mDecorCaptionView,
                         new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
             }
-            mNonClientDecorView.addView(root,
+            mDecorCaptionView.addView(root,
                     new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         } else {
             addView(root, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         }
         mContentRoot = (ViewGroup) root;
+        initializeElevation();
         return root;
     }
 
-    // Free floating overlapping windows require a non client decor with a caption and shadow..
-    private NonClientDecorView createNonClientDecorView(LayoutInflater inflater) {
-        NonClientDecorView nonClientDecorView = null;
-        for (int i = getChildCount() - 1; i >= 0 && nonClientDecorView == null; i--) {
+    // Free floating overlapping windows require a caption.
+    private DecorCaptionView createDecorCaptionView(LayoutInflater inflater) {
+        DecorCaptionView DecorCaptionView = null;
+        for (int i = getChildCount() - 1; i >= 0 && DecorCaptionView == null; i--) {
             View view = getChildAt(i);
-            if (view instanceof NonClientDecorView) {
+            if (view instanceof DecorCaptionView) {
                 // The decor was most likely saved from a relaunch - so reuse it.
-                nonClientDecorView = (NonClientDecorView) view;
+                DecorCaptionView = (DecorCaptionView) view;
                 removeViewAt(i);
             }
         }
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
-        boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
+        final boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
-        // Only a non floating application window on one of the allowed workspaces can get a non
-        // client decor.
-        final boolean hasNonClientDecor = ActivityManager.StackId.hasWindowDecor(mWorkspaceId);
-        if (!mWindow.isFloating() && isApplication && hasNonClientDecor) {
+        // Only a non floating application window on one of the allowed workspaces can get a caption
+        if (!mWindow.isFloating() && isApplication
+                && ActivityManager.StackId.hasWindowDecor(mStackId)) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
-            if (nonClientDecorView == null) {
+            if (DecorCaptionView == null) {
                 Context context = getContext();
                 TypedValue value = new TypedValue();
                 context.getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
                 inflater = inflater.from(context);
                 if (Color.luminance(value.data) < 0.5) {
-                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
-                            R.layout.non_client_decor_dark, null);
+                    DecorCaptionView = (DecorCaptionView) inflater.inflate(
+                            R.layout.decor_caption_dark, null);
                 } else {
-                    nonClientDecorView = (NonClientDecorView) inflater.inflate(
-                            R.layout.non_client_decor_light, null);
+                    DecorCaptionView = (DecorCaptionView) inflater.inflate(
+                            R.layout.decor_caption_light, null);
                 }
             }
-            nonClientDecorView.setPhoneWindow(mWindow,
-                    ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
-                    ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
+            DecorCaptionView.setPhoneWindow(mWindow, true /*showDecor*/);
         } else {
-            nonClientDecorView = null;
+            DecorCaptionView = null;
         }
 
-        // Tell the decor if it has a visible non client decor.
-        enableNonClientDecor(nonClientDecorView != null && hasNonClientDecor);
-        return nonClientDecorView;
+        // Tell the decor if it has a visible caption.
+        enableCaption(DecorCaptionView != null);
+        return DecorCaptionView;
     }
 
     /**
@@ -1652,12 +1649,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     /**
-     * Returns the Id of the workspace which contains this window.
-     * Note that if no workspace can be determined - which usually means that it was not
-     * created for an activity - the fullscreen workspace ID will be returned.
-     * @return Returns the workspace stack id which contains this window.
+     * Returns the Id of the stack which contains this window.
+     * Note that if no stack can be determined - which usually means that it was not
+     * created for an activity - the fullscreen stack ID will be returned.
+     * @return Returns the stack id which contains this window.
      **/
-    private int getWorkspaceId() {
+    private int getStackId() {
         int workspaceId = INVALID_STACK_ID;
         final Window.WindowControllerCallback callback = mWindow.getWindowControllerCallback();
         if (callback != null) {
@@ -1674,12 +1671,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     void clearContentView() {
-        if (mNonClientDecorView != null) {
-            if (mNonClientDecorView.getChildCount() > 1) {
-                mNonClientDecorView.removeViewAt(1);
+        if (mDecorCaptionView != null) {
+            if (mDecorCaptionView.getChildCount() > 1) {
+                mDecorCaptionView.removeViewAt(1);
             }
         } else {
-            // This window doesn't have non client decor, so we need to just remove the
+            // This window doesn't have caption, so we need to just remove the
             // children of the decor view.
             removeAllViews();
         }
@@ -1749,18 +1746,60 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
+    /**
+     * The elevation gets set for the first time and the framework needs to be informed that
+     * the surface layer gets created with the shadow size in mind.
+     */
+    private void initializeElevation() {
+        // TODO(skuhne): Call setMaxElevation here accordingly after b/22668382 got fixed.
+        mAllowUpdateElevation = false;
+        updateElevation();
+    }
+
     private void updateElevation() {
-        if (mNonClientDecorView != null) {
-            mNonClientDecorView.updateElevation();
+        float elevation = 0;
+        final boolean wasAdjustedForStack = mElevationAdjustedForStack;
+        // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
+        // since the shadow is bound to the content size and not the target size.
+        if (ActivityManager.StackId.hasWindowShadow(mStackId)
+                && mBackdropFrameRenderer == null) {
+            elevation = hasWindowFocus() ?
+                    DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
+            // TODO(skuhne): Remove this if clause once b/22668382 got fixed.
+            if (!mAllowUpdateElevation) {
+                elevation = DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
+            }
+            // Convert the DP elevation into physical pixels.
+            elevation = dipToPx(elevation);
+            mElevationAdjustedForStack = true;
+        } else {
+            mElevationAdjustedForStack = false;
+        }
+
+        // Don't change the elevation if we didn't previously adjust it for the stack it was in
+        // or it didn't change.
+        if ((wasAdjustedForStack || mElevationAdjustedForStack)
+                && getElevation() != elevation) {
+            mWindow.setElevation(elevation);
         }
     }
 
     boolean isShowingCaption() {
-        return mNonClientDecorView != null && mNonClientDecorView.isShowingDecor();
+        return mDecorCaptionView != null && mDecorCaptionView.isCaptionShowing();
     }
 
     int getCaptionHeight() {
-        return isShowingCaption() ? mNonClientDecorView.getDecorCaptionHeight() : 0;
+        return isShowingCaption() ? mDecorCaptionView.getCaptionHeight() : 0;
+    }
+
+    /**
+     * Converts a DIP measure into physical pixels.
+     * @param dip The dip value.
+     * @return Returns the number of pixels.
+     */
+    private float dipToPx(float dip) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
+                getResources().getDisplayMetrics());
     }
 
     private static class ColorViewState {

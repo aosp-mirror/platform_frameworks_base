@@ -28,47 +28,33 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.Window;
 import android.util.Log;
-import android.util.TypedValue;
 
 import com.android.internal.R;
-import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 /**
- * This class represents the special screen elements to control a window on free form
- * environment. All thse screen elements are added in the "non client area" which is the area of
- * the window which is handled by the OS and not the application.
+ * This class represents the special screen elements to control a window on freeform
+ * environment.
  * As such this class handles the following things:
  * <ul>
  * <li>The caption, containing the system buttons like maximize, close and such as well as
  * allowing the user to drag the window around.</li>
- * <li>The shadow - which is changing dependent on the window focus.</li>
- * <li>The border around the client area (if there is one).</li>
- * <li>The resize handles which allow to resize the window.</li>
- * </ul>
  * After creating the view, the function
  * {@link #setPhoneWindow} needs to be called to make
  * the connection to it's owning PhoneWindow.
  * Note: At this time the application can change various attributes of the DecorView which
  * will break things (in settle/unexpected ways):
  * <ul>
- * <li>setElevation</li>
  * <li>setOutlineProvider</li>
  * <li>setSurfaceFormat</li>
  * <li>..</li>
  * </ul>
- * This will be mitigated once b/22527834 will be addressed.
  */
-public class NonClientDecorView extends LinearLayout
+public class DecorCaptionView extends LinearLayout
         implements View.OnClickListener, View.OnTouchListener {
-    private final static String TAG = "NonClientDecorView";
-    // The height of a window which has focus in DIP.
-    private final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
-    // The height of a window which has not in DIP.
-    private final int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
+    private final static String TAG = "DecorCaptionView";
     private PhoneWindow mOwner = null;
-    private boolean mWindowHasShadow = false;
-    private boolean mShowDecor = false;
+    private boolean mShow = false;
 
     // True if the window is being dragged.
     private boolean mDragging = false;
@@ -76,37 +62,22 @@ public class NonClientDecorView extends LinearLayout
     // True when the left mouse button got released while dragging.
     private boolean mLeftMouseButtonReleased;
 
-    // True if this window is resizable (which is currently only true when the decor is shown).
-    public boolean mVisible = false;
-
-    // The current focus state of the window for updating the window elevation.
-    private boolean mWindowHasFocus = true;
-
-    // Cludge to address b/22668382: Set the shadow size to the maximum so that the layer
-    // size calculation takes the shadow size into account. We set the elevation currently
-    // to max until the first layout command has been executed.
-    private boolean mAllowUpdateElevation = false;
-
-    public NonClientDecorView(Context context) {
+    public DecorCaptionView(Context context) {
         super(context);
     }
 
-    public NonClientDecorView(Context context, AttributeSet attrs) {
+    public DecorCaptionView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public NonClientDecorView(Context context, AttributeSet attrs, int defStyle) {
+    public DecorCaptionView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
-    public void setPhoneWindow(PhoneWindow owner, boolean showDecor, boolean windowHasShadow) {
+    public void setPhoneWindow(PhoneWindow owner, boolean show) {
         mOwner = owner;
-        mWindowHasShadow = windowHasShadow;
-        mShowDecor = showDecor;
+        mShow = show;
         updateCaptionVisibility();
-        if (mWindowHasShadow) {
-            initializeElevation();
-        }
         // By changing the outline provider to BOUNDS, the window can remove its
         // background without removing the shadow.
         mOwner.getDecorView().setOutlineProvider(ViewOutlineProvider.BOUNDS);
@@ -122,8 +93,8 @@ public class NonClientDecorView extends LinearLayout
         // input device we are listening to.
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (!mShowDecor) {
-                    // When there is no decor we should not react to anything.
+                if (!mShow) {
+                    // When there is no caption we should not react to anything.
                     return false;
                 }
                 // A drag action is started if we aren't dragging already and the starting event is
@@ -162,17 +133,12 @@ public class NonClientDecorView extends LinearLayout
     }
 
     /**
-     * The phone window configuration has changed and the decor needs to be updated.
-     * @param showDecor True if the decor should be shown.
-     * @param windowHasShadow True when the window should show a shadow.
-     **/
-    public void onConfigurationChanged(boolean showDecor, boolean windowHasShadow) {
-        mShowDecor = showDecor;
+     * The phone window configuration has changed and the caption needs to be updated.
+     * @param show True if the caption should be shown.
+     */
+    public void onConfigurationChanged(boolean show) {
+        mShow = show;
         updateCaptionVisibility();
-        if (windowHasShadow != mWindowHasShadow) {
-            mWindowHasShadow = windowHasShadow;
-            initializeElevation();
-        }
     }
 
     @Override
@@ -185,27 +151,10 @@ public class NonClientDecorView extends LinearLayout
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        mWindowHasFocus = hasWindowFocus;
-        updateElevation();
-        super.onWindowFocusChanged(hasWindowFocus);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        // If the application changed its SystemUI metrics, we might also have to adapt
-        // our shadow elevation.
-        updateElevation();
-        mAllowUpdateElevation = true;
-
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
-    @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         // Make sure that we never get more then one client area in our view.
         if (index >= 2 || getChildCount() >= 2) {
-            throw new IllegalStateException("NonClientDecorView can only handle 1 client view");
+            throw new IllegalStateException("DecorCaptionView can only handle 1 client view");
         }
         super.addView(child, index, params);
     }
@@ -224,65 +173,11 @@ public class NonClientDecorView extends LinearLayout
      * Updates the visibility of the caption.
      **/
     private void updateCaptionVisibility() {
-        // Don't show the decor if the window has e.g. entered full screen.
-        boolean invisible = isFillingScreen() || !mShowDecor;
+        // Don't show the caption if the window has e.g. entered full screen.
+        boolean invisible = isFillingScreen() || !mShow;
         View caption = getChildAt(0);
         caption.setVisibility(invisible ? GONE : VISIBLE);
         caption.setOnTouchListener(this);
-        mVisible = !invisible;
-    }
-
-    /**
-     * The elevation gets set for the first time and the framework needs to be informed that
-     * the surface layer gets created with the shadow size in mind.
-     **/
-    private void initializeElevation() {
-        // TODO(skuhne): Call setMaxElevation here accordingly after b/22668382 got fixed.
-        mAllowUpdateElevation = false;
-        if (mWindowHasShadow) {
-            updateElevation();
-        } else {
-            mOwner.setElevation(0);
-        }
-    }
-
-    /**
-     * The shadow height gets controlled by the focus to visualize highlighted windows.
-     * Note: This will overwrite application elevation properties.
-     * Note: Windows which have (temporarily) changed their attributes to cover the SystemUI
-     *       will get no shadow as they are expected to be "full screen".
-     **/
-    public void updateElevation() {
-        float elevation = 0;
-        // Do not use a shadow when we are in resizing mode (mRenderer not null) since the shadow
-        // is bound to the content size and not the target size.
-        if (mWindowHasShadow
-                && ((DecorView) mOwner.getDecorView()).mBackdropFrameRenderer == null) {
-            boolean fill = isFillingScreen();
-            elevation = fill ? 0 :
-                    (mWindowHasFocus ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP :
-                            DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP);
-            // TODO(skuhne): Remove this if clause once b/22668382 got fixed.
-            if (!mAllowUpdateElevation && !fill) {
-                elevation = DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
-            }
-            // Convert the DP elevation into physical pixels.
-            elevation = dipToPx(elevation);
-        }
-        // Don't change the elevation if it didn't change since it can require some time.
-        if (mOwner.getDecorView().getElevation() != elevation) {
-            mOwner.setElevation(elevation);
-        }
-    }
-
-    /**
-     * Converts a DIP measure into physical pixels.
-     * @param dip The dip value.
-     * @return Returns the number of pixels.
-     */
-    private float dipToPx(float dip) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
-                getResources().getDisplayMetrics());
     }
 
     /**
@@ -299,11 +194,11 @@ public class NonClientDecorView extends LinearLayout
         }
     }
 
-    public boolean isShowingDecor() {
-        return mShowDecor;
+    public boolean isCaptionShowing() {
+        return mShow;
     }
 
-    public int getDecorCaptionHeight() {
+    public int getCaptionHeight() {
         final View caption = getChildAt(0);
         return (caption != null) ? caption.getHeight() : 0;
     }

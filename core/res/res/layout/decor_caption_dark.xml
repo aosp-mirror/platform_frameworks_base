@@ -17,7 +17,7 @@
 */
 -->
 
-<com.android.internal.widget.NonClientDecorView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.DecorCaptionView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_gravity="end"
         android:layout_height="wrap_content"
-        android:background="@drawable/non_client_decor_title"
+        android:background="@drawable/decor_caption_title"
         android:focusable="false"
         android:descendantFocusability="blocksDescendants" >
         <LinearLayout
@@ -53,4 +53,4 @@
             android:contentDescription="@string/close_button_text"
             android:background="@drawable/decor_close_button_dark" />
     </LinearLayout>
-</com.android.internal.widget.NonClientDecorView>
+</com.android.internal.widget.DecorCaptionView>
