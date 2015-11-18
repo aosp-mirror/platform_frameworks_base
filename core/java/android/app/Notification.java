@@ -3271,12 +3271,16 @@ public class Notification implements Parcelable
          * Construct a RemoteViews for the final big notification layout.
          */
         public RemoteViews makeBigContentView() {
-            if (mStyle != null) {
+            if (mN.bigContentView != null) {
+                return mN.bigContentView;
+            } else if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeBigContentView();
                 if (styleView != null) {
                     return styleView;
                 }
-            } else if (mActions.size() == 0) return null;
+            } else if (mActions.size() == 0) {
+                return null;
+            }
 
             return applyStandardTemplateWithActions(getBigBaseLayoutResource());
         }
@@ -3285,12 +3289,17 @@ public class Notification implements Parcelable
          * Construct a RemoteViews for the final heads-up notification layout.
          */
         public RemoteViews makeHeadsUpContentView() {
-            if (mStyle != null) {
-                final RemoteViews styleView = mStyle.makeHeadsUpContentView();
-                if (styleView != null) {
-                    return styleView;
-                }
-            } else if (mActions.size() == 0) return null;
+            if (mN.headsUpContentView != null) {
+                return mN.headsUpContentView;
+            } else if (mStyle != null) {
+                    final RemoteViews styleView = mStyle.makeHeadsUpContentView();
+                    if (styleView != null) {
+                        return styleView;
+                    }
+            } else if (mActions.size() == 0) {
+                return null;
+            }
+
 
             return applyStandardTemplateWithActions(getBigBaseLayoutResource());
         }
