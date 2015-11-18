@@ -105,36 +105,29 @@ public class NotificationData {
         }
 
         public boolean cacheContentViews(Context ctx, Notification updatedNotification) {
-            boolean cached = false;
+            boolean applyInPlace = false;
             if (updatedNotification != null) {
                 final Notification.Builder updatedNotificationBuilder
                         = Notification.Builder.recoverBuilder(ctx, updatedNotification);
                 final RemoteViews newContentView = updatedNotificationBuilder.makeContentView();
-                if (!compareRemoteViews(cachedContentView, newContentView)) {
-                    cachedContentView = newContentView;
-                    cached |= true;
-                }
                 final RemoteViews newBigContentView =
                         updatedNotificationBuilder.makeBigContentView();
-                if (!compareRemoteViews(cachedBigContentView, newBigContentView)) {
-                    cachedBigContentView = newBigContentView;
-                    cached |= true;
-                }
                 final RemoteViews newHeadsUpContentView =
                         updatedNotificationBuilder.makeHeadsUpContentView();
-                if (!compareRemoteViews(cachedHeadsUpContentView, newBigContentView)) {
-                    cachedHeadsUpContentView = newHeadsUpContentView;
-                    cached |= true;
-                }
                 final Notification updatedPublicNotification = updatedNotification.publicVersion;
                 final RemoteViews newPubContentView = (updatedPublicNotification != null)
                         ? Notification.Builder.recoverBuilder(
                                 ctx, updatedPublicNotification).makeContentView()
                         : null;
-                if (!compareRemoteViews(cachedPublicContentView, newPubContentView)) {
-                    cachedPublicContentView = newPubContentView;
-                    cached |= true;
-                }
+
+                applyInPlace = compareRemoteViews(cachedContentView, newContentView)
+                        && compareRemoteViews(cachedBigContentView, newBigContentView)
+                        && compareRemoteViews(cachedHeadsUpContentView, newHeadsUpContentView)
+                        && compareRemoteViews(cachedPublicContentView, newPubContentView);
+                cachedPublicContentView = newPubContentView;
+                cachedHeadsUpContentView = newHeadsUpContentView;
+                cachedBigContentView = newBigContentView;
+                cachedContentView = newContentView;
             } else {
                 final Notification.Builder builder
                         = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
@@ -150,9 +143,9 @@ public class NotificationData {
                             = Notification.Builder.recoverBuilder(ctx, publicNotification);
                     cachedPublicContentView = publicBuilder.makeContentView();
                 }
-                cached = true;
+                applyInPlace = false;
             }
-            return cached;
+            return applyInPlace;
         }
 
         // Returns true if the RemoteViews are the same.
