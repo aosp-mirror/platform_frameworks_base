@@ -34,7 +34,7 @@
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_part_line2" />
+        <include layout="@layout/notification_template_progress" />
 
         <!-- We can't have another vertical linear layout here with weight != 0 so this forces us to
              put the badge on the first line. -->

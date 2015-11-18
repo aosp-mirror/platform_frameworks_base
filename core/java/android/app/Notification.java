@@ -2969,7 +2969,6 @@ public class Notification implements Parcelable
             Bitmap profileBadge = getProfileBadge();
 
             contentView.setViewVisibility(R.id.profile_badge_large_template, View.GONE);
-            contentView.setViewVisibility(R.id.profile_badge_line2, View.GONE);
             contentView.setViewVisibility(R.id.profile_badge_line3, View.GONE);
 
             if (profileBadge != null) {
@@ -2986,29 +2985,14 @@ public class Notification implements Parcelable
             return false;
         }
 
-        private void shrinkLine3Text(RemoteViews contentView) {
-            float subTextSize = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_subtext_size);
-            contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
-        }
-
-        private void unshrinkLine3Text(RemoteViews contentView) {
-            float regularTextSize = mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_text_size);
-            contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, regularTextSize);
-        }
-
         private void resetStandardTemplate(RemoteViews contentView) {
             resetHeader(contentView);
             resetContentMargins(contentView);
             contentView.setViewVisibility(R.id.right_icon, View.GONE);
             contentView.setTextViewText(R.id.title, null);
             contentView.setTextViewText(R.id.text, null);
-            unshrinkLine3Text(contentView);
-            contentView.setTextViewText(R.id.text2, null);
-            contentView.setViewVisibility(R.id.text2, View.GONE);
-            contentView.setViewVisibility(R.id.info, View.GONE);
             contentView.setViewVisibility(R.id.line3, View.GONE);
+            contentView.setViewVisibility(R.id.text_line_1, View.GONE);
             contentView.setViewVisibility(R.id.progress, View.GONE);
         }
 
@@ -3017,15 +3001,16 @@ public class Notification implements Parcelable
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.expand_button, View.GONE);
-            contentView.setViewVisibility(R.id.sub_text_time_divider, View.GONE);
             contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
-            contentView.setViewVisibility(R.id.app_title_sub_text_divider, View.GONE);
+            contentView.setViewVisibility(R.id.header_content_info, View.GONE);
             contentView.setViewVisibility(R.id.number_of_children, View.GONE);
+            contentView.setViewVisibility(R.id.sub_text_divider, View.GONE);
+            contentView.setViewVisibility(R.id.content_info_divider, View.GONE);
+            contentView.setViewVisibility(R.id.time_divider, View.GONE);
         }
 
         private void resetContentMargins(RemoteViews contentView) {
             contentView.setViewLayoutMarginEnd(R.id.line1, 0);
-            contentView.setViewLayoutMarginEnd(R.id.line2, 0);
             contentView.setViewLayoutMarginEnd(R.id.line3, 0);
         }
 
@@ -3042,9 +3027,6 @@ public class Notification implements Parcelable
             resetStandardTemplate(contentView);
 
             boolean showLine3 = false;
-            // TODO: look into line3 shrinking
-            boolean showLine2 = false;
-            boolean contentTextInLine2 = false;
             final Bundle ex = mN.extras;
 
             bindNotificationHeader(contentView);
@@ -3053,70 +3035,46 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.title,
                         processLegacyText(ex.getCharSequence(EXTRA_TITLE)));
             }
+            boolean showProgress = handleProgressBar(hasProgress, contentView, ex);
             if (ex.getCharSequence(EXTRA_TEXT) != null) {
-                contentView.setTextViewText(R.id.text,
+                contentView.setTextViewText(showProgress ? R.id.text_line_1 : R.id.text,
                         processLegacyText(ex.getCharSequence(EXTRA_TEXT)));
-                showLine3 = true;
-            }
-            if (ex.getCharSequence(EXTRA_INFO_TEXT) != null) {
-                contentView.setTextViewText(R.id.info,
-                        processLegacyText(ex.getCharSequence(EXTRA_INFO_TEXT)));
-                contentView.setViewVisibility(R.id.info, View.VISIBLE);
-                showLine3 = true;
-            } else if (mN.number > 0) {
-                final int tooBig = mContext.getResources().getInteger(
-                        R.integer.status_bar_notification_info_maxnum);
-                if (mN.number > tooBig) {
-                    contentView.setTextViewText(R.id.info, processLegacyText(
-                            mContext.getResources().getString(
-                                    R.string.status_bar_notification_info_overflow)));
-                } else {
-                    NumberFormat f = NumberFormat.getIntegerInstance();
-                    contentView.setTextViewText(R.id.info, processLegacyText(f.format(mN.number)));
+                if (showProgress) {
+                    contentView.setViewVisibility(R.id.text_line_1, View.VISIBLE);
                 }
-                contentView.setViewVisibility(R.id.info, View.VISIBLE);
-                showLine3 = true;
-            } else {
-                contentView.setViewVisibility(R.id.info, View.GONE);
+                showLine3 = !showProgress;
             }
+            // We want to add badge to first line of text.
+            if (addProfileBadge(contentView, R.id.profile_badge_line3)) {
+                showLine3 = true;
+            }
+            // Note getStandardView may hide line 3 again.
+            contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
 
-            contentView.setViewVisibility(R.id.text2, View.GONE);
+            return contentView;
+        }
+
+        private boolean handleProgressBar(boolean hasProgress, RemoteViews contentView, Bundle ex) {
             final int max = ex.getInt(EXTRA_PROGRESS_MAX, 0);
             final int progress = ex.getInt(EXTRA_PROGRESS, 0);
             final boolean ind = ex.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
             if (hasProgress && (max != 0 || ind)) {
-                contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+                contentView.setViewVisibility(com.android.internal.R.id.progress, View.VISIBLE);
                 contentView.setProgressBar(
-                            R.id.progress, max, progress, ind);
+                        R.id.progress, max, progress, ind);
                 contentView.setProgressBackgroundTintList(
                         R.id.progress, ColorStateList.valueOf(mContext.getColor(
                                 R.color.notification_progress_background_color)));
-                    if (mN.color != COLOR_DEFAULT) {
-                        ColorStateList colorStateList = ColorStateList.valueOf(mN.color);
+                if (mN.color != COLOR_DEFAULT) {
+                    ColorStateList colorStateList = ColorStateList.valueOf(mN.color);
                     contentView.setProgressTintList(R.id.progress, colorStateList);
                     contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
                 }
-                showLine2 = true;
+                return true;
             } else {
                 contentView.setViewVisibility(R.id.progress, View.GONE);
+                return false;
             }
-            if (showLine2) {
-
-                // need to shrink all the type to make sure everything fits
-                shrinkLine3Text(contentView);
-            }
-
-            // We want to add badge to first line of text.
-            boolean addedBadge = addProfileBadge(contentView,
-                    contentTextInLine2 ? R.id.profile_badge_line2 : R.id.profile_badge_line3);
-            // If we added the badge to line 3 then we should show line 3.
-            if (addedBadge && !contentTextInLine2) {
-                showLine3 = true;
-            }
-
-            // Note getStandardView may hide line 3 again.
-            contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
-            return contentView;
         }
 
         private void bindLargeIcon(RemoteViews contentView) {
@@ -3127,8 +3085,8 @@ public class Notification implements Parcelable
                 int endMargin = mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_content_picture_margin);
                 contentView.setViewLayoutMarginEnd(R.id.line1, endMargin);
-                contentView.setViewLayoutMarginEnd(R.id.line2, endMargin);
                 contentView.setViewLayoutMarginEnd(R.id.line3, endMargin);
+                contentView.setViewLayoutMarginEnd(R.id.progress, endMargin);
             }
         }
 
@@ -3136,8 +3094,35 @@ public class Notification implements Parcelable
             bindSmallIcon(contentView);
             bindHeaderAppName(contentView);
             bindHeaderSubText(contentView);
+            bindContentInfo(contentView);
             bindHeaderChronometerAndTime(contentView);
             bindExpandButton(contentView);
+        }
+
+        private void bindContentInfo(RemoteViews contentView) {
+            boolean visible = false;
+            if (mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
+                contentView.setTextViewText(R.id.header_content_info,
+                        processLegacyText(mN.extras.getCharSequence(EXTRA_INFO_TEXT)));
+                contentView.setViewVisibility(R.id.header_content_info, View.VISIBLE);
+                visible = true;
+            } else if (mN.number > 0) {
+                final int tooBig = mContext.getResources().getInteger(
+                        R.integer.status_bar_notification_info_maxnum);
+                if (mN.number > tooBig) {
+                    contentView.setTextViewText(R.id.header_content_info, processLegacyText(
+                            mContext.getResources().getString(
+                                    R.string.status_bar_notification_info_overflow)));
+                } else {
+                    contentView.setTextViewText(R.id.header_content_info,
+                            processLegacyText(String.valueOf(mN.number)));
+                }
+                contentView.setViewVisibility(R.id.header_content_info, View.VISIBLE);
+                visible = true;
+            }
+            if (visible) {
+                contentView.setViewVisibility(R.id.content_info_divider, View.VISIBLE);
+            }
         }
 
         private void bindExpandButton(RemoteViews contentView) {
@@ -3147,7 +3132,7 @@ public class Notification implements Parcelable
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView) {
             if (showsTimeOrChronometer()) {
-                contentView.setViewVisibility(R.id.sub_text_time_divider, View.VISIBLE);
+                contentView.setViewVisibility(R.id.time_divider, View.VISIBLE);
                 if (mN.extras.getBoolean(EXTRA_SHOW_CHRONOMETER)) {
                     contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
                     contentView.setLong(R.id.chronometer, "setBase",
@@ -3170,7 +3155,7 @@ public class Notification implements Parcelable
                 // TODO: Remove the span entirely to only have the string with propper formating.
                 contentView.setTextViewText(R.id.header_sub_text, processLegacyText(subText));
                 contentView.setViewVisibility(R.id.header_sub_text, View.VISIBLE);
-                contentView.setViewVisibility(R.id.app_title_sub_text_divider, View.VISIBLE);
+                contentView.setViewVisibility(R.id.sub_text_divider, View.VISIBLE);
             }
         }
 
@@ -3202,30 +3187,6 @@ public class Notification implements Parcelable
          */
         private boolean showsTimeOrChronometer() {
             return mN.when != 0 && mN.extras.getBoolean(EXTRA_SHOW_WHEN);
-        }
-
-        /**
-         * Logic to find out whether the notification is going to have three lines in the contracted
-         * layout. This is used to adjust the top padding.
-         *
-         * @return true if the notification is going to have three lines; false if the notification
-         *         is going to have one or two lines
-         */
-        private boolean hasThreeLines() {
-            final CharSequence subText = mN.extras.getCharSequence(EXTRA_SUB_TEXT);
-            final CharSequence text = mN.extras.getCharSequence(EXTRA_TEXT);
-            boolean contentTextInLine2 = subText != null && text != null;
-            boolean hasProgress = mStyle == null || mStyle.hasProgress();
-            // If we have content text in line 2, badge goes into line 2, or line 3 otherwise
-            boolean badgeInLine3 = getProfileBadgeDrawable() != null && !contentTextInLine2;
-            boolean hasLine3 = text != null || mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null
-                    || mN.number > 0 || badgeInLine3;
-            final Bundle ex = mN.extras;
-            final int max = ex.getInt(EXTRA_PROGRESS_MAX, 0);
-            final boolean ind = ex.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
-            boolean hasLine2 = (subText != null && text != null) ||
-                    (hasProgress && subText == null && (max != 0 || ind));
-            return hasLine2 && hasLine3;
         }
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
@@ -3286,7 +3247,12 @@ public class Notification implements Parcelable
                 result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
             }
             adaptNotificationHeaderForBigContentView(result);
+            hideLine1Text(result);
             return result;
+        }
+
+        private void hideLine1Text(RemoteViews result) {
+            result.setViewVisibility(R.id.text_line_1, View.GONE);
         }
 
         private void adaptNotificationHeaderForBigContentView(RemoteViews result) {
@@ -3823,10 +3789,7 @@ public class Notification implements Parcelable
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
-            boolean twoTextLines = mBuilder.getAllExtras().getCharSequence(EXTRA_SUB_TEXT) != null
-                    && mBuilder.getAllExtras().getCharSequence(EXTRA_TEXT) != null;
-            mBuilder.addProfileBadge(contentView,
-                    twoTextLines ? R.id.profile_badge_line2 : R.id.profile_badge_line3);
+            mBuilder.addProfileBadge(contentView, R.id.profile_badge_line3);
             return contentView;
         }
 
@@ -3959,9 +3922,6 @@ public class Notification implements Parcelable
             contentView.setTextViewText(R.id.big_text, mBuilder.processLegacyText(mBigText));
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
             contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines());
-            contentView.setViewVisibility(R.id.text2, View.GONE);
-
-            mBuilder.shrinkLine3Text(contentView);
 
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
@@ -3978,11 +3938,6 @@ public class Notification implements Parcelable
             }
             if (hasSummary) {
                 lineCount -= LINES_CONSUMED_BY_SUMMARY;
-            }
-
-            // If we have less top padding at the top, we can fit less lines.
-            if (!mBuilder.hasThreeLines()) {
-                lineCount--;
             }
             return lineCount;
         }
@@ -4079,8 +4034,6 @@ public class Notification implements Parcelable
 
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, oldBuilderContentText);
 
-            contentView.setViewVisibility(R.id.text2, View.GONE);
-
             int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3,
                     R.id.inbox_text4, R.id.inbox_text5, R.id.inbox_text6};
 
@@ -4111,8 +4064,6 @@ public class Notification implements Parcelable
                 }
                 i++;
             }
-
-            mBuilder.shrinkLine3Text(contentView);
 
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
@@ -4305,14 +4256,12 @@ public class Notification implements Parcelable
                 }
             }
             handleImage(big);
-            big.setViewVisibility(android.R.id.progress, View.GONE);
             return big;
         }
 
         private void handleImage(RemoteViews contentView) {
             if (mBuilder.mN.mLargeIcon != null) {
                 contentView.setViewLayoutMarginEnd(R.id.line1, 0);
-                contentView.setViewLayoutMarginEnd(R.id.line2, 0);
                 contentView.setViewLayoutMarginEnd(R.id.line3, 0);
             }
         }

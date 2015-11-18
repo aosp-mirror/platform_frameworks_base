@@ -34,8 +34,16 @@
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_part_line2" />
         <include layout="@layout/notification_template_part_line3" />
     </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/notification_content_margin_start"
+        android:layout_marginBottom="11dp"
+        android:layout_marginEnd="@dimen/notification_content_margin_end">
+        <include layout="@layout/notification_template_progress" />
+    </FrameLayout>
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>

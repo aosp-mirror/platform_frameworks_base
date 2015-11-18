@@ -53,7 +53,7 @@
         android:singleLine="true"
         />
     <TextView
-        android:id="@+id/app_title_sub_text_divider"
+        android:id="@+id/sub_text_divider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
@@ -69,7 +69,25 @@
         android:visibility="gone"
         android:singleLine="true"/>
     <TextView
-        android:id="@+id/sub_text_time_divider"
+        android:id="@+id/content_info_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Material.Notification.Info"
+        android:layout_marginEnd="4dp"
+        android:text="@string/notification_header_divider_symbol"
+        android:singleLine="true"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/header_content_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Material.Notification.Info"
+        android:layout_marginEnd="4dp"
+        android:visibility="gone"
+        android:maxWidth="60dp"
+        android:singleLine="true"/>
+    <TextView
+        android:id="@+id/time_divider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"

@@ -215,7 +215,6 @@
   <java-symbol type="id" name="pin_error_message" />
   <java-symbol type="id" name="timePickerLayout" />
   <java-symbol type="id" name="profile_badge_large_template" />
-  <java-symbol type="id" name="profile_badge_line2" />
   <java-symbol type="id" name="profile_badge_line3" />
   <java-symbol type="id" name="transitionPosition" />
   <java-symbol type="id" name="selection_start_handle" />
@@ -2348,12 +2347,14 @@
 
   <java-symbol type="id" name="app_name_text" />
   <java-symbol type="id" name="number_of_children" />
-  <java-symbol type="id" name="app_title_sub_text_divider" />
   <java-symbol type="id" name="header_sub_text" />
-  <java-symbol type="id" name="sub_text_time_divider" />
   <java-symbol type="id" name="expand_button" />
-  <java-symbol type="id" name="line2" />
   <java-symbol type="id" name="notification_header" />
+  <java-symbol type="id" name="header_content_info" />
+  <java-symbol type="id" name="time_divider" />
+  <java-symbol type="id" name="sub_text_divider" />
+  <java-symbol type="id" name="content_info_divider" />
+  <java-symbol type="id" name="text_line_1" />
   <java-symbol type="drawable" name="ic_arrow_up_14dp" />
   <java-symbol type="dimen" name="notification_big_picture_content_min_height_with_picture" />
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />

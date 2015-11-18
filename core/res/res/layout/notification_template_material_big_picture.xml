@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <include layout="@layout/notification_template_part_line1"/>
-            <include layout="@layout/notification_template_part_line2"/>
+            <include layout="@layout/notification_template_progress"/>
             <include layout="@layout/notification_template_part_line3"/>
         </LinearLayout>
         <ImageView

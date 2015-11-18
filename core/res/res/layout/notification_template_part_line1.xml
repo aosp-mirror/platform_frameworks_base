@@ -23,11 +23,21 @@
     >
     <TextView android:id="@+id/title"
         android:textAppearance="@style/TextAppearance.Material.Notification.Title"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:fadingEdge="horizontal"
+        />
+    <TextView android:id="@+id/text_line_1"
+        android:textAppearance="@style/TextAppearance.Material.Notification"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="end|bottom"
         android:layout_weight="1"
+        android:layout_marginStart="16dp"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:fadingEdge="horizontal"
         />
 </LinearLayout>

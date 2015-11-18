@@ -65,9 +65,7 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
      */
     private boolean mIconForceGraysaleWhenDark;
     private TextView mSubText;
-    private TextView mInfoText;
-    private View mProfileBadge;
-    private View mThirdLine;
+    private View mSubTextDivider;
     private ImageView mExpandButton;
     private View mNotificationHeader;
     private View.OnClickListener mExpandClickListener;
@@ -90,10 +88,8 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
                 : null;
         mIcon = (ImageView) mView.findViewById(com.android.internal.R.id.icon);
         mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
-        mSubText = (TextView) mView.findViewById(com.android.internal.R.id.text);
-        mInfoText = (TextView) mView.findViewById(com.android.internal.R.id.info);
-        mProfileBadge = mView.findViewById(com.android.internal.R.id.profile_badge_line3);
-        mThirdLine = mView.findViewById(com.android.internal.R.id.line3);
+        mSubText = (TextView) mView.findViewById(com.android.internal.R.id.header_sub_text);
+        mSubTextDivider = mView.findViewById(com.android.internal.R.id.sub_text_divider);
         mExpandButton = (ImageView) mView.findViewById(com.android.internal.R.id.expand_button);
         mColor = resolveColor(mExpandButton);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
@@ -256,25 +252,10 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         boolean subTextAvailable = !TextUtils.isEmpty(mSubText.getText());
         if (visible && subTextAvailable) {
             mSubText.setVisibility(View.VISIBLE);
+            mSubTextDivider.setVisibility(View.VISIBLE);
         } else {
             mSubText.setVisibility(View.GONE);
-        }
-        // TODO: figure out what to do with the number (same place as contentInfo)
-        // work profile badge. For now we hide it since it looks nicer.
-        boolean infoAvailable = !TextUtils.isEmpty(mInfoText.getText());
-        if (visible && infoAvailable) {
-            mInfoText.setVisibility(View.VISIBLE);
-        } else {
-            mInfoText.setVisibility(View.GONE);
-        }
-        boolean showThirdLine = (visible && (infoAvailable || subTextAvailable))
-                || mProfileBadge.getVisibility() == View.VISIBLE;
-        if (mThirdLine != null) {
-            if (showThirdLine) {
-                mThirdLine.setVisibility(View.VISIBLE);
-            } else {
-                mThirdLine.setVisibility(View.GONE);
-            }
+            mSubTextDivider.setVisibility(View.GONE);
         }
     }
 

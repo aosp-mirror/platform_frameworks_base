@@ -32,16 +32,6 @@
         android:ellipsize="marquee"
         android:fadingEdge="horizontal"
         />
-    <TextView android:id="@+id/info"
-        android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="0"
-        android:singleLine="true"
-        android:gravity="center"
-        android:paddingStart="8dp"
-        />
     <ImageView android:id="@+id/profile_badge_line3"
         android:layout_width="@dimen/notification_badge_size"
         android:layout_height="@dimen/notification_badge_size"
