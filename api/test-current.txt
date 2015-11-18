@@ -39178,7 +39178,7 @@ package android.util {
     method public static final java.lang.String digitsAndPlusOnly(java.util.regex.Matcher);
     field public static final java.util.regex.Pattern DOMAIN_NAME;
     field public static final java.util.regex.Pattern EMAIL_ADDRESS;
-    field public static final java.lang.String GOOD_IRI_CHAR = "a-zA-Z0-9\u00a0-\ud7ff\uf900-\ufdcf\ufdf0-\uffef";
+    field public static final deprecated java.lang.String GOOD_IRI_CHAR = "a-zA-Z0-9\u00a0-\ud7ff\uf900-\ufdcf\ufdf0-\uffef";
     field public static final java.util.regex.Pattern IP_ADDRESS;
     field public static final java.util.regex.Pattern PHONE;
     field public static final deprecated java.util.regex.Pattern TOP_LEVEL_DOMAIN;

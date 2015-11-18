@@ -218,7 +218,7 @@ public class Linkify {
         ArrayList<LinkSpec> links = new ArrayList<LinkSpec>();
 
         if ((mask & WEB_URLS) != 0) {
-            gatherLinks(links, text, Patterns.WEB_URL,
+            gatherLinks(links, text, Patterns.AUTOLINK_WEB_URL,
                 new String[] { "http://", "https://", "rtsp://" },
                 sUrlMatchFilter, null);
         }
