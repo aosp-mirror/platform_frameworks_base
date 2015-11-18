@@ -61,6 +61,5 @@
         android:layout_gravity="center_vertical|end"
         android:padding="12dp"
         android:background="@drawable/recents_button_bg"
-        android:visibility="invisible"
         android:src="@drawable/recents_dismiss_light" />
 </com.android.systemui.recents.views.TaskViewHeader>

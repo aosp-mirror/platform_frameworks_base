@@ -574,11 +574,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     }
 
     @Override
-    public void onUserInteraction() {
-        mRecentsView.onUserInteraction();
-    }
-
-    @Override
     public void onBackPressed() {
         // Test mode where back does not do anything
         if (mConfig.debugModeEnabled) return;
