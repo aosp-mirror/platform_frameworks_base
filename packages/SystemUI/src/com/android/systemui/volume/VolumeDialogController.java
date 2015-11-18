@@ -391,6 +391,7 @@ public class VolumeDialogController {
             case AudioSystem.STREAM_BLUETOOTH_SCO:
             case AudioSystem.STREAM_MUSIC:
             case AudioSystem.STREAM_RING:
+            case AudioSystem.STREAM_NOTIFICATION:
             case AudioSystem.STREAM_SYSTEM:
             case AudioSystem.STREAM_VOICE_CALL:
                 return true;
