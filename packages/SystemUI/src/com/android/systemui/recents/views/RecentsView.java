@@ -517,6 +517,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         cancelLaunchedTaskWindowTransitionWithDelay(task, 0);
     }
 
+    public void resetHasBeenTouched() {
+        List<TaskStackView> stackViews = getTaskStackViews();
+        if (!stackViews.isEmpty()) {
+            stackViews.get(0).resetHasBeenTouched();
+        }
+    }
+
+    public boolean hasBeenTouched() {
+        List<TaskStackView> stackViews = getTaskStackViews();
+        if (!stackViews.isEmpty()) {
+            return stackViews.get(0).hasBeenTouched();
+        }
+
+        return false;
+    }
+
     @Override
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
                                   final TaskStack stack, final Task task, final boolean lockToTask) {
