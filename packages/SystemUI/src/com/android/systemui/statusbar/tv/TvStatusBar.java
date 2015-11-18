@@ -130,7 +130,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected int getMaxKeyguardNotifications() {
+    protected int getMaxKeyguardNotifications(boolean recompute) {
         return 0;
     }
 

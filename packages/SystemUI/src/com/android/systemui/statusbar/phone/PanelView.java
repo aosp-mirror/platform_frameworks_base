@@ -36,9 +36,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
-import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingManager;
-import com.android.systemui.classifier.HumanInteractionClassifier;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
@@ -891,6 +889,7 @@ public abstract class PanelView extends FrameLayout {
                         if (mStatusBar.getStatusBarWindow().getHeight()
                                 != mStatusBar.getStatusBarHeight()) {
                             getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            mStatusBar.onPanelExpandedAndLayouted();
                             if (animate) {
                                 mBar.startOpeningPanel(PanelView.this);
                                 notifyExpandingStarted();

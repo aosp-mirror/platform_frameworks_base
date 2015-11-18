@@ -44,6 +44,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
@@ -446,6 +447,36 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
         requestScrollerTopPaddingUpdate(animate);
+    }
+
+    /**
+     * @param maximum the maximum to return at most
+     * @return the maximum keyguard notifications that can fit on the screen
+     */
+    public int computeMaxKeyguardNotifications(int maximum) {
+        float minPadding = mClockPositionAlgorithm.getMinStackScrollerPadding(getHeight(),
+                mKeyguardStatusView.getHeight());
+        int keyguardPadding = getResources().getDimensionPixelSize(
+                R.dimen.notification_padding_dimmed);
+        final int overflowheight = getResources().getDimensionPixelSize(
+                R.dimen.notification_summary_height);
+        float bottomStackSize = mNotificationStackScroller.getKeyguardBottomStackSize();
+        float availableSpace = mNotificationStackScroller.getHeight() - minPadding - overflowheight
+                - bottomStackSize;
+        int count = 0;
+        for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            availableSpace -= child.getMinHeight() + keyguardPadding;
+            if (availableSpace >= 0 && count < maximum) {
+                count++;
+            } else {
+                return count;
+            }
+        }
+        return count;
     }
 
     private void startClockAnimation(int y) {

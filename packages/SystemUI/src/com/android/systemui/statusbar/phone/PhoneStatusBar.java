@@ -110,8 +110,8 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -171,7 +171,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -338,7 +337,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
 
-    int mKeyguardMaxNotificationCount;
+    int mMaxAllowedKeyguardNotifications;
 
     boolean mExpandedVisible;
 
@@ -428,6 +427,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
+    private int mMaxKeyguardNotifications;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
@@ -3132,7 +3132,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_min_height);
         mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_max_height);
 
-        mKeyguardMaxNotificationCount = res.getInteger(R.integer.keyguard_max_notification_count);
+        mMaxAllowedKeyguardNotifications = res.getInteger(R.integer.keyguard_max_notification_count);
 
         if (DEBUG) Log.v(TAG, "updateResources");
     }
@@ -3913,8 +3913,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected int getMaxKeyguardNotifications() {
-        return mKeyguardMaxNotificationCount;
+    protected int getMaxKeyguardNotifications(boolean recompute) {
+        if (recompute) {
+            mMaxKeyguardNotifications = Math.max(1,
+                    mNotificationPanel.computeMaxKeyguardNotifications(
+                            mMaxAllowedKeyguardNotifications));
+            return mMaxKeyguardNotifications;
+        }
+        return mMaxKeyguardNotifications;
+    }
+
+    public int getMaxKeyguardNotifications() {
+        return getMaxKeyguardNotifications(false /* recompute */);
     }
 
     public NavigationBarView getNavigationBarView() {

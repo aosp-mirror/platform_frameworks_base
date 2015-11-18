@@ -2266,6 +2266,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         return Math.max(emptyMargin, 0);
     }
 
+    public float getKeyguardBottomStackSize() {
+        return mBottomStackPeekSize + getResources().getDimensionPixelSize(
+                R.dimen.bottom_stack_slow_down_length);
+    }
+
     public void onExpansionStarted() {
         mIsExpansionChanging = true;
         mStackScrollAlgorithm.onExpansionStarted(mCurrentStackScrollState);

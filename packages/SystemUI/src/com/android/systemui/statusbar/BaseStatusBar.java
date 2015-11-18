@@ -1289,6 +1289,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    /**
+     * Called when the panel was layouted expanded for the first time after being collapsed.
+     */
+    public void onPanelExpandedAndLayouted() {
+        if (mState == StatusBarState.KEYGUARD) {
+            // Since the number of notifications is determined based on the height of the view, we
+            // need to update them.
+            updateRowStates();
+        }
+    }
+
     protected class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
@@ -1955,15 +1966,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
+     * @param recompute wheter the number should be recomputed
      * @return The number of notifications we show on Keyguard.
      */
-    protected abstract int getMaxKeyguardNotifications();
+    protected abstract int getMaxKeyguardNotifications(boolean recompute);
 
     /**
      * Updates expanded, dimmed and locked states of notification rows.
      */
     protected void updateRowStates() {
-        int maxKeyguardNotifications = getMaxKeyguardNotifications();
         mKeyguardIconOverflowContainer.getIconsView().removeAllViews();
 
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
@@ -1971,6 +1982,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         int visibleNotifications = 0;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
+        int maxNotifications = 0;
+        if (onKeyguard) {
+            maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
+        }
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
             if (onKeyguard) {
@@ -1986,7 +2001,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     == View.VISIBLE;
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if ((isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
-                    (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
+                    (onKeyguard && (visibleNotifications >= maxNotifications
                             && !childWithVisibleSummary
                             || !showOnKeyguard))) {
                 entry.row.setVisibility(View.GONE);
