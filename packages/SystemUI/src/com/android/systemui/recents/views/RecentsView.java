@@ -393,17 +393,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return insets.consumeSystemWindowInsets();
     }
 
-    /** Notifies each task view of the user interaction. */
-    public void onUserInteraction() {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            stackView.onUserInteraction();
-        }
-    }
-
     /** Focuses the next task in the first stack view */
     public void focusNextTask(boolean forward) {
         // Get the first stack view

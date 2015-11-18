@@ -34,7 +34,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
@@ -78,7 +77,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskStackViewCallbacks mCb;
     ViewPool<TaskView, Task> mViewPool;
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<TaskViewTransform>();
-    DozeTrigger mUIDozeTrigger;
     DebugOverlayView mDebugOverlay;
     Rect mTaskStackBounds = new Rect();
     DismissView mDismissAllButton;
@@ -125,18 +123,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller = new TaskStackViewScroller(context, mConfig, mLayoutAlgorithm);
         mStackScroller.setCallbacks(this);
         mTouchHandler = new TaskStackViewTouchHandler(context, this, mConfig, mStackScroller);
-        mUIDozeTrigger = new DozeTrigger(mConfig.taskBarDismissDozeDelaySeconds, new Runnable() {
-            @Override
-            public void run() {
-                // Show the task bar dismiss buttons
-                List<TaskView> taskViews = getTaskViews();
-                int taskViewCount = taskViews.size();
-                for (int i = 0; i < taskViewCount; i++) {
-                    TaskView tv = taskViews.get(i);
-                    tv.startNoUserInteractionAnimation();
-                }
-            }
-        });
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
@@ -213,10 +199,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackViewsClipDirty = true;
         mAwaitingFirstLayout = true;
         mPrevAccessibilityFocusedIndex = -1;
-        if (mUIDozeTrigger != null) {
-            mUIDozeTrigger.stopDozing();
-            mUIDozeTrigger.resetTrigger();
-        }
         mStackScroller.reset();
 
         mStartEnterAnimationCompleted = false;
@@ -890,11 +872,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 focusTask(Math.max(0, mStack.getTaskCount() - 1), false);
             }
         }
-
-        // Start dozing
-        if (!mConfig.multiStackEnabled) {
-            mUIDozeTrigger.startDozing();
-        }
     }
 
     /** Requests this task stacks to start it's enter-recents animation */
@@ -940,8 +917,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 @Override
                 public void run() {
                     mStartEnterAnimationCompleted = true;
-                    // Poke the dozer to restart the trigger after the animation completes
-                    mUIDozeTrigger.poke();
 
                     RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
                     SystemServicesProxy ssp = loader.getSystemServicesProxy();
@@ -1100,12 +1075,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
         return isTransformedTouchPointInView(x, y, child, null);
-    }
-
-    /** Pokes the dozer on user interaction. */
-    void onUserInteraction() {
-        // Poke the doze trigger if it is dozing
-        mUIDozeTrigger.poke();
     }
 
     @Override
@@ -1315,12 +1284,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Load the task data
         RecentsTaskLoader.getInstance().loadTaskData(task);
 
-        // If the doze trigger has already fired, then update the state for this task view
-        if (mConfig.launchedWithAltTab ||
-                mConfig.multiStackEnabled || mUIDozeTrigger.hasTriggered()) {
-            tv.setNoUserInteractionState();
-        }
-
         // If we've finished the start animation, then ensure we always enable the focus animations
         if (mStartEnterAnimationCompleted) {
             tv.enableFocusAnimations();
@@ -1391,9 +1354,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask) {
-        // Cancel any doze triggers
-        mUIDozeTrigger.stopDozing();
-
         if (mCb != null) {
             mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask);
         }
@@ -1450,7 +1410,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onScrollChanged(float p) {
-        mUIDozeTrigger.poke();
         requestSynchronizeStackViewsWithModel();
         postInvalidateOnAnimation();
     }

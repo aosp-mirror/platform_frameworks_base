@@ -155,7 +155,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Resets this TaskView for reuse. */
     void reset() {
         resetViewProperties();
-        resetNoUserInteractionState();
         setClipViewInStack(false);
         setCallbacks(null);
         disableFocusAnimations();
@@ -459,8 +458,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
                     .start();
         } else {
-            // Hide the dismiss button
-            mHeaderView.startLaunchTaskDismissAnimation();
             // If this is another view in the task grouping and is in front of the launch task,
             // animate it away first
             if (occludesLaunchTarget) {
@@ -505,27 +502,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Enables/disables handling touch on this task view. */
     void setTouchEnabled(boolean enabled) {
         setOnClickListener(enabled ? this : null);
-    }
-
-    /** Animates this task view if the user does not interact with the stack after a certain time. */
-    void startNoUserInteractionAnimation() {
-        mHeaderView.startNoUserInteractionAnimation();
-    }
-
-    /**
-     * Mark this task view that the user does has not interacted with the stack after a certain
-     * time.
-     */
-    void setNoUserInteractionState() {
-        mHeaderView.setNoUserInteractionState();
-    }
-
-    /**
-     * Resets the state tracking that the user has not interacted with the stack after a certain
-     * time.
-     */
-    void resetNoUserInteractionState() {
-        mHeaderView.resetNoUserInteractionState();
     }
 
     /** Dismisses this task. */

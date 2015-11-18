@@ -266,53 +266,6 @@ public class TaskViewHeader extends FrameLayout {
         mApplicationIcon.setImageDrawable(null);
     }
 
-    /** Animates this task bar dismiss button when launching a task. */
-    void startLaunchTaskDismissAnimation() {
-        if (mDismissButton.getVisibility() == View.VISIBLE) {
-            mDismissButton.animate().cancel();
-            mDismissButton.animate()
-                    .alpha(0f)
-                    .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.taskViewExitToAppDuration)
-                    .start();
-        }
-    }
-
-    /** Animates this task bar if the user does not interact with the stack after a certain time. */
-    void startNoUserInteractionAnimation() {
-        if (mDismissButton.getVisibility() != View.VISIBLE) {
-            mDismissButton.setVisibility(View.VISIBLE);
-            mDismissButton.setAlpha(0f);
-            mDismissButton.animate()
-                    .alpha(1f)
-                    .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .setDuration(mConfig.taskViewEnterFromAppDuration)
-                    .start();
-        }
-    }
-
-    /**
-     * Mark this task view that the user does has not interacted with the stack after a certain
-     * time.
-     */
-    void setNoUserInteractionState() {
-        if (mDismissButton.getVisibility() != View.VISIBLE) {
-            mDismissButton.animate().cancel();
-            mDismissButton.setVisibility(View.VISIBLE);
-            mDismissButton.setAlpha(1f);
-        }
-    }
-
-    /**
-     * Resets the state tracking that the user has not interacted with the stack after a certain
-     * time.
-     */
-    void resetNoUserInteractionState() {
-        mDismissButton.setVisibility(View.INVISIBLE);
-    }
-
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
 
