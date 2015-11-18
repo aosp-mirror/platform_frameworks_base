@@ -4,7 +4,7 @@ import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.settingslib.net.MobileDataControllerImpl;
+import com.android.settingslib.net.MobileDataController;
 import org.mockito.Mockito;
 
 @SmallTest
@@ -88,7 +88,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 Mockito.mock(AccessPointControllerImpl.class),
-                Mockito.mock(MobileDataControllerImpl.class), mMockSubDefaults);
+                Mockito.mock(MobileDataController.class), mMockSubDefaults);
         setupNetworkController();
 
         setupDefaultSignal();
