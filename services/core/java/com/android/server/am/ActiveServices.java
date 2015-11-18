@@ -1094,15 +1094,20 @@ public final class ActiveServices {
                 }
                 r = smap.mServicesByName.get(name);
                 if (r == null && createIfNeeded) {
-                    // Before going further -- if this app is not allowed to run in the background,
-                    // then at this point we aren't going to let it period.
-                    if (!mAm.checkAllowBackgroundLocked(sInfo.applicationInfo.uid,
-                            sInfo.packageName, callingPid)) {
-                        Slog.w(TAG, "Background execution not allowed: service "
-                                + r.intent + " to " + name.flattenToShortString()
-                                + " from pid=" + callingPid + " uid=" + callingUid
-                                + " pkg=" + callingPackage);
-                        return null;
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        // Before going further -- if this app is not allowed to run in the
+                        // background, then at this point we aren't going to let it period.
+                        if (!mAm.checkAllowBackgroundLocked(sInfo.applicationInfo.uid,
+                                sInfo.packageName, callingPid)) {
+                            Slog.w(TAG, "Background execution not allowed: service "
+                                    + r.intent + " to " + name.flattenToShortString()
+                                    + " from pid=" + callingPid + " uid=" + callingUid
+                                    + " pkg=" + callingPackage);
+                            return null;
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
                     }
 
                     Intent.FilterComparison filter
