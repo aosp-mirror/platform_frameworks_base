@@ -1008,6 +1008,21 @@
            "How to detect location data on Android Wear devices."
           >Detecting Location</a>
       </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/wear-permissions.html"
+           description=
+           "How to request permissions on Android Wear devices."
+          >Requesting Permissions</a>
+      </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/wearables/wearable-sounds.html"
+           description=
+           "How to use the speaker on Android Wear devices."
+          >Using the Speaker</a>
+      </li>
+
     </ul>
   </li>
   <!-- End Building for wearables -->
