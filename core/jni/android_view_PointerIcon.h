@@ -19,6 +19,8 @@
 
 #include "jni.h"
 
+#include <vector>
+
 #include <utils/Errors.h>
 #include <SkBitmap.h>
 
@@ -69,6 +71,8 @@ struct PointerIcon {
     SkBitmap bitmap;
     float hotSpotX;
     float hotSpotY;
+    std::vector<SkBitmap> bitmapFrames;
+    int32_t durationPerFrame;
 
     inline bool isNullIcon() {
         return style == POINTER_ICON_STYLE_NULL;
@@ -79,6 +83,8 @@ struct PointerIcon {
         bitmap.reset();
         hotSpotX = 0;
         hotSpotY = 0;
+        bitmapFrames.clear();
+        durationPerFrame = 0;
     }
 };
 

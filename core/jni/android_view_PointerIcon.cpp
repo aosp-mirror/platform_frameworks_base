@@ -24,6 +24,7 @@
 #include <android_runtime/Log.h>
 #include <utils/Log.h>
 #include <android/graphics/GraphicsJNI.h>
+#include "ScopedLocalRef.h"
 
 #include "core_jni_helpers.h"
 
@@ -35,6 +36,8 @@ static struct {
     jfieldID mBitmap;
     jfieldID mHotSpotX;
     jfieldID mHotSpotY;
+    jfieldID mBitmapFrames;
+    jfieldID mDurationPerFrame;
     jmethodID getSystemIcon;
     jmethodID load;
 } gPointerIconClassInfo;
@@ -84,6 +87,19 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
         env->DeleteLocalRef(bitmapObj);
     }
 
+    ScopedLocalRef<jobjectArray> bitmapFramesObj(env, reinterpret_cast<jobjectArray>(
+            env->GetObjectField(loadedPointerIconObj, gPointerIconClassInfo.mBitmapFrames)));
+    if (bitmapFramesObj.get()) {
+        outPointerIcon->durationPerFrame = env->GetIntField(
+                loadedPointerIconObj, gPointerIconClassInfo.mDurationPerFrame);
+        jsize size = env->GetArrayLength(bitmapFramesObj.get());
+        outPointerIcon->bitmapFrames.resize(size);
+        for (jsize i = 0; i < size; ++i) {
+            ScopedLocalRef<jobject> bitmapObj(env, env->GetObjectArrayElement(bitmapFramesObj.get(), i));
+            GraphicsJNI::getSkBitmap(env, bitmapObj.get(), &(outPointerIcon->bitmapFrames[i]));
+        }
+    }
+
     env->DeleteLocalRef(loadedPointerIconObj);
     return OK;
 }
@@ -120,6 +136,12 @@ int register_android_view_PointerIcon(JNIEnv* env) {
 
     gPointerIconClassInfo.mHotSpotY = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mHotSpotY", "F");
+
+    gPointerIconClassInfo.mBitmapFrames = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
+            "mBitmapFrames", "[Landroid/graphics/Bitmap;");
+
+    gPointerIconClassInfo.mDurationPerFrame = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
+            "mDurationPerFrame", "I");
 
     gPointerIconClassInfo.getSystemIcon = GetStaticMethodIDOrDie(env, gPointerIconClassInfo.clazz,
             "getSystemIcon", "(Landroid/content/Context;I)Landroid/view/PointerIcon;");
