@@ -33,9 +33,8 @@ import com.android.internal.R;
 import com.android.internal.policy.PhoneWindow;
 
 /**
- * This class represents the special screen elements to control a window on free form
- * environment. All these screen elements are added in the "non client area" which is the area of
- * the window which is handled by the OS and not the application.
+ * This class represents the special screen elements to control a window on freeform
+ * environment.
  * As such this class handles the following things:
  * <ul>
  * <li>The caption, containing the system buttons like maximize, close and such as well as
@@ -46,18 +45,16 @@ import com.android.internal.policy.PhoneWindow;
  * Note: At this time the application can change various attributes of the DecorView which
  * will break things (in settle/unexpected ways):
  * <ul>
- * <li>setElevation</li>
  * <li>setOutlineProvider</li>
  * <li>setSurfaceFormat</li>
  * <li>..</li>
  * </ul>
- * This will be mitigated once b/22527834 will be addressed.
  */
-public class NonClientDecorView extends LinearLayout
+public class DecorCaptionView extends LinearLayout
         implements View.OnClickListener, View.OnTouchListener {
-    private final static String TAG = "NonClientDecorView";
+    private final static String TAG = "DecorCaptionView";
     private PhoneWindow mOwner = null;
-    private boolean mShowDecor = false;
+    private boolean mShow = false;
 
     // True if the window is being dragged.
     private boolean mDragging = false;
@@ -65,21 +62,21 @@ public class NonClientDecorView extends LinearLayout
     // True when the left mouse button got released while dragging.
     private boolean mLeftMouseButtonReleased;
 
-    public NonClientDecorView(Context context) {
+    public DecorCaptionView(Context context) {
         super(context);
     }
 
-    public NonClientDecorView(Context context, AttributeSet attrs) {
+    public DecorCaptionView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public NonClientDecorView(Context context, AttributeSet attrs, int defStyle) {
+    public DecorCaptionView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
-    public void setPhoneWindow(PhoneWindow owner, boolean showDecor) {
+    public void setPhoneWindow(PhoneWindow owner, boolean show) {
         mOwner = owner;
-        mShowDecor = showDecor;
+        mShow = show;
         updateCaptionVisibility();
         // By changing the outline provider to BOUNDS, the window can remove its
         // background without removing the shadow.
@@ -96,8 +93,8 @@ public class NonClientDecorView extends LinearLayout
         // input device we are listening to.
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (!mShowDecor) {
-                    // When there is no decor we should not react to anything.
+                if (!mShow) {
+                    // When there is no caption we should not react to anything.
                     return false;
                 }
                 // A drag action is started if we aren't dragging already and the starting event is
@@ -136,11 +133,11 @@ public class NonClientDecorView extends LinearLayout
     }
 
     /**
-     * The phone window configuration has changed and the decor needs to be updated.
-     * @param showDecor True if the decor should be shown.
+     * The phone window configuration has changed and the caption needs to be updated.
+     * @param show True if the caption should be shown.
      */
-    public void onConfigurationChanged(boolean showDecor) {
-        mShowDecor = showDecor;
+    public void onConfigurationChanged(boolean show) {
+        mShow = show;
         updateCaptionVisibility();
     }
 
@@ -157,7 +154,7 @@ public class NonClientDecorView extends LinearLayout
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         // Make sure that we never get more then one client area in our view.
         if (index >= 2 || getChildCount() >= 2) {
-            throw new IllegalStateException("NonClientDecorView can only handle 1 client view");
+            throw new IllegalStateException("DecorCaptionView can only handle 1 client view");
         }
         super.addView(child, index, params);
     }
@@ -176,8 +173,8 @@ public class NonClientDecorView extends LinearLayout
      * Updates the visibility of the caption.
      **/
     private void updateCaptionVisibility() {
-        // Don't show the decor if the window has e.g. entered full screen.
-        boolean invisible = isFillingScreen() || !mShowDecor;
+        // Don't show the caption if the window has e.g. entered full screen.
+        boolean invisible = isFillingScreen() || !mShow;
         View caption = getChildAt(0);
         caption.setVisibility(invisible ? GONE : VISIBLE);
         caption.setOnTouchListener(this);
@@ -197,11 +194,11 @@ public class NonClientDecorView extends LinearLayout
         }
     }
 
-    public boolean isShowingDecor() {
-        return mShowDecor;
+    public boolean isCaptionShowing() {
+        return mShow;
     }
 
-    public int getDecorCaptionHeight() {
+    public int getCaptionHeight() {
         final View caption = getChildAt(0);
         return (caption != null) ? caption.getHeight() : 0;
     }

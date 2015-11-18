@@ -16,6 +16,6 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_window_focused="true"
-          android:drawable="@drawable/non_client_decor_title_focused" />
-    <item android:drawable="@drawable/non_client_decor_title_unfocused" />
+          android:drawable="@drawable/decor_caption_title_focused" />
+    <item android:drawable="@drawable/decor_caption_title_unfocused" />
 </selector>
