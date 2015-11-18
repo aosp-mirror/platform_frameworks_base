@@ -120,12 +120,12 @@ public class DragDownHelper implements Gefingerpoken {
                 if (mLastHeight > mMinDragDistance) {
                     if (!mDraggedFarEnough) {
                         mDraggedFarEnough = true;
-                        mDragDownCallback.onThresholdReached();
+                        mDragDownCallback.onCrossedThreshold(true);
                     }
                 } else {
                     if (mDraggedFarEnough) {
                         mDraggedFarEnough = false;
-                        mDragDownCallback.onDragDownReset();
+                        mDragDownCallback.onCrossedThreshold(false);
                     }
                 }
                 return true;
@@ -236,7 +236,12 @@ public class DragDownHelper implements Gefingerpoken {
          */
         boolean onDraggedDown(View startingChild, int dragLengthY);
         void onDragDownReset();
-        void onThresholdReached();
+
+        /**
+         * The user has dragged either above or below the threshold
+         * @param above whether he dragged above it
+         */
+        void onCrossedThreshold(boolean above);
         void onTouchSlopExceeded();
         void setEmptyDragAmount(float amount);
     }

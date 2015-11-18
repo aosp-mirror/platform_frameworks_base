@@ -3944,11 +3944,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void onDragDownReset() {
         mStackScroller.setDimmed(true /* dimmed */, true /* animated */);
+        mStackScroller.resetScrollPosition();
     }
 
     @Override
-    public void onThresholdReached() {
-        mStackScroller.setDimmed(false /* dimmed */, true /* animate */);
+    public void onCrossedThreshold(boolean above) {
+        mStackScroller.setDimmed(!above /* dimmed */, true /* animate */);
     }
 
     @Override
