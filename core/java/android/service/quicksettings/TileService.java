@@ -15,6 +15,7 @@
  */
 package android.service.quicksettings;
 
+import android.app.Dialog;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.view.WindowManager;
 
 /**
  * A QSTileService provides the user a tile that can be added to Quick Settings.
@@ -55,7 +57,7 @@ import android.os.RemoteException;
  *     android:icon="@drawable/my_default_icon_label"
  *     android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
  *     <intent-filter>
- *         <action android:name="android.intent.action.QS_TILE" />
+ *         <action android:name="android.service.quicksettings.action.QS_TILE" />
  *     </intent-filter>
  * </service>}
  * </pre>
@@ -73,6 +75,7 @@ public class TileService extends Service {
 
     private boolean mListening = false;
     private Tile mTile;
+    private IBinder mToken;
 
     /**
      * Called when the user adds this tile to Quick Settings.
@@ -116,6 +119,20 @@ public class TileService extends Service {
     }
 
     /**
+     * Used to show a dialog.
+     *
+     * This will collapse the Quick Settings panel and show the dialog.
+     *
+     * @param dialog Dialog to show.
+     */
+    public final void showDialog(Dialog dialog) {
+        dialog.getWindow().getAttributes().token = mToken;
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_QS_DIALOG);
+        dialog.show();
+        getQsTile().onShowDialog();
+    }
+
+    /**
      * Gets the {@link Tile} for this service.
      * <p/>
      * This tile may be used to get or set the current state for this
@@ -155,8 +172,8 @@ public class TileService extends Service {
             }
 
             @Override
-            public void onClick() throws RemoteException {
-                mHandler.sendEmptyMessage(H.MSG_TILE_CLICKED);
+            public void onClick(IBinder wtoken) throws RemoteException {
+                mHandler.obtainMessage(H.MSG_TILE_CLICKED, wtoken).sendToTarget();
             }
         };
     }
@@ -185,19 +202,20 @@ public class TileService extends Service {
                 case MSG_TILE_REMOVED:
                     TileService.this.onTileAdded();
                     break;
-                case MSG_START_LISTENING:
+                case MSG_STOP_LISTENING:
                     if (mListening) {
                         mListening = false;
                         TileService.this.onStopListening();
                     }
                     break;
-                case MSG_STOP_LISTENING:
+                case MSG_START_LISTENING:
                     if (!mListening) {
                         mListening = true;
                         TileService.this.onStartListening();
                     }
                     break;
                 case MSG_TILE_CLICKED:
+                    mToken = (IBinder) msg.obj;
                     TileService.this.onClick();
                     break;
             }

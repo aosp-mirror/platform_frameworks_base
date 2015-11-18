@@ -293,9 +293,18 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
         verifyCaller(tile.getComponentName().getPackageName());
         CustomTile customTile = getTileForComponent(tile.getComponentName());
         if (customTile != null) {
-            Log.d("TileService", "Got tile update for " + tile.getComponentName());
             customTile.updateState(tile);
             customTile.refreshState();
+        }
+    }
+
+    @Override
+    public void onShowDialog(Tile tile) throws RemoteException {
+        verifyCaller(tile.getComponentName().getPackageName());
+        CustomTile customTile = getTileForComponent(tile.getComponentName());
+        if (customTile != null) {
+            customTile.onDialogShown();
+            collapsePanels();
         }
     }
 

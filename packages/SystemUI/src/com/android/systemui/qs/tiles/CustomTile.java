@@ -24,12 +24,16 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.util.Log;
-
+import android.view.IWindowManager;
+import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileServiceWrapper;
@@ -38,19 +42,26 @@ import com.android.systemui.statusbar.phone.QSTileHost;
 public class CustomTile extends QSTile<QSTile.State> {
     public static final String PREFIX = "custom(";
 
+    private static final boolean DEBUG = false;
+
     // We don't want to thrash binding and unbinding if the user opens and closes the panel a lot.
     // So instead we have a period of waiting.
     private static final long UNBIND_DELAY = 30000;
 
     private final ComponentName mComponent;
     private final Tile mTile;
+    private final IWindowManager mWindowManager;
+    private final IBinder mToken = new Binder();
 
     private QSTileServiceWrapper mService;
     private boolean mListening;
     private boolean mBound;
+    private boolean mIsTokenGranted;
+    private boolean mIsShowingDialog;
 
     private CustomTile(QSTileHost host, String action) {
         super(host);
+        mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
         mTile = new Tile(mComponent, host);
         try {
@@ -72,10 +83,13 @@ public class CustomTile extends QSTile<QSTile.State> {
     }
 
     public void updateState(Tile tile) {
-        Log.d("TileService", "Setting state " + tile.getLabel());
         mTile.setIcon(tile.getIcon());
         mTile.setLabel(tile.getLabel());
         mTile.setContentDescription(tile.getContentDescription());
+    }
+
+    public void onDialogShown() {
+        mIsShowingDialog = true;
     }
 
     @Override
@@ -95,14 +109,30 @@ public class CustomTile extends QSTile<QSTile.State> {
             if (mService!= null) {
                 mService.onStopListening();
             }
+            if (mIsTokenGranted && !mIsShowingDialog) {
+                try {
+                    if (DEBUG) Log.d(TAG, "Removing token");
+                    mWindowManager.removeWindowToken(mToken);
+                } catch (RemoteException e) {
+                }
+                mIsTokenGranted = false;
+            }
+            mIsShowingDialog = false;
             mHandler.postDelayed(mUnbind, UNBIND_DELAY);
         }
     }
-    
+
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
         mHandler.removeCallbacks(mUnbind);
+        if (mIsTokenGranted) {
+            try {
+                if (DEBUG) Log.d(TAG, "Removing token");
+                mWindowManager.removeWindowToken(mToken);
+            } catch (RemoteException e) {
+            }
+        }
         mUnbind.run();
     }
 
@@ -119,7 +149,13 @@ public class CustomTile extends QSTile<QSTile.State> {
     @Override
     protected void handleClick() {
         if (mService != null) {
-            mService.onClick();
+            try {
+                if (DEBUG) Log.d(TAG, "Adding token");
+                mWindowManager.addWindowToken(mToken, WindowManager.LayoutParams.TYPE_QS_DIALOG);
+                mIsTokenGranted = true;
+            } catch (RemoteException e) {
+            }
+            mService.onClick(mToken);
         } else {
             Log.e(TAG, "Click with no service " + getTileSpec());
         }

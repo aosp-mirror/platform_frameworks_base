@@ -137,6 +137,18 @@ public final class Tile implements Parcelable {
         }
     }
 
+    /**
+     * @hide
+     * Notifies the IQSService that this tile is showing a dialog.
+     */
+    void onShowDialog() {
+        try {
+            mService.onShowDialog(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't onShowDialog");
+        }
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongInterface(mService);

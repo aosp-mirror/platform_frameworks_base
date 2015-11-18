@@ -27,5 +27,5 @@ oneway interface IQSTileService {
     void onTileRemoved();
     void onStartListening();
     void onStopListening();
-    void onClick();
+    void onClick(IBinder wtoken);
 }

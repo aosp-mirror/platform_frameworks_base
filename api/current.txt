@@ -33245,6 +33245,7 @@ package android.service.quicksettings {
     method public void onStopListening();
     method public void onTileAdded();
     method public void onTileRemoved();
+    method public final void showDialog(android.app.Dialog);
     field public static final java.lang.String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
   }
 

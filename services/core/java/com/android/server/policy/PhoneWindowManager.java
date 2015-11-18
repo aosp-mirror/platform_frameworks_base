@@ -108,9 +108,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.policy.PhoneWindow;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -124,6 +121,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
@@ -1915,6 +1914,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_PRIVATE_PRESENTATION:
             case TYPE_VOICE_INTERACTION:
             case TYPE_ACCESSIBILITY_OVERLAY:
+            case TYPE_QS_DIALOG:
                 // The window manager will check these.
                 break;
             case TYPE_PHONE:
@@ -2109,6 +2109,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // wallpaper is at the bottom, though the window manager may move it.
             return 2;
         case TYPE_DOCK_DIVIDER:
+            return 2;
+        case TYPE_QS_DIALOG:
             return 2;
         case TYPE_PHONE:
             return 3;

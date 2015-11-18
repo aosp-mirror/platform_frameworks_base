@@ -66,9 +66,9 @@ public class QSTileServiceWrapper implements IQSTileService {
     }
 
     @Override
-    public void onClick() {
+    public void onClick(IBinder token) {
         try {
-            mService.onClick();
+            mService.onClick(token);
         } catch (Exception e) {
             Log.d(TAG, "Caught exception from QSTileService", e);
         }

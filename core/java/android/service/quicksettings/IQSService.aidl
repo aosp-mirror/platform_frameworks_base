@@ -23,4 +23,5 @@ import android.service.quicksettings.Tile;
  */
 interface IQSService {
     void updateQsTile(in Tile tile);
+    void onShowDialog(in Tile tile);
 }

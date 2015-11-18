@@ -238,6 +238,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION, to = "TYPE_VOICE_INTERACTION"),
             @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING, to = "TYPE_VOICE_INTERACTION_STARTING"),
             @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER, to = "TYPE_DOCK_DIVIDER"),
+            @ViewDebug.IntToString(from = TYPE_QS_DIALOG, to = "TYPE_QS_DIALOG"),
         })
         public int type;
 
@@ -582,6 +583,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_DOCK_DIVIDER = FIRST_SYSTEM_WINDOW+34;
+
+        /**
+         * Window type: like {@link #TYPE_APPLICATION_ATTACHED_DIALOG}, but used
+         * by Quick Settings Tiles.
+         * @hide
+         */
+        public static final int TYPE_QS_DIALOG = FIRST_SYSTEM_WINDOW+35;
 
         /**
          * End of types of system windows.
