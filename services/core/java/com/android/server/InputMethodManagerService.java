@@ -935,7 +935,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 || (newLocale != null && !newLocale.equals(mLastSystemLocale))) {
             if (!updateOnlyWhenLocaleChanged) {
                 hideCurrentInputLocked(0, null);
-                unbindCurrentMethodLocked(true, false);
+                resetCurrentMethodAndClient();
             }
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
@@ -1395,7 +1395,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
         }
 
-        unbindCurrentMethodLocked(false, true);
+        unbindCurrentMethodLocked(true);
 
         mCurIntent = new Intent(InputMethod.SERVICE_INTERFACE);
         mCurIntent.setComponent(info.getComponent());
@@ -1453,7 +1453,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurMethod = IInputMethod.Stub.asInterface(service);
                 if (mCurToken == null) {
                     Slog.w(TAG, "Service connected without a token!");
-                    unbindCurrentMethodLocked(false, false);
+                    unbindCurrentMethodLocked(false);
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
@@ -1490,11 +1490,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         channel.dispose();
     }
 
-    void unbindCurrentMethodLocked(boolean resetCurrentMethodAndClient, boolean savePosition) {
-        if (resetCurrentMethodAndClient) {
-            mCurMethodId = null;
-        }
-
+    void unbindCurrentMethodLocked(boolean savePosition) {
         if (mVisibleBound) {
             mContext.unbindService(mVisibleConnection);
             mVisibleBound = false;
@@ -1520,10 +1516,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mCurId = null;
         clearCurMethodLocked();
+    }
 
-        if (resetCurrentMethodAndClient) {
-            unbindCurrentClientLocked();
-        }
+    void resetCurrentMethodAndClient() {
+        mCurMethodId = null;
+        unbindCurrentMethodLocked(false);
+        unbindCurrentClientLocked();
     }
 
     void requestClientSessionLocked(ClientState cs) {
@@ -1876,12 +1874,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodLocked(id, mSettings.getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
-                unbindCurrentMethodLocked(true, false);
+                resetCurrentMethodAndClient();
             }
             mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
-            unbindCurrentMethodLocked(true, false);
+            resetCurrentMethodAndClient();
         }
         // Here is not the perfect place to reset the switching controller. Ideally
         // mSwitchingController and mSettings should be able to share the same state.
