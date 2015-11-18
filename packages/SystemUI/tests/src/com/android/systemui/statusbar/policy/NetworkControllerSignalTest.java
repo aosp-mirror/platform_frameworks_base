@@ -29,7 +29,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.settingslib.net.MobileDataControllerImpl;
+import com.android.settingslib.net.MobileDataController;
 import com.android.systemui.R;
 
 import org.mockito.ArgumentCaptor;
@@ -47,7 +47,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class),
+                mock(AccessPointControllerImpl.class), mock(MobileDataController.class),
                 mMockSubDefaults);
         setupNetworkController();
 
@@ -96,7 +96,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class),
+                mock(AccessPointControllerImpl.class), mock(MobileDataController.class),
                 mMockSubDefaults);
         setupNetworkController();
 
