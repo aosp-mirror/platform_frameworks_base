@@ -741,7 +741,12 @@ class WindowStateAnimator {
 
         if (mSurfaceController != null) {
             int i = mWin.mChildWindows.size();
-            while (i > 0) {
+            // When destroying a surface we want to make sure child windows
+            // are hidden. If we are preserving the surface until redraw though
+            // we intend to swap it out with another surface for resizing. In this case
+            // the window always remains visible to the user and the child windows
+            // should likewise remain visable.
+            while (!mDestroyPreservedSurfaceUponRedraw && i > 0) {
                 i--;
                 WindowState c = mWin.mChildWindows.get(i);
                 c.mAttachedHidden = true;
