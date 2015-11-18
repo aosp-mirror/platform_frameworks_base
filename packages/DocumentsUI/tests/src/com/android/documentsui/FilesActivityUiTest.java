@@ -125,6 +125,7 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
                 "Videos",
                 "Audio",
                 "Downloads",
+                "Home",
                 ROOT_0_ID,
                 ROOT_1_ID);
     }
@@ -134,6 +135,13 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
 
         mBot.openRoot(ROOT_0_ID);
         mBot.assertHasDocuments("file0.log", "file1.png", "file2.csv");
+    }
+
+    public void testRootClickSetsWindowTitle() throws Exception {
+        initTestFiles();
+
+        mBot.openRoot("Home");
+        mBot.assertWindowTitle("Home");
     }
 
     public void testFilesList_LiveUpdate() throws Exception {

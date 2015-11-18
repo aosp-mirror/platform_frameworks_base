@@ -85,9 +85,11 @@ public class ExternalStorageProvider extends DocumentsProvider {
         public String docId;
         public File visiblePath;
         public File path;
+        public boolean reportAvailableBytes = true;
     }
 
     private static final String ROOT_ID_PRIMARY_EMULATED = "primary";
+    private static final String ROOT_ID_HOME = "home";
 
     private StorageManager mStorageManager;
     private Handler mHandler;
@@ -118,6 +120,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private void updateVolumesLocked() {
         mRoots.clear();
 
+        VolumeInfo primaryVolume = null;
         final int userId = UserHandle.myUserId();
         final List<VolumeInfo> volumes = mStorageManager.getVolumes();
         for (VolumeInfo volume : volumes) {
@@ -126,6 +129,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
             final String rootId;
             final String title;
             if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
+                // save off the primary volume for subsequent "Home" dir initialization.
+                primaryVolume = volume;
+
                 // We currently only support a single emulated volume mounted at
                 // a time, and it's always considered the primary
                 rootId = ROOT_ID_PRIMARY_EMULATED;
@@ -152,25 +158,58 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 continue;
             }
 
+            final RootInfo root = new RootInfo();
+            mRoots.put(rootId, root);
+
+            root.rootId = rootId;
+            root.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
+                    | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
+
+            // Dunno when this would NOT be the case, but never hurts to be correct.
+            if (volume.isMountedWritable()) {
+                root.flags |= Root.FLAG_SUPPORTS_CREATE;
+            }
+            root.title = title;
+            if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
+                root.flags |= Root.FLAG_HAS_SETTINGS;
+            }
+            if (volume.isVisibleForRead(userId)) {
+                root.visiblePath = volume.getPathForUser(userId);
+            } else {
+                root.visiblePath = null;
+            }
+            root.path = volume.getInternalPathForUser(userId);
             try {
-                final RootInfo root = new RootInfo();
-                mRoots.put(rootId, root);
-
-                root.rootId = rootId;
-                root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
-                        | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
-                root.title = title;
-                if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
-                    root.flags |= Root.FLAG_HAS_SETTINGS;
-                }
-                if (volume.isVisibleForRead(userId)) {
-                    root.visiblePath = volume.getPathForUser(userId);
-                } else {
-                    root.visiblePath = null;
-                }
-                root.path = volume.getInternalPathForUser(userId);
                 root.docId = getDocIdForFile(root.path);
+            } catch (FileNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
+        }
 
+        // Finally, if primary storage is available we add the "Home" directory,
+        // creating it as needed.
+        if (primaryVolume != null && primaryVolume.isVisible()) {
+            final RootInfo root = new RootInfo();
+            root.rootId = ROOT_ID_HOME;
+            mRoots.put(root.rootId, root);
+            root.title = getContext().getString(R.string.root_home);
+
+            // Only report bytes on *volumes*...as a matter of policy.
+            root.reportAvailableBytes = false;
+            root.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_SEARCH
+                    | Root.FLAG_SUPPORTS_IS_CHILD;
+
+            // Dunno when this would NOT be the case, but never hurts to be correct.
+            if (primaryVolume.isMountedWritable()) {
+                root.flags |= Root.FLAG_SUPPORTS_CREATE;
+            }
+
+            root.visiblePath = new File(
+                    primaryVolume.getPathForUser(userId), root.rootId);
+            root.path = new File(
+                    primaryVolume.getInternalPathForUser(userId), root.rootId);
+            try {
+                root.docId = getDocIdForFile(root.path);
             } catch (FileNotFoundException e) {
                 throw new IllegalStateException(e);
             }
@@ -312,7 +351,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 row.add(Root.COLUMN_FLAGS, root.flags);
                 row.add(Root.COLUMN_TITLE, root.title);
                 row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
-                row.add(Root.COLUMN_AVAILABLE_BYTES, root.path.getFreeSpace());
+                row.add(Root.COLUMN_AVAILABLE_BYTES,
+                        root.reportAvailableBytes ? root.path.getFreeSpace() : -1);
             }
         }
         return result;

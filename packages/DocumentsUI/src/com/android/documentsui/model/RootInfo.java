@@ -52,7 +52,7 @@ public class RootInfo implements Durable, Parcelable {
     public static final int TYPE_DOWNLOADS = 5;
     public static final int TYPE_LOCAL = 6;
     public static final int TYPE_MTP = 7;
-    public static final int TYPE_CLOUD = 8;
+    public static final int TYPE_OTHER = 8;
 
     public String authority;
     public String rootId;
@@ -168,7 +168,10 @@ public class RootInfo implements Durable, Parcelable {
         derivedMimeTypes = (mimeTypes != null) ? mimeTypes.split("\n") : null;
 
         // TODO: remove these special case icons
-        if (isExternalStorage()) {
+        if (isHome()) {
+            derivedIcon = R.drawable.ic_root_home;
+            derivedType = TYPE_LOCAL;
+        } else if (isExternalStorage()) {
             derivedIcon = R.drawable.ic_root_sdcard;
             derivedType = TYPE_LOCAL;
         } else if (isDownloads()) {
@@ -188,12 +191,19 @@ public class RootInfo implements Durable, Parcelable {
         } else if (isMtp()) {
             derivedType = TYPE_MTP;
         } else {
-            derivedType = TYPE_CLOUD;
+            derivedType = TYPE_OTHER;
         }
     }
 
     public boolean isRecents() {
         return authority == null && rootId == null;
+    }
+
+    public boolean isHome() {
+        // Note that "home" is the expected root id for the auto-created
+        // user home directory on external storage. The "home" value should
+        // match ExternalStorageProvider.ROOT_ID_HOME.
+        return isExternalStorage() && "home".equals(rootId);
     }
 
     public boolean isExternalStorage() {
