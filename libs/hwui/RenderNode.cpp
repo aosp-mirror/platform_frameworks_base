@@ -288,6 +288,9 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     bool transformUpdateNeeded = false;
     if (!mLayer) {
         mLayer = createLayer(info.canvasContext.getRenderState(), getWidth(), getHeight());
+#if !HWUI_NEW_OPS
+        applyLayerPropertiesToLayer(info);
+#endif
         damageSelf(info);
         transformUpdateNeeded = true;
     } else if (!layerMatchesWidthAndHeight(mLayer, getWidth(), getHeight())) {
