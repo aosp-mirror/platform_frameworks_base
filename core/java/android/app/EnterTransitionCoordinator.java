@@ -248,6 +248,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             } else if (mTransitioningViews != null) {
                 mTransitioningViews.addAll(mSharedElements);
             }
+            moveSharedElementsFromOverlay();
             mSharedElementNames.clear();
             mSharedElements.clear();
             mAllSharedElementNames.clear();
