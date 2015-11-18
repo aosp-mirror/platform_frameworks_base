@@ -20,6 +20,16 @@ import android.content.Context;
 
 /** @hide */
 public final class Shared {
+    /** Intent action name to pick a copy destination. */
+    public static final String ACTION_PICK_COPY_DESTINATION =
+            "com.android.documentsui.PICK_COPY_DESTINATION";
+
+    /**
+     * Extra boolean flag for {@link ACTION_PICK_COPY_DESTINATION}, which
+     * specifies if the destination directory needs to create new directory or not.
+     */
+    public static final String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
+
     public static final boolean DEBUG = true;
     public static final String TAG = "Documents";
     public static final String EXTRA_STACK = "com.android.documentsui.STACK";

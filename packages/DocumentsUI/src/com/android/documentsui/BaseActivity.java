@@ -358,18 +358,6 @@ public abstract class BaseActivity extends Activity {
         return mState;
     }
 
-    public static abstract class DocumentsIntent {
-        /** Intent action name to open copy destination. */
-        public static String ACTION_OPEN_COPY_DESTINATION =
-                "com.android.documentsui.OPEN_COPY_DESTINATION";
-
-        /**
-         * Extra boolean flag for ACTION_OPEN_COPY_DESTINATION_STRING, which
-         * specifies if the destination directory needs to create new directory or not.
-         */
-        public static String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
-    }
-
     void setDisplayAdvancedDevices(boolean display) {
         LocalPreferences.setDisplayAdvancedDevices(this, display);
         mState.showAdvanced = mState.forceAdvanced | display;

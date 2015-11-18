@@ -125,8 +125,7 @@ public final class DocumentsContract {
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
     /** {@hide} */
-    public static final String
-            ACTION_BROWSE_DOCUMENT_ROOT = "android.provider.action.BROWSE_DOCUMENT_ROOT";
+    public static final String ACTION_BROWSE = "android.provider.action.BROWSE";
 
     /** {@hide} */
     public static final String

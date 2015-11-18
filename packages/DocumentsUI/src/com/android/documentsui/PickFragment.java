@@ -110,7 +110,7 @@ public class PickFragment extends Fragment {
                 mPick.setText(R.string.button_select);
                 mCancel.setVisibility(View.GONE);
                 break;
-            case State.ACTION_OPEN_COPY_DESTINATION:
+            case State.ACTION_PICK_COPY_DESTINATION:
                 mPick.setText(R.string.button_copy);
                 mCancel.setVisibility(View.VISIBLE);
                 break;
