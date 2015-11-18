@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_PATHPARSER_H
 
 #include "VectorDrawablePath.h"
+#include "utils/VectorDrawableUtils.h"
 
 #include <jni.h>
 #include <android/log.h>
@@ -40,7 +41,7 @@ public:
      */
     ANDROID_API static void parseStringForSkPath(SkPath* outPath, ParseResult* result,
             const char* pathStr, size_t strLength);
-    static void getPathDataFromString(PathData* outData, ParseResult* result,
+    ANDROID_API static void getPathDataFromString(PathData* outData, ParseResult* result,
             const char* pathStr, size_t strLength);
     static void dump(const PathData& data);
 };

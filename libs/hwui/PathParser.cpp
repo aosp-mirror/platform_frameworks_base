@@ -221,7 +221,7 @@ void PathParser::parseStringForSkPath(SkPath* skPath, ParseResult* result, const
         result->failureMessage = "No verbs found in the string for pathData";
         return;
     }
-    VectorDrawablePath::verbsToPath(skPath, &pathData);
+    VectorDrawableUtils::verbsToPath(skPath, pathData);
     return;
 }
 
