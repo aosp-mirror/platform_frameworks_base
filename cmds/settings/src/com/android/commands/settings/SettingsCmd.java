@@ -291,7 +291,7 @@ public final class SettingsCmd {
         System.err.println("        settings [--user NUM] delete namespace key");
         System.err.println("        settings [--user NUM] list namespace");
         System.err.println("\n'namespace' is one of {system, secure, global}, case-insensitive");
-        System.err.println("If '--user NUM' is not given, the operations are performed on the"
+        System.err.println("If '--user NUM' is not given, the operations are performed on the "
                 + "system user.");
     }
 
