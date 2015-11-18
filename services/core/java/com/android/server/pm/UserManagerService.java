@@ -306,13 +306,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     void systemReady() {
-        // Prune out any partially created/partially removed users.
+        // Prune out any partially created, partially removed and ephemeral users.
         ArrayList<UserInfo> partials = new ArrayList<>();
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i);
-                if ((ui.partial || ui.guestToRemove) && i != 0) {
+                if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
                     partials.add(ui);
                 }
             }
@@ -1675,6 +1675,10 @@ public class UserManagerService extends IUserManager.Stub {
                         }
                     }
                 }
+
+                if (parent != null && parent.isEphemeral()) {
+                    flags |= UserInfo.FLAG_EPHEMERAL;
+                }
                 userId = getNextAvailableId();
                 userInfo = new UserInfo(userId, name, null, flags);
                 userInfo.serialNumber = mNextSerialNumber++;
@@ -1703,12 +1707,13 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            storage.createUserKey(userId, userInfo.serialNumber);
+            storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
             for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
                 final String volumeUuid = vol.getFsUuid();
                 try {
                     final File userDir = Environment.getDataUserDirectory(volumeUuid, userId);
-                    storage.prepareUserStorage(volumeUuid, userId, userInfo.serialNumber);
+                    storage.prepareUserStorage(
+                            volumeUuid, userId, userInfo.serialNumber, userInfo.isEphemeral());
                     enforceSerialNumber(userDir, userInfo.serialNumber);
                 } catch (IOException e) {
                     Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);

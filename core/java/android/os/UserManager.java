@@ -721,6 +721,25 @@ public class UserManager {
     }
 
     /**
+     * Checks if the calling app is running as an ephemeral user.
+     *
+     * @return whether the caller is an ephemeral user.
+     * @hide
+     */
+    public boolean isEphemeralUser() {
+        return isUserEphemeral(UserHandle.myUserId());
+    }
+
+    /**
+     * Returns whether the specified user is ephemeral.
+     * @hide
+     */
+    public boolean isUserEphemeral(int userId) {
+        final UserInfo user = getUserInfo(userId);
+        return user != null && user.isEphemeral();
+    }
+
+    /**
      * Return whether the given user is actively running.  This means that
      * the user is in the "started" state, not "stopped" -- it is currently
      * allowed to run code through scheduled alarms, receiving broadcasts,

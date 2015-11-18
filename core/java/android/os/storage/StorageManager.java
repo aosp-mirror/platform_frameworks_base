@@ -966,9 +966,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void createUserKey(int userId, int serialNumber) {
+    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
         try {
-            mMountService.createUserKey(userId, serialNumber);
+            mMountService.createUserKey(userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -1002,9 +1002,10 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber) {
+    public void prepareUserStorage(
+            String volumeUuid, int userId, int serialNumber, boolean ephemeral) {
         try {
-            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber);
+            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

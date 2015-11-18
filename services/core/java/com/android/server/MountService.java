@@ -2716,12 +2716,13 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public void createUserKey(int userId, int serialNumber) {
+    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
         try {
-            mCryptConnector.execute("cryptfs", "create_user_key", userId, serialNumber);
+            mCryptConnector.execute("cryptfs", "create_user_key", userId, serialNumber,
+                ephemeral ? 1 : 0);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2797,13 +2798,14 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber) {
+    public void prepareUserStorage(
+            String volumeUuid, int userId, int serialNumber, boolean ephemeral) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
         try {
             mCryptConnector.execute("cryptfs", "prepare_user_storage", escapeNull(volumeUuid),
-                    userId, serialNumber);
+                    userId, serialNumber, ephemeral ? 1 : 0);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

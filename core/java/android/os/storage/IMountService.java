@@ -25,8 +25,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 
-import java.io.FileDescriptor;
-
 /**
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
  * file. In particular, the ordering of the methods below must match the
@@ -1202,13 +1200,15 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void createUserKey(int userId, int serialNumber) throws RemoteException {
+            public void createUserKey(int userId, int serialNumber, boolean ephemeral)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeInt(userId);
                     _data.writeInt(serialNumber);
+                    _data.writeInt(ephemeral ? 1 : 0);
                     mRemote.transact(Stub.TRANSACTION_createUserKey, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -1283,7 +1283,8 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void prepareUserStorage(String volumeUuid, int userId, int serialNumber)
+            public void prepareUserStorage(
+                    String volumeUuid, int userId, int serialNumber, boolean ephemeral)
                     throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -1292,6 +1293,7 @@ public interface IMountService extends IInterface {
                     _data.writeString(volumeUuid);
                     _data.writeInt(userId);
                     _data.writeInt(serialNumber);
+                    _data.writeInt(ephemeral ? 1 : 0);
                     mRemote.transact(Stub.TRANSACTION_prepareUserStorage, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -2012,7 +2014,8 @@ public interface IMountService extends IInterface {
                     data.enforceInterface(DESCRIPTOR);
                     int userId = data.readInt();
                     int serialNumber = data.readInt();
-                    createUserKey(userId, serialNumber);
+                    boolean ephemeral = data.readInt() != 0;
+                    createUserKey(userId, serialNumber, ephemeral);
                     reply.writeNoException();
                     return true;
                 }
@@ -2052,7 +2055,8 @@ public interface IMountService extends IInterface {
                     String volumeUuid = data.readString();
                     int userId = data.readInt();
                     int serialNumber = data.readInt();
-                    prepareUserStorage(volumeUuid, userId, serialNumber);
+                    boolean ephemeral = data.readInt() != 0;
+                    prepareUserStorage(volumeUuid, userId, serialNumber, ephemeral);
                     reply.writeNoException();
                     return true;
                 }
@@ -2376,15 +2380,16 @@ public interface IMountService extends IInterface {
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback)
             throws RemoteException;
 
-    public void createUserKey(int userId, int serialNumber) throws RemoteException;
+    public void createUserKey(int userId, int serialNumber, boolean ephemeral)
+            throws RemoteException;
     public void destroyUserKey(int userId) throws RemoteException;
 
     public void unlockUserKey(int userId, int serialNumber, byte[] token) throws RemoteException;
     public void lockUserKey(int userId) throws RemoteException;
     public boolean isUserKeyUnlocked(int userId) throws RemoteException;
 
-    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber)
-            throws RemoteException;
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber,
+            boolean ephemeral) throws RemoteException;
 
     public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException;
 }

@@ -16,11 +16,11 @@
 
 package com.android.commands.pm;
 
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
@@ -798,6 +798,10 @@ public final class Pm {
                 flags |= UserInfo.FLAG_MANAGED_PROFILE;
             } else if ("--restricted".equals(opt)) {
                 flags |= UserInfo.FLAG_RESTRICTED;
+            } else if ("--ephemeral".equals(opt)) {
+                flags |= UserInfo.FLAG_EPHEMERAL;
+            } else if ("--guest".equals(opt)) {
+                flags |= UserInfo.FLAG_GUEST;
             } else {
                 System.err.println("Error: unknown option " + opt);
                 return showUsage();
@@ -1356,7 +1360,7 @@ public final class Pm {
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
         System.err.println("       pm trim-caches DESIRED_FREE_SPACE [internal|UUID]");
-        System.err.println("       pm create-user [--profileOf USER_ID] [--managed] [--restricted] USER_NAME");
+        System.err.println("       pm create-user [--profileOf USER_ID] [--managed] [--restricted] [--ephemeral] [--guest] USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");
         System.err.println("");
