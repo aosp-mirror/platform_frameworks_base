@@ -3560,11 +3560,6 @@ org.apache.harmony.security.asn1.BerInputStream
 org.apache.harmony.security.asn1.BerOutputStream
 org.apache.harmony.security.asn1.DerInputStream
 org.apache.harmony.security.asn1.DerOutputStream
-org.apache.harmony.security.fortress.Engine
-org.apache.harmony.security.fortress.Engine$ServiceCacheEntry
-org.apache.harmony.security.fortress.Engine$SpiAndProvider
-org.apache.harmony.security.fortress.SecurityAccess
-org.apache.harmony.security.fortress.Services
 org.apache.harmony.security.provider.crypto.CryptoProvider
 org.apache.harmony.security.utils.AlgNameMapper
 org.apache.harmony.security.utils.AlgNameMapperSource
