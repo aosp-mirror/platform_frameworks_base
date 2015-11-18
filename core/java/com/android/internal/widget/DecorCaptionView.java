@@ -23,7 +23,6 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.Window;
@@ -50,7 +49,7 @@ import com.android.internal.policy.PhoneWindow;
  * <li>..</li>
  * </ul>
  */
-public class DecorCaptionView extends LinearLayout
+public class DecorCaptionView extends ViewGroup
         implements View.OnClickListener, View.OnTouchListener {
     private final static String TAG = "DecorCaptionView";
     private PhoneWindow mOwner = null;
@@ -61,6 +60,11 @@ public class DecorCaptionView extends LinearLayout
 
     // True when the left mouse button got released while dragging.
     private boolean mLeftMouseButtonReleased;
+
+    private boolean mOverlayWithAppContent = false;
+
+    private View mCaption;
+    private View mContent;
 
     public DecorCaptionView(Context context) {
         super(context);
@@ -74,9 +78,16 @@ public class DecorCaptionView extends LinearLayout
         super(context, attrs, defStyle);
     }
 
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mCaption = getChildAt(0);
+    }
+
     public void setPhoneWindow(PhoneWindow owner, boolean show) {
         mOwner = owner;
         mShow = show;
+        mOverlayWithAppContent = owner.getOverlayDecorCaption();
         updateCaptionVisibility();
         // By changing the outline provider to BOUNDS, the window can remove its
         // background without removing the shadow.
@@ -152,13 +163,61 @@ public class DecorCaptionView extends LinearLayout
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        if (!(params instanceof MarginLayoutParams)) {
+            throw new IllegalArgumentException(
+                    "params " + params + " must subclass MarginLayoutParams");
+        }
         // Make sure that we never get more then one client area in our view.
         if (index >= 2 || getChildCount() >= 2) {
             throw new IllegalStateException("DecorCaptionView can only handle 1 client view");
         }
-        super.addView(child, index, params);
+        // To support the overlaying content in the caption, we need to put the content view as the
+        // first child to get the right Z-Ordering.
+        super.addView(child, 0, params);
+        mContent = child;
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int captionHeight;
+        if (mCaption.getVisibility() != View.GONE) {
+            measureChildWithMargins(mCaption, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            captionHeight = mCaption.getMeasuredHeight();
+        } else {
+            captionHeight = 0;
+        }
+        if (mContent != null) {
+            if (mOverlayWithAppContent) {
+                measureChildWithMargins(mContent, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            } else {
+                measureChildWithMargins(mContent, widthMeasureSpec, 0, heightMeasureSpec,
+                        captionHeight);
+            }
+        }
+
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),
+                MeasureSpec.getSize(heightMeasureSpec));
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        final int captionHeight;
+        if (mCaption.getVisibility() != View.GONE) {
+            mCaption.layout(0, 0, mCaption.getMeasuredWidth(), mCaption.getMeasuredHeight());
+            captionHeight = mCaption.getBottom() - mCaption.getTop();
+        } else {
+            captionHeight = 0;
+        }
+
+        if (mContent != null) {
+            if (mOverlayWithAppContent) {
+                mContent.layout(0, 0, mContent.getMeasuredWidth(), mContent.getMeasuredHeight());
+            } else {
+                mContent.layout(0, captionHeight, mContent.getMeasuredWidth(),
+                        captionHeight + mContent.getMeasuredHeight());
+            }
+        }
+    }
     /**
      * Determine if the workspace is entirely covered by the window.
      * @return Returns true when the window is filling the entire screen/workspace.
@@ -175,9 +234,8 @@ public class DecorCaptionView extends LinearLayout
     private void updateCaptionVisibility() {
         // Don't show the caption if the window has e.g. entered full screen.
         boolean invisible = isFillingScreen() || !mShow;
-        View caption = getChildAt(0);
-        caption.setVisibility(invisible ? GONE : VISIBLE);
-        caption.setOnTouchListener(this);
+        mCaption.setVisibility(invisible ? GONE : VISIBLE);
+        mCaption.setOnTouchListener(this);
     }
 
     /**
@@ -199,7 +257,38 @@ public class DecorCaptionView extends LinearLayout
     }
 
     public int getCaptionHeight() {
-        final View caption = getChildAt(0);
-        return (caption != null) ? caption.getHeight() : 0;
+        return (mCaption != null) ? mCaption.getHeight() : 0;
+    }
+
+    public void removeContentView() {
+        if (mContent != null) {
+            removeView(mContent);
+            mContent = null;
+        }
+    }
+
+    public View getCaption() {
+        return mCaption;
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new MarginLayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected LayoutParams generateDefaultLayoutParams() {
+        return new MarginLayoutParams(MarginLayoutParams.MATCH_PARENT,
+                MarginLayoutParams.MATCH_PARENT);
+    }
+
+    @Override
+    protected LayoutParams generateLayoutParams(LayoutParams p) {
+        return new MarginLayoutParams(p);
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof MarginLayoutParams;
     }
 }

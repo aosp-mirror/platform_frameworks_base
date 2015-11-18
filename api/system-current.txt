@@ -3602,6 +3602,7 @@ package android.app {
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback, int);
     method public void openContextMenu(android.view.View);
     method public void openOptionsMenu();
+    method public void overlayWithDecorCaption(boolean);
     method public void overridePendingTransition(int, int);
     method public void postponeEnterTransition();
     method public void recreate();

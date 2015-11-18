@@ -276,6 +276,8 @@ public abstract class Window {
 
     private boolean mDestroyed;
 
+    private boolean mOverlayWithDecorCaption = false;
+
     // The current window attributes.
     private final WindowManager.LayoutParams mWindowAttributes =
         new WindowManager.LayoutParams();
@@ -2043,5 +2045,19 @@ public abstract class Window {
 
     /** @hide */
     public void setTheme(int resId) {
+    }
+
+    /**
+     * Whether the caption should be displayed directly on the content rather than push the content
+     * down. This affects only freeform windows since they display the caption.
+     * @hide
+     */
+    public void setOverlayDecorCaption(boolean overlayCaption) {
+        mOverlayWithDecorCaption = overlayCaption;
+    }
+
+    /** @hide */
+    public boolean getOverlayDecorCaption() {
+        return mOverlayWithDecorCaption;
     }
 }

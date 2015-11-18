@@ -1570,7 +1570,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
             }
             mDecorCaptionView.addView(root,
-                    new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+                    new ViewGroup.MarginLayoutParams(MATCH_PARENT, MATCH_PARENT));
         } else {
             addView(root, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         }
@@ -1672,9 +1672,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     void clearContentView() {
         if (mDecorCaptionView != null) {
-            if (mDecorCaptionView.getChildCount() > 1) {
-                mDecorCaptionView.removeViewAt(1);
-            }
+            mDecorCaptionView.removeContentView();
         } else {
             // This window doesn't have caption, so we need to just remove the
             // children of the decor view.

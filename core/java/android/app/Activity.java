@@ -6618,6 +6618,17 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Set whether the caption should displayed directly on the content rather than push it down.
+     *
+     * This affects only freeform windows since they display the caption and only the main
+     * window of the activity. The caption is used to drag the window around and also shows
+     * maximize and close action buttons.
+     */
+    public void overlayWithDecorCaption(boolean overlay) {
+        mWindow.setOverlayDecorCaption(overlay);
+    }
+
+    /**
      * Interface for informing a translucent {@link Activity} once all visible activities below it
      * have completed drawing. This is necessary only after an {@link Activity} has been made
      * opaque using {@link Activity#convertFromTranslucent()} and before it has been drawn
