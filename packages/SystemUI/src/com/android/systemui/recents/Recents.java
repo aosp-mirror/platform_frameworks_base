@@ -73,6 +73,7 @@ public class Recents extends SystemUI
 
     private Handler mHandler;
     private RecentsImpl mImpl;
+    private int mDraggingInRecentsCurrentUser;
 
     // Only For system user, this is the callbacks instance we return to each secondary user
     private RecentsSystemUser mSystemUserCallbacks;
@@ -213,14 +214,14 @@ public class Recents extends SystemUI
 
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
-            mImpl.showRecents(triggeredFromAltTab);
+            mImpl.showRecents(triggeredFromAltTab, false /* draggingInRecents */);
         } else {
             if (mSystemUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
                         mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
-                        callbacks.showRecents(triggeredFromAltTab);
+                        callbacks.showRecents(triggeredFromAltTab, false /* draggingInRecents */);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -361,8 +362,57 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public void dockTopTask() {
-        mImpl.dockTopTask();
+    public void dockTopTask(boolean draggingInRecents) {
+        mImpl.dockTopTask(draggingInRecents);
+        if (draggingInRecents) {
+            mDraggingInRecentsCurrentUser = sSystemServicesProxy.getCurrentUser();
+        }
+    }
+
+    @Override
+    public void onDraggingInRecents(float distanceFromTop) {
+        if (sSystemServicesProxy.isSystemUser(mDraggingInRecentsCurrentUser)) {
+            mImpl.onDraggingInRecents(distanceFromTop);
+        } else {
+            if (mSystemUserCallbacks != null) {
+                IRecentsNonSystemUserCallbacks callbacks =
+                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(
+                                mDraggingInRecentsCurrentUser);
+                if (callbacks != null) {
+                    try {
+                        callbacks.onDraggingInRecents(distanceFromTop);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                } else {
+                    Log.e(TAG, "No SystemUI callbacks found for user: "
+                            + mDraggingInRecentsCurrentUser);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onDraggingInRecentsEnded(float velocity) {
+        if (sSystemServicesProxy.isSystemUser(mDraggingInRecentsCurrentUser)) {
+            mImpl.onDraggingInRecentsEnded(velocity);
+        } else {
+            if (mSystemUserCallbacks != null) {
+                IRecentsNonSystemUserCallbacks callbacks =
+                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(
+                                mDraggingInRecentsCurrentUser);
+                if (callbacks != null) {
+                    try {
+                        callbacks.onDraggingInRecentsEnded(velocity);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                } else {
+                    Log.e(TAG, "No SystemUI callbacks found for user: "
+                            + mDraggingInRecentsCurrentUser);
+                }
+            }
+        }
     }
 
     @Override

@@ -32,6 +32,7 @@ public class Divider extends SystemUI {
     private static final String TAG = "Divider";
     private int mDividerWindowWidth;
     private DividerWindowManager mWindowManager;
+    private DividerView mView;
 
     @Override
     public void start() {
@@ -39,6 +40,7 @@ public class Divider extends SystemUI {
         mDividerWindowWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         update(mContext.getResources().getConfiguration());
+        putComponent(Divider.class, this);
     }
 
     @Override
@@ -47,14 +49,18 @@ public class Divider extends SystemUI {
         update(newConfig);
     }
 
+    public DividerView getView() {
+        return mView;
+    }
+
     private void addDivider(Configuration configuration) {
-        DividerView view = (DividerView)
+        mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
         final int width = landscape ? mDividerWindowWidth : MATCH_PARENT;
         final int height = landscape ? MATCH_PARENT : mDividerWindowWidth;
-        mWindowManager.add(view, width, height);
-        view.setWindowManager(mWindowManager);
+        mWindowManager.add(mView, width, height);
+        mView.setWindowManager(mWindowManager);
     }
 
     private void removeDivider() {

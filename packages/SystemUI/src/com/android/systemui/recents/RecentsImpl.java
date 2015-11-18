@@ -46,6 +46,8 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
+import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ForegroundThread;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -140,6 +142,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     RecentsAppWidgetHost mAppWidgetHost;
     boolean mBootCompleted;
     boolean mCanReuseTaskStackViews = true;
+    boolean mDraggingInRecents;
 
     // Task launching
     Rect mSearchBarBounds = new Rect();
@@ -164,13 +167,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         public void run() {
             // When this fires, then the user has not released alt-tab for at least
             // FAST_ALT_TAB_DELAY_MS milliseconds
-            showRecents(mTriggeredFromAltTab);
+            showRecents(mTriggeredFromAltTab, false /* draggingInRecents */);
         }
     });
 
     Bitmap mThumbnailTransitionBitmapCache;
     Task mThumbnailTransitionBitmapCacheKey;
-
 
     public RecentsImpl(Context context) {
         mContext = context;
@@ -248,8 +250,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     }
 
     @Override
-    public void showRecents(boolean triggeredFromAltTab) {
+    public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents) {
         mTriggeredFromAltTab = triggeredFromAltTab;
+        mDraggingInRecents = draggingInRecents;
         if (mFastAltTabTrigger.hasTriggered()) {
             // We are calling this from the doze trigger, so just fall through to show Recents
             mFastAltTabTrigger.resetTrigger();
@@ -315,6 +318,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             return;
         }
 
+        mDraggingInRecents = false;
         mTriggeredFromAltTab = false;
 
         try {
@@ -383,6 +387,16 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     @Override
     public void cancelPreloadingRecents() {
         // Do nothing
+    }
+
+    @Override
+    public void onDraggingInRecents(float distanceFromTop) {
+        EventBus.getDefault().sendOntoMainThread(new DraggingInRecentsEvent(distanceFromTop));
+    }
+
+    @Override
+    public void onDraggingInRecentsEnded(float velocity) {
+        EventBus.getDefault().sendOntoMainThread(new DraggingInRecentsEndedEvent(velocity));
     }
 
     /**
@@ -521,13 +535,13 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         showRelativeAffiliatedTask(false);
     }
 
-    public void dockTopTask() {
+    public void dockTopTask(boolean draggingInRecents) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
         if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
             ssp.startTaskInDockedMode(topTask.id,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
-            showRecents(false /* triggeredFromAltTab */);
+            showRecents(false /* triggeredFromAltTab */, draggingInRecents);
         }
     }
 
@@ -856,7 +870,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         launchState.launchedNumVisibleTasks = vr.numVisibleTasks;
         launchState.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
         launchState.launchedHasConfigurationChanged = false;
-        launchState.startHidden = topTask != null && topTask.stackId == FREEFORM_WORKSPACE_STACK_ID;
+        launchState.startHidden = topTask != null && topTask.stackId == FREEFORM_WORKSPACE_STACK_ID
+                || mDraggingInRecents;
 
         Intent intent = new Intent();
         intent.setClassName(RECENTS_PACKAGE, RECENTS_ACTIVITY);

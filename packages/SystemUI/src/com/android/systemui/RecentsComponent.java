@@ -31,5 +31,20 @@ public interface RecentsComponent {
     /**
      * Docks the top-most task and opens recents.
      */
-    void dockTopTask();
+    void dockTopTask(boolean draggingInRecents);
+
+    /**
+     * Called during a drag-from-navbar-in gesture.
+     *
+     * @param distanceFromTop the distance of the current drag in gesture from the top of the
+     *                        screen
+     */
+    void onDraggingInRecents(float distanceFromTop);
+
+    /**
+     * Called when the gesture to drag in recents ended.
+     *
+     * @param velocity the velocity of the finger when releasing it in pixels per second
+     */
+    void onDraggingInRecentsEnded(float velocity);
 }

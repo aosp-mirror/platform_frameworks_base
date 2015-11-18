@@ -502,6 +502,19 @@ public class EventBus extends BroadcastReceiver {
         queueEvent(event);
     }
 
+    /**
+     * If this method is called from the main thread, it will be handled directly. If this method
+     * is not called from the main thread, it will be posted onto the main thread.
+     */
+    public void sendOntoMainThread(Event event) {
+        long callingThreadId = Thread.currentThread().getId();
+        if (callingThreadId != mHandler.getLooper().getThread().getId()) {
+            post(event);
+        } else {
+            send(event);
+        }
+    }
+
     /** Prevent post()ing an InterprocessEvent */
     @Deprecated
     public void post(InterprocessEvent event) {
