@@ -19,23 +19,19 @@ package com.android.internal.widget;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 
 import android.content.Context;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.ThreadedRenderer;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.Window;
-import android.view.WindowCallbacks;
 import android.util.Log;
 import android.util.TypedValue;
 
 import com.android.internal.R;
-import com.android.internal.policy.BackdropFrameRenderer;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 /**
@@ -64,7 +60,7 @@ import com.android.internal.policy.PhoneWindow;
  * This will be mitigated once b/22527834 will be addressed.
  */
 public class NonClientDecorView extends LinearLayout
-        implements View.OnClickListener, View.OnTouchListener, WindowCallbacks {
+        implements View.OnClickListener, View.OnTouchListener {
     private final static String TAG = "NonClientDecorView";
     // The height of a window which has focus in DIP.
     private final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
@@ -72,9 +68,7 @@ public class NonClientDecorView extends LinearLayout
     private final int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
     private PhoneWindow mOwner = null;
     private boolean mWindowHasShadow = false;
-    public boolean mShowDecor = false;
-    // True when this object is listening for window size changes.
-    private boolean mAttachedCallbacksToRootViewImpl = false;
+    private boolean mShowDecor = false;
 
     // True if the window is being dragged.
     private boolean mDragging = false;
@@ -93,11 +87,6 @@ public class NonClientDecorView extends LinearLayout
     // to max until the first layout command has been executed.
     private boolean mAllowUpdateElevation = false;
 
-    private BackdropFrameRenderer mBackdropFrameRenderer = null;
-
-    public Drawable mResizingBackgroundDrawable;
-    public Drawable mCaptionBackgroundDrawable;
-
     public NonClientDecorView(Context context) {
         super(context);
     }
@@ -110,37 +99,10 @@ public class NonClientDecorView extends LinearLayout
         super(context, attrs, defStyle);
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (!mAttachedCallbacksToRootViewImpl) {
-            // If there is no window callback installed there was no window set before. Set it now.
-            // Note that our ViewRootImpl object will not change.
-            getViewRootImpl().addWindowCallbacks(this);
-            mAttachedCallbacksToRootViewImpl = true;
-        } else if (mBackdropFrameRenderer != null) {
-            // We are resizing and this call happened due to a configuration change. Tell the
-            // renderer about it.
-            mBackdropFrameRenderer.onConfigurationChange();
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mAttachedCallbacksToRootViewImpl) {
-            getViewRootImpl().removeWindowCallbacks(this);
-            mAttachedCallbacksToRootViewImpl = false;
-        }
-    }
-
-    public void setPhoneWindow(PhoneWindow owner, boolean showDecor, boolean windowHasShadow,
-            Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawableDrawable) {
+    public void setPhoneWindow(PhoneWindow owner, boolean showDecor, boolean windowHasShadow) {
         mOwner = owner;
         mWindowHasShadow = windowHasShadow;
         mShowDecor = showDecor;
-        mResizingBackgroundDrawable = resizingBackgroundDrawable;
-        mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
         updateCaptionVisibility();
         if (mWindowHasShadow) {
             initializeElevation();
@@ -290,11 +252,12 @@ public class NonClientDecorView extends LinearLayout
      * Note: Windows which have (temporarily) changed their attributes to cover the SystemUI
      *       will get no shadow as they are expected to be "full screen".
      **/
-    private void updateElevation() {
+    public void updateElevation() {
         float elevation = 0;
         // Do not use a shadow when we are in resizing mode (mRenderer not null) since the shadow
         // is bound to the content size and not the target size.
-        if (mWindowHasShadow && mBackdropFrameRenderer == null) {
+        if (mWindowHasShadow
+                && ((DecorView) mOwner.getDecorView()).mBackdropFrameRenderer == null) {
             boolean fill = isFillingScreen();
             elevation = fill ? 0 :
                     (mWindowHasFocus ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP :
@@ -336,77 +299,12 @@ public class NonClientDecorView extends LinearLayout
         }
     }
 
-    @Override
-    public void onWindowDragResizeStart(Rect initialBounds) {
-        if (mOwner.isDestroyed()) {
-            // If the owner's window is gone, we should not be able to come here anymore.
-            releaseResources();
-            return;
-        }
-        if (mBackdropFrameRenderer != null) {
-            return;
-        }
-        final ThreadedRenderer renderer =
-                (ThreadedRenderer) mOwner.getDecorView().getHardwareRenderer();
-        if (renderer != null) {
-            mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer, initialBounds);
-            // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
-            // If we want to get the shadow shown while resizing, we would need to elevate a new
-            // element which owns the caption and has the elevation.
-            updateElevation();
-        }
+    public boolean isShowingDecor() {
+        return mShowDecor;
     }
 
-    @Override
-    public boolean onContentDrawn(int xOffset, int yOffset, int xSize, int ySize) {
-        if (mBackdropFrameRenderer == null) {
-            return false;
-        }
-        return mBackdropFrameRenderer.onContentDrawn(xOffset, yOffset, xSize, ySize);
+    public int getDecorCaptionHeight() {
+        final View caption = getChildAt(0);
+        return (caption != null) ? caption.getHeight() : 0;
     }
-
-    @Override
-    public void onRequestDraw(boolean reportNextDraw) {
-        if (mBackdropFrameRenderer != null) {
-            mBackdropFrameRenderer.onRequestDraw(reportNextDraw);
-        } else if (reportNextDraw) {
-            // If render thread is gone, just report immediately.
-            if (isAttachedToWindow()) {
-                getViewRootImpl().reportDrawFinish();
-            }
-        }
-    }
-
-    @Override
-    public void onWindowDragResizeEnd() {
-        releaseThreadedRenderer();
-    }
-
-    @Override
-    public void onWindowSizeIsChanging(Rect newBounds) {
-        if (mBackdropFrameRenderer != null) {
-            mBackdropFrameRenderer.setTargetRect(newBounds);
-        }
-    }
-
-    /**
-     * Release the renderer thread which is usually done when the user stops resizing.
-     */
-    private void releaseThreadedRenderer() {
-        if (mBackdropFrameRenderer != null) {
-            mBackdropFrameRenderer.releaseRenderer();
-            mBackdropFrameRenderer = null;
-            // Bring the shadow back.
-            updateElevation();
-        }
-    }
-
-    /**
-     * Called when the parent window is destroyed to release all resources. Note that this will also
-     * destroy the renderer thread.
-     */
-    private void releaseResources() {
-        releaseThreadedRenderer();
-    }
-
 }
