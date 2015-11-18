@@ -3704,6 +3704,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // This is used by freeform <-> recents windows transition. We need to synchronize
         // the animation with the appearance of the content of recents, so we will make
         // animation stay on the first or last frame a little longer.
+        if (specs == null) {
+            Slog.wtf(TAG, "prolongAnimationsFromSpecs: AppTransitionAnimationSpec is null!");
+            return;
+        }
         mTmpTaskIds.clear();
         for (int i = specs.length - 1; i >= 0; i--) {
             mTmpTaskIds.put(specs[i].taskId, 0);
