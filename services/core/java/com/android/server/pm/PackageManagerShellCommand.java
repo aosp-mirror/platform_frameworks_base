@@ -1000,7 +1000,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    the text in FILTER.");
         pw.println("    Options:");
         pw.println("      -f: see their associated file");
-        pw.println("      -d: filter to only show disbled packages");
+        pw.println("      -d: filter to only show disabled packages");
         pw.println("      -e: filter to only show enabled packages");
         pw.println("      -s: filter to only show system packages");
         pw.println("      -3: filter to only show third party packages");
@@ -1055,4 +1055,3 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 }
-
