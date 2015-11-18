@@ -1196,6 +1196,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ClientState cs = mClients.remove(client.asBinder());
             if (cs != null) {
                 clearClientSessionLocked(cs);
+                if (mCurClient == cs) {
+                    mCurClient = null;
+                }
             }
         }
     }
