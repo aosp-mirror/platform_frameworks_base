@@ -395,20 +395,38 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Focuses the next task in the first stack view */
     public void focusNextTask(boolean forward) {
-        // Get the first stack view
         List<TaskStackView> stackViews = getTaskStackViews();
         if (!stackViews.isEmpty()) {
             stackViews.get(0).focusNextTask(forward);
         }
     }
 
+    /** Focuses the current task in the first stack view */
+    public void refocusCurrentTask(boolean scrollToNewPosition) {
+        List<TaskStackView> stackViews = getTaskStackViews();
+        if (!stackViews.isEmpty()) {
+            final TaskStackView stackView = stackViews.get(0);
+            stackView.focusTask(stackView.mFocusedTaskIndex, scrollToNewPosition);
+        }
+    }
+
     /** Dismisses the focused task. */
     public void dismissFocusedTask() {
-        // Get the first stack view
         List<TaskStackView> stackViews = getTaskStackViews();
         if (!stackViews.isEmpty()) {
             stackViews.get(0).dismissFocusedTask();
         }
+    }
+
+    /** Ensures that there is a task focused. */
+    public boolean ensureFocusedTask(boolean findClosestToCenter) {
+        List<TaskStackView> stackViews = getTaskStackViews();
+        if (!stackViews.isEmpty()) {
+            final TaskStackView stackView = stackViews.get(0);
+            return stackView.ensureFocusedTask(findClosestToCenter);
+        }
+
+        return false;
     }
 
     /** Unfilters any filtered stacks */

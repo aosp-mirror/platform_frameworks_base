@@ -151,7 +151,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
-                mIsTouching = true;
+                startTouching();
                 mHasBeenTouched = true;
                 mInitialMotionX = mLastMotionX = (int) ev.getX();
                 mInitialMotionY = mLastMotionY = (int) ev.getY();
@@ -261,7 +261,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
-                mIsTouching = true;
+                startTouching();
                 mHasBeenTouched = true;
                 mInitialMotionX = mLastMotionX = (int) ev.getX();
                 mInitialMotionY = mLastMotionY = (int) ev.getY();
@@ -457,7 +457,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     @Override
     public void onBeginDrag(View v) {
-        mIsTouching = true;
+        startTouching();
         mHasBeenTouched = true;
 
         TaskView tv = (TaskView) v;
@@ -511,6 +511,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onDragCancelled(View v) {
         mIsTouching = false;
+    }
+
+    private void startTouching() {
+        mIsTouching = true;
+        mSv.resetFocusedTask();
     }
 
     public boolean isTouching() {

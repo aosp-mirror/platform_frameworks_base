@@ -154,6 +154,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 // Notify the fallback receiver that we have successfully got the broadcast
                 // See AlternateRecentsComponent.onAnimationStarted()
                 setResultCode(Activity.RESULT_OK);
+            } else if (action.equals(Recents.ACTION_ALT_TAB_TRAVERSAL)) {
+                // In the case of another ALT event, ignore the previous touches.
+                mRecentsView.resetHasBeenTouched();
+                if (mRecentsView.ensureFocusedTask(true)) {
+                    mRecentsView.refocusCurrentTask(true);
+                }
             }
         }
     };
@@ -419,6 +425,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
         filter.addAction(Recents.ACTION_HIDE_RECENTS_ACTIVITY);
+        filter.addAction(Recents.ACTION_ALT_TAB_TRAVERSAL);
         filter.addAction(Recents.ACTION_TOGGLE_RECENTS_ACTIVITY);
         filter.addAction(Recents.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
@@ -546,7 +553,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
-                    mRecentsView.focusNextTask(!backward);
+                    if (mRecentsView.ensureFocusedTask(true)) {
+                        mRecentsView.focusNextTask(!backward);
+                    }
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
                 }
 

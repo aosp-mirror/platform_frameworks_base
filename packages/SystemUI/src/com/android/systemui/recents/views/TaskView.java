@@ -748,6 +748,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /**
      * Returns whether we have explicitly been focused.
+     * This only determines whether or not focus is being drawn.
      */
     public boolean isFocusedTask() {
         return mIsFocused;
