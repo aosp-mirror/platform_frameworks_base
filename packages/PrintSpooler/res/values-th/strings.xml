@@ -27,6 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"2 ด้าน"</string>
     <string name="label_orientation" msgid="2853142581990496477">"การวางแนว"</string>
     <string name="label_pages" msgid="7768589729282182230">"หน้า"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"เลือกเครื่องพิมพ์"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"ทั้ง <xliff:g id="PAGE_COUNT">%1$s</xliff:g> หน้า"</string>
     <string name="template_page_range" msgid="428638530038286328">"ช่วง <xliff:g id="PAGE_COUNT">%1$s</xliff:g> หน้า"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"เช่น 1—5,8,11—13"</string>

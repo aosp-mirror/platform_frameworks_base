@@ -27,6 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"രണ്ട് വശങ്ങളുള്ളത്"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ഓറിയന്‍റേഷന്‍‌"</string>
     <string name="label_pages" msgid="7768589729282182230">"പേജുകൾ"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"ഒരു പ്രിന്റർ തിരഞ്ഞെടുക്കുക"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"എല്ലാ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> എന്നതിന്റെ പരിധി"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ഉദാ. 1—5,8,11—13"</string>
