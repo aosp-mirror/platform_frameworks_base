@@ -58,6 +58,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     // Used to calculate when a tap is outside a task view rectangle.
     final int mWindowTouchSlop;
     boolean mIsTouching;
+    boolean mHasBeenTouched;
 
     SwipeHelper mSwipeHelper;
     boolean mInterceptedBySwipeHelper;
@@ -151,6 +152,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
                 mIsTouching = true;
+                mHasBeenTouched = true;
                 mInitialMotionX = mLastMotionX = (int) ev.getX();
                 mInitialMotionY = mLastMotionY = (int) ev.getY();
                 mInitialP = mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
@@ -260,6 +262,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
                 mIsTouching = true;
+                mHasBeenTouched = true;
                 mInitialMotionX = mLastMotionX = (int) ev.getX();
                 mInitialMotionY = mLastMotionY = (int) ev.getY();
                 mInitialP = mLastP = mSv.mLayoutAlgorithm.screenYToCurveProgress(mLastMotionY);
@@ -455,6 +458,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onBeginDrag(View v) {
         mIsTouching = true;
+        mHasBeenTouched = true;
 
         TaskView tv = (TaskView) v;
         // Disable clipping with the stack while we are swiping
@@ -513,7 +517,16 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         return mIsTouching;
     }
 
+    public void resetHasBeenTouched() {
+        mHasBeenTouched = false;
+    }
+
+    public boolean hasBeenTouched() {
+        return mHasBeenTouched;
+    }
+
     public void reset() {
         mIsTouching = false;
+        mHasBeenTouched = false;
     }
 }

@@ -1091,6 +1091,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    public void resetHasBeenTouched() {
+        mTouchHandler.resetHasBeenTouched();
+    }
+
+    public boolean hasBeenTouched() {
+        return mTouchHandler.hasBeenTouched();
+    }
+
     /**** TaskStackCallbacks Implementation ****/
 
     @Override

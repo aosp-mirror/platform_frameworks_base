@@ -136,7 +136,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (action.equals(Recents.ACTION_HIDE_RECENTS_ACTIVITY)) {
                 if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
-                    dismissRecentsToFocusedTaskOrHome(false);
+                    if (!mRecentsView.hasBeenTouched()) {
+                        dismissRecentsToFocusedTaskOrHome(false);
+                    }
                 } else if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
                     // Otherwise, dismiss Recents to Home
                     dismissRecentsToHomeRaw(true);
@@ -546,6 +548,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     final boolean backward = event.isShiftPressed();
                     mRecentsView.focusNextTask(!backward);
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
+                }
+
+                // In the case of another ALT event, ignore the previous touches.
+                final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
+                if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
+                    mRecentsView.resetHasBeenTouched();
                 }
                 return true;
             }
