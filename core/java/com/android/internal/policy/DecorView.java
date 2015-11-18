@@ -88,6 +88,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private static final boolean SWEEP_OPEN_MENU = false;
 
+    // The height of a window which has focus in DIP.
+    private final static int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
+    // The height of a window which has not in DIP.
+    private final static int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
+
+    // Cludge to address b/22668382: Set the shadow size to the maximum so that the layer
+    // size calculation takes the shadow size into account. We set the elevation currently
+    // to max until the first layout command has been executed.
+    private boolean mAllowUpdateElevation = false;
+
+    private boolean mElevationAdjustedForStack = false;
+
     int mDefaultOpacity = PixelFormat.OPAQUE;
 
     /** The feature ID of the panel, or -1 if this is the application's DecorView */
@@ -351,7 +363,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        if (mHasNonClientDecor && mNonClientDecorView.mVisible) {
+        if (mHasNonClientDecor && isShowingCaption()) {
             // Don't dispatch ACTION_DOWN to the non client decor if the window is
             // resizable and the event was (starting) outside the window.
             // Window resizing events should be handled by WindowManager.
@@ -630,6 +642,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mOutsets.top > 0) {
             offsetTopAndBottom(-mOutsets.top);
         }
+
+        // If the application changed its SystemUI metrics, we might also have to adapt
+        // our shadow elevation.
+        updateElevation();
+        mAllowUpdateElevation = true;
     }
 
     @Override
@@ -1213,6 +1230,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mFloatingActionMode != null) {
             mFloatingActionMode.onWindowFocusChanged(hasWindowFocus);
         }
+
+        updateElevation();
     }
 
     @Override
@@ -1537,17 +1556,17 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     void onConfigurationChanged() {
+        int workspaceId = getWorkspaceId();
         if (mNonClientDecorView != null) {
-            int workspaceId = getWorkspaceId();
             if (mWorkspaceId != workspaceId) {
                 mWorkspaceId = workspaceId;
                 // We might have to change the kind of surface before we do anything else.
                 mNonClientDecorView.onConfigurationChanged(
-                        ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
-                        ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
+                        ActivityManager.StackId.hasWindowDecor(mWorkspaceId));
                 enableNonClientDecor(ActivityManager.StackId.hasWindowDecor(workspaceId));
             }
         }
+        initializeElevation();
     }
 
     View onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
@@ -1576,6 +1595,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             addView(root, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         }
         mContentRoot = (ViewGroup) root;
+        initializeElevation();
         return root;
     }
 
@@ -1591,12 +1611,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
-        boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
+        final boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
         // Only a non floating application window on one of the allowed workspaces can get a non
         // client decor.
-        final boolean hasNonClientDecor = ActivityManager.StackId.hasWindowDecor(mWorkspaceId);
-        if (!mWindow.isFloating() && isApplication && hasNonClientDecor) {
+        if (!mWindow.isFloating() && isApplication
+                && ActivityManager.StackId.hasWindowDecor(mWorkspaceId)) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (nonClientDecorView == null) {
@@ -1612,15 +1632,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                             R.layout.non_client_decor_light, null);
                 }
             }
-            nonClientDecorView.setPhoneWindow(mWindow,
-                    ActivityManager.StackId.hasWindowDecor(mWorkspaceId),
-                    ActivityManager.StackId.hasWindowShadow(mWorkspaceId));
+            nonClientDecorView.setPhoneWindow(mWindow, true /*showDecor*/);
         } else {
             nonClientDecorView = null;
         }
 
         // Tell the decor if it has a visible non client decor.
-        enableNonClientDecor(nonClientDecorView != null && hasNonClientDecor);
+        enableNonClientDecor(nonClientDecorView != null);
         return nonClientDecorView;
     }
 
@@ -1749,9 +1767,41 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
+    /**
+     * The elevation gets set for the first time and the framework needs to be informed that
+     * the surface layer gets created with the shadow size in mind.
+     */
+    private void initializeElevation() {
+        // TODO(skuhne): Call setMaxElevation here accordingly after b/22668382 got fixed.
+        mAllowUpdateElevation = false;
+        updateElevation();
+    }
+
     private void updateElevation() {
-        if (mNonClientDecorView != null) {
-            mNonClientDecorView.updateElevation();
+        float elevation = 0;
+        final boolean wasAdjustedForStack = mElevationAdjustedForStack;
+        // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
+        // since the shadow is bound to the content size and not the target size.
+        if (ActivityManager.StackId.hasWindowShadow(mWorkspaceId)
+                && mBackdropFrameRenderer == null) {
+            elevation = hasWindowFocus() ?
+                    DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
+            // TODO(skuhne): Remove this if clause once b/22668382 got fixed.
+            if (!mAllowUpdateElevation) {
+                elevation = DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
+            }
+            // Convert the DP elevation into physical pixels.
+            elevation = dipToPx(elevation);
+            mElevationAdjustedForStack = true;
+        } else {
+            mElevationAdjustedForStack = false;
+        }
+
+        // Don't change the elevation if we didn't previously adjust it for the stack it was in
+        // or it didn't change.
+        if ((wasAdjustedForStack || mElevationAdjustedForStack)
+                && getElevation() != elevation) {
+            mWindow.setElevation(elevation);
         }
     }
 
@@ -1761,6 +1811,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     int getCaptionHeight() {
         return isShowingCaption() ? mNonClientDecorView.getDecorCaptionHeight() : 0;
+    }
+
+    /**
+     * Converts a DIP measure into physical pixels.
+     * @param dip The dip value.
+     * @return Returns the number of pixels.
+     */
+    private float dipToPx(float dip) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
+                getResources().getDisplayMetrics());
     }
 
     private static class ColorViewState {
