@@ -209,6 +209,7 @@ import libcore.util.EmptyArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.EphemeralResolveInfo;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
@@ -252,6 +253,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
@@ -301,6 +303,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_VERIFY = false;
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
+    private static final boolean DEBUG_EPHEMERAL = false;
 
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
@@ -597,6 +600,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private final ComponentName mIntentFilterVerifierComponent;
     private int mIntentFilterVerificationToken = 0;
+
+    /** Component that knows whether or not an ephemeral application exists */
+    final ComponentName mEphemeralResolverComponent;
+    /** The service connection to the ephemeral resolver */
+    final EphemeralResolverConnection mEphemeralResolverConnection;
+
+    /** Component used to install ephemeral applications */
+    final ComponentName mEphemeralInstallerComponent;
+    final ActivityInfo mEphemeralInstallerActivity = new ActivityInfo();
+    final ResolveInfo mEphemeralInstallerInfo = new ResolveInfo();
 
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
             = new SparseArray<IntentFilterVerificationState>();
@@ -2344,6 +2357,33 @@ public class PackageManagerService extends IPackageManager.Stub {
             mIntentFilterVerifier = new IntentVerifierProxy(mContext,
                     mIntentFilterVerifierComponent);
 
+            final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
+            final ComponentName ephemeralInstallerComponent = getEphemeralInstallerLPr();
+            // both the installer and resolver must be present to enable ephemeral
+            if (ephemeralInstallerComponent != null && ephemeralResolverComponent != null) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.i(TAG, "Ephemeral activated; resolver: " + ephemeralResolverComponent
+                            + " installer:" + ephemeralInstallerComponent);
+                }
+                mEphemeralResolverComponent = ephemeralResolverComponent;
+                mEphemeralInstallerComponent = ephemeralInstallerComponent;
+                setUpEphemeralInstallerActivityLP(mEphemeralInstallerComponent);
+                mEphemeralResolverConnection =
+                        new EphemeralResolverConnection(mContext, mEphemeralResolverComponent);
+            } else {
+                if (DEBUG_EPHEMERAL) {
+                    final String missingComponent =
+                            (ephemeralResolverComponent == null)
+                            ? (ephemeralInstallerComponent == null)
+                                    ? "resolver and installer"
+                                    : "resolver"
+                            : "installer";
+                    Slog.i(TAG, "Ephemeral deactivated; missing " + missingComponent);
+                }
+                mEphemeralResolverComponent = null;
+                mEphemeralInstallerComponent = null;
+                mEphemeralResolverConnection = null;
+            }
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
@@ -2480,6 +2520,89 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return verifierComponentName;
+    }
+
+    private ComponentName getEphemeralResolverLPr() {
+        final String[] packageArray =
+                mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
+        if (packageArray.length == 0) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral resolver NOT found; empty package list");
+            }
+            return null;
+        }
+
+        Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
+        final List<ResolveInfo> resolvers = queryIntentServices(resolverIntent,
+                null /*resolvedType*/, 0 /*flags*/, UserHandle.USER_SYSTEM);
+
+        final int N = resolvers.size();
+        if (N == 0) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral resolver NOT found; no matching intent filters");
+            }
+            return null;
+        }
+
+        final Set<String> possiblePackages = new ArraySet<>(Arrays.asList(packageArray));
+        for (int i = 0; i < N; i++) {
+            final ResolveInfo info = resolvers.get(i);
+
+            if (info.serviceInfo == null) {
+                continue;
+            }
+
+            final String packageName = info.serviceInfo.packageName;
+            if (!possiblePackages.contains(packageName)) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.d(TAG, "Ephemeral resolver not in allowed package list;"
+                            + " pkg: " + packageName + ", info:" + info);
+                }
+                continue;
+            }
+
+            if (DEBUG_EPHEMERAL) {
+                Slog.v(TAG, "Ephemeral resolver found;"
+                        + " pkg: " + packageName + ", info:" + info);
+            }
+            return new ComponentName(packageName, info.serviceInfo.name);
+        }
+        if (DEBUG_EPHEMERAL) {
+            Slog.v(TAG, "Ephemeral resolver NOT found");
+        }
+        return null;
+    }
+
+    private ComponentName getEphemeralInstallerLPr() {
+        Intent installerIntent = new Intent(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
+        installerIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        installerIntent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
+        final List<ResolveInfo> installers = queryIntentActivities(installerIntent,
+                PACKAGE_MIME_TYPE, 0 /*flags*/, 0 /*userId*/);
+
+        ComponentName ephemeralInstaller = null;
+
+        final int N = installers.size();
+        for (int i = 0; i < N; i++) {
+            final ResolveInfo info = installers.get(i);
+            final String packageName = info.activityInfo.packageName;
+
+            if (!info.activityInfo.applicationInfo.isSystemApp()) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.d(TAG, "Ephemeral installer is not system app;"
+                            + " pkg: " + packageName + ", info:" + info);
+                }
+                continue;
+            }
+
+            if (ephemeralInstaller != null) {
+                throw new RuntimeException("There must only be one ephemeral installer");
+            }
+
+            ephemeralInstaller = new ComponentName(packageName, info.activityInfo.name);
+        }
+
+        return ephemeralInstaller;
     }
 
     private void primeDomainVerificationsLPw(int userId) {
@@ -4263,8 +4386,97 @@ public class PackageManagerService extends IPackageManager.Stub {
                 false, false, false, userId);
     }
 
+    private boolean isEphemeralAvailable(Intent intent, String resolvedType, int userId) {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance(EphemeralResolveInfo.SHA_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            // If we can't create a digest, ignore ephemeral apps.
+            return false;
+        }
+
+        final byte[] hostBytes = intent.getData().getHost().getBytes();
+        final byte[] digestBytes = digest.digest(hostBytes);
+        int shaPrefix =
+                digestBytes[0] << 24
+                | digestBytes[1] << 16
+                | digestBytes[2] << 8
+                | digestBytes[3] << 0;
+        final List<EphemeralResolveInfo> ephemeralResolveInfoList =
+                mEphemeralResolverConnection.getEphemeralResolveInfoList(shaPrefix);
+        if (ephemeralResolveInfoList == null || ephemeralResolveInfoList.size() == 0) {
+            // No hash prefix match; there are no ephemeral apps for this domain.
+            return false;
+        }
+        for (int i = ephemeralResolveInfoList.size() - 1; i >= 0; --i) {
+            EphemeralResolveInfo ephemeralApplication = ephemeralResolveInfoList.get(i);
+            if (!Arrays.equals(digestBytes, ephemeralApplication.getDigestBytes())) {
+                continue;
+            }
+            final List<IntentFilter> filters = ephemeralApplication.getFilters();
+            // No filters; this should never happen.
+            if (filters.isEmpty()) {
+                continue;
+            }
+            // We have a domain match; resolve the filters to see if anything matches.
+            final EphemeralIntentResolver ephemeralResolver = new EphemeralIntentResolver();
+            for (int j = filters.size() - 1; j >= 0; --j) {
+                ephemeralResolver.addFilter(filters.get(j));
+            }
+            List<ResolveInfo> ephemeralResolveList = ephemeralResolver.queryIntent(
+                    intent, resolvedType, false /*defaultOnly*/, userId);
+            return !ephemeralResolveList.isEmpty();
+        }
+        // Hash or filter mis-match; no ephemeral apps for this domain.
+        return false;
+    }
+
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, int userId) {
+        final boolean isWebUri = hasWebURI(intent);
+        // Check whether or not an ephemeral app exists to handle the URI.
+        if (isWebUri && mEphemeralResolverConnection != null) {
+            // Deny ephemeral apps if the user choose _ALWAYS or _ALWAYS_ASK for intent resolution.
+            boolean hasAlwaysHandler = false;
+            synchronized (mPackages) {
+                final int count = query.size();
+                for (int n=0; n<count; n++) {
+                    ResolveInfo info = query.get(n);
+                    String packageName = info.activityInfo.packageName;
+                    PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        // Try to get the status from User settings first
+                        long packedStatus = getDomainVerificationStatusLPr(ps, userId);
+                        int status = (int) (packedStatus >> 32);
+                        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
+                                || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                            hasAlwaysHandler = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Only consider installing an ephemeral app if there isn't already a verified handler.
+            // We've determined that there's an ephemeral app available for the URI, ignore any
+            // ResolveInfo's and just return the ephemeral installer
+            if (!hasAlwaysHandler && isEphemeralAvailable(intent, resolvedType, userId)) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.v(TAG, "Resolving to the ephemeral installer");
+                }
+                // ditch the result and return a ResolveInfo to launch the ephemeral installer
+                ResolveInfo ri = new ResolveInfo(mEphemeralInstallerInfo);
+                ri.activityInfo = new ActivityInfo(ri.activityInfo);
+                // make a deep copy of the applicationInfo
+                ri.activityInfo.applicationInfo = new ApplicationInfo(
+                        ri.activityInfo.applicationInfo);
+                if (userId != 0) {
+                    ri.activityInfo.applicationInfo.uid = UserHandle.getUid(userId,
+                            UserHandle.getAppId(ri.activityInfo.applicationInfo.uid));
+                }
+                return ri;
+            }
+        }
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -7773,6 +7985,30 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private void setUpEphemeralInstallerActivityLP(ComponentName installerComponent) {
+        final PackageParser.Package pkg = mPackages.get(installerComponent.getPackageName());
+
+        // Set up information for ephemeral installer activity
+        mEphemeralInstallerActivity.applicationInfo = pkg.applicationInfo;
+        mEphemeralInstallerActivity.name = mEphemeralInstallerComponent.getClassName();
+        mEphemeralInstallerActivity.packageName = pkg.applicationInfo.packageName;
+        mEphemeralInstallerActivity.processName = pkg.applicationInfo.packageName;
+        mEphemeralInstallerActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+        mEphemeralInstallerActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS |
+                ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+        mEphemeralInstallerActivity.theme = 0;
+        mEphemeralInstallerActivity.exported = true;
+        mEphemeralInstallerActivity.enabled = true;
+        mEphemeralInstallerInfo.activityInfo = mEphemeralInstallerActivity;
+        mEphemeralInstallerInfo.priority = 0;
+        mEphemeralInstallerInfo.preferredOrder = 0;
+        mEphemeralInstallerInfo.match = 0;
+
+        if (DEBUG_EPHEMERAL) {
+            Slog.d(TAG, "Set ephemeral installer activity: " + mEphemeralInstallerComponent);
+        }
+    }
+
     private static String calculateBundledApkRoot(final String codePathString) {
         final File codePath = new File(codePathString);
         final File codeRoot;
@@ -9329,7 +9565,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         private final ArrayMap<ComponentName, PackageParser.Provider> mProviders
                 = new ArrayMap<ComponentName, PackageParser.Provider>();
         private int mFlags;
-    };
+    }
+
+    private static final class EphemeralIntentResolver
+            extends IntentResolver<IntentFilter, ResolveInfo> {
+        @Override
+        protected IntentFilter[] newArray(int size) {
+            return new IntentFilter[size];
+        }
+
+        @Override
+        protected boolean isPackageForFilter(String packageName, IntentFilter info) {
+            return true;
+        }
+
+        @Override
+        protected ResolveInfo newResult(IntentFilter info, int match, int userId) {
+            if (!sUserManager.exists(userId)) return null;
+            final ResolveInfo res = new ResolveInfo();
+            res.filter = info;
+            return res;
+        }
+    }
 
     private static final Comparator<ResolveInfo> mResolvePrioritySorter =
             new Comparator<ResolveInfo>() {
