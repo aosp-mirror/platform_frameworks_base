@@ -925,6 +925,7 @@ package android {
     field public static final deprecated int phoneNumber = 16843111; // 0x1010167
     field public static final int pivotX = 16843189; // 0x10101b5
     field public static final int pivotY = 16843190; // 0x10101b6
+    field public static final int pointerShape = 16844042; // 0x101050a
     field public static final int popupAnimationStyle = 16843465; // 0x10102c9
     field public static final int popupBackground = 16843126; // 0x1010176
     field public static final int popupCharacters = 16843332; // 0x1010244

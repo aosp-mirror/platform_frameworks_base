@@ -4487,6 +4487,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         initializeScrollIndicators = true;
                     }
                     break;
+                case R.styleable.View_pointerShape:
+                    final int pointerShape = a.getInt(attr, PointerIcon.STYLE_NOT_SPECIFIED);
+                    if (pointerShape != PointerIcon.STYLE_NOT_SPECIFIED) {
+                        setPointerShape(pointerShape);
+                    }
+                    break;
             }
         }
 
