@@ -11,7 +11,7 @@ next.link=audio-output.html
 @jd:body
 
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -27,21 +27,21 @@ next.link=audio-output.html
   <li><a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a></li>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 
 <p>With multiple apps potentially playing audio it's important to think about how they should
 interact. To avoid every music app playing at the same time, Android uses audio focus to moderate
 audio playback&mdash;only apps that hold the audio focus should play audio.</p>
 
-<p>Before your app starts playing audio it should request&mdash;and receive&mdash;the audio focus. 
+<p>Before your app starts playing audio it should request&mdash;and receive&mdash;the audio focus.
 Likewise, it should know how to listen for a loss of audio focus and respond appropriately when that
 happens.</p>
 
- 
-<h2 id="RequestFocus">Request the Audio Focus</h2> 
- 
+
+<h2 id="RequestFocus">Request the Audio Focus</h2>
+
 <p>Before your app starts playing any audio, it should hold the audio focus for the stream
 it will be using. This is done with a call to {@link android.media.AudioManager#requestAudioFocus
 requestAudioFocus()} which returns
@@ -55,7 +55,7 @@ plan to play audio for the foreseeable future (for example, when playing music).
 <p>The following snippet requests permanent audio focus on the music audio stream. You should
 request the audio focus immediately before you begin playback, such as when the user presses
 play or the background music for the next game level begins.</p>
-  
+
 <pre>
 AudioManager am = mContext.getSystemService(Context.AUDIO_SERVICE);
 ...
@@ -66,7 +66,7 @@ int result = am.requestAudioFocus(afChangeListener,
                                  AudioManager.STREAM_MUSIC,
                                  // Request permanent focus.
                                  AudioManager.AUDIOFOCUS_GAIN);
-   
+
 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
     am.registerMediaButtonEventReceiver(RemoteControlReceiver);
     // Start playback.
@@ -80,7 +80,7 @@ android.media.AudioManager.OnAudioFocusChangeListener}. In the case of abandonin
 this allows any interupted app to continue playback.</p>
 
 <pre>
-// Abandon audio focus when playback complete    
+// Abandon audio focus when playback complete
 am.abandonAudioFocus(afChangeListener);
 </pre>
 
@@ -97,7 +97,7 @@ int result = am.requestAudioFocus(afChangeListener,
                              AudioManager.STREAM_MUSIC,
                              // Request permanent focus.
                              AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-   
+
 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
     // Start playback.
 }
@@ -111,7 +111,7 @@ transient (with or without support for ducking) audio focus is received by the l
 registered when requesting focus.</p>
 
 
-<h2 id="HandleFocusLoss">Handle the Loss of Audio Focus</h2> 
+<h2 id="HandleFocusLoss">Handle the Loss of Audio Focus</h2>
 
 <p>If your app can request audio focus, it follows that it will in turn lose that focus when another
 app requests it. How your app responds to a loss of audio focus depends on the manner of that
@@ -139,26 +139,27 @@ loss is transient and resume it when we have regained the focus. If the loss is 
 unregisters our media button event receiver and stops monitoring audio focus changes.<p>
 
 <pre>
-OnAudioFocusChangeListener afChangeListener = new OnAudioFocusChangeListener() {
-    public void onAudioFocusChange(int focusChange) {
-        if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT
-            // Pause playback
-        } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-            // Resume playback 
-        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-            am.unregisterMediaButtonEventReceiver(RemoteControlReceiver);
-            am.abandonAudioFocus(afChangeListener);
-            // Stop playback
+AudioManager.OnAudioFocusChangeListener afChangeListener =
+    new AudioManager.OnAudioFocusChangeListener() {
+        public void onAudioFocusChange(int focusChange) {
+            if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT) {
+                // Pause playback
+            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                // Resume playback
+            } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                am.unregisterMediaButtonEventReceiver(RemoteControlReceiver);
+                am.abandonAudioFocus(afChangeListener);
+                // Stop playback
+            }
         }
-    }
-};
+    };
 </pre>
- 
+
 <p>In the case of a transient loss of audio focus where ducking is permitted, rather than pausing
 playback, you can "duck" instead.</p>
 
 
-<h2 id="DUCK">Duck!</h2> 
+<h2 id="DUCK">Duck!</h2>
 
 <p>Ducking is the process of lowering your audio stream output volume to make transient audio from
 another app easier to hear without totally disrupting the audio from your own application.</p>
