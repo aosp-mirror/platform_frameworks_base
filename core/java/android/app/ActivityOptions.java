@@ -64,11 +64,13 @@ public class ActivityOptions {
     public static final String KEY_PACKAGE_NAME = "android:activity.packageName";
 
     /**
-     * The bounds that the activity should be started in. Set to null explicitly
-     * for full screen. If the key is not found, previous bounds will be preserved.
+     * The bounds (window size) that the activity should be launched in. Set to null explicitly for
+     * full screen. If the key is not found, previous bounds will be preserved.
+     * NOTE: This value is ignored on devices that don't have
+     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} enabled.
      * @hide
      */
-    public static final String KEY_BOUNDS = "android:activity.bounds";
+    public static final String KEY_LAUNCH_BOUNDS = "android:activity.launchBounds";
 
     /**
      * Type of animation that arguments specify.
@@ -193,8 +195,8 @@ public class ActivityOptions {
     public static final int ANIM_CLIP_REVEAL = 11;
 
     private String mPackageName;
-    private boolean mHasBounds;
-    private Rect mBounds;
+    private boolean mHasLaunchBounds;
+    private Rect mLaunchBounds;
     private int mAnimationType = ANIM_NONE;
     private int mCustomEnterResId;
     private int mCustomExitResId;
@@ -705,9 +707,9 @@ public class ActivityOptions {
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
-        mHasBounds = opts.containsKey(KEY_BOUNDS);
-        if (mHasBounds) {
-            mBounds = opts.getParcelable(KEY_BOUNDS);
+        mHasLaunchBounds = opts.containsKey(KEY_LAUNCH_BOUNDS);
+        if (mHasLaunchBounds) {
+            mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS);
         }
         mAnimationType = opts.getInt(KEY_ANIM_TYPE);
         switch (mAnimationType) {
@@ -766,10 +768,15 @@ public class ActivityOptions {
         }
     }
 
-    /** @hide */
-    public ActivityOptions setBounds(Rect bounds) {
-        mHasBounds = true;
-        mBounds = bounds;
+    /**
+     * Sets the bounds (window size) that the activity should be launched in. Set to null explicitly
+     * for full screen.
+     * NOTE: This value is ignored on devices that don't have
+     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} enabled.
+     */
+    public ActivityOptions setLaunchBounds(Rect launchBounds) {
+        mHasLaunchBounds = true;
+        mLaunchBounds = launchBounds;
         return this;
     }
 
@@ -778,14 +785,12 @@ public class ActivityOptions {
         return mPackageName;
     }
 
-    /** @hide */
-    public boolean hasBounds() {
-        return mHasBounds;
+    public boolean hasLaunchBounds() {
+        return mHasLaunchBounds;
     }
 
-    /** @hide */
-    public Rect getBounds(){
-        return mBounds;
+    public Rect getLaunchBounds(){
+        return mLaunchBounds;
     }
 
     /** @hide */
@@ -997,8 +1002,8 @@ public class ActivityOptions {
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
         }
-        if (mHasBounds) {
-            b.putParcelable(KEY_BOUNDS, mBounds);
+        if (mHasLaunchBounds) {
+            b.putParcelable(KEY_LAUNCH_BOUNDS, mLaunchBounds);
         }
         b.putInt(KEY_ANIM_TYPE, mAnimationType);
         if (mUsageTimeReport != null) {

@@ -99,7 +99,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
@@ -1926,9 +1925,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean overrideBounds = false;
         Rect newBounds = null;
         if (options != null && (r.info.resizeable || (inTask != null && inTask.mResizeable))) {
-            if (options.hasBounds()) {
+            if (canUseActivityOptionsLaunchBounds(options)) {
                 overrideBounds = true;
-                newBounds = options.getBounds();
+                newBounds = options.getLaunchBounds();
             }
         }
 
@@ -2930,8 +2929,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (task.mResizeable && options != null) {
-            if (options.hasBounds()) {
-                Rect bounds = options.getBounds();
+            if (canUseActivityOptionsLaunchBounds(options)) {
+                Rect bounds = options.getLaunchBounds();
                 task.updateOverrideConfiguration(bounds);
                 final int stackId = task.getLaunchStackId();
                 if (stackId != task.stack.mStackId) {
@@ -2953,6 +2952,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
+    }
+
+    private boolean canUseActivityOptionsLaunchBounds(ActivityOptions options) {
+        // We use the launch bounds in the activity options is the device supports freeform
+        // window management.
+        return options.hasLaunchBounds() && mService.mSupportsFreeformWindowManagement;
     }
 
     ActivityStack getStack(int stackId) {
