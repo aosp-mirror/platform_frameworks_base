@@ -33,4 +33,8 @@
 
     <!-- Title for documents backend that offers bugreports. -->
     <string name="bugreport_storage_title">Bug reports</string>
+
+    <!-- Toast message sent when the bugreport file could be read. -->
+    <string name="bugreport_unreadable_text">Bug report file could not be read</string>
+
 </resources>

@@ -37,6 +37,7 @@ import android.support.v4.content.FileProvider;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Patterns;
+import android.widget.Toast;
 
 import com.google.android.collect.Lists;
 import libcore.io.Streams;
@@ -105,6 +106,13 @@ public class BugreportReceiver extends BroadcastReceiver {
      */
     private void triggerLocalNotification(final Context context, final File bugreportFile,
             final File screenshotFile) {
+        if (!bugreportFile.exists() || !bugreportFile.canRead()) {
+            Log.e(TAG, "Could not read bugreport file " + bugreportFile);
+            Toast.makeText(context, context.getString(R.string.bugreport_unreadable_text),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
         boolean isPlainText = bugreportFile.getName().toLowerCase().endsWith(".txt");
         if (!isPlainText) {
             // Already zipped, send it right away.
@@ -141,10 +149,12 @@ public class BugreportReceiver extends BroadcastReceiver {
         intent.putExtra(Intent.EXTRA_TEXT, messageBody);
         final ClipData clipData = new ClipData(null, new String[] { mimeType },
                 new ClipData.Item(null, null, null, bugreportUri));
-        clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
+        final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri);
+        if (screenshotUri != null) {
+            clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
+            attachments.add(screenshotUri);
+        }
         intent.setClipData(clipData);
-
-        final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri, screenshotUri);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
         final Account sendToAccount = findSendToAccount(context);
@@ -162,8 +172,8 @@ public class BugreportReceiver extends BroadcastReceiver {
             File screenshotFile) {
         // Files are kept on private storage, so turn into Uris that we can
         // grant temporary permissions for.
-        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
-        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
+        final Uri bugreportUri = getUri(context, bugreportFile);
+        final Uri screenshotUri = getUri(context, screenshotFile);
 
         Intent sendIntent = buildSendIntent(context, bugreportUri, screenshotUri);
         Intent notifIntent;
@@ -270,6 +280,10 @@ public class BugreportReceiver extends BroadcastReceiver {
             }
         }
         return foundAccount;
+    }
+
+    private static Uri getUri(Context context, File file) {
+        return file != null ? FileProvider.getUriForFile(context, AUTHORITY, file) : null;
     }
 
     private static File getFileExtra(Intent intent, String key) {
