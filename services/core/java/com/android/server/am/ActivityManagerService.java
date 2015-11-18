@@ -28,6 +28,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
+import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.IResultReceiver;
@@ -12268,6 +12269,17 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start up initial activity.
             mBooting = true;
+            // Enable home activity for system user, so that the system can always boot
+            if (UserManager.isSplitSystemUser()) {
+                ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
+                try {
+                    AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0,
+                            UserHandle.USER_SYSTEM);
+                } catch (RemoteException e) {
+                    e.rethrowAsRuntimeException();
+                }
+            }
             startHomeActivityLocked(currentUserId, "systemReady");
 
             try {
