@@ -421,6 +421,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (state.startHidden) {
             state.startHidden = false;
             mRecentsView.setStackViewVisibility(View.INVISIBLE);
+        } else {
+            mRecentsView.setStackViewVisibility(View.VISIBLE);
         }
     }
 
