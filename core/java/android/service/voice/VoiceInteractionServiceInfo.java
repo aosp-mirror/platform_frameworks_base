@@ -52,9 +52,21 @@ public class VoiceInteractionServiceInfo {
     }
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
-            throws PackageManager.NameNotFoundException, RemoteException {
-        this(pm, AppGlobals.getPackageManager().getServiceInfo(comp,
-                PackageManager.GET_META_DATA, userHandle));
+            throws PackageManager.NameNotFoundException {
+        this(pm, getServiceInfoOrThrow(comp, userHandle));
+    }
+
+    static ServiceInfo getServiceInfoOrThrow(ComponentName comp, int userHandle)
+            throws PackageManager.NameNotFoundException {
+        try {
+            ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(comp,
+                    PackageManager.GET_META_DATA, userHandle);
+            if (si != null) {
+                return si;
+            }
+        } catch (RemoteException e) {
+        }
+        throw new PackageManager.NameNotFoundException(comp.toString());
     }
 
     public VoiceInteractionServiceInfo(PackageManager pm, ServiceInfo si) {
