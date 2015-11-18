@@ -23,6 +23,7 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
+import com.android.internal.view.InputMethodClient;
 
 import android.annotation.RequiresPermission;
 import android.content.Context;
@@ -440,8 +441,11 @@ public final class InputMethodManager {
                 }
                 case MSG_UNBIND: {
                     final int sequence = msg.arg1;
+                    @InputMethodClient.UnbindReason
+                    final int reason = msg.arg2;
                     if (DEBUG) {
-                        Log.i(TAG, "handleMessage: MSG_UNBIND " + sequence);
+                        Log.i(TAG, "handleMessage: MSG_UNBIND " + sequence +
+                                " reason=" + InputMethodClient.getUnbindReason(reason));
                     }
                     final boolean startInput;
                     synchronized (mH) {
@@ -569,8 +573,8 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void onUnbindMethod(int sequence) {
-            mH.sendMessage(mH.obtainMessage(MSG_UNBIND, sequence, 0));
+        public void onUnbindMethod(int sequence, @InputMethodClient.UnbindReason int unbindReason) {
+            mH.sendMessage(mH.obtainMessage(MSG_UNBIND, sequence, unbindReason));
         }
 
         @Override

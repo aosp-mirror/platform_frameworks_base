@@ -30,6 +30,7 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
+import com.android.internal.view.InputMethodClient;
 import com.android.server.statusbar.StatusBarManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -160,8 +161,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_START_INPUT = 2000;
     static final int MSG_RESTART_INPUT = 2010;
 
-    static final int MSG_UNBIND_METHOD = 3000;
-    static final int MSG_BIND_METHOD = 3010;
+    static final int MSG_UNBIND_CLIENT = 3000;
+    static final int MSG_BIND_CLIENT = 3010;
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
@@ -935,7 +936,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 || (newLocale != null && !newLocale.equals(mLastSystemLocale))) {
             if (!updateOnlyWhenLocaleChanged) {
                 hideCurrentInputLocked(0, null);
-                resetCurrentMethodAndClient();
+                resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_RESET_IME);
             }
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
@@ -1208,7 +1209,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
          }
     }
 
-    void unbindCurrentClientLocked() {
+    void unbindCurrentClientLocked(
+            /* @InputMethodClient.UnbindReason */ final int unbindClientReason) {
         if (mCurClient != null) {
             if (DEBUG) Slog.v(TAG, "unbindCurrentInputLocked: client = "
                     + mCurClient.client.asBinder());
@@ -1222,8 +1224,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
                     MSG_SET_ACTIVE, 0, mCurClient));
-            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                    MSG_UNBIND_METHOD, mCurSeq, mCurClient.client));
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                    MSG_UNBIND_CLIENT, mCurSeq, unbindClientReason, mCurClient.client));
             mCurClient.sessionRequested = false;
             mCurClient = null;
 
@@ -1324,7 +1326,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurClientInKeyguard = isKeyguardLocked();
             // If the client is changing, we need to switch over to the new
             // one.
-            unbindCurrentClientLocked();
+            unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_SWITCH_CLIENT);
             if (DEBUG) Slog.v(TAG, "switching to client: client = "
                     + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
 
@@ -1479,7 +1481,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     InputBindResult res = attachNewInputLocked(true);
                     if (res.method != null) {
                         executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
-                                MSG_BIND_METHOD, mCurClient.client, res));
+                                MSG_BIND_CLIENT, mCurClient.client, res));
                     }
                     return;
                 }
@@ -1518,10 +1520,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         clearCurMethodLocked();
     }
 
-    void resetCurrentMethodAndClient() {
+    void resetCurrentMethodAndClient(
+            /* @InputMethodClient.UnbindReason */ final int unbindClientReason) {
         mCurMethodId = null;
         unbindCurrentMethodLocked(false);
-        unbindCurrentClientLocked();
+        unbindCurrentClientLocked(unbindClientReason);
     }
 
     void requestClientSessionLocked(ClientState cs) {
@@ -1588,8 +1591,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mShowRequested = mInputShown;
                 mInputShown = false;
                 if (mCurClient != null) {
-                    executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                            MSG_UNBIND_METHOD, mCurSeq, mCurClient.client));
+                    executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                            MSG_UNBIND_CLIENT, InputMethodClient.UNBIND_REASON_DISCONNECT_IME,
+                            mCurSeq, mCurClient.client));
                 }
             }
         }
@@ -1874,12 +1878,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodLocked(id, mSettings.getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
-                resetCurrentMethodAndClient();
+                resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_SWITCH_IME_FAILED);
             }
             mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
-            resetCurrentMethodAndClient();
+            resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_NO_IME);
         }
         // Here is not the perfect place to reset the switching controller. Ideally
         // mSwitchingController and mSettings should be able to share the same state.
@@ -1965,7 +1969,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
-            unbindCurrentClientLocked();
+            unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_SWITCH_IME);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -2769,14 +2773,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // ---------------------------------------------------------
 
-            case MSG_UNBIND_METHOD:
+            case MSG_UNBIND_CLIENT:
                 try {
-                    ((IInputMethodClient)msg.obj).onUnbindMethod(msg.arg1);
+                    ((IInputMethodClient)msg.obj).onUnbindMethod(msg.arg1, msg.arg2);
                 } catch (RemoteException e) {
                     // There is nothing interesting about the last client dying.
                 }
                 return true;
-            case MSG_BIND_METHOD: {
+            case MSG_BIND_CLIENT: {
                 args = (SomeArgs)msg.obj;
                 IInputMethodClient client = (IInputMethodClient)args.arg1;
                 InputBindResult res = (InputBindResult)args.arg2;
