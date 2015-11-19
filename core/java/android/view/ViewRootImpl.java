@@ -5372,10 +5372,10 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
-                // When the drag operation ends, reset drag-related state
+                // When the drag operation ends, release any local state object
+                // that may have been in use
                 if (what == DragEvent.ACTION_DRAG_ENDED) {
                     setLocalDragState(null);
-                    mAttachInfo.mDragToken = null;
                 }
             }
         }

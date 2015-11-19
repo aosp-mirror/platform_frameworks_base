@@ -401,32 +401,6 @@ final class Session extends IWindowSession.Stub
         }
     }
 
-    public void cancelDrag(IBinder dragToken) {
-        if (WindowManagerService.DEBUG_DRAG) {
-            Slog.d(WindowManagerService.TAG, "cancel drag");
-        }
-
-        synchronized (mService.mWindowMap) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                if (mService.mDragState == null) {
-                    Slog.w(WindowManagerService.TAG, "cancelDrag() without prepareDrag()");
-                    throw new IllegalStateException("cancelDrag() without prepareDrag()");
-                }
-
-                if (mService.mDragState.mToken != dragToken) {
-                    Slog.w(WindowManagerService.TAG, "cancelDrag() does not match prepareDrag()");
-                    throw new IllegalStateException("cancelDrag() does not match prepareDrag()");
-                }
-
-                mService.mDragState.mDragResult = false;
-                mService.mDragState.endDragLw();
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     public void dragRecipientEntered(IWindow window) {
         if (WindowManagerService.DEBUG_DRAG) {
             Slog.d(WindowManagerService.TAG, "Drag into new candidate view @ " + window.asBinder());
