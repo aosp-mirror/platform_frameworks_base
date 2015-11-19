@@ -13,7 +13,6 @@ import android.icu.util.ULocale;
 import android.text.Primitive.PrimitiveType;
 import android.text.StaticLayout.LineBreaks;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,8 +52,8 @@ public class StaticLayout_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nLoadHyphenator(ByteBuffer buf, int offset) {
-        return Hyphenator_Delegate.loadHyphenator(buf, offset);
+    /*package*/ static long nLoadHyphenator(String patternData) {
+        return Hyphenator_Delegate.loadHyphenator(patternData);
     }
 
     @LayoutlibDelegate
