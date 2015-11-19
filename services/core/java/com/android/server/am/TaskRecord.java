@@ -45,6 +45,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
