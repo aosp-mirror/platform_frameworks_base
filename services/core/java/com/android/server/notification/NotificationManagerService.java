@@ -1224,19 +1224,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setPackagePeekable(String pkg, int uid, boolean peekable) {
-            checkCallerIsSystem();
-
-            mRankingHelper.setPackagePeekable(pkg, uid, peekable);
-        }
-
-        @Override
-        public boolean getPackagePeekable(String pkg, int uid) {
-            checkCallerIsSystem();
-            return mRankingHelper.getPackagePeekable(pkg, uid);
-        }
-
-        @Override
         public void setPackageVisibilityOverride(String pkg, int uid, int visibility) {
             checkCallerIsSystem();
             mRankingHelper.setPackageVisibilityOverride(pkg, uid, visibility);
@@ -2156,14 +2143,6 @@ public class NotificationManagerService extends SystemService {
                         if (notification.priority < Notification.PRIORITY_HIGH) {
                             notification.priority = Notification.PRIORITY_HIGH;
                         }
-                    }
-                    // force no heads up per package config
-                    if (!mRankingHelper.getPackagePeekable(pkg, callingUid)) {
-                        if (notification.extras == null) {
-                            notification.extras = new Bundle();
-                        }
-                        notification.extras.putInt(Notification.EXTRA_AS_HEADS_UP,
-                                Notification.HEADS_UP_NEVER);
                     }
 
                     // 1. initial score: buckets of 10, around the app [-20..20]
