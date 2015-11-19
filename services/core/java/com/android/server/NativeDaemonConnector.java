@@ -177,6 +177,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
             mCallbacks.onDaemonConnected();
 
+            FileDescriptor[] fdList = null;
             byte[] buffer = new byte[BUFFER_SIZE];
             int start = 0;
 
@@ -186,6 +187,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     loge("got " + count + " reading with start = " + start);
                     break;
                 }
+                fdList = socket.getAncillaryFileDescriptors();
 
                 // Add our starting point to the count and reset the start.
                 count += start;
@@ -200,8 +202,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
                         boolean releaseWl = false;
                         try {
-                            final NativeDaemonEvent event = NativeDaemonEvent.parseRawEvent(
-                                    rawEvent);
+                            final NativeDaemonEvent event =
+                                    NativeDaemonEvent.parseRawEvent(rawEvent, fdList);
 
                             log("RCV <- {" + event + "}");
 
