@@ -25,6 +25,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 
+import com.android.documentsui.R;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +45,8 @@ class DirectoryItemAnimator extends DefaultItemAnimator {
     private final Integer mSelectedColor;
 
     public DirectoryItemAnimator(Context context) {
-        mDefaultColor = context.getResources().getColor(android.R.color.transparent);
-        // Get the accent color.
-        TypedValue selColor = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorAccent, selColor, true);
-        // Set the opacity to 10%.
-        mSelectedColor = (selColor.data & 0x00ffffff) | 0x16000000;
+        mDefaultColor = context.getResources().getColor(R.color.item_doc_background);
+        mSelectedColor = context.getResources().getColor(R.color.item_doc_background_selected);
     }
 
     @Override

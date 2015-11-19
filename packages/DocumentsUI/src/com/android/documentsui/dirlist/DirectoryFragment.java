@@ -943,7 +943,6 @@ public class DirectoryFragment extends Fragment {
 
         public void setSelected(boolean selected) {
             itemView.setActivated(selected);
-            itemView.setBackgroundColor(selected ? mSelectedItemColor : mDefaultItemColor);
         }
 
         @Override
@@ -1080,8 +1079,6 @@ public class DirectoryFragment extends Fragment {
 
             holder.setSelected(isSelected(position));
 
-            final View line2 = itemView.findViewById(R.id.line2);
-
             final ImageView iconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
             final ImageView iconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
             final TextView title = (TextView) itemView.findViewById(android.R.id.title);
@@ -1138,14 +1135,11 @@ public class DirectoryFragment extends Fragment {
                         getDocumentIcon(mContext, docAuthority, docId, docMimeType, docIcon, state));
             }
 
-            boolean hasLine2 = false;
-
-            final boolean hideTitle = (state.derivedMode == MODE_GRID) && mHideGridTitles;
-            if (!hideTitle) {
+            if ((state.derivedMode == MODE_GRID) && mHideGridTitles) {
+                title.setVisibility(View.GONE);
+            } else {
                 title.setText(docDisplayName);
                 title.setVisibility(View.VISIBLE);
-            } else {
-                title.setVisibility(View.GONE);
             }
 
             Drawable iconDrawable = null;
@@ -1161,7 +1155,6 @@ public class DirectoryFragment extends Fragment {
                     if (alwaysShowSummary) {
                         summary.setText(root.getDirectoryString());
                         summary.setVisibility(View.VISIBLE);
-                        hasLine2 = true;
                     } else {
                         if (iconDrawable != null && roots.isIconUniqueBlocking(root)) {
                             // No summary needed if icon speaks for itself
@@ -1170,7 +1163,6 @@ public class DirectoryFragment extends Fragment {
                             summary.setText(root.getDirectoryString());
                             summary.setVisibility(View.VISIBLE);
                             summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
-                            hasLine2 = true;
                         }
                     }
                 }
@@ -1187,48 +1179,37 @@ public class DirectoryFragment extends Fragment {
                     if (docSummary != null) {
                         summary.setText(docSummary);
                         summary.setVisibility(View.VISIBLE);
-                        hasLine2 = true;
                     } else {
                         summary.setVisibility(View.INVISIBLE);
                     }
                 }
             }
 
-            if (icon1 != null) icon1.setVisibility(View.GONE);
-
             if (iconDrawable != null) {
                 icon1.setVisibility(View.VISIBLE);
                 icon1.setImageDrawable(iconDrawable);
+            } else {
+                icon1.setVisibility(View.GONE);
             }
 
             if (docLastModified == -1) {
                 date.setText(null);
             } else {
                 date.setText(formatTime(mContext, docLastModified));
-                hasLine2 = true;
             }
 
-            if (state.showSize) {
-                size.setVisibility(View.VISIBLE);
-                if (Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
-                    size.setText(null);
-                } else {
-                    size.setText(Formatter.formatFileSize(mContext, docSize));
-                    hasLine2 = true;
-                }
-            } else {
+            if (!state.showSize || Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
                 size.setVisibility(View.GONE);
-            }
-
-            if (line2 != null) {
-                line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
+            } else {
+                size.setVisibility(View.VISIBLE);
+                size.setText(Formatter.formatFileSize(mContext, docSize));
             }
 
             setEnabledRecursive(itemView, enabled);
 
             iconMime.setAlpha(iconAlpha);
             iconThumb.setAlpha(iconAlpha);
-            if (icon1 != null) icon1.setAlpha(iconAlpha);
+            icon1.setAlpha(iconAlpha);
 
             if (DEBUG_ENABLE_DND) {
                 setupDragAndDropOnDocumentView(itemView, cursor);

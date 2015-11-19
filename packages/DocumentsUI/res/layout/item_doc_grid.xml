@@ -18,101 +18,101 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/grid_item_margin"
-    android:background="@color/item_doc_grid_background"
+    android:background="@color/item_doc_background"
     android:focusable="true">
 
     <!-- Main item thumbnail.  Comprised of two overlapping images, the
          visibility of which is controlled by code in
          DirectoryFragment.java. -->
+
     <FrameLayout
         android:id="@+id/thumbnail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp">
-      
+        android:layout_height="wrap_content">
+
         <com.android.documentsui.GridItemThumbnail
             android:id="@+id/icon_thumb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
             android:contentDescription="@null" />
-  
-        <ImageView
+
+        <com.android.documentsui.GridItemThumbnail
             android:id="@+id/icon_mime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="centerInside"
             android:contentDescription="@null" />
-        
+
     </FrameLayout>
-  
+
     <!-- Item nameplate.  Has a mime-type icon and some text fields (title,
          size, mod-time, etc). -->
-    <TextView
-        android:id="@android:id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/thumbnail"
-        android:layout_toEndOf="@android:id/icon1"
-        android:singleLine="true"
-        android:ellipsize="middle"
-        android:textAlignment="viewStart"
-        android:paddingEnd="12dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-        android:textColor="@*android:color/primary_text_default_material_light" />
 
-    <TextView
-        android:id="@+id/size"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@android:id/title"
-        android:layout_toEndOf="@android:id/icon1"
-        android:paddingEnd="4dp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:textAlignment="viewStart"
-        android:textAppearance="@android:style/TextAppearance.Material.Caption"
-        android:textColor="@*android:color/primary_text_default_material_light" />
-
-    <TextView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@android:id/title"
-        android:layout_toEndOf="@id/size"
-        android:paddingEnd="12dp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:textAlignment="viewStart"
-        android:textAppearance="@android:style/TextAppearance.Material.Caption"
-        android:textColor="@*android:color/primary_text_default_material_light" />
-    
-    <ImageView
-        android:id="@android:id/icon1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_below="@id/thumbnail"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBottom="@id/size"
-        android:layout_alignTop="@android:id/title"
-        android:scaleType="centerInside"
-        android:contentDescription="@null"
-        android:paddingStart="12dp"
-        android:paddingEnd="8dp"/>
-
-    <!-- Use an explicit spacer so we can align things to it. -->
-    <Space
-        android:id="@+id/bottomPadding"
+    <RelativeLayout
+        android:id="@+id/nameplate"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_below="@id/size" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/thumbnail"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp">
+
+        <ImageView
+            android:id="@android:id/icon1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:scaleType="centerInside"
+            android:contentDescription="@null"/>
+
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@android:id/icon1"
+            android:singleLine="true"
+            android:ellipsize="middle"
+            android:textAlignment="viewStart"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            android:textColor="@*android:color/primary_text_default_material_light" />
+
+        <TextView
+            android:id="@+id/size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@android:id/icon1"
+            android:layout_below="@android:id/title"
+            android:layout_marginEnd="4dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textAlignment="viewStart"
+            android:textAppearance="@android:style/TextAppearance.Material.Caption"
+            android:textColor="@*android:color/primary_text_default_material_light" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@android:id/title"
+            android:layout_toEndOf="@id/size"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textAlignment="viewStart"
+            android:textAppearance="@android:style/TextAppearance.Material.Caption"
+            android:textColor="@*android:color/primary_text_default_material_light" />
+
+    </RelativeLayout>
 
     <!-- An overlay that draws the item border when it is focused. -->
     <View
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/bottomPadding"
+        android:layout_alignBottom="@id/nameplate"
         android:layout_alignTop="@id/thumbnail"
         android:layout_alignLeft="@id/thumbnail"
         android:layout_alignRight="@id/thumbnail"
