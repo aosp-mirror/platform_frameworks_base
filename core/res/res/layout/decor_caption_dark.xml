@@ -23,6 +23,7 @@
     android:layout_height="match_parent"
     android:descendantFocusability="beforeDescendants" >
     <LinearLayout
+        android:id="@+id/caption"
         android:layout_width="match_parent"
         android:layout_gravity="end"
         android:layout_height="wrap_content"
