@@ -111,7 +111,9 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private void handleRefreshState() {
         mIsIconVisible = mSecurityController.isVpnEnabled();
-        if (mSecurityController.hasDeviceOwner()) {
+        // If the device has device owner, show "Device may be monitored", but --
+        // TODO See b/25779452 -- device owner doesn't actually have monitoring power.
+        if (mSecurityController.isDeviceManaged()) {
             mFooterTextId = R.string.device_owned_footer;
             mIsVisible = true;
         } else {
@@ -156,6 +158,8 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private String getMessage(String deviceOwner, String profileOwner, String primaryVpn,
             String profileVpn, boolean primaryUserIsManaged) {
+        // Show a special warning when the device has device owner, but --
+        // TODO See b/25779452 -- device owner doesn't actually have monitoring power.
         if (deviceOwner != null) {
             if (primaryVpn != null) {
                 return mContext.getString(R.string.monitoring_description_vpn_app_device_owned,

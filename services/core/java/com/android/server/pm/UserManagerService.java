@@ -513,7 +513,7 @@ public class UserManagerService extends IUserManager.Stub {
         DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         // restricted profile can be created if there is no DO set and the admin user has no PO
-        return dpm.getDeviceOwner() == null && dpm.getProfileOwnerAsUser(userId) == null;
+        return !dpm.isDeviceManaged() && dpm.getProfileOwnerAsUser(userId) == null;
     }
 
     /*
@@ -1599,7 +1599,7 @@ public class UserManagerService extends IUserManager.Stub {
                     DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
                             mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
                     if (devicePolicyManager == null
-                            || devicePolicyManager.getDeviceOwner() == null) {
+                            || !devicePolicyManager.isDeviceManaged()) {
                         flags |= UserInfo.FLAG_ADMIN;
                     }
                 }

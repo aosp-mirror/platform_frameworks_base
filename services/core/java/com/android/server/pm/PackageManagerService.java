@@ -13065,7 +13065,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
             if (dpm != null) {
-                final ComponentName deviceOwnerComponentName = dpm.getDeviceOwner();
+                final ComponentName deviceOwnerComponentName = dpm.getDeviceOwnerComponent(
+                        /* callingUserOnly =*/ false);
                 final String deviceOwnerPackageName = deviceOwnerComponentName == null ? null
                         : deviceOwnerComponentName.getPackageName();
                 // Does the package contains the device owner?

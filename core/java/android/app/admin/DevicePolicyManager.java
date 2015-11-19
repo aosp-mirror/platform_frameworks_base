@@ -89,6 +89,10 @@ public class DevicePolicyManager {
     private final Context mContext;
     private final IDevicePolicyManager mService;
 
+    // TODO Use it everywhere.
+    private static final String REMOTE_EXCEPTION_MESSAGE =
+            "Failed to talk with device policy manager service";
+
     private DevicePolicyManager(Context context) {
         this(context, IDevicePolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.DEVICE_POLICY_SERVICE)));
@@ -686,7 +690,7 @@ public class DevicePolicyManager {
      * extra field. This will invoke a UI to bring the user through adding the profile owner admin
      * to remotely control restrictions on the user.
      *
-     * <p>The intent must be invoked via {@link Activity#startActivityForResult()} to receive the
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult} to receive the
      * result of whether or not the user approved the action. If approved, the result will
      * be {@link Activity#RESULT_OK} and the component will be set as an active admin as well
      * as a profile owner.
@@ -2765,37 +2769,94 @@ public class DevicePolicyManager {
      * the setup process.
      * @param packageName the package name of the app, to compare with the registered device owner
      * app, if any.
-     * @return whether or not the package is registered as the device owner app.  Note this method
-     * does *not* check weather the device owner is actually running on the current user.
+     * @return whether or not the package is registered as the device owner app.
      */
     public boolean isDeviceOwnerApp(String packageName) {
+        return isDeviceOwnerAppOnCallingUser(packageName);
+    }
+
+    /**
+     * @return true if a package is registered as device owner, only when it's running on the
+     * calling user.
+     *
+     * <p>Same as {@link #isDeviceOwnerApp}, but bundled code should use it for clarity.
+     * @hide
+     */
+    public boolean isDeviceOwnerAppOnCallingUser(String packageName) {
+        return isDeviceOwnerAppOnAnyUserInner(packageName, /* callingUserOnly =*/ true);
+    }
+
+    /**
+     * @return true if a package is registered as device owner, even if it's running on a different
+     * user.
+     *
+     * <p>Requires the MANAGE_USERS permission.
+     *
+     * @hide
+     */
+    public boolean isDeviceOwnerAppOnAnyUser(String packageName) {
+        return isDeviceOwnerAppOnAnyUserInner(packageName, /* callingUserOnly =*/ false);
+    }
+
+    /**
+     * @return device owner component name, only when it's running on the calling user.
+     *
+     * @hide
+     */
+    public ComponentName getDeviceOwnerComponentOnCallingUser() {
+        return getDeviceOwnerComponentInner(/* callingUserOnly =*/ true);
+    }
+
+    /**
+     * @return device owner component name, even if it's running on a different user.
+     *
+     * <p>Requires the MANAGE_USERS permission.
+     *
+     * @hide
+     */
+    public ComponentName getDeviceOwnerComponentOnAnyUser() {
+        return getDeviceOwnerComponentInner(/* callingUserOnly =*/ false);
+    }
+
+    private boolean isDeviceOwnerAppOnAnyUserInner(String packageName, boolean callingUserOnly) {
         if (packageName == null) {
             return false;
         }
-        final ComponentName deviceOwner = getDeviceOwnerComponent();
+        final ComponentName deviceOwner = getDeviceOwnerComponentInner(callingUserOnly);
         if (deviceOwner == null) {
             return false;
         }
         return packageName.equals(deviceOwner.getPackageName());
     }
 
-    /**
-     * @hide
-     * Redirect to isDeviceOwnerApp.
-     */
-    public boolean isDeviceOwner(String packageName) {
-        return isDeviceOwnerApp(packageName);
+    private ComponentName getDeviceOwnerComponentInner(boolean callingUserOnly) {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerComponent(callingUserOnly);
+            } catch (RemoteException re) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
+            }
+        }
+        return null;
     }
 
     /**
-     * Check whether a given component is registered as a device owner.
-     * Note this method does *not* check weather the device owner is actually running on the current
-     * user.
+     * @return ID of the user who runs device owner, or {@link UserHandle#USER_NULL} if there's
+     * no device owner.
+     *
+     * <p>Requires the MANAGE_USERS permission.
      *
      * @hide
      */
-    public boolean isDeviceOwner(ComponentName who) {
-        return (who != null) && who.equals(getDeviceOwner());
+    public int getDeviceOwnerUserId() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerUserId();
+            } catch (RemoteException re) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
+            }
+        }
+        return UserHandle.USER_NULL;
     }
 
     /**
@@ -2818,46 +2879,43 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the device owner package name.  Note this method will still return the device owner
-     * package name even if it's running on a different user.
+     * Returns the device owner package name, only if it's running on the calling user.
+     *
+     * <p>Bundled components should use {@code getDeviceOwnerComponentOnCallingUser()} for clarity.
      *
      * @hide
      */
     @SystemApi
     public String getDeviceOwner() {
-        final ComponentName componentName = getDeviceOwnerComponent();
-        return componentName == null ? null : componentName.getPackageName();
+        final ComponentName name = getDeviceOwnerComponentOnCallingUser();
+        return name != null ? name.getPackageName() : null;
     }
 
     /**
-     * Returns the device owner name.  Note this method will still return the device owner
-     * name even if it's running on a different user.
+     * @return true if the device is managed by any device owner.
+     *
+     * <p>Requires the MANAGE_USERS permission.
      *
      * @hide
      */
-    public String getDeviceOwnerName() {
+    public boolean isDeviceManaged() {
+        return getDeviceOwnerComponentOnAnyUser() != null;
+    }
+
+    /**
+     * Returns the device owner name.  Note this method *will* return the device owner
+     * name when it's running on a different user.
+     *
+     * <p>Requires the MANAGE_USERS permission.
+     *
+     * @hide
+     */
+    public String getDeviceOwnerNameOnAnyUser() {
         if (mService != null) {
             try {
                 return mService.getDeviceOwnerName();
             } catch (RemoteException re) {
-                Log.w(TAG, "Failed to get device owner");
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the device owner component name.  Note this method will still return the device owner
-     * component name even if it's running on a different user.
-     *
-     * @hide
-     */
-    public ComponentName getDeviceOwnerComponent() {
-        if (mService != null) {
-            try {
-                return mService.getDeviceOwner();
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed to get device owner");
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
             }
         }
         return null;
@@ -3130,7 +3188,7 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * @param user The user for whom to fetch the profile owner name, if any.
+     * @param userId The user for whom to fetch the profile owner name, if any.
      * @return the human readable name of the organisation associated with this profile owner or
      *         null if one is not set.
      * @throws IllegalArgumentException if the userId is invalid.

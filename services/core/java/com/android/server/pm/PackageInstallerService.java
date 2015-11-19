@@ -866,10 +866,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             mAppOps.checkPackage(callingUid, callerPackageName);
         }
 
-        // Check whether the caller is device owner
+        // Check whether the caller is device owner, in which case we do it silently.
         DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        boolean isDeviceOwner = (dpm != null) && dpm.isDeviceOwnerApp(callerPackageName);
+        boolean isDeviceOwner = (dpm != null) && dpm.isDeviceOwnerAppOnCallingUser(
+                callerPackageName);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, packageName, isDeviceOwner, userId);

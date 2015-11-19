@@ -27,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Pair;
@@ -35,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,9 +58,9 @@ import static org.mockito.Mockito.when;
  *
  m FrameworksServicesTests &&
  adb install \
- -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
+   -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.devicepolicy.DevicePolicyManagerTest \
- -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+   -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
 
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
@@ -458,6 +460,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      */
     public void testSetDeviceOwner() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
@@ -467,11 +470,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Make sure admin1 is installed on system user.
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
 
+        // Check various get APIs.
+        checkGetDeviceOwnerInfoApi(dpm, /* hasDeviceOwner =*/ false);
+
         // DO needs to be an DA.
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
 
         // Fire!
         assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
+
+        // getDeviceOwnerComponent should return the admin1 component.
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnCallingUser());
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+
+        // Check various get APIs.
+        checkGetDeviceOwnerInfoApi(dpm, /* hasDeviceOwner =*/ true);
+
+        // getDeviceOwnerComponent should *NOT* return the admin1 component for other users.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
 
         // Verify internal calls.
         verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
@@ -485,7 +505,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
 
-        assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
 
         // Try to set a profile owner on the same user, which should fail.
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_SYSTEM_USER_UID);
@@ -502,11 +522,163 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // DPMS.getApplicationLabel() because Context.createPackageContextAsUser() is not mockable.
     }
 
+    private void checkGetDeviceOwnerInfoApi(DevicePolicyManager dpm, boolean hasDeviceOwner) {
+        final int origCallingUser = mContext.binder.callingUid;
+        final List origPermissions = new ArrayList(mContext.callerPermissions);
+        mContext.callerPermissions.clear();
+
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+
+        mContext.binder.callingUid = Process.SYSTEM_UID;
+
+        // TODO Test getDeviceOwnerName() too.  To do so, we need to change
+        // DPMS.getApplicationLabel() because Context.createPackageContextAsUser() is not mockable.
+        if (hasDeviceOwner) {
+            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertTrue(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnCallingUser());
+
+            assertTrue(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_SYSTEM, dpm.getDeviceOwnerUserId());
+        } else {
+            assertFalse(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+
+            assertFalse(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_NULL, dpm.getDeviceOwnerUserId());
+        }
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        if (hasDeviceOwner) {
+            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertTrue(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnCallingUser());
+
+            assertTrue(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_SYSTEM, dpm.getDeviceOwnerUserId());
+        } else {
+            assertFalse(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+
+            assertFalse(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_NULL, dpm.getDeviceOwnerUserId());
+        }
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        // Still with MANAGE_USERS.
+        assertFalse(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+        assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+        assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+
+        if (hasDeviceOwner) {
+            assertTrue(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_SYSTEM, dpm.getDeviceOwnerUserId());
+        } else {
+            assertFalse(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_NULL, dpm.getDeviceOwnerUserId());
+        }
+
+        mContext.binder.callingUid = Process.SYSTEM_UID;
+        mContext.callerPermissions.remove(permission.MANAGE_USERS);
+        // System can still call "OnAnyUser" without MANAGE_USERS.
+        if (hasDeviceOwner) {
+            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertTrue(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnCallingUser());
+
+            assertTrue(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_SYSTEM, dpm.getDeviceOwnerUserId());
+        } else {
+            assertFalse(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+
+            assertFalse(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnAnyUser());
+            assertEquals(UserHandle.USER_NULL, dpm.getDeviceOwnerUserId());
+        }
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        // Still no MANAGE_USERS.
+        if (hasDeviceOwner) {
+            assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertTrue(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(admin1, dpm.getDeviceOwnerComponentOnCallingUser());
+        } else {
+            assertFalse(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+            assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+            assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+        }
+
+        try {
+            dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName());
+            fail();
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getDeviceOwnerComponentOnAnyUser();
+            fail();
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getDeviceOwnerUserId();
+            fail();
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getDeviceOwnerNameOnAnyUser();
+            fail();
+        } catch (SecurityException expected) {
+        }
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        // Still no MANAGE_USERS.
+        assertFalse(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+        assertFalse(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+        assertEquals(null, dpm.getDeviceOwnerComponentOnCallingUser());
+
+        try {
+            dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName());
+            fail();
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getDeviceOwnerComponentOnAnyUser();
+            fail();
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getDeviceOwnerUserId();
+            fail();
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getDeviceOwnerNameOnAnyUser();
+            fail();
+        } catch (SecurityException expected) {
+        }
+
+        // Restore.
+        mContext.binder.callingUid = origCallingUser;
+        mContext.callerPermissions.addAll(origPermissions);
+    }
+
+
     /**
      * Test for: {@link DevicePolicyManager#setDeviceOwner} Package doesn't exist.
      */
     public void testSetDeviceOwner_noSuchPackage() {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
@@ -528,6 +700,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testClearDeviceOwner() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
@@ -547,7 +720,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
                 eq(admin1.getPackageName()));
 
-        assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
 
         // Set up other mocks.
         when(mContext.userManager.getUserRestrictions()).thenReturn(new Bundle());
@@ -559,13 +732,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.clearDeviceOwnerApp(admin1.getPackageName());
 
         // Now DO shouldn't be set.
-        assertNull(dpm.getDeviceOwner());
+        assertNull(dpm.getDeviceOwnerComponentOnAnyUser());
 
         // TODO Check other calls.
     }
 
     public void testClearDeviceOwner_fromDifferentUser() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
@@ -585,7 +759,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.iactivityManager, times(1)).updateDeviceOwner(
                 eq(admin1.getPackageName()));
 
-        assertEquals(admin1.getPackageName(), dpm.getDeviceOwner());
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
 
         // Now call clear from the secondary user, which should throw.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -601,8 +775,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             assertEquals("clearDeviceOwner can only be called by the device owner", e.getMessage());
         }
 
-        // Now DO shouldn't be set.
-        assertNotNull(dpm.getDeviceOwner());
+        // DO shouldn't be removed.
+        assertTrue(dpm.isDeviceManaged());
     }
 
     public void testSetProfileOwner() throws Exception {
@@ -639,6 +813,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mMockContext.addUser(ANOTHER_USER_ID, 0); // Add one more user.
 
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
@@ -667,8 +842,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.setUserRunning(DpmMockContext.CALLER_USER_HANDLE, true);
         assertTrue(dpm.setDeviceOwner(admin2, "owner-name", DpmMockContext.CALLER_USER_HANDLE));
 
-        // Make sure it's set.
-        assertEquals(admin2, dpm.getDeviceOwnerComponent());
+        assertEquals(admin2, dpms.getDeviceOwnerComponent(/* callingUserOnly =*/ false));
 
         // Then check getDeviceOwnerAdminLocked().
         assertEquals(admin2, dpms.getDeviceOwnerAdminLocked().info.getComponent());
@@ -692,7 +866,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpms.mOwners.writeDeviceOwner();
 
         // Make sure the DO component name doesn't have a class name.
-        assertEquals("", dpms.getDeviceOwner().getClassName());
+        assertEquals("", dpms.getDeviceOwnerComponent(/* callingUserOnly =*/ false).getClassName());
 
         // Then create a new DPMS to have it load the settings from files.
         when(mContext.userManager.getUserRestrictions(any(UserHandle.class)))
@@ -702,7 +876,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Now the DO component name is a full name.
         // *BUT* because both admin1 and admin2 belong to the same package, we think admin1 is the
         // DO.
-        assertEquals(admin1, dpms.getDeviceOwner());
+        assertEquals(admin1, dpms.getDeviceOwnerComponent(/* callingUserOnly =*/ false));
     }
 
     public void testSetGetApplicationRestriction() {
@@ -740,6 +914,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserRestriction_asDo() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
