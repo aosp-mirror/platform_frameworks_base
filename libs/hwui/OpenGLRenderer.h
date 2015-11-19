@@ -193,8 +193,6 @@ public:
     void drawPoints(const float* points, int count, const SkPaint* paint);
     void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
             float hOffset, float vOffset, const SkPaint* paint);
-    void drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = DrawOpMode::kImmediate);
@@ -637,24 +635,11 @@ private:
      */
     void drawConvexPath(const SkPath& path, const SkPaint* paint);
 
-    /**
-     * Draws text underline and strike-through if needed.
-     *
-     * @param text The text to decor
-     * @param bytesCount The number of bytes in the text
-     * @param totalAdvance The total advance in pixels, defines underline/strikethrough length
-     * @param x The x coordinate where the text will be drawn
-     * @param y The y coordinate where the text will be drawn
-     * @param paint The paint to draw the text with
-     */
-    void drawTextDecorations(float totalAdvance, float x, float y, const SkPaint* paint);
-
    /**
      * Draws shadow layer on text (with optional positions).
      *
      * @param paint The paint to draw the shadow with
      * @param text The text to draw
-     * @param bytesCount The number of bytes in the text
      * @param count The number of glyphs in the text
      * @param positions The x, y positions of individual glyphs (or NULL)
      * @param fontRenderer The font renderer object
@@ -662,7 +647,7 @@ private:
      * @param x The x coordinate where the shadow will be drawn
      * @param y The y coordinate where the shadow will be drawn
      */
-    void drawTextShadow(const SkPaint* paint, const char* text, int bytesCount, int count,
+    void drawTextShadow(const SkPaint* paint, const char* text, int count,
             const float* positions, FontRenderer& fontRenderer, int alpha,
             float x, float y);
 

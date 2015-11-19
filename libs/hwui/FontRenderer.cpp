@@ -21,12 +21,19 @@
 #include "Extensions.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
-#include "OpenGLRenderer.h"
 #include "PixelBuffer.h"
 #include "Rect.h"
 #include "renderstate/RenderState.h"
 #include "utils/Blur.h"
 #include "utils/Timing.h"
+
+
+#if HWUI_NEW_OPS
+#include "BakedOpState.h"
+#include "BakedOpRenderer.h"
+#else
+#include "OpenGLRenderer.h"
+#endif
 
 #include <algorithm>
 #include <cutils/properties.h>
@@ -59,14 +66,25 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
     int transformFlags = pureTranslate
             ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
     Glop glop;
+#if HWUI_NEW_OPS
+    GlopBuilder(renderer->renderState(), renderer->caches(), &glop)
+            .setRoundRectClipState(bakedState->roundRectClipState)
+            .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
+            .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, bakedState->alpha)
+            .setTransform(bakedState->computedState.transform, transformFlags)
+            .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+            .build();
+    renderer->renderGlop(*bakedState, glop);
+#else
     GlopBuilder(renderer->mRenderState, renderer->mCaches, &glop)
+            .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
             .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, renderer->currentSnapshot()->alpha)
             .setTransform(*(renderer->currentSnapshot()), transformFlags)
             .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
-            .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)
             .build();
     renderer->renderGlop(glop);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -539,7 +557,7 @@ void FontRenderer::setFont(const SkPaint* paint, const SkMatrix& matrix) {
 }
 
 FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, float radius, const float* positions) {
+        int numGlyphs, float radius, const float* positions) {
     checkInit();
 
     DropShadow image;
@@ -558,7 +576,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     mBounds = nullptr;
 
     Rect bounds;
-    mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds, positions);
+    mCurrentFont->measure(paint, text, numGlyphs, &bounds, positions);
 
     uint32_t intRadius = Blur::convertRadiusToInt(radius);
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * intRadius;
@@ -590,7 +608,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
         // text has non-whitespace, so draw and blur to create the shadow
         // NOTE: bounds.isEmpty() can't be used here, since vertical coordinates are inverted
         // TODO: don't draw pure whitespace in the first place, and avoid needing this check
-        mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
+        mCurrentFont->render(paint, text, numGlyphs, penX, penY,
                 Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, nullptr, positions);
 
         // Unbind any PBO we might have used
@@ -635,15 +653,15 @@ void FontRenderer::endPrecaching() {
 }
 
 bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
-        const float* positions, Rect* bounds, TextDrawFunctor* functor, bool forceFinish) {
+        int numGlyphs, int x, int y, const float* positions,
+        Rect* bounds, TextDrawFunctor* functor, bool forceFinish) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
     }
 
     initRender(clip, bounds, functor);
-    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y, positions);
+    mCurrentFont->render(paint, text, numGlyphs, x, y, positions);
 
     if (forceFinish) {
         finishRender();
@@ -653,15 +671,15 @@ bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const c
 }
 
 bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-        float hOffset, float vOffset, Rect* bounds, TextDrawFunctor* functor) {
+        int numGlyphs, const SkPath* path, float hOffset, float vOffset,
+        Rect* bounds, TextDrawFunctor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
     }
 
     initRender(clip, bounds, functor);
-    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, path, hOffset, vOffset);
+    mCurrentFont->render(paint, text, numGlyphs, path, hOffset, vOffset);
     finishRender();
 
     return mDrawn;

@@ -291,19 +291,17 @@ CachedGlyphInfo* Font::getCachedGlyph(const SkPaint* paint, glyph_t textUnit, bo
     return cachedGlyph;
 }
 
-void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+void Font::render(const SkPaint* paint, const char *text,
             int numGlyphs, int x, int y, const float* positions) {
-    render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, nullptr,
+    render(paint, text, numGlyphs, x, y, FRAMEBUFFER, nullptr,
             0, 0, nullptr, positions);
 }
 
-void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
-        int numGlyphs, const SkPath* path, float hOffset, float vOffset) {
-    if (numGlyphs == 0 || text == nullptr || len == 0) {
+void Font::render(const SkPaint* paint, const char *text, int numGlyphs,
+        const SkPath* path, float hOffset, float vOffset) {
+    if (numGlyphs == 0 || text == nullptr) {
         return;
     }
-
-    text += start;
 
     int glyphsCount = 0;
     SkFixed prevRsbDelta = 0;
@@ -317,7 +315,7 @@ void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32
     float pathLength = SkScalarToFloat(measure.getLength());
 
     if (paint->getTextAlign() != SkPaint::kLeft_Align) {
-        float textWidth = SkScalarToFloat(paint->measureText(text, len));
+        float textWidth = SkScalarToFloat(paint->measureText(text, numGlyphs * 2));
         float pathOffset = pathLength;
         if (paint->getTextAlign() == SkPaint::kCenter_Align) {
             textWidth *= 0.5f;
@@ -347,14 +345,14 @@ void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32
     }
 }
 
-void Font::measure(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::measure(const SkPaint* paint, const char* text,
         int numGlyphs, Rect *bounds, const float* positions) {
     if (bounds == nullptr) {
         ALOGE("No return rectangle provided to measure text");
         return;
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
-    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, nullptr, 0, 0, bounds, positions);
+    render(paint, text, numGlyphs, 0, 0, MEASURE, nullptr, 0, 0, bounds, positions);
 }
 
 void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
@@ -378,10 +376,10 @@ void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
     }
 }
 
-void Font::render(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::render(const SkPaint* paint, const char* text,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
         uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* positions) {
-    if (numGlyphs == 0 || text == nullptr || len == 0) {
+    if (numGlyphs == 0 || text == nullptr) {
         return;
     }
 
@@ -395,7 +393,6 @@ void Font::render(const SkPaint* paint, const char* text, uint32_t start, uint32
     };
     RenderGlyph render = gRenderGlyph[(mode << 1) + !mIdentityTransform];
 
-    text += start;
     int glyphsCount = 0;
 
     while (glyphsCount < numGlyphs) {

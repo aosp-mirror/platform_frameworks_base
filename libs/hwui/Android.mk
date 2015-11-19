@@ -37,6 +37,7 @@ hwui_src_files := \
     AnimatorManager.cpp \
     AssetAtlas.cpp \
     Caches.cpp \
+    Canvas.cpp \
     CanvasState.cpp \
     ClipArea.cpp \
     DamageAccumulator.cpp \

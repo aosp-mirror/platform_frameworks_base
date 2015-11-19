@@ -178,8 +178,6 @@ public:
     virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) override;
-    virtual void drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const SkPaint& paint) override;
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
     virtual bool drawTextAbsolutePos() const override { return false; }
@@ -221,6 +219,15 @@ private:
         return cachedPath;
     }
 
+    /**
+     * Returns a RenderThread-safe, const copy of the SkPaint parameter passed in (with deduping
+     * based on paint generation ID)
+     *
+     * Note that this forces Left_Align, since drawText glyph rendering expects left alignment,
+     * since alignment offsetting has been done at a higher level. This is done to essentially all
+     * copied paints, since the deduping can mean a paint is shared by drawText commands and other
+     * types (which wouldn't care about alignment).
+     */
     inline const SkPaint* refPaint(const SkPaint* paint) {
         if (!paint) return nullptr;
 
@@ -239,10 +246,11 @@ private:
         // In the unlikely event that 2 unique paints have the same hash we do a
         // object equality check to ensure we don't erroneously dedup them.
         if (cachedPaint == nullptr || *cachedPaint != *paint) {
-            cachedPaint = new SkPaint(*paint);
-            std::unique_ptr<const SkPaint> copy(cachedPaint);
-            mDisplayList->paints.push_back(std::move(copy));
+            SkPaint* copy = new SkPaint(*paint);
+            copy->setTextAlign(SkPaint::kLeft_Align);
 
+            cachedPaint = copy;
+            mDisplayList->paints.emplace_back(copy);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
             refBitmapsInShader(cachedPaint->getShader());

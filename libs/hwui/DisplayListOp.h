@@ -1278,24 +1278,6 @@ private:
     float mVOffset;
 };
 
-class DrawPosTextOp : public DrawSomeTextOp {
-public:
-    DrawPosTextOp(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint)
-            : DrawSomeTextOp(text, bytesCount, count, paint), mPositions(positions) {
-        /* TODO: inherit from DrawBounded and init mLocalBounds */
-    }
-
-    virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
-        renderer.drawPosText(mText, mBytesCount, mCount, mPositions, mPaint);
-    }
-
-    virtual const char* name() override { return "DrawPosText"; }
-
-private:
-    const float* mPositions;
-};
-
 class DrawTextOp : public DrawStrokableOp {
 public:
     DrawTextOp(const char* text, int bytesCount, int count, float x, float y,

@@ -136,14 +136,14 @@ TEST(OpReorderer, simpleRejection) {
 }
 
 TEST(OpReorderer, simpleBatching) {
-    static int SIMPLE_BATCHING_LOOPS = 5;
+    const int LOOPS = 5;
     class SimpleBatchingTestRenderer : public TestRendererBase {
     public:
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
-            EXPECT_TRUE(mIndex++ >= SIMPLE_BATCHING_LOOPS);
+            EXPECT_TRUE(mIndex++ >= LOOPS) << "Bitmaps should be above all rects";
         }
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
-            EXPECT_TRUE(mIndex++ < SIMPLE_BATCHING_LOOPS);
+            EXPECT_TRUE(mIndex++ < LOOPS) << "Rects should be below all bitmaps";
         }
     };
 
@@ -153,7 +153,7 @@ TEST(OpReorderer, simpleBatching) {
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
         // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-        for (int i = 0; i < SIMPLE_BATCHING_LOOPS; i++) {
+        for (int i = 0; i < LOOPS; i++) {
             canvas.translate(0, 10);
             canvas.drawRect(0, 0, 10, 10, SkPaint());
             canvas.drawBitmap(bitmap, 5, 0, nullptr);
@@ -164,7 +164,35 @@ TEST(OpReorderer, simpleBatching) {
     OpReorderer reorderer(200, 200, *dl, sLightCenter);
     SimpleBatchingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(2 * SIMPLE_BATCHING_LOOPS, renderer.getIndex()); // 2 x loops ops, because no merging (TODO: force no merging)
+    EXPECT_EQ(2 * LOOPS, renderer.getIndex())
+            << "Expect number of ops = 2 * loop count"; // TODO: force no merging
+}
+
+TEST(OpReorderer, textStrikethroughBatching) {
+    const int LOOPS = 5;
+    class TextStrikethroughTestRenderer : public TestRendererBase {
+    public:
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_TRUE(mIndex++ >= LOOPS) << "Strikethrough rects should be above all text";
+        }
+        void onTextOp(const TextOp& op, const BakedOpState& state) override {
+            EXPECT_TRUE(mIndex++ < LOOPS) << "Text should be beneath all strikethrough rects";
+        }
+    };
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 2000, [](RecordingCanvas& canvas) {
+        SkPaint textPaint;
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(20);
+        textPaint.setStrikeThruText(true);
+        for (int i = 0; i < LOOPS; i++) {
+            TestUtils::drawTextToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
+        }
+    });
+    OpReorderer reorderer(200, 2000, *dl, sLightCenter);
+    TextStrikethroughTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2 * LOOPS, renderer.getIndex())
+            << "Expect number of ops = 2 * loop count"; // TODO: force no merging
 }
 
 TEST(OpReorderer, renderNode) {

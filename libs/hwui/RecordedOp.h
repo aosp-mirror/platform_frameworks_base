@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_RECORDED_OP_H
 #define ANDROID_HWUI_RECORDED_OP_H
 
+#include "font/FontUtil.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
@@ -42,10 +43,12 @@ struct Vertex;
  */
 #define MAP_OPS(OP_FN) \
         OP_FN(BitmapOp) \
+        OP_FN(LinesOp) \
         OP_FN(RectOp) \
         OP_FN(RenderNodeOp) \
         OP_FN(ShadowOp) \
         OP_FN(SimpleRectsOp) \
+        OP_FN(TextOp) \
         OP_FN(BeginLayerOp) \
         OP_FN(EndLayerOp) \
         OP_FN(LayerOp)
@@ -98,12 +101,25 @@ struct RenderNodeOp : RecordedOp {
     bool skipInOrderDraw = false;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Standard Ops
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct BitmapOp : RecordedOp {
     BitmapOp(BASE_PARAMS, const SkBitmap* bitmap)
             : SUPER(BitmapOp)
             , bitmap(bitmap) {}
     const SkBitmap* bitmap;
     // TODO: asset atlas/texture id lookup?
+};
+
+struct LinesOp : RecordedOp {
+    LinesOp(BASE_PARAMS, const float* points, const int floatCount)
+            : SUPER(LinesOp)
+            , points(points)
+            , floatCount(floatCount) {}
+    const float* points;
+    const int floatCount;
 };
 
 struct RectOp : RecordedOp {
@@ -147,6 +163,27 @@ struct SimpleRectsOp : RecordedOp { // Filled, no AA (TODO: better name?)
     Vertex* vertices;
     const size_t vertexCount;
 };
+
+struct TextOp : RecordedOp {
+    TextOp(BASE_PARAMS, const glyph_t* glyphs, const float* positions, int glyphCount,
+            float x, float y)
+            : SUPER(TextOp)
+            , glyphs(glyphs)
+            , positions(positions)
+            , glyphCount(glyphCount)
+            , x(x)
+            , y(y) {}
+    const glyph_t* glyphs;
+    const float* positions;
+    const int glyphCount;
+    const float x;
+    const float y;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Layers
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 /**
  * Stateful operation! denotes the creation of an off-screen layer,

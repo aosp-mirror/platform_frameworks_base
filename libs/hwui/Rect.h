@@ -260,13 +260,6 @@ public:
         bottom = std::max(bottom, y);
     }
 
-    void expandToCoverRect(float otherLeft, float otherTop, float otherRight, float otherBottom) {
-        left = std::min(left, otherLeft);
-        top = std::min(top, otherTop);
-        right = std::max(right, otherRight);
-        bottom = std::max(bottom, otherBottom);
-    }
-
     SkRect toSkRect() const {
         return SkRect::MakeLTRB(left, top, right, bottom);
     }

@@ -1950,7 +1950,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
 }
 
 void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
-        int bytesCount, int count, const float* positions,
+        int count, const float* positions,
         FontRenderer& fontRenderer, int alpha, float x, float y) {
     mCaches.textureState().activateTexture(0);
 
@@ -1963,7 +1963,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     //       if shader-based correction is enabled
     mCaches.dropShadowCache.setFontRenderer(fontRenderer);
     ShadowTexture* texture = mCaches.dropShadowCache.get(
-            paint, text, bytesCount, count, textShadow.radius, positions);
+            paint, text, count, textShadow.radius, positions);
     // If the drop shadow exceeds the max texture size or couldn't be
     // allocated, skip drawing
     if (!texture) return;
@@ -1989,57 +1989,6 @@ bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
             ? 1.0f : paint->getAlpha()) * currentSnapshot()->alpha;
     return MathUtils::isZero(alpha)
             && PaintUtils::getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
-}
-
-void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
-        const float* positions, const SkPaint* paint) {
-    if (text == nullptr || count == 0 || mState.currentlyIgnored() || canSkipText(paint)) {
-        return;
-    }
-
-    // NOTE: Skia does not support perspective transform on drawPosText yet
-    if (!currentTransform()->isSimple()) {
-        return;
-    }
-
-    mRenderState.scissor().setEnabled(true);
-
-    float x = 0.0f;
-    float y = 0.0f;
-    const bool pureTranslate = currentTransform()->isPureTranslate();
-    if (pureTranslate) {
-        x = floorf(x + currentTransform()->getTranslateX() + 0.5f);
-        y = floorf(y + currentTransform()->getTranslateY() + 0.5f);
-    }
-
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer();
-    fontRenderer.setFont(paint, SkMatrix::I());
-
-    int alpha = PaintUtils::getAlphaDirect(paint) * currentSnapshot()->alpha;
-    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(paint);
-
-    if (CC_UNLIKELY(PaintUtils::hasTextShadow(paint))) {
-        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
-                alpha, 0.0f, 0.0f);
-    }
-
-    // Pick the appropriate texture filtering
-    bool linearFilter = currentTransform()->changesBounds();
-    if (pureTranslate && !linearFilter) {
-        linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
-    }
-    fontRenderer.setTextureFiltering(linearFilter);
-
-    const Rect& clip(pureTranslate ? writableSnapshot()->getRenderTargetClip() : writableSnapshot()->getLocalClip());
-    Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
-
-    TextDrawFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
-    if (fontRenderer.renderPosText(paint, &clip, text, 0, bytesCount, count, x, y,
-            positions, hasLayer() ? &bounds : nullptr, &functor)) {
-        dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
-        mDirty = true;
-    }
-
 }
 
 bool OpenGLRenderer::findBestFontTransform(const mat4& transform, SkMatrix* outMatrix) const {
@@ -2166,7 +2115,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
 
     if (CC_UNLIKELY(PaintUtils::hasTextShadow(paint))) {
         fontRenderer.setFont(paint, SkMatrix::I());
-        drawTextShadow(paint, text, bytesCount, count, positions, fontRenderer,
+        drawTextShadow(paint, text, count, positions, fontRenderer,
                 alpha, oldX, oldY);
     }
 
@@ -2195,17 +2144,22 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("unsupported");
+    TextDrawFunctor functor(nullptr, nullptr, x, y, pureTranslate, alpha, mode, paint);
+#else
     TextDrawFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
+#endif
 
     // don't call issuedrawcommand, do it at end of batch
     bool forceFinish = (drawOpMode != DrawOpMode::kDefer);
     if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
-        status = fontRenderer.renderPosText(&paintCopy, clip, text, 0, bytesCount, count, x, y,
+        status = fontRenderer.renderPosText(&paintCopy, clip, text, count, x, y,
                 positions, hasActiveLayer ? &layerBounds : nullptr, &functor, forceFinish);
     } else {
-        status = fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
+        status = fontRenderer.renderPosText(paint, clip, text, count, x, y,
                 positions, hasActiveLayer ? &layerBounds : nullptr, &functor, forceFinish);
     }
 
@@ -2215,8 +2169,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
         }
         dirtyLayerUnchecked(layerBounds, getRegion());
     }
-
-    drawTextDecorations(totalAdvance, oldX, oldY, paint);
 
     mDirty = true;
 }
@@ -2236,12 +2188,17 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
 
     int alpha = PaintUtils::getAlphaDirect(paint) * currentSnapshot()->alpha;
     SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(paint);
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("unsupported");
+    TextDrawFunctor functor(nullptr, nullptr, 0.0f, 0.0f, false, alpha, mode, paint);
+#else
     TextDrawFunctor functor(this, 0.0f, 0.0f, false, alpha, mode, paint);
+#endif
 
     const Rect* clip = &writableSnapshot()->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-    if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
+    if (fontRenderer.renderTextOnPath(paint, clip, text, count, path,
             hOffset, vOffset, hasLayer() ? &bounds : nullptr, &functor)) {
         dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
         mDirty = true;
@@ -2373,56 +2330,6 @@ void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
             .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
             .build();
     renderGlop(glop);
-}
-
-// Same values used by Skia
-#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
-#define kStdUnderline_Offset    (1.0f / 9.0f)
-#define kStdUnderline_Thickness (1.0f / 18.0f)
-
-void OpenGLRenderer::drawTextDecorations(float underlineWidth, float x, float y,
-        const SkPaint* paint) {
-    // Handle underline and strike-through
-    uint32_t flags = paint->getFlags();
-    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
-        SkPaint paintCopy(*paint);
-
-        if (CC_LIKELY(underlineWidth > 0.0f)) {
-            const float textSize = paintCopy.getTextSize();
-            const float strokeWidth = std::max(textSize * kStdUnderline_Thickness, 1.0f);
-
-            const float left = x;
-            float top = 0.0f;
-
-            int linesCount = 0;
-            if (flags & SkPaint::kUnderlineText_Flag) linesCount++;
-            if (flags & SkPaint::kStrikeThruText_Flag) linesCount++;
-
-            const int pointsCount = 4 * linesCount;
-            float points[pointsCount];
-            int currentPoint = 0;
-
-            if (flags & SkPaint::kUnderlineText_Flag) {
-                top = y + textSize * kStdUnderline_Offset;
-                points[currentPoint++] = left;
-                points[currentPoint++] = top;
-                points[currentPoint++] = left + underlineWidth;
-                points[currentPoint++] = top;
-            }
-
-            if (flags & SkPaint::kStrikeThruText_Flag) {
-                top = y + textSize * kStdStrikeThru_Offset;
-                points[currentPoint++] = left;
-                points[currentPoint++] = top;
-                points[currentPoint++] = left + underlineWidth;
-                points[currentPoint++] = top;
-            }
-
-            paintCopy.setStrokeWidth(strokeWidth);
-
-            drawLines(&points[0], pointsCount, &paintCopy);
-        }
-    }
 }
 
 void OpenGLRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {

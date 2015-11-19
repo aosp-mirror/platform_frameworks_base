@@ -671,6 +671,13 @@ void OpReorderer::onBitmapOp(const BitmapOp& op) {
     currentLayer().deferMergeableOp(mAllocator, bakedStateOp, OpBatchType::Bitmap, mergeId);
 }
 
+void OpReorderer::onLinesOp(const LinesOp& op) {
+    BakedOpState* bakedStateOp = tryBakeOpState(op);
+    if (!bakedStateOp) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
+
+}
+
 void OpReorderer::onRectOp(const RectOp& op) {
     BakedOpState* bakedStateOp = tryBakeOpState(op);
     if (!bakedStateOp) return; // quick rejected
@@ -681,6 +688,17 @@ void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
     BakedOpState* bakedStateOp = tryBakeOpState(op);
     if (!bakedStateOp) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
+}
+
+void OpReorderer::onTextOp(const TextOp& op) {
+    BakedOpState* bakedStateOp = tryBakeOpState(op);
+    if (!bakedStateOp) return; // quick rejected
+
+    // TODO: better handling of shader (since we won't care about color then)
+    batchid_t batchId = op.paint->getColor() == SK_ColorBLACK
+            ? OpBatchType::Text : OpBatchType::ColorText;
+    mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
+    currentLayer().deferMergeableOp(mAllocator, bakedStateOp, batchId, mergeId);
 }
 
 void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
