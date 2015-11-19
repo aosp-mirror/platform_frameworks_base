@@ -47,7 +47,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.storage.MountServiceInternal;
 import android.util.ArrayMap;
@@ -1554,15 +1556,300 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void dumpHelp(PrintWriter pw) {
-        pw.println("AppOps service (appops) dump options:");
-        pw.println("  [-h] [CMD]");
-        pw.println("  -h: print this help text.");
-        pw.println("Commands:");
+    static class Shell extends ShellCommand {
+        final IAppOpsService mInterface;
+        final AppOpsService mInternal;
+
+        int userId = UserHandle.USER_SYSTEM;
+        String packageName;
+        String opStr;
+        int op;
+        int packageUid;
+
+        Shell(IAppOpsService iface, AppOpsService internal) {
+            mInterface = iface;
+            mInternal = internal;
+        }
+
+        @Override
+        public int onCommand(String cmd) {
+            return onShellCommand(this, cmd);
+        }
+
+        @Override
+        public void onHelp() {
+            PrintWriter pw = getOutPrintWriter();
+            dumpCommandHelp(pw);
+        }
+
+        private int strOpToOp(String op, PrintWriter err) {
+            try {
+                return AppOpsManager.strOpToOp(op);
+            } catch (IllegalArgumentException e) {
+            }
+            try {
+                return Integer.parseInt(op);
+            } catch (NumberFormatException e) {
+            }
+            try {
+                return AppOpsManager.strDebugOpToOp(op);
+            } catch (IllegalArgumentException e) {
+                err.println("Error: " + e.getMessage());
+                return -1;
+            }
+        }
+
+        int parseUserPackageOp(boolean reqOp, PrintWriter err) throws RemoteException {
+            userId = UserHandle.USER_CURRENT;
+            packageName = null;
+            opStr = null;
+            for (String argument; (argument = getNextArg()) != null;) {
+                if ("--user".equals(argument)) {
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                } else {
+                    if (packageName == null) {
+                        packageName = argument;
+                    } else if (opStr == null) {
+                        opStr = argument;
+                        break;
+                    }
+                }
+            }
+            if (packageName == null) {
+                err.println("Error: Package name not specified.");
+                return -1;
+            } else if (opStr == null && reqOp) {
+                err.println("Error: Operation not specified.");
+                return -1;
+            }
+            if (opStr != null) {
+                op = strOpToOp(opStr, err);
+                if (op < 0) {
+                    return -1;
+                }
+            } else {
+                op = AppOpsManager.OP_NONE;
+            }
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = ActivityManager.getCurrentUser();
+            }
+            if ("root".equals(packageName)) {
+                packageUid = 0;
+            } else {
+                packageUid = AppGlobals.getPackageManager().getPackageUid(packageName, userId);
+            }
+            if (packageUid < 0) {
+                err.println("Error: No UID for " + packageName + " in user " + userId);
+                return -1;
+            }
+            return 0;
+        }
+    }
+
+    @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+        (new Shell(this, this)).exec(this, in, out, err, args, resultReceiver);
+    }
+
+    static void dumpCommandHelp(PrintWriter pw) {
+        pw.println("AppOps service (appops) commands:");
+        pw.println("  help");
+        pw.println("    Print this help text.");
+        pw.println("  set [--user <USER_ID>] <PACKAGE> <OP> <MODE>");
+        pw.println("    Set the mode for a particular application and operation.");
+        pw.println("  get [--user <USER_ID>] <PACKAGE> [<OP>]");
+        pw.println("    Return the mode for a particular application and optional operation.");
+        pw.println("  reset [--user <USER_ID>] [<PACKAGE>]");
+        pw.println("    Reset the given application or all applications to default modes.");
         pw.println("  write-settings");
         pw.println("    Immediately write pending changes to storage.");
         pw.println("  read-settings");
         pw.println("    Read the last written settings, replacing current state in RAM.");
+        pw.println("  options:");
+        pw.println("    <PACKAGE> an Android package name.");
+        pw.println("    <OP>      an AppOps operation.");
+        pw.println("    <MODE>    one of allow, ignore, deny, or default");
+        pw.println("    <USER_ID> the user id under which the package is installed. If --user is not");
+        pw.println("              specified, the current user is assumed.");
+    }
+
+    static int onShellCommand(Shell shell, String cmd) {
+        if (cmd == null) {
+            return shell.handleDefaultCommands(cmd);
+        }
+        PrintWriter pw = shell.getOutPrintWriter();
+        PrintWriter err = shell.getErrPrintWriter();
+        try {
+            switch (cmd) {
+                case "set": {
+                    int res = shell.parseUserPackageOp(true, err);
+                    if (res < 0) {
+                        return res;
+                    }
+                    String modeStr = shell.getNextArg();
+                    if (modeStr == null) {
+                        err.println("Error: Mode not specified.");
+                        return -1;
+                    }
+
+                    final int mode;
+                    switch (modeStr) {
+                        case "allow":
+                            mode = AppOpsManager.MODE_ALLOWED;
+                            break;
+                        case "deny":
+                            mode = AppOpsManager.MODE_ERRORED;
+                            break;
+                        case "ignore":
+                            mode = AppOpsManager.MODE_IGNORED;
+                            break;
+                        case "default":
+                            mode = AppOpsManager.MODE_DEFAULT;
+                            break;
+                        default:
+                            err.println("Error: Mode " + modeStr + " is not valid,");
+                            return -1;
+                    }
+
+                    shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName, mode);
+                    return 0;
+                }
+                case "get": {
+                    int res = shell.parseUserPackageOp(false, err);
+                    if (res < 0) {
+                        return res;
+                    }
+
+                    List<AppOpsManager.PackageOps> ops = shell.mInterface.getOpsForPackage(
+                            shell.packageUid, shell.packageName,
+                            shell.op != AppOpsManager.OP_NONE ? new int[] {shell.op} : null);
+                    if (ops == null || ops.size() <= 0) {
+                        pw.println("No operations.");
+                        return 0;
+                    }
+                    final long now = System.currentTimeMillis();
+                    for (int i=0; i<ops.size(); i++) {
+                        List<AppOpsManager.OpEntry> entries = ops.get(i).getOps();
+                        for (int j=0; j<entries.size(); j++) {
+                            AppOpsManager.OpEntry ent = entries.get(j);
+                            pw.print(AppOpsManager.opToName(ent.getOp()));
+                            pw.print(": ");
+                            switch (ent.getMode()) {
+                                case AppOpsManager.MODE_ALLOWED:
+                                    pw.print("allow");
+                                    break;
+                                case AppOpsManager.MODE_IGNORED:
+                                    pw.print("ignore");
+                                    break;
+                                case AppOpsManager.MODE_ERRORED:
+                                    pw.print("deny");
+                                    break;
+                                case AppOpsManager.MODE_DEFAULT:
+                                    pw.print("default");
+                                    break;
+                                default:
+                                    pw.print("mode=");
+                                    pw.print(ent.getMode());
+                                    break;
+                            }
+                            if (ent.getTime() != 0) {
+                                pw.print("; time=");
+                                TimeUtils.formatDuration(now - ent.getTime(), pw);
+                                pw.print(" ago");
+                            }
+                            if (ent.getRejectTime() != 0) {
+                                pw.print("; rejectTime=");
+                                TimeUtils.formatDuration(now - ent.getRejectTime(), pw);
+                                pw.print(" ago");
+                            }
+                            if (ent.getDuration() == -1) {
+                                pw.print(" (running)");
+                            } else if (ent.getDuration() != 0) {
+                                pw.print("; duration=");
+                                TimeUtils.formatDuration(ent.getDuration(), pw);
+                            }
+                            pw.println();
+                        }
+                    }
+                    return 0;
+                }
+                case "reset": {
+                    String packageName = null;
+                    int userId = UserHandle.USER_CURRENT;
+                    for (String argument; (argument = shell.getNextArg()) != null;) {
+                        if ("--user".equals(argument)) {
+                            String userStr = shell.getNextArgRequired();
+                            userId = UserHandle.parseUserArg(userStr);
+                        } else {
+                            if (packageName == null) {
+                                packageName = argument;
+                            } else {
+                                err.println("Error: Unsupported argument: " + argument);
+                                return -1;
+                            }
+                        }
+                    }
+
+                    if (userId == UserHandle.USER_CURRENT) {
+                        userId = ActivityManager.getCurrentUser();
+                    }
+
+                    shell.mInterface.resetAllModes(userId, packageName);
+                    pw.print("Reset all modes for: ");
+                    if (userId == UserHandle.USER_ALL) {
+                        pw.print("all users");
+                    } else {
+                        pw.print("user "); pw.print(userId);
+                    }
+                    pw.print(", ");
+                    if (packageName == null) {
+                        pw.println("all packages");
+                    } else {
+                        pw.print("package "); pw.println(packageName);
+                    }
+                    return 0;
+                }
+                case "write-settings": {
+                    shell.mInternal.mContext.enforcePermission(
+                            android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                            Binder.getCallingPid(), Binder.getCallingUid(), null);
+                    long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (shell.mInternal) {
+                            shell.mInternal.mHandler.removeCallbacks(shell.mInternal.mWriteRunner);
+                        }
+                        shell.mInternal.writeState();
+                        pw.println("Current settings written.");
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    return 0;
+                }
+                case "read-settings": {
+                    shell.mInternal.mContext.enforcePermission(
+                            android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                            Binder.getCallingPid(), Binder.getCallingUid(), null);
+                    long token = Binder.clearCallingIdentity();
+                    try {
+                        shell.mInternal.readState();
+                        pw.println("Last settings read.");
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    return 0;
+                }
+                default:
+                    return shell.handleDefaultCommands(cmd);
+            }
+        } catch (RemoteException e) {
+            pw.println("Remote exception: " + e);
+        }
+        return -1;
+    }
+
+    private void dumpHelp(PrintWriter pw) {
+        pw.println("AppOps service (appops) dump options:");
+        pw.println("  none");
     }
 
     @Override
@@ -1583,27 +1870,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return;
                 } else if ("-a".equals(arg)) {
                     // dump all data
-                } else if ("write-settings".equals(arg)) {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        synchronized (this) {
-                            mHandler.removeCallbacks(mWriteRunner);
-                        }
-                        writeState();
-                        pw.println("Current settings written.");
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                    return;
-                } else if ("read-settings".equals(arg)) {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        readState();
-                        pw.println("Last settings read.");
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                    return;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     return;
