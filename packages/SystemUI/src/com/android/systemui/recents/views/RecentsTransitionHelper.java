@@ -17,6 +17,8 @@
 package com.android.systemui.recents.views;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -47,6 +49,7 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
@@ -243,8 +246,7 @@ public class RecentsTransitionHelper {
         // Ensure we have a valid target stack id
         final int targetStackId = destinationStack != INVALID_STACK_ID ?
                 destinationStack : task.key.stackId;
-        if (targetStackId != FREEFORM_WORKSPACE_STACK_ID
-                && targetStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
+        if (!StackId.useAnimationSpecForAppTransition(targetStackId)) {
             return null;
         }
 

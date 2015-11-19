@@ -528,6 +528,15 @@ public class ActivityManager {
             return stackId == FULLSCREEN_WORKSPACE_STACK_ID
                     || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
         }
+
+        /**
+         * Returns true if animation specs should be constructed for app transition that moves
+         * the task to the specified stack.
+         */
+        public static boolean useAnimationSpecForAppTransition(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
+        }
     }
 
     /**
