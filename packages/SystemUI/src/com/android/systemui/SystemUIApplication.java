@@ -48,12 +48,12 @@ public class SystemUIApplication extends Application {
             com.android.systemui.keyguard.KeyguardViewMediator.class,
             com.android.systemui.recents.Recents.class,
             com.android.systemui.volume.VolumeUI.class,
+            Divider.class,
             com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.usb.StorageNotification.class,
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.keyboard.KeyboardUI.class,
-            Divider.class
     };
 
     /**

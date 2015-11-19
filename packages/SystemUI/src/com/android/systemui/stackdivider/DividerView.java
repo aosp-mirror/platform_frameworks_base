@@ -127,6 +127,28 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mWindowManager = windowManager;
     }
 
+    public WindowManagerProxy getWindowManagerProxy() {
+        return mWindowManagerProxy;
+    }
+
+    public boolean startDragging() {
+        mDockSide = mWindowManagerProxy.getDockSide();
+        if (mDockSide != WindowManager.DOCKED_INVALID) {
+            mWindowManagerProxy.setResizing(true);
+            mWindowManager.setSlippery(false);
+            liftBackground();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void stopDragging(int position, float velocity) {
+        fling(position, velocity);
+        mWindowManager.setSlippery(true);
+        releaseBackground();
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         convertToScreenCoordinates(event);
@@ -138,20 +160,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mStartX = (int) event.getX();
                 mStartY = (int) event.getY();
                 getLocationOnScreen(mTempInt2);
-                mDockSide = mWindowManagerProxy.getDockSide();
+                boolean result = startDragging();
                 if (isHorizontalDivision()) {
                     mStartPosition = mTempInt2[1] + mDividerInsets;
                 } else {
                     mStartPosition = mTempInt2[0] + mDividerInsets;
                 }
-                if (mDockSide != WindowManager.DOCKED_INVALID) {
-                    mWindowManagerProxy.setResizing(true);
-                    mWindowManager.setSlippery(false);
-                    liftBackground();
-                    return true;
-                } else {
-                    return false;
-                }
+                return result;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
                 int x = (int) event.getX();
@@ -168,10 +183,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 y = (int) event.getRawY();
 
                 mVelocityTracker.computeCurrentVelocity(1000);
-                fling(x, y, mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
-
-                mWindowManager.setSlippery(true);
-                releaseBackground();
+                int position = calculatePosition(x, y);
+                stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()
+                        : mVelocityTracker.getXVelocity());
                 break;
         }
         return true;
@@ -181,9 +195,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         event.setLocation(event.getRawX(), event.getRawY());
     }
 
-    private void fling(int x, int y, float xVelocity, float yVelocity) {
-        int position = calculatePosition(x, y);
-        float velocity = isHorizontalDivision() ? yVelocity : xVelocity;
+    private void fling(int position, float velocity) {
         final SnapTarget snapTarget = new DividerSnapAlgorithm(getContext(), mFlingAnimationUtils,
                 mDividerSize, isHorizontalDivision()).calculateSnapTarget(position, velocity);
 
@@ -277,9 +289,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return isHorizontalDivision() ? calculateYPosition(touchY) : calculateXPosition(touchX);
     }
 
-    private boolean isHorizontalDivision() {
-        return mDockSide == WindowManager.DOCKED_TOP
-                || mDockSide == WindowManager.DOCKED_BOTTOM;
+    public boolean isHorizontalDivision() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     private int calculateXPosition(int touchX) {
@@ -290,7 +301,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mStartPosition + touchY - mStartY;
     }
 
-    private void resizeStack(int position) {
+    public void resizeStack(int position) {
         mTmpRect.set(0, 0, mDisplayWidth, mDisplayHeight);
         switch (mDockSide) {
             case WindowManager.DOCKED_LEFT:

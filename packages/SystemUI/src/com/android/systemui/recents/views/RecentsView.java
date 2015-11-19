@@ -41,6 +41,8 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
+import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -540,6 +542,15 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 }
             });
         }
+    }
+
+    public final void onBusEvent(DraggingInRecentsEvent event) {
+        setStackViewVisibility(View.VISIBLE);
+        setTranslationY(event.distanceFromTop - mTaskStackView.getTaskViews().get(0).getY());
+    }
+
+    public final void onBusEvent(DraggingInRecentsEndedEvent event) {
+        animate().translationY(0f);
     }
 
     /**

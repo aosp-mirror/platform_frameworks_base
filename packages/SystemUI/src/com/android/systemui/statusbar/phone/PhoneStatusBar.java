@@ -117,6 +117,7 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -739,7 +740,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             context, R.layout.navigation_bar, null);
                 }
                 mNavigationBarView.setDisabledFlags(mDisabled1);
-                mNavigationBarView.setBar(this);
+                mNavigationBarView.setComponents(mRecents, getComponent(Divider.class));
                 mNavigationBarView.setOnVerticalChangedListener(
                         new NavigationBarView.OnVerticalChangedListener() {
                     @Override
@@ -1135,7 +1136,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public boolean onLongClick(View v) {
             if (mRecents != null) {
-                mRecents.dockTopTask();
+                mRecents.dockTopTask(false /* draggingInRecents */);
                 return true;
             }
             return false;

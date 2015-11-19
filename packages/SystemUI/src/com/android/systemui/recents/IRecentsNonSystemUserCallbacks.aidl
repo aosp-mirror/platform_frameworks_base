@@ -24,8 +24,10 @@ package com.android.systemui.recents;
 oneway interface IRecentsNonSystemUserCallbacks {
     void preloadRecents();
     void cancelPreloadingRecents();
-    void showRecents(boolean triggeredFromAltTab);
+    void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents);
     void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecents();
     void onConfigurationChanged();
+    void onDraggingInRecents(float distanceFromTop);
+    void onDraggingInRecentsEnded(float velocity);
 }
