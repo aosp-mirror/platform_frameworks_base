@@ -57,7 +57,7 @@ trainingnavtop=true
   moves the button up when it shows a {@link
   android.support.design.widget.Snackbar}, instead of drawing the {@link
   android.support.design.widget.Snackbar} on top of the button. You can see how
-  this looks in <a href="#video-coord">figure 1</a>.
+  this looks in Figure 1.
   </li>
 </ul>
 
