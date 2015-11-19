@@ -57,6 +57,8 @@ final class DefaultPermissionGrantPolicy {
     private static final String TAG = "DefaultPermGrantPolicy"; // must be <= 23 chars
     private static final boolean DEBUG = false;
 
+    private static final int DEFAULT_FLAGS = PackageManager.GET_ENCRYPTION_UNAWARE_COMPONENTS;
+
     private static final String AUDIO_MIME_TYPE = "audio/mpeg";
 
     private static final Set<String> PHONE_PERMISSIONS = new ArraySet<>();
@@ -696,7 +698,7 @@ final class DefaultPermissionGrantPolicy {
     private PackageParser.Package getDefaultSystemHandlerActivityPackageLPr(
             Intent intent, int userId) {
         ResolveInfo handler = mService.resolveIntent(intent,
-                intent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+                intent.resolveType(mService.mContext.getContentResolver()), DEFAULT_FLAGS, userId);
         if (handler == null || handler.activityInfo == null) {
             return null;
         }
@@ -711,7 +713,7 @@ final class DefaultPermissionGrantPolicy {
     private PackageParser.Package getDefaultSystemHandlerServicePackageLPr(
             Intent intent, int userId) {
         List<ResolveInfo> handlers = mService.queryIntentServices(intent,
-                intent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+                intent.resolveType(mService.mContext.getContentResolver()), DEFAULT_FLAGS, userId);
         if (handlers == null) {
             return null;
         }
@@ -738,7 +740,8 @@ final class DefaultPermissionGrantPolicy {
             homeIntent.setPackage(syncAdapterPackageName);
 
             ResolveInfo homeActivity = mService.resolveIntent(homeIntent,
-                    homeIntent.resolveType(mService.mContext.getContentResolver()), 0, userId);
+                    homeIntent.resolveType(mService.mContext.getContentResolver()), DEFAULT_FLAGS,
+                    userId);
             if (homeActivity != null) {
                 continue;
             }
@@ -754,7 +757,7 @@ final class DefaultPermissionGrantPolicy {
 
     private PackageParser.Package getDefaultProviderAuthorityPackageLPr(
             String authority, int userId) {
-        ProviderInfo provider = mService.resolveContentProvider(authority, 0, userId);
+        ProviderInfo provider = mService.resolveContentProvider(authority, DEFAULT_FLAGS, userId);
         if (provider != null) {
             return getSystemPackageLPr(provider.packageName);
         }

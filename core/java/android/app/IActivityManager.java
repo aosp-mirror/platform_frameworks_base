@@ -390,6 +390,7 @@ public interface IActivityManager extends IInterface {
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
     public boolean startUserInBackground(int userid) throws RemoteException;
+    public boolean unlockUser(int userid, byte[] token) throws RemoteException;
     public int stopUser(int userid, IStopUserCallback callback) throws RemoteException;
     public UserInfo getCurrentUser() throws RemoteException;
     public boolean isUserRunning(int userid, int flags) throws RemoteException;
@@ -904,4 +905,5 @@ public interface IActivityManager extends IInterface {
     int REMOVE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 348;
     int MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 349;
     int GET_APP_START_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 350;
+    int UNLOCK_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 351;
 }

@@ -1665,9 +1665,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         UserInfo user = getUserInfo(userId);
         // TODO: Timeout for work challenge
-        if (user.isManagedProfile()
-                && mService.mContext.getSystemService(StorageManager.class)
-                    .isPerUserEncryptionEnabled()) {
+        if (user.isManagedProfile() && StorageManager.isFileBasedEncryptionEnabled()) {
             KeyguardManager km = (KeyguardManager) mService.mContext
                     .getSystemService(Context.KEYGUARD_SERVICE);
 

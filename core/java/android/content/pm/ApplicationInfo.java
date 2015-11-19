@@ -982,7 +982,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 .getAbsolutePath();
 
         if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0
-                && SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false)) {
+                && StorageManager.isFileBasedEncryptionEnabled()) {
             dataDir = deviceEncryptedDataDir;
         } else {
             dataDir = credentialEncryptedDataDir;

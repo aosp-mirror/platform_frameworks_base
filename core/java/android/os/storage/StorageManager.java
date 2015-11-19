@@ -33,6 +33,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -77,11 +78,9 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_HAS_ADOPTABLE = "vold.has_adoptable";
     /** {@hide} */
-    public static final String PROP_HAS_FBE = "vold.has_fbe";
-    /** {@hide} */
     public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
     /** {@hide} */
-    public static final String PROP_EMULATE_FBE = "vold.emulate_fbe";
+    public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -1021,12 +1020,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public boolean isPerUserEncryptionEnabled() {
-        try {
-            return mMountService.isPerUserEncryptionEnabled();
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+    public static boolean isFileBasedEncryptionEnabled() {
+        return "file".equals(SystemProperties.get("ro.crypto.type", "none"))
+                || SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
     }
 
     /** {@hide} */

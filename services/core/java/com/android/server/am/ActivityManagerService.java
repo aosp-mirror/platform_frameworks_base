@@ -20220,6 +20220,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public boolean unlockUser(int userId, byte[] token) {
+        return mUserController.unlockUser(userId, token);
+    }
+
+    @Override
     public boolean switchUser(final int userId) {
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         String userName;

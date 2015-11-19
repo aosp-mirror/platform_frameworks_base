@@ -66,6 +66,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.UserManagerService;
 
@@ -99,7 +100,9 @@ final class UserController {
     /**
      * Which users have been started, so are allowed to run code.
      */
+    @GuardedBy("mService")
     private final SparseArray<UserState> mStartedUsers = new SparseArray<>();
+
     /**
      * LRU list of history of current users.  Most recently current is at the end.
      */
@@ -415,7 +418,7 @@ final class UserController {
 
     private void updateUserUnlockedState(UserState uss) {
         final IMountService mountService = IMountService.Stub
-                .asInterface(ServiceManager.getService(Context.STORAGE_SERVICE));
+                .asInterface(ServiceManager.getService("mount"));
         if (mountService != null) {
             try {
                 uss.unlocked = mountService.isUserKeyUnlocked(uss.mHandle.getIdentifier());
@@ -424,7 +427,7 @@ final class UserController {
             }
         } else {
             // System isn't fully booted yet, so guess based on property
-            uss.unlocked = !SystemProperties.getBoolean(StorageManager.PROP_HAS_FBE, false);
+            uss.unlocked = !StorageManager.isFileBasedEncryptionEnabled();
         }
     }
 
@@ -604,6 +607,35 @@ final class UserController {
         boolean result = startUser(userId, /* foreground */ true);
         dlg.dismiss();
         return result;
+    }
+
+    boolean unlockUser(final int userId, byte[] token) {
+        if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: unlockUser() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + INTERACT_ACROSS_USERS_FULL;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        final UserInfo userInfo = getUserInfo(userId);
+        final IMountService mountService = IMountService.Stub
+                .asInterface(ServiceManager.getService("mount"));
+        try {
+            mountService.unlockUserKey(userId, userInfo.serialNumber, token);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to unlock: " + e.getMessage());
+            throw e.rethrowAsRuntimeException();
+        }
+
+        synchronized (mService) {
+            final UserState uss = mStartedUsers.get(userId);
+            updateUserUnlockedState(uss);
+        }
+
+        return true;
     }
 
     void showUserSwitchDialog(int userId, String userName) {

@@ -3802,8 +3802,7 @@ final class Settings {
         if ((flags & PackageManager.GET_ENCRYPTION_UNAWARE_COMPONENTS) != 0) {
             return true;
         }
-        if ((flags & PackageManager.FLAG_USER_RUNNING_WITH_AMNESIA) != 0) {
-            // When running with amnesia, we can only run encryption-aware apps
+        if ((flags & PackageManager.MATCH_ENCRYPTION_AWARE_ONLY) != 0) {
             return componentInfo.encryptionAware;
         }
         return true;
