@@ -512,7 +512,7 @@ android.content.Intent}. (You should never call {@link android.app.Service#onSta
 onStartCommand()} directly.)</p>
 
 <p>For example, an activity can start the example service in the previous section ({@code
-HelloSevice}) using an explicit intent with {@link android.content.Context#startService
+HelloService}) using an explicit intent with {@link android.content.Context#startService
 startService()}:</p>
 
 <pre>
