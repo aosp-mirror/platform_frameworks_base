@@ -2490,7 +2490,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case GET_TASK_DESCRIPTION_ICON_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String filename = data.readString();
-            Bitmap icon = getTaskDescriptionIcon(filename);
+            int userId = data.readInt();
+            Bitmap icon = getTaskDescriptionIcon(filename, userId);
             reply.writeNoException();
             if (icon == null) {
                 reply.writeInt(0);
@@ -5998,11 +5999,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException {
+    public Bitmap getTaskDescriptionIcon(String filename, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(filename);
+        data.writeInt(userId);
         mRemote.transact(GET_TASK_DESCRIPTION_ICON_TRANSACTION, data, reply, 0);
         reply.readException();
         final Bitmap icon = reply.readInt() == 0 ? null : Bitmap.CREATOR.createFromParcel(reply);

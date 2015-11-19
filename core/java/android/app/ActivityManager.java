@@ -884,7 +884,7 @@ public class ActivityManager {
             if (mIcon != null) {
                 return mIcon;
             }
-            return loadTaskDescriptionIcon(mIconFilename);
+            return loadTaskDescriptionIcon(mIconFilename, UserHandle.myUserId());
         }
 
         /** @hide */
@@ -898,11 +898,11 @@ public class ActivityManager {
         }
 
         /** @hide */
-        public static Bitmap loadTaskDescriptionIcon(String iconFilename) {
+        public static Bitmap loadTaskDescriptionIcon(String iconFilename, int userId) {
             if (iconFilename != null) {
                 try {
                     return ActivityManagerNative.getDefault().
-                            getTaskDescriptionIcon(iconFilename);
+                            getTaskDescriptionIcon(iconFilename, userId);
                 } catch (RemoteException e) {
                 }
             }

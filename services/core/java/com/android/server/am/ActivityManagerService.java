@@ -8827,12 +8827,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public Bitmap getTaskDescriptionIcon(String filename) {
-        if (!FileUtils.isValidExtFilename(filename)
-                || !filename.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {
-            throw new IllegalArgumentException("Bad filename: " + filename);
+    public Bitmap getTaskDescriptionIcon(String filePath, int userId) {
+        if (userId != UserHandle.getCallingUserId()) {
+            enforceCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "getTaskDescriptionIcon");
         }
-        return mTaskPersister.getTaskDescriptionIcon(filename);
+        final File passedIconFile = new File(filePath);
+        final File legitIconFile = new File(TaskPersister.getUserImagesDir(userId),
+                passedIconFile.getName());
+        if (!legitIconFile.getPath().equals(filePath)
+                || !filePath.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {
+            throw new IllegalArgumentException("Bad file path: " + filePath);
+        }
+        return mTaskPersister.getTaskDescriptionIcon(filePath);
     }
 
     @Override

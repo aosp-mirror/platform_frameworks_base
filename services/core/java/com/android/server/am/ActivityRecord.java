@@ -61,6 +61,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -1212,8 +1213,10 @@ final class ActivityRecord {
         if (_taskDescription.getIconFilename() == null &&
                 (icon = _taskDescription.getIcon()) != null) {
             final String iconFilename = createImageFilename(createTime, task.taskId);
-            mStackSupervisor.mService.mTaskPersister.saveImage(icon, iconFilename);
-            _taskDescription.setIconFilename(iconFilename);
+            final File iconFile = new File(TaskPersister.getUserImagesDir(userId), iconFilename);
+            final String iconFilePath = iconFile.getAbsolutePath();
+            mStackSupervisor.mService.mTaskPersister.saveImage(icon, iconFilePath);
+            _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;
     }
