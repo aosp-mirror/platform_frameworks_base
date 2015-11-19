@@ -309,9 +309,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     ClientState mCurClient;
 
     /**
-     * The last window token that gained focus.
+     * The last window token that we confirmed to be focused.  This is always updated upon reports
+     * from the input method client.  If the window state is already changed before the report is
+     * handled, this field just keeps the last value.
      */
     IBinder mCurFocusedWindow;
+
+    /**
+     * The client by which {@link #mCurFocusedWindow} was reported.  Used only for debugging.
+     */
+    ClientState mCurFocusedWindowClient;
 
     /**
      * The input context last provided by the current client.
@@ -1198,6 +1205,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 clearClientSessionLocked(cs);
                 if (mCurClient == cs) {
                     mCurClient = null;
+                }
+                if (mCurFocusedWindowClient == cs) {
+                    mCurFocusedWindowClient = null;
                 }
             }
         }
@@ -2194,6 +2204,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return null;
                 }
                 mCurFocusedWindow = windowToken;
+                mCurFocusedWindowClient = cs;
 
                 // Should we auto-show the IME even if the caller has not
                 // specified what should be done with it?
@@ -3705,6 +3716,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         IInputMethod method;
         ClientState client;
+        ClientState focusedWindowClient;
 
         final Printer p = new PrintWriterPrinter(pw);
 
@@ -3729,6 +3741,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
             p.println("  mCurFocusedWindow=" + mCurFocusedWindow);
+            focusedWindowClient = mCurFocusedWindowClient;
+            p.println("  mCurFocusedWindowClient=" + focusedWindowClient);
             p.println("  mCurId=" + mCurId + " mHaveConnect=" + mHaveConnection
                     + " mBoundToMethod=" + mBoundToMethod);
             p.println("  mCurToken=" + mCurToken);
@@ -3758,6 +3772,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         } else {
             p.println("No input method client.");
+        }
+
+        if (focusedWindowClient != null && client != focusedWindowClient) {
+            p.println(" ");
+            p.println("Warning: Current input method client doesn't match the last focused. "
+                    + "window.");
+            p.println("Dumping input method client in the last focused window just in case.");
+            p.println(" ");
+            pw.flush();
+            try {
+                focusedWindowClient.client.asBinder().dump(fd, args);
+            } catch (RemoteException e) {
+                p.println("Input method client in focused window dead: " + e);
+            }
         }
 
         p.println(" ");
