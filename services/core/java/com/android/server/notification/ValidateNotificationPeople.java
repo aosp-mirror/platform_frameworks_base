@@ -41,6 +41,9 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import android.os.SystemClock;
+import com.android.internal.logging.MetricsLogger;
+
 /**
  * This {@link NotificationSignalExtractor} attempts to validate
  * people references. Also elevates the priority of real people.
@@ -218,6 +221,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
     private PeopleRankingReconsideration validatePeople(Context context, String key, Bundle extras,
             float[] affinityOut) {
+        long start = SystemClock.elapsedRealtime();
         float affinity = NONE;
         if (extras == null) {
             return null;
@@ -250,6 +254,9 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         // record the best available data, so far:
         affinityOut[0] = affinity;
+
+        MetricsLogger.histogram(mBaseContext, "validate_people_cache_latency",
+                (int) (SystemClock.elapsedRealtime() - start));
 
         if (pendingLookups.isEmpty()) {
             if (VERBOSE) Slog.i(TAG, "final affinity: " + affinity);
@@ -430,6 +437,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         @Override
         public void work() {
+            long start = SystemClock.elapsedRealtime();
             if (VERBOSE) Slog.i(TAG, "Executing: validation for: " + mKey);
             long timeStartMs = System.currentTimeMillis();
             for (final String handle: mPendingLookups) {
@@ -468,6 +476,9 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 mUsageStats.registerPeopleAffinity(mRecord, mContactAffinity > NONE,
                         mContactAffinity == STARRED_CONTACT, false /* cached */);
             }
+
+            MetricsLogger.histogram(mBaseContext, "validate_people_lookup_latency",
+                    (int) (SystemClock.elapsedRealtime() - start));
         }
 
         @Override
