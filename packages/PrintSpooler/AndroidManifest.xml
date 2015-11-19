@@ -61,7 +61,7 @@
 
         <activity
             android:name=".ui.PrintActivity"
-            android:configChanges="orientation|screenSize"
+            android:configChanges="screenSize|smallestScreenSize|orientation"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
             android:theme="@style/PrintActivity">
             <intent-filter>
