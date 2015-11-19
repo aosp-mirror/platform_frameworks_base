@@ -12,12 +12,23 @@
 
 -keep class com.android.systemui.statusbar.phone.PhoneStatusBar
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
--keep class com.android.systemui.recents.*
 
 -keepclassmembers class ** {
     public void onBusEvent(**);
     public void onInterprocessBusEvent(**);
 }
 -keepclassmembers class ** extends **.EventBus$InterprocessEvent {
-	public <init>(android.os.Bundle);
+    public <init>(android.os.Bundle);
+}
+
+-keep class com.android.systemui.recents.views.StackLayoutAlgorithm {
+    public float getFocusState();
+    public void setFocusState(float);
+}
+
+-keep class com.android.systemui.recents.views.TaskView {
+    public int getDim();
+    public void setDim(int);
+    public float getTaskProgress();
+    public void setTaskProgress(float);
 }
