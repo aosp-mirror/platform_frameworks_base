@@ -1,6 +1,7 @@
 page.title=Get real user feedback with beta tests
 page.metaDescription=Run alpha and beta tests from the developer console, and make improvements and correct issues before you release.
 page.image=images/cards/distribute/engage/beta.jpg
+page.tags="beta, alpha, release channels"
 Xnonavpage=true
 
 @jd:body

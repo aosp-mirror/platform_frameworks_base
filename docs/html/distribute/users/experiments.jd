@@ -1,6 +1,7 @@
 page.title=Increase installs with Store Listing Experiments
 page.metaDescription=Run experiments to find the best possible Play Store listing page.
 page.image=images/cards/distribute/users/experiments.png
+page.tags="ab testing, experiments, testing"
 Xnonavpage=true
 
 @jd:body
