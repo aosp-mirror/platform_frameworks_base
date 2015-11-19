@@ -15,11 +15,11 @@
  */
 
 #include "flatten/TableFlattener.h"
+#include "test/Builders.h"
+#include "test/Context.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Util.h"
 
-#include "test/Builders.h"
-#include "test/Context.h"
 
 #include <gtest/gtest.h>
 

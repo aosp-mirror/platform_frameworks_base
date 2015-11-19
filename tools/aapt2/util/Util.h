@@ -331,15 +331,6 @@ inline uint32_t deviceToHost32(uint32_t value) {
 }
 
 /**
- * Returns a package name if the namespace URI is of the form:
- * http://schemas.android.com/apk/res/<package>
- *
- * Special case: if namespaceUri is http://schemas.android.com/apk/res-auto,
- * returns an empty package name.
- */
-Maybe<std::u16string> extractPackageFromNamespace(const std::u16string& namespaceUri);
-
-/**
  * Given a path like: res/xml-sw600dp/foo.xml
  *
  * Extracts "res/xml-sw600dp/" into outPrefix.

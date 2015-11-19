@@ -97,19 +97,19 @@ bool BinaryResourceParser::parse() {
     return !error;
 }
 
-bool BinaryResourceParser::getSymbol(const void* data, ResourceNameRef* outSymbol) {
+Maybe<Reference> BinaryResourceParser::getSymbol(const void* data) {
     if (!mSymbolEntries || mSymbolEntryCount == 0) {
-        return false;
+        return {};
     }
 
     if ((uintptr_t) data < (uintptr_t) mData) {
-        return false;
+        return {};
     }
 
     // We only support 32 bit offsets right now.
     const uintptr_t offset = (uintptr_t) data - (uintptr_t) mData;
     if (offset > std::numeric_limits<uint32_t>::max()) {
-        return false;
+        return {};
     }
 
     for (size_t i = 0; i < mSymbolEntryCount; i++) {
@@ -118,24 +118,23 @@ bool BinaryResourceParser::getSymbol(const void* data, ResourceNameRef* outSymbo
             const StringPiece16 str = util::getString(
                     mSymbolPool, util::deviceToHost32(mSymbolEntries[i].name.index));
 
-            StringPiece16 typeStr;
-            ResourceUtils::extractResourceName(str, &outSymbol->package, &typeStr,
-                                               &outSymbol->entry);
-            const ResourceType* type = parseResourceType(typeStr);
-            if (!type) {
-                return false;
+            ResourceNameRef nameRef;
+            bool privateRef = false;
+            if (!ResourceUtils::parseResourceName(str, &nameRef, &privateRef)) {
+                return {};
             }
-
-            outSymbol->type = *type;
 
             // Since we scan the symbol table in order, we can start looking for the
             // next symbol from this point.
             mSymbolEntryCount -= i + 1;
             mSymbolEntries += i + 1;
-            return true;
+
+            Reference ref(nameRef);
+            ref.privateReference = privateRef;
+            return Maybe<Reference>(std::move(ref));
         }
     }
-    return false;
+    return {};
 }
 
 /**
@@ -566,7 +565,13 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
             resourceValue = parseValue(name, config, value, entry->flags);
         }
 
-        assert(resourceValue && "failed to interpret valid resource");
+        if (!resourceValue) {
+            mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                              << "failed to parse value for resource " << name
+                                              << " (" << resId << ") with configuration '"
+                                              << config << "'");
+            return false;
+        }
 
         Source source = mSource;
         if (sourceBlock) {
@@ -657,7 +662,7 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
     if (value->dataType == Res_value::TYPE_REFERENCE ||
             value->dataType == Res_value::TYPE_ATTRIBUTE) {
         const Reference::Type type = (value->dataType == Res_value::TYPE_REFERENCE) ?
-                    Reference::Type::kResource : Reference::Type::kAttribute;
+                Reference::Type::kResource : Reference::Type::kAttribute;
 
         if (data != 0) {
             // This is a normal reference.
@@ -665,9 +670,9 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
         }
 
         // This reference has an invalid ID. Check if it is an unresolved symbol.
-        ResourceNameRef symbol;
-        if (getSymbol(&value->data, &symbol)) {
-            return util::make_unique<Reference>(symbol, type);
+        if (Maybe<Reference> ref = getSymbol(&value->data)) {
+            ref.value().referenceType = type;
+            return util::make_unique<Reference>(std::move(ref.value()));
         }
 
         // This is not an unresolved symbol, so it must be the magic @null reference.
@@ -715,10 +720,8 @@ std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& n
     if (util::deviceToHost32(map->parent.ident) == 0) {
         // The parent is either not set or it is an unresolved symbol.
         // Check to see if it is a symbol.
-        ResourceNameRef symbol;
-        if (getSymbol(&map->parent.ident, &symbol)) {
-            style->parent = Reference(symbol.toResourceName());
-        }
+        style->parent = getSymbol(&map->parent.ident);
+
     } else {
          // The parent is a regular reference to a resource.
         style->parent = Reference(util::deviceToHost32(map->parent.ident));
@@ -731,10 +734,14 @@ std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& n
         if (util::deviceToHost32(mapEntry.name.ident) == 0) {
             // The map entry's key (attribute) is not set. This must be
             // a symbol reference, so resolve it.
-            ResourceNameRef symbol;
-            bool result = getSymbol(&mapEntry.name.ident, &symbol);
-            assert(result);
-            styleEntry.key.name = symbol.toResourceName();
+            Maybe<Reference> symbol = getSymbol(&mapEntry.name.ident);
+            if (!symbol) {
+                mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                  << "unresolved style attribute");
+                return {};
+            }
+            styleEntry.key = std::move(symbol.value());
+
         } else {
             // The map entry's key (attribute) is a regular reference.
             styleEntry.key.id = ResourceId(util::deviceToHost32(mapEntry.name.ident));
@@ -742,7 +749,9 @@ std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& n
 
         // Parse the attribute's value.
         styleEntry.value = parseValue(name, config, &mapEntry.value, 0);
-        assert(styleEntry.value);
+        if (!styleEntry.value) {
+            return {};
+        }
     }
     return style;
 }
@@ -773,10 +782,14 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
             if (util::deviceToHost32(mapEntry.name.ident) == 0) {
                 // The map entry's key (id) is not set. This must be
                 // a symbol reference, so resolve it.
-                ResourceNameRef symbolName;
-                bool result = getSymbol(&mapEntry.name.ident, &symbolName);
-                assert(result);
-                symbol.symbol.name = symbolName.toResourceName();
+                Maybe<Reference> ref = getSymbol(&mapEntry.name.ident);
+                if (!ref) {
+                    mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                      << "unresolved attribute symbol");
+                    return {};
+                }
+                symbol.symbol = std::move(ref.value());
+
             } else {
                 // The map entry's key (id) is a regular reference.
                 symbol.symbol.id = ResourceId(util::deviceToHost32(mapEntry.name.ident));
@@ -808,10 +821,14 @@ std::unique_ptr<Styleable> BinaryResourceParser::parseStyleable(const ResourceNa
         if (util::deviceToHost32(mapEntry.name.ident) == 0) {
             // The map entry's key (attribute) is not set. This must be
             // a symbol reference, so resolve it.
-            ResourceNameRef symbol;
-            bool result = getSymbol(&mapEntry.name.ident, &symbol);
-            assert(result);
-            styleable->entries.emplace_back(symbol);
+            Maybe<Reference> ref = getSymbol(&mapEntry.name.ident);
+            if (!ref) {
+                mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                  << "unresolved styleable symbol");
+                return {};
+            }
+            styleable->entries.emplace_back(std::move(ref.value()));
+
         } else {
             // The map entry's key (attribute) is a regular reference.
             styleable->entries.emplace_back(util::deviceToHost32(mapEntry.name.ident));
@@ -826,6 +843,9 @@ std::unique_ptr<Plural> BinaryResourceParser::parsePlural(const ResourceNameRef&
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
     for (const ResTable_map& mapEntry : map) {
         std::unique_ptr<Item> item = parseValue(name, config, &mapEntry.value, 0);
+        if (!item) {
+            return {};
+        }
 
         switch (util::deviceToHost32(mapEntry.name.ident)) {
             case android::ResTable_map::ATTR_ZERO:

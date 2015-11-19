@@ -26,7 +26,7 @@ namespace aapt {
 TEST(XmlIdCollectorTest, CollectsIds) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom(R"EOF(
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
                   android:id="@+id/foo"
                   text="@+id/bar">
@@ -50,7 +50,7 @@ TEST(XmlIdCollectorTest, CollectsIds) {
 TEST(XmlIdCollectorTest, DontCollectNonIds) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom("<View foo=\"@+string/foo\"/>");
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom("<View foo=\"@+string/foo\"/>");
 
     XmlIdCollector collector;
     ASSERT_TRUE(collector.consume(context.get(), doc.get()));

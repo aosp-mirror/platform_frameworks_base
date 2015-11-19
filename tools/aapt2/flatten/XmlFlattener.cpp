@@ -15,15 +15,14 @@
  */
 
 #include "SdkConstants.h"
-#include "XmlDom.h"
-
 #include "flatten/ChunkWriter.h"
 #include "flatten/ResourceTypeExtensions.h"
 #include "flatten/XmlFlattener.h"
+#include "xml/XmlDom.h"
 
 #include <androidfw/ResourceTypes.h>
-#include <vector>
 #include <utils/misc.h>
+#include <vector>
 
 using namespace android;
 
@@ -306,7 +305,7 @@ bool XmlFlattener::flatten(IAaptContext* context, xml::Node* node) {
     return true;
 }
 
-bool XmlFlattener::consume(IAaptContext* context, XmlResource* resource) {
+bool XmlFlattener::consume(IAaptContext* context, xml::XmlResource* resource) {
     if (!resource->root) {
         return false;
     }

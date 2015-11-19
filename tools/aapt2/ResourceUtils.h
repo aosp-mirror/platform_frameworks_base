@@ -39,6 +39,13 @@ namespace ResourceUtils {
 bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
                          StringPiece16* outType, StringPiece16* outEntry);
 
+/**
+ * Returns true if the string was parsed as a resource name ([*][package:]type/name), with
+ * `outResource` set to the parsed resource name and `outPrivate` set to true if a '*' prefix
+ * was present.
+ */
+bool parseResourceName(const StringPiece16& str, ResourceNameRef* outResource, bool* outPrivate);
+
 /*
  * Returns true if the string was parsed as a reference (@[+][package:]type/name), with
  * `outReference` set to the parsed reference.

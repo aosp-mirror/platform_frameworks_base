@@ -16,15 +16,30 @@
 
 #include "Resource.h"
 #include "ResourceUtils.h"
-
 #include "test/Common.h"
 
 #include <gtest/gtest.h>
 
 namespace aapt {
 
+TEST(ResourceUtilsTest, ParseResourceName) {
+    ResourceNameRef actual;
+    bool actualPriv = false;
+    EXPECT_TRUE(ResourceUtils::parseResourceName(u"android:color/foo", &actual, &actualPriv));
+    EXPECT_EQ(ResourceNameRef(u"android", ResourceType::kColor, u"foo"), actual);
+    EXPECT_FALSE(actualPriv);
+
+    EXPECT_TRUE(ResourceUtils::parseResourceName(u"color/foo", &actual, &actualPriv));
+    EXPECT_EQ(ResourceNameRef({}, ResourceType::kColor, u"foo"), actual);
+    EXPECT_FALSE(actualPriv);
+
+    EXPECT_TRUE(ResourceUtils::parseResourceName(u"*android:color/foo", &actual, &actualPriv));
+    EXPECT_EQ(ResourceNameRef(u"android", ResourceType::kColor, u"foo"), actual);
+    EXPECT_TRUE(actualPriv);
+}
+
 TEST(ResourceUtilsTest, ParseReferenceWithNoPackage) {
-    ResourceNameRef expected = { {}, ResourceType::kColor, u"foo" };
+    ResourceNameRef expected({}, ResourceType::kColor, u"foo");
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
@@ -35,7 +50,7 @@ TEST(ResourceUtilsTest, ParseReferenceWithNoPackage) {
 }
 
 TEST(ResourceUtilsTest, ParseReferenceWithPackage) {
-    ResourceNameRef expected = { u"android", ResourceType::kColor, u"foo" };
+    ResourceNameRef expected(u"android", ResourceType::kColor, u"foo");
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
@@ -47,7 +62,7 @@ TEST(ResourceUtilsTest, ParseReferenceWithPackage) {
 }
 
 TEST(ResourceUtilsTest, ParseReferenceWithSurroundingWhitespace) {
-    ResourceNameRef expected = { u"android", ResourceType::kColor, u"foo" };
+    ResourceNameRef expected(u"android", ResourceType::kColor, u"foo");
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
@@ -59,7 +74,7 @@ TEST(ResourceUtilsTest, ParseReferenceWithSurroundingWhitespace) {
 }
 
 TEST(ResourceUtilsTest, ParseAutoCreateIdReference) {
-    ResourceNameRef expected = { u"android", ResourceType::kId, u"foo" };
+    ResourceNameRef expected(u"android", ResourceType::kId, u"foo");
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
@@ -71,7 +86,7 @@ TEST(ResourceUtilsTest, ParseAutoCreateIdReference) {
 }
 
 TEST(ResourceUtilsTest, ParsePrivateReference) {
-    ResourceNameRef expected = { u"android", ResourceType::kId, u"foo" };
+    ResourceNameRef expected(u"android", ResourceType::kId, u"foo");
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
@@ -111,8 +126,8 @@ TEST(ResourceUtilsTest, FailParseIncompleteReference) {
 }
 
 TEST(ResourceUtilsTest, ParseStyleParentReference) {
-    const ResourceName kAndroidStyleFooName = { u"android", ResourceType::kStyle, u"foo" };
-    const ResourceName kStyleFooName = { {}, ResourceType::kStyle, u"foo" };
+    const ResourceName kAndroidStyleFooName(u"android", ResourceType::kStyle, u"foo");
+    const ResourceName kStyleFooName({}, ResourceType::kStyle, u"foo");
 
     std::string errStr;
     Maybe<Reference> ref = ResourceUtils::parseStyleParentReference(u"@android:style/foo", &errStr);

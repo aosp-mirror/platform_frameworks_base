@@ -51,6 +51,7 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
 
     std::shared_ptr<Symbol> symbol = std::make_shared<Symbol>();
     symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(), sr.entry->id.value());
+    symbol->isPublic = (sr.entry->symbolStatus.state == SymbolState::kPublic);
 
     if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
         const ConfigDescription kDefaultConfig;
@@ -158,11 +159,50 @@ const ISymbolTable::Symbol* AssetManagerSymbolTableBuilder::AssetManagerSymbolTa
         }
 
         if (s) {
+            s->isPublic = (typeSpecFlags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
             mCache.put(name, s);
             return s.get();
         }
     }
     return nullptr;
+}
+
+static Maybe<ResourceName> getResourceName(const android::ResTable& table, ResourceId id) {
+    android::ResTable::resource_name resName;
+    if (!table.getResourceName(id.id, true, &resName)) {
+        return {};
+    }
+
+    ResourceName name;
+    if (resName.package) {
+        name.package = StringPiece16(resName.package, resName.packageLen).toString();
+    }
+
+    const ResourceType* type;
+    if (resName.type) {
+        type = parseResourceType(StringPiece16(resName.type, resName.typeLen));
+
+    } else if (resName.type8) {
+        type = parseResourceType(util::utf8ToUtf16(StringPiece(resName.type8, resName.typeLen)));
+    } else {
+        return {};
+    }
+
+    if (!type) {
+        return {};
+    }
+
+    name.type = *type;
+
+    if (resName.name) {
+        name.entry = StringPiece16(resName.name, resName.nameLen).toString();
+    } else if (resName.name8) {
+        name.entry = util::utf8ToUtf16(StringPiece(resName.name8, resName.nameLen));
+    } else {
+        return {};
+    }
+
+    return name;
 }
 
 const ISymbolTable::Symbol* AssetManagerSymbolTableBuilder::AssetManagerSymbolTable::findById(
@@ -174,22 +214,16 @@ const ISymbolTable::Symbol* AssetManagerSymbolTableBuilder::AssetManagerSymbolTa
     for (const auto& asset : mAssets) {
         const android::ResTable& table = asset->getResources(false);
 
-        android::ResTable::resource_name name;
-        if (!table.getResourceName(id.id, true, &name)) {
+        Maybe<ResourceName> maybeName = getResourceName(table, id);
+        if (!maybeName) {
             continue;
         }
 
-        bool isAttr = false;
-        if (name.type) {
-            if (const ResourceType* t = parseResourceType(StringPiece16(name.type, name.typeLen))) {
-                isAttr = (*t == ResourceType::kAttr);
-            }
-        } else if (name.type8) {
-            isAttr = (StringPiece(name.type8, name.typeLen) == "attr");
-        }
+        uint32_t typeSpecFlags = 0;
+        table.getResourceFlags(id.id, &typeSpecFlags);
 
         std::shared_ptr<Symbol> s;
-        if (isAttr) {
+        if (maybeName.value().type == ResourceType::kAttr) {
             s = lookupAttributeInTable(table, id);
         } else {
             s = std::make_shared<Symbol>();
@@ -197,6 +231,7 @@ const ISymbolTable::Symbol* AssetManagerSymbolTableBuilder::AssetManagerSymbolTa
         }
 
         if (s) {
+            s->isPublic = (typeSpecFlags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
             mIdCache.put(id, s);
             return s.get();
         }

@@ -15,7 +15,6 @@
  */
 
 #include "ResourceTable.h"
-
 #include "link/Linkers.h"
 
 #include <algorithm>

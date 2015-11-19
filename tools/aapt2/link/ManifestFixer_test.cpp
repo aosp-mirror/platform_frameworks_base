@@ -15,7 +15,6 @@
  */
 
 #include "link/ManifestFixer.h"
-
 #include "test/Builders.h"
 #include "test/Context.h"
 
@@ -51,13 +50,13 @@ struct ManifestFixerTest : public ::testing::Test {
                 .build();
     }
 
-    std::unique_ptr<XmlResource> verify(const StringPiece& str) {
+    std::unique_ptr<xml::XmlResource> verify(const StringPiece& str) {
         return verifyWithOptions(str, {});
     }
 
-    std::unique_ptr<XmlResource> verifyWithOptions(const StringPiece& str,
-                                                   const ManifestFixerOptions& options) {
-        std::unique_ptr<XmlResource> doc = test::buildXmlDom(str);
+    std::unique_ptr<xml::XmlResource> verifyWithOptions(const StringPiece& str,
+                                                        const ManifestFixerOptions& options) {
+        std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(str);
         ManifestFixer fixer(options);
         if (fixer.consume(mContext.get(), doc.get())) {
             return doc;
@@ -88,7 +87,7 @@ TEST_F(ManifestFixerTest, EnsureManifestHasPackage) {
 TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
     ManifestFixerOptions options = { std::u16string(u"8"), std::u16string(u"22") };
 
-    std::unique_ptr<XmlResource> doc = verifyWithOptions(R"EOF(
+    std::unique_ptr<xml::XmlResource> doc = verifyWithOptions(R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="android">
         <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="21" />

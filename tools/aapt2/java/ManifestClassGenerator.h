@@ -18,15 +18,15 @@
 #define AAPT_JAVA_MANIFESTCLASSGENERATOR_H
 
 #include "Diagnostics.h"
-#include "process/IResourceTableConsumer.h"
 #include "util/StringPiece.h"
+#include "xml/XmlDom.h"
 
 #include <iostream>
 
 namespace aapt {
 
 struct ManifestClassGenerator {
-    bool generate(IDiagnostics* diag, const StringPiece16& package, XmlResource* res,
+    bool generate(IDiagnostics* diag, const StringPiece16& package, xml::XmlResource* res,
                   std::ostream* out);
 };
 

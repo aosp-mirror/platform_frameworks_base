@@ -78,10 +78,18 @@ public:
     explicit SymbolWriter(StringPool* pool) : mPool(pool) {
     }
 
-    void addSymbol(const ResourceNameRef& name, size_t offset) {
-        symbols.push_back(Entry{ mPool->makeRef(name.package.toString() + u":" +
-                                               toString(name.type).toString() + u"/" +
-                                               name.entry.toString()), offset });
+    void addSymbol(const Reference& ref, size_t offset) {
+        const ResourceName& name = ref.name.value();
+        std::u16string fullName;
+        if (ref.privateReference) {
+            fullName += u"*";
+        }
+
+        if (!name.package.empty()) {
+            fullName += name.package + u":";
+        }
+        fullName += toString(name.type).toString() + u"/" + name.entry;
+        symbols.push_back(Entry{ mPool->makeRef(fullName), offset });
     }
 
     void shiftAllOffsets(size_t offset) {
@@ -100,20 +108,23 @@ struct MapFlattenVisitor : public RawValueVisitor {
     SymbolWriter* mSymbols;
     FlatEntry* mEntry;
     BigBuffer* mBuffer;
+    bool mUseExtendedChunks;
     size_t mEntryCount = 0;
     Maybe<uint32_t> mParentIdent;
     Maybe<ResourceNameRef> mParentName;
 
-    MapFlattenVisitor(SymbolWriter* symbols, FlatEntry* entry, BigBuffer* buffer) :
-            mSymbols(symbols), mEntry(entry), mBuffer(buffer) {
+    MapFlattenVisitor(SymbolWriter* symbols, FlatEntry* entry, BigBuffer* buffer,
+                      bool useExtendedChunks) :
+            mSymbols(symbols), mEntry(entry), mBuffer(buffer),
+            mUseExtendedChunks(useExtendedChunks) {
     }
 
     void flattenKey(Reference* key, ResTable_map* outEntry) {
-        if (!key->id) {
+        if (!key->id || (key->privateReference && mUseExtendedChunks)) {
             assert(key->name && "reference must have a name");
 
             outEntry->name.ident = util::hostToDevice32(0);
-            mSymbols->addSymbol(key->name.value(), (mBuffer->size() - sizeof(ResTable_map)) +
+            mSymbols->addSymbol(*key, (mBuffer->size() - sizeof(ResTable_map)) +
                                     offsetof(ResTable_map, name));
         } else {
             outEntry->name.ident = util::hostToDevice32(key->id.value().id);
@@ -121,16 +132,21 @@ struct MapFlattenVisitor : public RawValueVisitor {
     }
 
     void flattenValue(Item* value, ResTable_map* outEntry) {
+        bool privateRef = false;
         if (Reference* ref = valueCast<Reference>(value)) {
-            if (!ref->id) {
+            privateRef = ref->privateReference && mUseExtendedChunks;
+            if (!ref->id || privateRef) {
                 assert(ref->name && "reference must have a name");
 
-                mSymbols->addSymbol(ref->name.value(), (mBuffer->size() - sizeof(ResTable_map)) +
+                mSymbols->addSymbol(*ref, (mBuffer->size() - sizeof(ResTable_map)) +
                                         offsetof(ResTable_map, value) + offsetof(Res_value, data));
             }
         }
 
         bool result = value->flatten(&outEntry->value);
+        if (privateRef) {
+            outEntry->value.data = 0;
+        }
         assert(result && "flatten failed");
     }
 
@@ -169,7 +185,8 @@ struct MapFlattenVisitor : public RawValueVisitor {
 
     void visit(Style* style) override {
         if (style->parent) {
-            if (!style->parent.value().id) {
+            bool privateRef = style->parent.value().privateReference && mUseExtendedChunks;
+            if (!style->parent.value().id || privateRef) {
                 assert(style->parent.value().name && "reference must have a name");
                 mParentName = style->parent.value().name;
             } else {
@@ -339,21 +356,28 @@ private:
     bool flattenValue(FlatEntry* entry, BigBuffer* buffer) {
         if (Item* item = valueCast<Item>(entry->value)) {
             writeEntry<ResTable_entry, true>(entry, buffer);
+            bool privateRef = false;
             if (Reference* ref = valueCast<Reference>(entry->value)) {
-                if (!ref->id) {
+                // If there is no ID or the reference is private and we allow extended chunks,
+                // write out a 0 and mark the symbol table with the name of the reference.
+                privateRef = (ref->privateReference && mOptions.useExtendedChunks);
+                if (!ref->id || privateRef) {
                     assert(ref->name && "reference must have at least a name");
-                    mSymbols->addSymbol(ref->name.value(),
-                                        buffer->size() + offsetof(Res_value, data));
+                    mSymbols->addSymbol(*ref, buffer->size() + offsetof(Res_value, data));
                 }
             }
             Res_value* outValue = buffer->nextBlock<Res_value>();
             bool result = item->flatten(outValue);
             assert(result && "flatten failed");
+            if (privateRef) {
+                // Force the value of 0 so we look up the symbol at unflatten time.
+                outValue->data = 0;
+            }
             outValue->size = util::hostToDevice16(sizeof(*outValue));
         } else {
             const size_t beforeEntry = buffer->size();
             ResTable_entry_ext* outEntry = writeEntry<ResTable_entry_ext, false>(entry, buffer);
-            MapFlattenVisitor visitor(mSymbols, entry, buffer);
+            MapFlattenVisitor visitor(mSymbols, entry, buffer, mOptions.useExtendedChunks);
             entry->value->accept(&visitor);
             outEntry->count = util::hostToDevice32(visitor.mEntryCount);
             if (visitor.mParentName) {

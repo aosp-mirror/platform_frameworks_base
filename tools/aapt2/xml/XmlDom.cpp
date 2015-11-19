@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "util/Util.h"
 #include "XmlDom.h"
 #include "XmlPullParser.h"
+#include "util/Util.h"
 
 #include <cassert>
+#include <expat.h>
 #include <memory>
 #include <stack>
 #include <string>
@@ -317,6 +318,10 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
     return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
 }
 
+Element* findRootElement(XmlResource* doc) {
+    return findRootElement(doc->root.get());
+}
+
 Element* findRootElement(Node* node) {
     if (!node) {
         return nullptr;
@@ -395,6 +400,40 @@ std::vector<Element*> Element::getChildElements() {
         }
     }
     return elements;
+}
+
+void PackageAwareVisitor::visit(Namespace* ns) {
+   bool added = false;
+   if (Maybe<ExtractedPackage> maybePackage = extractPackageFromNamespace(ns->namespaceUri)) {
+       ExtractedPackage& package = maybePackage.value();
+       mPackageDecls.push_back(PackageDecl{ ns->namespacePrefix, std::move(package) });
+       added = true;
+   }
+
+   Visitor::visit(ns);
+
+   if (added) {
+       mPackageDecls.pop_back();
+   }
+}
+
+Maybe<ExtractedPackage> PackageAwareVisitor::transformPackageAlias(
+       const StringPiece16& alias, const StringPiece16& localPackage) const {
+   if (alias.empty()) {
+       return ExtractedPackage{ localPackage.toString(), false /* private */ };
+   }
+
+   const auto rend = mPackageDecls.rend();
+   for (auto iter = mPackageDecls.rbegin(); iter != rend; ++iter) {
+       if (alias == iter->prefix) {
+           if (iter->package.package.empty()) {
+               return ExtractedPackage{ localPackage.toString(),
+                                              iter->package.privateNamespace };
+           }
+           return iter->package;
+       }
+   }
+   return {};
 }
 
 } // namespace xml

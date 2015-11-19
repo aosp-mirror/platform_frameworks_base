@@ -16,11 +16,10 @@
 
 #include "flatten/XmlFlattener.h"
 #include "link/Linkers.h"
-#include "util/BigBuffer.h"
-#include "util/Util.h"
-
 #include "test/Builders.h"
 #include "test/Context.h"
+#include "util/BigBuffer.h"
+#include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <gtest/gtest.h>
@@ -45,7 +44,7 @@ public:
                 .build();
     }
 
-    ::testing::AssertionResult flatten(XmlResource* doc, android::ResXMLTree* outTree,
+    ::testing::AssertionResult flatten(xml::XmlResource* doc, android::ResXMLTree* outTree,
                                        XmlFlattenerOptions options = {}) {
         BigBuffer buffer(1024);
         XmlFlattener flattener(&buffer, options);
@@ -65,7 +64,7 @@ protected:
 };
 
 TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom(R"EOF(
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
             <View xmlns:test="http://com.test"
                   attr="hey">
               <Layout test:hello="hi" />
@@ -144,7 +143,7 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
 }
 
 TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom(R"EOF(
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
                 android:paddingStart="1dp"
                 android:colorAccent="#ffffff"/>)EOF");
@@ -169,7 +168,7 @@ TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
 }
 
 TEST_F(XmlFlattenerTest, AssignSpecialAttributeIndices) {
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom(R"EOF(
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
                   android:id="@id/id"
                   class="str"
@@ -192,7 +191,7 @@ TEST_F(XmlFlattenerTest, AssignSpecialAttributeIndices) {
  * namespace.
  */
 TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
-    std::unique_ptr<XmlResource> doc = test::buildXmlDom("<View package=\"android\"/>");
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom("<View package=\"android\"/>");
 
     android::ResXMLTree tree;
     ASSERT_TRUE(flatten(doc.get(), &tree));

@@ -17,15 +17,11 @@
 #ifndef AAPT_FLATTEN_XMLFLATTENER_H
 #define AAPT_FLATTEN_XMLFLATTENER_H
 
-#include "util/BigBuffer.h"
-
 #include "process/IResourceTableConsumer.h"
+#include "util/BigBuffer.h"
+#include "xml/XmlDom.h"
 
 namespace aapt {
-
-namespace xml {
-struct Node;
-}
 
 struct XmlFlattenerOptions {
     /**
@@ -45,7 +41,7 @@ public:
             mBuffer(buffer), mOptions(options) {
     }
 
-    bool consume(IAaptContext* context, XmlResource* resource) override;
+    bool consume(IAaptContext* context, xml::XmlResource* resource) override;
 
 private:
     BigBuffer* mBuffer;

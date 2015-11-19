@@ -62,7 +62,7 @@ struct ExtendedTypes {
          * A raw string value that hasn't had its escape sequences
          * processed nor whitespace removed.
          */
-        TYPE_RAW_STRING = 0xfe
+        TYPE_RAW_STRING = 0xfe,
     };
 };
 

@@ -58,8 +58,9 @@ sources := \
 	ResourceValues.cpp \
 	SdkConstants.cpp \
 	StringPool.cpp \
-	XmlDom.cpp \
-	XmlPullParser.cpp
+	xml/XmlDom.cpp \
+	xml/XmlPullParser.cpp \
+	xml/XmlUtil.cpp
 
 testSources := \
 	compile/IdAssigner_test.cpp \
@@ -90,8 +91,9 @@ testSources := \
 	ResourceUtils_test.cpp \
 	StringPool_test.cpp \
 	ValueVisitor_test.cpp \
-	XmlDom_test.cpp \
-	XmlPullParser_test.cpp
+	xml/XmlDom_test.cpp \
+	xml/XmlPullParser_test.cpp \
+	xml/XmlUtil_test.cpp
 
 toolSources := \
 	compile/Compile.cpp \

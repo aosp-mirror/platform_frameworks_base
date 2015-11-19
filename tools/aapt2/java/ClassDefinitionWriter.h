@@ -17,6 +17,7 @@
 #ifndef AAPT_JAVA_CLASSDEFINITION_H
 #define AAPT_JAVA_CLASSDEFINITION_H
 
+#include "Resource.h"
 #include "java/AnnotationProcessor.h"
 #include "util/StringPiece.h"
 #include "util/Util.h"

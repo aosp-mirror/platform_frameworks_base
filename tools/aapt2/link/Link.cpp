@@ -18,8 +18,6 @@
 #include "Debug.h"
 #include "Flags.h"
 #include "NameMangler.h"
-#include "XmlDom.h"
-
 #include "compile/IdAssigner.h"
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
@@ -28,6 +26,7 @@
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
 #include "link/Linkers.h"
+#include "link/ReferenceLinker.h"
 #include "link/ManifestFixer.h"
 #include "link/TableMerger.h"
 #include "process/IResourceTableConsumer.h"
@@ -36,6 +35,7 @@
 #include "unflatten/FileExportHeaderReader.h"
 #include "util/Files.h"
 #include "util/StringPiece.h"
+#include "xml/XmlDom.h"
 
 #include <fstream>
 #include <sys/stat.h>
@@ -159,7 +159,7 @@ public:
     /**
      * Inflates an XML file from the source path.
      */
-    std::unique_ptr<XmlResource> loadXml(const std::string& path) {
+    std::unique_ptr<xml::XmlResource> loadXml(const std::string& path) {
         std::ifstream fin(path, std::ifstream::binary);
         if (!fin) {
             mContext.getDiagnostics()->error(DiagMessage(path) << strerror(errno));
@@ -172,7 +172,7 @@ public:
     /**
      * Inflates a binary XML file from the source path.
      */
-    std::unique_ptr<XmlResource> loadBinaryXmlSkipFileExport(const std::string& path) {
+    std::unique_ptr<xml::XmlResource> loadBinaryXmlSkipFileExport(const std::string& path) {
         // Read header for symbol info and export info.
         std::string errorStr;
         Maybe<android::FileMap> maybeF = file::mmapPath(path, &errorStr);
@@ -188,7 +188,7 @@ public:
             return {};
         }
 
-        std::unique_ptr<XmlResource> xmlRes = xml::inflate(
+        std::unique_ptr<xml::XmlResource> xmlRes = xml::inflate(
                 (const uint8_t*) maybeF.value().getDataPtr() + (size_t) offset,
                 maybeF.value().getDataLength() - offset,
                 mContext.getDiagnostics(), Source(path));
@@ -245,7 +245,7 @@ public:
         return true;
     }
 
-    Maybe<AppInfo> extractAppInfoFromManifest(XmlResource* xmlRes) {
+    Maybe<AppInfo> extractAppInfoFromManifest(xml::XmlResource* xmlRes) {
         // Make sure the first element is <manifest> with package attribute.
         if (xml::Element* manifestEl = xml::findRootElement(xmlRes->root.get())) {
             if (manifestEl->namespaceUri.empty() && manifestEl->name == u"manifest") {
@@ -309,7 +309,7 @@ public:
         return true;
     }
 
-    bool flattenXml(XmlResource* xmlRes, const StringPiece& path, Maybe<size_t> maxSdkLevel,
+    bool flattenXml(xml::XmlResource* xmlRes, const StringPiece& path, Maybe<size_t> maxSdkLevel,
                     IArchiveWriter* writer) {
         BigBuffer buffer(1024);
         XmlFlattenerOptions options = {};
@@ -354,7 +354,7 @@ public:
         return true;
     }
 
-    bool writeManifestJavaFile(XmlResource* manifestXml) {
+    bool writeManifestJavaFile(xml::XmlResource* manifestXml) {
         if (!mOptions.generateJavaClassPath) {
             return true;
         }
@@ -502,7 +502,7 @@ public:
 
     int run(const std::vector<std::string>& inputFiles) {
         // Load the AndroidManifest.xml
-        std::unique_ptr<XmlResource> manifestXml = loadXml(mOptions.manifestPath);
+        std::unique_ptr<xml::XmlResource> manifestXml = loadXml(mOptions.manifestPath);
         if (!manifestXml) {
             return 1;
         }
@@ -545,23 +545,19 @@ public:
                                   << "with package ID " << std::hex << (int) mContext.mPackageId);
         }
 
-        bool error = false;
 
         for (const std::string& input : inputFiles) {
             if (!processFile(input, false)) {
-                error = true;
+                mContext.getDiagnostics()->error(DiagMessage() << "failed parsing input");
+                return 1;
             }
         }
 
         for (const std::string& input : mOptions.overlayFiles) {
             if (!processFile(input, true)) {
-                error = true;
+                mContext.getDiagnostics()->error(DiagMessage() << "failed parsing overlays");
+                return 1;
             }
-        }
-
-        if (error) {
-            mContext.getDiagnostics()->error(DiagMessage() << "failed parsing input");
-            return 1;
         }
 
         if (!verifyNoExternalPackages()) {
@@ -608,6 +604,7 @@ public:
             return 1;
         }
 
+        bool error = false;
         {
             ManifestFixerOptions manifestFixerOptions;
             manifestFixerOptions.minSdkVersionDefault = mOptions.minSdkVersionDefault;
@@ -616,6 +613,11 @@ public:
             if (!manifestFixer.consume(&mContext, manifestXml.get())) {
                 error = true;
             }
+
+            // AndroidManifest.xml has no resource name, but the CallSite is built from the name
+            // (aka, which package the AndroidManifest.xml is coming from).
+            // So we give it a package name so it can see local resources.
+            manifestXml->file.name.package = mContext.getCompilationPackage().toString();
 
             XmlReferenceLinker manifestLinker;
             if (manifestLinker.consume(&mContext, manifestXml.get())) {
@@ -640,14 +642,21 @@ public:
             }
         }
 
+        if (error) {
+            mContext.getDiagnostics()->error(DiagMessage() << "failed processing manifest");
+            return 1;
+        }
+
         for (const FileToProcess& file : mFilesToProcess) {
             if (file.file.name.type != ResourceType::kRaw &&
                     util::stringEndsWith<char>(file.source.path, ".xml.flat")) {
                 if (mOptions.verbose) {
-                    mContext.getDiagnostics()->note(DiagMessage() << "linking " << file.source.path);
+                    mContext.getDiagnostics()->note(DiagMessage()
+                                                    << "linking " << file.source.path);
                 }
 
-                std::unique_ptr<XmlResource> xmlRes = loadBinaryXmlSkipFileExport(file.source.path);
+                std::unique_ptr<xml::XmlResource> xmlRes = loadBinaryXmlSkipFileExport(
+                        file.source.path);
                 if (!xmlRes) {
                     return 1;
                 }

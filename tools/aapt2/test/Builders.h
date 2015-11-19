@@ -19,10 +19,9 @@
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
-#include "XmlDom.h"
-#include "util/Util.h"
-
 #include "test/Common.h"
+#include "util/Util.h"
+#include "xml/XmlDom.h"
 
 #include <memory>
 
@@ -212,12 +211,19 @@ public:
     }
 };
 
-inline std::unique_ptr<XmlResource> buildXmlDom(const StringPiece& str) {
+inline std::unique_ptr<xml::XmlResource> buildXmlDom(const StringPiece& str) {
     std::stringstream in;
     in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
     StdErrDiagnostics diag;
-    std::unique_ptr<XmlResource> doc = xml::inflate(&in, &diag, {});
+    std::unique_ptr<xml::XmlResource> doc = xml::inflate(&in, &diag, {});
     assert(doc);
+    return doc;
+}
+
+inline std::unique_ptr<xml::XmlResource> buildXmlDomForPackageName(IAaptContext* context,
+                                                                   const StringPiece& str) {
+    std::unique_ptr<xml::XmlResource> doc = buildXmlDom(str);
+    doc->file.name.package = context->getCompilationPackage().toString();
     return doc;
 }
 
