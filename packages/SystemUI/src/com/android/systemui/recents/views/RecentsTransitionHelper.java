@@ -31,7 +31,6 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.GuardedBy;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
@@ -93,7 +92,7 @@ public class RecentsTransitionHelper {
             final boolean lockToTask, final Rect bounds, int destinationStack) {
         final ActivityOptions opts = ActivityOptions.makeBasic();
         if (bounds != null) {
-            opts.setBounds(bounds.isEmpty() ? null : bounds);
+            opts.setLaunchBounds(bounds.isEmpty() ? null : bounds);
         }
 
         final ActivityOptions.OnAnimationStartedListener animStartedListener;

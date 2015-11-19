@@ -45,7 +45,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -337,7 +336,7 @@ final class TaskRecord {
         mNextAffiliateTaskId = nextTaskId;
         mCallingUid = callingUid;
         mCallingPackage = callingPackage;
-        mResizeable = resizeable || mService.mForceResizableActivites;
+        mResizeable = resizeable || mService.mForceResizableActivities;
         mPrivileged = privileged;
         ActivityInfo info = (mActivities.size() > 0) ? mActivities.get(0).info : null;
         mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
@@ -439,7 +438,7 @@ final class TaskRecord {
         } else {
             autoRemoveRecents = false;
         }
-        mResizeable = info.resizeable || mService.mForceResizableActivites;
+        mResizeable = info.resizeable || mService.mForceResizableActivities;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
@@ -694,7 +693,7 @@ final class TaskRecord {
         // Only set this based on the first activity
         if (mActivities.isEmpty()) {
             taskType = r.mActivityType;
-            if (taskType == HOME_ACTIVITY_TYPE && mService.mForceResizableActivites) {
+            if (taskType == HOME_ACTIVITY_TYPE && mService.mForceResizableActivities) {
                 mResizeable = r.info.resizeable;
             }
             isPersistable = r.isPersistable();
