@@ -84,6 +84,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private final RadialTimePickerView mRadialTimePickerView;
     private final TextView mSeparatorView;
 
+    private final Calendar mTempCalendar;
+
     private boolean mIsEnabled = true;
     private boolean mAllowAutoAdvance;
     private int mInitialHourOfDay;
@@ -102,8 +104,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     // Most recent time announcement values for accessibility.
     private CharSequence mLastAnnouncedText;
     private boolean mLastAnnouncedIsHour;
-
-    private Calendar mTempCalendar;
 
     public TimePickerClockDelegate(TimePicker delegator, Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {

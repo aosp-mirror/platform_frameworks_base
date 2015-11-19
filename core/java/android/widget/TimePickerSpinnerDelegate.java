@@ -32,6 +32,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import libcore.icu.LocaleData;
 
@@ -45,11 +46,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     private static final boolean DEFAULT_ENABLED_STATE = true;
     private static final int HOURS_IN_HALF_DAY = 12;
 
-    // state
-    private boolean mIs24HourView;
-    private boolean mIsAm;
-
-    // ui components
     private final NumberPicker mHourSpinner;
     private final NumberPicker mMinuteSpinner;
     private final NumberPicker mAmPmSpinner;
@@ -66,10 +62,14 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     private final String[] mAmPmStrings;
 
+    private final Calendar mTempCalendar;
+
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
-    private Calendar mTempCalendar;
     private boolean mHourWithTwoDigit;
     private char mHourFormat;
+
+    private boolean mIs24HourView;
+    private boolean mIsAm;
 
     public TimePickerSpinnerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -202,6 +202,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         updateAmPmControl();
 
         // set to current time
+        mTempCalendar = Calendar.getInstance(mLocale);
         setHour(mTempCalendar.get(Calendar.HOUR_OF_DAY));
         setMinute(mTempCalendar.get(Calendar.MINUTE));
 
