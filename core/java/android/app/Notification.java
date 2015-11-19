@@ -3000,7 +3000,6 @@ public class Notification implements Parcelable
             contentView.setImageViewResource(R.id.icon, 0);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
-            contentView.setViewVisibility(R.id.expand_button, View.GONE);
             contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
             contentView.setViewVisibility(R.id.header_content_info, View.GONE);
             contentView.setViewVisibility(R.id.number_of_children, View.GONE);
@@ -3245,9 +3244,10 @@ public class Notification implements Parcelable
             }
             if (result == null) {
                 result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
+            } else {
+                hideLine1Text(result);
             }
             adaptNotificationHeaderForBigContentView(result);
-            hideLine1Text(result);
             return result;
         }
 
