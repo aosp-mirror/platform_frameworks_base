@@ -83,8 +83,8 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
         record.tileView.setVisibility(View.VISIBLE);
         record.tileView.init(null, null, null);
         record.tileView.setOnTouchListener(this);
-        if (mCurrentClip != null
-                && mCurrentClip.getItemAt(0).getText().toString().equals(record.tile.getTileSpec())) {
+        if (mCurrentClip != null && mCurrentClip.getItemAt(0)
+                .getText().toString().equals(record.tile.getTileSpec())) {
             record.tileView.setAlpha(.3f);
             mCurrentView = record.tileView;
         }
@@ -180,7 +180,7 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
             case MotionEvent.ACTION_DOWN:
                 // Stash the current tiles, in case the drop is on info, that we can restore
                 // the previous state.
-                mPanel.getCustomHost().stashCurrentTiles();
+                mPanel.stashCurrentTiles();
                 mCurrentView = v;
                 mCurrentClip = mPanel.getClip((QSTile<?>) v.getTag());
                 View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);

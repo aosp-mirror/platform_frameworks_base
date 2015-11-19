@@ -44,8 +44,8 @@ import java.util.Objects;
  * state update pass on tile looper.
  */
 public abstract class QSTile<TState extends State> implements Listenable {
-    protected final String TAG = "QSTile." + getClass().getSimpleName();
-    protected static final boolean DEBUG = Log.isLoggable("QSTile", Log.DEBUG);
+    protected final String TAG = "Tile." + getClass().getSimpleName();
+    protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
     protected final Host mHost;
     protected final Context mContext;
@@ -332,7 +332,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         Looper getLooper();
         Context getContext();
         Collection<QSTile<?>> getTiles();
-        void setCallback(Callback callback);
+        void addCallback(Callback callback);
         BluetoothController getBluetoothController();
         LocationController getLocationController();
         RotationLockController getRotationLockController();
@@ -453,9 +453,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public static class State {
         public boolean visible;
         public Icon icon;
-        public String label;
-        public String contentDescription;
-        public String dualLabelContentDescription;
+        public CharSequence label;
+        public CharSequence contentDescription;
+        public CharSequence dualLabelContentDescription;
         public boolean autoMirrorDrawable = true;
 
         public boolean copyTo(State other) {

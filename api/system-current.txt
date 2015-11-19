@@ -43,6 +43,7 @@ package android {
     field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
+    field public static final java.lang.String BIND_QUICK_SETTINGS_TILE = "android.permission.BIND_QUICK_SETTINGS_TILE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_TELECOM_CONNECTION_SERVICE = "android.permission.BIND_TELECOM_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
@@ -31195,6 +31196,35 @@ package android.service.persistentdata {
     method public void setOemUnlockEnabled(boolean);
     method public void wipe();
     method public int write(byte[]);
+  }
+
+}
+
+package android.service.quicksettings {
+
+  public final class Tile implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.CharSequence getContentDescription();
+    method public android.graphics.drawable.Icon getIcon();
+    method public java.lang.CharSequence getLabel();
+    method public void setContentDescription(java.lang.CharSequence);
+    method public void setIcon(android.graphics.drawable.Icon);
+    method public void setLabel(java.lang.CharSequence);
+    method public void updateTile();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.quicksettings.Tile> CREATOR;
+  }
+
+  public class TileService extends android.app.Service {
+    ctor public TileService();
+    method public final android.service.quicksettings.Tile getQsTile();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public void onClick();
+    method public void onStartListening();
+    method public void onStopListening();
+    method public void onTileAdded();
+    method public void onTileRemoved();
+    field public static final java.lang.String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
   }
 
 }

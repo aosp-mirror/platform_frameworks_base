@@ -59,8 +59,6 @@ public class TunerFragment extends PreferenceFragment {
 
     private SwitchPreference mBatteryPct;
 
-    private Preference mQsTuner;
-
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -68,17 +66,6 @@ public class TunerFragment extends PreferenceFragment {
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
 
-        mQsTuner = findPreference(KEY_QS_TUNER);
-        mQsTuner.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(android.R.id.content, new QsTuner(), "QsTuner");
-                ft.addToBackStack(null);
-                ft.commit();
-                return true;
-            }
-        });
         findPreference(KEY_DEMO_MODE).setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -96,13 +83,6 @@ public class TunerFragment extends PreferenceFragment {
                 new TunerWarningFragment().show(getFragmentManager(), WARNING_TAG);
             }
         }
-        TunerService.get(getContext()).addTunable(mQsPaging, QSPanel.QS_THE_NEW_QS);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        TunerService.get(getContext()).removeTunable(mQsPaging);
     }
 
     @Override
@@ -172,14 +152,6 @@ public class TunerFragment extends PreferenceFragment {
             MetricsLogger.action(getContext(), MetricsLogger.TUNER_BATTERY_PERCENTAGE, v);
             System.putInt(getContext().getContentResolver(), SHOW_PERCENT_SETTING, v ? 1 : 0);
             return true;
-        }
-    };
-
-    private final Tunable mQsPaging = new Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            // Only enable QS rearranging when paging is off, because its very broken.
-            mQsTuner.setEnabled(newValue == null || Integer.parseInt(newValue) == 0);
         }
     };
 

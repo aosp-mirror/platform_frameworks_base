@@ -77,9 +77,9 @@ public class QSPanel extends FrameLayout implements Tunable {
     private Record mDetailRecord;
     private Callback mCallback;
     private BrightnessController mBrightnessController;
-    private QSTileHost mHost;
+    protected QSTileHost mHost;
 
-    private QSFooter mFooter;
+    protected QSFooter mFooter;
     private boolean mGridContentVisible = true;
 
     protected LinearLayout mQsContainer;

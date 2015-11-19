@@ -133,7 +133,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                     R.string.accessibility_quick_settings_bluetooth_off);
         }
 
-        String bluetoothName = state.label;
+        CharSequence bluetoothName = state.label;
         if (connected) {
             bluetoothName = state.dualLabelContentDescription = mContext.getString(
                     R.string.accessibility_bluetooth_name, state.label);

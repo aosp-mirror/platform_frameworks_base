@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.service.quicksettings.TileService;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,8 +83,10 @@ public class TileAdapter extends BaseAdapter {
                     continue;
                 }
                 if (tileSpecs.contains(spec)) {
+                    Log.d(TAG, "Skipping " + spec);
                     continue;
                 }
+                Log.d(TAG, "Trying " + spec);
                 final QSTile<?> tile = host.createTile(spec);
                 // Bad, bad, very bad.
                 tile.setListening(true);
@@ -156,7 +159,7 @@ public class TileAdapter extends BaseAdapter {
             Log.d(TAG, "Added " + mLabel);
         }
 
-        private void addTile(String spec, Drawable icon, String label) {
+        private void addTile(String spec, Drawable icon, CharSequence label) {
             TileInfo info = new TileInfo();
             info.label = label;
             info.drawable = icon;
@@ -164,7 +167,7 @@ public class TileAdapter extends BaseAdapter {
             mTiles.add(info);
         }
 
-        private void addTile(String spec, Icon icon, String label, Context context) {
+        private void addTile(String spec, Icon icon, CharSequence label, Context context) {
             addTile(spec, icon.getDrawable(context), label);
         }
 
@@ -208,19 +211,17 @@ public class TileAdapter extends BaseAdapter {
     private static class TileInfo {
         private String spec;
         private Drawable drawable;
-        private String label;
+        private CharSequence label;
     }
 
     private class QueryTilesTask extends AsyncTask<Void, Void, Collection<TileGroup>> {
-        // TODO: Become non-prototype and an API.
-        private static final String TILE_ACTION = "android.intent.action.QS_TILE";
-
         @Override
         protected Collection<TileGroup> doInBackground(Void... params) {
             HashMap<String, TileGroup> pkgMap = new HashMap<>();
             PackageManager pm = mContext.getPackageManager();
             // TODO: Handle userness.
-            List<ResolveInfo> services = pm.queryIntentServices(new Intent(TILE_ACTION), 0);
+            List<ResolveInfo> services = pm.queryIntentServices(
+                    new Intent(TileService.ACTION_QS_TILE), 0);
             for (ResolveInfo info : services) {
                 String packageName = info.serviceInfo.packageName;
                 ComponentName componentName = new ComponentName(packageName, info.serviceInfo.name);
