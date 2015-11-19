@@ -1480,7 +1480,9 @@ public class AppTransition implements Dump {
                                 mNextAppTransitionFutureCallback, null /* finishedCallback */,
                                 mNextAppTransitionScaleUp);
                         mNextAppTransitionFutureCallback = null;
-                        mService.prolongAnimationsFromSpecs(specs, mNextAppTransitionScaleUp);
+                        if (specs != null) {
+                            mService.prolongAnimationsFromSpecs(specs, mNextAppTransitionScaleUp);
+                        }
                     }
                     mService.requestTraversal();
                 }
