@@ -1691,8 +1691,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
-        if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
-        if ((visibility & InputMethodService.IME_VISIBLE) == 0) return false;
+        final boolean isImeActive = ((visibility & InputMethodService.IME_ACTIVE) != 0);
+        final boolean isHardkeyboardAvailable = mWindowManagerService.isHardKeyboardAvailable();
+        final boolean isImeVisible = ((visibility & InputMethodService.IME_VISIBLE) != 0);
+        if (isHardkeyboardAvailable) {
+            if (!isImeActive) return false;
+        } else {
+            if (!isImeVisible) return false;
+        }
 
         List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
         final int N = imis.size();
