@@ -195,6 +195,15 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
+     * @return The minimum height this child chan be expanded to. Note that this might be different
+     * than {@link #getMinHeight()} because some elements can't be collapsed by an expand gesture
+     * to it's absolute minimal height
+     */
+    public int getMinExpandHeight() {
+        return getHeight();
+    }
+
+    /**
      * Sets the notification as dimmed. The default implementation does nothing.
      *
      * @param dimmed Whether the notification should be dimmed.

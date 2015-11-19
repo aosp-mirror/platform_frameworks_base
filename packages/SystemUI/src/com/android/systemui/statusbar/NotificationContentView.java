@@ -52,7 +52,6 @@ public class NotificationContentView extends FrameLayout {
 
     private final Rect mClipBounds = new Rect();
     private final int mSingleLineHeight;
-    private final int mSmallHeight;
     private final int mHeadsUpHeight;
     private final int mRoundRectRadius;
     private final Interpolator mLinearInterpolator = new LinearInterpolator();
@@ -77,6 +76,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mIsHeadsUp;
     private boolean mShowingLegacyBackground;
     private boolean mIsChildInGroup;
+    private int mSmallHeight;
     private ExpandableNotificationRow mContainingNotification;
     private StatusBarNotification mStatusBarNotification;
     private NotificationGroupManager mGroupManager;
@@ -116,7 +116,6 @@ public class NotificationContentView extends FrameLayout {
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
         mSingleLineHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_single_line_height);
-        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
         mRoundRectRadius = getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
@@ -124,6 +123,10 @@ public class NotificationContentView extends FrameLayout {
                 R.bool.config_notifications_round_rect_clipping);
         reset(true);
         setOutlineProvider(mOutlineProvider);
+    }
+
+    public void setSmallHeight(int smallHeight) {
+        mSmallHeight = smallHeight;
     }
 
     @Override

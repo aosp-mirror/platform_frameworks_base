@@ -192,6 +192,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    protected int mRowMinHeightLegacy;
     protected int mRowMinHeight;
     protected int mRowMaxHeight;
 
@@ -1338,7 +1339,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         PackageManager pmUser = getPackageManagerForUser(mContext,
                 entry.notification.getUser().getIdentifier());
 
-        int maxHeight = mRowMaxHeight;
         final StatusBarNotification sbn = entry.notification;
         entry.cacheContentViews(mContext, null);
 
@@ -1537,7 +1537,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         entry.row = row;
-        entry.row.setHeightRange(mRowMinHeight, maxHeight);
+        updateNotificationHeightRange(entry);
         entry.row.setOnActivatedListener(this);
         entry.row.setExpandable(bigContentViewLocal != null);
 
@@ -1553,6 +1553,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         row.setEntry(entry);
         applyRemoteInput(entry);
         return true;
+    }
+
+    private void updateNotificationHeightRange(Entry entry) {
+        boolean customView = entry.getContentView().getId()
+                != com.android.internal.R.id.status_bar_latest_event_content;
+        boolean beforeN = entry.targetSdk < Build.VERSION_CODES.N;
+        int minHeight = customView && beforeN ? mRowMinHeightLegacy : mRowMinHeight;
+        entry.row.setHeightRange(minHeight, mRowMaxHeight);
     }
 
     /**

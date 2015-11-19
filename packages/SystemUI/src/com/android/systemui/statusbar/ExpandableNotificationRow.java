@@ -525,6 +525,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setHeightRange(int rowMinHeight, int rowMaxHeight) {
         mRowMinHeight = rowMinHeight;
         mMaxViewHeight = rowMaxHeight;
+        mPrivateLayout.setSmallHeight(mRowMinHeight);
+        mPublicLayout.setSmallHeight(mRowMinHeight);
     }
 
     public boolean isExpandable() {
@@ -890,12 +892,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public int getMinHeight() {
+        NotificationContentView showingLayout = getShowingLayout();
+        return showingLayout.getMinHeight();
+    }
+
+    @Override
+    public int getMinExpandHeight() {
         if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getMinHeight()
                     + mNotificationHeader.getHeight();
         }
-        NotificationContentView showingLayout = getShowingLayout();
-        return showingLayout.getMinHeight();
+        return getMinHeight();
     }
 
     @Override

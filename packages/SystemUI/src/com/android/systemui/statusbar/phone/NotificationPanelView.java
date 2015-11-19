@@ -1694,7 +1694,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private float getFadeoutAlpha() {
-        float alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
+        float alpha = (getNotificationsTopY() + mNotificationStackScroller.getFirstItemMinHeight())
                 / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
                 - mNotificationStackScroller.getCollapseSecondCardPadding());
         alpha = Math.max(0, Math.min(alpha, 1));

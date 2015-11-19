@@ -272,7 +272,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     protected void onDraw(Canvas canvas) {
         if (DEBUG) {
-            int y = mCollapsedSize;
+            int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             y = (int) (getLayoutHeight() - mBottomStackPeekSize
                     - mBottomStackSlowDownHeight);
@@ -550,8 +550,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         return Math.min(mMaxLayoutHeight, mCurrentStackHeight);
     }
 
-    public int getItemHeight() {
-        return mCollapsedSize;
+    public int getFirstItemMinHeight() {
+        final ExpandableView firstChild = getFirstChildNotGone();
+        return firstChild != null ? firstChild.getMinHeight() : mCollapsedSize;
     }
 
     public int getBottomStackPeekSize() {
@@ -1321,14 +1322,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         ExpandableView firstChild = (ExpandableView) getFirstChildNotGone();
         if (firstChild != null) {
             int contentHeight = getContentHeight();
-            int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
             scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize
                     + mBottomStackSlowDownHeight);
             if (scrollRange > 0) {
-                View lastChild = getLastChildNotGone();
+                int firstChildMaxExpandHeight = getMaxExpandHeight(firstChild);
                 // We want to at least be able collapse the first item and not ending in a weird
                 // end state.
-                scrollRange = Math.max(scrollRange, firstChildMaxExpandHeight - mCollapsedSize);
+                scrollRange = Math.max(scrollRange, firstChildMaxExpandHeight
+                        - firstChild.getMinHeight());
             }
         }
         return scrollRange;
@@ -1337,12 +1338,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * @return the first child which has visibility unequal to GONE
      */
-    private View getFirstChildNotGone() {
+    private ExpandableView getFirstChildNotGone() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE) {
-                return child;
+                return (ExpandableView) child;
             }
         }
         return null;
@@ -1504,7 +1505,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getMinStackHeight() {
-        return mCollapsedSize + mBottomStackPeekSize + mCollapseSecondCardPadding;
+        final ExpandableView firstChild = getFirstChildNotGone();
+        final int firstChildMinHeight = firstChild != null ? (int) firstChild.getMinHeight()
+                : mCollapsedSize;
+        return firstChildMinHeight + mBottomStackPeekSize + mCollapseSecondCardPadding;
     }
 
     public float getTopPaddingOverflow() {
@@ -1512,7 +1516,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getPeekHeight() {
-        return mIntrinsicPadding + mCollapsedSize + mBottomStackPeekSize
+        final ExpandableView firstChild = getFirstChildNotGone();
+        final int firstChildMinHeight = firstChild != null ? (int) firstChild.getMinHeight()
+                : mCollapsedSize;
+        return mIntrinsicPadding + firstChildMinHeight + mBottomStackPeekSize
                 + mCollapseSecondCardPadding;
     }
 
