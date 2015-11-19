@@ -34,7 +34,7 @@ page.tags=vector
 
   <h2>Dependencies and Prerequisites</h2>
   <ul>
-    <li>Gradle 1.4.0 or higher</li>
+    <li><a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a> 1.5.0 or higher</li>
   </ul>
 
 </div>
@@ -98,7 +98,8 @@ minimum API level that is lower, Vector Asset Studio adds the vector drawable fi
 project; also, at build time, Gradle creates Portable Network Graphic (PNG) raster images at various
 resolutions. Gradle generates the PNG densities specified by the Domain Specific Language (DSL)
 <a href="http://google.github.io/android-gradle-dsl/1.4/com.android.build.gradle.internal.dsl.ProductFlavor.html#com.android.build.gradle.internal.dsl.ProductFlavor:generatedDensities" class="external-link">generatedDensities</a> property
-in a <code>build.gradle</code> file. To generate PNGs, the build system requires Gradle 1.4.0 or higher.</p>
+in a <code>build.gradle</code> file. To generate PNGs, the build system requires Android
+Plugin for Gradle 1.5.0 or higher.</p>
 
 <p>For Android 5.0 (API level 21) and higher, Vector Asset Studio supports all of the {@link
 android.graphics.drawable.VectorDrawable} elements. For backward compatibility with Android 4.4 (API
@@ -106,7 +107,7 @@ level 20) and lower, Vector Asset Studio supports the following XML elements:</p
 
 <div class="wrap">
   <div class="cols">
-    <div class="col-1of2">
+    <div class="col-1of3">
 
 <p><code>&lt;vector></code></p>
 <ul>
@@ -119,8 +120,23 @@ level 20) and lower, Vector Asset Studio supports the following XML elements:</p
 
 </div>
 
+<div class="col-1of3">
 
-<div class="col-1of2">
+<p><code>&lt;group></code></p>
+<ul>
+  <li><code>android:rotation</code></li>
+  <li><code>android:pivotX</code></li>
+  <li><code>android:pivotY</code></li>
+  <li><code>android:scaleX</code></li>
+  <li><code>android:scaleY</code></li>
+  <li><code>android:translateX</code></li>
+  <li><code>android:translateY</code></li>
+</ul>
+
+</div>
+
+
+<div class="col-1of3">
 
 <p><code>&lt;path></code></p>
 <ul>
@@ -130,6 +146,9 @@ level 20) and lower, Vector Asset Studio supports the following XML elements:</p
   <li><code>android:strokeWidth</code></li>
   <li><code>android:strokeAlpha</code></li>
   <li><code>android:fillAlpha</code></li>
+  <li><code>android:strokeLineCap</code></li>
+  <li><code>android:strokeLineJoin</code></li>
+  <li><code>android:strokeMiterLimit</code></li>
 </ul>
 
 </div>
@@ -163,12 +182,12 @@ android.graphics.drawable.VectorDrawable}. For more information, see
   <p>Vector Asset Studio appears.</p>
   <img src="{@docRoot}images/tools/vas-materialicon.png" />
   <li>If a <em>Need newer Android plugin for Gradle</em> dialog appears instead, correct
-  your Gradle version as follows.</li>
+  your Gradle version as follows:</li>
     <ol type="a">
       <li>Select <strong>File</strong> > <strong>Project Structure</strong>.</li>
       <li>In the <em>Project Structure</em> dialog, select <strong>Project</strong>.</li>
-      <li>In the <strong>Android Plugin Version</strong> field, change the Gradle version to
-      <strong>1.4.0</strong> or higher, and click <strong>OK</strong>.</li>
+      <li>In the <strong>Android Plugin Version</strong> field, change the Android Plugin for Gradle
+      version to <strong>1.5.0</strong> or higher, and click <strong>OK</strong>.</li>
       <p>Gradle syncs the project.</p>
       <li>In the <a href="{@docRoot}sdk/installing/create-project.html#ProjectView">Android view</a>
       of the <em>Project</em> window, right-click the <strong>res</strong> folder and select
@@ -480,7 +499,7 @@ changes.</p>
 
 <ul>
   <li>Create one APK that includes both the vector images and the corresponding raster
-    representations. This is the easiest solution.</li>
+    representations. This solution is the simplest to implement.</li>
   <li>Create separate APKs for different API levels. When you don’t include the corresponding
     raster images in the APK for Android 5.0 (API level 21) and higher, the APK can be much smaller in
     size. For more information, see <a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK Support</a>.</li>
