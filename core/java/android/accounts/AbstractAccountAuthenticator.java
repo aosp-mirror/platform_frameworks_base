@@ -116,6 +116,25 @@ public abstract class AbstractAccountAuthenticator {
      */
     public static final String KEY_CUSTOM_TOKEN_EXPIRY = "android.accounts.expiry";
 
+    /**
+     * Bundle key used for the {@link String} account type in session bundle.
+     * This is used in the default implementation of
+     * {@link #startAddAccountSession}. TODO: and startUpdateCredentialsSession.
+     */
+    private static final String KEY_AUTH_TOKEN_TYPE = "android.accounts.KEY_AUTH_TOKEN_TYPE";
+    /**
+     * Bundle key used for the {@link String} array of required features in
+     * session bundle. This is used in the default implementation of
+     * {@link #startAddAccountSession}. TODO: and startUpdateCredentialsSession.
+     */
+    private static final String KEY_REQUIRED_FEATURES = "android.accounts.AbstractAccountAuthenticator.KEY_REQUIRED_FEATURES";
+    /**
+     * Bundle key used for the {@link Bundle} options in session bundle. This is
+     * used in default implementation of {@link #startAddAccountSession}. TODO:
+     * and startUpdateCredentialsSession.
+     */
+    private static final String KEY_OPTIONS = "android.accounts.AbstractAccountAuthenticator.KEY_OPTIONS";
+
     private final Context mContext;
 
     public AbstractAccountAuthenticator(Context context) {
@@ -334,6 +353,36 @@ public abstract class AbstractAccountAuthenticator {
                 }
             } catch (Exception e) {
                 handleException(response, "addAccountFromCredentials", account.toString(), e);
+            }
+        }
+
+        @Override
+        public void startAddAccountSession(IAccountAuthenticatorResponse response,
+                String accountType, String authTokenType, String[] features, Bundle options)
+                throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG,
+                        "startAddAccountSession: accountType " + accountType
+                        + ", authTokenType " + authTokenType
+                        + ", features " + (features == null ? "[]" : Arrays.toString(features)));
+            }
+            checkBinderPermission();
+            try {
+                final Bundle result = AbstractAccountAuthenticator.this.startAddAccountSession(
+                        new AccountAuthenticatorResponse(response), accountType, authTokenType,
+                        features, options);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
+                    Log.v(TAG, "startAddAccountSession: result "
+                            + AccountManager.sanitizeResult(result));
+                }
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (Exception e) {
+                handleException(response, "startAddAccountSession", accountType, e);
             }
         }
     }
@@ -600,6 +649,54 @@ public abstract class AbstractAccountAuthenticator {
                 result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
                 response.onResult(result);
             }
+        }).start();
+        return null;
+    }
+
+    /**
+     * Starts the add account session to authenticate user to an account of the
+     * specified accountType.
+     *
+     * @param response to send the result back to the AccountManager, will never
+     *            be null
+     * @param accountType the type of account to authenticate with, will never
+     *            be null
+     * @param authTokenType the type of auth token to retrieve after
+     *            authenticating with the account, may be null
+     * @param requiredFeatures a String array of authenticator-specific features
+     *            that the account authenticated with must support, may be null
+     * @param options a Bundle of authenticator-specific options, may be null
+     * @return a Bundle result or null if the result is to be returned via the
+     *         response. The result will contain either:
+     *         <ul>
+     *         <li>{@link AccountManager#KEY_INTENT}, or
+     *         <li>{@link AccountManager#KEY_ACCOUNT_SESSION_BUNDLE} for adding
+     *         the account to device later, and if account is authenticated,
+     *         optional {@link AccountManager#KEY_PASSWORD} and
+     *         {@link AccountManager#KEY_ACCOUNT_STATUS_TOKEN} for checking the
+     *         status of the account, or
+     *         <li>{@link AccountManager#KEY_ERROR_CODE} and
+     *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
+     *         </ul>
+     * @throws NetworkErrorException if the authenticator could not honor the
+     *             request due to a network error
+     */
+    public Bundle startAddAccountSession(final AccountAuthenticatorResponse response,
+            final String accountType, final String authTokenType, final String[] requiredFeatures,
+            final Bundle options)
+            throws NetworkErrorException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bundle sessionBundle = new Bundle();
+                sessionBundle.putString(KEY_AUTH_TOKEN_TYPE, authTokenType);
+                sessionBundle.putStringArray(KEY_REQUIRED_FEATURES, requiredFeatures);
+                sessionBundle.putBundle(KEY_OPTIONS, options);
+                Bundle result = new Bundle();
+                result.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, sessionBundle);
+                response.onResult(result);
+            }
+
         }).start();
         return null;
     }
