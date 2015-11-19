@@ -16,8 +16,6 @@
 
 package android.app.admin;
 
-import android.os.Bundle;
-
 import java.util.List;
 
 /**
@@ -71,13 +69,4 @@ public abstract class DevicePolicyManagerInternal {
      * @return true if the uid is an active admin with the given policy.
      */
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
-
-    /**
-     * Takes a {@link Bundle} containing "base" user restrictions stored in
-     * {@link com.android.server.pm.UserManagerService}, mixes restrictions set by the device owner
-     * and the profile owner and returns the merged restrictions.
-     *
-     * This method always returns a new {@link Bundle}.
-     */
-    public abstract Bundle getComposedUserRestrictions(int userId, Bundle inBundle);
 }

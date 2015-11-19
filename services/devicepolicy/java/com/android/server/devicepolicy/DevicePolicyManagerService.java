@@ -201,31 +201,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final int STATUS_BAR_DISABLE2_MASK =
             StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
-    private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
-    static {
-        DEVICE_OWNER_USER_RESTRICTIONS = new ArraySet<>();
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_USB_FILE_TRANSFER);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_TETHERING);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_NETWORK_RESET);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FACTORY_RESET);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADD_USER);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FUN);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SAFE_BOOT);
-        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CREATE_WINDOWS);
-    }
-
-    // The following user restrictions cannot be changed by any active admin, including device
-    // owner and profile owner.
-    private static final Set<String> IMMUTABLE_USER_RESTRICTIONS;
-    static {
-        IMMUTABLE_USER_RESTRICTIONS = new ArraySet<>();
-        IMMUTABLE_USER_RESTRICTIONS.add(UserManager.DISALLOW_WALLPAPER);
-    }
-
     private static final Set<String> SECURE_SETTINGS_WHITELIST;
     private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
@@ -305,6 +280,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         @Override
         public void onBootPhase(int phase) {
             mService.systemReady(phase);
+        }
+
+        @Override
+        public void onStartUser(int userHandle) {
+            mService.onStartUser(userHandle);
         }
     }
 
@@ -1014,7 +994,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    // DO NOT call it while taking the "this" lock, which could cause a dead lock.
     private void handlePackagesChanged(String packageName, int userHandle) {
         boolean removed = false;
         if (VERBOSE_LOG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
@@ -1060,11 +1039,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         if (removed) {
-            synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
-                synchronized (DevicePolicyManagerService.this) {
-                    mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
-                }
-            }
+            // The removed admin might have disabled camera, so update user restrictions.
+            pushUserRestrictions(userHandle);
         }
     }
 
@@ -1350,8 +1326,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
 
             updateDeviceOwnerLocked();
-
-            // TODO Notify UM to update restrictions (?)
         }
     }
 
@@ -1403,6 +1377,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             migrateUserRestrictionsForUser(UserHandle.SYSTEM, deviceOwnerAdmin,
                     /* exceptionList =*/ UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS);
 
+            // Push DO user restrictions to user manager.
+            pushUserRestrictions(UserHandle.USER_SYSTEM);
+
             mOwners.setDeviceOwnerUserRestrictionsMigrated();
         }
 
@@ -1432,6 +1409,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                     migrateUserRestrictionsForUser(ui.getUserHandle(), profileOwnerAdmin,
                             exceptionList);
+
+                    // Note if a secondary user has no PO but has a DA that disables camera, we
+                    // don't get here and won't push the camera user restriction to UserManager
+                    // here.  That's okay because we'll push user restrictions anyway when a user
+                    // starts.  But we still do it because we want to let user manager persist
+                    // upon migration.
+                    pushUserRestrictions(userId);
                 }
 
                 mOwners.setProfileOwnerUserRestrictionsMigrated(userId);
@@ -1709,12 +1693,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 updateMaximumTimeToLockLocked(policy);
                                 policy.mRemovingAdmins.remove(adminReceiver);
                             }
-                            synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
-                                synchronized (DevicePolicyManagerService.this) {
-                                    mUserManagerInternal.updateEffectiveUserRestrictionsLR(
-                                            userHandle);
-                                }
-                            }
+                            // The removed admin might have disabled camera, so update user
+                            // restrictions.
+                            pushUserRestrictions(userHandle);
                         }
                     });
         }
@@ -2113,19 +2094,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         getUserData(UserHandle.USER_SYSTEM);
         loadOwners();
         cleanUpOldUsers();
+
+        onStartUser(UserHandle.USER_SYSTEM);
+
         // Register an observer for watching for user setup complete.
         new SetupContentObserver(mHandler).register(mContext.getContentResolver());
         // Initialize the user setup state, to handle the upgrade case.
         updateUserSetupComplete();
-
-        // Update the screen capture disabled cache in the window manager
-        List<UserInfo> users = mUserManager.getUsers(true);
-        final int N = users.size();
-        for (int i = 0; i < N; i++) {
-            int userHandle = users.get(i).id;
-            updateScreenCaptureDisabledInWindowManager(userHandle,
-                    getScreenCaptureDisabled(null, userHandle));
-        }
     }
 
     private void ensureDeviceOwnerUserStarted() {
@@ -2145,6 +2120,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         }
+    }
+
+    private void onStartUser(int userId) {
+        updateScreenCaptureDisabledInWindowManager(userId,
+                getScreenCaptureDisabled(null, userId));
+        pushUserRestrictions(userId);
     }
 
     private void cleanUpOldUsers() {
@@ -4307,15 +4288,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void updateScreenCaptureDisabledInWindowManager(int userHandle, boolean disabled) {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            mInjector.getIWindowManager().setScreenCaptureDisabled(userHandle, disabled);
-        } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+    private void updateScreenCaptureDisabledInWindowManager(final int userHandle,
+            final boolean disabled) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mInjector.getIWindowManager().setScreenCaptureDisabled(userHandle, disabled);
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
+                }
+            }
+        });
     }
 
     /**
@@ -4381,15 +4365,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         // Tell the user manager that the restrictions have changed.
-        synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
-            synchronized (this) {
-                if (isDeviceOwner(who, userHandle)) {
-                    mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersLR();
-                } else {
-                    mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
-                }
-            }
-        }
+        pushUserRestrictions(userHandle);
     }
 
     /**
@@ -4398,6 +4374,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     @Override
     public boolean getCameraDisabled(ComponentName who, int userHandle) {
+        return getCameraDisabled(who, userHandle, /* mergeDeviceOwnerRestriction= */ true);
+    }
+
+    private boolean getCameraDisabled(ComponentName who, int userHandle,
+            boolean mergeDeviceOwnerRestriction) {
         if (!mHasFeature) {
             return false;
         }
@@ -4407,9 +4388,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return (admin != null) ? admin.disableCamera : false;
             }
             // First, see if DO has set it.  If so, it's device-wide.
-            final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            if (deviceOwner != null && deviceOwner.disableCamera) {
-                return true;
+            if (mergeDeviceOwnerRestriction) {
+                final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+                if (deviceOwner != null && deviceOwner.disableCamera) {
+                    return true;
+                }
             }
 
             // Then check each device admin on the user.
@@ -4602,6 +4585,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return admin;
             }
         }
+        Slog.wtf(LOG_TAG, "Active admin for device owner not found. component=" + component);
         return null;
     }
 
@@ -4622,6 +4606,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new SecurityException("clearDeviceOwner can only be called by the device owner");
         }
         synchronized (this) {
+            final ActiveAdmin admin = getDeviceOwnerAdminLocked();
+            if (admin != null) {
+                admin.disableCamera = false;
+                admin.userRestrictions = null;
+            }
             clearUserPoliciesLocked(new UserHandle(UserHandle.USER_SYSTEM));
 
             mOwners.clearDeviceOwner();
@@ -4667,6 +4656,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ActiveAdmin admin =
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
+            admin.disableCamera = false;
             admin.userRestrictions = null;
             clearUserPoliciesLocked(callingUser);
             final int userId = callingUser.getIdentifier();
@@ -4713,9 +4703,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mIPackageManager.updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                     0  /* flagValues */, userHandle.getIdentifier());
-            synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
-                mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle.getIdentifier());
-            }
+            pushUserRestrictions(userHandle.getIdentifier());
         } catch (RemoteException re) {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
@@ -5004,31 +4992,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        final Printer p = new PrintWriterPrinter(pw);
-
         synchronized (this) {
-            p.println("Current Device Policy Manager state:");
+            pw.println("Current Device Policy Manager state:");
             mOwners.dump("  ", pw);
             int userCount = mUserData.size();
             for (int u = 0; u < userCount; u++) {
                 DevicePolicyData policy = getUserData(mUserData.keyAt(u));
-                p.println("  Enabled Device Admins (User " + policy.mUserHandle + "):");
+                pw.println();
+                pw.println("  Enabled Device Admins (User " + policy.mUserHandle + "):");
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin ap = policy.mAdminList.get(i);
                     if (ap != null) {
-                        pw.print("  "); pw.print(ap.info.getComponent().flattenToShortString());
+                        pw.print("    "); pw.print(ap.info.getComponent().flattenToShortString());
                                 pw.println(":");
-                        ap.dump("    ", pw);
+                        ap.dump("      ", pw);
                     }
                 }
                 if (!policy.mRemovingAdmins.isEmpty()) {
-                    p.println("  Removing Device Admins (User " + policy.mUserHandle + "): "
+                    pw.println("    Removing Device Admins (User " + policy.mUserHandle + "): "
                             + policy.mRemovingAdmins);
                 }
 
                 pw.println(" ");
-                pw.print("  mPasswordOwner="); pw.println(policy.mPasswordOwner);
+                pw.print("    mPasswordOwner="); pw.println(policy.mPasswordOwner);
             }
         }
     }
@@ -5666,47 +5653,67 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    // DO NOT call it while taking the "this" lock, which could cause a dead lock.
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
-        synchronized (mUserManagerInternal.getUserRestrictionsLock()) {
-            synchronized (this) {
-                ActiveAdmin activeAdmin =
-                        getActiveAdminForCallerLocked(who,
-                                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-                final boolean isDeviceOwner = isDeviceOwner(who, userHandle);
-                if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
-                    throw new SecurityException(
-                            "Profile owners cannot set user restriction " + key);
+        synchronized (this) {
+            ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(who,
+                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            final boolean isDeviceOwner = isDeviceOwner(who, userHandle);
+            if (isDeviceOwner) {
+                if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
+                    throw new SecurityException("Device owner cannot set user restriction " + key);
                 }
-                if (IMMUTABLE_USER_RESTRICTIONS.contains(key)) {
-                    throw new SecurityException("User restriction " + key + " cannot be changed");
+            } else { // profile owner
+                if (!UserRestrictionsUtils.canProfileOwnerChange(key)) {
+                    throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
-
-                final long id = mInjector.binderClearCallingIdentity();
-                try {
-                    // Save the restriction to ActiveAdmin.
-                    // TODO When DO sets a restriction, it'll always be treated as device-wide.
-                    // If there'll be a policy that can be set by both, we'll need scoping support,
-                    // and need to have another Bundle in DO active admin to hold restrictions as
-                    // PO.
-                    activeAdmin.ensureUserRestrictions().putBoolean(key, enabledFromThisOwner);
-                    saveSettingsLocked(userHandle);
-
-                    // Tell UserManager the new value.
-                    if (isDeviceOwner) {
-                        mUserManagerInternal.updateEffectiveUserRestrictionsForAllUsersLR();
-                    } else {
-                        mUserManagerInternal.updateEffectiveUserRestrictionsLR(userHandle);
-                    }
-                } finally {
-                    mInjector.binderRestoreCallingIdentity(id);
-                }
-
-                sendChangedNotification(userHandle);
             }
+
+            // Save the restriction to ActiveAdmin.
+            activeAdmin.ensureUserRestrictions().putBoolean(key, enabledFromThisOwner);
+            saveSettingsLocked(userHandle);
+
+            pushUserRestrictions(userHandle);
+
+            sendChangedNotification(userHandle);
+        }
+    }
+
+    private void pushUserRestrictions(int userId) {
+        synchronized (this) {
+            final Bundle global;
+            final Bundle local = new Bundle();
+            if (mOwners.isDeviceOwnerUserId(userId)) {
+                global = new Bundle();
+
+                final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+                if (deviceOwner == null) {
+                    return; // Shouldn't happen.
+                }
+
+                UserRestrictionsUtils.sortToGlobalAndLocal(deviceOwner.userRestrictions,
+                        global, local);
+                // DO can disable camera globally.
+                if (deviceOwner.disableCamera) {
+                    global.putBoolean(UserManager.DISALLOW_CAMERA, true);
+                }
+            } else {
+                global = null;
+
+                ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
+                if (profileOwner != null) {
+                    UserRestrictionsUtils.merge(local, profileOwner.userRestrictions);
+                }
+            }
+            // Also merge in *local* camera restriction.
+            if (getCameraDisabled(/* who= */ null,
+                    userId, /* mergeDeviceOwnerRestriction= */ false)) {
+                local.putBoolean(UserManager.DISALLOW_CAMERA, true);
+            }
+            mUserManagerInternal.setDevicePolicyUserRestrictions(userId, local, global);
         }
     }
 
@@ -6445,37 +6452,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int userId = UserHandle.getUserId(uid);
             synchronized(DevicePolicyManagerService.this) {
                 return getActiveAdminWithPolicyForUidLocked(null, reqPolicy, uid) != null;
-            }
-        }
-
-        @Override
-        public Bundle getComposedUserRestrictions(int userId, Bundle inBundle) {
-            synchronized (DevicePolicyManagerService.this) {
-                final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-                final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
-
-                final Bundle deviceOwnerRestrictions =
-                        deviceOwner == null ? null : deviceOwner.userRestrictions;
-                final Bundle profileOwnerRestrictions =
-                        profileOwner == null ? null : profileOwner.userRestrictions;
-                final boolean cameraDisabled = getCameraDisabled(null, userId);
-
-                if (deviceOwnerRestrictions == null && profileOwnerRestrictions == null
-                        && !cameraDisabled) {
-                    // No restrictions to merge.
-                    return inBundle;
-                }
-
-                final Bundle composed = new Bundle(inBundle);
-                UserRestrictionsUtils.merge(composed, deviceOwnerRestrictions);
-                UserRestrictionsUtils.merge(composed, profileOwnerRestrictions);
-
-                // Also merge in the camera restriction.
-                if (cameraDisabled) {
-                    composed.putBoolean(UserManager.DISALLOW_CAMERA, true);
-                }
-
-                return composed;
             }
         }
 

@@ -18,6 +18,10 @@ package com.android.server.pm;
 
 import com.google.android.collect.Sets;
 
+import com.android.internal.util.Preconditions;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
@@ -26,6 +30,7 @@ import android.os.Bundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -79,22 +84,64 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SAFE_BOOT,
             UserManager.ALLOW_PARENT_PROFILE_APP_LINKING,
             UserManager.DISALLOW_RECORD_AUDIO,
+            UserManager.DISALLOW_CAMERA,
     };
 
     /**
      * Set of user restrictions, which can only be enforced by the system.
      */
     public static final Set<String> SYSTEM_CONTROLLED_USER_RESTRICTIONS = Sets.newArraySet(
-            UserManager.DISALLOW_RECORD_AUDIO);
+            UserManager.DISALLOW_RECORD_AUDIO
+    );
 
     /**
      * Set of user restriction which we don't want to persist.
      */
-    public static final Set<String> NON_PERSIST_USER_RESTRICTIONS = Sets.newArraySet(
-            UserManager.DISALLOW_RECORD_AUDIO);
+    private static final Set<String> NON_PERSIST_USER_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_RECORD_AUDIO
+    );
 
-    public static void writeRestrictions(XmlSerializer serializer, Bundle restrictions,
-            String tag) throws IOException {
+    /**
+     * User restrictions that can not be set by profile owners.
+     */
+    private static final Set<String> DEVICE_OWNER_ONLY_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_USB_FILE_TRANSFER,
+            UserManager.DISALLOW_CONFIG_TETHERING,
+            UserManager.DISALLOW_NETWORK_RESET,
+            UserManager.DISALLOW_FACTORY_RESET,
+            UserManager.DISALLOW_ADD_USER,
+            UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
+            UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+            UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+            UserManager.DISALLOW_SMS,
+            UserManager.DISALLOW_FUN,
+            UserManager.DISALLOW_SAFE_BOOT,
+            UserManager.DISALLOW_CREATE_WINDOWS
+    );
+
+    /**
+     * User restrictions that can't be changed by device owner or profile owner.
+     */
+    private static final Set<String> IMMUTABLE_BY_OWNERS = Sets.newArraySet(
+            UserManager.DISALLOW_RECORD_AUDIO,
+            UserManager.DISALLOW_WALLPAPER
+    );
+
+    /**
+     * Special user restrictions that can be applied to a user as well as to all users globally,
+     * depending on callers.  When device owner sets them, they'll be applied to all users.
+     */
+    private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_ADJUST_VOLUME,
+            UserManager.DISALLOW_UNMUTE_MICROPHONE
+    );
+
+    public static void writeRestrictions(@NonNull XmlSerializer serializer,
+            @Nullable Bundle restrictions, @NonNull String tag) throws IOException {
+        if (restrictions == null) {
+            return;
+        }
+
         serializer.startTag(null, tag);
         for (String key : USER_RESTRICTIONS) {
             if (restrictions.getBoolean(key)
@@ -115,7 +162,31 @@ public class UserRestrictionsUtils {
         }
     }
 
-    public static void merge(Bundle dest, Bundle in) {
+    /**
+     * @return {@code in} itself when it's not null, or an empty bundle (which can writable).
+     */
+    public static Bundle nonNull(@Nullable Bundle in) {
+        return in != null ? in : new Bundle();
+    }
+
+    public static boolean isEmpty(@Nullable Bundle in) {
+        return (in == null) || (in.size() == 0);
+    }
+
+    /**
+     * Creates a copy of the {@code in} Bundle.  If {@code in} is null, it'll return an empty
+     * bundle.
+     *
+     * <p>The resulting {@link Bundle} is always writable. (i.e. it won't return
+     * {@link Bundle#EMPTY})
+     */
+    public static @NonNull Bundle clone(@Nullable Bundle in) {
+        return (in != null) ? new Bundle(in) : new Bundle();
+    }
+
+    public static void merge(@NonNull Bundle dest, @Nullable Bundle in) {
+        Preconditions.checkNotNull(dest);
+        Preconditions.checkArgument(dest != in);
         if (in == null) {
             return;
         }
@@ -124,6 +195,77 @@ public class UserRestrictionsUtils {
                 dest.putBoolean(key, true);
             }
         }
+    }
+
+    /**
+     * @return true if a restriction is "system controlled"; i.e. can not be overwritten via
+     * {@link UserManager#setUserRestriction}.
+     */
+    public static boolean isSystemControlled(String restriction) {
+        return SYSTEM_CONTROLLED_USER_RESTRICTIONS.contains(restriction);
+    }
+
+    /**
+     * @return true if a restriction is settable by device owner.
+     */
+    public static boolean canDeviceOwnerChange(String restriction) {
+        return !IMMUTABLE_BY_OWNERS.contains(restriction);
+    }
+
+    /**
+     * @return true if a restriction is settable by profile owner.
+     */
+    public static boolean canProfileOwnerChange(String restriction) {
+        return !(IMMUTABLE_BY_OWNERS.contains(restriction)
+                || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction));
+    }
+
+    /**
+     * Takes restrictions that can be set by device owner, and sort them into what should be applied
+     * globally and what should be applied only on the current user.
+     */
+    public static void sortToGlobalAndLocal(@Nullable Bundle in, @NonNull Bundle global,
+            @NonNull Bundle local) {
+        if (in == null || in.size() == 0) {
+            return;
+        }
+        for (String key : in.keySet()) {
+            if (!in.getBoolean(key)) {
+                continue;
+            }
+            if (DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)) {
+                global.putBoolean(key, true);
+            } else {
+                local.putBoolean(key, true);
+            }
+        }
+    }
+
+    /**
+     * @return true if two Bundles contain the same user restriction.
+     * A null bundle and an empty bundle are considered to be equal.
+     */
+    public static boolean areEqual(@Nullable Bundle a, @Nullable Bundle b) {
+        if (a == b) {
+            return true;
+        }
+        if (isEmpty(a)) {
+            return isEmpty(b);
+        }
+        if (isEmpty(b)) {
+            return false;
+        }
+        for (String key : a.keySet()) {
+            if (a.getBoolean(key) != b.getBoolean(key)) {
+                return false;
+            }
+        }
+        for (String key : b.keySet()) {
+            if (a.getBoolean(key) != b.getBoolean(key)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -145,7 +287,7 @@ public class UserRestrictionsUtils {
             }
         }
     }
-
+    
     /**
      * Apply each user restriction.
      *
@@ -155,6 +297,10 @@ public class UserRestrictionsUtils {
      */
     private static void applyUserRestrictionLR(Context context, int userId, String key,
             boolean newValue) {
+        if (UserManagerService.DBG) {
+            Log.d(TAG, "Applying user restriction: userId=" + userId
+                    + " key=" + key + " value=" + newValue);
+        }
         // When certain restrictions are cleared, we don't update the system settings,
         // because these settings are changeable on the Settings UI and we don't know the original
         // value -- for example LOCATION_MODE might have been off already when the restriction was

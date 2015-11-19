@@ -260,9 +260,6 @@ public class DpmMockContext extends MockContext {
 
         // System user is always running.
         setUserRunning(UserHandle.USER_SYSTEM, true);
-
-        // This method must return an object.
-        when(userManagerInternal.getUserRestrictionsLock()).thenReturn(new Object());
     }
 
     public File addUser(int userId, int flags) {

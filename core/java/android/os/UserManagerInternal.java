@@ -15,6 +15,9 @@
  */
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * @hide Only for use within the system server.
  */
@@ -31,32 +34,18 @@ public abstract class UserManagerInternal {
     }
 
     /**
-     * Lock that must be held when calling certain methods in this class.
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
+     * to set per-user as well as global user restrictions.
      *
-     * This is used to avoid dead lock between
-     * {@link com.android.server.pm.UserManagerService} and
-     * {@link com.android.server.devicepolicy.DevicePolicyManagerService}.  This lock should not
-     * be newly taken while holding the DPMS lock, which would cause a dead lock.  Take this
-     * lock first before taking the DPMS lock to avoid that.
+     * @param userId target user id for the local restrictions.
+     * @param localRestrictions per-user restrictions.
+     *     Caller must not change it once passed to this method.
+     * @param globalRestrictions global restrictions set by DO.  Must be null when PO changed user
+     *     restrictions, in which case global restrictions won't change.
+     *     Caller must not change it once passed to this method.
      */
-    public abstract Object getUserRestrictionsLock();
-
-    /**
-     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to get
-     * {@link com.android.server.pm.UserManagerService} to update effective user restrictions.
-     *
-     * Must be called while taking the {@link #getUserRestrictionsLock()} lock.
-     */
-    public abstract void updateEffectiveUserRestrictionsLR(int userId);
-
-    /**
-     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to get
-     * {@link com.android.server.pm.UserManagerService} to update effective user restrictions.
-     *
-     * Must be called while taking the {@link #getUserRestrictionsLock()} lock.
-     */
-    public abstract void updateEffectiveUserRestrictionsForAllUsersLR();
-
+    public abstract void setDevicePolicyUserRestrictions(int userId,
+            @NonNull Bundle localRestrictions, @Nullable Bundle globalRestrictions);
     /**
      * Returns the "base" user restrictions.
      *

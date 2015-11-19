@@ -221,6 +221,10 @@ class Owners {
         return mDeviceOwner != null;
     }
 
+    boolean isDeviceOwnerUserId(int userId) {
+        return mDeviceOwner != null && mDeviceOwnerUserId == userId;
+    }
+
     boolean hasProfileOwner(int userId) {
         return getProfileOwnerComponent(userId) != null;
     }
@@ -625,20 +629,30 @@ class Owners {
     }
 
     public void dump(String prefix, PrintWriter pw) {
+        boolean needBlank = false;
         if (mDeviceOwner != null) {
             pw.println(prefix + "Device Owner: ");
             mDeviceOwner.dump(prefix + "  ", pw);
             pw.println(prefix + "  User ID: " + mDeviceOwnerUserId);
-            pw.println();
+            needBlank = true;
         }
         if (mSystemUpdatePolicy != null) {
+            if (needBlank) {
+                needBlank = false;
+                pw.println();
+            }
             pw.println(prefix + "System Update Policy: " + mSystemUpdatePolicy);
-            pw.println();
+            needBlank = true;
         }
         if (mProfileOwners != null) {
             for (Map.Entry<Integer, OwnerInfo> entry : mProfileOwners.entrySet()) {
+                if (needBlank) {
+                    needBlank = false;
+                    pw.println();
+                }
                 pw.println(prefix + "Profile Owner (User " + entry.getKey() + "): ");
                 entry.getValue().dump(prefix + "  ", pw);
+                needBlank = true;
             }
         }
     }

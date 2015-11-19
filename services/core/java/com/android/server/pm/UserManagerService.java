@@ -25,7 +25,6 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +35,7 @@ import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -48,7 +48,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -104,7 +103,8 @@ import libcore.io.IoUtils;
  */
 public class UserManagerService extends IUserManager.Stub {
     private static final String LOG_TAG = "UserManagerService";
-    private static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
+    static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
+    private static final boolean DBG_WITH_STACKTRACE = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG_NAME = "name";
     private static final String ATTR_FLAGS = "flags";
@@ -123,6 +123,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_USERS = "users";
     private static final String TAG_USER = "user";
     private static final String TAG_RESTRICTIONS = "restrictions";
+    private static final String TAG_DEVICE_POLICY_RESTRICTIONS = "device_policy_restrictions";
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String ATTR_KEY = "key";
@@ -206,12 +207,26 @@ public class UserManagerService extends IUserManager.Stub {
     private final SparseArray<Bundle> mCachedEffectiveUserRestrictions = new SparseArray<>();
 
     /**
-     * User restrictions that have already been applied in {@link #applyUserRestrictionsLR}.  We
-     * use it to detect restrictions that have changed since the last
-     * {@link #applyUserRestrictionsLR} call.
+     * User restrictions that have already been applied in
+     * {@link #updateUserRestrictionsInternalLR(Bundle, int)}.  We use it to detect restrictions
+     * that have changed since the last
+     * {@link #updateUserRestrictionsInternalLR(Bundle, int)} call.
      */
     @GuardedBy("mRestrictionsLock")
     private final SparseArray<Bundle> mAppliedUserRestrictions = new SparseArray<>();
+
+    /**
+     * User restrictions set by {@link DevicePolicyManager} that should be applied to all users,
+     * including guests.
+     */
+    @GuardedBy("mRestrictionsLock")
+    private Bundle mDevicePolicyGlobalUserRestrictions;
+
+    /**
+     * User restrictions set by {@link DevicePolicyManager} for each user.
+     */
+    @GuardedBy("mRestrictionsLock")
+    private final SparseArray<Bundle> mDevicePolicyLocalUserRestrictions = new SparseArray<>();
 
     @GuardedBy("mGuestRestrictions")
     private final Bundle mGuestRestrictions = new Bundle();
@@ -302,16 +317,14 @@ public class UserManagerService extends IUserManager.Stub {
                     + " (name=" + ui.name + ")");
             removeUserState(ui.id);
         }
+
         onUserForeground(UserHandle.USER_SYSTEM);
+
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
-        for (int i = 0; i < mUserIds.length; ++i) {
-            final int userId = mUserIds[i];
-            try {
-                mAppOpsService.setUserRestrictions(getEffectiveUserRestrictions(userId), userId);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
-            }
+
+        synchronized (mRestrictionsLock) {
+            applyUserRestrictionsLR(UserHandle.USER_SYSTEM);
         }
     }
 
@@ -661,19 +674,72 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * See {@link UserManagerInternal#setDevicePolicyUserRestrictions(int, Bundle, Bundle)}
+     */
+    void setDevicePolicyUserRestrictions(int userId, @NonNull Bundle local,
+            @Nullable Bundle global) {
+        Preconditions.checkNotNull(local);
+        boolean globalChanged = false;
+        boolean localChanged;
+        synchronized (mRestrictionsLock) {
+            if (global != null) {
+                // Update global.
+                globalChanged = !UserRestrictionsUtils.areEqual(
+                        mDevicePolicyGlobalUserRestrictions, global);
+                if (globalChanged) {
+                    mDevicePolicyGlobalUserRestrictions = global;
+                }
+            }
+            {
+                // Update local.
+                final Bundle prev = mDevicePolicyLocalUserRestrictions.get(userId);
+                localChanged = !UserRestrictionsUtils.areEqual(prev, local);
+                if (localChanged) {
+                    mDevicePolicyLocalUserRestrictions.put(userId, local);
+                }
+            }
+        }
+        if (DBG) {
+            Log.d(LOG_TAG, "setDevicePolicyUserRestrictions: userId=" + userId
+                            + " global=" + global + (globalChanged ? " (changed)" : "")
+                            + " local=" + local + (localChanged ? " (changed)" : "")
+            );
+        }
+        // Don't call them within the mRestrictionsLock.
+        synchronized (mPackagesLock) {
+            if (globalChanged) {
+                writeUserListLP();
+            }
+            if (localChanged) {
+                writeUserLP(getUserInfoNoChecks(userId));
+            }
+        }
+
+        synchronized (mRestrictionsLock) {
+            if (globalChanged) {
+                applyUserRestrictionsForAllUsersLR();
+            } else if (localChanged) {
+                applyUserRestrictionsLR(userId);
+            }
+        }
+    }
+
     @GuardedBy("mRestrictionsLock")
     private Bundle computeEffectiveUserRestrictionsLR(int userId) {
-        final DevicePolicyManagerInternal dpmi =
-                LocalServices.getService(DevicePolicyManagerInternal.class);
-        final Bundle systemRestrictions = mBaseUserRestrictions.get(userId);
+        final Bundle baseRestrictions =
+                UserRestrictionsUtils.nonNull(mBaseUserRestrictions.get(userId));
+        final Bundle global = mDevicePolicyGlobalUserRestrictions;
+        final Bundle local = mDevicePolicyLocalUserRestrictions.get(userId);
 
-        final Bundle effective;
-        if (dpmi == null) {
-            // TODO Make sure it's because DPMS is disabled and not because we called it too early.
-            effective = systemRestrictions;
-        } else {
-            effective = dpmi.getComposedUserRestrictions(userId, systemRestrictions);
+        if (UserRestrictionsUtils.isEmpty(global) && UserRestrictionsUtils.isEmpty(local)) {
+            // Common case first.
+            return baseRestrictions;
         }
+        final Bundle effective = UserRestrictionsUtils.clone(baseRestrictions);
+        UserRestrictionsUtils.merge(effective, global);
+        UserRestrictionsUtils.merge(effective, local);
+
         return effective;
     }
 
@@ -709,14 +775,13 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public Bundle getUserRestrictions(int userId) {
-        Bundle restrictions = getEffectiveUserRestrictions(userId);
-        return restrictions != null ? new Bundle(restrictions) : new Bundle();
+        return UserRestrictionsUtils.clone(getEffectiveUserRestrictions(userId));
     }
 
     @Override
     public void setUserRestriction(String key, boolean value, int userId) {
         checkManageUsersPermission("setUserRestriction");
-        if (!UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS.contains(key)) {
+        if (!UserRestrictionsUtils.isSystemControlled(key)) {
             setUserRestrictionNoCheck(key, value, userId);
         }
     }
@@ -731,8 +796,8 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
             // a copy.
-            final Bundle newRestrictions = new Bundle();
-            UserRestrictionsUtils.merge(newRestrictions, mBaseUserRestrictions.get(userId));
+            final Bundle newRestrictions = UserRestrictionsUtils.clone(
+                    mBaseUserRestrictions.get(userId));
             newRestrictions.putBoolean(key, value);
 
             updateUserRestrictionsInternalLR(newRestrictions, userId);
@@ -740,75 +805,70 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Optionally updating user restrictions, calculate the effective user restrictions by
-     * consulting {@link com.android.server.devicepolicy.DevicePolicyManagerService} and also
-     * apply it to {@link com.android.server.AppOpsService}.
-     * TODO applyUserRestrictionsLocked() should also apply to system settings.
+     * Optionally updating user restrictions, calculate the effective user restrictions and also
+     * propagate to other services and system settings.
      *
-     * @param newRestrictions User restrictions to set.  If null, only the effective restrictions
-     *     will be updated.  Note don't pass an existing Bundle in {@link #mBaseUserRestrictions}
-     *     or {@link #mCachedEffectiveUserRestrictions}; that'll most likely cause a sub
+     * @param newRestrictions User restrictions to set.
+     *      If null, will not update user restrictions and only does the propagation.
      * @param userId target user ID.
      */
     @GuardedBy("mRestrictionsLock")
     private void updateUserRestrictionsInternalLR(
             @Nullable Bundle newRestrictions, int userId) {
-        if (DBG) {
-            Log.d(LOG_TAG, "updateUserRestrictionsInternalLocked userId=" + userId
-                    + " bundle=" + newRestrictions);
-        }
-        // Update system restrictions.
+
+        final Bundle prevAppliedRestrictions = UserRestrictionsUtils.nonNull(
+                mAppliedUserRestrictions.get(userId));
+
+        // Update base restrictions.
         if (newRestrictions != null) {
             // If newRestrictions == the current one, it's probably a bug.
-            Preconditions.checkState(mBaseUserRestrictions.get(userId) != newRestrictions);
+            final Bundle prevBaseRestrictions = mBaseUserRestrictions.get(userId);
+
+            Preconditions.checkState(prevBaseRestrictions != newRestrictions);
             Preconditions.checkState(mCachedEffectiveUserRestrictions.get(userId)
                     != newRestrictions);
-            mBaseUserRestrictions.put(userId, newRestrictions);
-            scheduleWriteUser(getUserInfoNoChecks(userId));
+
+            if (!UserRestrictionsUtils.areEqual(prevBaseRestrictions, newRestrictions)) {
+                mBaseUserRestrictions.put(userId, newRestrictions);
+                scheduleWriteUser(getUserInfoNoChecks(userId));
+            }
         }
 
         final Bundle effective = computeEffectiveUserRestrictionsLR(userId);
 
         mCachedEffectiveUserRestrictions.put(userId, effective);
 
-        applyUserRestrictionsLR(userId, effective);
-    }
-
-    @GuardedBy("mRestrictionsLock")
-    private void applyUserRestrictionsLR(int userId, Bundle newRestrictions) {
-        if (newRestrictions == null) {
-            newRestrictions = Bundle.EMPTY;
-        }
-
-        Bundle prevRestrictions = mAppliedUserRestrictions.get(userId);
-        if (prevRestrictions == null) {
-            prevRestrictions = Bundle.EMPTY;
-        }
-
+        // Apply the new restrictions.
         if (DBG) {
-            Log.d(LOG_TAG, "applyUserRestrictionsRL userId=" + userId
-                    + " new=" + newRestrictions + " prev=" + prevRestrictions);
+            debug("Applying user restrictions: userId=" + userId
+                    + " new=" + effective + " prev=" + prevAppliedRestrictions);
         }
 
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mAppOpsService.setUserRestrictions(newRestrictions, userId);
-        } catch (RemoteException e) {
-            Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        if (mAppOpsService != null) { // We skip it until system-ready.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mAppOpsService.setUserRestrictions(effective, userId);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
-        UserRestrictionsUtils.applyUserRestrictionsLR(
-                mContext, userId, newRestrictions, prevRestrictions);
+        propagateUserRestrictionsLR(userId, effective, prevAppliedRestrictions);
 
-        notifyUserRestrictionsListeners(userId, newRestrictions, prevRestrictions);
-
-        mAppliedUserRestrictions.put(userId, new Bundle(newRestrictions));
+        mAppliedUserRestrictions.put(userId, new Bundle(effective));
     }
 
-    private void notifyUserRestrictionsListeners(final int userId,
+    private void propagateUserRestrictionsLR(final int userId,
             Bundle newRestrictions, Bundle prevRestrictions) {
+        // Note this method doesn't touch any state, meaning it doesn't require mRestrictionsLock
+        // actually, but we still need some kind of synchronization otherwise we might end up
+        // calling listeners out-of-order, thus "LR".
+
+        if (UserRestrictionsUtils.areEqual(newRestrictions, prevRestrictions)) {
+            return;
+        }
 
         final Bundle newRestrictionsFinal = new Bundle(newRestrictions);
         final Bundle prevRestrictionsFinal = new Bundle(prevRestrictions);
@@ -816,6 +876,11 @@ public class UserManagerService extends IUserManager.Stub {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                synchronized (mRestrictionsLock) {
+                    UserRestrictionsUtils.applyUserRestrictionsLR(
+                            mContext, userId, newRestrictionsFinal, prevRestrictionsFinal);
+                }
+
                 final UserRestrictionsListener[] listeners;
                 synchronized (mUserRestrictionsListeners) {
                     listeners = new UserRestrictionsListener[mUserRestrictionsListeners.size()];
@@ -829,13 +894,17 @@ public class UserManagerService extends IUserManager.Stub {
         });
     }
 
-    @GuardedBy("mRestrictionsLock")
-    private void updateEffectiveUserRestrictionsLR(int userId) {
+    // Package private for the inner class.
+    void applyUserRestrictionsLR(int userId) {
         updateUserRestrictionsInternalLR(null, userId);
     }
 
     @GuardedBy("mRestrictionsLock")
-    private void updateEffectiveUserRestrictionsForAllUsersLR() {
+    // Package private for the inner class.
+    void applyUserRestrictionsForAllUsersLR() {
+        if (DBG) {
+            debug("applyUserRestrictionsForAllUsersLR");
+        }
         // First, invalidate all cached values.
         mCachedEffectiveUserRestrictions.clear();
 
@@ -856,10 +925,9 @@ public class UserManagerService extends IUserManager.Stub {
                 // It's okay if a new user has started after the getRunningUserIds() call,
                 // because we'll do the same thing (re-calculate the restrictions and apply)
                 // when we start a user.
-                // TODO: "Apply restrictions upon user start hasn't been implemented.  Implement it.
                 synchronized (mRestrictionsLock) {
                     for (int i = 0; i < runningUsers.length; i++) {
-                        updateUserRestrictionsInternalLR(null, runningUsers[i]);
+                        applyUserRestrictionsLR(runningUsers[i]);
                     }
                 }
             }
@@ -1020,6 +1088,8 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
 
+            final Bundle newDevicePolicyGlobalUserRestrictions = new Bundle();
+
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG) {
                     final String name = parser.getName();
@@ -1044,12 +1114,19 @@ public class UserManagerService extends IUserManager.Stub {
                                         UserRestrictionsUtils
                                                 .readRestrictions(parser, mGuestRestrictions);
                                     }
+                                } else if (parser.getName().equals(TAG_DEVICE_POLICY_RESTRICTIONS)
+                                        ) {
+                                    UserRestrictionsUtils.readRestrictions(parser,
+                                            newDevicePolicyGlobalUserRestrictions);
                                 }
                                 break;
                             }
                         }
                     }
                 }
+            }
+            synchronized (mRestrictionsLock) {
+                mDevicePolicyGlobalUserRestrictions = newDevicePolicyGlobalUserRestrictions;
             }
             updateUserIds();
             upgradeIfNecessaryLP();
@@ -1064,6 +1141,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
      */
     private void upgradeIfNecessaryLP() {
+        final int originalVersion = mUserVersion;
         int userVersion = mUserVersion;
         if (userVersion < 1) {
             // Assign a proper name for the owner, if not initialized correctly before
@@ -1116,7 +1194,10 @@ public class UserManagerService extends IUserManager.Stub {
                     + USER_VERSION);
         } else {
             mUserVersion = userVersion;
-            writeUserListLP();
+
+            if (originalVersion < mUserVersion) {
+                writeUserListLP();
+            }
         }
     }
 
@@ -1150,6 +1231,9 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void scheduleWriteUser(UserInfo userInfo) {
+        if (DBG) {
+            debug("scheduleWriteUser");
+        }
         // No need to wrap it within a lock -- worst case, we'll just post the same message
         // twice.
         if (!mHandler.hasMessages(WRITE_USER_MSG, userInfo)) {
@@ -1166,6 +1250,9 @@ public class UserManagerService extends IUserManager.Stub {
      * </user>
      */
     private void writeUserLP(UserInfo userInfo) {
+        if (DBG) {
+            debug("writeUserLP " + userInfo);
+        }
         FileOutputStream fos = null;
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userInfo.id + XML_SUFFIX));
         try {
@@ -1205,13 +1292,12 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.startTag(null, TAG_NAME);
             serializer.text(userInfo.name);
             serializer.endTag(null, TAG_NAME);
-            Bundle restrictions;
             synchronized (mRestrictionsLock) {
-                restrictions = mBaseUserRestrictions.get(userInfo.id);
-            }
-            if (restrictions != null) {
-                UserRestrictionsUtils
-                        .writeRestrictions(serializer, restrictions, TAG_RESTRICTIONS);
+                UserRestrictionsUtils.writeRestrictions(serializer,
+                        mBaseUserRestrictions.get(userInfo.id), TAG_RESTRICTIONS);
+                UserRestrictionsUtils.writeRestrictions(serializer,
+                        mDevicePolicyLocalUserRestrictions.get(userInfo.id),
+                        TAG_DEVICE_POLICY_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
 
@@ -1232,6 +1318,9 @@ public class UserManagerService extends IUserManager.Stub {
      * </users>
      */
     private void writeUserListLP() {
+        if (DBG) {
+            debug("writeUserList");
+        }
         FileOutputStream fos = null;
         AtomicFile userListFile = new AtomicFile(mUserListFile);
         try {
@@ -1254,6 +1343,10 @@ public class UserManagerService extends IUserManager.Stub {
                         .writeRestrictions(serializer, mGuestRestrictions, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
+            synchronized (mRestrictionsLock) {
+                UserRestrictionsUtils.writeRestrictions(serializer,
+                        mDevicePolicyGlobalUserRestrictions, TAG_DEVICE_POLICY_RESTRICTIONS);
+            }
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
                 userIdsToWrite = new int[mUsers.size()];
@@ -1289,7 +1382,8 @@ public class UserManagerService extends IUserManager.Stub {
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
         boolean guestToRemove = false;
-        Bundle restrictions = new Bundle();
+        Bundle baseRestrictions = new Bundle();
+        Bundle localRestrictions = new Bundle();
 
         FileInputStream fis = null;
         try {
@@ -1346,7 +1440,9 @@ public class UserManagerService extends IUserManager.Stub {
                             name = parser.getText();
                         }
                     } else if (TAG_RESTRICTIONS.equals(tag)) {
-                        UserRestrictionsUtils.readRestrictions(parser, restrictions);
+                        UserRestrictionsUtils.readRestrictions(parser, baseRestrictions);
+                    } else if (TAG_DEVICE_POLICY_RESTRICTIONS.equals(tag)) {
+                        UserRestrictionsUtils.readRestrictions(parser, localRestrictions);
                     }
                 }
             }
@@ -1360,7 +1456,8 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.profileGroupId = profileGroupId;
             userInfo.restrictedProfileParentId = restrictedProfileParentId;
             synchronized (mRestrictionsLock) {
-                mBaseUserRestrictions.append(id, restrictions);
+                mBaseUserRestrictions.put(id, baseRestrictions);
+                mDevicePolicyLocalUserRestrictions.put(id, localRestrictions);
             }
             return userInfo;
 
@@ -2118,6 +2215,15 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Called right before a user starts.  This will not be called for the system user.
+     */
+    public void onBeforeStartUser(int userId) {
+        synchronized (mRestrictionsLock) {
+            applyUserRestrictionsLR(userId);
+        }
+    }
+
+    /**
      * Make a note of the last started time of a user and do some cleanup.
      * @param userId the user that was just foregrounded
      */
@@ -2313,16 +2419,25 @@ public class UserManagerService extends IUserManager.Stub {
                     synchronized (mRestrictionsLock) {
                         UserRestrictionsUtils.dumpRestrictions(
                                 pw, "      ", mBaseUserRestrictions.get(user.id));
+                        pw.println("    Device policy local restrictions:");
+                        UserRestrictionsUtils.dumpRestrictions(
+                                pw, "      ", mDevicePolicyLocalUserRestrictions.get(user.id));
                         pw.println("    Effective restrictions:");
                         UserRestrictionsUtils.dumpRestrictions(
                                 pw, "      ", mCachedEffectiveUserRestrictions.get(user.id));
                     }
+                    pw.println();
                 }
             }
+            pw.println("  Device policy global restrictions:");
+            synchronized (mRestrictionsLock) {
+                UserRestrictionsUtils
+                        .dumpRestrictions(pw, "    ", mDevicePolicyGlobalUserRestrictions);
+            }
             pw.println();
-            pw.println("Guest restrictions:");
+            pw.println("  Guest restrictions:");
             synchronized (mGuestRestrictions) {
-                UserRestrictionsUtils.dumpRestrictions(pw, "  ", mGuestRestrictions);
+                UserRestrictionsUtils.dumpRestrictions(pw, "    ", mGuestRestrictions);
             }
         }
     }
@@ -2354,22 +2469,11 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private class LocalService extends UserManagerInternal {
-
         @Override
-        public Object getUserRestrictionsLock() {
-            return mRestrictionsLock;
-        }
-
-        @Override
-        @GuardedBy("mRestrictionsLock")
-        public void updateEffectiveUserRestrictionsLR(int userId) {
-            UserManagerService.this.updateEffectiveUserRestrictionsLR(userId);
-        }
-
-        @Override
-        @GuardedBy("mRestrictionsLock")
-        public void updateEffectiveUserRestrictionsForAllUsersLR() {
-            UserManagerService.this.updateEffectiveUserRestrictionsForAllUsersLR();
+        public void setDevicePolicyUserRestrictions(int userId, @NonNull Bundle localRestrictions,
+                @Nullable Bundle globalRestrictions) {
+            UserManagerService.this.setDevicePolicyUserRestrictions(userId, localRestrictions,
+                    globalRestrictions);
         }
 
         @Override
@@ -2433,5 +2537,10 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("  list");
             pw.println("    Prints all users on the system.");
         }
+    }
+
+    private static void debug(String message) {
+        Log.d(LOG_TAG, message +
+                (DBG_WITH_STACKTRACE ? " called at\n" + Debug.getCallers(10, "  ") : ""));
     }
 }
