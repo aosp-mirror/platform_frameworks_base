@@ -2841,6 +2841,17 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="com.android.internal.app.SystemUserHomeActivity"
+                  android:enabled="false"
+                  android:process=":ui"
+                  android:systemUserOnly="true"
+                  android:theme="@style/Theme.Translucent.NoTitleBar">
+            <intent-filter android:priority="-100">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver"
                 android:systemUserOnly="true">
             <intent-filter android:priority="1000">
