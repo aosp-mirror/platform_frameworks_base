@@ -38559,7 +38559,6 @@ package android.view {
     method public boolean canResolveTextDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
-    method public final void cancelDrag();
     method public void cancelLongPress();
     method public final void cancelPendingInputEvents();
     method public boolean checkInputConnectionProxy(android.view.View);
