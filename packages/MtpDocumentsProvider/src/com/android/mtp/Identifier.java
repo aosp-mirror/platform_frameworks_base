@@ -16,54 +16,24 @@
 
 package com.android.mtp;
 
+import java.util.Objects;
+
 /**
  * Static utilities for ID.
  */
 class Identifier {
+    final static int DUMMY_HANDLE_FOR_ROOT = 0;
+
     final int mDeviceId;
     final int mStorageId;
     final int mObjectHandle;
     final String mDocumentId;
-
-    static Identifier createFromRootId(String rootId) {
-        final String[] components = rootId.split("_");
-        return new Identifier(
-                Integer.parseInt(components[0]),
-                Integer.parseInt(components[1]));
-    }
-
-    static Identifier createFromDocumentId(String documentId) {
-        final String[] components = documentId.split("_");
-        return new Identifier(
-                Integer.parseInt(components[0]),
-                Integer.parseInt(components[1]),
-                Integer.parseInt(components[2]));
-    }
-
-
-    Identifier(int deviceId, int storageId) {
-        this(deviceId, storageId, CursorHelper.DUMMY_HANDLE_FOR_ROOT);
-    }
-
-    Identifier(int deviceId, int storageId, int objectHandle) {
-        this(deviceId, storageId, objectHandle, null);
-    }
 
     Identifier(int deviceId, int storageId, int objectHandle, String documentId) {
         mDeviceId = deviceId;
         mStorageId = storageId;
         mObjectHandle = objectHandle;
         mDocumentId = documentId;
-    }
-
-    // TODO: Make the ID persistent.
-    String toRootId() {
-        return String.format("%d_%d", mDeviceId, mStorageId);
-    }
-
-    // TODO: Make the ID persistent.
-    String toDocumentId() {
-        return String.format("%d_%d_%d", mDeviceId, mStorageId, mObjectHandle);
     }
 
     @Override
@@ -77,6 +47,6 @@ class Identifier {
 
     @Override
     public int hashCode() {
-        return (mDeviceId << 16) ^ (mStorageId << 8) ^ mObjectHandle;
+        return Objects.hash(mDeviceId, mStorageId, mObjectHandle, mDocumentId);
     }
 }

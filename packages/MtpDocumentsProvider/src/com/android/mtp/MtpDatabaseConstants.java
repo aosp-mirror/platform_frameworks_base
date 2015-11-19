@@ -129,11 +129,7 @@ class MtpDatabaseConstants {
                             Root.COLUMN_TITLE + "," +
                     TABLE_DOCUMENTS + "." + Document.COLUMN_SUMMARY + " AS " +
                             Root.COLUMN_SUMMARY + "," +
-                    // Temporary replace COLUMN_DOCUMENT_ID with old format.
                     TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID + " AS " +
-                    Root.COLUMN_DOCUMENT_ID + "_," +
-                    TABLE_DOCUMENTS + "." + COLUMN_DEVICE_ID + "|| '_' ||" +
-                    TABLE_DOCUMENTS + "." + COLUMN_STORAGE_ID + "||'_0' AS " +
                     Root.COLUMN_DOCUMENT_ID + "," +
                     TABLE_ROOT_EXTRA + "." + Root.COLUMN_AVAILABLE_BYTES + "," +
                     TABLE_ROOT_EXTRA + "." + Root.COLUMN_CAPACITY_BYTES + "," +

@@ -191,6 +191,7 @@ class MtpDatabaseInternal {
     String putNewDocument(String parentDocumentId, ContentValues values) {
         mDatabase.beginTransaction();
         try {
+
             final long id = mDatabase.insert(TABLE_DOCUMENTS, null, values);
             mDatabase.setTransactionSuccessful();
             return Long.toString(id);
@@ -203,54 +204,28 @@ class MtpDatabaseInternal {
      * Gets identifier from document ID.
      * @param documentId Document ID.
      * @return Identifier.
+     * @throws FileNotFoundException
      */
-    Identifier createIdentifier(String documentId) {
-        // Currently documentId is old format.
-        final Identifier oldIdentifier = Identifier.createFromDocumentId(documentId);
-        final String selection;
-        final String[] args;
-        if (oldIdentifier.mObjectHandle == CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
-            selection = COLUMN_DEVICE_ID + "= ? AND " +
-                    COLUMN_ROW_STATE + " IN (?, ?) AND " +
-                    COLUMN_STORAGE_ID + "= ? AND " +
-                    COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
-            args = strings(
-                    oldIdentifier.mDeviceId,
-                    ROW_STATE_VALID,
-                    ROW_STATE_INVALIDATED,
-                    oldIdentifier.mStorageId);
-        } else {
-            selection = COLUMN_DEVICE_ID + "= ? AND " +
-                    COLUMN_ROW_STATE + " IN (?, ?) AND " +
-                    COLUMN_STORAGE_ID + "= ? AND " +
-                    COLUMN_OBJECT_HANDLE + " = ?";
-            args = strings(
-                    oldIdentifier.mDeviceId,
-                    ROW_STATE_VALID,
-                    ROW_STATE_INVALIDATED,
-                    oldIdentifier.mStorageId,
-                    oldIdentifier.mObjectHandle);
-        }
-
+    Identifier createIdentifier(String documentId) throws FileNotFoundException {
         final Cursor cursor = mDatabase.query(
                 TABLE_DOCUMENTS,
-                strings(Document.COLUMN_DOCUMENT_ID),
-                selection,
-                args,
+                strings(COLUMN_DEVICE_ID, COLUMN_STORAGE_ID, COLUMN_OBJECT_HANDLE),
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
                 null,
                 null,
                 null,
                 "1");
         try {
             if (cursor.getCount() == 0) {
-                return oldIdentifier;
+                throw new FileNotFoundException("ID is not found.");
             } else {
                 cursor.moveToNext();
                 return new Identifier(
-                        oldIdentifier.mDeviceId,
-                        oldIdentifier.mStorageId,
-                        oldIdentifier.mObjectHandle,
-                        cursor.getString(0));
+                        cursor.getInt(0),
+                        cursor.getInt(1),
+                        cursor.isNull(2) ? Identifier.DUMMY_HANDLE_FOR_ROOT : cursor.getInt(2),
+                        documentId);
             }
         } finally {
             cursor.close();
@@ -481,7 +456,8 @@ class MtpDatabaseInternal {
     void clearMapping() {
         mDatabase.beginTransaction();
         try {
-            deleteDocumentsAndRootsRecursively(COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_PENDING));
+            deleteDocumentsAndRootsRecursively(
+                    COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_PENDING));
             final ContentValues values = new ContentValues();
             values.putNull(COLUMN_OBJECT_HANDLE);
             values.putNull(COLUMN_STORAGE_ID);
@@ -571,7 +547,6 @@ class MtpDatabaseInternal {
                     args);
             deleted += mDatabase.delete(TABLE_DOCUMENTS, selection, args);
             mDatabase.setTransactionSuccessful();
-            // TODO Remove child.
             // TODO Remove mappingState.
             return deleted != 0;
         } finally {

@@ -57,7 +57,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
 
     public void testBasic() throws Exception {
         final Uri uri = DocumentsContract.buildChildDocumentsUri(
-                MtpDocumentsProvider.AUTHORITY, mParentIdentifier.toDocumentId());
+                MtpDocumentsProvider.AUTHORITY, mParentIdentifier.mDocumentId);
         setUpDocument(mManager, 40);
         mManager.blockDocument(0, 15);
         mManager.blockDocument(0, 35);

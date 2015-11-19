@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
 import android.provider.DocumentsContract;
-import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -75,7 +74,7 @@ class DocumentLoader {
             int parentHandle = parent.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
             // getObjectHandles if we would like to obtain children under the root.
-            if (parentHandle == CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
+            if (parentHandle == Identifier.DUMMY_HANDLE_FOR_ROOT) {
                 parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
             }
             // TODO: Handle nit race around here.
@@ -221,8 +220,8 @@ class DocumentLoader {
                     throw new IOException(mError);
             }
 
-            final Cursor cursor = mDatabase.queryChildDocuments(
-                    columnNames, mIdentifier.mDocumentId, /* use old ID format */ true);
+            final Cursor cursor =
+                    mDatabase.queryChildDocuments(columnNames, mIdentifier.mDocumentId);
             cursor.setNotificationUri(resolver, createUri());
             cursor.respond(extras);
 
@@ -282,7 +281,7 @@ class DocumentLoader {
 
         private Uri createUri() {
             return DocumentsContract.buildChildDocumentsUri(
-                    MtpDocumentsProvider.AUTHORITY, mIdentifier.toDocumentId());
+                    MtpDocumentsProvider.AUTHORITY, mIdentifier.mDocumentId);
         }
     }
 }

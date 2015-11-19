@@ -22,6 +22,8 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Point;
+import android.media.MediaFile;
+import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
@@ -116,39 +118,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
-        final Identifier identifier = Identifier.createFromDocumentId(documentId);
-
-        if (identifier.mObjectHandle != CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
-            MtpObjectInfo objectInfo;
-            try {
-                objectInfo = mMtpManager.getObjectInfo(
-                        identifier.mDeviceId, identifier.mObjectHandle);
-            } catch (IOException e) {
-                throw new FileNotFoundException(e.getMessage());
-            }
-            final MatrixCursor cursor = new MatrixCursor(projection);
-            CursorHelper.addToCursor(
-                    objectInfo,
-                    new Identifier(identifier.mDeviceId, identifier.mStorageId),
-                    cursor.newRow());
-            return cursor;
-        } else {
-            MtpRoot[] roots;
-            try {
-                roots = mMtpManager.getRoots(identifier.mDeviceId);
-            } catch (IOException e) {
-                throw new FileNotFoundException(e.getMessage());
-            }
-            for (final MtpRoot root : roots) {
-                if (identifier.mStorageId != root.mStorageId)
-                    continue;
-                final MatrixCursor cursor = new MatrixCursor(projection);
-                CursorHelper.addToCursor(mResources, root, cursor.newRow());
-                return cursor;
-            }
-        }
-
-        throw new FileNotFoundException();
+        return mDatabase.queryDocument(documentId, projection);
     }
 
     @Override
@@ -170,7 +140,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(
             String documentId, String mode, CancellationSignal signal)
                     throws FileNotFoundException {
-        final Identifier identifier = Identifier.createFromDocumentId(documentId);
+        final Identifier identifier = mDatabase.createIdentifier(documentId);
         try {
             switch (mode) {
                 case "r":
@@ -195,7 +165,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             String documentId,
             Point sizeHint,
             CancellationSignal signal) throws FileNotFoundException {
-        final Identifier identifier = Identifier.createFromDocumentId(documentId);
+        final Identifier identifier = mDatabase.createIdentifier(documentId);
         try {
             return new AssetFileDescriptor(
                     getPipeManager(identifier).readThumbnail(mMtpManager, identifier),
@@ -209,15 +179,17 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public void deleteDocument(String documentId) throws FileNotFoundException {
         try {
-            final Identifier identifier = Identifier.createFromDocumentId(documentId);
-            final int parentHandle =
-                    mMtpManager.getParent(identifier.mDeviceId, identifier.mObjectHandle);
+            final Identifier identifier = mDatabase.createIdentifier(documentId);
+            final Identifier parentIdentifier =
+                    mDatabase.createIdentifier(mDatabase.getParentId(documentId));
             mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
-            final Identifier parentIdentifier = new Identifier(
-                    identifier.mDeviceId, identifier.mStorageId, parentHandle);
+            mDatabase.deleteDocument(documentId);
             getDocumentLoader(parentIdentifier).clearTask(parentIdentifier);
-            notifyChildDocumentsChange(parentIdentifier.toDocumentId());
+            notifyChildDocumentsChange(parentIdentifier.mDocumentId);
         } catch (IOException error) {
+            for (final StackTraceElement element : error.getStackTrace()) {
+                Log.e("hirono", element.toString());
+            }
             throw new FileNotFoundException(error.getMessage());
         }
     }
@@ -235,19 +207,23 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public String createDocument(String parentDocumentId, String mimeType, String displayName)
             throws FileNotFoundException {
         try {
-            final Identifier parentId = Identifier.createFromDocumentId(parentDocumentId);
+            final Identifier parentId = mDatabase.createIdentifier(parentDocumentId);
             final ParcelFileDescriptor pipe[] = ParcelFileDescriptor.createReliablePipe();
             pipe[0].close();  // 0 bytes for a new document.
-            final int objectHandle = mMtpManager.createDocument(
-                    parentId.mDeviceId,
-                    new MtpObjectInfo.Builder()
-                            .setStorageId(parentId.mStorageId)
-                            .setParent(parentId.mObjectHandle)
-                            .setFormat(CursorHelper.mimeTypeToFormatType(displayName, mimeType))
-                            .setName(displayName)
-                            .build(), pipe[1]);
-            final String documentId = new Identifier(parentId.mDeviceId, parentId.mStorageId,
-                   objectHandle).toDocumentId();
+            final int formatCode = Document.MIME_TYPE_DIR.equals(mimeType) ?
+                    MtpConstants.FORMAT_ASSOCIATION :
+                    MediaFile.getFormatCode(displayName, mimeType);
+            final MtpObjectInfo info = new MtpObjectInfo.Builder()
+                    .setStorageId(parentId.mStorageId)
+                    .setParent(parentId.mObjectHandle)
+                    .setFormat(formatCode)
+                    .setName(displayName)
+                    .build();
+            final int objectHandle = mMtpManager.createDocument(parentId.mDeviceId, info, pipe[1]);
+            final MtpObjectInfo infoWithHandle =
+                    new MtpObjectInfo.Builder(info).setObjectHandle(objectHandle).build();
+            final String documentId = mDatabase.putNewDocument(
+                    parentId.mDeviceId, parentDocumentId, infoWithHandle);
             getDocumentLoader(parentId).clearTask(parentId);
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;

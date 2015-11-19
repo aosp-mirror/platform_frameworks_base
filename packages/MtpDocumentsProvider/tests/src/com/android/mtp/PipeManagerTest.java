@@ -44,13 +44,13 @@ public class PipeManagerTest extends AndroidTestCase {
     public void testReadDocument_basic() throws Exception {
         mtpManager.setImportFileBytes(0, 1, HELLO_BYTES);
         final ParcelFileDescriptor descriptor = mPipeManager.readDocument(
-                mtpManager, new Identifier(0, 0, 1));
+                mtpManager, new Identifier(0, 0, 1, null));
         assertDescriptor(descriptor, HELLO_BYTES);
     }
 
     public void testReadDocument_error() throws Exception {
         final ParcelFileDescriptor descriptor =
-                mPipeManager.readDocument(mtpManager, new Identifier(0, 0, 1));
+                mPipeManager.readDocument(mtpManager, new Identifier(0, 0, 1, null));
         assertDescriptorError(descriptor);
     }
 
@@ -62,7 +62,7 @@ public class PipeManagerTest extends AndroidTestCase {
 
         // Upload testing bytes.
         final ParcelFileDescriptor descriptor = mPipeManager.writeDocument(
-                getContext(), mtpManager, new Identifier(0, 0, 1));
+                getContext(), mtpManager, new Identifier(0, 0, 1, null));
         final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
                 new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
         outputStream.write(HELLO_BYTES, 0, HELLO_BYTES.length);
@@ -94,13 +94,13 @@ public class PipeManagerTest extends AndroidTestCase {
     public void testReadThumbnail_basic() throws Exception {
         mtpManager.setThumbnail(0, 1, HELLO_BYTES);
         final ParcelFileDescriptor descriptor = mPipeManager.readThumbnail(
-                mtpManager, new Identifier(0, 0, 1));
+                mtpManager, new Identifier(0, 0, 1, null));
         assertDescriptor(descriptor, HELLO_BYTES);
     }
 
     public void testReadThumbnail_error() throws Exception {
         final ParcelFileDescriptor descriptor =
-                mPipeManager.readThumbnail(mtpManager, new Identifier(0, 0, 1));
+                mPipeManager.readThumbnail(mtpManager, new Identifier(0, 0, 1, null));
         assertDescriptorError(descriptor);
     }
 

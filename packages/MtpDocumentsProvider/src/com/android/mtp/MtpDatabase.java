@@ -22,6 +22,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.media.MediaFile;
+import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -67,10 +69,8 @@ import java.util.Map;
  * the database tries to find corresponding rows by using document's name instead of MTP identifier
  * at the next update cycle.
  *
- * TODO: Remove @VisibleForTesting annotation when we start to use this class.
  * TODO: Improve performance by SQL optimization.
  */
-@VisibleForTesting
 class MtpDatabase {
     private final MtpDatabaseInternal mDatabase;
 
@@ -111,38 +111,21 @@ class MtpDatabase {
     /**
      * {@link MtpDatabaseInternal#queryChildDocuments}
      */
-    @VisibleForTesting
     Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
-        return queryChildDocuments(columnNames, parentDocumentId, false);
-    }
-
-    @VisibleForTesting
-    Cursor queryChildDocuments(String[] columnNames, String parentDocumentId, boolean useOldId) {
-        final String[] newColumnNames = new String[columnNames.length];
-
-        // TODO: Temporary replace document ID with old format.
-        for (int i = 0; i < columnNames.length; i++) {
-            if (useOldId && DocumentsContract.Document.COLUMN_DOCUMENT_ID.equals(columnNames[i])) {
-                newColumnNames[i] = COLUMN_DEVICE_ID + " || '_' || " + COLUMN_STORAGE_ID +
-                        " || '_' || IFNULL(" + COLUMN_OBJECT_HANDLE + ",0) AS " +
-                        DocumentsContract.Document.COLUMN_DOCUMENT_ID;
-            } else {
-                newColumnNames[i] = columnNames[i];
-            }
-        }
-
-        return mDatabase.queryChildDocuments(newColumnNames, parentDocumentId);
+        return mDatabase.queryChildDocuments(columnNames, parentDocumentId);
     }
 
     /**
      * {@link MtpDatabaseInternal#queryDocument}
      */
-    @VisibleForTesting
     Cursor queryDocument(String documentId, String[] projection) {
         return mDatabase.queryDocument(documentId, projection);
     }
 
-    Identifier createIdentifier(String parentDocumentId) {
+    /**
+     * {@link MtpDatabaseInternal#createIdentifier}
+     */
+    Identifier createIdentifier(String parentDocumentId) throws FileNotFoundException {
         return mDatabase.createIdentifier(parentDocumentId);
     }
 
@@ -157,7 +140,6 @@ class MtpDatabase {
      * {@link MtpDatabaseInternal#getParentId}
      * @throws FileNotFoundException
      */
-    @VisibleForTesting
     String getParentId(String documentId) throws FileNotFoundException {
         return mDatabase.getParentId(documentId);
     }
@@ -165,7 +147,6 @@ class MtpDatabase {
     /**
      * {@link MtpDatabaseInternal#deleteDocument}
      */
-    @VisibleForTesting
     void deleteDocument(String documentId) {
         mDatabase.deleteDocument(documentId);
     }
@@ -174,7 +155,6 @@ class MtpDatabase {
      * {@link MtpDatabaseInternal#putNewDocument}
      * @throws FileNotFoundException
      */
-    @VisibleForTesting
     String putNewDocument(int deviceId, String parentDocumentId, MtpObjectInfo info)
             throws FileNotFoundException {
         final ContentValues values = new ContentValues();
@@ -405,7 +385,9 @@ class MtpDatabase {
     private void getChildDocumentValues(
             ContentValues values, int deviceId, String parentId, MtpObjectInfo info) {
         values.clear();
-        final String mimeType = CursorHelper.formatTypeToMimeType(info.getFormat());
+        final String mimeType = info.getFormat() == MtpConstants.FORMAT_ASSOCIATION ?
+                DocumentsContract.Document.MIME_TYPE_DIR :
+                MediaFile.getMimeTypeForFormatCode(info.getFormat());
         int flag = 0;
         if (info.getProtectionStatus() == 0) {
             flag |= Document.FLAG_SUPPORTS_DELETE |
