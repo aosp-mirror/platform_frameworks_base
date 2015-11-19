@@ -29,6 +29,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 
+import java.io.FileNotFoundException;
 import java.util.Objects;
 
 /**
@@ -118,11 +119,84 @@ class MtpDatabaseInternal {
     }
 
     /**
+     * Queries a single document.
+     * @param documentId
+     * @param projection
+     * @return Database cursor.
+     */
+    public Cursor queryDocument(String documentId, String[] projection) {
+        return mDatabase.query(
+                TABLE_DOCUMENTS,
+                projection,
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null,
+                "1");
+    }
+
+    /**
      * Remove all rows belong to a device.
      * @param deviceId Device ID.
      */
     void removeDeviceRows(int deviceId) {
+        // Call non-recursive version because it anyway deletes all rows in the devices.
         deleteDocumentsAndRoots(COLUMN_DEVICE_ID + "=?", strings(deviceId));
+    }
+
+    /**
+     * Obtains parent document ID.
+     * @param documentId
+     * @return parent document ID.
+     * @throws FileNotFoundException
+     */
+    String getParentId(String documentId) throws FileNotFoundException {
+        final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(COLUMN_PARENT_DOCUMENT_ID),
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null,
+                "1");
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getString(0);
+            } else {
+                throw new FileNotFoundException("Cannot find a row having ID=" + documentId);
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /**
+     * Deletes document and its children.
+     * @param documentId
+     */
+    void deleteDocument(String documentId) {
+        deleteDocumentsAndRootsRecursively(SELECTION_DOCUMENT_ID, strings(documentId));
+    }
+
+    /**
+     * Adds new document under the parent.
+     * The method does not affect invalidated and pending documents because we know the document is
+     * newly added and never mapped with existing ones.
+     * @param parentDocumentId
+     * @param values
+     * @return Document ID of added document.
+     */
+    String putNewDocument(String parentDocumentId, ContentValues values) {
+        mDatabase.beginTransaction();
+        try {
+            final long id = mDatabase.insert(TABLE_DOCUMENTS, null, values);
+            mDatabase.setTransactionSuccessful();
+            return Long.toString(id);
+        } finally {
+            mDatabase.endTransaction();
+        }
     }
 
     /**
@@ -197,7 +271,7 @@ class MtpDatabaseInternal {
         mDatabase.beginTransaction();
         try {
             // Delete all pending rows.
-            deleteDocumentsAndRoots(
+            deleteDocumentsAndRootsRecursively(
                     selection + " AND " + COLUMN_ROW_STATE + "=?", strings(arg, ROW_STATE_PENDING));
 
             // Set all documents as invalidated.
@@ -366,14 +440,14 @@ class MtpDatabaseInternal {
                 }
 
                 // Delete 'pending' row.
-                deleteDocumentsAndRoots(SELECTION_DOCUMENT_ID, new String[] { pendingId });
+                deleteDocumentsAndRootsRecursively(SELECTION_DOCUMENT_ID, new String[] { pendingId });
             }
             mergingCursor.close();
 
             boolean changed = false;
 
             // Delete all invalidated rows that cannot be mapped.
-            if (deleteDocumentsAndRoots(
+            if (deleteDocumentsAndRootsRecursively(
                     COLUMN_ROW_STATE + " = ? AND " + selection,
                     strings(ROW_STATE_INVALIDATED, arg))) {
                 changed = true;
@@ -407,7 +481,7 @@ class MtpDatabaseInternal {
     void clearMapping() {
         mDatabase.beginTransaction();
         try {
-            deleteDocumentsAndRoots(COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_PENDING));
+            deleteDocumentsAndRootsRecursively(COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_PENDING));
             final ContentValues values = new ContentValues();
             values.putNull(COLUMN_OBJECT_HANDLE);
             values.putNull(COLUMN_STORAGE_ID);
@@ -446,6 +520,39 @@ class MtpDatabaseInternal {
      * @param args Arguments for selection.
      * @return Whether the method deletes rows.
      */
+    private boolean deleteDocumentsAndRootsRecursively(String selection, String[] args) {
+        mDatabase.beginTransaction();
+        try {
+            boolean changed = false;
+            final Cursor cursor = mDatabase.query(
+                    TABLE_DOCUMENTS,
+                    strings(Document.COLUMN_DOCUMENT_ID),
+                    selection,
+                    args,
+                    null,
+                    null,
+                    null);
+            try {
+                while (cursor.moveToNext()) {
+                    if (deleteDocumentsAndRootsRecursively(
+                            COLUMN_PARENT_DOCUMENT_ID + "=?",
+                            strings(cursor.getString(0)))) {
+                        changed = true;
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+            if (deleteDocumentsAndRoots(selection, args)) {
+                changed = true;
+            }
+            mDatabase.setTransactionSuccessful();
+            return changed;
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
     private boolean deleteDocumentsAndRoots(String selection, String[] args) {
         mDatabase.beginTransaction();
         try {
@@ -464,6 +571,8 @@ class MtpDatabaseInternal {
                     args);
             deleted += mDatabase.delete(TABLE_DOCUMENTS, selection, args);
             mDatabase.setTransactionSuccessful();
+            // TODO Remove child.
+            // TODO Remove mappingState.
             return deleted != 0;
         } finally {
             mDatabase.endTransaction();
@@ -505,7 +614,7 @@ class MtpDatabaseInternal {
      * @param args Values converted into string array.
      * @return String array.
      */
-    private static String[] strings(Object... args) {
+    static String[] strings(Object... args) {
         final String[] results = new String[args.length];
         for (int i = 0; i < args.length; i++) {
             results[i] = Objects.toString(args[i]);

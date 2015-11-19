@@ -29,6 +29,7 @@ import android.provider.DocumentsContract.Root;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -133,6 +134,14 @@ class MtpDatabase {
         return mDatabase.queryChildDocuments(newColumnNames, parentDocumentId);
     }
 
+    /**
+     * {@link MtpDatabaseInternal#queryDocument}
+     */
+    @VisibleForTesting
+    Cursor queryDocument(String documentId, String[] projection) {
+        return mDatabase.queryDocument(documentId, projection);
+    }
+
     Identifier createIdentifier(String parentDocumentId) {
         return mDatabase.createIdentifier(parentDocumentId);
     }
@@ -142,6 +151,35 @@ class MtpDatabase {
      */
     void removeDeviceRows(int deviceId) {
         mDatabase.removeDeviceRows(deviceId);
+    }
+
+    /**
+     * {@link MtpDatabaseInternal#getParentId}
+     * @throws FileNotFoundException
+     */
+    @VisibleForTesting
+    String getParentId(String documentId) throws FileNotFoundException {
+        return mDatabase.getParentId(documentId);
+    }
+
+    /**
+     * {@link MtpDatabaseInternal#deleteDocument}
+     */
+    @VisibleForTesting
+    void deleteDocument(String documentId) {
+        mDatabase.deleteDocument(documentId);
+    }
+
+    /**
+     * {@link MtpDatabaseInternal#putNewDocument}
+     * @throws FileNotFoundException
+     */
+    @VisibleForTesting
+    String putNewDocument(int deviceId, String parentDocumentId, MtpObjectInfo info)
+            throws FileNotFoundException {
+        final ContentValues values = new ContentValues();
+        getChildDocumentValues(values, deviceId, parentDocumentId, info);
+        return mDatabase.putNewDocument(parentDocumentId, values);
     }
 
     /**
@@ -186,7 +224,11 @@ class MtpDatabase {
         try {
             final boolean heuristic;
             final String mapColumn;
-            switch (mMappingMode.get(getRootDocumentsMappingStateKey(deviceId))) {
+            final String key = getRootDocumentsMappingStateKey(deviceId);
+            if (!mMappingMode.containsKey(key)) {
+                throw new IllegalStateException("startAddingRootDocuments has not been called.");
+            }
+            switch (mMappingMode.get(key)) {
                 case MAP_BY_MTP_IDENTIFIER:
                     heuristic = false;
                     mapColumn = COLUMN_STORAGE_ID;
