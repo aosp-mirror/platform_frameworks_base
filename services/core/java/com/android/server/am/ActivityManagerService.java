@@ -192,6 +192,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DebugUtils;
 import android.util.EventLog;
+import android.util.LocaleList;
 import android.util.Log;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -2445,7 +2446,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
 
         mConfiguration.setToDefaults();
-        mConfiguration.setLocale(Locale.getDefault());
+        mConfiguration.setLocales(LocaleList.getDefault());
 
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessCpuTracker.init();
@@ -17709,6 +17710,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 UserHandle.USER_NULL);
     }
 
+    // To cache the list of supported system locales
+    private String[] mSupportedSystemLocales = null;
+
     /**
      * Do either or both things: (1) change the current configuration, and (2)
      * make sure the given activity is running with the (now) current
@@ -17732,11 +17736,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
 
-                if (!initLocale && values.locale != null && values.userSetLocale) {
-                    final String languageTag = values.locale.toLanguageTag();
-                    SystemProperties.set("persist.sys.locale", languageTag);
+                if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
+                    if (mSupportedSystemLocales == null) {
+                        mSupportedSystemLocales = Resources.getSystem().getAssets().getLocales();
+                    }
+                    final Locale locale = values.getLocales().getBestMatch(mSupportedSystemLocales);
+                    SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
                     mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
-                            values.locale));
+                            locale));
                 }
 
                 mConfigurationSeq++;
