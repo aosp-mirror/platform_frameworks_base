@@ -2947,7 +2947,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Rect frame = new Rect(0, 0, width, height);
             final Rect insets = new Rect();
             Rect surfaceInsets = null;
-            final boolean fullscreen = win != null && win.isFullscreen(width, height);
+            final boolean fullscreen = win != null && win.isFrameFullscreen(displayInfo);
             final boolean freeform = win != null && win.inFreeformWorkspace();
             final boolean docked = win != null && win.inDockedWorkspace();
             if (win != null) {
@@ -5876,7 +5876,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         screenshotReady = true;
                     }
 
-                    if (ws.isFullscreen(dw, dh) && ws.isOpaqueDrawn()){
+                    if (ws.isObscuringFullscreen(displayInfo)){
                         break;
                     }
                 }

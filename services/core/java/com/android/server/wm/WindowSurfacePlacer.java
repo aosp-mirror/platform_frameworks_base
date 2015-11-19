@@ -661,7 +661,7 @@ class WindowSurfacePlacer {
                 // Update effect.
                 w.mObscured = mObscured;
                 if (!mObscured) {
-                    handleNotObscuredLocked(w, innerDw, innerDh);
+                    handleNotObscuredLocked(w, displayInfo);
                 }
 
                 w.applyDimLayerIfNeeded();
@@ -1332,16 +1332,14 @@ class WindowSurfacePlacer {
 
     /**
      * @param w WindowState this method is applied to.
-     * @param innerDw Width of app window.
-     * @param innerDh Height of app window.
+     * @param dispInfo info of the display that the window's obscuring state is checked against.
      */
-    private void handleNotObscuredLocked(final WindowState w, final int innerDw, final int innerDh) {
+    private void handleNotObscuredLocked(final WindowState w, final DisplayInfo dispInfo) {
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
-        final boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
 
-        if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
+        if (canBeSeen && w.isObscuringFullscreen(dispInfo)) {
             // This window completely covers everything behind it,
             // so we want to leave all of them as undimmed (for
             // performance reasons).
