@@ -1424,7 +1424,7 @@ public abstract class Drawable {
         }
     }
 
-    static int resolveDensity(@NonNull Resources r, int parentDensity) {
+    static int resolveDensity(@Nullable Resources r, int parentDensity) {
         final int densityDpi = r == null ? parentDensity : r.getDisplayMetrics().densityDpi;
         return densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
