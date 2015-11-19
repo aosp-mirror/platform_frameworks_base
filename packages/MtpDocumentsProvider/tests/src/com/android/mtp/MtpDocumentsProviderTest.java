@@ -49,11 +49,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     @Override
     public void tearDown() {
-        try {
-            mProvider.close();
-        } catch (InterruptedException e) {
-            fail();
-        }
+        mProvider.shutdown();
     }
 
     public void testOpenAndCloseDevice() throws Exception {

@@ -31,6 +31,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
@@ -59,6 +60,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     private MtpManager mMtpManager;
     private ContentResolver mResolver;
+    @GuardedBy("mDeviceToolkits")
     private Map<Integer, DeviceToolkit> mDeviceToolkits;
     private RootScanner mRootScanner;
     private Resources mResources;
@@ -222,9 +224,11 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     @Override
     public void onTrimMemory(int level) {
-      for (final DeviceToolkit toolkit : mDeviceToolkits.values()) {
-          toolkit.mDocumentLoader.clearCompletedTasks();
-      }
+        synchronized (mDeviceToolkits) {
+            for (final DeviceToolkit toolkit : mDeviceToolkits.values()) {
+                toolkit.mDocumentLoader.clearCompletedTasks();
+            }
+        }
     }
 
     @Override
@@ -254,21 +258,28 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     void openDevice(int deviceId) throws IOException {
-        mMtpManager.openDevice(deviceId);
-        mDeviceToolkits.put(deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
-        mRootScanner.scanNow();
+        synchronized (mDeviceToolkits) {
+            mMtpManager.openDevice(deviceId);
+            mDeviceToolkits.put(deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
+        }
+        mRootScanner.resume();
     }
 
-    void closeDevice(int deviceId) throws IOException {
+    void closeDevice(int deviceId) throws IOException, InterruptedException {
         // TODO: Flush the device before closing (if not closed externally).
-        getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
-        mDeviceToolkits.remove(deviceId);
-        mDatabase.removeDeviceRows(deviceId);
-        mMtpManager.closeDevice(deviceId);
+        synchronized (mDeviceToolkits) {
+            getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
+            mDeviceToolkits.remove(deviceId);
+            mDatabase.removeDeviceRows(deviceId);
+            mMtpManager.closeDevice(deviceId);
+        }
         mRootScanner.notifyChange();
+        if (!hasOpenedDevices()) {
+            mRootScanner.pause();
+        }
     }
 
-    void close() throws InterruptedException {
+    synchronized void closeAllDevices() throws InterruptedException {
         boolean closed = false;
         for (int deviceId : mMtpManager.getOpenedDeviceIds()) {
             try {
@@ -282,13 +293,28 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
         if (closed) {
             mRootScanner.notifyChange();
+            mRootScanner.pause();
         }
-        mRootScanner.close();
-        mDatabase.close();
     }
 
     boolean hasOpenedDevices() {
         return mMtpManager.getOpenedDeviceIds().length != 0;
+    }
+
+    /**
+     * Finalize the content provider for unit tests.
+     */
+    @Override
+    public void shutdown() {
+        try {
+            closeAllDevices();
+        } catch (InterruptedException e) {
+            // It should fail unit tests by throwing runtime exception.
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            mDatabase.close();
+            super.shutdown();
+        }
     }
 
     private void notifyChildDocumentsChange(String parentDocumentId) {
@@ -299,11 +325,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     private DeviceToolkit getDeviceToolkit(int deviceId) throws FileNotFoundException {
-        final DeviceToolkit toolkit = mDeviceToolkits.get(deviceId);
-        if (toolkit == null) {
-            throw new FileNotFoundException();
+        synchronized (mDeviceToolkits) {
+            final DeviceToolkit toolkit = mDeviceToolkits.get(deviceId);
+            if (toolkit == null) {
+                throw new FileNotFoundException();
+            }
+            return toolkit;
         }
-        return toolkit;
     }
 
     private PipeManager getPipeManager(Identifier identifier) throws FileNotFoundException {

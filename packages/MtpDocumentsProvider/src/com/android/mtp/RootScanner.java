@@ -9,6 +9,10 @@ import android.provider.DocumentsContract;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 final class RootScanner {
     /**
@@ -27,13 +31,18 @@ final class RootScanner {
      */
     private final static long SHORT_POLLING_TIMES = 10;
 
+    /**
+     * Milliseconds we wait for background thread when pausing.
+     */
+    private final static long AWAIT_TERMINATION_TIMEOUT = 2000;
+
     final ContentResolver mResolver;
     final Resources mResources;
     final MtpManager mManager;
     final MtpDatabase mDatabase;
-    boolean mClosed = false;
-    int mPollingCount;
-    Thread mBackgroundThread;
+
+    ExecutorService mExecutor;
+    FutureTask<Void> mCurrentTask;
 
     RootScanner(
             ContentResolver resolver,
@@ -46,6 +55,9 @@ final class RootScanner {
         mDatabase = database;
     }
 
+    /**
+     * Notifies a change of the roots list via ContentResolver.
+     */
     void notifyChange() {
         final Uri uri =
                 DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
@@ -56,74 +68,81 @@ final class RootScanner {
      * Starts to check new changes right away.
      * If the background thread has already gone, it restarts another background thread.
      */
-    synchronized void scanNow() {
-        if (mClosed) {
+    synchronized void resume() {
+        if (mExecutor == null) {
+            // Only single thread updates the database.
+            mExecutor = Executors.newSingleThreadExecutor();
+        }
+        if (mCurrentTask != null) {
+            // Cancel previous task.
+            mCurrentTask.cancel(true);
+        }
+        mCurrentTask = new FutureTask<Void>(new UpdateRootsRunnable(), null);
+        mExecutor.submit(mCurrentTask);
+    }
+
+    /**
+     * Stops background thread and wait for its termination.
+     * @throws InterruptedException
+     */
+    synchronized void pause() throws InterruptedException {
+        if (mExecutor == null) {
             return;
         }
-        mPollingCount = 0;
-        if (mBackgroundThread == null) {
-            mBackgroundThread = new BackgroundLoaderThread();
-            mBackgroundThread.start();
-        } else {
-            notify();
+        mExecutor.shutdownNow();
+        if (!mExecutor.awaitTermination(AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS)) {
+            Log.e(MtpDocumentsProvider.TAG, "Failed to terminate RootScanner's background thread.");
         }
+        mExecutor = null;
     }
 
-    void close() throws InterruptedException {
-        Thread thread;
-        synchronized (this) {
-            mClosed = true;
-            thread = mBackgroundThread;
-            if (mBackgroundThread == null) {
-                return;
-            }
-            notify();
-        }
-        thread.join();
-    }
-
-    private final class BackgroundLoaderThread extends Thread {
+    /**
+     * Runnable to scan roots and update the database information.
+     */
+    private final class UpdateRootsRunnable implements Runnable {
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            synchronized (RootScanner.this) {
-                while (!mClosed) {
-                    final int[] deviceIds = mManager.getOpenedDeviceIds();
-                    if (deviceIds.length == 0) {
-                        break;
-                    }
-                    boolean changed = false;
-                    for (int deviceId : deviceIds) {
+            int pollingCount = 0;
+            while (!Thread.interrupted()) {
+                final int[] deviceIds = mManager.getOpenedDeviceIds();
+                if (deviceIds.length == 0) {
+                    return;
+                }
+                boolean changed = false;
+                for (int deviceId : deviceIds) {
+                    try {
+                        final MtpRoot[] roots = mManager.getRoots(deviceId);
                         mDatabase.startAddingRootDocuments(deviceId);
                         try {
-                            changed = mDatabase.putRootDocuments(
-                                    deviceId, mResources, mManager.getRoots(deviceId)) || changed;
-                        } catch (IOException|SQLiteException exp) {
-                            // The error may happen on the device. We would like to continue getting
-                            // roots for other devices.
-                            Log.e(MtpDocumentsProvider.TAG, exp.getMessage());
-                            continue;
+                            if (mDatabase.putRootDocuments(deviceId, mResources, roots)) {
+                                changed = true;
+                            }
                         } finally {
-                            changed = mDatabase.stopAddingRootDocuments(deviceId) || changed;
+                            if (mDatabase.stopAddingRootDocuments(deviceId)) {
+                                changed = true;
+                            }
                         }
-                    }
-                    if (changed) {
-                        notifyChange();
-                    }
-                    mPollingCount++;
-                    try {
-                        // Use SHORT_POLLING_PERIOD for the first SHORT_POLLING_TIMES because it is
-                        // more likely to add new root just after the device is added.
-                        // TODO: Use short interval only for a device that is just added.
-                        RootScanner.this.wait(
-                                mPollingCount > SHORT_POLLING_TIMES ?
-                                        LONG_POLLING_INTERVAL : SHORT_POLLING_INTERVAL);
-                    } catch (InterruptedException exception) {
-                        break;
+                    } catch (IOException | SQLiteException exception) {
+                        // The error may happen on the device. We would like to continue getting
+                        // roots for other devices.
+                        Log.e(MtpDocumentsProvider.TAG, exception.getMessage());
                     }
                 }
-
-                mBackgroundThread = null;
+                if (changed) {
+                    notifyChange();
+                }
+                pollingCount++;
+                try {
+                    // Use SHORT_POLLING_PERIOD for the first SHORT_POLLING_TIMES because it is
+                    // more likely to add new root just after the device is added.
+                    // TODO: Use short interval only for a device that is just added.
+                    Thread.sleep(pollingCount > SHORT_POLLING_TIMES ?
+                        LONG_POLLING_INTERVAL : SHORT_POLLING_INTERVAL);
+                } catch (InterruptedException exp) {
+                    // The while condition handles the interrupted flag.
+                    continue;
+                }
             }
         }
     }
