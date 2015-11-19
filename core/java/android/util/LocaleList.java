@@ -49,6 +49,7 @@ public final class LocaleList {
         return location < mList.length ? mList[location] : null;
     }
 
+    @Nullable
     public Locale getPrimary() {
         return mList.length == 0 ? null : get(0);
     }
@@ -177,6 +178,12 @@ public final class LocaleList {
             }
             return new LocaleList(localeArray);
         }
+    }
+
+    @Nullable
+    public Locale getBestMatch(String[] locales) {
+        // TODO: Fix this to actually do locale negotiation and choose the best match
+        return getPrimary();
     }
 
     private final static Object sLock = new Object();
