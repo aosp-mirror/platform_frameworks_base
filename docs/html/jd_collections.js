@@ -353,6 +353,10 @@ var RESOURCE_COLLECTIONS = {
       "distribute/users/ota-installs.html",
       "distribute/users/youtube.html",
       "distribute/users/house-ads.html",
+      "distribute/users/experiments.html",
+      "distribute/users/user-acquisition.html",
+      "distribute/users/banners.html",
+      "distribute/users/beta.html"
     ]
   },
   "distribute/engagelanding": {
@@ -366,6 +370,8 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/easy-signin.html",
       "distribute/analyze/build-better-apps.html",
       "distribute/engage/gcm.html",
+      "distribute/engage/beta.html"
+
     ]
   },
   "distribute/monetize": {
@@ -555,11 +561,44 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer"
     ]
   },
-  "distribute/googleplay/developerconsole": {
+  "distribute/googleplay/developerconsole/related": {
     "title": "Developer Console",
     "resources": [
       "google/play/billing/index.html",
       "https://support.google.com/googleplay/android-developer/answer/138294"
+    ]
+  },
+  "distribute/googleplay/beta": {
+    "title": "Alpha and Beta Testing",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/3131213",
+      "https://support.google.com/googleplay/android-developer/answer/3131213#games",
+      "distribute/googleplay/experiments.html"
+    ]
+  },
+  "distribute/googleplay/experiments/successes": {
+    "title": "Store Listing Experiment successes",
+    "resources": [
+    ]
+  },
+  "distribute/googleplay/experiments/related": {
+    "title": "Store Listing Experiments",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/6227309",
+      "https://www.youtube.com/watch?v=B6ydLpkhq04",
+      "https://support.google.com/tagmanager/answer/6003007"
+    ]
+  },
+  "distribute/googleplay/banners/related": {
+    "title": "App Install Banners",
+    "resources": [
+      "https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android#native"
+    ]
+  },
+  "distribute/googleplay/useracquisition/related": {
+    "title": "User Acquisition",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/6263332"
     ]
   },
   "distribute/googleplay/cast": {
@@ -997,11 +1036,13 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/cloud-messaging/android/client",
     ]
   },
-  "distribute/engage/googleplaygames": {
+  "distribute/engage/gamesservices/related": {
     "title": "",
     "resources": [
-      "google/play-services/games.html",
-      "distribute/essentials/best-practices/games.html"
+      "https://developers.google.com/games/services/",
+      "distribute/analyze/start.html",
+      "distribute/googleplay/cardboard.html",
+      "http://www.google.com/admob/"
     ]
   },
   "distribute/engage/gplus": {
