@@ -167,11 +167,6 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void cancelDrag(IBinder dragToken) {
-        // pass for now
-    }
-
-    @Override
     public void dragRecipientEntered(IWindow window) throws RemoteException {
         // pass for now
     }
