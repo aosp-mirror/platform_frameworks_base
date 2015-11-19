@@ -186,11 +186,6 @@ interface IWindowSession {
 	void reportDropResult(IWindow window, boolean consumed);
 
     /**
-     * Cancel a drag operation.
-     */
-    void cancelDrag(IBinder dragToken);
-
-    /**
      * Tell the OS that we've just dragged into a View that is willing to accept the drop
      */
     void dragRecipientEntered(IWindow window);
