@@ -78,6 +78,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.security.NetworkSecurityPolicy;
+import android.security.net.config.NetworkSecurityConfigProvider;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -4830,6 +4831,11 @@ public final class ActivityThread {
                 Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
             }
         }
+
+        // Install the Network Security Config Provider. This must happen before the application
+        // code is loaded to prevent issues with instances of TLS objects being created before
+        // the provider is installed.
+        NetworkSecurityConfigProvider.install(appContext);
 
         // Continue loading instrumentation.
         if (ii != null) {

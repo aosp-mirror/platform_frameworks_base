@@ -1566,6 +1566,7 @@ android.security.keystore.AndroidKeyStoreBCWorkaroundProvider
 android.security.keystore.AndroidKeyStoreKey
 android.security.keystore.AndroidKeyStoreProvider
 android.security.keystore.KeyStoreCryptoOperation
+android.security.net.config.NetworkSecurityConfigProvider
 android.service.persistentdata.PersistentDataBlockManager
 android.system.ErrnoException
 android.system.GaiException
