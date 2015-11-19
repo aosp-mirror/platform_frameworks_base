@@ -540,6 +540,13 @@ public final class InputMethodManager {
         void deactivate() {
             mActive = false;
         }
+
+        @Override
+        public String toString() {
+            return "ControlledInputConnectionWrapper{mActive=" + mActive
+                    + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
+                    + "}";
+        }
     }
     
     final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
