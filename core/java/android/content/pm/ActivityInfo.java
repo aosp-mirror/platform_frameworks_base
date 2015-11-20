@@ -627,9 +627,9 @@ public class ActivityInfo extends ComponentInfo
      * {@link #CONFIG_MCC}, {@link #CONFIG_MNC},
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
-     * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT} and
-     * {@link #CONFIG_LAYOUT_DIRECTION}.  Set from the {@link android.R.attr#configChanges}
-     * attribute.
+     * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
+     * {@link #CONFIG_DENSITY}, and {@link #CONFIG_LAYOUT_DIRECTION}.
+     * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
 
