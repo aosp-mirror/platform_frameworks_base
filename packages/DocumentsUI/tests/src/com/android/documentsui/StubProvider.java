@@ -531,6 +531,16 @@ public class StubProvider extends DocumentsProvider {
             this.rootInfo = rootInfo;
             mStorage.put(this.documentId, this);
         }
+        @Override
+        public String toString() {
+            return "StubDocument{"
+                    + "path:" + file.getPath()
+                    + ", mimeType:" + mimeType
+                    + ", rootInfo:" + rootInfo
+                    + ", documentId:" + documentId
+                    + ", parentId:" + parentId
+                    + "}";
+        }
     }
 
     private static String getDocumentIdForFile(File file) {

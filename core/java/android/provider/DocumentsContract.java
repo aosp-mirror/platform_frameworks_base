@@ -67,7 +67,7 @@ import java.util.List;
  * @see DocumentsProvider
  */
 public final class DocumentsContract {
-    private static final String TAG = "Documents";
+    private static final String TAG = "DocumentsContract";
 
     // content://com.example/root/
     // content://com.example/root/sdcard/
@@ -591,6 +591,12 @@ public final class DocumentsContract {
      */
     public static final String EXTRA_ERROR = "error";
 
+    /**
+     * Optional result (I'm thinking boolean) answer to a question.
+     * {@hide}
+     */
+    public static final String EXTRA_RESULT = "result";
+
     /** {@hide} */
     public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
     /** {@hide} */
@@ -601,6 +607,8 @@ public final class DocumentsContract {
     public static final String METHOD_COPY_DOCUMENT = "android:copyDocument";
     /** {@hide} */
     public static final String METHOD_MOVE_DOCUMENT = "android:moveDocument";
+    /** {@hide} */
+    public static final String METHOD_IS_CHILD_DOCUMENT = "android:isChildDocument";
 
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
@@ -1023,6 +1031,24 @@ public final class DocumentsContract {
 
         final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
         return out.getParcelable(DocumentsContract.EXTRA_URI);
+    }
+
+    /** {@hide} */
+    public static boolean isChildDocument(ContentProviderClient client, Uri parentDocumentUri,
+            Uri childDocumentUri) throws RemoteException {
+
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, parentDocumentUri);
+        in.putParcelable(DocumentsContract.EXTRA_TARGET_URI, childDocumentUri);
+
+        final Bundle out = client.call(METHOD_IS_CHILD_DOCUMENT, null, in);
+        if (out == null) {
+            throw new RemoteException("Failed to get a reponse from isChildDocument query.");
+        }
+        if (!out.containsKey(DocumentsContract.EXTRA_RESULT)) {
+            throw new RemoteException("Response did not include result field..");
+        }
+        return out.getBoolean(DocumentsContract.EXTRA_RESULT);
     }
 
     /**

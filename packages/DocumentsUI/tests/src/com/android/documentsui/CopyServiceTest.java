@@ -28,12 +28,10 @@ import android.net.Uri;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Document;
 import android.test.MoreAsserts;
 import android.test.ServiceTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -48,6 +46,7 @@ import libcore.io.Streams;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -55,9 +54,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @MediumTest
-public class CopyTest extends ServiceTestCase<CopyService> {
+public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
-    public CopyTest() {
+    public CopyServiceTest() {
         super(CopyService.class);
     }
 
@@ -72,11 +71,13 @@ public class CopyTest extends ServiceTestCase<CopyService> {
     private DocumentsProviderHelper mDocHelper;
     private StubProvider mStorage;
     private Context mSystemContext;
+    private CopyJobListener mListener;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
+        mListener = new CopyJobListener();
         setupTestContext();
         mClient = mResolver.acquireContentProviderClient(AUTHORITY);
 
@@ -84,6 +85,8 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         mStorage.clearCacheAndBuildRoots();
 
         mDocHelper = new DocumentsProviderHelper(AUTHORITY, mClient);
+
+        assertDestFileCount(0);
     }
 
     @Override
@@ -97,15 +100,13 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
                 "The five boxing wizards jump quickly".getBytes());
 
-        assertDstFileCountEquals(0);
-
         startService(createCopyIntent(Lists.newArrayList(testFile)));
 
         // 2 operations: file creation, then writing data.
         mResolver.waitForChanges(2);
 
         // Verify that one file was copied; check file contents.
-        assertDstFileCountEquals(1);
+        assertDestFileCount(1);
         assertCopied(srcPath);
     }
 
@@ -113,8 +114,6 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         String srcPath = "/test0.txt";
         String testContent = "The five boxing wizards jump quickly";
         Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain", testContent.getBytes());
-
-        assertDstFileCountEquals(0);
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testFile));
         moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
@@ -124,7 +123,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         mResolver.waitForChanges(3);
 
         // Verify that one file was moved; check file contents.
-        assertDstFileCountEquals(1);
+        assertDestFileCount(1);
         assertDoesNotExist(SRC_ROOT, srcPath);
 
         byte[] dstContent = readFile(DST_ROOT, srcPath);
@@ -147,15 +146,13 @@ public class CopyTest extends ServiceTestCase<CopyService> {
                 mStorage.createFile(SRC_ROOT, srcPaths[1], "text/plain", testContent[1].getBytes()),
                 mStorage.createFile(SRC_ROOT, srcPaths[2], "text/plain", testContent[2].getBytes()));
 
-        assertDstFileCountEquals(0);
-
         // Copy all the test files.
         startService(createCopyIntent(testFiles));
 
         // 3 file creations, 3 file writes.
         mResolver.waitForChanges(6);
 
-        assertDstFileCountEquals(3);
+        assertDestFileCount(3);
         for (String path : srcPaths) {
             assertCopied(path);
         }
@@ -163,29 +160,54 @@ public class CopyTest extends ServiceTestCase<CopyService> {
 
     public void testCopyEmptyDir() throws Exception {
         String srcPath = "/emptyDir";
-        Uri testDir = mStorage.createFile(SRC_ROOT, srcPath, DocumentsContract.Document.MIME_TYPE_DIR,
-                null);
-
-        assertDstFileCountEquals(0);
+        Uri testDir = createTestDirectory(srcPath);
 
         startService(createCopyIntent(Lists.newArrayList(testDir)));
 
         // Just 1 operation: Directory creation.
         mResolver.waitForChanges(1);
 
-        assertDstFileCountEquals(1);
+        assertDestFileCount(1);
 
         // Verify that the dst exists and is a directory.
         File dst = mStorage.getFile(DST_ROOT, srcPath);
         assertTrue(dst.isDirectory());
     }
 
+    public void testNoCopyDirToSelf() throws Exception {
+        Uri testDir = createTestDirectory("/someDir");
+
+        Intent intent = createCopyIntent(Lists.newArrayList(testDir), testDir);
+        startService(intent);
+
+        getService().addFinishedListener(mListener);
+
+        mListener.waitForFinished();
+        mListener.assertFailedCount(1);
+        mListener.assertFileFailed("someDir");
+
+        assertDestFileCount(0);
+    }
+
+    public void testNoCopyDirToDescendent() throws Exception {
+        Uri testDir = createTestDirectory("/someDir");
+        Uri descDir = createTestDirectory("/someDir/theDescendent");
+
+        Intent intent = createCopyIntent(Lists.newArrayList(testDir), descDir);
+        startService(intent);
+
+        getService().addFinishedListener(mListener);
+
+        mListener.waitForFinished();
+        mListener.assertFailedCount(1);
+        mListener.assertFileFailed("someDir");
+
+        assertDestFileCount(0);
+    }
+
     public void testMoveEmptyDir() throws Exception {
         String srcPath = "/emptyDir";
-        Uri testDir = mStorage.createFile(SRC_ROOT, srcPath, DocumentsContract.Document.MIME_TYPE_DIR,
-                null);
-
-        assertDstFileCountEquals(0);
+        Uri testDir = createTestDirectory(srcPath);
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testDir));
         moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
@@ -194,7 +216,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         // 2 operations: Directory creation, and removal of the original.
         mResolver.waitForChanges(2);
 
-        assertDstFileCountEquals(1);
+        assertDestFileCount(1);
 
         // Verify that the dst exists and is a directory.
         File dst = mStorage.getFile(DST_ROOT, srcPath);
@@ -217,8 +239,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
                 srcDir + "/test2.txt"
         };
         // Create test dir; put some files in it.
-        Uri testDir = mStorage.createFile(SRC_ROOT, srcDir, DocumentsContract.Document.MIME_TYPE_DIR,
-                null);
+        Uri testDir = createTestDirectory(srcDir);
         mStorage.createFile(SRC_ROOT, srcFiles[0], "text/plain", testContent[0].getBytes());
         mStorage.createFile(SRC_ROOT, srcFiles[1], "text/plain", testContent[1].getBytes());
         mStorage.createFile(SRC_ROOT, srcFiles[2], "text/plain", testContent[2].getBytes());
@@ -252,8 +273,6 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
                 "The five boxing wizards jump quickly".getBytes());
 
-        assertDstFileCountEquals(0);
-
         mStorage.simulateReadErrorsForFile(testFile);
 
         startService(createCopyIntent(Lists.newArrayList(testFile)));
@@ -262,15 +281,13 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         mResolver.waitForChanges(3);
 
         // Verify that the failed copy was cleaned up.
-        assertDstFileCountEquals(0);
+        assertDestFileCount(0);
     }
 
     public void testMoveFileWithReadErrors() throws Exception {
         String srcPath = "/test0.txt";
         Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
                 "The five boxing wizards jump quickly".getBytes());
-
-        assertDstFileCountEquals(0);
 
         mStorage.simulateReadErrorsForFile(testFile);
 
@@ -288,7 +305,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
             return;
         } finally {
             // Verify that the failed copy was cleaned up, and the src file wasn't removed.
-            assertDstFileCountEquals(0);
+            assertDestFileCount(0);
             assertExists(SRC_ROOT, srcPath);
         }
         // The asserts above didn't fail, but the CopyService did something unexpected.
@@ -308,8 +325,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
                 srcDir + "/test2.txt"
         };
         // Create test dir; put some files in it.
-        Uri testDir = mStorage.createFile(SRC_ROOT, srcDir, DocumentsContract.Document.MIME_TYPE_DIR,
-                null);
+        Uri testDir = createTestDirectory(srcDir);
         mStorage.createFile(SRC_ROOT, srcFiles[0], "text/plain", testContent[0].getBytes());
         Uri errFile = mStorage
                 .createFile(SRC_ROOT, srcFiles[1], "text/plain", testContent[1].getBytes());
@@ -346,33 +362,37 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         assertExists(SRC_ROOT, srcFiles[1]);
     }
 
-    /**
-     * Copies the given files to a pre-determined destination.
-     *
-     * @throws FileNotFoundException
-     */
+    private Uri createTestDirectory(String dir) throws IOException {
+        return mStorage.createFile(
+                SRC_ROOT, dir, DocumentsContract.Document.MIME_TYPE_DIR, null);
+    }
+
     private Intent createCopyIntent(List<Uri> srcs) throws Exception {
+        RootInfo root = mDocHelper.getRoot(DST_ROOT);
+        final Uri dst = DocumentsContract.buildDocumentUri(AUTHORITY, root.documentId);
+
+        return createCopyIntent(srcs, dst);
+    }
+
+    private Intent createCopyIntent(List<Uri> srcs, Uri dst) throws Exception {
         final ArrayList<DocumentInfo> srcDocs = Lists.newArrayList();
         for (Uri src : srcs) {
             srcDocs.add(DocumentInfo.fromUri(mResolver, src));
         }
 
-        RootInfo root = mDocHelper.getRoot(DST_ROOT);
-        final Uri dst = DocumentsContract.buildDocumentUri(AUTHORITY, root.documentId);
         DocumentStack stack = new DocumentStack();
         stack.push(DocumentInfo.fromUri(mResolver, dst));
         final Intent copyIntent = new Intent(mContext, CopyService.class);
         copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST, srcDocs);
         copyIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
 
-        // startService(copyIntent);
         return copyIntent;
     }
 
     /**
      * Returns a count of the files in the given directory.
      */
-    private void assertDstFileCountEquals(int expected) throws RemoteException {
+    private void assertDestFileCount(int expected) throws RemoteException {
         RootInfo dest = mDocHelper.getRoot(DST_ROOT);
         final Uri queryUri = DocumentsContract.buildChildDocumentsUri(AUTHORITY,
                 dest.documentId);
@@ -447,6 +467,34 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         mStorage = new StubProvider();
         mStorage.attachInfo(mContext, info);
         mResolver.addProvider(AUTHORITY, mStorage);
+    }
+
+    private final class CopyJobListener implements CopyService.TestOnlyListener {
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final List<DocumentInfo> failedDocs = new ArrayList<>();
+        @Override
+        public void onFinished(List<DocumentInfo> failed) {
+            failedDocs.addAll(failed);
+            latch.countDown();
+        }
+
+        public void assertFileFailed(String expectedName) {
+            for (DocumentInfo failed : failedDocs) {
+                if (expectedName.equals(failed.displayName)) {
+                    return;
+                }
+            }
+            fail("Couldn't find failed file: " + expectedName);
+        }
+
+        public void waitForFinished() throws InterruptedException {
+            latch.await(500, TimeUnit.MILLISECONDS);
+        }
+
+        public void assertFailedCount(int expected) {
+            assertEquals(expected, failedDocs.size());
+        }
     }
 
     /**

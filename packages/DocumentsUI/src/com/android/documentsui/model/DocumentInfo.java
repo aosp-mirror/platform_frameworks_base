@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import com.android.documentsui.DocumentsApplication;
@@ -204,13 +205,18 @@ public class DocumentInfo implements Durable, Parcelable {
         }
     }
 
-    private void deriveFields() {
+    @VisibleForTesting
+    void deriveFields() {
         derivedUri = DocumentsContract.buildDocumentUri(authority, documentId);
     }
 
     @Override
     public String toString() {
-        return "Document{docId=" + documentId + ", name=" + displayName + "}";
+        return "Document{"
+                + "docId=" + documentId
+                + ", name=" + displayName
+                + ", isDirectory=" + isDirectory()
+                + "}";
     }
 
     public boolean isCreateSupported() {
@@ -235,6 +241,22 @@ public class DocumentInfo implements Durable, Parcelable {
 
     public boolean isGridTitlesHidden() {
         return (flags & Document.FLAG_DIR_HIDE_GRID_TITLES) != 0;
+    }
+
+    public int hashCode() {
+        return derivedUri.hashCode() + mimeType.hashCode();
+    }
+
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (!(other instanceof DocumentInfo)) {
+            return false;
+        }
+
+        DocumentInfo that = (DocumentInfo) other;
+        // Uri + mime type should be totally unique.
+        return derivedUri.equals(that.derivedUri) && mimeType.equals(that.mimeType);
     }
 
     public static String getCursorString(Cursor cursor, String columnName) {
