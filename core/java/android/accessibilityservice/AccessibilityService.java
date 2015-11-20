@@ -178,15 +178,8 @@ import java.util.Set;
  * </p>
  * <h3>Notification strategy</h3>
  * <p>
- * For each feedback type only one accessibility service is notified. Services are notified
- * in the order of registration. Hence, if two services are registered for the same
- * feedback type in the same package the first one wins. It is possible however, to
- * register a service as the default one for a given feedback type. In such a case this
- * service is invoked if no other service was interested in the event. In other words, default
- * services do not compete with other services and are notified last regardless of the
- * registration order. This enables "generic" accessibility services that work reasonably
- * well with most applications to coexist with "polished" ones that are targeted for
- * specific applications.
+ * All accessibility services are notified of all events they have requested, regardless of their
+ * feedback type.
  * </p>
  * <p class="note">
  * <strong>Note:</strong> The event notification timeout is useful to avoid propagating

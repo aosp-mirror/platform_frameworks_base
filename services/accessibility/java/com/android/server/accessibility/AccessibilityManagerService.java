@@ -433,7 +433,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         AccessibilityEvent.obtain(event)).sendToTarget();
             }
             event.recycle();
-            getUserStateLocked(resolvedUserId).mHandledFeedbackTypes = 0;
         }
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
@@ -1051,9 +1050,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Service service = state.mBoundServices.get(i);
 
                 if (service.mIsDefault == isDefault) {
-                    if (canDispatchEventToServiceLocked(service, event,
-                            state.mHandledFeedbackTypes)) {
-                        state.mHandledFeedbackTypes |= service.mFeedbackType;
+                    if (canDispatchEventToServiceLocked(service, event)) {
                         service.notifyAccessibilityEvent(event);
                     }
                 }
@@ -1088,19 +1085,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     /**
      * Determines if given event can be dispatched to a service based on the package of the
-     * event source and already notified services for that event type. Specifically, a
-     * service is notified if it is interested in events from the package and no other service
-     * providing the same feedback type has been notified. Exception are services the
-     * provide generic feedback (feedback type left as a safety net for unforeseen feedback
-     * types) which are always notified.
+     * event source. Specifically, a service is notified if it is interested in events from the
+     * package.
      *
      * @param service The potential receiver.
      * @param event The event.
-     * @param handledFeedbackTypes The feedback types for which services have been notified.
      * @return True if the listener should be notified, false otherwise.
      */
-    private boolean canDispatchEventToServiceLocked(Service service, AccessibilityEvent event,
-            int handledFeedbackTypes) {
+    private boolean canDispatchEventToServiceLocked(Service service, AccessibilityEvent event) {
 
         if (!service.canReceiveEventsLocked()) {
             return false;
@@ -1121,15 +1113,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         String packageName = (event.getPackageName() != null)
                 ? event.getPackageName().toString() : null;
 
-        if (packageNames.isEmpty() || packageNames.contains(packageName)) {
-            int feedbackType = service.mFeedbackType;
-            if ((handledFeedbackTypes & feedbackType) != feedbackType
-                    || feedbackType == AccessibilityServiceInfo.FEEDBACK_GENERIC) {
-                return true;
-            }
-        }
-
-        return false;
+        return (packageNames.isEmpty() || packageNames.contains(packageName));
     }
 
     private void unbindAllServicesLocked(UserState userState) {
@@ -3886,8 +3870,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public final Set<ComponentName> mTouchExplorationGrantedServices =
                 new HashSet<>();
 
-        public int mHandledFeedbackTypes = 0;
-
         public int mLastSentClientState = -1;
 
         public boolean mIsAccessibilityEnabled;
@@ -3950,7 +3932,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mBindingServices.clear();
 
             // Clear event management state.
-            mHandledFeedbackTypes = 0;
             mLastSentClientState = -1;
 
             // Clear state persisted in settings.
