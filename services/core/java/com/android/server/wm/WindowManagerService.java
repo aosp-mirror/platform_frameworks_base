@@ -2863,7 +2863,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // notifying the client to render to with an offset from the surface's top-left.
         if (win.isDragResizeChanged()) {
             win.setDragResizing();
-            if (win.mHasSurface) {
+            // We can only change top level windows to the full-screen surface when
+            // resizing (as we only have one full-screen surface). So there is no need
+            // to preserve and destroy windows which are attached to another, they 
+            // will keep their surface and its size may change over time.
+            if (win.mHasSurface && win.mAttachedWindow == null) {
                 winAnimator.preserveSurfaceLocked();
                 result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
             }
