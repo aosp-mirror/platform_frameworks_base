@@ -37,6 +37,7 @@ public class Environment {
     private static final String ENV_ANDROID_STORAGE = "ANDROID_STORAGE";
     private static final String ENV_DOWNLOAD_CACHE = "DOWNLOAD_CACHE";
     private static final String ENV_OEM_ROOT = "OEM_ROOT";
+    private static final String ENV_ODM_ROOT = "ODM_ROOT";
     private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
 
     /** {@hide} */
@@ -56,6 +57,7 @@ public class Environment {
     private static final File DIR_ANDROID_STORAGE = getDirectory(ENV_ANDROID_STORAGE, "/storage");
     private static final File DIR_DOWNLOAD_CACHE = getDirectory(ENV_DOWNLOAD_CACHE, "/cache");
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
+    private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
 
     private static UserEnvironment sCurrentUser;
@@ -153,6 +155,16 @@ public class Environment {
      */
     public static File getOemDirectory() {
         return DIR_OEM_ROOT;
+    }
+
+    /**
+     * Return root directory of the "odm" partition holding ODM customizations,
+     * if any. If present, the partition is mounted read-only.
+     *
+     * @hide
+     */
+    public static File getOdmDirectory() {
+        return DIR_ODM_ROOT;
     }
 
     /**
