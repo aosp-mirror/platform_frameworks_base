@@ -6828,7 +6828,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mEditor != null) mEditor.prepareCursorControllers();
     }
 
-    private Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
+    /**
+     * @hide
+     */
+    protected Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
             Layout.Alignment alignment, boolean shouldEllipsize, TruncateAt effectiveEllipsize,
             boolean useSaved) {
         Layout result = null;
@@ -9708,7 +9711,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    TextDirectionHeuristic getTextDirectionHeuristic() {
+    /**
+     * @hide
+     */
+    protected TextDirectionHeuristic getTextDirectionHeuristic() {
         if (hasPasswordTransformationMethod()) {
             // passwords fields should be LTR
             return TextDirectionHeuristics.LTR;

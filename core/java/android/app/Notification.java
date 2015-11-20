@@ -3925,6 +3925,8 @@ public class Notification implements Parcelable
 
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
+            contentView.setBoolean(R.id.big_text, "setHasImage", mBuilder.mN.mLargeIcon != null);
+
             return contentView;
         }
 

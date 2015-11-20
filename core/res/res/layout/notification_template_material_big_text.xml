@@ -44,7 +44,7 @@
             android:gravity="top"
             android:layout_weight="1"
             >
-            <TextView android:id="@+id/big_text"
+            <com.android.internal.widget.ImageFloatingTextView android:id="@+id/big_text"
                 android:textAppearance="@style/TextAppearance.Material.Notification"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
