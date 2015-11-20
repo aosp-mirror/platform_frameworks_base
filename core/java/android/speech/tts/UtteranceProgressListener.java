@@ -2,6 +2,8 @@
 
 package android.speech.tts;
 
+import android.media.AudioFormat;
+
 /**
  * Listener for events relating to the progress of an utterance through
  * the synthesis queue. Each utterance is associated with a call to
@@ -14,10 +16,10 @@ public abstract class UtteranceProgressListener {
     /**
      * Called when an utterance "starts" as perceived by the caller. This will
      * be soon before audio is played back in the case of a {@link TextToSpeech#speak}
-     * or before the first bytes of a file are written to storage in the case
+     * or before the first bytes of a file are written to the file system in the case
      * of {@link TextToSpeech#synthesizeToFile}.
      *
-     * @param utteranceId the utterance ID of the utterance.
+     * @param utteranceId The utterance ID of the utterance.
      */
     public abstract void onStart(String utteranceId);
 
@@ -28,7 +30,7 @@ public abstract class UtteranceProgressListener {
      *
      * This request is guaranteed to be called after {@link #onStart(String)}.
      *
-     * @param utteranceId the utterance ID of the utterance.
+     * @param utteranceId The utterance ID of the utterance.
      */
     public abstract void onDone(String utteranceId);
 
@@ -39,7 +41,7 @@ public abstract class UtteranceProgressListener {
      * be a call to both {@link #onDone(String)} and {@link #onError(String)} for
      * the same utterance.
      *
-     * @param utteranceId the utterance ID of the utterance.
+     * @param utteranceId The utterance ID of the utterance.
      * @deprecated Use {@link #onError(String,int)} instead
      */
     @Deprecated
@@ -52,7 +54,7 @@ public abstract class UtteranceProgressListener {
      * be a call to both {@link #onDone(String)} and {@link #onError(String,int)} for
      * the same utterance. The default implementation calls {@link #onError(String)}.
      *
-     * @param utteranceId the utterance ID of the utterance.
+     * @param utteranceId The utterance ID of the utterance.
      * @param errorCode one of the ERROR_* codes from {@link TextToSpeech}
      */
     public void onError(String utteranceId, int errorCode) {
@@ -65,12 +67,58 @@ public abstract class UtteranceProgressListener {
      * or uses {@link TextToSpeech#QUEUE_FLUSH} as an argument with the
      * {@link TextToSpeech#speak} or {@link TextToSpeech#synthesizeToFile} methods.
      *
-     * @param utteranceId the utterance ID of the utterance.
+     * @param utteranceId The utterance ID of the utterance.
      * @param interrupted If true, then the utterance was interrupted while being synthesized
      *        and its output is incomplete. If false, then the utterance was flushed
      *        before the synthesis started.
      */
     public void onStop(String utteranceId, boolean interrupted) {
+    }
+
+    /**
+     * Called when the TTS engine begins to synthesize the audio for a request.
+     *
+     * <p>
+     * It provides information about the format of the byte array for subsequent
+     * {@link #onAudioAvailable} calls.
+     * </p>
+     *
+     * <p>
+     * This is called when the TTS engine starts synthesizing audio for the request. If an
+     * application wishes to know when the audio is about to start playing, {#onStart(String)}
+     * should be used instead.
+     * </p>
+     *
+     * @param utteranceId The utterance ID of the utterance.
+     * @param sampleRateInHz Sample rate in hertz of the generated audio.
+     * @param audioFormat Audio format of the generated audio. Should be one of
+     *        {@link AudioFormat#ENCODING_PCM_8BIT}, {@link AudioFormat#ENCODING_PCM_16BIT} or
+     *        {@link AudioFormat#ENCODING_PCM_FLOAT}.
+     * @param channelCount The number of channels.
+     */
+    public void onBeginSynthesis(String utteranceId, int sampleRateInHz, int audioFormat, int channelCount) {
+    }
+
+    /**
+     * This is called when a chunk of audio is ready for consumption.
+     *
+     * <p>
+     * The audio parameter is a copy of what will be synthesized to the speakers (when synthesis was
+     * initiated with a {@link TextToSpeech#speak} call) or written to the file system (for
+     * {@link TextToSpeech#synthesizeToFile}). The audio bytes are delivered in one or more chunks;
+     * if {@link #onDone} or {@link #onError} is called all chunks have been received.
+     * </p>
+     *
+     * <p>
+     * The audio received here may not be played for some time depending on buffer sizes and the
+     * amount of items on the synthesis queue.
+     * </p>
+     *
+     * @param utteranceId The utterance ID of the utterance.
+     * @param audio A chunk of audio; the format can be known by listening to
+     *        {@link #onBeginSynthesis(String, int, int, int)}.
+     */
+    public void onAudioAvailable(String utteranceId, byte[] audio) {
     }
 
     /**

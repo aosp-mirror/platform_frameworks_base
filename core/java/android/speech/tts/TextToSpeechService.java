@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
@@ -111,7 +112,7 @@ public abstract class TextToSpeechService extends Service {
     // A thread and it's associated handler for playing back any audio
     // associated with this TTS engine. Will handle all requests except synthesis
     // to file requests, which occur on the synthesis thread.
-    private AudioPlaybackHandler mAudioPlaybackHandler;
+    @NonNull private AudioPlaybackHandler mAudioPlaybackHandler;
     private TtsEngines mEngineHelper;
 
     private CallbackMap mCallbacks;
@@ -649,6 +650,8 @@ public abstract class TextToSpeechService extends Service {
         public void dispatchOnSuccess();
         public void dispatchOnStart();
         public void dispatchOnError(int errorCode);
+        public void dispatchOnBeginSynthesis(int sampleRateInHz, int audioFormat, int channelCount);
+        public void dispatchOnAudioAvailable(byte[] audio);
     }
 
     /** Set of parameters affecting audio output. */
@@ -850,6 +853,22 @@ public abstract class TextToSpeechService extends Service {
             final String utteranceId = getUtteranceId();
             if (utteranceId != null) {
                 mCallbacks.dispatchOnError(getCallerIdentity(), utteranceId, errorCode);
+            }
+        }
+
+        @Override
+        public void dispatchOnBeginSynthesis(int sampleRateInHz, int audioFormat, int channelCount) {
+            final String utteranceId = getUtteranceId();
+            if (utteranceId != null) {
+                mCallbacks.dispatchOnBeginSynthesis(getCallerIdentity(), utteranceId, sampleRateInHz, audioFormat, channelCount);
+            }
+        }
+
+        @Override
+        public void dispatchOnAudioAvailable(byte[] audio) {
+            final String utteranceId = getUtteranceId();
+            if (utteranceId != null) {
+                mCallbacks.dispatchOnAudioAvailable(getCallerIdentity(), utteranceId, audio);
             }
         }
 
@@ -1430,7 +1449,6 @@ public abstract class TextToSpeechService extends Service {
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback onStart failed: " + e);
             }
-
         }
 
         public void dispatchOnError(Object callerIdentity, String utteranceId,
@@ -1441,6 +1459,26 @@ public abstract class TextToSpeechService extends Service {
                 cb.onError(utteranceId, errorCode);
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback onError failed: " + e);
+            }
+        }
+
+        public void dispatchOnBeginSynthesis(Object callerIdentity, String utteranceId, int sampleRateInHz, int audioFormat, int channelCount) {
+            ITextToSpeechCallback cb = getCallbackFor(callerIdentity);
+            if (cb == null) return;
+            try {
+                cb.onBeginSynthesis(utteranceId, sampleRateInHz, audioFormat, channelCount);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Callback dispatchOnBeginSynthesis(String, int, int, int) failed: " + e);
+            }
+        }
+
+        public void dispatchOnAudioAvailable(Object callerIdentity, String utteranceId, byte[] buffer) {
+            ITextToSpeechCallback cb = getCallbackFor(callerIdentity);
+            if (cb == null) return;
+            try {
+                cb.onAudioAvailable(utteranceId, buffer);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Callback dispatchOnAudioAvailable(String, byte[]) failed: " + e);
             }
         }
 
