@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -130,6 +131,7 @@ public class DevicePolicyManager {
      * As of {@link android.os.Build.VERSION_CODES#M}, it should contain the extra
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, although specifying only
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported.
+     * This intent may also contain the extra {@link #EXTRA_PROVISIONING_LOGO_URI}.
      *
      * <p> When managed provisioning has completed, broadcasts are sent to the application specified
      * in the provisioning intent. The
@@ -196,6 +198,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
      * </ul>
      *
      * <p> When device owner provisioning has completed, an intent of the type
@@ -571,6 +574,28 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
+
+    /**
+     * A {@link Uri} extra pointing to a logo image. This image will be shown during the
+     * provisioning. If this extra is not passed, a default image will be shown.
+     * <h5>The following URI schemes are accepted:</h5>
+     * <ul>
+     * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})</li>
+     * </ul>
+     *
+     * <p> It is the responsability of the caller to provide an image with a reasonable
+     * pixed density for the device.
+     *
+     * <p> If a content: URI is passed, the intent should have the flag
+     * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} and the uri should be added to the
+     * {@link android.content.ClipData} of the intent too.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     */
+    public static final String EXTRA_PROVISIONING_LOGO_URI =
+            "android.app.extra.PROVISIONING_LOGO_URI";
 
     /**
      * This MIME type is used for starting the Device Owner provisioning.
