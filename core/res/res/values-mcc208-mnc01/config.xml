@@ -28,9 +28,6 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string-array translatable="false" name="config_tether_apndata">
         <item>Orange Internet,orange.fr,,,orange,orange,,,,,208,01,1,DUN</item>
-        <item>[ApnSettingV3]Carrefour WAP,ofnew.fr,,,orange,orange,,,,,208,01,1,DUN,,,true,0,,,,,,,gid,33</item>
-        <item>[ApnSettingV3]VM WAP,ofnew.fr,,,orange,orange,,,,,208,01,1,DUN,,,true,0,,,,,,,gid,52</item>
-        <item>[ApnSettingV3]NRJWEB,ofnew.fr,,,orange,orange,,,,,208,01,1,DUN,,,true,0,,,,,,,gid,4E</item>
     </string-array>
 
 </resources>
