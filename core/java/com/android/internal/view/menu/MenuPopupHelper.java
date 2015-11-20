@@ -38,12 +38,16 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
     private View mAnchorView;
     private MenuPopup mPopup;
 
-    private int mDropDownGravity = Gravity.NO_GRAVITY;
+    private int mDropDownGravity = Gravity.START;
     private boolean mForceShowIcon;
     private boolean mShowTitle;
     private Callback mPresenterCallback;
+
     private int mInitXOffset;
     private int mInitYOffset;
+
+    /** Whether the popup has anchor-relative offsets. */
+    private boolean mHasOffsets;
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle, 0);
@@ -131,12 +135,31 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
 
         mInitXOffset = 0;
         mInitYOffset = 0;
+        mHasOffsets = false;
         mShowTitle = false;
 
         showPopup();
         return true;
     }
 
+    /**
+     * Shows the popup menu and makes a best-effort to anchor it to the
+     * specified (x,y) coordinate relative to the anchor view.
+     * <p>
+     * If the popup's resolved gravity is {@link Gravity#LEFT}, this will
+     * display the popup with its top-left corner at (x,y) relative to the
+     * anchor view. If the resolved gravity is {@link Gravity#RIGHT}, the
+     * popup's top-right corner will be at (x,y).
+     * <p>
+     * If the popup cannot be displayed fully on-screen, this method will
+     * attempt to scroll the anchor view's ancestors and/or offset the popup
+     * such that it may be displayed fully on-screen.
+     *
+     * @param x x coordinate relative to the anchor view
+     * @param y y coordinate relative to the anchor view
+     * @return {@code true} if the popup was shown or was already showing prior
+     *         to calling this method, {@code false} otherwise
+     */
     public boolean tryShow(int x, int y) {
         if (isShowing()) {
             return true;
@@ -148,6 +171,7 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
 
         mInitXOffset = x;
         mInitYOffset = y;
+        mHasOffsets = true;
         mShowTitle = true;
 
         showPopup();
@@ -160,9 +184,24 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
         mPopup.setCallback(mPresenterCallback);
         mPopup.setForceShowIcon(mForceShowIcon);
         mPopup.setGravity(mDropDownGravity);
-        mPopup.setHorizontalOffset(mInitXOffset);
         mPopup.setShowTitle(mShowTitle);
-        mPopup.setVerticalOffset(mInitYOffset);
+
+        if (mHasOffsets) {
+            // If the resolved drop-down gravity is RIGHT, the popup's right
+            // edge will be aligned with the anchor view. Adjust by the anchor
+            // width such that the top-right corner is at the X offset.
+            final int hgrav = Gravity.getAbsoluteGravity(mDropDownGravity,
+                    mAnchorView.getLayoutDirection()) & Gravity.HORIZONTAL_GRAVITY_MASK;
+            final int resolvedXOffset;
+            if (hgrav == Gravity.RIGHT) {
+                resolvedXOffset = mInitXOffset - mAnchorView.getWidth();
+            } else {
+                resolvedXOffset = mInitXOffset;
+            }
+
+            mPopup.setHorizontalOffset(resolvedXOffset);
+            mPopup.setVerticalOffset(mInitYOffset);
+        }
 
         // In order for subclasses of MenuPopupHelper to satisfy the OnDismissedListener interface,
         // we must set the listener to this outer Helper rather than to the inner MenuPopup.
