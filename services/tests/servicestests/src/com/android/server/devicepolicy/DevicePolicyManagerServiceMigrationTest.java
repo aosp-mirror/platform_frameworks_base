@@ -145,16 +145,13 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         // Check the new base restrictions.
         DpmTestUtils.assertRestrictions(
-                DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_RECORD_AUDIO
-                ),
+                DpmTestUtils.newRestrictions(),
                 newBaseRestrictions.get(UserHandle.USER_SYSTEM));
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
                         UserManager.DISALLOW_SMS,
-                        UserManager.DISALLOW_OUTGOING_CALLS,
-                        UserManager.DISALLOW_RECORD_AUDIO
+                        UserManager.DISALLOW_OUTGOING_CALLS
                 ),
                 newBaseRestrictions.get(10));
 
@@ -162,28 +159,30 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
                 DpmTestUtils.newRestrictions(
                         UserManager.DISALLOW_SMS,
                         UserManager.DISALLOW_OUTGOING_CALLS,
-                        UserManager.DISALLOW_WALLPAPER,
-                        UserManager.DISALLOW_RECORD_AUDIO
+                        UserManager.DISALLOW_WALLPAPER
                 ),
                 newBaseRestrictions.get(11));
 
         // Check the new owner restrictions.
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_ADD_USER
+                        UserManager.DISALLOW_ADD_USER,
+                        UserManager.DISALLOW_RECORD_AUDIO
                 ),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions());
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
                         UserManager.DISALLOW_REMOVE_USER,
-                        UserManager.DISALLOW_WALLPAPER
+                        UserManager.DISALLOW_WALLPAPER,
+                        UserManager.DISALLOW_RECORD_AUDIO
                 ),
                 dpms.getProfileOwnerAdminLocked(10).ensureUserRestrictions());
 
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_REMOVE_USER
+                        UserManager.DISALLOW_REMOVE_USER,
+                        UserManager.DISALLOW_RECORD_AUDIO
                 ),
                 dpms.getProfileOwnerAdminLocked(11).ensureUserRestrictions());
     }

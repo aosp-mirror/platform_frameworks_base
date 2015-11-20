@@ -5151,12 +5151,12 @@ public class AudioService extends IAudioService.Stub {
                     UserInfo userInfo = UserManagerService.getInstance().getUserInfo(userId);
                     killBackgroundUserProcessesWithRecordAudioPermission(userInfo);
                 }
-                UserManagerService.getInstance().setSystemControlledUserRestriction(
+                UserManagerService.getInstance().setUserRestriction(
                         UserManager.DISALLOW_RECORD_AUDIO, true, userId);
             } else if (action.equals(Intent.ACTION_USER_FOREGROUND)) {
                 // Enable audio recording for foreground user/profile
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                UserManagerService.getInstance().setSystemControlledUserRestriction(
+                UserManagerService.getInstance().setUserRestriction(
                         UserManager.DISALLOW_RECORD_AUDIO, false, userId);
             }
         }
