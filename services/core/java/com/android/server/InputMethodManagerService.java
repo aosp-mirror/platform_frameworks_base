@@ -178,7 +178,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
 
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
-    private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
 
 
     final Context mContext;
@@ -1705,9 +1704,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (N > 2) return true;
         if (N < 1) return false;
         int nonAuxCount = 0;
-        int auxCount = 0;
-        InputMethodSubtype nonAuxSubtype = null;
-        InputMethodSubtype auxSubtype = null;
         for(int i = 0; i < N; ++i) {
             final InputMethodInfo imi = imis.get(i);
             final List<InputMethodSubtype> subtypes =
@@ -1720,25 +1716,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     final InputMethodSubtype subtype = subtypes.get(j);
                     if (!subtype.isAuxiliary()) {
                         ++nonAuxCount;
-                        nonAuxSubtype = subtype;
-                    } else {
-                        ++auxCount;
-                        auxSubtype = subtype;
                     }
                 }
             }
-        }
-        if (nonAuxCount > 1 || auxCount > 1) {
-            return true;
-        } else if (nonAuxCount == 1 && auxCount == 1) {
-            if (nonAuxSubtype != null && auxSubtype != null
-                    && (nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
-                            || auxSubtype.overridesImplicitlyEnabledSubtype()
-                            || nonAuxSubtype.overridesImplicitlyEnabledSubtype())
-                    && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
-                return false;
-            }
-            return true;
+            if (nonAuxCount > 1) return true;
         }
         return false;
     }
