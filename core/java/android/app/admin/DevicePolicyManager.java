@@ -3788,12 +3788,18 @@ public class DevicePolicyManager {
      * {@link UserManager#getUserRestrictions()}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if the {@code admin} is not an active admin.
      */
     public Bundle getUserRestrictions(@NonNull ComponentName admin) {
+        return getUserRestrictions(admin, myUserId());
+    }
+
+    /** @hide per-user version */
+    public Bundle getUserRestrictions(@NonNull ComponentName admin, int userHandle) {
         Bundle ret = null;
         if (mService != null) {
             try {
-                ret = mService.getUserRestrictions(admin);
+                ret = mService.getUserRestrictions(admin, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
