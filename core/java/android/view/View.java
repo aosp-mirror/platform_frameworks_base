@@ -3696,7 +3696,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag indicating that a drag can cross window boundaries.  When
-     * {@link #startDrag(ClipData, DragShadowBuilder, Object, int)} is called
+     * {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)} is called
      * with this flag set, all visible applications will be able to participate
      * in the drag operation and receive the dragged content.
      *
@@ -3741,7 +3741,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag indicating that the drag shadow will be opaque.  When
-     * {@link #startDrag(ClipData, DragShadowBuilder, Object, int)} is called
+     * {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)} is called
      * with this flag set, the drag shadow will be opaque, otherwise, it will be semitransparent.
      */
     public static final int DRAG_FLAG_OPAQUE = 1 << 9;
@@ -19910,6 +19910,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @deprecated Use {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)
+     * startDragAndDrop()} for newer platform versions.
+     */
+    public final boolean startDrag(ClipData data, DragShadowBuilder shadowBuilder,
+                                   Object myLocalState, int flags) {
+        return startDragAndDrop(data, shadowBuilder, myLocalState, flags);
+    }
+
+    /**
      * Starts a drag and drop operation. When your application calls this method, it passes a
      * {@link android.view.View.DragShadowBuilder} object to the system. The
      * system calls this object's {@link DragShadowBuilder#onProvideShadowMetrics(Point, Point)}
@@ -19926,9 +19935,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *  {@link android.view.DragEvent#ACTION_DRAG_STARTED}.
      * </p>
      * <p>
-     * Your application can invoke startDrag() on any attached View object. The View object does not
-     * need to be the one used in {@link android.view.View.DragShadowBuilder}, nor does it need to
-     * be related to the View the user selected for dragging.
+     * Your application can invoke {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object,
+     * int) startDragAndDrop()} on any attached View object. The View object does not need to be
+     * the one used in {@link android.view.View.DragShadowBuilder}, nor does it need to be related
+     * to the View the user selected for dragging.
      * </p>
      * @param data A {@link android.content.ClipData} object pointing to the data to be
      * transferred by the drag and drop operation.
@@ -19948,10 +19958,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code false} if it fails anywhere. Returning {@code false} means the system was unable to
      * do a drag, and so no drag operation is in progress.
      */
-    public final boolean startDrag(ClipData data, DragShadowBuilder shadowBuilder,
+    public final boolean startDragAndDrop(ClipData data, DragShadowBuilder shadowBuilder,
             Object myLocalState, int flags) {
         if (ViewDebug.DEBUG_DRAG) {
-            Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " flags=" + flags);
+            Log.d(VIEW_LOG_TAG, "startDragAndDrop: data=" + data + " flags=" + flags);
         }
         boolean okay = false;
 
@@ -20030,7 +20040,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Handles drag events sent by the system following a call to
-     * {@link android.view.View#startDrag(ClipData,DragShadowBuilder,Object,int) startDrag()}.
+     * {@link android.view.View#startDragAndDrop(ClipData,DragShadowBuilder,Object,int)
+     * startDragAndDrop()}.
      *<p>
      * When the system calls this method, it passes a
      * {@link android.view.DragEvent} object. A call to
