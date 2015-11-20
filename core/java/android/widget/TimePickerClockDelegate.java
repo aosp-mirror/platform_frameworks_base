@@ -880,8 +880,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 final int actionMasked = motionEvent.getActionMasked();
                 if (actionMasked == MotionEvent.ACTION_DOWN) {
-                    mInitialTouchTarget = findNearestChild((ViewGroup) view,
-                            (int) motionEvent.getX(), (int) motionEvent.getY());
+                    if (view instanceof ViewGroup) {
+                        mInitialTouchTarget = findNearestChild((ViewGroup) view,
+                                (int) motionEvent.getX(), (int) motionEvent.getY());
+                    } else {
+                        mInitialTouchTarget = null;
+                    }
                 }
 
                 final View child = mInitialTouchTarget;
