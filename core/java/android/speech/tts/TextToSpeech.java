@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.annotation.IntDef;
 import android.annotation.RawRes;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -38,6 +39,8 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,6 +77,12 @@ public class TextToSpeech {
      * client should never expect to see this result code.
      */
     public static final int STOPPED = -2;
+
+    /** @hide */
+    @IntDef({ERROR_SYNTHESIS, ERROR_SERVICE, ERROR_OUTPUT, ERROR_NETWORK, ERROR_NETWORK_TIMEOUT,
+             ERROR_INVALID_REQUEST, ERROR_NOT_INSTALLED_YET})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Error {}
 
     /**
      * Denotes a failure of a TTS engine to synthesize the given input.
