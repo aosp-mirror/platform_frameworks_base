@@ -10,7 +10,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 <section class="dac-hero-carousel">
 
 <!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
-<article class="dac-expand dac-hero dac-invert dac-darken mprev active" style="background-color: #75d1ff;">
+<article class="dac-expand dac-hero dac-invert dac-darken mprev summit active" style="background-color: #75d1ff;">
 <a href="https://androiddevsummit.withgoogle.com/">
   <div class="wrap" style="max-width:1100px;margin-top:0">
     <div class="cols dac-hero-content">
