@@ -822,6 +822,41 @@ public abstract class NotificationListenerService extends Service {
          * @hide */
         public static final int VISIBILITY_NO_OVERRIDE = -1000;
 
+        /**
+         * Value signifying thatn the has not expressed an importance.
+         *
+         * This value is for persisting preferences, and should never ve associated with
+         * an actual notification.
+         */
+        public static final int IMPORTANCE_UNSPECIFIED = -1000;
+
+        /**
+         * A notification with no importance: shows nowhere, is blocked.
+         */
+        public static final int IMPORTANCE_NONE = -2;
+
+        /**
+         * Low notification importance: only shows in the shade, below the fold.
+         */
+        public static final int IMPORTANCE_LOW = -1;
+
+        /**
+         * Default notification importance: shows everywhere, but is not intrusive.
+         */
+        public static final int IMPORTANCE_DEFAULT = 0;
+
+        /**
+         * Higher notification importance: shows everywhere, makes noise,
+         * but does not visually intrude.
+         */
+        public static final int IMPORTANCE_HIGH = 1;
+
+        /**
+         * Highest notification importance: shows everywhere, makes noise,
+         * and also visually intrudes.
+         */
+        public static final int IMPORTANCE_MAX = 2;
+
         private String mKey;
         private int mRank = -1;
         private boolean mIsAmbient;
@@ -875,7 +910,6 @@ public abstract class NotificationListenerService extends Service {
             return mSuppressedVisualEffects;
         }
 
-
         /**
          * Returns whether the notification matches the user's interruption
          * filter.
@@ -885,6 +919,27 @@ public abstract class NotificationListenerService extends Service {
          */
         public boolean matchesInterruptionFilter() {
             return mMatchesInterruptionFilter;
+        }
+
+        /**
+         * Returns the importance of the notification, which dictates its
+         * modes of presentation, see: {@link #IMPORTANCE_DEFAULT}, etc.
+         *
+         * @return the rank of the notification
+         */
+        public int getImportance() {
+            return IMPORTANCE_DEFAULT;  // TODO implement;
+        }
+
+        /**
+         * If the importance has been overriden by user preference, or by a
+         * {@link NotificationAssistantService}, then this will be non-null,
+         * and should be displayed to the user.
+         *
+         * @return the explanation for the importance, or null if it is the natural importance
+         */
+        public CharSequence getImportanceExplanation() {
+            return null;  // TODO implement
         }
 
         private void populate(String key, int rank, boolean isAmbient,

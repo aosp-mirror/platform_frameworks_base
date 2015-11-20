@@ -17,6 +17,19 @@
 package com.android.server.notification;
 
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CLICK;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL_ALL;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_ERROR;
+import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
+import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
+import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
+import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL;
+import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL;
+import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL_ALL;
+import static android.service.notification.NotificationAssistantService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationAssistantService.REASON_GROUP_OPTIMIZATION;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
@@ -281,19 +294,6 @@ public class NotificationManagerService extends SystemService {
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
-    private static final int REASON_DELEGATE_CLICK = 1;
-    private static final int REASON_DELEGATE_CANCEL = 2;
-    private static final int REASON_DELEGATE_CANCEL_ALL = 3;
-    private static final int REASON_DELEGATE_ERROR = 4;
-    private static final int REASON_PACKAGE_CHANGED = 5;
-    private static final int REASON_USER_STOPPED = 6;
-    private static final int REASON_PACKAGE_BANNED = 7;
-    private static final int REASON_NOMAN_CANCEL = 8;
-    private static final int REASON_NOMAN_CANCEL_ALL = 9;
-    private static final int REASON_LISTENER_CANCEL = 10;
-    private static final int REASON_LISTENER_CANCEL_ALL = 11;
-    private static final int REASON_GROUP_SUMMARY_CANCELED = 12;
-    private static final int REASON_GROUP_OPTIMIZATION = 13;
 
     private static class Archive {
         final int mBufferSize;
@@ -1176,7 +1176,7 @@ public class NotificationManagerService extends SystemService {
             cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(), pkg, tag, id, 0,
                     Binder.getCallingUid() == Process.SYSTEM_UID
                             ? 0 : Notification.FLAG_FOREGROUND_SERVICE, false, userId,
-                    REASON_NOMAN_CANCEL, null);
+                    REASON_APP_CANCEL, null);
         }
 
         @Override
@@ -1190,7 +1190,7 @@ public class NotificationManagerService extends SystemService {
             // running foreground services.
             cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
                     pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId,
-                    REASON_NOMAN_CANCEL_ALL, null);
+                    REASON_APP_CANCEL_ALL, null);
         }
 
         @Override
@@ -2871,8 +2871,8 @@ public class NotificationManagerService extends SystemService {
             case REASON_LISTENER_CANCEL_ALL:
                 mUsageStats.registerDismissedByUser(r);
                 break;
-            case REASON_NOMAN_CANCEL:
-            case REASON_NOMAN_CANCEL_ALL:
+            case REASON_APP_CANCEL:
+            case REASON_APP_CANCEL_ALL:
                 mUsageStats.registerRemovedByApp(r);
                 break;
         }

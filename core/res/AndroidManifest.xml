@@ -2601,6 +2601,14 @@
     <permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link
+         android.service.notification.NotificationAssistantService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link
          android.service.chooser.ChooserTargetService}, to ensure that
          only the system can bind to it.
