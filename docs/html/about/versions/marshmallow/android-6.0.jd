@@ -406,12 +406,12 @@ mode, the UI continues to be rendered at the original resolution (such as 1080p)
 <h2 id="behavior-themeable-colorstatelists">Themeable ColorStateLists</h2>
 <p>Theme attributes are now supported in
 {@link android.content.res.ColorStateList} for devices running on Android 6.0 (API level 23). The
-{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} and
-{@link android.content.res.Resources#getColor(int) getColor()} methods have been deprecated. If
-you are calling these APIs, call the new
-{@link android.content.Context#getColorStateList(int) getColorStateList()} or
-{@link android.content.Context#getColor(int) getColor()} methods instead. These methods are also
-available in the v4 appcompat library via {@link android.support.v4.content.ContextCompat}.</p>
+{@link android.content.res.Resources#getColorStateList(int) Resources.getColorStateList()} and
+{@link android.content.res.Resources#getColor(int) Resources.getColor()} methods have been
+deprecated. If you are calling these APIs, call the new
+{@link android.content.Context#getColorStateList(int) Context.getColorStateList()} or
+{@link android.content.Context#getColor(int) Context.getColor()} methods instead. These methods are
+also available in the v4 appcompat library via {@link android.support.v4.content.ContextCompat}.</p>
 
 <h2 id="audio">Audio Features</h2>
 
