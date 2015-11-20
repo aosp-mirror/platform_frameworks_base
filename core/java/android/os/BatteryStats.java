@@ -169,7 +169,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Current version of checkin data format.
      */
-    static final String CHECKIN_VERSION = "16";
+    static final String CHECKIN_VERSION = "17";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -407,17 +407,23 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getCameraTurnedOnTimer();
         public abstract Timer getForegroundActivityTimer();
 
-        // Time this uid has any processes in foreground state.
-        public static final int PROCESS_STATE_FOREGROUND = 0;
-        // Time this uid has any process in active state (not cached).
-        public static final int PROCESS_STATE_ACTIVE = 1;
+        // Time this uid has any processes in the top state.
+        public static final int PROCESS_STATE_TOP = 0;
+        // Time this uid has any process with a started out bound foreground service.
+        public static final int PROCESS_STATE_FOREGROUND_SERVICE = 1;
+        // Time this uid has any process that is top while the device is sleeping.
+        public static final int PROCESS_STATE_TOP_SLEEPING = 2;
+        // Time this uid has any process in an active foreground state.
+        public static final int PROCESS_STATE_FOREGROUND = 3;
+        // Time this uid has any process in an active background state.
+        public static final int PROCESS_STATE_BACKGROUND = 4;
         // Time this uid has any processes running at all.
-        public static final int PROCESS_STATE_RUNNING = 2;
+        public static final int PROCESS_STATE_CACHED = 5;
         // Total number of process states we track.
-        public static final int NUM_PROCESS_STATE = 3;
+        public static final int NUM_PROCESS_STATE = 6;
 
         static final String[] PROCESS_STATE_NAMES = {
-            "Foreground", "Active", "Running"
+            "Top", "Fg Service", "Top Sleeping", "Foreground", "Background", "Cached"
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);
@@ -2954,8 +2960,9 @@ public abstract class BatteryStats implements Parcelable {
             final Object[] stateTimes = new Object[Uid.NUM_PROCESS_STATE];
             long totalStateTime = 0;
             for (int ips=0; ips<Uid.NUM_PROCESS_STATE; ips++) {
-                totalStateTime += u.getProcessStateTime(ips, rawRealtime, which);
-                stateTimes[ips] = (totalStateTime + 500) / 1000;
+                final long time = u.getProcessStateTime(ips, rawRealtime, which);
+                totalStateTime += time;
+                stateTimes[ips] = (time + 500) / 1000;
             }
             if (totalStateTime > 0) {
                 dumpLine(pw, uid, category, STATE_TIME_DATA, stateTimes);
@@ -4122,10 +4129,17 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append("    ");
                     sb.append(Uid.PROCESS_STATE_NAMES[ips]);
                     sb.append(" for: ");
-                    formatTimeMs(sb, (totalStateTime + 500) / 1000);
+                    formatTimeMs(sb, (time + 500) / 1000);
                     pw.println(sb.toString());
                     uidActivity = true;
                 }
+            }
+            if (totalStateTime > 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Total running: ");
+                formatTimeMs(sb, (totalStateTime + 500) / 1000);
+                pw.println(sb.toString());
             }
 
             final long userCpuTimeUs = u.getUserCpuTimeUs(which);
