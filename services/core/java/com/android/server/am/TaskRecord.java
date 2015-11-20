@@ -1277,7 +1277,7 @@ final class TaskRecord {
             }
 
             final Configuration serviceConfig = mService.mConfiguration;
-            mOverrideConfig = new Configuration(serviceConfig);
+            mOverrideConfig = new Configuration(Configuration.EMPTY);
             // TODO(multidisplay): Update Dp to that of display stack is on.
             final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
             mOverrideConfig.screenWidthDp =

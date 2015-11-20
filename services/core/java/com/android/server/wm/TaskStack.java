@@ -515,10 +515,11 @@ public class TaskStack implements DimLayer.DimLayerUser {
         for (int i = 0; i < count; i++) {
             final TaskStack otherStack = mService.mStackIdToStack.valueAt(i);
             final int otherStackId = otherStack.mStackId;
-            if (StackId.isResizeableByDockedStack(otherStackId)) {
+            if (StackId.isResizeableByDockedStack(otherStackId)
+                    && !otherStack.mBounds.equals(bounds)) {
                 mService.mH.sendMessage(
                         mService.mH.obtainMessage(RESIZE_STACK, otherStackId,
-                                1 /*allowResizeInDockedMode*/, bounds));
+                                1 /*allowResizeInDockedMode*/, fullscreen ? null : bounds));
             }
         }
     }
