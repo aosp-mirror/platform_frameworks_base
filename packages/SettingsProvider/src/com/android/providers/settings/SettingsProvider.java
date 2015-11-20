@@ -904,11 +904,11 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        // Enforce what the calling package can mutate the system settings.
-        enforceRestrictedSystemSettingsMutationForCallingPackage(operation, name, runAsUserId);
-
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
+
+        // Enforce what the calling package can mutate the system settings.
+        enforceRestrictedSystemSettingsMutationForCallingPackage(operation, name, callingUserId);
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
