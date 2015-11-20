@@ -14,6 +14,8 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
+  <li><strong>In-app Promotions</strong>&mdash;Developers can create promo codes
+    which users can redeem for content or features.</li>
   <li><strong>Prorated Subscription Prices</strong>&mdash;Content providers can
     lower the price of seasonal subscriptions for users who sign up late in the
     season. For example, a sports-related service might lower the subscription
