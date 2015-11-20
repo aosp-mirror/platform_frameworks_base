@@ -60,6 +60,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -416,7 +417,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 "cross-profile-widget-providers";
         private static final String TAG_PROVIDER = "provider";
         private static final String TAG_PACKAGE_LIST_ITEM  = "item";
-
+        private static final String TAG_KEEP_UNINSTALLED_PACKAGES  = "keep-uninstalled-packages";
         private static final String TAG_USER_RESTRICTIONS = "user-restrictions";
 
         final DeviceAdminInfo info;
@@ -488,6 +489,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Null means all input methods are allowed, empty means none except system imes are
         // allowed.
         List<String> permittedInputMethods;
+
+        // List of package names to keep cached.
+        List<String> keepUninstalledPackages;
 
         // TODO: review implementation decisions with frameworks team
         boolean specifiesGlobalProxy = false;
@@ -674,6 +678,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             writePackageListToXml(out, TAG_PERMITTED_ACCESSIBILITY_SERVICES,
                     permittedAccessiblityServices);
             writePackageListToXml(out, TAG_PERMITTED_IMES, permittedInputMethods);
+            writePackageListToXml(out, TAG_KEEP_UNINSTALLED_PACKAGES, keepUninstalledPackages);
             if (hasUserRestrictions()) {
                 UserRestrictionsUtils.writeRestrictions(
                         out, userRestrictions, TAG_USER_RESTRICTIONS);
@@ -787,6 +792,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     permittedAccessiblityServices = readPackageList(parser, tag);
                 } else if (TAG_PERMITTED_IMES.equals(tag)) {
                     permittedInputMethods = readPackageList(parser, tag);
+                } else if (TAG_KEEP_UNINSTALLED_PACKAGES.equals(tag)) {
+                    keepUninstalledPackages = readPackageList(parser, tag);
                 } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
                     UserRestrictionsUtils.readRestrictions(parser, ensureUserRestrictions());
                 } else {
@@ -981,13 +988,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disabledKeyguardFeatures);
             pw.print(prefix); pw.print("crossProfileWidgetProviders=");
                     pw.println(crossProfileWidgetProviders);
-            if (!(permittedAccessiblityServices == null)) {
+            if (permittedAccessiblityServices != null) {
                 pw.print(prefix); pw.print("permittedAccessibilityServices=");
-                        pw.println(permittedAccessiblityServices.toString());
+                    pw.println(permittedAccessiblityServices);
             }
-            if (!(permittedInputMethods == null)) {
+            if (permittedInputMethods != null) {
                 pw.print(prefix); pw.print("permittedInputMethods=");
-                        pw.println(permittedInputMethods.toString());
+                    pw.println(permittedInputMethods);
+            }
+            if (keepUninstalledPackages != null) {
+                pw.print(prefix); pw.print("keepUninstalledPackages=");
+                    pw.println(keepUninstalledPackages);
             }
             pw.print(prefix); pw.println("userRestrictions:");
             UserRestrictionsUtils.dumpRestrictions(pw, prefix + "  ", userRestrictions);
@@ -1066,6 +1077,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         UserManagerInternal getUserManagerInternal() {
             return LocalServices.getService(UserManagerInternal.class);
+        }
+
+        PackageManagerInternal getPackageManagerInternal() {
+            return LocalServices.getService(PackageManagerInternal.class);
         }
 
         NotificationManager getNotificationManager() {
@@ -2101,6 +2116,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         new SetupContentObserver(mHandler).register(mContext.getContentResolver());
         // Initialize the user setup state, to handle the upgrade case.
         updateUserSetupComplete();
+
+        List<String> packageList;
+        synchronized (this) {
+            packageList = getKeepUninstalledPackagesLocked();
+        }
+        if (packageList != null) {
+            mInjector.getPackageManagerInternal().setKeepUninstalledPackages(packageList);
+        }
     }
 
     private void ensureDeviceOwnerUserStarted() {
@@ -4487,6 +4510,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public void setKeepUninstalledPackages(ComponentName who, List<String> packageList) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkNotNull(packageList, "packageList is null");
+        final int userHandle = UserHandle.getCallingUserId();
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            admin.keepUninstalledPackages = packageList;
+            saveSettingsLocked(userHandle);
+            mInjector.getPackageManagerInternal().setKeepUninstalledPackages(packageList);
+        }
+    }
+
+    @Override
+    public List<String> getKeepUninstalledPackages(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        if (!mHasFeature) {
+            return null;
+        }
+        // TODO In split system user mode, allow apps on user 0 to query the list
+        synchronized (this) {
+            // Check if this is the device owner who is calling
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            return getKeepUninstalledPackagesLocked();
+        }
+    }
+
+    private List<String> getKeepUninstalledPackagesLocked() {
+        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        return (deviceOwner != null) ? deviceOwner.keepUninstalledPackages : null;
     }
 
     @Override

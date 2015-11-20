@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import android.annotation.NonNull;
+import java.util.List;
 
 /**
  * Package manager local system service interface.
@@ -115,4 +115,11 @@ public abstract class PackageManagerInternal {
      */
     public abstract void grantDefaultPermissionsToDefaultSimCallManager(String packageName,
             int userId);
+
+    /**
+     * Sets a list of apps to keep in PM's internal data structures and as APKs even if no user has
+     * currently installed it. The apps are not preloaded.
+     * @param packageList List of package names to keep cached.
+     */
+    public abstract void setKeepUninstalledPackages(List<String> packageList);
 }

@@ -3616,6 +3616,48 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to get the list of apps to keep around as APKs even if no user has
+     * currently installed it.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     *
+     * @return List of package names to keep cached.
+     * @hide
+     */
+    public List<String> getKeepUninstalledPackages(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getKeepUninstalledPackages(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Called by a device owner to set a list of apps to keep around as APKs even if no user has
+     * currently installed it.
+     *
+     * <p>Please note that setting this policy does not imply that specified apps will be
+     * automatically pre-cached.</p>
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageNames List of package names to keep cached.
+     * @hide
+     */
+    public void setKeepUninstalledPackages(@NonNull ComponentName admin,
+            @NonNull List<String> packageNames) {
+        if (mService != null) {
+            try {
+                mService.setKeepUninstalledPackages(admin, packageNames);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
      * Called by a device owner to create a user with the specified name. The UserHandle returned
      * by this method should not be persisted as user handles are recycled as users are removed and
      * created. If you need to persist an identifier for this user, use
