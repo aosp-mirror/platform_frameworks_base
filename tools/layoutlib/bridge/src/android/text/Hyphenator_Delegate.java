@@ -20,10 +20,9 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 
 /**
- * Delegate that overrides implementation for certain methods in {@link android.text.Hyphenator}
+ * Delegate that overrides implementation for certain methods in {@link android.text.StaticLayout}
  * <p/>
  * Through the layoutlib_create tool, selected methods of StaticLayout have been replaced
  * by calls to methods of the same name in this delegate class.
@@ -39,7 +38,7 @@ public class Hyphenator_Delegate {
         return null;
     }
 
-    /*package*/ static long loadHyphenator(ByteBuffer buf, int offset) {
+    /*package*/ static long loadHyphenator(String patternData) {
         return sDelegateManager.addNewDelegate(new Hyphenator_Delegate());
     }
 }
