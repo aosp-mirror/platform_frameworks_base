@@ -4066,10 +4066,23 @@ public class Notification implements Parcelable
                 }
                 i++;
             }
-
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
+            handleInboxImageMargin(contentView, rowIds[0]);
+
             return contentView;
+        }
+
+        private void handleInboxImageMargin(RemoteViews contentView, int id) {
+            final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
+            final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
+            boolean hasProgress = max != 0 || ind;
+            int endMargin = 0;
+            if (mTexts.size() > 0 && mBuilder.mN.mLargeIcon != null && !hasProgress) {
+                endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_content_picture_margin);
+            }
+            contentView.setViewLayoutMarginEnd(id, endMargin);
         }
     }
 
