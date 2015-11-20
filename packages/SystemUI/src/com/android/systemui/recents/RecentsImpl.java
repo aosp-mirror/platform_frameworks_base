@@ -799,12 +799,13 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         // Update the header bar if necessary
         reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
 
-        if (sInstanceLoadPlan == null) {
-            // Create a new load plan if onPreloadRecents() was never triggered
+        // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
+        // should always preload the tasks now
+        if (mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
+            // Create a new load plan if preloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
-
-        if (!sInstanceLoadPlan.hasTasks()) {
+        if (mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
             loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();

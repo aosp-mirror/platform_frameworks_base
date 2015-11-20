@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -29,7 +30,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -40,12 +40,10 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
@@ -340,15 +338,21 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     animate().alpha(1f)
                             .translationY(transform.translationY)
                             .setUpdateListener(null)
-                            .setInterpolator(mFastOutSlowInInterpolator)
-                            .setDuration(taskViewEnterFromHomeDuration)
-                            .withEndAction(new Runnable() {
+                            .setListener(new AnimatorListenerAdapter() {
+                                private boolean hasEnded;
+
+                                // We use the animation listener instead of withEndAction() to
+                                // ensure that onAnimationEnd() is called when the animator is
+                                // cancelled
                                 @Override
-                                public void run() {
-                                    // Decrement the post animation trigger
+                                public void onAnimationEnd(Animator animation) {
+                                    if (hasEnded) return;
                                     ctx.postAnimationTrigger.decrement();
+                                    hasEnded = true;
                                 }
                             })
+                            .setInterpolator(mFastOutSlowInInterpolator)
+                            .setDuration(taskViewEnterFromHomeDuration)
                             .start();
                     ctx.postAnimationTrigger.increment();
                 }
@@ -368,19 +372,28 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .translationY(transform.translationY)
                     .setStartDelay(delay)
                     .setUpdateListener(ctx.updateListener)
+                    .setListener(new AnimatorListenerAdapter() {
+                        private boolean hasEnded;
+
+                        // We use the animation listener instead of withEndAction() to ensure that
+                        // onAnimationEnd() is called when the animator is cancelled
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            if (hasEnded) return;
+                            ctx.postAnimationTrigger.decrement();
+                            hasEnded = true;
+                        }
+                    })
                     .setInterpolator(mQuintOutInterpolator)
                     .setDuration(taskViewEnterFromHomeDuration +
                             frontIndex * taskViewEnterFromHomeStaggerDelay)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Decrement the post animation trigger
-                            ctx.postAnimationTrigger.decrement();
-                        }
-                    })
                     .start();
             ctx.postAnimationTrigger.increment();
         }
+    }
+
+    public void cancelEnterRecentsAnimation() {
+        animate().cancel();
     }
 
     public void fadeInActionButton(int duration) {

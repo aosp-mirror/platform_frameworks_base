@@ -166,12 +166,6 @@ public class TaskStackViewScroller {
         mScrollAnimator.setDuration(mContext.getResources().getInteger(
                 R.integer.recents_animate_task_stack_scroll_duration));
         mScrollAnimator.setInterpolator(mLinearOutSlowInInterpolator);
-        mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                setStackScroll((Float) animation.getAnimatedValue());
-            }
-        });
         mScrollAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
