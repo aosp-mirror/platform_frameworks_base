@@ -19,7 +19,6 @@ package android.widget;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
-import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.ShowableListMenu;
 
 import android.annotation.MenuRes;
@@ -45,7 +44,7 @@ public class PopupMenu {
     private final MenuPopupHelper mPopup;
 
     private OnMenuItemClickListener mMenuItemClickListener;
-    private OnDismissListener mDismissListener;
+    private OnDismissListener mOnDismissListener;
     private OnTouchListener mDragListener;
 
     /**
@@ -114,19 +113,12 @@ public class PopupMenu {
 
         mPopup = new MenuPopupHelper(context, mMenu, anchor, false, popupStyleAttr, popupStyleRes);
         mPopup.setGravity(gravity);
-        mPopup.setCallback(new MenuPresenter.Callback() {
+        mPopup.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
-            public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
-                if (mDismissListener != null) {
-                    mDismissListener.onDismiss(PopupMenu.this);
+            public void onDismiss() {
+                if (mOnDismissListener != null) {
+                    mOnDismissListener.onDismiss(PopupMenu.this);
                 }
-            }
-
-            @Override
-            public boolean onOpenSubMenu(MenuBuilder subMenu) {
-                // The menu presenter will handle opening the submenu itself.
-                // Nothing to do here.
-                return false;
             }
         });
     }
@@ -259,7 +251,7 @@ public class PopupMenu {
      * @param listener the listener to notify
      */
     public void setOnDismissListener(OnDismissListener listener) {
-        mDismissListener = listener;
+        mOnDismissListener = listener;
     }
 
     /**

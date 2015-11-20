@@ -18,86 +18,104 @@ package com.android.internal.view.menu;
 
 import com.android.internal.view.menu.MenuPresenter.Callback;
 
+import android.annotation.AttrRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 
 /**
  * Presents a menu as a small, simple popup anchored to another view.
- *
- * @hide
  */
-public class MenuPopupHelper implements PopupWindow.OnDismissListener {
+public class MenuPopupHelper {
     private final Context mContext;
+
+    // Immutable cached popup menu properties.
     private final MenuBuilder mMenu;
     private final boolean mOverflowOnly;
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
 
+    // Mutable cached popup menu properties.
     private View mAnchorView;
-    private MenuPopup mPopup;
-
     private int mDropDownGravity = Gravity.START;
     private boolean mForceShowIcon;
-    private boolean mShowTitle;
     private Callback mPresenterCallback;
 
-    private int mInitXOffset;
-    private int mInitYOffset;
+    private MenuPopup mPopup;
+    private OnDismissListener mOnDismissListener;
 
-    /** Whether the popup has anchor-relative offsets. */
-    private boolean mHasOffsets;
-
-    public MenuPopupHelper(Context context, MenuBuilder menu) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu) {
         this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle, 0);
     }
 
-    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu,
+            @NonNull View anchorView) {
         this(context, menu, anchorView, false, com.android.internal.R.attr.popupMenuStyle, 0);
     }
 
-    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView,
-            boolean overflowOnly, int popupStyleAttr) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu,
+            @NonNull View anchorView,
+            boolean overflowOnly, @AttrRes int popupStyleAttr) {
         this(context, menu, anchorView, overflowOnly, popupStyleAttr, 0);
     }
 
-    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView,
-            boolean overflowOnly, int popupStyleAttr, int popupStyleRes) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu,
+            @NonNull View anchorView, boolean overflowOnly, @AttrRes int popupStyleAttr,
+            @StyleRes int popupStyleRes) {
         mContext = context;
         mMenu = menu;
+        mAnchorView = anchorView;
         mOverflowOnly = overflowOnly;
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
-        mAnchorView = anchorView;
-        mPopup = createMenuPopup();
     }
 
-    private MenuPopup createMenuPopup() {
-        if (mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableCascadingSubmenus)) {
-            return new CascadingMenuPopup(mContext, mAnchorView, mPopupStyleAttr, mPopupStyleRes,
-                    mOverflowOnly);
-        }
-        return new StandardMenuPopup(
-                mContext, mMenu, mAnchorView, mPopupStyleAttr, mPopupStyleRes, mOverflowOnly);
+    public void setOnDismissListener(@Nullable OnDismissListener listener) {
+        mOnDismissListener = listener;
     }
 
-    public void setAnchorView(View anchor) {
+    /**
+      * Sets the view to which the popup window is anchored.
+      * <p>
+      * Changes take effect on the next call to show().
+      *
+      * @param anchor the view to which the popup window should be anchored
+      */
+    public void setAnchorView(@NonNull View anchor) {
         mAnchorView = anchor;
-        mPopup.setAnchorView(anchor);
     }
 
-    public void setForceShowIcon(boolean forceShow) {
-        mForceShowIcon = forceShow;
-        mPopup.setForceShowIcon(forceShow);
+    /**
+     * Sets whether the popup menu's adapter is forced to show icons in the
+     * menu item views.
+     * <p>
+     * Changes take effect on the next call to show().
+     *
+     * @param forceShowIcon {@code true} to force icons to be shown, or
+     *                  {@code false} for icons to be optionally shown
+     */
+    public void setForceShowIcon(boolean forceShowIcon) {
+        mForceShowIcon = forceShowIcon;
     }
 
+    /**
+      * Sets the alignment of the popup window relative to the anchor view.
+      * <p>
+      * Changes take effect on the next call to show().
+      *
+      * @param gravity alignment of the popup relative to the anchor
+      */
     public void setGravity(int gravity) {
         mDropDownGravity = gravity;
-        mPopup.setGravity(gravity);
     }
 
+    /**
+     * @return alignment of the popup relative to the anchor
+     */
     public int getGravity() {
         return mDropDownGravity;
     }
@@ -114,7 +132,11 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
         }
     }
 
-    public ShowableListMenu getPopup() {
+    @NonNull
+    public MenuPopup getPopup() {
+        if (mPopup == null) {
+            mPopup = createPopup();
+        }
         return mPopup;
     }
 
@@ -133,12 +155,7 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
             return false;
         }
 
-        mInitXOffset = 0;
-        mInitYOffset = 0;
-        mHasOffsets = false;
-        mShowTitle = false;
-
-        showPopup();
+        showPopup(0, 0, false, false);
         return true;
     }
 
@@ -169,67 +186,104 @@ public class MenuPopupHelper implements PopupWindow.OnDismissListener {
             return false;
         }
 
-        mInitXOffset = x;
-        mInitYOffset = y;
-        mHasOffsets = true;
-        mShowTitle = true;
-
-        showPopup();
+        showPopup(x, y, true, true);
         return true;
     }
 
-    private void showPopup() {
-        mPopup = createMenuPopup();
-        mPopup.setAnchorView(mAnchorView);
-        mPopup.setCallback(mPresenterCallback);
-        mPopup.setForceShowIcon(mForceShowIcon);
-        mPopup.setGravity(mDropDownGravity);
-        mPopup.setShowTitle(mShowTitle);
+    /**
+     * Creates the popup and assigns cached properties.
+     *
+     * @return an initialized popup
+     */
+    @NonNull
+    private MenuPopup createPopup() {
+        final boolean enableCascadingSubmenus = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableCascadingSubmenus);
 
-        if (mHasOffsets) {
+        final MenuPopup popup;
+        if (enableCascadingSubmenus) {
+            popup = new CascadingMenuPopup(mContext, mAnchorView, mPopupStyleAttr,
+                    mPopupStyleRes, mOverflowOnly);
+        } else {
+            popup = new StandardMenuPopup(mContext, mMenu, mAnchorView, mPopupStyleAttr,
+                    mPopupStyleRes, mOverflowOnly);
+        }
+
+        // Assign immutable properties.
+        popup.addMenu(mMenu);
+        popup.setOnDismissListener(mInternalOnDismissListener);
+
+        // Assign mutable properties. These may be reassigned later.
+        popup.setAnchorView(mAnchorView);
+        popup.setCallback(mPresenterCallback);
+        popup.setForceShowIcon(mForceShowIcon);
+        popup.setGravity(mDropDownGravity);
+
+        return popup;
+    }
+
+    private void showPopup(int xOffset, int yOffset, boolean resolveOffsets, boolean showTitle) {
+        if (resolveOffsets) {
             // If the resolved drop-down gravity is RIGHT, the popup's right
             // edge will be aligned with the anchor view. Adjust by the anchor
             // width such that the top-right corner is at the X offset.
             final int hgrav = Gravity.getAbsoluteGravity(mDropDownGravity,
                     mAnchorView.getLayoutDirection()) & Gravity.HORIZONTAL_GRAVITY_MASK;
-            final int resolvedXOffset;
             if (hgrav == Gravity.RIGHT) {
-                resolvedXOffset = mInitXOffset - mAnchorView.getWidth();
-            } else {
-                resolvedXOffset = mInitXOffset;
+                xOffset -= mAnchorView.getWidth();
             }
-
-            mPopup.setHorizontalOffset(resolvedXOffset);
-            mPopup.setVerticalOffset(mInitYOffset);
         }
 
-        // In order for subclasses of MenuPopupHelper to satisfy the OnDismissedListener interface,
-        // we must set the listener to this outer Helper rather than to the inner MenuPopup.
-        // Not to worry -- the inner MenuPopup will call our own #onDismiss method after it's done
-        // its own handling.
-        mPopup.setOnDismissListener(this);
-
-        mPopup.addMenu(mMenu);
-        mPopup.show();
+        final MenuPopup popup = getPopup();
+        popup.setHorizontalOffset(xOffset);
+        popup.setVerticalOffset(yOffset);
+        popup.setShowTitle(showTitle);
+        popup.show();
     }
 
+    /**
+     * Dismisses the popup, if showing.
+     */
     public void dismiss() {
         if (isShowing()) {
             mPopup.dismiss();
         }
     }
 
-    @Override
-    public void onDismiss() {
+    /**
+     * Called after the popup has been dismissed.
+     * <p>
+     * <strong>Note:</strong> Subclasses should call the super implementation
+     * last to ensure that any necessary tear down has occurred before the
+     * listener specified by {@link #setOnDismissListener(OnDismissListener)}
+     * is called.
+     */
+    protected void onDismiss() {
         mPopup = null;
+
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
+        }
     }
 
     public boolean isShowing() {
         return mPopup != null && mPopup.isShowing();
     }
 
-    public void setCallback(MenuPresenter.Callback cb) {
+    public void setCallback(@Nullable MenuPresenter.Callback cb) {
         mPresenterCallback = cb;
-        mPopup.setCallback(cb);
+        if (mPopup != null) {
+            mPopup.setCallback(cb);
+        }
     }
+
+    /**
+     * Listener used to proxy dismiss callbacks to the helper's owner.
+     */
+    private final OnDismissListener mInternalOnDismissListener = new OnDismissListener() {
+        @Override
+        public void onDismiss() {
+            MenuPopupHelper.this.onDismiss();
+        }
+    };
 }
