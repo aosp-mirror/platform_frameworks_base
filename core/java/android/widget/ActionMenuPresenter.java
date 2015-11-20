@@ -937,10 +937,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
 
         @Override
-        public void onDismiss() {
-            super.onDismiss();
+        protected void onDismiss() {
             mMenu.close();
             mOverflowPopup = null;
+
+            super.onDismiss();
         }
     }
 
@@ -959,10 +960,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
 
         @Override
-        public void onDismiss() {
-            super.onDismiss();
+        protected void onDismiss() {
             mActionButtonPopup = null;
             mOpenSubMenuId = 0;
+
+            super.onDismiss();
         }
     }
 
