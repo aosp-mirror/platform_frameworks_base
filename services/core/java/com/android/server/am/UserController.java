@@ -674,7 +674,7 @@ final class UserController {
 
     void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
         synchronized (mService) {
-            Slog.w(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
+            Slog.wtf(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
             sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
         }
     }
