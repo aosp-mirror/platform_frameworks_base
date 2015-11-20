@@ -19980,11 +19980,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         Surface surface = new Surface();
         try {
-            IBinder token = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
+            mAttachInfo.mDragToken = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
                     flags, shadowSize.x, shadowSize.y, surface);
-            if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
-                    + " surface=" + surface);
-            if (token != null) {
+            if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token="
+                    + mAttachInfo.mDragToken + " surface=" + surface);
+            if (mAttachInfo.mDragToken != null) {
                 Canvas canvas = surface.lockCanvas(null);
                 try {
                     canvas.drawColor(0, PorterDuff.Mode.CLEAR);
@@ -20001,7 +20001,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // repurpose 'shadowSize' for the last touch point
                 root.getLastTouchPoint(shadowSize);
 
-                okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
+                okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, mAttachInfo.mDragToken,
                         shadowSize.x, shadowSize.y,
                         shadowTouchPoint.x, shadowTouchPoint.y, data);
                 if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
@@ -20016,6 +20016,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return okay;
+    }
+
+    /**
+     * Cancels an ongoing drag and drop operation.
+     * <p>
+     * A {@link android.view.DragEvent} object with
+     * {@link android.view.DragEvent#getAction()} value of
+     * {@link android.view.DragEvent#ACTION_DRAG_ENDED} and
+     * {@link android.view.DragEvent#getResult()} value of {@code false}
+     * will be sent to every
+     * View that received {@link android.view.DragEvent#ACTION_DRAG_STARTED}
+     * even if they are not currently visible.
+     * </p>
+     * <p>
+     * This method can be called on any View in the same window as the View on which
+     * {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int) startDragAndDrop}
+     * was called.
+     * </p>
+     */
+    public final void cancelDragAndDrop() {
+        if (ViewDebug.DEBUG_DRAG) {
+            Log.d(VIEW_LOG_TAG, "cancelDragAndDrop");
+        }
+        if (mAttachInfo.mDragToken != null) {
+            try {
+                mAttachInfo.mSession.cancelDragAndDrop(mAttachInfo.mDragToken);
+            } catch (Exception e) {
+                Log.e(VIEW_LOG_TAG, "Unable to cancel drag", e);
+            }
+            mAttachInfo.mDragToken = null;
+        } else {
+            Log.e(VIEW_LOG_TAG, "No active drag to cancel");
+        }
     }
 
     /**
@@ -22302,6 +22335,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * during the next traversal.
          */
         final List<View> mPartialLayoutViews = new ArrayList<View>();
+
+        /**
+         * Used to track the identity of the current drag operation.
+         */
+        IBinder mDragToken;
 
         /**
          * Creates a new set of attachment information with the specified
