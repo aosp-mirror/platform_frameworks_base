@@ -5717,7 +5717,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 Bitmap bm = screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1,
-                        true);
+                        true, 1f);
                 try {
                     receiver.send(bm);
                 } catch (RemoteException e) {
@@ -5736,18 +5736,20 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param displayId the Display to take a screenshot of.
      * @param width the width of the target bitmap
      * @param height the height of the target bitmap
+     * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
      */
     @Override
-    public Bitmap screenshotApplications(IBinder appToken, int displayId, int width, int height) {
+    public Bitmap screenshotApplications(IBinder appToken, int displayId, int width, int height,
+            float frameScale) {
         if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
-        return screenshotApplicationsInner(appToken, displayId, width, height, false);
+        return screenshotApplicationsInner(appToken, displayId, width, height, false, frameScale);
     }
 
     Bitmap screenshotApplicationsInner(IBinder appToken, int displayId, int width, int height,
-            boolean includeFullDisplay) {
+            boolean includeFullDisplay, float frameScale) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = getDisplayContentLocked(displayId);
@@ -5927,10 +5929,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 if (width < 0) {
-                    width = frame.width();
+                    width = (int) (frame.width() * frameScale);
                 }
                 if (height < 0) {
-                    height = frame.height();
+                    height = (int) (frame.height() * frameScale);
                 }
 
                 // Tell surface flinger what part of the image to crop. Take the top

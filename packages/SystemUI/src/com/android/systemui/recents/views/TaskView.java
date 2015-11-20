@@ -200,7 +200,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         // Measure the content
         mContent.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
 
         // Measure the bar view, and action button
         mHeaderView.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
@@ -211,7 +211,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // Measure the thumbnail to be square
         mThumbnailView.measure(
                 MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
         mThumbnailView.updateClipToTaskBar(mHeaderView);
         setMeasuredDimension(width, height);
         invalidateOutline();
@@ -619,23 +619,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         setDim(getDimFromTaskProgress());
     }
 
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-
-        RecentsDebugFlags flags = Recents.getDebugFlags();
-        if (flags.isFastToggleRecentsEnabled() && mIsFocused) {
-            Paint tmpPaint = new Paint();
-            Rect tmpRect = new Rect();
-            tmpRect.set(0, 0, getWidth(), getHeight());
-            tmpPaint.setColor(0xFFFF0000);
-            tmpPaint.setStrokeWidth(35);
-            tmpPaint.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(tmpRect, tmpPaint);
-        }
-    }
-
     /**** View focus state ****/
 
     /**
@@ -665,10 +648,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             if (isAccessibilityFocused() && ssp.isTouchExplorationEnabled()) {
                 clearAccessibilityFocus();
             }
-        }
-        RecentsDebugFlags flags = Recents.getDebugFlags();
-        if (flags.isFastToggleRecentsEnabled()) {
-            invalidate();
         }
     }
 

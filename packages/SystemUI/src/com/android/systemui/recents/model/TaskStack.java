@@ -59,7 +59,7 @@ interface TaskFilter {
 class FilteredTaskList {
 
     private static final String TAG = "FilteredTaskList";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     ArrayList<Task> mTasks = new ArrayList<>();
     ArrayList<Task> mFilteredTasks = new ArrayList<>();

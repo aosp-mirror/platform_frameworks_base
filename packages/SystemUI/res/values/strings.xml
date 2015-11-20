@@ -1159,10 +1159,20 @@
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
+    <!-- Toggles paging recents via the recents button -->
+    <string name="overview_page_on_toggle">Enable paging</string>
+    <!-- Description for the toggle for fast-toggling recents via the recents button -->
+    <string name="overview_page_on_toggle_desc">Enable paging via the Overview button</string>
+
     <!-- Toggles fast-toggling recents via the recents button -->
     <string name="overview_fast_toggle_via_button">Enable fast toggle</string>
     <!-- Description for the toggle for fast-toggling recents via the recents button -->
-    <string name="overview_fast_toggle_via_button_desc">Enable paging via the Overview button</string>
+    <string name="overview_fast_toggle_via_button_desc">Enable launch timeout while paging</string>
+
+    <!-- Toggles fullscreen screenshots -->
+    <string name="overview_fullscreen_thumbnails">Enable fullscreen screenshots</string>
+    <!-- Description for the toggle for fullscreen screenshots -->
+    <string name="overview_fullscreen_thumbnails_desc">Enable fullscreen screenshots in Overview</string>
 
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->

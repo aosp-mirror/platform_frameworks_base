@@ -298,7 +298,7 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth,
-            int maxHeight) throws RemoteException {
+            int maxHeight, float frameScale) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }

@@ -21,7 +21,7 @@
     public <init>(android.os.Bundle);
 }
 
--keep class com.android.systemui.recents.views.StackLayoutAlgorithm {
+-keep class com.android.systemui.recents.views.TaskStackLayoutAlgorithm {
     public float getFocusState();
     public void setFocusState(float);
 }

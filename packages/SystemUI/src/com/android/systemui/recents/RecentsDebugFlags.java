@@ -27,6 +27,8 @@ import com.android.systemui.tuner.TunerService;
 public class RecentsDebugFlags implements TunerService.Tunable {
 
     private static final String KEY_FAST_TOGGLE = "overview_fast_toggle";
+    private static final String KEY_PAGE_ON_TOGGLE = "overview_page_on_toggle";
+    private static final String KEY_FULLSCREEN_THUMBNAILS = "overview_fullscreen_thumbnails";
 
     public static class Static {
         // Enables debug drawing for the transition thumbnail
@@ -47,8 +49,9 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final int SystemServicesProxyMockTaskCount = 100;
     }
 
-    private boolean mForceEnableFreeformWorkspace;
-    private boolean mEnableFastToggleRecents;
+    private boolean mFastToggleRecents;
+    private boolean mPageOnToggle;
+    private boolean mUseFullscreenThumbnails;
 
     /**
      * We read the prefs once when we start the activity, then update them as the tuner changes
@@ -57,21 +60,44 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public RecentsDebugFlags(Context context) {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
-        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE);
+        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_PAGE_ON_TOGGLE,
+                KEY_FULLSCREEN_THUMBNAILS);
     }
 
     /**
      * @return whether we are enabling fast toggling.
      */
     public boolean isFastToggleRecentsEnabled() {
-        return mEnableFastToggleRecents;
+        return mPageOnToggle && mFastToggleRecents;
+    }
+
+    /**
+     * @return whether the recents button toggles pages.
+     */
+    public boolean isPageOnToggleEnabled() {
+        return mPageOnToggle;
+    }
+
+    /**
+     * @return whether we should show fullscreen thumbnails
+     */
+    public boolean isFullscreenThumbnailsEnabled() {
+        return mUseFullscreenThumbnails;
     }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
         switch (key) {
             case KEY_FAST_TOGGLE:
-                mEnableFastToggleRecents = (newValue != null) &&
+                mFastToggleRecents = (newValue != null) &&
+                        (Integer.parseInt(newValue) != 0);
+                break;
+            case KEY_PAGE_ON_TOGGLE:
+                mPageOnToggle = (newValue != null) &&
+                        (Integer.parseInt(newValue) != 0);
+                break;
+            case KEY_FULLSCREEN_THUMBNAILS:
+                mUseFullscreenThumbnails = (newValue != null) &&
                         (Integer.parseInt(newValue) != 0);
                 break;
         }

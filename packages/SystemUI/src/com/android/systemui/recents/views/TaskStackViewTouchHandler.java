@@ -31,10 +31,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -59,6 +59,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     boolean mIsScrolling;
     float mDownScrollP;
     int mDownX, mDownY;
+    int mLastY;
     int mActivePointerId = INACTIVE_POINTER_ID;
     int mOverscrollSize;
     TaskView mActiveTaskView = null;
@@ -150,11 +151,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         if (mSv.getTaskViews().size() == 0) {
             return false;
         }
-        // Short circuit while we are alt-tabbing
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        if (launchState.launchedWithAltTab) {
-            return false;
-        }
 
         final TaskStackLayoutAlgorithm layoutAlgorithm = mSv.mLayoutAlgorithm;
         int action = ev.getAction();
@@ -163,6 +159,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 // Save the touch down info
                 mDownX = (int) ev.getX();
                 mDownY = (int) ev.getY();
+                mLastY = mDownY;
                 mDownScrollP = mScroller.getStackScroll();
                 mActivePointerId = ev.getPointerId(0);
                 mActiveTaskView = findViewAtPoint(mDownX, mDownY);
@@ -181,6 +178,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 final int index = ev.getActionIndex();
                 mDownX = (int) ev.getX();
                 mDownY = (int) ev.getY();
+                mLastY = mDownY;
                 mDownScrollP = mScroller.getStackScroll();
                 mActivePointerId = ev.getPointerId(index);
                 mVelocityTracker.addMovement(ev);
@@ -209,8 +207,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (DEBUG) {
                         Log.d(TAG, "scroll: " + curScrollP);
                     }
+                    EventBus.getDefault().send(new StackViewScrolledEvent(y - mLastY));
                 }
 
+                mLastY = y;
                 mVelocityTracker.addMovement(ev);
                 break;
             }
