@@ -13,7 +13,6 @@ page.title=Build System Overview
    <li><a href="{@docRoot}sdk/installing/studio.html">
    Getting Started with Android Studio</a></li>
    <li><a href="{@docRoot}tools/studio/index.html">Android Studio Basics</a></li>
-   <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating from Eclipse</a></li>
 </div>
 </div>
 
