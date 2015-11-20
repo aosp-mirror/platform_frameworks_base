@@ -255,10 +255,10 @@ class DocumentLoader {
                 return;
             }
             if (mNumLoaded == 0) {
-                mDatabase.startAddingChildDocuments(mIdentifier.mDocumentId);
+                mDatabase.getMapper().startAddingChildDocuments(mIdentifier.mDocumentId);
             }
             try {
-                mDatabase.putChildDocuments(
+                mDatabase.getMapper().putChildDocuments(
                         mIdentifier.mDeviceId, mIdentifier.mDocumentId, objectInfoList);
                 mNumLoaded += objectInfoList.length;
             } catch (SQLiteException exp) {
@@ -266,7 +266,7 @@ class DocumentLoader {
                 mNumLoaded = 0;
             }
             if (getState() != STATE_LOADING) {
-                mDatabase.stopAddingChildDocuments(mIdentifier.mDocumentId);
+                mDatabase.getMapper().stopAddingChildDocuments(mIdentifier.mDocumentId);
             }
         }
 
@@ -275,7 +275,7 @@ class DocumentLoader {
             mError = message;
             mNumLoaded = 0;
             if (lastState == STATE_LOADING) {
-                mDatabase.stopAddingChildDocuments(mIdentifier.mDocumentId);
+                mDatabase.getMapper().stopAddingChildDocuments(mIdentifier.mDocumentId);
             }
         }
 

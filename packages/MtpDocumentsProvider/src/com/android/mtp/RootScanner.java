@@ -113,13 +113,14 @@ final class RootScanner {
                 for (int deviceId : deviceIds) {
                     try {
                         final MtpRoot[] roots = mManager.getRoots(deviceId);
-                        mDatabase.startAddingRootDocuments(deviceId);
+                        mDatabase.getMapper().startAddingRootDocuments(deviceId);
                         try {
-                            if (mDatabase.putRootDocuments(deviceId, mResources, roots)) {
+                            if (mDatabase.getMapper().putRootDocuments(
+                                    deviceId, mResources, roots)) {
                                 changed = true;
                             }
                         } finally {
-                            if (mDatabase.stopAddingRootDocuments(deviceId)) {
+                            if (mDatabase.getMapper().stopAddingRootDocuments(deviceId)) {
                                 changed = true;
                             }
                         }

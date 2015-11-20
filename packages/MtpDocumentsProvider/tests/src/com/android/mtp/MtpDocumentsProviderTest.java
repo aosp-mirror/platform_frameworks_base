@@ -29,7 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import static com.android.mtp.MtpDatabaseInternal.strings;
+import static com.android.mtp.MtpDatabase.strings;
 
 @SmallTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {

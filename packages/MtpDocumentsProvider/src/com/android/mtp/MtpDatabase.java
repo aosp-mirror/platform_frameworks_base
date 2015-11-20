@@ -22,6 +22,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.MediaFile;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
@@ -32,8 +35,7 @@ import android.provider.DocumentsContract.Root;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Database for MTP objects.
@@ -49,13 +51,13 @@ import java.util.Map;
  * by comparing the directory structure and object name.
  *
  * To start putting documents into the database, the client needs to call
- * {@link #startAddingChildDocuments(String)} with the parent document ID. Also it needs to call
- * {@link #stopAddingChildDocuments(String)} after putting all child documents to the database.
- * (All explanations are same for root documents)
+ * {@link Mapper#startAddingChildDocuments(String)} with the parent document ID. Also it
+ * needs to call {@link Mapper#stopAddingChildDocuments(String)} after putting all child
+ * documents to the database. (All explanations are same for root documents)
  *
- * database.startAddingChildDocuments();
- * database.putChildDocuments();
- * database.stopAddingChildDocuments();
+ * database.getMapper().startAddingChildDocuments();
+ * database.getMapper().putChildDocuments();
+ * database.getMapper().stopAddingChildDocuments();
  *
  * To update the existing documents, the client code can repeat to call the three methods again.
  * The newly added rows update corresponding existing rows that have same MTP identifier like
@@ -72,186 +74,229 @@ import java.util.Map;
  * TODO: Improve performance by SQL optimization.
  */
 class MtpDatabase {
-    private final MtpDatabaseInternal mDatabase;
+    private final SQLiteDatabase mDatabase;
+    private final Mapper mMapper;
 
-    /**
-     * Mapping mode for roots/documents where we start adding child documents.
-     * Methods operate the state needs to be synchronized.
-     */
-    private final Map<String, Integer> mMappingMode = new HashMap<>();
-
-    @VisibleForTesting
-    MtpDatabase(Context context, int flags) {
-        mDatabase = new MtpDatabaseInternal(context, flags);
+    SQLiteDatabase getSQLiteDatabase() {
+        return mDatabase;
     }
 
-    /**
-     * Closes the database.
-     */
-    @VisibleForTesting
+    MtpDatabase(Context context, int flags) {
+        final OpenHelper helper = new OpenHelper(context, flags);
+        mDatabase = helper.getWritableDatabase();
+        mMapper = new Mapper(this);
+    }
+
     void close() {
         mDatabase.close();
     }
 
     /**
-     * {@link MtpDatabaseInternal#queryRoots}
+     * Returns operations for mapping.
+     * @return Mapping operations.
      */
-    Cursor queryRoots(String[] columnNames) {
-        return mDatabase.queryRoots(columnNames);
+    Mapper getMapper() {
+        return mMapper;
     }
 
     /**
-     * {@link MtpDatabaseInternal#queryRootDocuments}
+     * Queries roots information.
+     * @param columnNames Column names defined in {@link android.provider.DocumentsContract.Root}.
+     * @return Database cursor.
+     */
+    Cursor queryRoots(String[] columnNames) {
+        return mDatabase.query(
+                VIEW_ROOTS,
+                columnNames,
+                COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED),
+                null,
+                null,
+                null);
+    }
+
+    /**
+     * Queries root documents information.
+     * @param columnNames Column names defined in
+     *     {@link android.provider.DocumentsContract.Document}.
+     * @return Database cursor.
      */
     @VisibleForTesting
     Cursor queryRootDocuments(String[] columnNames) {
-        return mDatabase.queryRootDocuments(columnNames);
+        return mDatabase.query(
+                TABLE_DOCUMENTS,
+                columnNames,
+                COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED),
+                null,
+                null,
+                null);
     }
 
     /**
-     * {@link MtpDatabaseInternal#queryChildDocuments}
+     * Queries documents information.
+     * @param columnNames Column names defined in
+     *     {@link android.provider.DocumentsContract.Document}.
+     * @return Database cursor.
      */
     Cursor queryChildDocuments(String[] columnNames, String parentDocumentId) {
-        return mDatabase.queryChildDocuments(columnNames, parentDocumentId);
+        return mDatabase.query(
+                TABLE_DOCUMENTS,
+                columnNames,
+                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_PARENT_DOCUMENT_ID + " = ?",
+                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED, parentDocumentId),
+                null,
+                null,
+                null);
     }
 
     /**
-     * {@link MtpDatabaseInternal#queryDocument}
+     * Queries a single document.
+     * @param documentId
+     * @param projection
+     * @return Database cursor.
      */
-    Cursor queryDocument(String documentId, String[] projection) {
-        return mDatabase.queryDocument(documentId, projection);
+    public Cursor queryDocument(String documentId, String[] projection) {
+        return mDatabase.query(
+                TABLE_DOCUMENTS,
+                projection,
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null,
+                "1");
     }
 
     /**
-     * {@link MtpDatabaseInternal#createIdentifier}
-     */
-    Identifier createIdentifier(String parentDocumentId) throws FileNotFoundException {
-        return mDatabase.createIdentifier(parentDocumentId);
-    }
-
-    /**
-     * {@link MtpDatabaseInternal#removeDeviceRows}
+     * Remove all rows belong to a device.
+     * @param deviceId Device ID.
      */
     void removeDeviceRows(int deviceId) {
-        mDatabase.removeDeviceRows(deviceId);
+        // Call non-recursive version because it anyway deletes all rows in the devices.
+        deleteDocumentsAndRoots(COLUMN_DEVICE_ID + "=?", strings(deviceId));
     }
 
     /**
-     * {@link MtpDatabaseInternal#getParentId}
+     * Obtains parent document ID.
+     * @param documentId
+     * @return parent document ID.
      * @throws FileNotFoundException
      */
     String getParentId(String documentId) throws FileNotFoundException {
-        return mDatabase.getParentId(documentId);
+        final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(COLUMN_PARENT_DOCUMENT_ID),
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null,
+                "1");
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getString(0);
+            } else {
+                throw new FileNotFoundException("Cannot find a row having ID=" + documentId);
+            }
+        } finally {
+            cursor.close();
+        }
     }
 
     /**
-     * {@link MtpDatabaseInternal#deleteDocument}
+     * Adds new document under the parent.
+     * The method does not affect invalidated and pending documents because we know the document is
+     * newly added and never mapped with existing ones.
+     * @param parentDocumentId
+     * @param info
+     * @return Document ID of added document.
      */
-    void deleteDocument(String documentId) {
-        mDatabase.deleteDocument(documentId);
-    }
-
-    /**
-     * {@link MtpDatabaseInternal#putNewDocument}
-     * @throws FileNotFoundException
-     */
-    String putNewDocument(int deviceId, String parentDocumentId, MtpObjectInfo info)
-            throws FileNotFoundException {
+    String putNewDocument(int deviceId, String parentDocumentId, MtpObjectInfo info) {
         final ContentValues values = new ContentValues();
         getChildDocumentValues(values, deviceId, parentDocumentId, info);
-        return mDatabase.putNewDocument(parentDocumentId, values);
-    }
-
-    /**
-     * Invokes {@link MtpDatabaseInternal#startAddingDocuments} for root documents.
-     * @param deviceId Device ID.
-     */
-    synchronized void startAddingRootDocuments(int deviceId) {
-        final String mappingStateKey = getRootDocumentsMappingStateKey(deviceId);
-        if (mMappingMode.containsKey(mappingStateKey)) {
-            throw new Error("Mapping for the root has already started.");
-        }
-        mMappingMode.put(
-                mappingStateKey,
-                mDatabase.startAddingDocuments(
-                        SELECTION_ROOT_DOCUMENTS, Integer.toString(deviceId)));
-    }
-
-    /**
-     * Invokes {@link MtpDatabaseInternal#startAddingDocuments} for child of specific documents.
-     * @param parentDocumentId Document ID for parent document.
-     */
-    @VisibleForTesting
-    synchronized void startAddingChildDocuments(String parentDocumentId) {
-        final String mappingStateKey = getChildDocumentsMappingStateKey(parentDocumentId);
-        if (mMappingMode.containsKey(mappingStateKey)) {
-            throw new Error("Mapping for the root has already started.");
-        }
-        mMappingMode.put(
-                mappingStateKey,
-                mDatabase.startAddingDocuments(SELECTION_CHILD_DOCUMENTS, parentDocumentId));
-    }
-
-    /**
-     * Puts root information to database.
-     * @param deviceId Device ID
-     * @param resources Resources required to localize root name.
-     * @param roots List of root information.
-     * @return If roots are added or removed from the database.
-     */
-    synchronized boolean putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
         mDatabase.beginTransaction();
         try {
-            final boolean heuristic;
-            final String mapColumn;
-            final String key = getRootDocumentsMappingStateKey(deviceId);
-            if (!mMappingMode.containsKey(key)) {
-                throw new IllegalStateException("startAddingRootDocuments has not been called.");
+            final long id = mDatabase.insert(TABLE_DOCUMENTS, null, values);
+            mDatabase.setTransactionSuccessful();
+            return Long.toString(id);
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    /**
+     * Deletes document and its children.
+     * @param documentId
+     */
+    void deleteDocument(String documentId) {
+        deleteDocumentsAndRootsRecursively(SELECTION_DOCUMENT_ID, strings(documentId));
+    }
+
+    /**
+     * Gets identifier from document ID.
+     * @param documentId Document ID.
+     * @return Identifier.
+     * @throws FileNotFoundException
+     */
+    Identifier createIdentifier(String documentId) throws FileNotFoundException {
+        // Currently documentId is old format.
+        final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(COLUMN_DEVICE_ID, COLUMN_STORAGE_ID, COLUMN_OBJECT_HANDLE),
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null,
+                "1");
+        try {
+            if (cursor.getCount() == 0) {
+                throw new FileNotFoundException("ID is not found.");
+            } else {
+                cursor.moveToNext();
+                return new Identifier(
+                        cursor.getInt(0),
+                        cursor.getInt(1),
+                        cursor.isNull(2) ? Identifier.DUMMY_HANDLE_FOR_ROOT : cursor.getInt(2),
+                        documentId);
             }
-            switch (mMappingMode.get(key)) {
-                case MAP_BY_MTP_IDENTIFIER:
-                    heuristic = false;
-                    mapColumn = COLUMN_STORAGE_ID;
-                    break;
-                case MAP_BY_NAME:
-                    heuristic = true;
-                    mapColumn = Document.COLUMN_DISPLAY_NAME;
-                    break;
-                default:
-                    throw new Error("Unexpected map mode.");
-            }
-            final ContentValues[] valuesList = new ContentValues[roots.length];
-            for (int i = 0; i < roots.length; i++) {
-                if (roots[i].mDeviceId != deviceId) {
-                    throw new IllegalArgumentException();
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /**
+     * Deletes a document, and its root information if the document is a root document.
+     * @param selection Query to select documents.
+     * @param args Arguments for selection.
+     * @return Whether the method deletes rows.
+     */
+    boolean deleteDocumentsAndRootsRecursively(String selection, String[] args) {
+        mDatabase.beginTransaction();
+        try {
+            boolean changed = false;
+            final Cursor cursor = mDatabase.query(
+                    TABLE_DOCUMENTS,
+                    strings(Document.COLUMN_DOCUMENT_ID),
+                    selection,
+                    args,
+                    null,
+                    null,
+                    null);
+            try {
+                while (cursor.moveToNext()) {
+                    if (deleteDocumentsAndRootsRecursively(
+                            COLUMN_PARENT_DOCUMENT_ID + "=?",
+                            strings(cursor.getString(0)))) {
+                        changed = true;
+                    }
                 }
-                valuesList[i] = new ContentValues();
-                getRootDocumentValues(valuesList[i], resources, roots[i]);
+            } finally {
+                cursor.close();
             }
-            final boolean changed = mDatabase.putDocuments(
-                    valuesList,
-                    SELECTION_ROOT_DOCUMENTS,
-                    Integer.toString(deviceId),
-                    heuristic,
-                    mapColumn);
-            final ContentValues values = new ContentValues();
-            int i = 0;
-            for (final MtpRoot root : roots) {
-                // Use the same value for the root ID and the corresponding document ID.
-                final String documentId = valuesList[i++].getAsString(Document.COLUMN_DOCUMENT_ID);
-                // If it fails to insert/update documents, the document ID will be set with -1.
-                // In this case we don't insert/update root extra information neither.
-                if (documentId == null) {
-                    continue;
-                }
-                values.put(Root.COLUMN_ROOT_ID, documentId);
-                values.put(
-                        Root.COLUMN_FLAGS,
-                        Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
-                values.put(Root.COLUMN_AVAILABLE_BYTES, root.mFreeSpace);
-                values.put(Root.COLUMN_CAPACITY_BYTES, root.mMaxCapacity);
-                values.put(Root.COLUMN_MIME_TYPES, "");
-                mDatabase.putRootExtra(values);
+            if (deleteDocumentsAndRoots(selection, args)) {
+                changed = true;
             }
             mDatabase.setTransactionSuccessful();
             return changed;
@@ -260,95 +305,50 @@ class MtpDatabase {
         }
     }
 
-    /**
-     * Puts document information to database.
-     * @param deviceId Device ID
-     * @param parentId Parent document ID.
-     * @param documents List of document information.
-     */
-    @VisibleForTesting
-    synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents) {
-        final boolean heuristic;
-        final String mapColumn;
-        switch (mMappingMode.get(getChildDocumentsMappingStateKey(parentId))) {
-            case MAP_BY_MTP_IDENTIFIER:
-                heuristic = false;
-                mapColumn = COLUMN_OBJECT_HANDLE;
-                break;
-            case MAP_BY_NAME:
-                heuristic = true;
-                mapColumn = Document.COLUMN_DISPLAY_NAME;
-                break;
-            default:
-                throw new Error("Unexpected map mode.");
-        }
-        final ContentValues[] valuesList = new ContentValues[documents.length];
-        for (int i = 0; i < documents.length; i++) {
-            valuesList[i] = new ContentValues();
-            getChildDocumentValues(valuesList[i], deviceId, parentId, documents[i]);
-        }
-        mDatabase.putDocuments(
-                valuesList, SELECTION_CHILD_DOCUMENTS, parentId, heuristic, mapColumn);
-    }
-
-    /**
-     * Clears mapping between MTP identifier and document/root ID.
-     */
-    @VisibleForTesting
-    synchronized void clearMapping() {
-        mDatabase.clearMapping();
-        mMappingMode.clear();
-    }
-
-    /**
-     * Stops adding root documents.
-     * @param deviceId Device ID.
-     * @return True if new rows are added/removed.
-     */
-    synchronized boolean stopAddingRootDocuments(int deviceId) {
-        final String mappingModeKey = getRootDocumentsMappingStateKey(deviceId);
-        switch (mMappingMode.get(mappingModeKey)) {
-            case MAP_BY_MTP_IDENTIFIER:
-                mMappingMode.remove(mappingModeKey);
-                return mDatabase.stopAddingDocuments(
-                        SELECTION_ROOT_DOCUMENTS,
-                        Integer.toString(deviceId),
-                        COLUMN_STORAGE_ID);
-            case MAP_BY_NAME:
-                mMappingMode.remove(mappingModeKey);
-                return mDatabase.stopAddingDocuments(
-                        SELECTION_ROOT_DOCUMENTS,
-                        Integer.toString(deviceId),
-                        Document.COLUMN_DISPLAY_NAME);
-            default:
-                throw new Error("Unexpected mapping state.");
+    private boolean deleteDocumentsAndRoots(String selection, String[] args) {
+        mDatabase.beginTransaction();
+        try {
+            int deleted = 0;
+            deleted += mDatabase.delete(
+                    TABLE_ROOT_EXTRA,
+                    Root.COLUMN_ROOT_ID + " IN (" + SQLiteQueryBuilder.buildQueryString(
+                            false,
+                            TABLE_DOCUMENTS,
+                            new String[] { Document.COLUMN_DOCUMENT_ID },
+                            selection,
+                            null,
+                            null,
+                            null,
+                            null) + ")",
+                    args);
+            deleted += mDatabase.delete(TABLE_DOCUMENTS, selection, args);
+            mDatabase.setTransactionSuccessful();
+            // TODO Remove mappingState.
+            return deleted != 0;
+        } finally {
+            mDatabase.endTransaction();
         }
     }
 
-    /**
-     * Stops adding documents under the parent.
-     * @param parentId Document ID of the parent.
-     */
-    @VisibleForTesting
-    synchronized void stopAddingChildDocuments(String parentId) {
-        final String mappingModeKey = getChildDocumentsMappingStateKey(parentId);
-        switch (mMappingMode.get(mappingModeKey)) {
-            case MAP_BY_MTP_IDENTIFIER:
-                mDatabase.stopAddingDocuments(
-                        SELECTION_CHILD_DOCUMENTS,
-                        parentId,
-                        COLUMN_OBJECT_HANDLE);
-                break;
-            case MAP_BY_NAME:
-                mDatabase.stopAddingDocuments(
-                        SELECTION_CHILD_DOCUMENTS,
-                        parentId,
-                        Document.COLUMN_DISPLAY_NAME);
-                break;
-            default:
-                throw new Error("Unexpected mapping state.");
+    private static class OpenHelper extends SQLiteOpenHelper {
+        public OpenHelper(Context context, int flags) {
+            super(context,
+                  flags == FLAG_DATABASE_IN_MEMORY ? null : DATABASE_NAME,
+                  null,
+                  DATABASE_VERSION);
         }
-        mMappingMode.remove(mappingModeKey);
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(QUERY_CREATE_DOCUMENTS);
+            db.execSQL(QUERY_CREATE_ROOT_EXTRA);
+            db.execSQL(QUERY_CREATE_VIEW_ROOTS);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -357,8 +357,7 @@ class MtpDatabase {
      * @param resources Resources used to get localized root name.
      * @param root Root to be converted {@link ContentValues}.
      */
-    private static void getRootDocumentValues(
-            ContentValues values, Resources resources, MtpRoot root) {
+    static void getRootDocumentValues(ContentValues values, Resources resources, MtpRoot root) {
         values.clear();
         values.put(COLUMN_DEVICE_ID, root.mDeviceId);
         values.put(COLUMN_STORAGE_ID, root.mStorageId);
@@ -382,7 +381,7 @@ class MtpDatabase {
      * @param parentId Parent document ID of the object.
      * @param info MTP object info.
      */
-    private void getChildDocumentValues(
+    static void getChildDocumentValues(
             ContentValues values, int deviceId, String parentId, MtpObjectInfo info) {
         values.clear();
         final String mimeType = info.getFormat() == MtpConstants.FORMAT_ASSOCIATION ?
@@ -415,19 +414,11 @@ class MtpDatabase {
         values.put(Document.COLUMN_SIZE, info.getCompressedSize());
     }
 
-    /**
-     * @param deviceId Device ID.
-     * @return Key for {@link #mMappingMode}.
-     */
-    private static String getRootDocumentsMappingStateKey(int deviceId) {
-        return "RootDocuments/" + deviceId;
-    }
-
-    /**
-     * @param parentDocumentId Document ID for the parent document.
-     * @return Key for {@link #mMappingMode}.
-     */
-    private static String getChildDocumentsMappingStateKey(String parentDocumentId) {
-        return "ChildDocuments/" + parentDocumentId;
+    static String[] strings(Object... args) {
+        final String[] results = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            results[i] = Objects.toString(args[i]);
+        }
+        return results;
     }
 }
