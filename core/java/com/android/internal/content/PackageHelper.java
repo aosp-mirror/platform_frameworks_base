@@ -58,6 +58,7 @@ import java.util.zip.ZipOutputStream;
 public class PackageHelper {
     public static final int RECOMMEND_INSTALL_INTERNAL = 1;
     public static final int RECOMMEND_INSTALL_EXTERNAL = 2;
+    public static final int RECOMMEND_INSTALL_EPHEMERAL = 3;
     public static final int RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;
     public static final int RECOMMEND_FAILED_INVALID_APK = -2;
     public static final int RECOMMEND_FAILED_INVALID_LOCATION = -3;
@@ -442,7 +443,12 @@ public class PackageHelper {
 
         final int prefer;
         final boolean checkBoth;
-        if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+        boolean ephemeral = false;
+        if ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            ephemeral = true;
+            checkBoth = false;
+        } else if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             checkBoth = false;
         } else if ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
@@ -483,8 +489,12 @@ public class PackageHelper {
         }
 
         if (prefer == RECOMMEND_INSTALL_INTERNAL) {
+            // The ephemeral case will either fit and return EPHEMERAL, or will not fit
+            // and will fall through to return INSUFFICIENT_STORAGE
             if (fitsOnInternal) {
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                return (ephemeral)
+                        ? PackageHelper.RECOMMEND_INSTALL_EPHEMERAL
+                        : PackageHelper.RECOMMEND_INSTALL_INTERNAL;
             }
         } else if (prefer == RECOMMEND_INSTALL_EXTERNAL) {
             if (fitsOnExternal) {
