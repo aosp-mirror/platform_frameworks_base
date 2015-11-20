@@ -41,19 +41,108 @@ TEST(RecordingCanvas, emptyPlayback) {
     playbackOps(*dl, [](const RecordedOp& op) { ADD_FAILURE(); });
 }
 
-TEST(RecordingCanvas, testSimpleRectRecord) {
+TEST(RecordingCanvas, drawLines) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setStrokeWidth(20);
+        float points[] = { 0, 0, 20, 10, 30, 40, 90 }; // NB: only 1 valid line
+        canvas.drawLines(&points[0], 7, paint);
+    });
+
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
+    auto op = dl->getOps()[0];
+    ASSERT_EQ(RecordedOpId::LinesOp, op->opId);
+    EXPECT_EQ(4, ((LinesOp*)op)->floatCount)
+            << "float count must be rounded down to closest multiple of 4";
+    EXPECT_EQ(Rect(-10, -10, 30, 20), op->unmappedBounds)
+            << "unmapped bounds must be size of line, outset by 1/2 stroke width";
+}
+
+TEST(RecordingCanvas, drawRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(10, 20, 90, 180, SkPaint());
+    });
+
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
+    auto op = *(dl->getOps()[0]);
+    ASSERT_EQ(RecordedOpId::RectOp, op.opId);
+    EXPECT_EQ(Rect(0, 0, 100, 200), op.localClipRect);
+    EXPECT_EQ(Rect(10, 20, 90, 180), op.unmappedBounds);
+}
+
+TEST(RecordingCanvas, drawText) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        paint.setTextSize(20);
+        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
     });
 
     int count = 0;
     playbackOps(*dl, [&count](const RecordedOp& op) {
         count++;
-        ASSERT_EQ(RecordedOpId::RectOp, op.opId);
-        ASSERT_EQ(Rect(0, 0, 100, 200), op.localClipRect);
-        ASSERT_EQ(Rect(10, 20, 90, 180), op.unmappedBounds);
+        ASSERT_EQ(RecordedOpId::TextOp, op.opId);
+        EXPECT_EQ(Rect(0, 0, 200, 200), op.localClipRect);
+        EXPECT_TRUE(op.localMatrix.isIdentity());
+        EXPECT_TRUE(op.unmappedBounds.contains(25, 15, 50, 25))
+                << "Op expected to be 25+ pixels wide, 10+ pixels tall";
     });
     ASSERT_EQ(1, count);
+}
+
+TEST(RecordingCanvas, drawText_strikeThruAndUnderline) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        paint.setTextSize(20);
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                paint.setUnderlineText(i != 0);
+                paint.setStrikeThruText(j != 0);
+                TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+            }
+        }
+    });
+
+    auto ops = dl->getOps();
+    ASSERT_EQ(8u, ops.size());
+
+    int index = 0;
+    EXPECT_EQ(RecordedOpId::TextOp, ops[index++]->opId); // no underline or strikethrough
+
+    EXPECT_EQ(RecordedOpId::TextOp, ops[index++]->opId);
+    EXPECT_EQ(RecordedOpId::RectOp, ops[index++]->opId); // strikethrough only
+
+    EXPECT_EQ(RecordedOpId::TextOp, ops[index++]->opId);
+    EXPECT_EQ(RecordedOpId::RectOp, ops[index++]->opId); // underline only
+
+    EXPECT_EQ(RecordedOpId::TextOp, ops[index++]->opId);
+    EXPECT_EQ(RecordedOpId::RectOp, ops[index++]->opId); // underline
+    EXPECT_EQ(RecordedOpId::RectOp, ops[index++]->opId); // strikethrough
+}
+
+TEST(RecordingCanvas, drawText_forceAlignLeft) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        paint.setTextSize(20);
+        paint.setTextAlign(SkPaint::kLeft_Align);
+        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+        paint.setTextAlign(SkPaint::kCenter_Align);
+        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+        paint.setTextAlign(SkPaint::kRight_Align);
+        TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
+    });
+
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        count++;
+        ASSERT_EQ(RecordedOpId::TextOp, op.opId);
+        EXPECT_EQ(SkPaint::kLeft_Align, op.paint->getTextAlign())
+                << "recorded drawText commands must force kLeft_Align on their paint";
+        EXPECT_EQ(SkPaint::kGlyphID_TextEncoding, op.paint->getTextEncoding()); // verify TestUtils
+    });
+    ASSERT_EQ(3, count);
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {
@@ -109,7 +198,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
     ASSERT_EQ(2, count);
 }
 
-TEST(RecordingCanvas, saveLayerSimple) {
+TEST(RecordingCanvas, saveLayer_simple) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 20, 190, 180, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
         canvas.drawRect(10, 20, 190, 180, SkPaint());
@@ -143,7 +232,7 @@ TEST(RecordingCanvas, saveLayerSimple) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayerViewportCrop) {
+TEST(RecordingCanvas, saveLayer_viewportCrop) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // shouldn't matter, since saveLayer will clip to its bounds
         canvas.clipRect(-1000, -1000, 1000, 1000, SkRegion::kReplace_Op);
@@ -167,7 +256,7 @@ TEST(RecordingCanvas, saveLayerViewportCrop) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayerRotateUnclipped) {
+TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.translate(100, 100);
@@ -193,7 +282,7 @@ TEST(RecordingCanvas, saveLayerRotateUnclipped) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, saveLayerRotateClipped) {
+TEST(RecordingCanvas, saveLayer_rotateClipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.translate(100, 100);
@@ -224,7 +313,7 @@ TEST(RecordingCanvas, saveLayerRotateClipped) {
     EXPECT_EQ(3, count);
 }
 
-TEST(RecordingCanvas, testReorderBarrier) {
+TEST(RecordingCanvas, insertReorderBarrier) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.insertReorderBarrier(true);

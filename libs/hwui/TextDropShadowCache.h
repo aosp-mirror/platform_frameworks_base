@@ -34,14 +34,14 @@ class Caches;
 class FontRenderer;
 
 struct ShadowText {
-    ShadowText(): len(0), radius(0.0f), textSize(0.0f), typeface(nullptr),
+    ShadowText(): glyphCount(0), radius(0.0f), textSize(0.0f), typeface(nullptr),
             flags(0), italicStyle(0.0f), scaleX(0), text(nullptr), positions(nullptr) {
     }
 
     // len is the number of bytes in text
-    ShadowText(const SkPaint* paint, float radius, uint32_t len, const char* srcText,
+    ShadowText(const SkPaint* paint, float radius, uint32_t glyphCount, const char* srcText,
             const float* positions):
-            len(len), radius(radius), positions(positions) {
+            glyphCount(glyphCount), radius(radius), positions(positions) {
         // TODO: Propagate this through the API, we should not cast here
         text = (const char16_t*) srcText;
 
@@ -73,17 +73,16 @@ struct ShadowText {
     }
 
     void copyTextLocally() {
-        uint32_t charCount = len / sizeof(char16_t);
-        str.setTo((const char16_t*) text, charCount);
+        str.setTo((const char16_t*) text, glyphCount);
         text = str.string();
         if (positions != nullptr) {
             positionsCopy.clear();
-            positionsCopy.appendArray(positions, charCount * 2);
+            positionsCopy.appendArray(positions, glyphCount * 2);
             positions = positionsCopy.array();
         }
     }
 
-    uint32_t len;
+    uint32_t glyphCount;
     float radius;
     float textSize;
     SkTypeface* typeface;
@@ -136,7 +135,7 @@ public:
      */
     void operator()(ShadowText& text, ShadowTexture*& texture) override;
 
-    ShadowTexture* get(const SkPaint* paint, const char* text, uint32_t len,
+    ShadowTexture* get(const SkPaint* paint, const char* text,
             int numGlyphs, float radius, const float* positions);
 
     /**

@@ -44,13 +44,28 @@ namespace RSC {
 namespace android {
 namespace uirenderer {
 
+#if HWUI_NEW_OPS
+class BakedOpState;
+class BakedOpRenderer;
+#else
 class OpenGLRenderer;
+#endif
 
 class TextDrawFunctor {
 public:
-    TextDrawFunctor(OpenGLRenderer* renderer, float x, float y, bool pureTranslate,
+    TextDrawFunctor(
+#if HWUI_NEW_OPS
+            BakedOpRenderer* renderer,
+            const BakedOpState* bakedState,
+#else
+            OpenGLRenderer* renderer,
+#endif
+            float x, float y, bool pureTranslate,
             int alpha, SkXfermode::Mode mode, const SkPaint* paint)
         : renderer(renderer)
+#if HWUI_NEW_OPS
+        , bakedState(bakedState)
+#endif
         , x(x)
         , y(y)
         , pureTranslate(pureTranslate)
@@ -61,7 +76,12 @@ public:
 
     void draw(CacheTexture& texture, bool linearFiltering);
 
+#if HWUI_NEW_OPS
+    BakedOpRenderer* renderer;
+    const BakedOpState* bakedState;
+#else
     OpenGLRenderer* renderer;
+#endif
     float x;
     float y;
     bool pureTranslate;
@@ -83,15 +103,13 @@ public:
     void precache(const SkPaint* paint, const char* text, int numGlyphs, const SkMatrix& matrix);
     void endPrecaching();
 
-    // bounds is an out parameter
     bool renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
-            uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, const float* positions,
-            Rect* bounds, TextDrawFunctor* functor, bool forceFinish = true);
+            int numGlyphs, int x, int y, const float* positions,
+            Rect* outBounds, TextDrawFunctor* functor, bool forceFinish = true);
 
-    // bounds is an out parameter
     bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
-            uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-            float hOffset, float vOffset, Rect* bounds, TextDrawFunctor* functor);
+            int numGlyphs, const SkPath* path,
+            float hOffset, float vOffset, Rect* outBounds, TextDrawFunctor* functor);
 
     struct DropShadow {
         uint32_t width;
@@ -103,8 +121,8 @@ public:
 
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
-    DropShadow renderDropShadow(const SkPaint* paint, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, float radius, const float* positions);
+    DropShadow renderDropShadow(const SkPaint* paint, const char *text, int numGlyphs,
+            float radius, const float* positions);
 
     void setTextureFiltering(bool linearFiltering) {
         mLinearFiltering = linearFiltering;

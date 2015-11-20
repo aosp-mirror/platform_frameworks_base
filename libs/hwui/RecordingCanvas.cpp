@@ -230,12 +230,9 @@ void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
 
 void RecordingCanvas::drawPaint(const SkPaint& paint) {
     // TODO: more efficient recording?
-    Matrix4 identity;
-    identity.loadIdentity();
-
     addOp(new (alloc()) RectOp(
             mState.getRenderTargetClipBounds(),
-            identity,
+            Matrix4::identity(),
             mState.getRenderTargetClipBounds(),
             refPaint(&paint)));
 }
@@ -244,9 +241,30 @@ void RecordingCanvas::drawPaint(const SkPaint& paint) {
 void RecordingCanvas::drawPoints(const float* points, int count, const SkPaint& paint) {
     LOG_ALWAYS_FATAL("TODO!");
 }
-void RecordingCanvas::drawLines(const float* points, int count, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+
+void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPaint& paint) {
+    if (floatCount < 4) return;
+    floatCount &= ~0x3; // round down to nearest four
+
+    Rect unmappedBounds(points[0], points[1], points[0], points[1]);
+    for (int i = 2; i < floatCount; i += 2) {
+        unmappedBounds.left = std::min(unmappedBounds.left, points[i]);
+        unmappedBounds.right = std::max(unmappedBounds.right, points[i]);
+        unmappedBounds.top = std::min(unmappedBounds.top, points[i + 1]);
+        unmappedBounds.bottom = std::max(unmappedBounds.bottom, points[i + 1]);
+    }
+
+    // since anything AA stroke with less than 1.0 pixel width is drawn with an alpha-reduced
+    // 1.0 stroke, treat 1.0 as minimum.
+    unmappedBounds.outset(std::max(paint.getStrokeWidth(), 1.0f) * 0.5f);
+
+    addOp(new (alloc()) LinesOp(
+            unmappedBounds,
+            *mState.currentSnapshot()->transform,
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint), refBuffer<float>(points, floatCount), floatCount));
 }
+
 void RecordingCanvas::drawRect(float left, float top, float right, float bottom, const SkPaint& paint) {
     addOp(new (alloc()) RectOp(
             Rect(left, top, right, bottom),
@@ -388,17 +406,24 @@ void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_p
 }
 
 // Text
-void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, int count,
+void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, int glyphCount,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) {
-    LOG_ALWAYS_FATAL("TODO!");
+    if (!glyphs || !positions || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
+    glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
+    positions = refBuffer<float>(positions, glyphCount * 2);
+
+    addOp(new (alloc()) TextOp(
+            Rect(boundsLeft, boundsTop, boundsRight, boundsBottom),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint), glyphs, positions, glyphCount, x, y));
+    drawTextDecorations(x, y, totalAdvance, paint);
 }
-void RecordingCanvas::drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
-}
+
 void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) {
+    // NOTE: can't use refPaint() directly, since it forces left alignment
     LOG_ALWAYS_FATAL("TODO!");
 }
 

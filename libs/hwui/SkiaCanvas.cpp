@@ -131,8 +131,6 @@ public:
             const SkPaint& paint, float x, float y,
             float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) override;
-    virtual void drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const SkPaint& paint) override;
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
 
@@ -152,7 +150,6 @@ private:
 
     void drawPoints(const float* points, int count, const SkPaint& paint,
                     SkCanvas::PointMode mode);
-    void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
 
     SkAutoTUnref<SkCanvas> mCanvas;
     std::unique_ptr<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
@@ -712,22 +709,7 @@ void SkiaCanvas::drawText(const uint16_t* text, const float* positions, int coun
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
     mCanvas->drawPosText(text, count << 1, reinterpret_cast<const SkPoint*>(positions), paintCopy);
-}
-
-void SkiaCanvas::drawPosText(const uint16_t* text, const float* positions, int count, int posCount,
-        const SkPaint& paint) {
-    SkPoint* posPtr = posCount > 0 ? new SkPoint[posCount] : NULL;
-    int indx;
-    for (indx = 0; indx < posCount; indx++) {
-        posPtr[indx].fX = positions[indx << 1];
-        posPtr[indx].fY = positions[(indx << 1) + 1];
-    }
-
-    SkPaint paintCopy(paint);
-    paintCopy.setTextEncoding(SkPaint::kUTF16_TextEncoding);
-    mCanvas->drawPosText(text, count, posPtr, paintCopy);
-
-    delete[] posPtr;
+    drawTextDecorations(x, y, totalAdvance, paint);
 }
 
 void SkiaCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,

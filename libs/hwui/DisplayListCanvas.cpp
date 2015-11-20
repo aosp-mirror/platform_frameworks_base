@@ -423,18 +423,6 @@ void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,
     addDrawOp(op);
 }
 
-void DisplayListCanvas::drawPosText(const uint16_t* text, const float* positions,
-        int count, int posCount, const SkPaint& paint) {
-    if (!text || count <= 0) return;
-
-    int bytesCount = 2 * count;
-    positions = refBuffer<float>(positions, count * 2);
-
-    DrawOp* op = new (alloc()) DrawPosTextOp(refText((const char*) text, bytesCount),
-                                             bytesCount, count, positions, refPaint(&paint));
-    addDrawOp(op);
-}
-
 void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
         int count, const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
@@ -450,6 +438,7 @@ void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
     DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
             x, y, positions, refPaint(&paint), totalAdvance, bounds);
     addDrawOp(op);
+    drawTextDecorations(x, y, totalAdvance, paint);
 }
 
 void DisplayListCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {

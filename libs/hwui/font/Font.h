@@ -82,10 +82,10 @@ public:
 
     ~Font();
 
-    void render(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+    void render(const SkPaint* paint, const char* text,
             int numGlyphs, int x, int y, const float* positions);
 
-    void render(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+    void render(const SkPaint* paint, const char* text,
             int numGlyphs, const SkPath* path, float hOffset, float vOffset);
 
     const Font::FontDescription& getDescription() const {
@@ -113,11 +113,11 @@ private:
 
     void precache(const SkPaint* paint, const char* text, int numGlyphs);
 
-    void render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+    void render(const SkPaint* paint, const char *text,
             int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
             uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions);
 
-    void measure(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+    void measure(const SkPaint* paint, const char* text,
             int numGlyphs, Rect *bounds, const float* positions);
 
     void invalidateTextureCache(CacheTexture* cacheTexture = nullptr);

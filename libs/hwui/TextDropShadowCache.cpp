@@ -30,8 +30,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 hash_t ShadowText::hash() const {
-    uint32_t charCount = len / sizeof(char16_t);
-    uint32_t hash = JenkinsHashMix(0, len);
+    uint32_t hash = JenkinsHashMix(0, glyphCount);
     hash = JenkinsHashMix(hash, android::hash_type(radius));
     hash = JenkinsHashMix(hash, android::hash_type(textSize));
     hash = JenkinsHashMix(hash, android::hash_type(typeface));
@@ -40,10 +39,10 @@ hash_t ShadowText::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
     if (text) {
         hash = JenkinsHashMixShorts(
-            hash, reinterpret_cast<const uint16_t*>(text), charCount);
+            hash, reinterpret_cast<const uint16_t*>(text), glyphCount);
     }
     if (positions) {
-        for (uint32_t i = 0; i < charCount * 2; i++) {
+        for (uint32_t i = 0; i < glyphCount * 2; i++) {
             hash = JenkinsHashMix(hash, android::hash_type(positions[i]));
         }
     }
@@ -51,7 +50,7 @@ hash_t ShadowText::hash() const {
 }
 
 int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
-    int deltaInt = int(lhs.len) - int(rhs.len);
+    int deltaInt = int(lhs.glyphCount) - int(rhs.glyphCount);
     if (deltaInt != 0) return deltaInt;
 
     deltaInt = lhs.flags - rhs.flags;
@@ -76,7 +75,7 @@ int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
         if (!lhs.text) return -1;
         if (!rhs.text) return +1;
 
-        deltaInt = memcmp(lhs.text, rhs.text, lhs.len);
+        deltaInt = memcmp(lhs.text, rhs.text, lhs.glyphCount * sizeof(glyph_t));
         if (deltaInt != 0) return deltaInt;
     }
 
@@ -84,7 +83,7 @@ int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
         if (!lhs.positions) return -1;
         if (!rhs.positions) return +1;
 
-        return memcmp(lhs.positions, rhs.positions, lhs.len << 2);
+        return memcmp(lhs.positions, rhs.positions, lhs.glyphCount << 1);
     }
 
     return 0;
@@ -168,16 +167,16 @@ void TextDropShadowCache::clear() {
     mCache.clear();
 }
 
-ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, uint32_t len,
-        int numGlyphs, float radius, const float* positions) {
-    ShadowText entry(paint, radius, len, text, positions);
+ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs, int numGlyphs,
+        float radius, const float* positions) {
+    ShadowText entry(paint, radius, numGlyphs * 2, glyphs, positions);
     ShadowTexture* texture = mCache.get(entry);
 
     if (!texture) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
-        FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(&paintCopy, text, 0,
-                len, numGlyphs, radius, positions);
+        FontRenderer::DropShadow shadow = mRenderer->renderDropShadow(&paintCopy, glyphs, numGlyphs,
+                radius, positions);
 
         if (!shadow.image) {
             return nullptr;
