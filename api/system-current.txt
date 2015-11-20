@@ -27899,12 +27899,15 @@ package android.provider {
   }
 
   public static final class ContactsContract.Directory implements android.provider.BaseColumns {
+    method public static boolean isEnterpriseDirectoryId(long);
+    method public static boolean isRemoteDirectory(long);
     method public static void notifyDirectoryChange(android.content.ContentResolver);
     field public static final java.lang.String ACCOUNT_NAME = "accountName";
     field public static final java.lang.String ACCOUNT_TYPE = "accountType";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_directory";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/contact_directories";
     field public static final android.net.Uri CONTENT_URI;
+    field public static final android.net.Uri CORP_CONTENT_URI;
     field public static final long DEFAULT = 0L; // 0x0L
     field public static final java.lang.String DIRECTORY_AUTHORITY = "authority";
     field public static final java.lang.String DISPLAY_NAME = "displayName";
