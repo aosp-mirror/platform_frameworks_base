@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static junit.framework.Assert.assertEquals;
+
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
 import android.support.test.uiautomator.UiDevice;
@@ -78,6 +80,20 @@ class UiBot {
     void openRoot(String label) throws UiObjectNotFoundException {
         findRoot(label).click();
         mDevice.waitForIdle();
+    }
+
+    void assertWindowTitle(String expected) {
+        // Turns out the title field on a window does not have
+        // an id associated with it at runtime (which confuses the hell out of me)
+        // In code we address this via "android.R.id.title".
+        UiObject2 o = find(By.text(expected));
+        // It's a bit of a conceit that we then *assert* that the title
+        // is the value that we used to identify the UiObject2.
+        // If the preceeding lookup fails, this'll choke with an NPE.
+        // But given the issue described in the comment above, we're
+        // going to do it anyway. Because we shouldn't be looking up
+        // the uiobject by it's expected content :|
+        assertEquals(expected, o.getText());
     }
 
     void assertHasRoots(String... labels) throws UiObjectNotFoundException {
