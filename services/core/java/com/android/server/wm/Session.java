@@ -325,8 +325,6 @@ final class Session extends IWindowSession.Stub
             }
 
             mService.mDragState.mData = data;
-            mService.mDragState.mCurrentX = touchX;
-            mService.mDragState.mCurrentY = touchY;
             mService.mDragState.broadcastDragStartedLw(touchX, touchY);
 
             // remember the thumb offsets for later

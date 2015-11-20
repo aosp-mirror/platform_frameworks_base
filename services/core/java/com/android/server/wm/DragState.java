@@ -16,6 +16,14 @@
 
 package com.android.server.wm;
 
+import android.graphics.Matrix;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
@@ -45,6 +53,8 @@ import java.util.ArrayList;
  * Drag/drop state
  */
 class DragState {
+    private static final long ANIMATION_DURATION_MS = 500;
+
     final WindowManagerService mService;
     IBinder mToken;
     SurfaceControl mSurfaceControl;
@@ -55,6 +65,8 @@ class DragState {
     ClipData mData;
     ClipDescription mDataDescription;
     boolean mDragResult;
+    float mOriginalAlpha;
+    float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
     float mThumbOffsetX, mThumbOffsetY;
     InputChannel mServerChannel, mClientChannel;
@@ -68,6 +80,10 @@ class DragState {
 
     private final Region mTmpRegion = new Region();
     private final Rect mTmpRect = new Rect();
+
+    private Animation mAnimation;
+    final Transformation mTransformation = new Transformation();
+    private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
 
     DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
@@ -184,6 +200,9 @@ class DragState {
     /* call out to each visible window/session informing it about the drag
      */
     void broadcastDragStartedLw(final float touchX, final float touchY) {
+        mOriginalX = mCurrentX = touchX;
+        mOriginalY = mCurrentY = touchY;
+
         // Cache a base-class instance of the clip metadata so that parceling
         // works correctly in calling out to the apps.
         mDataDescription = (mData != null) ? mData.getDescription() : null;
@@ -294,19 +313,32 @@ class DragState {
     }
 
     void endDragLw() {
-        mService.mDragState.broadcastDragEndedLw();
+        if (!mDragResult) {
+            mAnimation = createReturnAnimationLocked();
+            mService.scheduleAnimationLocked();
+            return;  // Will call cleanUpDragLw when the animation is done.
+        }
+        cleanUpDragLw();
+    }
+
+
+    void cleanUpDragLw() {
+        broadcastDragEndedLw();
 
         // stop intercepting input
-        mService.mDragState.unregister();
+        unregister();
 
         // free our resources and drop all the object references
-        mService.mDragState.reset();
+        reset();
         mService.mDragState = null;
 
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
     }
 
     void notifyMoveLw(float x, float y) {
+        mCurrentX = x;
+        mCurrentY = y;
+
         final int myPid = Process.myPid();
 
         // Move the surface to the given touch
@@ -378,6 +410,9 @@ class DragState {
     // result from the recipient.
     boolean notifyDropLw(WindowState touchedWin, DropPermissionHolder dropPermissionHolder,
             float x, float y) {
+        mCurrentX = x;
+        mCurrentY = y;
+
         if (touchedWin == null) {
             // "drop" outside a valid window -- no recipient to apply a
             // timeout to, and we can send the drag-ended message immediately.
@@ -468,5 +503,39 @@ class DragState {
         }
         return DragEvent.obtain(action, winX, winY, localState, description, data,
                 dropPermissionHolder, result);
+    }
+
+    boolean stepAnimationLocked(long currentTimeMs) {
+        if (mAnimation == null) {
+            return false;
+        }
+
+        mTransformation.clear();
+        if (!mAnimation.getTransformation(currentTimeMs, mTransformation)) {
+            cleanUpDragLw();
+            return false;
+        }
+
+        final float tmpFloats[] = mService.mTmpFloats;
+        mTransformation.getMatrix().getValues(tmpFloats);
+        mSurfaceControl.setPosition(
+                tmpFloats[Matrix.MTRANS_X] - mThumbOffsetX,
+                tmpFloats[Matrix.MTRANS_Y] - mThumbOffsetY);
+        mSurfaceControl.setAlpha(mTransformation.getAlpha());
+        mSurfaceControl.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
+                tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
+        return true;
+    }
+
+    private Animation createReturnAnimationLocked() {
+        final AnimationSet set = new AnimationSet(false);
+        set.addAnimation(new TranslateAnimation(
+                mCurrentX, mOriginalX, mCurrentY, mOriginalY));
+        set.addAnimation(new AlphaAnimation(mOriginalAlpha, mOriginalAlpha / 2));
+        set.setDuration(ANIMATION_DURATION_MS);
+        set.setInterpolator(mCubicEaseOutInterpolator);
+        set.initialize(0, 0, 0, 0);
+        set.start();  // Will start on the first call to getTransformation.
+        return set;
     }
 }

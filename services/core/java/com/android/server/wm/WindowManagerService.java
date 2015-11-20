@@ -309,6 +309,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
+    private static final float DRAG_SHADOW_ALPHA_TRANSPARENT = .7071f;
+
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -752,9 +754,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private boolean completeDropLw(float x, float y) {
         WindowState dropTargetWin = mDragState.getDropTargetWinLw(x, y);
-
-        mDragState.mCurrentX = x;
-        mDragState.mCurrentY = y;
 
         DropPermissionHolder dropPermissionHolder = null;
         if (dropTargetWin != null &&
@@ -7175,9 +7174,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         SurfaceControl surface = new SurfaceControl(session, "drag surface",
                                 width, height, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
                         surface.setLayerStack(display.getLayerStack());
+                        float alpha = 1;
                         if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {
-                            surface.setAlpha(.7071f);
+                            alpha = DRAG_SHADOW_ALPHA_TRANSPARENT;
                         }
+                        surface.setAlpha(alpha);
 
                         if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
                                 + surface + ": CREATE");
@@ -7187,6 +7188,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mDragState = new DragState(this, token, surface, flags, winBinder);
                         mDragState.mPid = callerPid;
                         mDragState.mUid = callerUid;
+                        mDragState.mOriginalAlpha = alpha;
                         token = mDragState.mToken = new Binder();
 
                         // 5 second timeout for this window to actually begin the drag
