@@ -401,6 +401,34 @@ final class Session extends IWindowSession.Stub
         }
     }
 
+    public void cancelDragAndDrop(IBinder dragToken) {
+        if (WindowManagerService.DEBUG_DRAG) {
+            Slog.d(WindowManagerService.TAG, "cancelDragAndDrop");
+        }
+
+        synchronized (mService.mWindowMap) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                if (mService.mDragState == null) {
+                    Slog.w(WindowManagerService.TAG, "cancelDragAndDrop() without prepareDrag()");
+                    throw new IllegalStateException("cancelDragAndDrop() without prepareDrag()");
+                }
+
+                if (mService.mDragState.mToken != dragToken) {
+                    Slog.w(WindowManagerService.TAG,
+                            "cancelDragAndDrop() does not match prepareDrag()");
+                    throw new IllegalStateException(
+                            "cancelDragAndDrop() does not match prepareDrag()");
+                }
+
+                mService.mDragState.mDragResult = false;
+                mService.mDragState.endDragLw();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
     public void dragRecipientEntered(IWindow window) {
         if (WindowManagerService.DEBUG_DRAG) {
             Slog.d(WindowManagerService.TAG, "Drag into new candidate view @ " + window.asBinder());
