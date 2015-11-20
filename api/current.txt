@@ -36764,7 +36764,8 @@ package android.view {
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback, int);
     method public void startAnimation(android.view.animation.Animation);
-    method public final boolean startDrag(android.content.ClipData, android.view.View.DragShadowBuilder, java.lang.Object, int);
+    method public final deprecated boolean startDrag(android.content.ClipData, android.view.View.DragShadowBuilder, java.lang.Object, int);
+    method public final boolean startDragAndDrop(android.content.ClipData, android.view.View.DragShadowBuilder, java.lang.Object, int);
     method public boolean startNestedScroll(int);
     method public void stopNestedScroll();
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
