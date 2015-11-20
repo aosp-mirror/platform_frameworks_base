@@ -3100,7 +3100,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     final int count = tasks.size();
                     for (int i = 0; i < count; i++) {
                         moveTaskToStackLocked(tasks.get(i).taskId,
-                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS, "resizeStack");
+                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS, "resizeStack",
+                                true /* animate */);
                     }
 
                     // stack shouldn't contain anymore activities, so nothing to resume.
@@ -3336,7 +3337,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
-            String reason) {
+            String reason, boolean animate) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
@@ -3357,7 +3358,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // preserve the old window until the new one is drawn. This prevents having a gap
             // between the removal and addition, in which no window is visible. We also want the
             // entrance of the new window to be properly animated.
-            mWindowManager.setReplacingWindow(topActivity.appToken);
+            mWindowManager.setReplacingWindow(topActivity.appToken, animate);
         }
         final ActivityStack stack = moveTaskToStackUncheckedLocked(
                 task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
@@ -3405,7 +3406,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // There is only one activity in the task. So, we can just move the task over to the
             // pinned stack without re-parenting the activity in a different task.
             moveTaskToStackLocked(task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS,
-                    "moveTopActivityToPinnedStack");
+                    "moveTopActivityToPinnedStack", true /* animate */);
         } else {
             final ActivityStack pinnedStack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
             pinnedStack.moveActivityToStack(r);

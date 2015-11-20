@@ -1389,6 +1389,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && token.mHasReplacedWindow) {
             if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replacing window: " + this);
             token.mWillReplaceWindow = false;
+            token.mAnimateReplacingWindow = false;
             token.mReplacingRemoveRequested = false;
             token.mReplacingWindow = null;
             token.mHasReplacedWindow = false;

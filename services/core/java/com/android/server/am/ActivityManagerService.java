@@ -4320,7 +4320,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (task.stack.mStackId != launchStackId) {
                     mStackSupervisor.moveTaskToStackLocked(
-                            taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents");
+                            taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
+                            true /* animate */);
                 }
             }
 
@@ -9239,7 +9240,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
                         + " to stackId=" + stackId);
                 mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, !FORCE_FOCUS,
-                        "moveActivityToStack");
+                        "moveActivityToStack", true /* animate */);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9260,7 +9261,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
                 mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS,
-                        "moveTaskToStack");
+                        "moveTaskToStack", true /* animate */);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9277,9 +9278,10 @@ public final class ActivityManagerService extends ActivityManagerNative
      *                   and
      *                   {@link android.app.ActivityManager#DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT}
      * @param toTop If the task and stack should be moved to the top.
+     * @param animate Whether we should play an animation for the moving the task
      */
     @Override
-    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop) {
+    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "moveTaskToDockedStack()");
         synchronized (this) {
@@ -9289,7 +9291,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " to createMode=" + createMode + " toTop=" + toTop);
                 mWindowManager.setDockedStackCreateMode(createMode);
                 mStackSupervisor.moveTaskToStackLocked(
-                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack");
+                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack",
+                        animate);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

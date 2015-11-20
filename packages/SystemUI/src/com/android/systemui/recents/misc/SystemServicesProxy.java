@@ -311,6 +311,17 @@ public class SystemServicesProxy {
         }
     }
 
+    /** Docks an already resumed task to the side of the screen. */
+    public void moveTaskToDockedStack(int taskId, int createMode) {
+        if (mIam == null) return;
+
+        try {
+            mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */, false /* animate */);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
     /** Returns the focused stack id. */
     public int getFocusedStack() {
         if (mIam == null) return -1;
