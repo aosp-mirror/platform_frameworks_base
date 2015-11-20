@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
@@ -32,9 +33,11 @@ import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -52,7 +55,8 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private final PorterDuffColorFilter mIconColorFilter = new PorterDuffColorFilter(
             0, PorterDuff.Mode.SRC_ATOP);
     private final int mIconDarkAlpha;
-    private final int mIconDarkColor;
+    private final int mIconDarkColor = 0xffffffff;
+    private final int mDarkProgressTint = 0xffffffff;
     private final Interpolator mLinearOutSlowInInterpolator;
 
     private int mColor;
@@ -60,39 +64,40 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private ImageView mIcon;
     protected ImageView mPicture;
 
-    /**
-     * Whether the icon needs to be forced grayscale when in dark mode.
-     */
-    private boolean mIconForceGraysaleWhenDark;
     private TextView mSubText;
     private View mSubTextDivider;
     private ImageView mExpandButton;
-    private View mNotificationHeader;
+    private ViewGroup mNotificationHeader;
     private View.OnClickListener mExpandClickListener;
     private HeaderTouchListener mHeaderTouchListener;
+    private ProgressBar mProgressBar;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
         super(view);
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
-        mIconDarkColor =
-                ctx.getColor(R.color.doze_small_icon_background_color);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(ctx,
                 android.R.interpolator.linear_out_slow_in);
+
         resolveViews();
     }
 
     private void resolveViews() {
         View mainColumn = mView.findViewById(com.android.internal.R.id.notification_main_column);
-        mInvertHelper = mainColumn != null
-                ? new ViewInvertHelper(mainColumn, NotificationPanelView.DOZE_ANIMATION_DURATION)
-                : null;
         mIcon = (ImageView) mView.findViewById(com.android.internal.R.id.icon);
         mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
         mSubText = (TextView) mView.findViewById(com.android.internal.R.id.header_sub_text);
         mSubTextDivider = mView.findViewById(com.android.internal.R.id.sub_text_divider);
         mExpandButton = (ImageView) mView.findViewById(com.android.internal.R.id.expand_button);
         mColor = resolveColor(mExpandButton);
-        mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
+        final View progress = mView.findViewById(com.android.internal.R.id.progress);
+        if (progress instanceof ProgressBar) {
+            mProgressBar = (ProgressBar) progress;
+        } else {
+            // It's still a viewstub
+            mProgressBar = null;
+        }
+        mNotificationHeader = (ViewGroup) mView.findViewById(
+                com.android.internal.R.id.notification_header);
         // Post to make sure the parent lays out its children before we get their bounds
         mHeaderTouchListener = new HeaderTouchListener();
         mExpandButton.post(new Runnable() {
@@ -102,11 +107,18 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
                 mHeaderTouchListener.bindTouchRects(mNotificationHeader, mIcon, mExpandButton);
             }
         });
-
-        // If the icon already has a color filter, we assume that we already forced the icon to be
-        // white when we created the notification.
-        final Drawable iconDrawable = mIcon != null ? mIcon.getDrawable() : null;
-        mIconForceGraysaleWhenDark = iconDrawable != null && iconDrawable.getColorFilter() != null;
+        ArrayList<View> viewsToInvert = new ArrayList<>();
+        if (mainColumn != null) {
+            viewsToInvert.add(mainColumn);
+        }
+        for (int i = 0; i < mNotificationHeader.getChildCount(); i++) {
+            View child = mNotificationHeader.getChildAt(i);
+            if (child != mIcon) {
+                viewsToInvert.add(child);
+            }
+        }
+        mInvertHelper = new ViewInvertHelper(viewsToInvert,
+                NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
     private int resolveColor(ImageView icon) {
@@ -140,18 +152,43 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             if (fade) {
                 fadeIconColorFilter(mIcon, dark, delay);
                 fadeIconAlpha(mIcon, dark, delay);
-                if (!mIconForceGraysaleWhenDark) {
-                    fadeGrayscale(mIcon, dark, delay);
-                }
             } else {
                 updateIconColorFilter(mIcon, dark);
                 updateIconAlpha(mIcon, dark);
-                if (!mIconForceGraysaleWhenDark) {
-                    updateGrayscale(mIcon, dark);
-                }
             }
         }
         setPictureGrayscale(dark, fade, delay);
+        setProgressBarDark(dark, fade, delay);
+    }
+
+    private void setProgressBarDark(boolean dark, boolean fade, long delay) {
+        if (mProgressBar != null) {
+            if (fade) {
+                fadeProgressDark(mProgressBar, dark, delay);
+            } else {
+                updateProgressDark(mProgressBar, dark);
+            }
+        }
+    }
+
+    private void fadeProgressDark(final ProgressBar target, final boolean dark, long delay) {
+        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float t = (float) animation.getAnimatedValue();
+                updateProgressDark(target, t);
+            }
+        }, dark, delay, null /* listener */);
+    }
+
+    private void updateProgressDark(ProgressBar target, float intensity) {
+        int color = interpolateColor(mColor, mDarkProgressTint, intensity);
+        target.getIndeterminateDrawable().mutate().setTint(color);
+        target.getProgressDrawable().mutate().setTint(color);
+    }
+
+    private void updateProgressDark(ProgressBar target, boolean dark) {
+        updateProgressDark(target, dark ? 1f : 0f);
     }
 
     protected void setPictureGrayscale(boolean grayscale, boolean fade, long delay) {
@@ -224,8 +261,8 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         mIconColorFilter.setColor(color);
         Drawable iconDrawable = target.getDrawable();
 
-        // The background might be null for legacy notifications. Also, the notification might have
-        // been modified during the animation, so background might be null here.
+        // Also, the notification might have been modified during the animation, so background
+        // might be null here.
         if (iconDrawable != null) {
             iconDrawable.mutate().setColorFilter(mIconColorFilter);
         }

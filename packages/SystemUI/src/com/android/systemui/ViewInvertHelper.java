@@ -26,6 +26,8 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import java.util.ArrayList;
+
 /**
  * Helper to invert the colors of views and fade between the states.
  */
@@ -33,14 +35,24 @@ public class ViewInvertHelper {
 
     private final Paint mDarkPaint = new Paint();
     private final Interpolator mLinearOutSlowInInterpolator;
-    private final View mTarget;
+    private final ArrayList<View> mTargets;
     private final ColorMatrix mMatrix = new ColorMatrix();
     private final ColorMatrix mGrayscaleMatrix = new ColorMatrix();
     private final long mFadeDuration;
 
     public ViewInvertHelper(View target, long fadeDuration) {
-        mTarget = target;
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(mTarget.getContext(),
+        this(constructArray(target), fadeDuration);
+    }
+
+    private static ArrayList<View> constructArray(View target) {
+        final ArrayList<View> views = new ArrayList<>();
+        views.add(target);
+        return views;
+    }
+
+    public ViewInvertHelper(ArrayList<View> targets, long fadeDuration) {
+        mTargets = targets;
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(mTargets.get(0).getContext(),
                 android.R.interpolator.linear_out_slow_in);
         mFadeDuration = fadeDuration;
     }
@@ -53,14 +65,18 @@ public class ViewInvertHelper {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 updateInvertPaint((Float) animation.getAnimatedValue());
-                mTarget.setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
+                for (int i = 0; i < mTargets.size(); i++) {
+                    mTargets.get(i).setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
+                }
             }
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!invert) {
-                    mTarget.setLayerType(View.LAYER_TYPE_NONE, null);
+                    for (int i = 0; i < mTargets.size(); i++) {
+                        mTargets.get(i).setLayerType(View.LAYER_TYPE_NONE, null);
+                    }
                 }
             }
         });
@@ -73,14 +89,14 @@ public class ViewInvertHelper {
     public void update(boolean invert) {
         if (invert) {
             updateInvertPaint(1f);
-            mTarget.setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
+            for (int i = 0; i < mTargets.size(); i++) {
+                mTargets.get(i).setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
+            }
         } else {
-            mTarget.setLayerType(View.LAYER_TYPE_NONE, null);
+            for (int i = 0; i < mTargets.size(); i++) {
+                mTargets.get(i).setLayerType(View.LAYER_TYPE_NONE, null);
+            }
         }
-    }
-
-    public View getTarget() {
-        return mTarget;
     }
 
     private void updateInvertPaint(float intensity) {
