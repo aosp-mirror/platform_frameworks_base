@@ -54,7 +54,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -70,7 +69,6 @@ import java.io.PrintWriter;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -148,22 +146,6 @@ public class SettingsProvider extends ContentProvider {
 
     private static final Bundle NULL_SETTING = Bundle.forPair(Settings.NameValueTable.VALUE, null);
 
-    // Per user settings that cannot be modified if associated user restrictions are enabled.
-    private static final Map<String, String> sSettingToUserRestrictionMap = new ArrayMap<>();
-    static {
-        sSettingToUserRestrictionMap.put(Settings.Secure.LOCATION_MODE,
-                UserManager.DISALLOW_SHARE_LOCATION);
-        sSettingToUserRestrictionMap.put(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                UserManager.DISALLOW_SHARE_LOCATION);
-        sSettingToUserRestrictionMap.put(Settings.Secure.INSTALL_NON_MARKET_APPS,
-                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-        sSettingToUserRestrictionMap.put(Settings.Global.ADB_ENABLED,
-                UserManager.DISALLOW_DEBUGGING_FEATURES);
-        sSettingToUserRestrictionMap.put(Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                UserManager.ENSURE_VERIFY_APPS);
-        sSettingToUserRestrictionMap.put(Settings.Global.PREFERRED_NETWORK_MODE,
-                UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
-    }
 
     // Per user secure settings that moved to the for all users global settings.
     static final Set<String> sSecureMovedToGlobalSettings = new ArraySet<>();
@@ -647,8 +629,9 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
-        // If this is a setting that is currently restricted for this user, done.
-        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId)) {
+        // If this is a setting that is currently restricted for this user, do not allow
+        // unrestricting changes.
+        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value)) {
             return false;
         }
 
@@ -772,8 +755,9 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
-        // If this is a setting that is currently restricted for this user, done.
-        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId)) {
+        // If this is a setting that is currently restricted for this user, do not allow
+        // unrestricting changes.
+        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value)) {
             return false;
         }
 
@@ -978,12 +962,59 @@ public class SettingsProvider extends ContentProvider {
         return false;
     }
 
-    private boolean isGlobalOrSecureSettingRestrictedForUser(String setting, int userId) {
-        String restriction = sSettingToUserRestrictionMap.get(setting);
-        if (restriction == null) {
-            return false;
+    /**
+     * Checks whether changing a setting to a value is prohibited by the corresponding user
+     * restriction.
+     *
+     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#applyUserRestrictionLR},
+     * which should be in sync with this method.
+     *
+     * @return true if the change is prohibited, false if the change is allowed.
+     */
+    private boolean isGlobalOrSecureSettingRestrictedForUser(String setting, int userId,
+            String value) {
+        String restriction;
+        switch (setting) {
+            case Settings.Secure.LOCATION_MODE:
+                // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
+                // in android.provider.Settings.Secure.putStringForUser(), so we shouldn't come
+                // here normally, but we still protect it here from a direct provider write.
+                if (String.valueOf(Settings.Secure.LOCATION_MODE_OFF).equals(value)) return false;
+                restriction = UserManager.DISALLOW_SHARE_LOCATION;
+                break;
+
+            case Settings.Secure.LOCATION_PROVIDERS_ALLOWED:
+                // See SettingsProvider.updateLocationProvidersAllowedLocked.  "-" is to disable
+                // a provider, which should be allowed even if the user restriction is set.
+                if (value != null && value.startsWith("-")) return false;
+                restriction = UserManager.DISALLOW_SHARE_LOCATION;
+                break;
+
+            case Settings.Secure.INSTALL_NON_MARKET_APPS:
+                if ("0".equals(value)) return false;
+                restriction = UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES;
+                break;
+
+            case Settings.Global.ADB_ENABLED:
+                if ("0".equals(value)) return false;
+                restriction = UserManager.DISALLOW_DEBUGGING_FEATURES;
+                break;
+
+            case Settings.Global.PACKAGE_VERIFIER_ENABLE:
+            case Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB:
+                if ("1".equals(value)) return false;
+                restriction = UserManager.ENSURE_VERIFY_APPS;
+                break;
+
+            case Settings.Global.PREFERRED_NETWORK_MODE:
+                restriction = UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS;
+                break;
+
+            default:
+                return false;
         }
-        return mUserManager.hasUserRestriction(restriction, new UserHandle(userId));
+
+        return mUserManager.hasUserRestriction(restriction, UserHandle.of(userId));
     }
 
     private int resolveOwningUserIdForSecureSettingLocked(int userId, String setting) {
@@ -1093,6 +1124,9 @@ public class SettingsProvider extends ContentProvider {
      * This setting contains a list of the currently enabled location providers.
      * But helper functions in android.providers.Settings can enable or disable
      * a single provider by using a "+" or "-" prefix before the provider name.
+     *
+     * <p>See also {@link #isGlobalOrSecureSettingRestrictedForUser()}.  If DISALLOW_SHARE_LOCATION
+     * is set, the said method will only allow values with the "-" prefix.
      *
      * @returns whether the enabled location providers changed.
      */
