@@ -262,4 +262,55 @@ TEST_F(TableFlattenerTest, FlattenUnlinkedTable) {
     EXPECT_EQ(ref->name.value(), test::parseNameOrDie(u"@com.app.test:color/green"));
 }
 
+TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
+    Attribute attr(false);
+    attr.typeMask = android::ResTable_map::TYPE_INTEGER;
+    attr.minInt = 10;
+    attr.maxInt = 23;
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addValue(u"@android:attr/foo", ResourceId(0x01010000),
+                      util::make_unique<Attribute>(attr))
+            .build();
+
+    ResourceTable result;
+    ASSERT_TRUE(flatten(table.get(), &result));
+
+    Attribute* actualAttr = test::getValue<Attribute>(&result, u"@android:attr/foo");
+    ASSERT_NE(nullptr, actualAttr);
+    EXPECT_EQ(attr.isWeak(), actualAttr->isWeak());
+    EXPECT_EQ(attr.typeMask, actualAttr->typeMask);
+    EXPECT_EQ(attr.minInt, actualAttr->minInt);
+    EXPECT_EQ(attr.maxInt, actualAttr->maxInt);
+}
+
+TEST_F(TableFlattenerTest, FlattenSourceAndCommentsForChildrenOfCompoundValues) {
+    Style style;
+    Reference key(test::parseNameOrDie(u"@android:attr/foo"));
+    key.id = ResourceId(0x01010000);
+    key.setSource(Source("test").withLine(2));
+    key.setComment(StringPiece16(u"comment"));
+    style.entries.push_back(Style::Entry{ key, util::make_unique<Id>() });
+
+    test::ResourceTableBuilder builder = test::ResourceTableBuilder();
+    std::unique_ptr<ResourceTable> table = builder
+            .setPackageId(u"android", 0x01)
+            .addValue(u"@android:attr/foo", ResourceId(0x01010000),
+                      test::AttributeBuilder().build())
+            .addValue(u"@android:style/foo", ResourceId(0x01020000),
+                      std::unique_ptr<Style>(style.clone(builder.getStringPool())))
+            .build();
+
+    ResourceTable result;
+    ASSERT_TRUE(flatten(table.get(), &result));
+
+    Style* actualStyle = test::getValue<Style>(&result, u"@android:style/foo");
+    ASSERT_NE(nullptr, actualStyle);
+    ASSERT_EQ(1u, actualStyle->entries.size());
+
+    Reference* actualKey = &actualStyle->entries[0].key;
+    EXPECT_EQ(key.getSource(), actualKey->getSource());
+    EXPECT_EQ(key.getComment(), actualKey->getComment());
+}
+
 } // namespace aapt

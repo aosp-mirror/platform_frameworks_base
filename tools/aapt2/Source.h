@@ -58,6 +58,10 @@ inline ::std::ostream& operator<<(::std::ostream& out, const Source& source) {
     return out;
 }
 
+inline bool operator==(const Source& lhs, const Source& rhs) {
+    return lhs.path == rhs.path && lhs.line == rhs.line;
+}
+
 inline bool operator<(const Source& lhs, const Source& rhs) {
     int cmp = lhs.path.compare(rhs.path);
     if (cmp < 0) return true;

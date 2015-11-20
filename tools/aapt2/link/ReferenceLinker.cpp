@@ -78,52 +78,6 @@ private:
         return value;
     }
 
-    void buildAttributeMismatchMessage(DiagMessage* msg, const Attribute* attr,
-                                       const Item* value) {
-        *msg << "expected";
-        if (attr->typeMask & android::ResTable_map::TYPE_BOOLEAN) {
-            *msg << " boolean";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_COLOR) {
-            *msg << " color";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_DIMENSION) {
-            *msg << " dimension";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_ENUM) {
-            *msg << " enum";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_FLAGS) {
-            *msg << " flags";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_FLOAT) {
-            *msg << " float";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_FRACTION) {
-            *msg << " fraction";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_INTEGER) {
-            *msg << " integer";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_REFERENCE) {
-            *msg << " reference";
-        }
-
-        if (attr->typeMask & android::ResTable_map::TYPE_STRING) {
-            *msg << " string";
-        }
-
-        *msg << " but got " << *value;
-    }
-
 public:
     using ValueVisitor::visit;
 
@@ -175,21 +129,19 @@ public:
                 entry.value->accept(this);
 
                 // Now verify that the type of this item is compatible with the attribute it
-                // is defined for.
-                android::Res_value val = {};
-                entry.value->flatten(&val);
-
-                // Always allow references.
-                const uint32_t typeMask = symbol->attribute->typeMask |
-                        android::ResTable_map::TYPE_REFERENCE;
-
-                if (!(typeMask & ResourceUtils::androidTypeToAttributeTypeMask(val.dataType))) {
+                // is defined for. We pass `nullptr` as the DiagMessage so that this check is
+                // fast and we avoid creating a DiagMessage when the match is successful.
+                if (!symbol->attribute->matches(entry.value.get(), nullptr)) {
                     // The actual type of this item is incompatible with the attribute.
                     DiagMessage msg(style->getSource());
-                    buildAttributeMismatchMessage(&msg, symbol->attribute.get(), entry.value.get());
+
+                    // Call the matches method again, this time with a DiagMessage so we fill
+                    // in the actual error message.
+                    symbol->attribute->matches(entry.value.get(), &msg);
                     mContext->getDiagnostics()->error(msg);
                     mError = true;
                 }
+
             } else {
                 DiagMessage msg(style->getSource());
                 msg << "style attribute '";

@@ -18,7 +18,6 @@
 #define AAPT_DIAGNOSTICS_H
 
 #include "Source.h"
-
 #include "util/StringPiece.h"
 #include "util/Util.h"
 

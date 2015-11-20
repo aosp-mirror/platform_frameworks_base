@@ -275,6 +275,29 @@ inline Maybe<T> make_nothing() {
     return Maybe<T>();
 }
 
+/**
+ * Define the == operator between Maybe<T> and Maybe<U> if the operator T == U is defined.
+ * Otherwise this won't be defined and the compiler will yell at the callsite instead of inside
+ * Maybe.h.
+ */
+template <typename T, typename U>
+auto operator==(const Maybe<T>& a, const Maybe<U>& b)
+-> decltype(std::declval<T> == std::declval<U>) {
+    if (a && b) {
+        return a.value() == b.value();
+    }
+    return false;
+}
+
+/**
+ * Same as operator== but negated.
+ */
+template <typename T, typename U>
+auto operator!=(const Maybe<T>& a, const Maybe<U>& b)
+-> decltype(std::declval<T> == std::declval<U>) {
+    return !(a == b);
+}
+
 } // namespace aapt
 
 #endif // AAPT_MAYBE_H
