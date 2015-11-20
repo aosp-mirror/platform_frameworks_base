@@ -5918,9 +5918,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void startManagedQuickContact(String actualLookupKey, long actualContactId,
-            Intent originalIntent) {
+            long actualDirectoryId, Intent originalIntent) {
         final Intent intent = QuickContact.rebuildManagedQuickContactsIntent(
-                actualLookupKey, actualContactId, originalIntent);
+                actualLookupKey, actualContactId, actualDirectoryId, originalIntent);
         final int callingUserId = UserHandle.getCallingUserId();
 
         final long ident = mInjector.binderClearCallingIdentity();
