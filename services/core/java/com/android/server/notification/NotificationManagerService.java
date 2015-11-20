@@ -1211,29 +1211,36 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setPackagePriority(String pkg, int uid, int priority) {
+        public ParceledListSlice<Notification.Topic> getTopics(String pkg, int uid) {
             checkCallerIsSystem();
-            mRankingHelper.setPackagePriority(pkg, uid, priority);
+            return new ParceledListSlice<Notification.Topic>(mRankingHelper.getTopics(pkg, uid));
+        }
+
+        @Override
+        public void setTopicPriority(String pkg, int uid, Notification.Topic topic, int priority) {
+            checkCallerIsSystem();
+            mRankingHelper.setTopicPriority(pkg, uid, topic, priority);
             savePolicyFile();
         }
 
         @Override
-        public int getPackagePriority(String pkg, int uid) {
+        public int getTopicPriority(String pkg, int uid, Notification.Topic topic) {
             checkCallerIsSystem();
-            return mRankingHelper.getPackagePriority(pkg, uid);
+            return mRankingHelper.getTopicPriority(pkg, uid, topic);
         }
 
         @Override
-        public void setPackageVisibilityOverride(String pkg, int uid, int visibility) {
+        public void setTopicVisibilityOverride(String pkg, int uid, Notification.Topic topic,
+                int visibility) {
             checkCallerIsSystem();
-            mRankingHelper.setPackageVisibilityOverride(pkg, uid, visibility);
+            mRankingHelper.setTopicVisibilityOverride(pkg, uid, topic, visibility);
             savePolicyFile();
         }
 
         @Override
-        public int getPackageVisibilityOverride(String pkg, int uid) {
+        public int getTopicVisibilityOverride(String pkg, int uid, Notification.Topic topic) {
             checkCallerIsSystem();
-            return mRankingHelper.getPackageVisibilityOverride(pkg, uid);
+            return mRankingHelper.getTopicVisibilityOverride(pkg, uid, topic);
         }
 
         /**

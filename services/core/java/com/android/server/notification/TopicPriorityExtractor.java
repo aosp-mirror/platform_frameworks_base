@@ -18,8 +18,11 @@ package com.android.server.notification;
 import android.content.Context;
 import android.util.Slog;
 
-public class PackagePriorityExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "ImportantPackageExtractor";
+/**
+ * Determines if the given notification can bypass Do Not Disturb.
+ */
+public class TopicPriorityExtractor implements NotificationSignalExtractor {
+    private static final String TAG = "ImportantTopicExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
@@ -39,8 +42,8 @@ public class PackagePriorityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int packagePriority = mConfig.getPackagePriority(
-                record.sbn.getPackageName(), record.sbn.getUid());
+        final int packagePriority = mConfig.getTopicPriority(record.sbn.getPackageName(),
+                record.sbn.getUid(), record.sbn.getNotification().getTopic());
         record.setPackagePriority(packagePriority);
 
         return null;

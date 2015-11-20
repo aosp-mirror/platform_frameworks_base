@@ -4985,6 +4985,7 @@ package android.app {
     field public static final int PRIORITY_MAX = 2; // 0x2
     field public static final int PRIORITY_MIN = -2; // 0xfffffffe
     field public static final deprecated int STREAM_DEFAULT = -1; // 0xffffffff
+    field public static final java.lang.String TOPIC_DEFAULT = "system_default_topic";
     field public static final int VISIBILITY_PRIVATE = 0; // 0x0
     field public static final int VISIBILITY_PUBLIC = 1; // 0x1
     field public static final int VISIBILITY_SECRET = -1; // 0xffffffff

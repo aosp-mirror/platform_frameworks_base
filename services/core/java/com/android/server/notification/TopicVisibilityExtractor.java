@@ -18,8 +18,11 @@ package com.android.server.notification;
 import android.content.Context;
 import android.util.Slog;
 
-public class PackageVisibilityExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "PackageVisibilityExtractor";
+/**
+ * Determines if the given notification can display sensitive content on the lockscreen.
+ */
+public class TopicVisibilityExtractor implements NotificationSignalExtractor {
+    private static final String TAG = "TopicVisibilityExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
@@ -39,8 +42,9 @@ public class PackageVisibilityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int packageVisibility = mConfig.getPackageVisibilityOverride(
-                record.sbn.getPackageName(), record.sbn.getUid());
+        final int packageVisibility = mConfig.getTopicVisibilityOverride(
+                record.sbn.getPackageName(), record.sbn.getUid(),
+                record.sbn.getNotification().getTopic());
         record.setPackageVisibilityOverride(packageVisibility);
 
         return null;

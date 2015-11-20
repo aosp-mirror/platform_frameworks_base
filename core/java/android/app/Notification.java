@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -1432,6 +1433,9 @@ public class Notification implements Parcelable
                     }
                 };
     }
+
+    @SystemApi
+    public static final String TOPIC_DEFAULT = "system_default_topic";
 
     private Topic topic;
 
@@ -3418,6 +3422,10 @@ public class Notification implements Parcelable
             if (!mPersonList.isEmpty()) {
                 mN.extras.putStringArray(EXTRA_PEOPLE,
                         mPersonList.toArray(new String[mPersonList.size()]));
+            }
+            if (mN.topic == null) {
+                mN.topic = new Topic(TOPIC_DEFAULT, mContext.getString(
+                        R.string.default_notification_topic_label));
             }
             return mN;
         }

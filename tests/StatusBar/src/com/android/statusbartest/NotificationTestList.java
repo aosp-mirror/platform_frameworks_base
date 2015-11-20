@@ -160,6 +160,36 @@ public class NotificationTestList extends TestActivity
             }
         },
 
+        new Test("with topic Hello") {
+            public void run() {
+                Notification n = new Notification.Builder(NotificationTestList.this)
+                        .setSmallIcon(R.drawable.icon1)
+                        .setWhen(mActivityCreateTime)
+                        .setContentTitle("hihi")
+                        .setContentText("This is a notification!!!")
+                        .setContentIntent(makeIntent2())
+                        .setTopic(new Notification.Topic("hello", "Hello"))
+                        .build();
+
+                mNM.notify(999, n);
+            }
+        },
+
+        new Test("with topic GoodBye") {
+            public void run() {
+                Notification n = new Notification.Builder(NotificationTestList.this)
+                        .setSmallIcon(R.drawable.icon1)
+                        .setWhen(mActivityCreateTime)
+                        .setContentTitle("byebye")
+                        .setContentText("This is a notification!!!")
+                        .setContentIntent(makeIntent2())
+                        .setTopic(new Notification.Topic("bye", "Goodbye"))
+                        .build();
+
+                mNM.notify(9999, n);
+            }
+        },
+
         new Test("Whens") {
             public void run()
             {

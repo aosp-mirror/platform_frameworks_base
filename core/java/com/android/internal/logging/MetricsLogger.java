@@ -33,6 +33,7 @@ public class MetricsLogger implements MetricsConstants {
     public static final int NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 260;
     public static final int ACTION_ZEN_ALLOW_PEEK = 261;
     public static final int ACTION_ZEN_ALLOW_LIGHTS = 262;
+    public static final int NOTIFICATION_TOPIC_NOTIFICATION = 263;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
