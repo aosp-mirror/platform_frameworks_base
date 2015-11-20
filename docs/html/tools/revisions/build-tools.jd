@@ -26,31 +26,7 @@ page.title=SDK Build Tools Release Notes
 
 <p>To use a specific version of the Build Tools in your application project:</p>
 
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Eclipse</a></p>
 
-  <div class="toggle-content-toggleme">
-  <ol>
-    <li>In the root folder of your application project, find the {@code project.properties}
-      file.</li>
-    <li>Open the file and specify the Build Tools version by adding a {@code buildtools} property
-      on a separate line:
-<pre>
-sdk.buildtools=17.0.0
-</pre>
-    </li>
-  </ol>
-  </div>
-</div>
-
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Android Studio</a></p>
-
-  <div class="toggle-content-toggleme">
   <ol>
     <li>In the root folder of your application project, find the {@code build.gradle}
       file.</li>
@@ -65,8 +41,6 @@ android {
 </pre>
     </li>
   </ol>
-  </div>
-</div>
 
 
 <h2 id="notes">Revisions</h2>
