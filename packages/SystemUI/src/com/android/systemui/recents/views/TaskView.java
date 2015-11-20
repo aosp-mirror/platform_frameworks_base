@@ -409,11 +409,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         ctx.postAnimationTrigger.increment();
     }
 
-    /** Animates this task view away when dismissing all tasks. */
-    void startDismissAllAnimation() {
-        dismissTask();
-    }
-
     /** Animates this task view as it exits recents */
     void startLaunchTaskAnimation(final Runnable postAnimRunnable, boolean isLaunchingTask,
             boolean occludesLaunchTarget, boolean lockToTask) {

@@ -138,12 +138,6 @@
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
 
-    <!-- The min animation duration for animating views that are currently visible. -->
-    <integer name="recents_filter_animate_current_views_duration">250</integer>
-
-    <!-- The min animation duration for animating views that are newly visible. -->
-    <integer name="recents_filter_animate_new_views_duration">250</integer>
-
     <!-- The duration of the window transition when coming to Recents from an app.
          In order to defer the in-app animations until after the transition is complete,
          we also need to use this value as the starting delay when animating the first
