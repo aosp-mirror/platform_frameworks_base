@@ -32,6 +32,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.os.StrictMode;
 import android.os.Trace;
 import android.text.Editable;
@@ -443,6 +444,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     boolean mStackFromBottom;
 
     /**
+     * Indicates whether to system-wide-override to enable/disable or not.
+     * 0 = force to enable scrollingCacheEnabled regardless of app setting
+     * 1 = default is to enable scrollingCacheEnabled unless app specifies
+     * 2 = default is to disable scrollingCacheEnabled unless app specifies
+     * 3 = force to disable scrollingCacheEnabled regardless of app setting
+     */
+    int mScrollingCacheProperty = SystemProperties.getInt("persist.sys.scrollingcache",1);
+
+    /**
      * When set to true, the list automatically discards the children's
      * bitmap cache after scrolling.
      */
@@ -837,28 +847,30 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         mDrawSelectorOnTop = a.getBoolean(R.styleable.AbsListView_drawSelectorOnTop, false);
-
-        setStackFromBottom(a.getBoolean(
-                R.styleable.AbsListView_stackFromBottom, false));
-        setScrollingCacheEnabled(a.getBoolean(
-                R.styleable.AbsListView_scrollingCache, true));
-        setTextFilterEnabled(a.getBoolean(
-                R.styleable.AbsListView_textFilterEnabled, false));
-        setTranscriptMode(a.getInt(
-                R.styleable.AbsListView_transcriptMode, TRANSCRIPT_MODE_DISABLED));
-        setCacheColorHint(a.getColor(
-                R.styleable.AbsListView_cacheColorHint, 0));
-        setSmoothScrollbarEnabled(a.getBoolean(
-                R.styleable.AbsListView_smoothScrollbar, true));
-        setChoiceMode(a.getInt(
-                R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
-
-        setFastScrollEnabled(a.getBoolean(
-                R.styleable.AbsListView_fastScrollEnabled, false));
-        setFastScrollStyle(a.getResourceId(
-                R.styleable.AbsListView_fastScrollStyle, 0));
-        setFastScrollAlwaysVisible(a.getBoolean(
-                R.styleable.AbsListView_fastScrollAlwaysVisible, false));
+        setStackFromBottom(a.getBoolean(R.styleable.AbsListView_stackFromBottom, false));
+        boolean scrollingCacheEnabled = true;
+        switch(mScrollingCacheProperty) {
+        case 0:
+            scrollingCacheEnabled = true;
+            break;
+        default:
+            scrollingCacheEnabled = a.getBoolean(R.styleable.AbsListView_scrollingCache, true);
+            break;
+        case 2:
+            scrollingCacheEnabled = a.getBoolean(R.styleable.AbsListView_scrollingCache, false);
+            break;
+        case 3:
+            scrollingCacheEnabled = false;
+            break;
+        }
+        setTextFilterEnabled(a.getBoolean(R.styleable.AbsListView_textFilterEnabled, false));
+        setTranscriptMode(a.getInt(R.styleable.AbsListView_transcriptMode, TRANSCRIPT_MODE_DISABLED));
+        setCacheColorHint(a.getColor(R.styleable.AbsListView_cacheColorHint, 0));
+        setSmoothScrollbarEnabled(a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true));
+        setChoiceMode(a.getInt(R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
+        setFastScrollEnabled(a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false));
+        setFastScrollStyle(a.getResourceId(R.styleable.AbsListView_fastScrollStyle, 0));
+        setFastScrollAlwaysVisible(a.getBoolean(R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
 
@@ -873,7 +885,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setFocusableInTouchMode(true);
         setWillNotDraw(false);
         setAlwaysDrawnWithCacheEnabled(false);
-        setScrollingCacheEnabled(true);
+        boolean scrollingCacheEnabled = (mScrollingCacheProperty < 2);
+        setScrollingCacheEnabled(scrollingCacheEnabled);
 
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
         mTouchSlop = configuration.getScaledTouchSlop();
