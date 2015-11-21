@@ -15,6 +15,8 @@ page.title=Optimizing Performance and Battery Life
 <h2>You should also read</h2>
 <ul>
   <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+  <li><a href="http://android-developers.blogspot.com/2014/12/making-performant-watch-face.html">
+Making a performant watch face</a></li>
 </ul>
 </div>
 </div>
