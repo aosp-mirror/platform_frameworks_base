@@ -17,6 +17,7 @@
 package com.android.printspooler.model;
 
 import android.app.Notification;
+import android.app.Notification.Action;
 import android.app.Notification.InboxStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.PowerManager;
@@ -114,13 +116,25 @@ final class NotificationController {
         }
     }
 
+    /**
+     * Create an {@link Action} that cancels a {@link PrintJobInfo print job}.
+     *
+     * @param printJob The {@link PrintJobInfo print job} to cancel
+     *
+     * @return An {@link Action} that will cancel a print job
+     */
+    private Action createCancelAction(PrintJobInfo printJob) {
+        return new Action.Builder(
+                Icon.createWithResource(mContext, R.drawable.stat_notify_cancelling),
+                mContext.getString(R.string.cancel), createCancelIntent(printJob)).build();
+    }
+
     private void createPrintingNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentIntent(createContentIntent(printJob.getId()))
                 .setSmallIcon(computeNotificationIcon(printJob))
                 .setContentTitle(computeNotificationTitle(printJob))
-                .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob))
+                .addAction(createCancelAction(printJob))
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
@@ -131,14 +145,16 @@ final class NotificationController {
     }
 
     private void createFailedNotification(PrintJobInfo printJob) {
+        Action.Builder restartActionBuilder = new Action.Builder(
+                Icon.createWithResource(mContext, R.drawable.ic_restart),
+                mContext.getString(R.string.restart), createRestartIntent(printJob.getId()));
+
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentIntent(createContentIntent(printJob.getId()))
                 .setSmallIcon(computeNotificationIcon(printJob))
                 .setContentTitle(computeNotificationTitle(printJob))
-                .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob))
-                .addAction(R.drawable.ic_restart, mContext.getString(R.string.restart),
-                        createRestartIntent(printJob.getId()))
+                .addAction(createCancelAction(printJob))
+                .addAction(restartActionBuilder.build())
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
@@ -153,8 +169,7 @@ final class NotificationController {
                 .setContentIntent(createContentIntent(printJob.getId()))
                 .setSmallIcon(computeNotificationIcon(printJob))
                 .setContentTitle(computeNotificationTitle(printJob))
-                .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob))
+                .addAction(createCancelAction(printJob))
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
@@ -196,7 +211,7 @@ final class NotificationController {
             PrintJobInfo printJob = printJobs.get(i);
             if (i == printJobCount - 1) {
                 builder.setLargeIcon(((BitmapDrawable) mContext.getResources().getDrawable(
-                        computeNotificationIcon(printJob))).getBitmap());
+                        computeNotificationIcon(printJob), null)).getBitmap());
                 builder.setSmallIcon(computeNotificationIcon(printJob));
                 builder.setContentTitle(computeNotificationTitle(printJob));
                 builder.setContentText(printJob.getPrinterName());
@@ -301,6 +316,7 @@ final class NotificationController {
     }
 
     public static final class NotificationBroadcastReceiver extends BroadcastReceiver {
+        @SuppressWarnings("hiding")
         private static final String LOG_TAG = "NotificationBroadcastReceiver";
 
         @Override
