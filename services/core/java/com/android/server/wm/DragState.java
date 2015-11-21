@@ -22,6 +22,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 import com.android.server.input.InputApplicationHandle;
@@ -324,6 +325,13 @@ class DragState {
         cleanUpDragLw();
     }
 
+    void cancelDragLw() {
+        if (mAnimation != null) {
+            return;
+        }
+        mAnimation = createCancelAnimationLocked();
+        mService.scheduleAnimationLocked();
+    }
 
     private void cleanUpDragLw() {
         broadcastDragEndedLw();
@@ -525,11 +533,11 @@ class DragState {
             return false;
         }
 
+        mTransformation.getMatrix().postTranslate(
+                mCurrentX - mThumbOffsetX, mCurrentY - mThumbOffsetY);
         final float tmpFloats[] = mService.mTmpFloats;
         mTransformation.getMatrix().getValues(tmpFloats);
-        mSurfaceControl.setPosition(
-                tmpFloats[Matrix.MTRANS_X] - mThumbOffsetX,
-                tmpFloats[Matrix.MTRANS_Y] - mThumbOffsetY);
+        mSurfaceControl.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
         mSurfaceControl.setAlpha(mTransformation.getAlpha());
         mSurfaceControl.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
                 tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
@@ -539,8 +547,19 @@ class DragState {
     private Animation createReturnAnimationLocked() {
         final AnimationSet set = new AnimationSet(false);
         set.addAnimation(new TranslateAnimation(
-                mCurrentX, mOriginalX, mCurrentY, mOriginalY));
+                0, mOriginalX - mCurrentX, 0, mOriginalY - mCurrentY));
         set.addAnimation(new AlphaAnimation(mOriginalAlpha, mOriginalAlpha / 2));
+        set.setDuration(ANIMATION_DURATION_MS);
+        set.setInterpolator(mCubicEaseOutInterpolator);
+        set.initialize(0, 0, 0, 0);
+        set.start();  // Will start on the first call to getTransformation.
+        return set;
+    }
+
+    private Animation createCancelAnimationLocked() {
+        final AnimationSet set = new AnimationSet(false);
+        set.addAnimation(new ScaleAnimation(1, 0, 1, 0, mThumbOffsetX, mThumbOffsetY));
+        set.addAnimation(new AlphaAnimation(mOriginalAlpha, 0));
         set.setDuration(ANIMATION_DURATION_MS);
         set.setInterpolator(mCubicEaseOutInterpolator);
         set.initialize(0, 0, 0, 0);
