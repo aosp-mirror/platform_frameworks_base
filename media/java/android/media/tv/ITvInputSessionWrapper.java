@@ -87,7 +87,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             return;
         }
 
-        long startTime = System.currentTimeMillis();
+        long startTime = System.nanoTime();
         switch (msg.what) {
             case DO_RELEASE: {
                 mTvInputSessionImpl.release();
@@ -185,18 +185,18 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
         }
-        long duration = System.currentTimeMillis() - startTime;
-        if (duration > EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS) {
+        long durationMs = (System.nanoTime() - startTime) / (1000 * 1000);
+        if (durationMs > EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS) {
             Log.w(TAG, "Handling message (" + msg.what + ") took too long time (duration="
-                    + duration + "ms)");
-            if (msg.what == DO_TUNE && duration > EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS) {
-                throw new RuntimeException("Too much time to handle tune request. (" + duration
+                    + durationMs + "ms)");
+            if (msg.what == DO_TUNE && durationMs > EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS) {
+                throw new RuntimeException("Too much time to handle tune request. (" + durationMs
                         + "ms > " + EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS + "ms) "
                         + "Consider handling the tune request in a separate thread.");
             }
-            if (duration > EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS) {
+            if (durationMs > EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS) {
                 throw new RuntimeException("Too much time to handle a request. (type=" + msg.what +
-                        ", " + duration + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
+                        ", " + durationMs + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
             }
         }
     }
