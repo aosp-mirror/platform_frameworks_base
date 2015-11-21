@@ -168,7 +168,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         public void run() {
             // When this fires, then the user has not released alt-tab for at least
             // FAST_ALT_TAB_DELAY_MS milliseconds
-            showRecents(mTriggeredFromAltTab, false /* draggingInRecents */);
+            showRecents(mTriggeredFromAltTab, false /* draggingInRecents */, true /* animate */);
         }
     });
 
@@ -251,7 +251,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     }
 
     @Override
-    public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents) {
+    public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
+            boolean animate) {
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
         if (mFastAltTabTrigger.hasTriggered()) {
@@ -284,7 +285,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
             if (topTask == null || !ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
-                startRecentsActivity(topTask, isTopTaskHome.value);
+                startRecentsActivity(topTask, isTopTaskHome.value, animate);
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentsActivity", e);
@@ -356,7 +357,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
                 }
 
                 // Otherwise, start the recents activity
-                startRecentsActivity(topTask, isTopTaskHome.value);
+                startRecentsActivity(topTask, isTopTaskHome.value, true /* animate */);
                 mLastToggleTime = SystemClock.elapsedRealtime();
             }
         } catch (ActivityNotFoundException e) {
@@ -542,7 +543,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
             ssp.moveTaskToDockedStack(topTask.id,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
-            showRecents(false /* triggeredFromAltTab */, draggingInRecents);
+            showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */);
         }
     }
 
@@ -792,7 +793,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
      * Shows the recents activity
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            boolean isTopTaskHome) {
+            boolean isTopTaskHome, boolean animate) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
 
         // Update the header bar if necessary
@@ -812,6 +813,14 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         mDummyStackView.updateLayoutForStack(stack);
         TaskStackLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
+
+        if (!animate) {
+            ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext, -1, -1);
+            startRecentsActivity(topTask, opts, false /* fromHome */,
+                    false /* fromSearchHome */, false /* fromThumbnail*/, stackVr);
+            return;
+        }
+
         boolean hasRecentTasks = stack.getTaskCount() > 0;
         boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 

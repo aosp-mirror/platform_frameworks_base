@@ -214,14 +214,15 @@ public class Recents extends SystemUI
 
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
-            mImpl.showRecents(triggeredFromAltTab, false /* draggingInRecents */);
+            mImpl.showRecents(triggeredFromAltTab, false /* draggingInRecents */, true /* animate */);
         } else {
             if (mSystemUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
                         mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
-                        callbacks.showRecents(triggeredFromAltTab, false /* draggingInRecents */);
+                        callbacks.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
+                                true /* animate */);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
