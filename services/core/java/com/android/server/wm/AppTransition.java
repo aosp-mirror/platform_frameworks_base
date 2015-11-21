@@ -1419,7 +1419,7 @@ public class AppTransition implements Dump {
                             // to be set.
                             Rect rect = spec.rect;
                             putDefaultNextAppTransitionCoordinates(rect.left, rect.top,
-                                    rect.width(), rect.height(), null);
+                                    rect.width(), rect.height(), spec.bitmap);
                         }
                     }
                 }
