@@ -119,21 +119,26 @@ public abstract class AbstractAccountAuthenticator {
     /**
      * Bundle key used for the {@link String} account type in session bundle.
      * This is used in the default implementation of
-     * {@link #startAddAccountSession}. TODO: and startUpdateCredentialsSession.
+     * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
      */
     private static final String KEY_AUTH_TOKEN_TYPE = "android.accounts.KEY_AUTH_TOKEN_TYPE";
     /**
      * Bundle key used for the {@link String} array of required features in
      * session bundle. This is used in the default implementation of
-     * {@link #startAddAccountSession}. TODO: and startUpdateCredentialsSession.
+     * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
      */
     private static final String KEY_REQUIRED_FEATURES = "android.accounts.AbstractAccountAuthenticator.KEY_REQUIRED_FEATURES";
     /**
      * Bundle key used for the {@link Bundle} options in session bundle. This is
-     * used in default implementation of {@link #startAddAccountSession}. TODO:
-     * and startUpdateCredentialsSession.
+     * used in default implementation of {@link #startAddAccountSession} and
+     * {@link startUpdateCredentialsSession}.
      */
     private static final String KEY_OPTIONS = "android.accounts.AbstractAccountAuthenticator.KEY_OPTIONS";
+    /**
+     * Bundle key used for the {@link Account} account in session bundle. This is used
+     * used in default implementation of {@link startUpdateCredentialsSession}.
+     */
+    private static final String KEY_ACCOUNT = "android.accounts.AbstractAccountAuthenticator.KEY_ACCOUNT";
 
     private final Context mContext;
 
@@ -383,6 +388,43 @@ public abstract class AbstractAccountAuthenticator {
                 }
             } catch (Exception e) {
                 handleException(response, "startAddAccountSession", accountType, e);
+            }
+        }
+
+        @Override
+        public void startUpdateCredentialsSession(
+                IAccountAuthenticatorResponse response,
+                Account account,
+                String authTokenType,
+                Bundle loginOptions) throws RemoteException {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "startUpdateCredentialsSession: "
+                        + account
+                        + ", authTokenType "
+                        + authTokenType);
+            }
+            checkBinderPermission();
+            try {
+                final Bundle result = AbstractAccountAuthenticator.this
+                        .startUpdateCredentialsSession(
+                                new AccountAuthenticatorResponse(response),
+                                account,
+                                authTokenType,
+                                loginOptions);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    // Result may be null.
+                    if (result != null) {
+                        result.keySet(); // force it to be unparcelled
+                    }
+                    Log.v(TAG, "startUpdateCredentialsSession: result "
+                            + AccountManager.sanitizeResult(result));
+                }
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (Exception e) {
+                handleException(response, "startUpdateCredentialsSession",
+                        account.toString() + "," + authTokenType, e);
             }
         }
     }
@@ -691,6 +733,51 @@ public abstract class AbstractAccountAuthenticator {
                 Bundle sessionBundle = new Bundle();
                 sessionBundle.putString(KEY_AUTH_TOKEN_TYPE, authTokenType);
                 sessionBundle.putStringArray(KEY_REQUIRED_FEATURES, requiredFeatures);
+                sessionBundle.putBundle(KEY_OPTIONS, options);
+                Bundle result = new Bundle();
+                result.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, sessionBundle);
+                response.onResult(result);
+            }
+
+        }).start();
+        return null;
+    }
+
+    /**
+     * Asks user to re-authenticate for an account but defers updating the locally stored
+     * credentials.
+     *
+     * @param response to send the result back to the AccountManager, will never
+     *            be null
+     * @param account the account whose credentials are to be updated, will
+     *            never be null
+     * @param authTokenType the type of auth token to retrieve after updating
+     *            the credentials, may be null (TODO)
+     * @param options a Bundle of authenticator-specific options, may be null
+     * @return a Bundle result or null if the result is to be returned via the
+     *         response. The result will contain either:
+     *         <ul>
+     *         <li>{@link AccountManager#KEY_INTENT}, or
+     *         <li>{@link AccountManager#KEY_ACCOUNT_SESSION_BUNDLE} for updating the
+     *         locally stored credentials later, and if account is
+     *         re-authenticated, {@link AccountManager#KEY_PASSWORD} and
+     *         {@link AccountManager#KEY_ACCOUNT_STATUS_TOKEN} for checking the
+     *         status of the account later, or
+     *         <li>{@link AccountManager#KEY_ERROR_CODE} and
+     *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
+     *         </ul>
+     * @throws NetworkErrorException if the authenticator could not honor the
+     *             request due to a network error
+     */
+    public Bundle startUpdateCredentialsSession(final AccountAuthenticatorResponse response,
+            final Account account, final String authTokenType, final Bundle options)
+                    throws NetworkErrorException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bundle sessionBundle = new Bundle();
+                sessionBundle.putString(KEY_AUTH_TOKEN_TYPE, authTokenType);
+                sessionBundle.putParcelable(KEY_ACCOUNT, account);
                 sessionBundle.putBundle(KEY_OPTIONS, options);
                 Bundle result = new Bundle();
                 result.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, sessionBundle);

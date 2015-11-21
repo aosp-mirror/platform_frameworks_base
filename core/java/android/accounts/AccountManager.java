@@ -2666,9 +2666,14 @@ public class AccountManager {
      *         trouble
      *         </ul>
      */
-    public AccountManagerFuture<Bundle> startAddAccountSession(final String accountType,
-            final String authTokenType, final String[] requiredFeatures, final Bundle options,
-            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+    public AccountManagerFuture<Bundle> startAddAccountSession(
+            final String accountType,
+            final String authTokenType,
+            final String[] requiredFeatures,
+            final Bundle options,
+            final Activity activity,
+            AccountManagerCallback<Bundle> callback,
+            Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         final Bundle optionsIn = new Bundle();
         if (options != null) {
@@ -2679,8 +2684,89 @@ public class AccountManager {
         return new AmsTask(activity, handler, callback) {
             @Override
             public void doWork() throws RemoteException {
-                mService.startAddAccountSession(mResponse, accountType, authTokenType,
-                        requiredFeatures, activity != null, optionsIn);
+                mService.startAddAccountSession(
+                        mResponse,
+                        accountType,
+                        authTokenType,
+                        requiredFeatures,
+                        activity != null,
+                        optionsIn);
+            }
+        }.start();
+    }
+
+    /**
+     * Asks the user to enter a new password for an account but not updating the
+     * saved credentials for the account until finishSession is
+     * called.
+     * <p>
+     * This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     * <p>
+     * <b>NOTE:</b> The saved credentials for the account alone will not be
+     * updated by calling this API alone .
+     *
+     * @param account The account to update credentials for
+     * @param authTokenType The credentials entered must allow an auth token of
+     *            this type to be created (but no actual auth token is
+     *            returned); may be null
+     * @param options Authenticator-specific options for the request; may be
+     *            null or empty
+     * @param activity The {@link Activity} context to use for launching a new
+     *            authenticator-defined sub-Activity to prompt the user to enter
+     *            a password; used only to call startActivity(); if null, the
+     *            prompt will not be launched directly, but the necessary
+     *            {@link Intent} will be returned to the caller instead
+     * @param callback Callback to invoke when the request completes, null for
+     *            no callback
+     * @param handler {@link Handler} identifying the callback thread, null for
+     *            the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *         these fields if an activity was supplied and user was
+     *         successfully re-authenticated to the account (TODO: default impl
+     *         only returns escorw?):
+     *         <ul>
+     *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
+     *         updating the local credentials on device later.
+     *         <li>{@link #KEY_PASSWORD} - optional, the password or password hash of the
+     *         account
+     *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check status of
+     *         the account
+     *         </ul>
+     *         If no activity was specified, the returned Bundle contains
+     *         {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     *         password prompt. If an error occurred,
+     *         {@link AccountManagerFuture#getResult()} throws:
+     *         <ul>
+     *         <li>{@link AuthenticatorException} if the authenticator failed to
+     *         respond
+     *         <li>{@link OperationCanceledException} if the operation was
+     *         canceled for any reason, including the user canceling the
+     *         password prompt
+     *         <li>{@link IOException} if the authenticator experienced an I/O
+     *         problem verifying the password, usually because of network
+     *         trouble
+     *         </ul>
+     */
+    public AccountManagerFuture<Bundle> startUpdateCredentialsSession(
+            final Account account,
+            final String authTokenType,
+            final Bundle options,
+            final Activity activity,
+            final AccountManagerCallback<Bundle> callback,
+            final Handler handler) {
+        if (account == null) {
+            throw new IllegalArgumentException("account is null");
+        }
+        return new AmsTask(activity, handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.startUpdateCredentialsSession(
+                        mResponse,
+                        account,
+                        authTokenType,
+                        activity != null,
+                        options);
             }
         }.start();
     }

@@ -90,4 +90,10 @@ oneway interface IAccountAuthenticator {
      */
     void startAddAccountSession(in IAccountAuthenticatorResponse response, String accountType,
         String authTokenType, in String[] requiredFeatures, in Bundle options);
+
+    /**
+     * Prompts the user for a new password but does not write it to the IAccountManager.
+     */
+    void startUpdateCredentialsSession(in IAccountAuthenticatorResponse response, in Account account,
+        String authTokenType, in Bundle options);
 }

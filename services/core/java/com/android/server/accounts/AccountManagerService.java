@@ -2286,8 +2286,11 @@ public class AccountManagerService
     }
 
     @Override
-    public void startAddAccountSession(final IAccountManagerResponse response, final String accountType,
-            final String authTokenType, final String[] requiredFeatures,
+    public void startAddAccountSession(
+            final IAccountManagerResponse response,
+            final String accountType,
+            final String authTokenType,
+            final String[] requiredFeatures,
             final boolean expectActivityLaunch,
             final Bundle optionsIn) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -2560,6 +2563,60 @@ public class AccountManagerService
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", updateCredentials"
+                            + ", " + account
+                            + ", authTokenType " + authTokenType
+                            + ", loginOptions " + loginOptions;
+                }
+            }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
+    public void startUpdateCredentialsSession(
+            IAccountManagerResponse response,
+            final Account account,
+            final String authTokenType,
+            final boolean expectActivityLaunch,
+            final Bundle loginOptions) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG,
+                    "startUpdateCredentialsSession: " + account + ", response " + response
+                            + ", authTokenType " + authTokenType + ", expectActivityLaunch "
+                            + expectActivityLaunch + ", caller's uid " + Binder.getCallingUid()
+                            + ", pid " + Binder.getCallingPid());
+        }
+        if (response == null) {
+            throw new IllegalArgumentException("response is null");
+        }
+        if (account == null) {
+            throw new IllegalArgumentException("account is null");
+        }
+        int userId = UserHandle.getCallingUserId();
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(userId);
+            new StartAccountSession(
+                    accounts,
+                    response,
+                    account.type,
+                    expectActivityLaunch,
+                    account.name,
+                    false /* authDetailsRequired */,
+                    true /* updateLastCredentialTime */) {
+                @Override
+                public void run() throws RemoteException {
+                    mAuthenticator.startUpdateCredentialsSession(this, account, authTokenType,
+                            loginOptions);
+                }
+
+                @Override
+                protected String toDebugString(long now) {
+                    if (loginOptions != null)
+                        loginOptions.keySet();
+                    return super.toDebugString(now)
+                            + ", startUpdateCredentialsSession"
                             + ", " + account
                             + ", authTokenType " + authTokenType
                             + ", loginOptions " + loginOptions;
