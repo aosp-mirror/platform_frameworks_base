@@ -2769,7 +2769,9 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override public void onUidIdle(int uid) throws RemoteException {
-            removeForStoppedLocked(uid);
+            synchronized (mLock) {
+                removeForStoppedLocked(uid);
+            }
         }
     };
 
