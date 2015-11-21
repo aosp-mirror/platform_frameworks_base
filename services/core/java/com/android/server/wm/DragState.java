@@ -281,7 +281,7 @@ class DragState {
         }
     }
 
-    void broadcastDragEndedLw() {
+    private void broadcastDragEndedLw() {
         final int myPid = Process.myPid();
 
         if (WindowManagerService.DEBUG_DRAG) {
@@ -313,6 +313,9 @@ class DragState {
     }
 
     void endDragLw() {
+        if (mAnimation != null) {
+            return;
+        }
         if (!mDragResult) {
             mAnimation = createReturnAnimationLocked();
             mService.scheduleAnimationLocked();
@@ -322,7 +325,7 @@ class DragState {
     }
 
 
-    void cleanUpDragLw() {
+    private void cleanUpDragLw() {
         broadcastDragEndedLw();
 
         // stop intercepting input
@@ -336,6 +339,9 @@ class DragState {
     }
 
     void notifyMoveLw(float x, float y) {
+        if (mAnimation != null) {
+            return;
+        }
         mCurrentX = x;
         mCurrentY = y;
 
@@ -410,6 +416,9 @@ class DragState {
     // result from the recipient.
     boolean notifyDropLw(WindowState touchedWin, DropPermissionHolder dropPermissionHolder,
             float x, float y) {
+        if (mAnimation != null) {
+            return false;
+        }
         mCurrentX = x;
         mCurrentY = y;
 
