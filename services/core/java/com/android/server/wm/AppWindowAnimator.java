@@ -228,7 +228,8 @@ public class AppWindowAnimator {
 
     private void stepThumbnailAnimation(long currentTime) {
         thumbnailTransformation.clear();
-        thumbnailAnimation.getTransformation(currentTime, thumbnailTransformation);
+        final long animationFrameTime = getAnimationFrameTime(thumbnailAnimation, currentTime);
+        thumbnailAnimation.getTransformation(animationFrameTime, thumbnailTransformation);
         thumbnailTransformation.getMatrix().preTranslate(thumbnailX, thumbnailY);
 
         ScreenRotationAnimation screenRotationAnimation =
@@ -265,16 +266,26 @@ public class AppWindowAnimator {
                 tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
     }
 
+    /**
+     * Sometimes we need to synchronize the first frame of animation with some external event, e.g.
+     * Recents hiding some of its content. To achieve this, we prolong the start of the animaiton
+     * and keep producing the first frame of the animation.
+     */
+    private long getAnimationFrameTime(Animation animation, long currentTime) {
+        if (mProlongAnimation == PROLONG_ANIMATION_AT_START) {
+            animation.setStartTime(currentTime);
+            return currentTime + 1;
+        }
+        return currentTime;
+    }
+
     private boolean stepAnimation(long currentTime) {
         if (animation == null) {
             return false;
         }
         transformation.clear();
-        if (mProlongAnimation == PROLONG_ANIMATION_AT_START) {
-            animation.setStartTime(currentTime);
-            currentTime += 1;
-        }
-        boolean hasMoreFrames = animation.getTransformation(currentTime, transformation);
+        final long animationFrameTime = getAnimationFrameTime(animation, currentTime);
+        boolean hasMoreFrames = animation.getTransformation(animationFrameTime, transformation);
         if (!hasMoreFrames) {
             if (deferThumbnailDestruction && !deferFinalFrameCleanup) {
                 // We are deferring the thumbnail destruction, so extend the animation for one more
@@ -290,10 +301,10 @@ public class AppWindowAnimator {
                     hasMoreFrames = true;
                 } else {
                     animation = null;
+                    clearThumbnail();
+                    if (DEBUG_ANIM) Slog.v(TAG, "Finished animation in " + mAppToken + " @ "
+                            + currentTime);
                 }
-                clearThumbnail();
-                if (DEBUG_ANIM) Slog.v(TAG,
-                        "Finished animation in " + mAppToken + " @ " + currentTime);
             }
         }
         hasTransformation = hasMoreFrames;
