@@ -197,8 +197,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                                 ? (int) event.getRawY()
                                 : (int) event.getRawX(),
                         !mIsVertical
-                                ? mVelocityTracker.getXVelocity()
-                                : mVelocityTracker.getYVelocity());
+                                ? mVelocityTracker.getYVelocity()
+                                : mVelocityTracker.getXVelocity());
             } else if (mDragMode == DRAG_MODE_RECENTS) {
                 mRecentsComponent.onDraggingInRecentsEnded(mVelocityTracker.getYVelocity());
             }
