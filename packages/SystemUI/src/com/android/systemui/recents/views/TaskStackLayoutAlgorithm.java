@@ -573,7 +573,7 @@ public class TaskStackLayoutAlgorithm {
                     (mCurrentStackRect.height() - mTaskRect.height()) / 2;
             y = centerYOffset + getYForDeltaP(p, 0);
             z = mMaxTranslationZ;
-            relP = p;
+            relP = 1f;
 
         } else {
             // Otherwise, update the task to the stack layout

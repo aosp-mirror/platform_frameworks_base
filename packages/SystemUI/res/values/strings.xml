@@ -698,6 +698,10 @@
     <string name="recents_search_bar_label">search</string>
     <!-- Recents: Launch error string. [CHAR LIMIT=NONE] -->
     <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
+    <!-- Recents: Show history string. [CHAR LIMIT=NONE] -->
+    <string name="recents_show_history_button_label">More</string>
+    <!-- Recents: The history of recents. [CHAR LIMIT=NONE] -->
+    <string name="recents_history_label">History</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>
@@ -1157,20 +1161,25 @@
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
-    <!-- Toggles paging recents via the recents button -->
+    <!-- Toggles paging recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_page_on_toggle">Enable paging</string>
-    <!-- Description for the toggle for fast-toggling recents via the recents button -->
+    <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_page_on_toggle_desc">Enable paging via the Overview button</string>
 
-    <!-- Toggles fast-toggling recents via the recents button -->
+    <!-- Toggles fast-toggling recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_fast_toggle_via_button">Enable fast toggle</string>
-    <!-- Description for the toggle for fast-toggling recents via the recents button -->
+    <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_fast_toggle_via_button_desc">Enable launch timeout while paging</string>
 
-    <!-- Toggles fullscreen screenshots -->
+    <!-- Toggles fullscreen screenshots. DO NOT TRANSLATE -->
     <string name="overview_fullscreen_thumbnails">Enable fullscreen screenshots</string>
-    <!-- Description for the toggle for fullscreen screenshots -->
+    <!-- Description for the toggle for fullscreen screenshots. DO NOT TRANSLATE -->
     <string name="overview_fullscreen_thumbnails_desc">Enable fullscreen screenshots in Overview</string>
+
+    <!-- Toggle to show the history view in Overview. DO NOT TRANSLATE -->
+    <string name="overview_show_history">Show History</string>
+    <!-- Description for the toggle to show the history view in Overview. DO NOT TRANSLATE -->
+    <string name="overview_show_history_desc">Enables the history view to see more recent tasks</string>
 
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->

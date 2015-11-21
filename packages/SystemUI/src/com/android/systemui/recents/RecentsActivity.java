@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -46,10 +47,12 @@ import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnim
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
+import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -65,6 +68,7 @@ import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
+import com.android.systemui.recents.history.RecentsHistoryView;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -99,6 +103,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private SystemBarScrimViews mScrimViews;
     private ViewStub mEmptyViewStub;
     private View mEmptyView;
+    private ViewStub mHistoryViewStub;
+    private RecentsHistoryView mHistoryView;
 
     // Resize task debug
     private RecentsResizeTaskDialog mResizeTaskDebugDialog;
@@ -260,6 +266,18 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     /**
+     * Dismisses the history view back into the stack view.
+     */
+    boolean dismissHistory() {
+        // Try and hide the history view first
+        if (mHistoryView != null && mHistoryView.isVisible()) {
+            EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
     boolean dismissRecentsToFocusedTask() {
@@ -349,6 +367,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
+        mHistoryViewStub = (ViewStub) findViewById(R.id.history_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
@@ -432,6 +451,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Reset some states
         mIgnoreAltTabRelease = false;
+        if (mHistoryView != null) {
+            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
+        }
 
         // Notify that recents is now hidden
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -550,8 +572,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     @Override
     public void onBackPressed() {
-        // Dismiss Recents to the focused Task or Home
-        dismissRecentsToFocusedTaskOrHome();
+        if (!dismissHistory()) {
+            dismissRecentsToFocusedTaskOrHome();
+        }
     }
 
     /**** RecentsResizeTaskDialog ****/
@@ -566,7 +589,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     /**** EventBus events ****/
 
     public final void onBusEvent(ToggleRecentsEvent event) {
-        dismissRecentsToFocusedTaskOrHome();
+        if (!dismissHistory()) {
+            dismissRecentsToFocusedTaskOrHome();
+        }
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
@@ -596,7 +621,21 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
-            dismissRecentsToHome(true /* animated */);
+            if (mHistoryView != null && mHistoryView.isVisible()) {
+                ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
+                t.increment();
+                t.addLastDecrementRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        dismissRecentsToHome(true /* animated */);
+                    }
+                });
+                EventBus.getDefault().send(new HideHistoryEvent(true, t));
+                t.decrement();
+
+            } else {
+                dismissRecentsToHome(true /* animated */);
+            }
         } else {
             // Do nothing
         }
@@ -724,6 +763,23 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Once the user has scrolled while holding alt-tab, then we should ignore the release of
         // the key
         mIgnoreAltTabRelease = true;
+    }
+
+    public final void onBusEvent(ShowHistoryEvent event) {
+        if (mHistoryView == null) {
+            mHistoryView = (RecentsHistoryView) mHistoryViewStub.inflate();
+            // Since this history view is inflated by a view stub after the insets have already
+            // been applied, we have to set them ourselves initial from the insets that were last
+            // provided.
+            mHistoryView.setSystemInsets(mRecentsView.getSystemInsets());
+        }
+        mHistoryView.show(mRecentsView.getTaskStack());
+    }
+
+    public final void onBusEvent(HideHistoryEvent event) {
+        if (mHistoryView != null) {
+            mHistoryView.hide(event.animate, event.postAnimationTrigger);
+        }
     }
 
     private void refreshSearchWidgetView() {

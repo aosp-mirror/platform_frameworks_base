@@ -177,6 +177,9 @@
     <!-- The animation duration for scrolling the stack to a particular item. -->
     <integer name="recents_animate_task_stack_scroll_duration">225</integer>
 
+    <!-- The animation duration for entering and exiting the history. -->
+    <integer name="recents_history_transition_duration">250</integer>
+
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
 

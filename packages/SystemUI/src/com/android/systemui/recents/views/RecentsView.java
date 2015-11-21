@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -25,20 +26,26 @@ import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
+import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
+import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
+import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
@@ -63,11 +70,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private static final String TAG = "RecentsView";
     private static final boolean DEBUG = false;
 
-    LayoutInflater mInflater;
     Handler mHandler;
 
+    TaskStack mStack;
     TaskStackView mTaskStackView;
     RecentsAppWidgetHostView mSearchBar;
+    View mHistoryButton;
     boolean mAwaitingFirstLayout = true;
     boolean mLastTaskLaunchedWasFreeform;
 
@@ -81,7 +89,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             TaskStack.DockState.BOTTOM,
     };
 
-    Interpolator mFastOutSlowInInterpolator;
+    private Interpolator mFastOutSlowInInterpolator;
+    private Interpolator mFastOutLinearInInterpolator;
+    private int mHistoryTransitionDuration;
 
     Rect mSystemInsets = new Rect();
 
@@ -99,18 +109,31 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        Resources res = context.getResources();
         setWillNotDraw(false);
-        mInflater = LayoutInflater.from(context);
         mHandler = new Handler();
         mTransitionHelper = new RecentsTransitionHelper(getContext(), mHandler);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
+        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_linear_in);
+        mHistoryTransitionDuration = res.getInteger(R.integer.recents_history_transition_duration);
         mTouchHandler = new RecentsViewTouchHandler(this);
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        mHistoryButton = inflater.inflate(R.layout.recents_history_button, this, false);
+        mHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault().send(new ShowHistoryEvent());
+            }
+        });
     }
 
     /** Set/get the bsp root node */
     public void setTaskStack(TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
+        mStack = stack;
         if (config.getLaunchState().launchedReuseTaskStackViews) {
             if (mTaskStackView != null) {
                 // If onRecentsHidden is not triggered, we need to the stack view again here
@@ -129,6 +152,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.setCallbacks(this);
             addView(mTaskStackView);
         }
+        if (indexOfChild(mHistoryButton) == -1) {
+            addView(mHistoryButton);
+        } else {
+            mHistoryButton.bringToFront();
+        }
 
         // Trigger a new layout
         requestLayout();
@@ -139,6 +167,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     public boolean isLastTaskLaunchedFreeform() {
         return mLastTaskLaunchedWasFreeform;
+    }
+
+    /**
+     * Returns the currently set task stack.
+     */
+    public TaskStack getTaskStack() {
+        return mStack;
     }
 
     /** Gets the next task in the stack - or if the last - the top task */
@@ -219,10 +254,15 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
         ctx.postAnimationTrigger.decrement();
 
+        // Hide the history button
+        int taskViewExitToHomeDuration = getResources().getInteger(
+                R.integer.recents_task_exit_to_home_duration);
+        hideHistoryButton(taskViewExitToHomeDuration);
+
         // If we are going home, cancel the previous task's window transition
         EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
 
-        // Notify of the exit animation
+        // Notify sof the exit animation
         EventBus.getDefault().send(new DismissRecentsToHomeAnimationStarted());
     }
 
@@ -251,6 +291,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             // Always bring the search bar to the top
             mSearchBar.bringToFront();
         }
+    }
+
+    /**
+     * Returns the last known system insets.
+     */
+    public Rect getSystemInsets() {
+        return mSystemInsets;
     }
 
     @Override
@@ -301,6 +348,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     MeasureSpec.makeMeasureSpec(taskRect.height(), MeasureSpec.AT_MOST));
         }
 
+        Rect stackRect = mTaskStackView.mLayoutAlgorithm.mCurrentStackRect;
+        measureChild(mHistoryButton,
+                MeasureSpec.makeMeasureSpec(stackRect.width(), MeasureSpec.EXACTLY),
+                heightMeasureSpec);
         setMeasuredDimension(width, height);
     }
 
@@ -330,6 +381,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     top + mDragView.getMeasuredHeight());
         }
 
+        Rect stackRect = mTaskStackView.mLayoutAlgorithm.mCurrentStackRect;
+        mHistoryButton.layout(stackRect.left, stackRect.top,
+                stackRect.left + mHistoryButton.getMeasuredWidth(),
+                stackRect.top + mHistoryButton.getMeasuredHeight());
+
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
 
@@ -346,7 +402,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mSystemInsets.set(insets.getSystemWindowInsets());
         requestLayout();
-        return insets.consumeSystemWindowInsets();
+        return insets;
     }
 
     @Override
@@ -490,6 +546,67 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public final void onBusEvent(DraggingInRecentsEndedEvent event) {
         animate().translationY(0f);
+    }
+
+    public final void onBusEvent(ShowHistoryEvent event) {
+        // Hide the history button when the history view is shown
+        hideHistoryButton(mHistoryTransitionDuration);
+    }
+
+    public final void onBusEvent(HideHistoryEvent event) {
+        // Show the history button when the history view is hidden
+        showHistoryButton(mHistoryTransitionDuration);
+    }
+
+    public final void onBusEvent(ShowHistoryButtonEvent event) {
+        showHistoryButton(150);
+    }
+
+    public final void onBusEvent(HideHistoryButtonEvent event) {
+        hideHistoryButton(100);
+    }
+
+    public final void onBusEvent(DebugFlagsChangedEvent event) {
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        if (!debugFlags.isHistoryEnabled()) {
+            hideHistoryButton(100);
+        }
+    }
+
+    /**
+     * Shows the history button.
+     */
+    private void showHistoryButton(int duration) {
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        if (!debugFlags.isHistoryEnabled()) {
+            return;
+        }
+
+        mHistoryButton.setVisibility(View.VISIBLE);
+        mHistoryButton.animate()
+                .alpha(1f)
+                .setDuration(duration)
+                .setInterpolator(mFastOutSlowInInterpolator)
+                .withLayer()
+                .start();
+    }
+
+    /**
+     * Hides the history button.
+     */
+    private void hideHistoryButton(int duration) {
+        mHistoryButton.animate()
+                .alpha(0f)
+                .setDuration(duration)
+                .setInterpolator(mFastOutLinearInInterpolator)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHistoryButton.setVisibility(View.INVISIBLE);
+                    }
+                })
+                .withLayer()
+                .start();
     }
 
     /**

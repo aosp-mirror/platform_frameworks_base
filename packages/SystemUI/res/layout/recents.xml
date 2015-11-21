@@ -39,6 +39,12 @@
            android:layout_width="match_parent"
            android:layout_height="match_parent" />
 
+    <!-- History View -->
+    <ViewStub android:id="@+id/history_view_stub"
+           android:layout="@layout/recents_history"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent" />
+
     <!-- Nav Bar Scrim View -->
     <ImageView
         android:id="@+id/nav_bar_scrim"

@@ -35,7 +35,7 @@ public class TaskStackViewScroller {
     private static final boolean DEBUG = false;
 
     public interface TaskStackViewScrollerCallbacks {
-        void onScrollChanged(float p);
+        void onScrollChanged(float prevScroll, float curScroll);
     }
 
     Context mContext;
@@ -78,9 +78,10 @@ public class TaskStackViewScroller {
 
     /** Sets the current stack scroll */
     public void setStackScroll(float s) {
+        float prevStackScroll = mStackScrollP;
         mStackScrollP = s;
         if (mCb != null) {
-            mCb.onScrollChanged(mStackScrollP);
+            mCb.onScrollChanged(prevStackScroll, mStackScrollP);
         }
     }
 
