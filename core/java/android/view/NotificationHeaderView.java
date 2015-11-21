@@ -17,13 +17,14 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 
-import com.android.internal.R;
+import java.util.ArrayList;
 
 /**
  * A header of a notification view
@@ -35,6 +36,10 @@ public class NotificationHeaderView extends LinearLayout {
     private final int mHeaderMinWidth;
     private View mAppName;
     private View mSubTextView;
+    private OnClickListener mExpandClickListener;
+    private HeaderTouchListener mTouchListener = new HeaderTouchListener();
+    private View mExpandButton;
+    private View mIcon;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -59,6 +64,8 @@ public class NotificationHeaderView extends LinearLayout {
         super.onFinishInflate();
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mSubTextView = findViewById(com.android.internal.R.id.header_sub_text);
+        mExpandButton = findViewById(com.android.internal.R.id.expand_button);
+        mIcon = findViewById(com.android.internal.R.id.icon);
     }
 
     @Override
@@ -104,5 +111,126 @@ public class NotificationHeaderView extends LinearLayout {
             totalWidth = givenWidth;
         }
         setMeasuredDimension(totalWidth, givenHeight);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        updateTouchListener();
+    }
+
+    private void updateTouchListener() {
+        if (mExpandClickListener != null) {
+            mTouchListener.bindTouchRects();
+        }
+    }
+
+    @Override
+    public void setOnClickListener(@Nullable OnClickListener l) {
+        mExpandClickListener = l;
+        setOnTouchListener(mExpandClickListener != null ? mTouchListener : null);
+        updateTouchListener();
+    }
+
+    public class HeaderTouchListener implements View.OnTouchListener {
+
+        private final ArrayList<Rect> mTouchRects = new ArrayList<>();
+        private int mTouchSlop;
+        private boolean mTrackGesture;
+        private float mDownX;
+        private float mDownY;
+
+        public HeaderTouchListener() {
+        }
+
+        public void bindTouchRects() {
+            mTouchRects.clear();
+            addRectAroundViewView(mIcon);
+            addRectAroundViewView(mExpandButton);
+            addInBetweenRect();
+            mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        }
+
+        private void addInBetweenRect() {
+            final Rect r = new Rect();
+            r.top = 0;
+            r.bottom = (int) (32 * getResources().getDisplayMetrics().density);
+            Rect leftRect = mTouchRects.get(0);
+            r.left = leftRect.right;
+            Rect rightRect = mTouchRects.get(1);
+            r.right = rightRect.left;
+            mTouchRects.add(r);
+        }
+
+        private void addRectAroundViewView(View view) {
+            final Rect r = getRectAroundView(view);
+            mTouchRects.add(r);
+        }
+
+        private Rect getRectAroundView(View view) {
+            float size = 48 * getResources().getDisplayMetrics().density;
+            final Rect r = new Rect();
+            if (view.getVisibility() == GONE) {
+                view = getFirstChildNotGone();
+                r.left = (int) (view.getLeft() - size / 2.0f);
+            } else {
+                r.left = (int) ((view.getLeft() + view.getRight()) / 2.0f - size / 2.0f);
+            }
+            r.top = (int) ((view.getTop() + view.getBottom()) / 2.0f - size / 2.0f);
+            r.bottom = (int) (r.top + size);
+            r.right = (int) (r.left + size);
+            return r;
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            float x = event.getX();
+            float y = event.getY();
+            switch (event.getActionMasked() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    mTrackGesture = false;
+                    if (isInside(x, y)) {
+                        mTrackGesture = true;
+                        return true;
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mTrackGesture) {
+                        if (Math.abs(mDownX - x) > mTouchSlop
+                                || Math.abs(mDownY - y) > mTouchSlop) {
+                            mTrackGesture = false;
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (mTrackGesture) {
+                        mExpandClickListener.onClick(NotificationHeaderView.this);
+                    }
+                    break;
+            }
+            return mTrackGesture;
+        }
+
+        private boolean isInside(float x, float y) {
+            for (int i = 0; i < mTouchRects.size(); i++) {
+                Rect r = mTouchRects.get(i);
+                if (r.contains((int) x, (int) y)) {
+                    mDownX = x;
+                    mDownY = y;
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private View getFirstChildNotGone() {
+        for (int i = 0; i < getChildCount(); i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                return child;
+            }
+        }
+        return this;
     }
 }

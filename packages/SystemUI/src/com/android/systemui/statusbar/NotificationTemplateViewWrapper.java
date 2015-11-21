@@ -68,8 +68,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private View mSubTextDivider;
     private ImageView mExpandButton;
     private ViewGroup mNotificationHeader;
-    private View.OnClickListener mExpandClickListener;
-    private HeaderTouchListener mHeaderTouchListener;
     private ProgressBar mProgressBar;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
@@ -98,15 +96,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         }
         mNotificationHeader = (ViewGroup) mView.findViewById(
                 com.android.internal.R.id.notification_header);
-        // Post to make sure the parent lays out its children before we get their bounds
-        mHeaderTouchListener = new HeaderTouchListener();
-        mExpandButton.post(new Runnable() {
-            @Override
-            public void run() {
-                // let's set up our touch regions
-                mHeaderTouchListener.bindTouchRects(mNotificationHeader, mIcon, mExpandButton);
-            }
-        });
         ArrayList<View> viewsToInvert = new ArrayList<>();
         if (mainColumn != null) {
             viewsToInvert.add(mainColumn);
@@ -299,8 +288,7 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     @Override
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
-        mNotificationHeader.setOnTouchListener(expandable ? mHeaderTouchListener : null);
-        mExpandClickListener = onClickListener;
+        mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
     }
 
     private void updateGrayscaleMatrix(float intensity) {
@@ -321,92 +309,5 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
                 (int) (rSource * (1f - t) + rTarget * t),
                 (int) (gSource * (1f - t) + gTarget * t),
                 (int) (bSource * (1f - t) + bTarget * t));
-    }
-
-    public class HeaderTouchListener implements View.OnTouchListener {
-
-        private final ArrayList<Rect> mTouchRects = new ArrayList<>();
-        private int mTouchSlop;
-        private boolean mTrackGesture;
-        private float mDownX;
-        private float mDownY;
-
-        public HeaderTouchListener() {
-        }
-
-        public void bindTouchRects(View parent, View icon, View expandButton) {
-            mTouchRects.clear();
-            addRectAroundViewView(icon);
-            addRectAroundViewView(expandButton);
-            addInBetweenRect(parent);
-            mTouchSlop = ViewConfiguration.get(parent.getContext()).getScaledTouchSlop();
-        }
-
-        private void addInBetweenRect(View parent) {
-            final Rect r = new Rect();
-            r.top = 0;
-            r.bottom = (int) (32 * parent.getResources().getDisplayMetrics().density);
-            Rect leftRect = mTouchRects.get(0);
-            r.left = leftRect.right;
-            Rect rightRect = mTouchRects.get(1);
-            r.right = rightRect.left;
-            mTouchRects.add(r);
-        }
-
-        private void addRectAroundViewView(View view) {
-            final Rect r = getRectAroundView(view);
-            mTouchRects.add(r);
-        }
-
-        private Rect getRectAroundView(View view) {
-            float size = 48 * view.getResources().getDisplayMetrics().density;
-            final Rect r = new Rect();
-            r.top = (int) ((view.getTop() + view.getBottom()) / 2.0f - size / 2.0f);
-            r.bottom = (int) (r.top + size);
-            r.left = (int) ((view.getLeft() + view.getRight()) / 2.0f - size / 2.0f);
-            r.right = (int) (r.left + size);
-            return r;
-        }
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            float x = event.getX();
-            float y = event.getY();
-            switch (event.getActionMasked() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_DOWN:
-                    mTrackGesture = false;
-                    if (isInside(x, y)) {
-                        mTrackGesture = true;
-                        return true;
-                    }
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (mTrackGesture) {
-                        if (Math.abs(mDownX - x) > mTouchSlop
-                                || Math.abs(mDownY - y) > mTouchSlop) {
-                            mTrackGesture = false;
-                        }
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if (mTrackGesture) {
-                        mExpandClickListener.onClick(mNotificationHeader);
-                    }
-                    break;
-            }
-            return mTrackGesture;
-        }
-
-        private boolean isInside(float x, float y) {
-            for (int i = 0; i < mTouchRects.size(); i++) {
-                Rect r = mTouchRects.get(i);
-                if (r.contains((int) x, (int) y)) {
-                    mDownX = x;
-                    mDownY = y;
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
