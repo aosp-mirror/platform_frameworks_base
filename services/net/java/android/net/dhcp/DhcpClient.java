@@ -22,8 +22,6 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
 import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -145,10 +143,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     // State variables.
     private final StateMachine mController;
-    private final PendingIntent mKickIntent;
-    private final PendingIntent mTimeoutIntent;
-    private final PendingIntent mRenewIntent;
-    private final PendingIntent mOneshotTimeoutIntent;
+    private final AlarmListener mKickAlarm;
+    private final AlarmListener mTimeoutAlarm;
+    private final AlarmListener mRenewAlarm;
+    private final AlarmListener mOneshotTimeoutAlarm;
     private final String mIfaceName;
 
     private boolean mRegisteredForPreDhcpNotification;
@@ -206,16 +204,15 @@ public class DhcpClient extends BaseDhcpStateMachine {
         mRandom = new Random();
 
         // Used to schedule packet retransmissions.
-        mKickIntent = createStateMachineCommandIntent("KICK", CMD_KICK);
+        mKickAlarm = new AlarmListener("KICK", CMD_KICK);
         // Used to time out PacketRetransmittingStates.
-        mTimeoutIntent = createStateMachineCommandIntent("TIMEOUT", CMD_TIMEOUT);
+        mTimeoutAlarm = new AlarmListener("TIMEOUT", CMD_TIMEOUT);
         // Used to schedule DHCP renews.
-        mRenewIntent = createStateMachineCommandIntent("RENEW", DhcpStateMachine.CMD_RENEW_DHCP);
+        mRenewAlarm = new AlarmListener("RENEW", DhcpStateMachine.CMD_RENEW_DHCP);
         // Used to tell the caller when its request (CMD_START_DHCP or CMD_RENEW_DHCP) timed out.
         // TODO: when the legacy DHCP client is gone, make the client fully asynchronous and
         // remove this.
-        mOneshotTimeoutIntent = createStateMachineCommandIntent("ONESHOT_TIMEOUT",
-                CMD_ONESHOT_TIMEOUT);
+        mOneshotTimeoutAlarm = new AlarmListener("ONESHOT_TIMEOUT", CMD_ONESHOT_TIMEOUT);
     }
 
     @Override
@@ -231,43 +228,29 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     /**
-     * Constructs a PendingIntent that sends the specified command to the state machine. This is
-     * implemented by creating an Intent with the specified parameters, and creating and registering
-     * a BroadcastReceiver for it. The broadcast must be sent by a process that holds the
-     * {@code CONNECTIVITY_INTERNAL} permission.
-     *
-     * @param cmdName the name of the command. The intent's action will be
-     *         {@code android.net.dhcp.DhcpClient.<mIfaceName>.<cmdName>}
-     * @param cmd the command to send to the state machine when the PendingIntent is triggered.
-     * @return the PendingIntent
+     * An AlarmListener that sends the specified command to the state machine.
      */
-    private PendingIntent createStateMachineCommandIntent(final String cmdName, final int cmd) {
-        String action = DhcpClient.class.getName() + "." + mIfaceName + "." + cmdName;
+    private class AlarmListener implements AlarmManager.OnAlarmListener {
+        private final int cmd;
+        private final String name;
 
-        Intent intent = new Intent(action, null).addFlags(
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-                Intent.FLAG_RECEIVER_FOREGROUND);
-        // TODO: The intent's package covers the whole of the system server, so it's pretty generic.
-        // Consider adding some sort of token as well.
-        intent.setPackage(mContext.getPackageName());
-        PendingIntent pendingIntent =  PendingIntent.getBroadcast(mContext, cmd, intent, 0);
+        public AlarmListener(final String cmdName, final int cmd) {
+            this.cmd = cmd;
+            this.name = DhcpClient.class.getSimpleName() + "." + mIfaceName + "." + cmdName;
+        }
 
-        mContext.registerReceiver(
-            new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    sendMessage(cmd);
-                }
-            },
-            new IntentFilter(action),
-            android.Manifest.permission.CONNECTIVITY_INTERNAL,
-            null);
+        public void set(long alarmTime) {
+            mAlarmManager.setExact(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, name, this, getHandler());
+        }
 
-        return pendingIntent;
-    }
+        public void cancel() {
+            mAlarmManager.cancel(this);
+        }
 
-    private void setAlarm(long alarmTime, PendingIntent intent) {
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, intent);
+        public void onAlarm() {
+            sendMessage(cmd);
+        }
     }
 
     private boolean initInterface() {
@@ -429,11 +412,11 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     private void scheduleRenew() {
-        mAlarmManager.cancel(mRenewIntent);
+        mAlarmManager.cancel(mRenewAlarm);
         if (mDhcpLeaseExpiry != 0) {
             long now = SystemClock.elapsedRealtime();
             long alarmTime = (now + mDhcpLeaseExpiry) / 2;
-            setAlarm(alarmTime, mRenewIntent);
+            mRenewAlarm.set(alarmTime);
             Log.d(TAG, "Scheduling renewal in " + ((alarmTime - now) / 1000) + "s");
         } else {
             Log.d(TAG, "Infinite lease, no renewal needed");
@@ -565,11 +548,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     // one state, so we can just use the state timeout.
     private void scheduleOneshotTimeout() {
         final long alarmTime = SystemClock.elapsedRealtime() + DHCP_TIMEOUT_MS;
-        setAlarm(alarmTime, mOneshotTimeoutIntent);
-    }
-
-    private void cancelOneshotTimeout() {
-        mAlarmManager.cancel(mOneshotTimeoutIntent);
+        mOneshotTimeoutAlarm.set(alarmTime);
     }
 
     class StoppedState extends LoggingState {
@@ -621,7 +600,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         @Override
         public void exit() {
-            cancelOneshotTimeout();
+            mOneshotTimeoutAlarm.cancel();
             if (mReceiveThread != null) {
                 mReceiveThread.halt();  // Also closes sockets.
                 mReceiveThread = null;
@@ -712,8 +691,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
 
         public void exit() {
-            mAlarmManager.cancel(mKickIntent);
-            mAlarmManager.cancel(mTimeoutIntent);
+            mKickAlarm.cancel();
+            mTimeoutAlarm.cancel();
         }
 
         abstract protected boolean sendPacket();
@@ -734,8 +713,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
             long now = SystemClock.elapsedRealtime();
             long timeout = jitterTimer(mTimer);
             long alarmTime = now + timeout;
-            mAlarmManager.cancel(mKickIntent);
-            setAlarm(alarmTime, mKickIntent);
+            mKickAlarm.cancel();
+            mKickAlarm.set(alarmTime);
             mTimer *= 2;
             if (mTimer > MAX_TIMEOUT_MS) {
                 mTimer = MAX_TIMEOUT_MS;
@@ -745,8 +724,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         protected void maybeInitTimeout() {
             if (mTimeout > 0) {
                 long alarmTime = SystemClock.elapsedRealtime() + mTimeout;
-                mAlarmManager.setExact(
-                        AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, mTimeoutIntent);
+                mTimeoutAlarm.set(alarmTime);
             }
         }
     }
@@ -846,7 +824,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
-            cancelOneshotTimeout();
+            mOneshotTimeoutAlarm.cancel();
             notifySuccess();
             // TODO: DhcpStateMachine only supports renewing at 50% of the lease time, and does not
             // support rebinding. Once the legacy DHCP client is gone, fix this.
