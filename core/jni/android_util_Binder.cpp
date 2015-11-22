@@ -711,6 +711,9 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             jniThrowException(env, "java/lang/RuntimeException",
                     "Not allowed to write file descriptors here");
             break;
+        case UNEXPECTED_NULL:
+            jniThrowNullPointerException(env, NULL);
+            break;
         case -EBADF:
             jniThrowException(env, "java/lang/RuntimeException",
                     "Bad file descriptor");
