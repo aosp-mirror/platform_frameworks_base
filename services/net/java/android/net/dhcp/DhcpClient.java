@@ -266,6 +266,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
         return pendingIntent;
     }
 
+    private void setAlarm(long alarmTime, PendingIntent intent) {
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, intent);
+    }
+
     private boolean initInterface() {
         try {
             mIface = NetworkInterface.getByName(mIfaceName);
@@ -429,7 +433,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         if (mDhcpLeaseExpiry != 0) {
             long now = SystemClock.elapsedRealtime();
             long alarmTime = (now + mDhcpLeaseExpiry) / 2;
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, mRenewIntent);
+            setAlarm(alarmTime, mRenewIntent);
             Log.d(TAG, "Scheduling renewal in " + ((alarmTime - now) / 1000) + "s");
         } else {
             Log.d(TAG, "Infinite lease, no renewal needed");
@@ -561,8 +565,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     // one state, so we can just use the state timeout.
     private void scheduleOneshotTimeout() {
         final long alarmTime = SystemClock.elapsedRealtime() + DHCP_TIMEOUT_MS;
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime,
-                mOneshotTimeoutIntent);
+        setAlarm(alarmTime, mOneshotTimeoutIntent);
     }
 
     private void cancelOneshotTimeout() {
@@ -732,7 +735,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
             long timeout = jitterTimer(mTimer);
             long alarmTime = now + timeout;
             mAlarmManager.cancel(mKickIntent);
-            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, mKickIntent);
+            setAlarm(alarmTime, mKickIntent);
             mTimer *= 2;
             if (mTimer > MAX_TIMEOUT_MS) {
                 mTimer = MAX_TIMEOUT_MS;
