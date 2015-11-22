@@ -2164,7 +2164,7 @@ class AlarmManagerService extends SystemService {
         public boolean matches(PendingIntent pi, IAlarmListener rec) {
             return (operation != null)
                     ? operation.equals(pi)
-                    : listener.asBinder().equals(rec.asBinder());
+                    : rec != null && listener.asBinder().equals(rec.asBinder());
         }
 
         public boolean matches(String packageName) {
