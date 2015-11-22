@@ -76,7 +76,8 @@ ad hoc access to specific pieces of data.</p>
 
 <p>This document describes how application developers can use the
 security features provided by Android.  A more general <a
-href="http://source.android.com/tech/security/index.html"> Android Security
+href="http://source.android.com/tech/security/index.html"
+class="external-link">Android Security
 Overview</a> is provided in the Android Open Source Project.</p>
 
 
@@ -98,7 +99,7 @@ require, and the Android system prompts the user for consent.</p>
 
 <p>The application sandbox does not depend on the technology used to build
 an application. In particular the Dalvik VM is not a security boundary, and
-any app can run native code (see <a href="/sdk/ndk/index.html">the Android
+any app can run native code (see <a href="{@docRoot}tools/sdk/ndk/index.html">the Android
 NDK</a>). All types of applications &mdash; Java, native, and hybrid &mdash;
 are sandboxed in the same way and have the same degree of security from each
 other.</p>
@@ -114,9 +115,9 @@ signed by a certificate authority; it is perfectly allowable, and typical,
 for Android applications to use self-signed certificates. The purpose of
 certificates in Android is to distinguish application authors. This allows
 the system to grant or deny applications access to <a
-href="/guide/topics/manifest/permission-element.html#plevel">signature-level
+href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">signature-level
 permissions</a> and to grant or deny an application's <a
-href="/guide/topics/manifest/manifest-element.html#uid">request to be given
+href="{@docRoot}guide/topics/manifest/manifest-element.html#uid">request to be given
 the same Linux identity</a> as another application.</p>
 
 <a name="userid"></a>
@@ -806,7 +807,7 @@ methods.</p>
     <dd>Information about Android works on different types of devices and an introduction
     to how you can optimize your app for each device or restrict your app's availability
     to different devices.</dd>
-    <dt><a href="{@docRoot}http://source.android.com/devices/tech/security/index.html"
+    <dt><a href="http://source.android.com/devices/tech/security/index.html"
         class="external-link">Android Security Overview</a></dt>
     <dd>A detailed discussion about the Android platform's security model.</dd>
   </dl>
