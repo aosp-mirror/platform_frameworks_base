@@ -24,4 +24,7 @@
     <java-symbol type="string" name="url_copy_success" />
     <java-symbol type="string" name="url_copy_failed" />
 
+    <!-- Rotation sensor -->
+    <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
+
 </resources>
