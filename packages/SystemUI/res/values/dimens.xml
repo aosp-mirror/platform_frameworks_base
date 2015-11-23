@@ -351,9 +351,6 @@
     <!-- radius of the corners of the material rounded rect background but negative-->
     <dimen name="notification_material_rounded_rect_radius_negative">-2dp</dimen>
 
-    <!-- height of notification header view if present -->
-    <dimen name="notification_header_height">32dp</dimen>
-
     <!-- The padding between notification children -->
     <dimen name="notification_children_padding">2dp</dimen>
 

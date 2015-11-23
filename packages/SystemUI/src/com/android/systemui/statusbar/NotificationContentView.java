@@ -24,6 +24,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -77,7 +78,6 @@ public class NotificationContentView extends FrameLayout {
     private boolean mShowingLegacyBackground;
     private boolean mIsChildInGroup;
     private int mSmallHeight;
-    private ExpandableNotificationRow mContainingNotification;
     private StatusBarNotification mStatusBarNotification;
     private NotificationGroupManager mGroupManager;
 
@@ -98,17 +98,7 @@ public class NotificationContentView extends FrameLayout {
                     mRoundRectRadius);
         }
     };
-    private OnClickListener mExpandClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
-                mGroupManager.toggleGroupExpansion(mStatusBarNotification);
-            } else {
-                mContainingNotification.setUserExpanded(!mContainingNotification.isExpanded());
-                mContainingNotification.notifyHeightChanged(true);
-            }
-        }
-    };
+    private OnClickListener mExpandClickListener;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -503,10 +493,6 @@ public class NotificationContentView extends FrameLayout {
         updateSingleLineView();
     }
 
-    public void setContainingNotification(ExpandableNotificationRow notification) {
-        mContainingNotification = notification;
-    }
-
     public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
         updateSingleLineView();
@@ -535,18 +521,19 @@ public class NotificationContentView extends FrameLayout {
         mGroupManager = groupManager;
     }
 
-    public void updateExpandButtons() {
+    public void setExpandClickListener(OnClickListener expandClickListener) {
+        mExpandClickListener = expandClickListener;
+    }
+
+    public void updateExpandButtons(boolean expandable) {
         if (mExpandedChild != null) {
-            mExpandedWrapper.updateExpandability(mContainingNotification.isExpandable(),
-                    mExpandClickListener);
+            mExpandedWrapper.updateExpandability(expandable, mExpandClickListener);
         }
         if (mContractedChild != null) {
-            mContractedWrapper.updateExpandability(mContainingNotification.isExpandable(),
-                    mExpandClickListener);
+            mContractedWrapper.updateExpandability(expandable, mExpandClickListener);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.updateExpandability(mContainingNotification.isExpandable(),
-                    mExpandClickListener);
+            mHeadsUpWrapper.updateExpandability(expandable,  mExpandClickListener);
         }
     }
 }

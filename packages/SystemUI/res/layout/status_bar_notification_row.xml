@@ -61,14 +61,6 @@
         />
 
     <ViewStub
-        android:layout="@layout/notification_header"
-        android:id="@+id/notification_header_stub"
-        android:inflatedId="@+id/notification_header"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_header_height"
-        />
-
-    <ViewStub
         android:layout="@layout/notification_guts"
         android:id="@+id/notification_guts_stub"
         android:inflatedId="@+id/notification_guts"

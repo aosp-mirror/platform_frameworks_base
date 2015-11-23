@@ -78,7 +78,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         mNotificationAppearDistance = getResources().getDimensionPixelSize(
                 R.dimen.notification_appear_distance);
         mNotificationHeaderHeight = getResources().getDimensionPixelSize(
-                R.dimen.notification_header_height);
+                com.android.internal.R.dimen.notification_header_height);
         mHeaderTopPaddingSubstraction = 2 * getResources().getDisplayMetrics().density;
         mCollapsedBottompadding = 10 * getResources().getDisplayMetrics().density;
         mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
@@ -246,7 +246,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      *         in @param maxAllowedVisibleChildren
      */
     private int getIntrinsicHeight(float maxAllowedVisibleChildren) {
-        int intrinsicHeight = 0;
+        int intrinsicHeight = mNotificationHeaderHeight;;
         int visibleChildren = 0;
         int childCount = mChildren.size();
         for (int i = 0; i < childCount; i++) {

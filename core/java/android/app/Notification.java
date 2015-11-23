@@ -58,7 +58,6 @@ import com.android.internal.util.NotificationColorUtil;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2986,7 +2985,7 @@ public class Notification implements Parcelable
         }
 
         private void resetStandardTemplate(RemoteViews contentView) {
-            resetHeader(contentView);
+            resetNotificationHeader(contentView);
             resetContentMargins(contentView);
             contentView.setViewVisibility(R.id.right_icon, View.GONE);
             contentView.setTextViewText(R.id.title, null);
@@ -2996,7 +2995,10 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.progress, View.GONE);
         }
 
-        private void resetHeader(RemoteViews contentView) {
+        /**
+         * Resets the notification header to its original state
+         */
+        private void resetNotificationHeader(RemoteViews contentView) {
             contentView.setImageViewResource(R.id.icon, 0);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
@@ -3091,11 +3093,16 @@ public class Notification implements Parcelable
 
         private void bindNotificationHeader(RemoteViews contentView) {
             bindSmallIcon(contentView);
+            bindChildCountColor(contentView);
             bindHeaderAppName(contentView);
             bindHeaderSubText(contentView);
             bindContentInfo(contentView);
             bindHeaderChronometerAndTime(contentView);
             bindExpandButton(contentView);
+        }
+
+        private void bindChildCountColor(RemoteViews contentView) {
+            contentView.setTextColor(R.id.number_of_children, resolveColor());
         }
 
         private void bindContentInfo(RemoteViews contentView) {
@@ -3249,6 +3256,19 @@ public class Notification implements Parcelable
             }
             adaptNotificationHeaderForBigContentView(result);
             return result;
+        }
+
+        /**
+         * Construct a RemoteViews for the final notification header only
+         *
+         * @hide
+         */
+        public RemoteViews makeNotificationHeader() {
+            RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
+                    R.layout.notification_template_header);
+            resetNotificationHeader(header);
+            bindNotificationHeader(header);
+            return header;
         }
 
         private void hideLine1Text(RemoteViews result) {

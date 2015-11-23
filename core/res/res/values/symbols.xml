@@ -2345,6 +2345,7 @@
   <java-symbol type="id" name="addToDictionaryButton" />
   <java-symbol type="id" name="deleteButton" />
 
+  <java-symbol type="string" name="notification_children_count_bracketed" />
   <java-symbol type="id" name="app_name_text" />
   <java-symbol type="id" name="number_of_children" />
   <java-symbol type="id" name="header_sub_text" />
@@ -2356,6 +2357,7 @@
   <java-symbol type="id" name="content_info_divider" />
   <java-symbol type="id" name="text_line_1" />
   <java-symbol type="drawable" name="ic_arrow_up_14dp" />
+  <java-symbol type="dimen" name="notification_header_height" />
   <java-symbol type="dimen" name="notification_big_picture_content_min_height_with_picture" />
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
   <java-symbol type="dimen" name="notification_content_margin_start" />

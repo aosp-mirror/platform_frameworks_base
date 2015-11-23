@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -40,6 +41,7 @@ public class NotificationHeaderView extends LinearLayout {
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private View mExpandButton;
     private View mIcon;
+    private TextView mChildCount;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -66,6 +68,7 @@ public class NotificationHeaderView extends LinearLayout {
         mSubTextView = findViewById(com.android.internal.R.id.header_sub_text);
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
+        mChildCount = (TextView) findViewById(com.android.internal.R.id.number_of_children);
     }
 
     @Override
@@ -130,6 +133,17 @@ public class NotificationHeaderView extends LinearLayout {
         mExpandClickListener = l;
         setOnTouchListener(mExpandClickListener != null ? mTouchListener : null);
         updateTouchListener();
+    }
+
+    public void setChildCount(int childCount) {
+        if (childCount > 0) {
+            mChildCount.setText(getContext().getString(
+                    com.android.internal.R.string.notification_children_count_bracketed,
+                    childCount));
+            mChildCount.setVisibility(VISIBLE);
+        } else {
+            mChildCount.setVisibility(GONE);
+        }
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {

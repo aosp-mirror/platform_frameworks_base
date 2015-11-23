@@ -92,8 +92,6 @@ public class NotificationGroupManager {
         if (group.children.isEmpty()) {
             if (group.summary == null) {
                 mGroupMap.remove(groupKey);
-            } else if (!group.expanded) {
-                group.summary.row.updateNotificationHeader();
             }
         }
     }
@@ -109,9 +107,6 @@ public class NotificationGroupManager {
         }
         if (notif.isGroupChild()) {
             group.children.add(added);
-            if (group.summary != null && group.children.size() == 1 && !group.expanded) {
-                group.summary.row.updateNotificationHeader();
-            }
         } else {
             group.summary = added;
             group.expanded = added.row.areChildrenExpanded();
