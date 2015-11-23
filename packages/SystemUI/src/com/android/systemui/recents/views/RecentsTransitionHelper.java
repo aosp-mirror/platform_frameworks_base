@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -49,7 +48,6 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;

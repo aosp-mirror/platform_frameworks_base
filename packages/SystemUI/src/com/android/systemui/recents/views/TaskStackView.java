@@ -1117,8 +1117,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayersDisabled = false;
 
         // Draw the freeform workspace background
-        if (mFreeformWorkspaceBackground.getAlpha() > 0) {
-            mFreeformWorkspaceBackground.draw(canvas);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.hasFreeformWorkspaceSupport()) {
+            if (mFreeformWorkspaceBackground.getAlpha() > 0) {
+                mFreeformWorkspaceBackground.draw(canvas);
+            }
         }
 
         super.dispatchDraw(canvas);
@@ -1162,8 +1165,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mViewPool.returnViewToPool(tv);
             }
 
-            // Get the stack scroll of the task to anchor to (since we are removing something, the front
-            // most task will be our anchor task)
+            // Get the stack scroll of the task to anchor to (since we are removing something, the
+            // front most task will be our anchor task)
             Task anchorTask = null;
             float prevAnchorTaskScroll = 0;
             boolean pullStackForward = stack.getTaskCount() > 0;
@@ -1180,11 +1183,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // to ensure that the new front most task is now fully visible
                 mStackScroller.setStackScroll(mLayoutAlgorithm.mMaxScrollP);
             } else if (pullStackForward) {
-                // Otherwise, offset the scroll by half the movement of the anchor task to allow the
-                // tasks behind the removed task to move forward, and the tasks in front to move back
+                // Otherwise, offset the scroll by the movement of the anchor task
                 float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
-                mStackScroller.setStackScroll(mStackScroller.getStackScroll() + (anchorTaskScroll
-                        - prevAnchorTaskScroll) / 2);
+                float newStackScroll = mStackScroller.getStackScroll() +
+                        (anchorTaskScroll - prevAnchorTaskScroll);
+                if (mLayoutAlgorithm.getFocusState() != TaskStackLayoutAlgorithm.STATE_FOCUSED) {
+                    // If we are focused, we don't want the front task to move, but otherwise, we
+                    // allow the back task to move up, and the front task to move back
+                    newStackScroll /= 2;
+                }
+                mStackScroller.setStackScroll(newStackScroll);
                 mStackScroller.boundScroll();
             }
 
@@ -1507,16 +1515,5 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Remove the task from the stack
         mStack.removeTask(task);
-
-        if (taskWasFocused || ssp.isTouchExplorationEnabled()) {
-            // If the dismissed task was focused or if we are in touch exploration mode, then focus
-            // the next task
-            RecentsConfiguration config = Recents.getConfiguration();
-            RecentsActivityLaunchState launchState = config.getLaunchState();
-            boolean isFreeformTask = taskIndex > 0 ?
-                    mStack.getTasks().get(taskIndex - 1).isFreeformTask() : false;
-            setFocusedTask(taskIndex - 1, !isFreeformTask /* scrollToTask */,
-                    launchState.launchedWithAltTab);
-        }
     }
 }

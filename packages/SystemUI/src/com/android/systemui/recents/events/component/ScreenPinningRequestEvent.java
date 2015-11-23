@@ -18,7 +18,6 @@ package com.android.systemui.recents.events.component;
 
 import android.content.Context;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 
 /**
  * This is sent when we want to start screen pinning.
