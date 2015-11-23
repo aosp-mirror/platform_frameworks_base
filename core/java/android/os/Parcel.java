@@ -231,6 +231,7 @@ public final class Parcel {
     private static final int VAL_SIZEF = 27;
 
     // The initial int32 in a Binder call's reply Parcel header:
+    // Keep these in sync with libbinder's binder/Status.h.
     private static final int EX_SECURITY = -1;
     private static final int EX_BAD_PARCELABLE = -2;
     private static final int EX_ILLEGAL_ARGUMENT = -3;
@@ -238,7 +239,11 @@ public final class Parcel {
     private static final int EX_ILLEGAL_STATE = -5;
     private static final int EX_NETWORK_MAIN_THREAD = -6;
     private static final int EX_UNSUPPORTED_OPERATION = -7;
+    private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
+    // EX_TRANSACTION_FAILED is used exclusively in native code.
+    // see libbinder's binder/Status.h
+    private static final int EX_TRANSACTION_FAILED = -129;
 
     private static native int nativeDataSize(long nativePtr);
     private static native int nativeDataAvail(long nativePtr);
@@ -1515,6 +1520,8 @@ public final class Parcel {
             code = EX_NETWORK_MAIN_THREAD;
         } else if (e instanceof UnsupportedOperationException) {
             code = EX_UNSUPPORTED_OPERATION;
+        } else if (e instanceof ServiceSpecificException) {
+            code = EX_SERVICE_SPECIFIC;
         }
         writeInt(code);
         StrictMode.clearGatheredViolations();
@@ -1525,6 +1532,9 @@ public final class Parcel {
             throw new RuntimeException(e);
         }
         writeString(e.getMessage());
+        if (e instanceof ServiceSpecificException) {
+            writeInt(((ServiceSpecificException)e).errorCode);
+        }
     }
 
     /**
@@ -1635,6 +1645,8 @@ public final class Parcel {
                 throw new NetworkOnMainThreadException();
             case EX_UNSUPPORTED_OPERATION:
                 throw new UnsupportedOperationException(msg);
+            case EX_SERVICE_SPECIFIC:
+                throw new ServiceSpecificException(readInt(), msg);
         }
         throw new RuntimeException("Unknown exception code: " + code
                 + " msg " + msg);
