@@ -80,6 +80,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.widget.DateTimeView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -280,6 +281,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         @Override
         public boolean onClickHandler(
                 final View view, final PendingIntent pendingIntent, final Intent fillInIntent) {
+            if (handleRemoteInput(view, pendingIntent, fillInIntent)) {
+                return true;
+            }
+
             if (DEBUG) {
                 Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
@@ -368,6 +373,65 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Intent fillInIntent) {
             return super.onClickHandler(view, pendingIntent, fillInIntent);
         }
+
+        private boolean handleRemoteInput(View view, PendingIntent pendingIntent, Intent fillInIntent) {
+            Object tag = view.getTag(com.android.internal.R.id.remote_input_tag);
+            RemoteInput[] inputs = null;
+            if (tag instanceof RemoteInput[]) {
+                inputs = (RemoteInput[]) tag;
+            }
+
+            if (inputs == null) {
+                return false;
+            }
+
+            RemoteInput input = null;
+
+            for (RemoteInput i : inputs) {
+                if (i.getAllowFreeFormInput()) {
+                    input = i;
+                }
+            }
+
+            if (input == null) {
+                return false;
+            }
+
+            ViewParent p = view.getParent();
+            RemoteInputView riv = null;
+            while (p != null) {
+                if (p instanceof View) {
+                    View pv = (View) p;
+                    if (pv.isRootNamespace()) {
+                        riv = (RemoteInputView) pv.findViewWithTag(RemoteInputView.VIEW_TAG);
+                        break;
+                    }
+                }
+                p = p.getParent();
+            }
+
+            if (riv == null) {
+                return false;
+            }
+
+            riv.setVisibility(View.VISIBLE);
+            int cx = view.getLeft() + view.getWidth() / 2;
+            int cy = view.getTop() + view.getHeight() / 2;
+            int w = riv.getWidth();
+            int h = riv.getHeight();
+            int r = Math.max(
+                    Math.max(cx + cy, cx + (h - cy)),
+                    Math.max((w - cx) + cy, (w - cx) + (h - cy)));
+            ViewAnimationUtils.createCircularReveal(riv, cx, cy, 0, r)
+                    .start();
+
+            riv.setPendingIntent(pendingIntent);
+            riv.setRemoteInput(inputs, input);
+            riv.focus();
+
+            return true;
+        }
+
     };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -1551,15 +1615,15 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         RemoteInput remoteInput = null;
 
-        // See if the notification has exactly one action and this action allows free-form input
-        // TODO: relax restrictions once we support more than one remote input action.
         Notification.Action[] actions = entry.notification.getNotification().actions;
-        if (actions != null && actions.length == 1) {
-            if (actions[0].getRemoteInputs() != null) {
-                for (RemoteInput ri : actions[0].getRemoteInputs()) {
-                    if (ri.getAllowFreeFormInput()) {
-                        remoteInput = ri;
-                        break;
+        if (actions != null) {
+            for (Notification.Action a : actions) {
+                if (a.getRemoteInputs() != null) {
+                    for (RemoteInput ri : a.getRemoteInputs()) {
+                        if (ri.getAllowFreeFormInput()) {
+                            remoteInput = ri;
+                            break;
+                        }
                     }
                 }
             }
@@ -1569,32 +1633,36 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (remoteInput != null) {
             View bigContentView = entry.getExpandedContentView();
             if (bigContentView != null) {
-                inflateRemoteInput(bigContentView, entry, remoteInput, actions);
+                inflateRemoteInput(bigContentView, entry);
             }
             View headsUpContentView = entry.getHeadsUpContentView();
             if (headsUpContentView != null) {
-                inflateRemoteInput(headsUpContentView, entry, remoteInput, actions);
+                inflateRemoteInput(headsUpContentView, entry);
             }
         }
 
     }
 
-    private void inflateRemoteInput(View view, Entry entry, RemoteInput remoteInput,
-            Notification.Action[] actions) {
-        View actionContainerCandidate = view.findViewById(com.android.internal.R.id.actions);
-        if (actionContainerCandidate instanceof ViewGroup) {
-            ViewGroup actionContainer = (ViewGroup) actionContainerCandidate;
-            RemoteInputView riv = inflateRemoteInputView(actionContainer, entry,
-                    actions[0], remoteInput);
+    private RemoteInputView inflateRemoteInput(View view, Entry entry) {
+        View actionContainerCandidate = view.findViewById(
+                com.android.internal.R.id.actions_container);
+        if (actionContainerCandidate instanceof FrameLayout) {
+            ViewGroup actionContainer = (FrameLayout) actionContainerCandidate;
+            RemoteInputView riv = inflateRemoteInputView(actionContainer, entry);
             if (riv != null) {
-                actionContainer.removeAllViews();
-                actionContainer.addView(riv);
+                riv.setVisibility(View.INVISIBLE);
+                actionContainer.addView(riv, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT)
+                );
+                riv.setBackgroundColor(entry.notification.getNotification().color);
+                return riv;
             }
         }
+        return null;
     }
 
-    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry,
-            Notification.Action action, RemoteInput remoteInput) {
+    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry) {
         return null;
     }
 

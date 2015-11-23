@@ -3282,12 +3282,17 @@ public class Notification implements Parcelable
                     tombstone ? getActionTombstoneLayoutResource()
                               : getActionLayoutResource());
             final Icon ai = action.getIcon();
-            button.setTextViewCompoundDrawablesRelative(R.id.action0, ai, null, null, null);
             button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
             button.setContentDescription(R.id.action0, action.title);
+            if (action.mRemoteInputs != null) {
+                button.setRemoteInputs(R.id.action0, action.mRemoteInputs);
+            }
+            if (mN.color != COLOR_DEFAULT) {
+                button.setTextColor(R.id.action0, mN.color);
+            }
             processLegacyAction(action, button);
             return button;
         }

@@ -2302,6 +2302,9 @@
   <java-symbol type="string" name="notification_inbox_ellipsis" />
   <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
 
+  <java-symbol type="id" name="actions_container" />
+  <java-symbol type="id" name="remote_input_tag" />
+
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
   <java-symbol type="string" name="ext_media_status_removed" />
   <java-symbol type="string" name="ext_media_status_unmounted" />
