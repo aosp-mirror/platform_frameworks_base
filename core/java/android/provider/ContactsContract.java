@@ -394,12 +394,19 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "directories");
 
         /**
-         * The content:// style URI for enterprise Directory table. Requests to this URI can be
-         * performed on the UI thread because they are always unblocking.
+         * URI used for getting all directories from primary and managed profile.
+         * It supports the same semantics as {@link #CONTENT_URI} and returns the same columns.
+         * If the device has no managed profile that is linked to the current profile, it behaves
+         * in the exact same way as {@link #CONTENT_URI}.
+         * If there is a managed profile linked to the current profile, it will merge
+         * managed profile and current profile's results and return.
+         *
+         * Note: this query returns primary profile results before managed profile results,
+         * and this order is not affected by sorting parameter.
          *
          */
-        public static final Uri CORP_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "directories_corp");
+        public static final Uri ENTERPRISE_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "directories_enterprise");
 
         /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
