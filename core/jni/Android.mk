@@ -237,7 +237,7 @@ LOCAL_SHARED_LIBRARIES := \
     libicuuc \
     libicui18n \
     libmedia \
-    libjpeg-turbo \
+    libjpeg \
     libusbhost \
     libharfbuzz_ng \
     libz \
