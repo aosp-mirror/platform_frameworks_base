@@ -131,7 +131,12 @@ public class DevicePolicyManager {
      * As of {@link android.os.Build.VERSION_CODES#M}, it should contain the extra
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, although specifying only
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported.
-     * This intent may also contain the extra {@link #EXTRA_PROVISIONING_LOGO_URI}.
+     *
+     * <p> The intent may also contain the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_PROVISIONING_LOGO_URI}, optional </li>
+     * <li> {@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional </li>
+     * </ul>
      *
      * <p> When managed provisioning has completed, broadcasts are sent to the application specified
      * in the provisioning intent. The
@@ -199,6 +204,7 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * </ul>
      *
      * <p> When device owner provisioning has completed, an intent of the type
@@ -356,6 +362,16 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
         = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
+
+    /**
+     * A integer extra indicating indicating the predominant color to show during the provisioning.
+     * Refer to {@link android.graphics#Color} for how the color is represented.
+     *
+     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE} or
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}.
+     */
+    public static final String EXTRA_PROVISIONING_MAIN_COLOR =
+             "android.app.extra.PROVISIONING_MAIN_COLOR";
 
     /**
      * A Boolean extra that can be used by the mobile device management application to skip the
