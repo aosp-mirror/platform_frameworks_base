@@ -1915,6 +1915,19 @@ public class Notification implements Parcelable
         builder.build(); // callers expect this notification to be ready to use
     }
 
+    /**
+     * @hide
+     */
+    public static void addFieldsFromContext(Context context, Notification notification) {
+        if (notification.extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO) == null) {
+            notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO,
+                    context.getApplicationInfo());
+        }
+        if (!notification.extras.containsKey(EXTRA_ORIGINATING_USERID)) {
+            notification.extras.putInt(EXTRA_ORIGINATING_USERID, context.getUserId());
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -2103,11 +2116,6 @@ public class Notification implements Parcelable
         private ArrayList<String> mPersonList = new ArrayList<String>();
         private NotificationColorUtil mColorUtil;
         private boolean mColorUtilInited = false;
-
-        /**
-         * The user that built the notification originally.
-         */
-        private int mOriginatingUserId;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -2940,7 +2948,7 @@ public class Notification implements Parcelable
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             return mContext.getPackageManager().getUserBadgeForDensity(
-                    new UserHandle(mOriginatingUserId), 0);
+                    new UserHandle(mContext.getUserId()), 0);
         }
 
         private Bitmap getProfileBadge() {
@@ -3423,10 +3431,6 @@ public class Notification implements Parcelable
                 mN.extras.putStringArray(EXTRA_PEOPLE,
                         mPersonList.toArray(new String[mPersonList.size()]));
             }
-            if (mN.topic == null) {
-                mN.topic = new Topic(TOPIC_DEFAULT, mContext.getString(
-                        R.string.default_notification_topic_label));
-            }
             return mN;
         }
 
@@ -3435,12 +3439,16 @@ public class Notification implements Parcelable
             ApplicationInfo applicationInfo = n.extras.getParcelable(
                     EXTRA_BUILDER_APPLICATION_INFO);
             Context builderContext;
-            try {
-                builderContext = context.createApplicationContext(applicationInfo,
-                        Context.CONTEXT_RESTRICTED);
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
-                builderContext = context;  // try with our context
+            if (applicationInfo != null) {
+                try {
+                    builderContext = context.createApplicationContext(applicationInfo,
+                            Context.CONTEXT_RESTRICTED);
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
+                    builderContext = context;  // try with our context
+                }
+            } else {
+                builderContext = context; // try with given context
             }
 
             return new Builder(builderContext, n);
@@ -3489,9 +3497,7 @@ public class Notification implements Parcelable
             }
 
             // lazy stuff from mContext; see comment in Builder(Context, Notification)
-            mN.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, mContext.getApplicationInfo());
-            mOriginatingUserId = mContext.getUserId();
-            mN.extras.putInt(EXTRA_ORIGINATING_USERID, mOriginatingUserId);
+            Notification.addFieldsFromContext(mContext, mN);
 
             buildUnstyled();
 
