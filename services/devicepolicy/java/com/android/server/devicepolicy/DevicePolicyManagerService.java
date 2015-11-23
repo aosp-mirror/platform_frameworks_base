@@ -4628,11 +4628,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    @Override
-    public int getDeviceOwnerUserId() {
-        return mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerUserId() : UserHandle.USER_NULL;
-    }
-
     // Returns the active device owner or null if there is no device owner.
     @VisibleForTesting
     ActiveAdmin getDeviceOwnerAdminLocked() {
