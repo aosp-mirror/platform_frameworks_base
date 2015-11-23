@@ -1,4 +1,4 @@
-page.title=Fundamentos 
+page.title=Como iniciar
 
 @jd:body
 
@@ -40,20 +40,27 @@ page.title=Fundamentos
 
 <h3>Manter compatibilidade com versões anteriores</h3>
 
-<p>Você pode adicionar muitos recursos do Material Design ao aplicativo e, ao mesmo tempo, manter a compatibilidade com versões anteriores ao Android 5.0. Para obter mais informações, consulte <a href="{@docRoot}training/material/compatibility.html">Como manter a compatibilidade</a>.</p>
+<p>Você pode adicionar muitos recursos do Material Design ao aplicativo e, ao mesmo tempo, manter
+a compatibilidade com versões anteriores ao Android 5.0. Para obter mais informações, consulte
+<a href="{@docRoot}training/material/compatibility.html">Como manter a compatibilidade</a>.</p>
 
 <h3>Atualizar o aplicativo com o Material Design</h3>
 
-<p>Para atualizar um aplicativo existente para incorporar o Material Design, atualize os layouts de acordo com as orientações do Material Design. Certifique-se também de incorporar profundidade, feedbacks de toque e animações.</p>
+<p>Para atualizar um aplicativo existente para incorporar o Material Design, atualize os layouts
+de acordo com as orientações do Material Design. Certifique-se também de incorporar profundidade, feedbacks de toque e
+animações.</p>
 
 <h3>Criar novos aplicativos com o Material Design</h3>
 
-<p>Se você está criando um novo aplicativo com recursos do Material Design, as <a href="http://www.google.com/design/spec">orientações do Material Design</a> fornecem uma estrutura de projeto coesa. Siga tais orientações e use a nova funcionalidade na estrutura do Android para projetar e desenvolver o aplicativo.</p>
+<p>Se você está criando um novo aplicativo com recursos do Material Design, as <a href="http://www.google.com/design/spec">orientações do Material Design</a> fornecem uma
+estrutura de projeto coesa. Siga tais orientações e use a nova funcionalidade na estrutura do Android para
+projetar e desenvolver o aplicativo.</p>
 
 
 <h2 id="ApplyTheme">Aplicar o tema do Material</h2>
 
-<p>Para aplicar o tema do Material no aplicativo, especifique um estilo herdado de <code>android:Theme.Material</code>:</p>
+<p>Para aplicar o tema do Material no aplicativo, especifique um estilo herdado de
+<code>android:Theme.Material</code>:</p>
 
 <pre>
 &lt;!-- res/values/styles.xml -->
@@ -65,12 +72,16 @@ page.title=Fundamentos
 &lt;/resources>
 </pre>
 
-<p>O tema do Material fornece widgets do sistema atualizados que permitem definir a paleta de cores e as animações padrão para feedback de toque e transições de atividades. Para obter mais detalhes, consulte <a href="{@docRoot}training/material/theme.html">Como usar o tema do Material</a>.</p>
+<p>O tema do Material fornece widgets do sistema atualizados que permitem definir a paleta de cores e as animações
+padrão para feedback de toque e transições de atividades. Para obter mais detalhes, consulte
+<a href="{@docRoot}training/material/theme.html">Como usar o tema do Material</a>.</p>
 
 
 <h2 id="Layouts">Projetar layouts</h2>
 
-<p>Além de aplicar e personalizar o tema do Material, os layouts devem estar em conformidade com as <a href="http://www.google.com/design/spec">orientações do Material Design</a>. Ao projetar os layouts, dê atenção especial ao seguinte:</p>
+<p>Além de aplicar e personalizar o tema do Material, os layouts devem estar em conformidade
+com as <a href="http://www.google.com/design/spec">orientações do Material Design</a>. Ao projetar os
+layouts, dê atenção especial ao seguinte:</p>
 
 <ul>
 <li>Grades das linhas de base</li>
@@ -83,7 +94,9 @@ page.title=Fundamentos
 
 <h2 id="Depth">Especificar a elevação em visualizações</h2>
 
-<p>As visualizações podem lançar sombras e o valor da elevação delas determina o tamanho da sombra e da ordem dos desenhos. Para definir a elevação de uma visualização, use o atributo <code>android:elevation</code> nos layouts:</p>
+<p>As visualizações podem lançar sombras e o valor da elevação delas
+determina o tamanho da sombra e a ordem dos desenhos. Para definir a elevação de uma visualização, use o atributo
+<code>android:elevation</code> nos layouts:</p>
 
 <pre>
 &lt;TextView
@@ -95,14 +108,22 @@ page.title=Fundamentos
     android:elevation="5dp" />
 </pre>
 
-<p>A nova propriedade <code>translationZ</code> permite a criação de animações que refletem mudanças temporárias na elevação de uma visualização. As mudanças de elevação podem ser úteis ao <a href="{@docRoot}training/material/animations.html#ViewState">responder a gestos de toque</a>.</p>
+<p>A nova propriedade <code>translationZ</code> permite a criação de animações que refletem mudanças
+temporárias na elevação de uma visualização. As mudanças de elevação podem ser úteis ao
+<a href="{@docRoot}training/material/animations.html#ViewState">responder a gestos
+de toque</a>.</p>
 
-<p>Para obter mais detalhes, consulte <a href="{@docRoot}training/material/shadows-clipping.html">Como definir sombras e recortar visualizações</a>.</p>
+<p>Para obter mais detalhes, consulte <a href="{@docRoot}training/material/shadows-clipping.html">Como definir
+sombras e recortar visualizações</a>.</p>
 
 
 <h2 id="ListsCards">Criar listas e cartões</h2>
 
-<p>{@link android.support.v7.widget.RecyclerView} é uma versão mais completa de {@link android.widget.ListView} compatível com diferentes tipos de layout e que fornece melhor desempenho. {@link android.support.v7.widget.CardView} permite a exibição de informações dentro dos cartões com uma aparência consistente nos aplicativos. O exemplo de código a seguir mostra como incluir um {@link android.support.v7.widget.CardView} no layout:</p>
+<p>{@link android.support.v7.widget.RecyclerView} é uma versão mais completa de {@link
+android.widget.ListView} compatível com diferentes tipos de layout e que fornece melhor desempenho.
+{@link android.support.v7.widget.CardView} permite a exibição de informações dentro dos cartões com uma
+aparência consistente nos aplicativos. O exemplo de código a seguir mostra como incluir um
+{@link android.support.v7.widget.CardView} no layout:</p>
 
 <pre>
 &lt;android.support.v7.widget.CardView
@@ -114,12 +135,15 @@ page.title=Fundamentos
 &lt;/android.support.v7.widget.CardView>
 </pre>
 
-<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/lists-cards.html">Como criar listas e cartões</a>.</p>
+<p>Para obter mais informações, consulte <a href="{@docRoot}training/material/lists-cards.html">Como criar
+listas e cartões</a>.</p>
 
 
 <h2 id="Animations">Personalizar animações</h2>
 
-<p>O Android 5.0 (API de nível 21) inclui novas APIs para criar animações personalizadas no aplicativo. Por exemplo, você pode habilitar transições de atividades e definir uma transição de saída dentro de uma atividade:</p>
+<p>O Android 5.0 (API de nível 21) inclui novas APIs para criar animações personalizadas no aplicativo.
+Por exemplo, você pode habilitar transições de atividades e definir uma transição de saída dentro
+de uma atividade:</p>
 
 <pre>
 public class MyActivity extends Activity {
@@ -144,4 +168,4 @@ public class MyActivity extends Activity {
 
 <p>Ao iniciar outra atividade a partir desta, a transição de saída é ativada.</p>
 
-<p>Para saber mais sobre as novas APIs de animação, consulte <a href="{@docRoot}training/material/animations.html">Como definir animações personalizadas</a>.</p> 
+<p>Para saber mais sobre as novas APIs de animação, consulte <a href="{@docRoot}training/material/animations.html">Como definir animações personalizadas</a>.</p>

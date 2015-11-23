@@ -1,0 +1,131 @@
+page.title=Menggunakan Tema Bahan
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#ColorPalette">Menyesuaikan Palet Warna</a></li>
+  <li><a href="#StatusBar">Menyesuaikan Baris Status</a></li>
+  <li><a href="#Inheritance">Tampilan Setiap Tema</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Tema bahan yang baru menyediakan:</p>
+
+<ul>
+  <li>Widget sistem yang memungkinkan Anda mengatur palet warnanya</li>
+  <li>Animasi umpan balik sentuh untuk widget sistem</li>
+  <li>Animasi transisi aktivitas</li>
+</ul>
+
+<p>Anda bisa menyesuaikan tampilan tema bahan
+sesuai dengan identitas merek Anda dengan palet warna yang Anda kontrol. Anda bisa mewarnai action-bar dan
+baris status dengan menggunakan atribut tema, seperti yang ditampilkan dalam <a href="#fig3">Gambar 3</a>.</p>
+
+<p>Widget sistem memiliki desain baru dan animasi umpan balik sentuh. Anda bisa menyesuaikan
+palet warna, animasi umpan balik sentuh, dan transisi aktivitas untuk aplikasi.</p>
+
+<p>Tema bahan didefinisikan sebagai:</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (versi gelap)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (versi terang)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>Untuk daftar gaya bahan yang bisa Anda gunakan, lihat referensi API untuk
+{@link android.R.style R.style}.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Gambar 1</strong>. Tema bahan gelap</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Gambar 2</strong>. Tema bahan terang</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>Catatan:</strong> Tema bahan hanya tersedia di Android 5.0 (API level 21)
+ke atas. <a href="{@docRoot}tools/support-library/features.html#v7">v7 Support Library</a>
+menyediakan tema dengan gaya desain bahan untuk beberapa widget dan dukungan untuk menyesuaikan
+palet warna. Untuk informasi selengkapnya, lihat
+<a href="{@docRoot}training/material/compatibility.html">Mempertahankan Kompatibilitas</a>.
+</p>
+
+
+<h2 id="ColorPalette">Menyesuaikan Palet Warna</h2>
+
+<p style="margin-bottom:30px">Untuk menyesuaikan warna dasar tema agar cocok dengan merek Anda, definisikan
+warna custom menggunakan atribut tema saat Anda mewariskan dari tema bahan:</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>Gambar 3.</strong> Menyesuaikan tema bahan.</p>
+</div>
+
+
+<h2 id="StatusBar">Menyesuaikan Baris Status</h2>
+
+<p>Tema bahan memungkinkan Anda menyesuaikan baris status dengan mudah; jadi Anda bisa menetapkan
+warna yang cocok dengan merek Anda dan memberikan kontras yang cukup untuk menampilkan ikon status putih. Untuk
+mengatur warna custom bagi baris status, gunakan atribut <code>android:statusBarColor</code> bila
+Anda memperluas tema bahan. Secara default, <code>android:statusBarColor</code> mewarisi
+nilai <code>android:colorPrimaryDark</code>.</p>
+
+<p>Anda juga bisa menggambar sendiri di belakang baris status. Misalnya, jika Anda ingin menampilkan
+baris status secara transparan di atas foto, dengan gradasi gelap yang halus untuk memastikan
+ikon status putih tetap terlihat. Caranya, atur atribut <code>android:statusBarColor</code> ke
+<code>&#64;android:color/transparent</code> dan sesuaikan flag jendela seperti yang diperlukan. Anda juga bisa
+menggunakan metode {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} untuk
+animasi atau pemudaran.</p>
+
+<p class="note">
+<strong>Catatan:</strong> Baris status harus selalu memiliki delineasi yang jelas dari
+toolbar utama, kecuali bila Anda menampilkan gambar detail atau konten media tepi-ke-tepi di belakang
+baris ini dan bila Anda menggunakan gradasi untuk memastikan ikon tetap terlihat.
+</p>
+
+<p>Bila Anda menyesuaikan baris navigasi dan baris status, jadikan keduanya transparan atau modifikasi
+baris status saja. Baris navigasi harus tetap hitam di semua kasus lainnya.</p>
+
+
+<h2 id="Inheritance">Tampilan Setiap Tema</h3>
+
+<p>Elemen dalam definisi layout XML bisa menetapkan atribut <code>android:theme</code>,
+yang merujuk sumber daya tema. Atribut ini memodifikasi tema untuk elemen itu dan setiap
+elemen anak, yang berguna untuk mengubah palet warna tema dalam porsi tertentu
+pada antarmuka.</p>

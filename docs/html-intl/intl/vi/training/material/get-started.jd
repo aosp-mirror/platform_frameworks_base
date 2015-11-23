@@ -1,0 +1,171 @@
+page.title=Bắt đầu
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#ApplyTheme">Áp dụng Chủ đề Material</a></li>
+  <li><a href="#Layouts">Thiết kế Bố trí của Bạn</a></li>
+  <li><a href="#Depth">Quy định Độ cao trong Dạng xem của Bạn</a></li>
+  <li><a href="#ListsCards">Tạo Danh sách và Thẻ</a></li>
+  <li><a href="#Animations">Tùy chỉnh Hoạt hình của Bạn</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Để tạo ứng dụng với material design:</p>
+
+<ol>
+  <li style="margin-bottom:10px">
+    Xem phần <a href="http://www.google.com/design/spec">đặc tả phong cách material design</a>.</li>
+  <li style="margin-bottom:10px">
+    Áp dụng chủ đề <strong>material</strong> cho ứng dụng của bạn.</li>
+  <li style="margin-bottom:10px">
+    Tạo <strong>bố trí</strong> của bạn theo hướng dẫn về material design.</li>
+  <li style="margin-bottom:10px">
+    Quy định <strong>độ cao</strong> cho dạng xem của bạn để đổ bóng.</li>
+  <li style="margin-bottom:10px">
+    Sử dụng <strong>widget</strong> hệ thống cho danh sách và thẻ.</li>
+  <li style="margin-bottom:10px">
+    Tùy chỉnh <strong>hoạt hình</strong> trong ứng dụng của bạn.</li>
+</ol>
+
+<h3>Duy trì tính tương thích ngược</h3>
+
+<p>Bạn có thể thêm nhiều tính năng material design vào ứng dụng của mình trong khi vẫn duy trì tính tương thích với
+các phiên bản Android trước 5.0. Để biết thêm thông tin, hãy xem phần
+<a href="{@docRoot}training/material/compatibility.html">Duy trì Tính tương thích</a>.</p>
+
+<h3>Cập nhật ứng dụng của bạn với material design</h3>
+
+<p>Để cập nhật một ứng dụng hiện tại bằng material design, hãy cập nhật các bố trí của bạn theo
+hướng dẫn về material design. Cũng nhớ kết hợp chiều sâu, phản hồi chạm và
+hoạt hình.</p>
+
+<h3>Tạo ứng dụng mới với material design</h3>
+
+<p>Nếu bạn tạo một ứng dụng mới với các tính năng của material design, <a href="http://www.google.com/design/spec">hướng dẫn về material design</a> cung cấp cho bạn một
+khuôn khổ thiết kế súc tích. Làm theo hướng dẫn đó và sử dụng chức năng mới trong khuôn khổ Android
+để thiết kế và phát triển ứng dụng của bạn.</p>
+
+
+<h2 id="ApplyTheme">Áp dụng Chủ đề Material</h2>
+
+<p>Để áp dụng chủ đề material trong ứng dụng của mình, hãy quy định một kiểu kế thừa từ
+<code>android:Theme.Material</code>:</p>
+
+<pre>
+&lt;!-- res/values/styles.xml -->
+&lt;resources>
+  &lt;!-- your theme inherits from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- theme customizations -->
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>Chủ đề material cung cấp các widget hệ thống được cập nhật để bạn có thể đặt bảng màu và
+hoạt hình mặc định cho phản hồi chạm và chuyển tiếp hoạt động. Để biết thêm chi tiết, hãy xem phần
+<a href="{@docRoot}training/material/theme.html">Sử dụng Chủ đề Material</a>.</p>
+
+
+<h2 id="Layouts">Thiết kế Bố trí của Bạn</h2>
+
+<p>Bên cạnh việc áp dụng và tùy chỉnh chủ đề material, bố trí của bạn cần tuân thủ
+<a href="http://www.google.com/design/spec">hướng dẫn về material design</a>. Khi thiết kế
+bố trí của bạn, hãy đặc biệt chú ý tới điều sau đây:</p>
+
+<ul>
+<li>Lưới đường cơ sở</li>
+<li>Dòng chính</li>
+<li>Giãn cách</li>
+<li>Kích cỡ mục tiêu chạm</li>
+<li>Cấu trúc bố trí</li>
+</ul>
+
+
+<h2 id="Depth">Quy định Độ cao trong Dạng xem của Bạn</h2>
+
+<p>Dạng xem có thể đổ bóng và giá trị độ cao của một dạng xem 
+xác định kích cỡ bóng và thứ tự vẽ của nó. Để đặt độ cao của một dạng xem, hãy sử dụng thuộc tính
+<code>android:elevation</code> trong bố trí của bạn:</p>
+
+<pre>
+&lt;TextView
+    android:id="&#64;+id/my_textview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="&#64;string/next"
+    android:background="&#64;color/white"
+    android:elevation="5dp" />
+</pre>
+
+<p>Thuộc tính <code>translationZ</code> mới cho phép bạn tạo những hoạt hình phản ánh các thay đổi
+tạm thời về độ cao của một dạng xem. Thay đổi về độ cao có thể hữu ích khi
+<a href="{@docRoot}training/material/animations.html#ViewState">phản hồi lại các cử chỉ
+chạm</a>.</p>
+
+<p>Để biết thêm chi tiết, hãy xem phần <a href="{@docRoot}training/material/shadows-clipping.html">Định nghĩa
+Đổ bóng và Dạng xem Cắt hình</a>.</p>
+
+
+<h2 id="ListsCards">Tạo Danh sách và Thẻ</h2>
+
+<p>{@link android.support.v7.widget.RecyclerView} là một phiên bản dễ ghép nối hơn của {@link
+android.widget.ListView} có hỗ trợ các kiểu bố trí khác nhau và cung cấp những cải tiến về hiệu năng.
+{@link android.support.v7.widget.CardView} cho phép bạn hiện các mẩu thông tin bên trong thẻ với
+một diện mạo nhất quán giữa các ứng dụng. Ví dụ về mã sau đây minh họa cách thêm 
+{@link android.support.v7.widget.CardView} vào bố trí của bạn:</p>
+
+<pre>
+&lt;android.support.v7.widget.CardView
+    android:id="&#64;+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    card_view:cardCornerRadius="3dp">
+    ...
+&lt;/android.support.v7.widget.CardView>
+</pre>
+
+<p>Để biết thêm thông tin, hãy xem phần <a href="{@docRoot}training/material/lists-cards.html">Tạo Danh sách
+và Thẻ</a>.</p>
+
+
+<h2 id="Animations">Tùy chỉnh Hoạt hình của Bạn</h2>
+
+<p>Android 5.0 (API mức 21) bao gồm các API mới để tạo hoạt hình tùy chỉnh trong ứng dụng của bạn.
+Ví dụ, bạn có thể cho phép chuyển tiếp hoạt động và định nghĩa một chuyển tiếp ra bên trong một
+hoạt động:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // enable transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        setContentView(R.layout.activity_my);
+    }
+
+    public void onSomeButtonClicked(View view) {
+        getWindow().setExitTransition(new Explode());
+        Intent intent = new Intent(this, MyOtherActivity.class);
+        startActivity(intent,
+                      ActivityOptions
+                          .makeSceneTransitionAnimation(this).toBundle());
+    }
+}
+</pre>
+
+<p>Khi bạn bắt đầu một hoạt động khác từ hoạt động này, chuyển tiếp ra được kích hoạt.</p>
+
+<p>Để tìm hiểu thêm về các API hoạt hình mới, hãy xem <a href="{@docRoot}training/material/animations.html">Định nghĩa Hoạt hình Tùy chỉnh</a>.</p>

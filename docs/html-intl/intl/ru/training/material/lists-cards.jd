@@ -1,4 +1,4 @@
-page.title=Создание списков и подсказок
+page.title=Создание списков и карточек
 
 @jd:body
 
@@ -7,7 +7,7 @@ page.title=Создание списков и подсказок
 <h2>Содержание этого урока</h2>
 <ol>
   <li><a href="#RecyclerView">Создание списков</a></li>
-  <li><a href="#CardView">Создание подсказок</a></li>
+  <li><a href="#CardView">Создание карточек</a></li>
   <li><a href="#Dependencies">Добавление зависимостей</a></li>
 </ol>
 <h2>См. также</h2>
@@ -19,28 +19,40 @@ page.title=Создание списков и подсказок
 </div>
 
 
-<p>Для создания в приложениях составных списков и подсказок с помощью стилей Material Design можно использовать виджеты {@link android.support.v7.widget.RecyclerView} и {@link android.support.v7.widget.CardView}.</p>
+<p>Для создания в приложениях составных списков и карточек с помощью стилей Material Design можно использовать виджеты
+{@link android.support.v7.widget.RecyclerView} и {@link android.support.v7.widget.CardView}.
+</p>
 
 
 <h2 id="RecyclerView">Создание списков</h2>
 
-<p>Виджет {@link android.support.v7.widget.RecyclerView} представляет собой расширенную и более гибкую версию {@link android.widget.ListView}. Он является контейнером для отображения больших наборов данных, которые можно эффективно прокручивать, сохраняя при этом ограниченное количество представлений. Виджет {@link android.support.v7.widget.RecyclerView} рекомендуется использовать в случаях, когда имеются коллекции данных, элементы которых изменяются во время выполнения на основе действий пользователя или сетевых событий.</p>
+<p>Виджет {@link android.support.v7.widget.RecyclerView} представляет собой расширенную и более гибкую версию {@link android.widget.ListView}.
+ Он является контейнером для отображения больших наборов данных, которые можно эффективно прокручивать, сохраняя при этом ограниченное количество представлений.
+ Виджет
+{@link android.support.v7.widget.RecyclerView} рекомендуется использовать в случаях, когда имеются коллекции данных, элементы которых изменяются во время выполнения в зависимости от действий пользователя или сетевых событий.
+</p>
 
-<p>Класс {@link android.support.v7.widget.RecyclerView} упрощает отображение и обработку больших наборов данных за счет предоставления:</p>
+<p>Класс {@link android.support.v7.widget.RecyclerView} упрощает отображение и обработку больших наборов данных с помощью следующих возможностей:
+</p>
 
 <ul>
   <li>менеджеров макетов для размещения элементов;</li>
-  <li>анимации по умолчанию для операций с общими элементами, таких как удаление или добавление элементов.</li>
+  <li>стандартных анимаций для операций с общими элементами, таких как удаление или добавление элементов.</li>
 </ul>
 
-<p>Также предоставляются гибкие возможности определения настраиваемых менеджеров макетов и анимации для виджетов {@link android.support.v7.widget.RecyclerView}.</p>
+<p>Также предоставляются гибкие возможности определения настраиваемых менеджеров макетов и анимации для виджетов {@link
+android.support.v7.widget.RecyclerView}.</p>
 
 <img src="{@docRoot}training/material/images/RecyclerView.png" alt="" width="550" height="106" />
 <p class="img-caption">
 <strong>Рисунок 1</strong>. Виджет <code>RecyclerView</code>.
 </p>
 
-<p>Чтобы воспользоваться виджетом {@link android.support.v7.widget.RecyclerView}, необходимо определить адаптер и менеджер макетов. Для создания адаптера следует наследовать класс {@link android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter}. Характеристики реализации зависят от особенностей используемого набора данных и типа представлений. Дополнительные сведения представлены в <a href="#RVExamples">примерах</a> ниже.</p>
+<p>Чтобы воспользоваться виджетом {@link android.support.v7.widget.RecyclerView}, необходимо определить адаптер и менеджер макетов.
+ Для создания адаптера необходимо наследовать класс {@link
+android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter}. Характеристики реализации зависят от особенностей используемого набора данных и типа представлений.
+ Дополнительные сведения представлены в <a href="#RVExamples">примерах</a> ниже.
+</p>
 
 <div style="float:right">
 <img src="{@docRoot}design/material/images/list_mail.png" alt="" width="250" height="426" />
@@ -49,25 +61,37 @@ page.title=Создание списков и подсказок
 </p>
 </div>
 
-<p><strong>Менеджер макетов</strong> размещает представления элемента внутри {@link android.support.v7.widget.RecyclerView} и определяет порядок повторного использования представлений элемента, которые более не отображаются для пользователя. Чтобы повторно использовать (или <em>перезапустить</em>) представление, менеджер макетов может запросить адаптер заменить содержимое представления другим элементом из набора данных. Такой перезапуск представлений позволяет повысить производительность за счет того, что исключается создание ненужных представлений и выполнение ресурсоемких операций подстановки {@link android.app.Activity#findViewById findViewById()}.</p>
+<p><strong>Менеджер макетов</strong> размещает представления элемента внутри {@link
+android.support.v7.widget.RecyclerView} и определяет порядок повторного использования представлений элемента, которые перестают быть видимыми пользователю.
+ Чтобы повторно использовать (или <em>перезапустить</em>) представление, менеджер макетов может запросить адаптер заменить содержимое представления другим элементом из набора данных.
+ Такой перезапуск представлений позволяет повысить производительность за счет того, что исключается создание ненужных представлений и выполнение ресурсоемких операций поиска {@link android.app.Activity#findViewById findViewById()}.
+
+</p>
 
 <p>Виджет {@link android.support.v7.widget.RecyclerView} включает следующие встроенные менеджеры макетов:</p>
 
 <ul>
-<li>{@link android.support.v7.widget.LinearLayoutManager} для отображения элементов в виде списка с вертикальной или горизонтальной прокруткой;</li>
+<li>{@link android.support.v7.widget.LinearLayoutManager} для отображения элементов в виде списка с вертикальной или горизонтальной прокруткой;
+</li>
 <li>{@link android.support.v7.widget.GridLayoutManager} для отображения элементов в виде сетки;</li>
 <li>{@link android.support.v7.widget.StaggeredGridLayoutManager} для отображения элементов в виде шахматной сетки.</li>
 </ul>
 
-<p>Для создания менеджера макетов следует наследовать класс {@link android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager}.</p>
+<p>Для создания менеджера макетов необходимо наследовать класс {@link
+android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager}.</p>
 
 <h3>Анимация</h3>
 
-<p>По умолчанию анимация для добавления и удаления элементов включается в виджете {@link android.support.v7.widget.RecyclerView}. Для настройки такой анимации следует наследовать класс {@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator} и воспользоваться методом {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}.</p>
+<p>По умолчанию анимация для добавления и удаления элементов включается в виджете {@link
+android.support.v7.widget.RecyclerView}. Для настройки такой анимации следует наследовать класс
+{@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator} и воспользоваться методом
+ {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}
+.</p>
 
 <h3 id="RVExamples">Примеры</h3>
 
-<p>В следующем примере демонстрируется, как включить в макет виджет {@link android.support.v7.widget.RecyclerView}:</p>
+<p>В следующем примере демонстрируется, как включить в макет виджет 
+{@link android.support.v7.widget.RecyclerView}:</p>
 
 <pre>
 &lt;!-- A RecyclerView with some commonly used attributes -->
@@ -78,7 +102,9 @@ page.title=Создание списков и подсказок
     android:layout_height="match_parent"/>
 </pre>
 
-<p>После добавления виджета {@link android.support.v7.widget.RecyclerView} подключите дескриптор объекта, подключите его к менеджеру макетов, а затем подключите адаптер к данным, которые будут отображаться:</p>
+<p>После добавления виджета {@link android.support.v7.widget.RecyclerView} подключите дескриптор объекта, подключите его к менеджеру макетов, а затем подключите адаптер к данным, которые будут отображаться:
+
+</p>
 
 <pre>
 public class MyActivity extends Activity {
@@ -108,7 +134,10 @@ public class MyActivity extends Activity {
 }
 </pre>
 
-<p>Адаптер обеспечивает доступ к элементам в наборе данных, создает представления для элементов и заменяет содержимое некоторых представлений новыми элементами данных, когда исходный элемент уже не отображается. Пример кода ниже представляет собой простую реализацию для набора данных, который состоит из массива строк, выведенного на экран с помощью виджетов {@link android.widget.TextView}:</p>
+<p>Адаптер обеспечивает доступ к элементам в наборе данных, создает представления для элементов и заменяет содержимое некоторых представлений новыми элементами данных, когда исходный элемент уже не отображается.
+
+ Пример кода ниже является простой реализацией набора данных, который состоит из массива строк, выведенного на экран с помощью виджетов {@link android.widget.TextView}:
+</p>
 
 <pre>
 public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
@@ -165,25 +194,35 @@ public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
 <div style="float:right;margin-top:15px;margin-left:30px">
 <img src="{@docRoot}design/material/images/card_travel.png" alt="" width="225" height="383">
 <p class="img-caption" style="margin-left:12px">
-<strong>Рисунок 3</strong>. Примеры подсказок.
+<strong>Рисунок 3</strong>. Примеры карточек.
 </p>
 </div>
 
-<h2 id="CardView">Создание подсказок</h2>
+<h2 id="CardView">Создание карточек</h2>
 
-<p>Виджет {@link android.support.v7.widget.CardView} является расширением класса {@link android.widget.FrameLayout} и позволяет отображать информацию внутри подсказок, которые будут выглядеть одинаково в рамках платформы. Виджеты {@link android.support.v7.widget.CardView} могут отбрасывать тени и иметь закругленные углы.</p>
+<p>Виджет {@link android.support.v7.widget.CardView} является расширением класса {@link android.widget.FrameLayout}
+и позволяет отображать информацию внутри карточек, которые будут выглядеть одинаково в рамках платформы. Виджеты {@link
+android.support.v7.widget.CardView} могут отбрасывать тени и иметь закругленные углы.</p>
 
-<p>Чтобы создать подсказку, отбрасывающую тень, воспользуйтесь атрибутом <code>card_view:cardElevation</code>. В Android 5.0 (уровень API 21) и более поздних версий виджет {@link android.support.v7.widget.CardView} использует реальную высоту и динамические тени, а в более ранних версиях виджет возвращается к программным теням. Дополнительные сведения представлены в разделе <a href="{@docRoot}training/material/compatibility.html">Обеспечение совместимости</a>.</p>
+<p>Чтобы создать карточку, отбрасывающую тень, воспользуйтесь атрибутом <code>card_view:cardElevation</code>. В Android 5.0 (уровень API 21) и более поздних версий виджет
+{@link android.support.v7.widget.CardView} использует реальную
+высоту и динамические тени, а в более ранних версиях в виджете реализованы программные тени.
+Дополнительные сведения представлены на странице <a href="{@docRoot}training/material/compatibility.html">Обеспечение
+совместимости</a>.</p>
 
-<p>Для настройки внешнего вида виджета {@link android.support.v7.widget.CardView} используйте следующие свойства:</p>
+<p>Для настройки внешнего вида виджета
+{@link android.support.v7.widget.CardView} используйте следующие свойства:</p>
 
 <ul>
-  <li>Чтобы задать радиус скругления углов в макете, используйте атрибут <code>card_view:cardCornerRadius</code>.</li>
-  <li>Чтобы задать радиус скругления углов в программном коде, используйте метод <code>CardView.setRadius</code>.</li>
-  <li>Чтобы задать цвет фона подсказки, используйте атрибут <code>card_view:cardBackgroundColor</code>.</li>
+  <li>чтобы задать радиус скругления углов в макете, используйте атрибут <code>card_view:cardCornerRadius</code>;
+</li>
+  <li>чтобы задать радиус скругления углов в программном коде, используйте метод <code>CardView.setRadius</code>;</li>
+  <li>чтобы задать цвет фона карточки, используйте атрибут <code>card_view:cardBackgroundColor</code>.
+</li>
 </ul>
 
-<p>В следующем примере показано, как включить виджет {@link android.support.v7.widget.CardView} в макет:</p>
+<p>В следующем примере показано, как включить виджет {@link android.support.v7.widget.CardView}
+ в макет:</p>
 
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -212,7 +251,11 @@ public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
 
 <h2 id="Dependencies">Добавление зависимостей</h2>
 
-<p>Виджеты {@link android.support.v7.widget.RecyclerView} и {@link android.support.v7.widget.CardView} имеются во <a href="{@docRoot}tools/support-library/features.html#v7">вспомогательных библиотеках v7</a>. Чтобы использовать эти виджеты в своем проекте, добавьте в модуль приложения следующие <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">зависимости Gradle</a>:</p>
+<p> Виджеты {@link android.support.v7.widget.RecyclerView} и {@link android.support.v7.widget.CardView}
+входят во <a href="{@docRoot}tools/support-library/features.html#v7">вспомогательные
+библиотеки v7</a>. Чтобы использовать эти виджеты в своем проекте, добавьте в модуль приложения следующие 
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">зависимости Gradle</a>:
+</p>
 
 <pre>
 dependencies {
@@ -220,4 +263,4 @@ dependencies {
     compile 'com.android.support:cardview-v7:21.0.+'
     compile 'com.android.support:recyclerview-v7:21.0.+'
 }
-</pre> 
+</pre>
