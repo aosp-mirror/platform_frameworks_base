@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostra la percentuale di carica della batteria nell\'icona della barra di stato quando non è in carica"</string>
     <string name="quick_settings" msgid="10042998191725428">"Impostazioni rapide"</string>
     <string name="status_bar" msgid="4877645476959324760">"Barra di stato"</string>
+    <string name="overview" msgid="4018602013895926956">"Panoramica"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Modalità demo"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Attiva modalità demo"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Mostra modalità demo"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra i secondi nell\'orologio nella barra di stato. Ciò potrebbe ridurre la durata della carica della batteria."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Riorganizza Impostazioni rapide"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostra luminosità in Impostazioni rapide"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Abilita attivazione/disattivazione veloce"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Attiva il paging tramite il pulsante Panoramica"</string>
     <string name="experimental" msgid="6198182315536726162">"Sperimentali"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Attivare il Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connettere la tastiera al tablet, devi prima attivare il Bluetooth."</string>

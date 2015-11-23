@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Tunjukkan peratusan aras bateri dalam ikon bar status semasa tidak mengecas"</string>
     <string name="quick_settings" msgid="10042998191725428">"Tetapan Pantas"</string>
     <string name="status_bar" msgid="4877645476959324760">"Bar status"</string>
+    <string name="overview" msgid="4018602013895926956">"Ikhtisar"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Mod tunjuk cara"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Dayakan mod tunjuk cara"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Tunjukkan mod tunjuk cara"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Tunjukkan saat jam dalam bar status. Mungkin menjejaskan hayat bateri."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Susun Semula Tetapan Pantas"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Tunjukkan kecerahan dalam Tetapan Pantas"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Mendayakan togol pantas"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Mendayakan penghalaman melalui butang Ikhtisar"</string>
     <string name="experimental" msgid="6198182315536726162">"Percubaan"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Hidupkan Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Untuk menyambungkan papan kekunci anda dengan tablet, anda perlu menghidupkan Bluetooth terlebih dahulu."</string>

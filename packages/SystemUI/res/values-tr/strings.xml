@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Şarj olmazken durum çubuğu simgesinin içinde pil düzeyi yüzdesini göster"</string>
     <string name="quick_settings" msgid="10042998191725428">"Hızlı Ayarlar"</string>
     <string name="status_bar" msgid="4877645476959324760">"Durum çubuğu"</string>
+    <string name="overview" msgid="4018602013895926956">"Genel Bakış"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Demo modu"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Demo modunu etkinleştir"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Demo modunu göster"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Durum çubuğunda saatin saniyelerini gösterir. Pil ömrünü etkileyebilir."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Hızlı Ayarlar\'ı Yeniden Düzenle"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Hızlı Ayarlar\'da parlaklığı göster"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Hızlı açma/kapatmayı etkinleştir"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Genel bakış düğmesiyle sayfalara ayırmayı etkinleştirin"</string>
     <string name="experimental" msgid="6198182315536726162">"Deneysel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth açılsın mı?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Klavyenizi tabletinize bağlamak için önce Bluetooth\'u açmanız gerekir."</string>

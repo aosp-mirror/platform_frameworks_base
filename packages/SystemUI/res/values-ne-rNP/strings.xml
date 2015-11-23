@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज नगरेको बेला वस्तुस्थिति पट्टी आइकन भित्र ब्याट्री प्रतिशत स्तर देखाउनुहोस्"</string>
     <string name="quick_settings" msgid="10042998191725428">"द्रुत सेटिङहरू"</string>
     <string name="status_bar" msgid="4877645476959324760">"स्थिति पट्टी"</string>
+    <string name="overview" msgid="4018602013895926956">"परिदृश्य"</string>
     <string name="demo_mode" msgid="2389163018533514619">"डेमो मोड"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"डेमो मोड सक्षम गर्नुहोस्"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"डेमो मोड देखाउनुहोस्"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"वस्तुस्थिति पट्टीको घडीमा सेकेन्ड देखाउनुहोस्। ब्याट्री आयु प्रभावित हुन सक्छ।"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"द्रुत सेटिङहरू पुनः व्यवस्थित गर्नुहोस्"</string>
     <string name="show_brightness" msgid="6613930842805942519">"द्रुत सेटिङहरूमा उज्यालो देखाउनुहोस्"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"छिटो टगल सक्रिय गर्नुहोस्"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"परिदृश्य बटन मार्फत पेजिङ सक्रिय गर्नुहोस्"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्ने हो?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>

@@ -411,6 +411,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Když neprobíhá nabíjení, zobrazit v ikoně na stavovém řádku procento nabití baterie"</string>
     <string name="quick_settings" msgid="10042998191725428">"Rychlé nastavení"</string>
     <string name="status_bar" msgid="4877645476959324760">"Stavový řádek"</string>
+    <string name="overview" msgid="4018602013895926956">"Přehled"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Ukázkový režim"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Zapnout ukázkový režim"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Zobrazit ukázkový režim"</string>
@@ -439,6 +440,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Na stavovém řádku se bude zobrazovat sekundová ručička. Může být ovlivněna výdrž baterie."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Změnit uspořádání Rychlého nastavení"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Zobrazit jas v Rychlém nastavení"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Povolit rychlé přepínání"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Povolit stránkování pomocí tlačítka Přehled"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentální"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Zapnout Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Chcete-li klávesnici připojit k tabletu, nejdříve musíte zapnout Bluetooth."</string>
