@@ -313,8 +313,8 @@ date to 15 August 2015 14:00:00 UTC.</p>
 try your subscription content before buying it. The trial period runs for the
 period of time that you set and then automatically converts to a full
 subscription managed according to the subscription's billing interval and
-price. Free trials are supported for monthly and annual subscriptions only, and
-are not supported for seasonal subscriptions.</p>
+price. Google Play supports free trials for all subscription types, including
+seasonal subscriptions.</p>
 
 <p>To take advantage of a free trial, a user must "purchase" the full
 subscription through the standard In-app Billing flow, providing a valid form of
@@ -332,10 +332,10 @@ against the credit card that the user provided during the initial purchase, at
 the amount set
 for the full subscription, and continuing at the subscription interval. If
 necessary, the user can cancel the subscription at any time during the trial
-period. In this case, Google Play <em>marks the subscription as expired immediately</em>,
-rather than waiting until the end of the trial period. The user has not
-paid for the trial period and so is not entitled to continued access after
-cancellation.</p>
+period. In this case, the subscription remains active until the end of the
+trial period, but Google Play sets the subscription <em>not</em> to renew
+automatically; at the end of the trial period the subscription expires, and
+Google Play does not charge the user.</p>
 
 <p>You can set up a trial period for a subscription in the Developer Console,
 without needing to modify or update your APK. Just locate and edit the
@@ -370,6 +370,24 @@ products available for purchase inside the app. </p>
 <p class="caution"><strong>Important</strong>: You can remove the subscription
 product from the product list offered in your app to prevent users from seeing
 or purchasing it.</p>
+
+<h3 id="prorate">Prorated Seasonal Subscription Prices</h3>
+
+<p>You can set up prorated prices for users who buy seasonal subscriptions
+after the season's start date. You specify the date on which the discounted
+price takes effect. The discounted price takes effect at 0:00 UTC on
+the specified date. You can set multiple prorated prices, dropping the
+subscription price lower and lower as the season goes on. If a user purchases
+a prorated seasonal subscription and remains subscribed until the start of the
+next season, Google Play charges them the full subscription price when the next
+season starts.</p>
+
+<p>For example, the professional checkers season runs from March 1 to August 31.
+The <em>Checkers Dilettante</em> app offers a seasonal subscription for €10. The
+app also offers two prorated prices: €7.50 for users who sign up on or after
+June 1, and €5 for users who sign up on or after
+August 15. Regardless of when the user signs up, the seasonal subscription ends
+on August 31.</p>
 
 <h2 id="cancellation">Subscription Cancellation</h2>
 

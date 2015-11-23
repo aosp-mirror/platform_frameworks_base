@@ -14,6 +14,16 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
+  <li><strong>Prorated Subscription Prices</strong>&mdash;Content providers can
+    lower the price of seasonal subscriptions for users who sign up late in the
+    season. For example, a sports-related service might lower the subscription
+    price halfway through the sport's season.</li>
+  <li><strong>Free Trials</strong>&mdash;Content providers can
+    offer free trial periods for all kinds of subscriptions, including
+    seasonal subscriptions. If a user cancels the subscription in the trial
+    period, they pay nothing. If they do not cancel by the end of the
+    trial period, the subscription automatically converts to a paid
+    subscription.</li>
   <li><strong>Subscription Upgrade/Downgrade</strong>&mdash;A user can
     subscribe to a higher or lower tier of subscription while their current
     subscription is active. The old subscription is canceled, and the unused
