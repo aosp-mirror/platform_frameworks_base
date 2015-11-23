@@ -807,6 +807,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static boolean sAlwaysRemeasureExactly = false;
 
     /**
+     * Relax constraints around whether setLayoutParams() must be called after
+     * modifying the layout params.
+     */
+    private static boolean sLayoutParamsAlwaysChanged = false;
+
+    /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
      */
@@ -3974,6 +3980,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // LinearLayout measurement passes using EXACTLY and non-EXACTLY
             // modes, so we always need to run an additional EXACTLY pass.
             sAlwaysRemeasureExactly = targetSdkVersion <= M;
+
+            // Prior to N, layout params could change without requiring a
+            // subsequent call to setLayoutParams() and they would usually
+            // work. Partial layout breaks this assumption.
+            sLayoutParamsAlwaysChanged = targetSdkVersion <= M;
 
             sCompatibilityDone = true;
         }
@@ -16904,6 +16915,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if this view's LayoutParams changed since last layout.
      */
     public final boolean didLayoutParamsChange() {
+        if (sLayoutParamsAlwaysChanged) {
+            return true;
+        }
         return (mPrivateFlags3 & PFLAG3_LAYOUT_PARAMS_CHANGED) == PFLAG3_LAYOUT_PARAMS_CHANGED;
     }
 
