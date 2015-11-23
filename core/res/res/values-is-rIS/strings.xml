@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Hægt er að setja upp skriftur til að bæta aðgengi að efni forrits."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Fylgjast með texta sem þú slærð inn"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Felur í sér persónuleg gögn á borð við kreditkortanúmer og aðgangsorð."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Stilla skjástærð"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Stjórnaðu aðdrætti og afstöðu skjásins."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"slökkva á eða breyta stöðustiku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Leyfir forriti að slökkva á stöðustikunni eða bæta við og fjarlægja kerfistákn."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vera stöðustikan"</string>
@@ -1499,4 +1501,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> valið</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valin</item>
     </plurals>
+    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
+    <skip />
 </resources>

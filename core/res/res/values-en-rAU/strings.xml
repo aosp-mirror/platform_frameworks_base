@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Scripts may be installed to make app content more accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observe text that you type"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Includes personal data such as credit card numbers and passwords."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Control display magnification"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Control the display\'s zoom level and positioning."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"disable or modify status bar"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Allows the app to disable the status bar or add and remove system icons."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"be the status bar"</string>
@@ -1499,4 +1501,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selected</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selected</item>
     </plurals>
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Miscellaneous"</string>
 </resources>

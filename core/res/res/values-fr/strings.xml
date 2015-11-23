@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Vous pouvez installer des scripts pour rendre le contenu des applications plus accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observer le texte que vous saisissez"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclut des données personnelles telles que les numéros de cartes de paiement et les mots de passe."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Contrôler l\'agrandissement de l\'écran"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Contrôler le niveau de zoom et le positionnement de l\'écran"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"remplacer la barre d\'état"</string>
@@ -1499,4 +1501,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>
     </plurals>
+    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
+    <skip />
 </resources>
