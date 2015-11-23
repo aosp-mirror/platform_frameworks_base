@@ -35,6 +35,7 @@ import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -539,7 +540,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
         if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
-            ssp.startTaskInDockedMode(topTask.id,
+            ssp.moveTaskToDockedStack(topTask.id,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
             showRecents(false /* triggeredFromAltTab */, draggingInRecents);
         }
