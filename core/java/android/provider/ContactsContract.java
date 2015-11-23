@@ -8360,10 +8360,15 @@ public final class ContactsContract {
          * @hide
          */
         public static Intent rebuildManagedQuickContactsIntent(String lookupKey, long contactId,
-                Intent originalIntent) {
+                long directoryId, Intent originalIntent) {
             final Intent intent = new Intent(ACTION_QUICK_CONTACT);
             // Rebuild the URI from a lookup key and a contact ID.
-            intent.setData(Contacts.getLookupUri(contactId, lookupKey));
+            Uri uri = Contacts.getLookupUri(contactId, lookupKey);
+            if (uri != null && directoryId != Directory.DEFAULT) {
+                uri = uri.buildUpon().appendQueryParameter(
+                        ContactsContract.DIRECTORY_PARAM_KEY, String.valueOf(directoryId)).build();
+            }
+            intent.setData(uri);
 
             // Copy flags and always set NEW_TASK because it won't have a parent activity.
             intent.setFlags(originalIntent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);

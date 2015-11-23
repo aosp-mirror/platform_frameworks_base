@@ -41,6 +41,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.ContactsContract.Directory;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.util.Log;
@@ -3379,15 +3380,25 @@ public class DevicePolicyManager {
      * @hide
      */
     public void startManagedQuickContact(String actualLookupKey, long actualContactId,
-            Intent originalIntent) {
+            long directoryId, Intent originalIntent) {
         if (mService != null) {
             try {
                 mService.startManagedQuickContact(
-                        actualLookupKey, actualContactId, originalIntent);
+                        actualLookupKey, actualContactId, directoryId, originalIntent);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
+    }
+
+    /**
+     * Start Quick Contact on the managed profile for the current user, if the policy allows.
+     * @hide
+     */
+    public void startManagedQuickContact(String actualLookupKey, long actualContactId,
+            Intent originalIntent) {
+        startManagedQuickContact(actualLookupKey, actualContactId, Directory.DEFAULT,
+                originalIntent);
     }
 
     /**
