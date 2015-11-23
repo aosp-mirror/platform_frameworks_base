@@ -410,6 +410,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Rādīt akumulatora uzlādes līmeni procentos statusa joslas ikonā, kad netiek veikta uzlāde"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ātrie iestatījumi"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusa josla"</string>
+    <string name="overview" msgid="4018602013895926956">"Pārskats"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Demonstrācijas režīms"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Iespējot demonstrācijas režīmu"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Rādīt demonstrācijas režīmu"</string>
@@ -438,6 +439,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Statusa joslā rādīt pulksteņa sekundes. Var ietekmēt akumulatora darbības laiku."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Pārkārtot ātros iestatījumus"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Rādīt spilgtumu ātrajos iestatījumos"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Iespējot ātro pārslēgšanu"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Iespējot lapošanu, izmantojot pogu Pārskats"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentāli"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vai ieslēgt Bluetooth savienojumu?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Lai pievienotu tastatūru planšetdatoram, vispirms ir jāieslēdz Bluetooth savienojums."</string>

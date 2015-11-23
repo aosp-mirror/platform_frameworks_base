@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ສະ​ແດງ​ເປີ​ເຊັນ​ລະ​ດັບ​ແບັດ​ເຕີ​ຣີ​ຢູ່​ດ້ານ​ໃນ​ໄອ​ຄອນ​ແຖບ​ສະ​ຖາ​ນະ ເມື່ອ​ບໍ່​ສາກ​ຢູ່"</string>
     <string name="quick_settings" msgid="10042998191725428">"ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
     <string name="status_bar" msgid="4877645476959324760">"ແຖບສະຖານະ"</string>
+    <string name="overview" msgid="4018602013895926956">"​ພາບ​ຮວມ"</string>
     <string name="demo_mode" msgid="2389163018533514619">"​ໂໝດສາ​ທິດ"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"​ເປີດ​ໃຊ້​ໂໝດສາທິດ"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"ສະ​ແດງ​ໂຫມດ​ສາ​ທິດ"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ສະ​ແດງວິ​ນາ​ທີ​ໂມງ​ຢູ່​ໃນ​ແຖບ​ສະ​ຖາ​ນະ. ອາດ​ຈະ​ມີ​ຜົນ​ກະ​ທົບ​ຕໍ່​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ຈັດ​ວາງ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ​ຄືນ​ໃໝ່"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ສະ​ແດງ​ຄວາມ​ແຈ້ງ​ຢູ່​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"ເປີດນຳໃຊ້ການສັບປ່ຽນໄວ"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"ເປີດນຳໃຊ້ການແບ່ງໜ້າຜ່ານປຸ່ມພາບຮວມ"</string>
     <string name="experimental" msgid="6198182315536726162">"ຍັງຢູ່ໃນການທົດລອງ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ເປີດ​ໃຊ້ Bluetooth ບໍ່?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ເພື່ອ​ເຊື່ອມ​ຕໍ່​ແປ້ນ​ພິມ​ຂອງ​ທ່ານ​ກັບ​ແທັບ​ເລັດ​ຂອງ​ທ່ານ, ກ່ອນ​ອື່ນ​ໝົດ​ທ່ານ​ຕ້ອງ​ເປີດ Bluetooth."</string>

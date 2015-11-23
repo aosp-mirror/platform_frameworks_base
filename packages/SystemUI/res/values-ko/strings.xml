@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"충전 중이 아닌 경우 상태 표시줄 아이콘 내에 배터리 잔량 비율 표시"</string>
     <string name="quick_settings" msgid="10042998191725428">"빠른 설정"</string>
     <string name="status_bar" msgid="4877645476959324760">"상태 표시줄"</string>
+    <string name="overview" msgid="4018602013895926956">"개요"</string>
     <string name="demo_mode" msgid="2389163018533514619">"데모 모드"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"데모 모드 사용"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"데모 모드 표시"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"상태 표시줄에 시계 초 단위를 표시합니다. 배터리 수명에 영향을 줄 수도 있습니다."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"빠른 설정 재정렬"</string>
     <string name="show_brightness" msgid="6613930842805942519">"빠른 설정에서 밝기 표시"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"빠른 전환 사용"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"개요 버튼을 통한 페이징 사용"</string>
     <string name="experimental" msgid="6198182315536726162">"베타"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"블루투스를 켜시겠습니까?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"키보드를 태블릿에 연결하려면 먼저 블루투스를 켜야 합니다."</string>

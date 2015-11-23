@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prozentzahl für Akkustand in Statusleistensymbol anzeigen, wenn das Gerät nicht geladen wird"</string>
     <string name="quick_settings" msgid="10042998191725428">"Schnelleinstellungen"</string>
     <string name="status_bar" msgid="4877645476959324760">"Statusleiste"</string>
+    <string name="overview" msgid="4018602013895926956">"Übersicht"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Demomodus"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Demomodus aktivieren"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Demomodus anzeigen"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Uhrsekunden in der Statusleiste anzeigen. Kann sich auf die Akkulaufzeit auswirken."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Schnelleinstellungen neu anordnen"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Helligkeit in den Schnelleinstellungen anzeigen"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Schnelles Wechseln aktivieren"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Seitenlayout über die Schaltfläche \"Übersicht\" aktivieren"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentell"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth aktivieren?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Zum Verbinden von Tastatur und Tablet muss Bluetooth aktiviert sein."</string>

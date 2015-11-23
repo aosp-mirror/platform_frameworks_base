@@ -410,6 +410,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Приказивање нивоа напуњености батерије у процентима унутар иконе на статусној траци када се батерија не пуни"</string>
     <string name="quick_settings" msgid="10042998191725428">"Брза подешавања"</string>
     <string name="status_bar" msgid="4877645476959324760">"Статусна трака"</string>
+    <string name="overview" msgid="4018602013895926956">"Преглед"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Режим демонстрације"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Омогући режим демонстрације"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Прикажи режим демонстрације"</string>
@@ -438,6 +439,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Секунде на сату се приказују на статусној траци. То може да утиче на трајање батерије."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Преуреди Брза подешавања"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Прикажи осветљеност у Брзим подешавањима"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Омогући брзо листање"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Омогућава листање помоћу дугмета Преглед"</string>
     <string name="experimental" msgid="6198182315536726162">"Експериментално"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Желите ли да укључите Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Да бисте повезали тастатуру са таблетом, прво морате да укључите Bluetooth."</string>

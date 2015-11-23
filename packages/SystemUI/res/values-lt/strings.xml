@@ -411,6 +411,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Rodyti akumuliatoriaus įkrovos lygio procentinę vertę būsenos juostos piktogramoje, kai įrenginys nėra įkraunamas"</string>
     <string name="quick_settings" msgid="10042998191725428">"Spartieji nustatymai"</string>
     <string name="status_bar" msgid="4877645476959324760">"Būsenos juosta"</string>
+    <string name="overview" msgid="4018602013895926956">"Apžvalga"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Demonstracinis režimas"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Įgalinti demonstracinį režimą"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Rodyti demonstraciniu režimu"</string>
@@ -439,6 +440,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Rodyti laikrodžio sekundes būsenos juostoje. Tai gali paveikti akumuliatoriaus naudojimo laiką."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Pertvarkyti sparčiuosius nustatymus"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Rodyti skaistį sparčiuosiuose nustatymuose"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Įgalinti greitą perjungimą"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Įgalinti puslapių kaitą per apžvalgos mygtuką"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentinė versija"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Įjungti „Bluetooth“?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Kad galėtumėte prijungti klaviatūrą prie planšetinio kompiuterio, pirmiausia turite įjungti „Bluetooth“."</string>

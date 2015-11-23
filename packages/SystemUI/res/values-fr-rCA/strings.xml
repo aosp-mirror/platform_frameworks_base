@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Afficher le pourcentage correspondant au niveau de la pile dans l\'icône de la barre d\'état lorsque l\'appareil n\'est pas en charge."</string>
     <string name="quick_settings" msgid="10042998191725428">"Paramètres rapides"</string>
     <string name="status_bar" msgid="4877645476959324760">"Barre d\'état"</string>
+    <string name="overview" msgid="4018602013895926956">"Aperçu"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Mode Démonstration"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Activer le mode Démonstration"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Afficher le mode Démonstration"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Afficher les secondes sur l\'horloge dans la barre d\'état. Cela peut réduire l\'autonomie de la pile."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Réorganiser les paramètres rapides"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Afficher la luminosité dans les paramètres rapides"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Activer le basculement rapide"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Activer la pagination à l\'aide du bouton Aperçu"</string>
     <string name="experimental" msgid="6198182315536726162">"Fonctions expérimentales"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activer Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pour connecter votre clavier à votre tablette, vous devez d\'abord activer la connectivité Bluetooth."</string>

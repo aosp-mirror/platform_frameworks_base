@@ -409,6 +409,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"যখন চার্জ করা হবে না তখন স্থিতি দন্ডের আইকনের ভিতরে ব্যাটারি স্তরের শতকার হার দেখায়"</string>
     <string name="quick_settings" msgid="10042998191725428">"দ্রুত সেটিংস"</string>
     <string name="status_bar" msgid="4877645476959324760">"স্থিতি দন্ড"</string>
+    <string name="overview" msgid="4018602013895926956">"এক নজরে"</string>
     <string name="demo_mode" msgid="2389163018533514619">"ডেমো মোড"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"ডেমো মোড সক্ষম করুন"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"ডেমো মোড দেখান"</string>
@@ -437,6 +438,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"দ্রুত সেটিংসে পুনরায় সাজান"</string>
     <string name="show_brightness" msgid="6613930842805942519">"দ্রুত সেটিংসে উজ্জ্বলতা দেখান"</string>
+    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"\'দ্রুত টগল করা\'র ব্যবস্থাটি সক্ষম করুন"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"\'এক নজরে\' বোতামের মাধ্যমে পেজিং সক্ষম করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>
