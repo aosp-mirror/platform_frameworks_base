@@ -1561,8 +1561,6 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
         final long ident = Binder.clearCallingIdentity();
-        final DevicePolicyManager devicePolicyManager = (DevicePolicyManager) mContext
-                .getSystemService(Context.DEVICE_POLICY_SERVICE);
         UserInfo userInfo;
         final int userId;
         try {
@@ -1605,22 +1603,13 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                if (devicePolicyManager != null) {
-                    int deviceOwnerUserId = devicePolicyManager.getDeviceOwnerUserId();
-                    // If there is a device owner, completely disallow multiple user in non-split
-                    // user devices. In split user devices, no further users can be added If there
-                    // is a device owner outside of the system user.
-                    if (deviceOwnerUserId != UserHandle.USER_NULL
-                            && (!UserManager.isSplitSystemUser()
-                            || deviceOwnerUserId != UserHandle.USER_SYSTEM)) {
-                        return null;
-                    }
-                }
                 // In split system user mode, we assign the first human user the primary flag.
                 // And if there is no device owner, we also assign the admin flag to primary user.
                 if (UserManager.isSplitSystemUser()
                         && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
                     flags |= UserInfo.FLAG_PRIMARY;
+                    DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+                            mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
                     if (devicePolicyManager == null
                             || devicePolicyManager.getDeviceOwner() == null) {
                         flags |= UserInfo.FLAG_ADMIN;
