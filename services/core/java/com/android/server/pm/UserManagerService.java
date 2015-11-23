@@ -781,18 +781,6 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserRestriction(String key, boolean value, int userId) {
         checkManageUsersPermission("setUserRestriction");
-        if (!UserRestrictionsUtils.isSystemControlled(key)) {
-            setUserRestrictionNoCheck(key, value, userId);
-        }
-    }
-
-    @Override
-    public void setSystemControlledUserRestriction(String key, boolean value, int userId) {
-        checkSystemOrRoot("setSystemControlledUserRestriction");
-        setUserRestrictionNoCheck(key, value, userId);
-    }
-
-    private void setUserRestrictionNoCheck(String key, boolean value, int userId) {
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
             // a copy.

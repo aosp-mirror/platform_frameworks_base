@@ -50,7 +50,7 @@ public class UserRestrictionsUtils {
     private UserRestrictionsUtils() {
     }
 
-    public static final String[] USER_RESTRICTIONS = {
+    public static final Set<String> USER_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_CONFIG_WIFI,
             UserManager.DISALLOW_MODIFY_ACCOUNTS,
             UserManager.DISALLOW_INSTALL_APPS,
@@ -84,14 +84,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SAFE_BOOT,
             UserManager.ALLOW_PARENT_PROFILE_APP_LINKING,
             UserManager.DISALLOW_RECORD_AUDIO,
-            UserManager.DISALLOW_CAMERA,
-    };
-
-    /**
-     * Set of user restrictions, which can only be enforced by the system.
-     */
-    public static final Set<String> SYSTEM_CONTROLLED_USER_RESTRICTIONS = Sets.newArraySet(
-            UserManager.DISALLOW_RECORD_AUDIO
+            UserManager.DISALLOW_CAMERA
     );
 
     /**
@@ -143,11 +136,17 @@ public class UserRestrictionsUtils {
         }
 
         serializer.startTag(null, tag);
-        for (String key : USER_RESTRICTIONS) {
-            if (restrictions.getBoolean(key)
-                    && !NON_PERSIST_USER_RESTRICTIONS.contains(key)) {
-                serializer.attribute(null, key, "true");
+        for (String key : restrictions.keySet()) {
+            if (NON_PERSIST_USER_RESTRICTIONS.contains(key)) {
+                continue; // Don't persist.
             }
+            if (USER_RESTRICTIONS.contains(key)) {
+                if (restrictions.getBoolean(key)) {
+                    serializer.attribute(null, key, "true");
+                }
+                continue;
+            }
+            Log.w(TAG, "Unknown user restriction detected: " + key);
         }
         serializer.endTag(null, tag);
     }
@@ -195,14 +194,6 @@ public class UserRestrictionsUtils {
                 dest.putBoolean(key, true);
             }
         }
-    }
-
-    /**
-     * @return true if a restriction is "system controlled"; i.e. can not be overwritten via
-     * {@link UserManager#setUserRestriction}.
-     */
-    public static boolean isSystemControlled(String restriction) {
-        return SYSTEM_CONTROLLED_USER_RESTRICTIONS.contains(restriction);
     }
 
     /**

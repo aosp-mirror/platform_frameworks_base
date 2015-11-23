@@ -1386,11 +1386,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             migrated = true;
 
-            // Migrate user 0 restrictions to DO, except for "system" restrictions.
+            // Migrate user 0 restrictions to DO.
             final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
 
             migrateUserRestrictionsForUser(UserHandle.SYSTEM, deviceOwnerAdmin,
-                    /* exceptionList =*/ UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS);
+                    /* exceptionList =*/ null);
 
             // Push DO user restrictions to user manager.
             pushUserRestrictions(UserHandle.USER_SYSTEM);
@@ -1402,7 +1402,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final Set<String> normalExceptionList = Sets.newArraySet(
                 UserManager.DISALLOW_OUTGOING_CALLS,
                 UserManager.DISALLOW_SMS);
-        normalExceptionList.addAll(UserRestrictionsUtils.SYSTEM_CONTROLLED_USER_RESTRICTIONS);
 
         final Set<String> managedExceptionList = new ArraySet<>(normalExceptionList.size() + 1);
         managedExceptionList.addAll(normalExceptionList);
@@ -1446,15 +1445,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final Bundle origRestrictions = mUserManagerInternal.getBaseUserRestrictions(
                 user.getIdentifier());
 
-        final Bundle newSystemRestrictions = new Bundle();
+        final Bundle newBaseRestrictions = new Bundle();
         final Bundle newOwnerRestrictions = new Bundle();
 
         for (String key : origRestrictions.keySet()) {
             if (!origRestrictions.getBoolean(key)) {
                 continue;
             }
-            if (exceptionList.contains(key)) {
-                newSystemRestrictions.putBoolean(key, true);
+            if (exceptionList!= null && exceptionList.contains(key)) {
+                newBaseRestrictions.putBoolean(key, true);
             } else {
                 newOwnerRestrictions.putBoolean(key, true);
             }
@@ -1462,11 +1461,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         if (VERBOSE_LOG) {
             Log.v(LOG_TAG, "origRestrictions=" + origRestrictions);
-            Log.v(LOG_TAG, "newSystemRestrictions=" + newSystemRestrictions);
+            Log.v(LOG_TAG, "newBaseRestrictions=" + newBaseRestrictions);
             Log.v(LOG_TAG, "newOwnerRestrictions=" + newOwnerRestrictions);
         }
         mUserManagerInternal.setBaseUserRestrictionsByDpmsForMigration(user.getIdentifier(),
-                newSystemRestrictions);
+                newBaseRestrictions);
 
         if (admin != null) {
             admin.ensureUserRestrictions().clear();
