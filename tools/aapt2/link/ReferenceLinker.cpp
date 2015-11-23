@@ -133,7 +133,7 @@ public:
                 // fast and we avoid creating a DiagMessage when the match is successful.
                 if (!symbol->attribute->matches(entry.value.get(), nullptr)) {
                     // The actual type of this item is incompatible with the attribute.
-                    DiagMessage msg(style->getSource());
+                    DiagMessage msg(entry.key.getSource());
 
                     // Call the matches method again, this time with a DiagMessage so we fill
                     // in the actual error message.
@@ -143,16 +143,11 @@ public:
                 }
 
             } else {
-                DiagMessage msg(style->getSource());
+                DiagMessage msg(entry.key.getSource());
                 msg << "style attribute '";
-                if (entry.key.name) {
-                    msg << entry.key.name.value().package << ":" << entry.key.name.value().entry;
-                } else {
-                    msg << entry.key.id.value();
-                }
+                ReferenceLinker::writeResourceName(&msg, entry.key, transformedReference);
                 msg << "' " << errStr;
                 mContext->getDiagnostics()->error(msg);
-                mContext->getDiagnostics()->note(DiagMessage(style->getSource()) << entry.key);
                 mError = true;
             }
         }
@@ -201,16 +196,12 @@ const ISymbolTable::Symbol* ReferenceLinker::resolveSymbolCheckVisibility(
         CallSite* callSite, std::string* outError) {
     const ISymbolTable::Symbol* symbol = resolveSymbol(reference, nameMangler, symbols);
     if (!symbol) {
-        std::stringstream errStr;
-        errStr << "not found";
-        if (outError) *outError = errStr.str();
+        if (outError) *outError = "not found";
         return nullptr;
     }
 
     if (!isSymbolVisible(*symbol, reference, *callSite)) {
-        std::stringstream errStr;
-        errStr << "is private";
-        if (outError) *outError = errStr.str();
+        if (outError) *outError = "is private";
         return nullptr;
     }
     return symbol;
@@ -227,9 +218,7 @@ const ISymbolTable::Symbol* ReferenceLinker::resolveAttributeCheckVisibility(
     }
 
     if (!symbol->attribute) {
-        std::stringstream errStr;
-        errStr << "is not an attribute";
-        if (outError) *outError = errStr.str();
+        if (outError) *outError = "is not an attribute";
         return nullptr;
     }
     return symbol;
@@ -246,12 +235,24 @@ Maybe<xml::AaptAttribute> ReferenceLinker::compileXmlAttribute(const Reference& 
     }
 
     if (!symbol->attribute) {
-        std::stringstream errStr;
-        errStr << "is not an attribute";
-        if (outError) *outError = errStr.str();
+        if (outError) *outError = "is not an attribute";
         return {};
     }
     return xml::AaptAttribute{ symbol->id, *symbol->attribute };
+}
+
+void ReferenceLinker::writeResourceName(DiagMessage* outMsg, const Reference& orig,
+                                        const Reference& transformed) {
+    assert(outMsg);
+
+    if (orig.name) {
+        *outMsg << orig.name.value();
+        if (transformed.name.value() != orig.name.value()) {
+            *outMsg << " (aka " << transformed.name.value() << ")";
+        }
+    } else {
+        *outMsg << orig.id.value();
+    }
 }
 
 bool ReferenceLinker::linkReference(Reference* reference, IAaptContext* context,
@@ -274,15 +275,7 @@ bool ReferenceLinker::linkReference(Reference* reference, IAaptContext* context,
 
     DiagMessage errorMsg(reference->getSource());
     errorMsg << "resource ";
-    if (reference->name) {
-        errorMsg << reference->name.value();
-        if (transformedReference.name.value() != reference->name.value()) {
-            errorMsg << " (aka " << transformedReference.name.value() << ")";
-        }
-    } else {
-        errorMsg << reference->id.value();
-    }
-
+    writeResourceName(&errorMsg, *reference, transformedReference);
     errorMsg << " " << errStr;
     context->getDiagnostics()->error(errorMsg);
     return false;

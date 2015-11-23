@@ -80,6 +80,13 @@ struct ReferenceLinker : public IResourceTableConsumer {
                                                          std::string* outError);
 
     /**
+     * Writes the resource name to the DiagMessage, using the "orig_name (aka <transformed_name>)"
+     * syntax.
+     */
+    static void writeResourceName(DiagMessage* outMsg, const Reference& orig,
+                                  const Reference& transformed);
+
+    /**
      * Transforms the package name of the reference to the fully qualified package name using
      * the xml::IPackageDeclStack, then mangles and looks up the symbol. If the symbol is visible
      * to the reference at the callsite, the reference is updated with an ID.
