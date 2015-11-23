@@ -34,7 +34,7 @@ public class RecentsActivityLaunchState {
     public boolean launchedFromSearchHome;
     public boolean launchedReuseTaskStackViews;
     public boolean launchedHasConfigurationChanged;
-    public boolean startHidden;
+    public boolean launchedViaDragGesture;
     public int launchedToTaskId;
     public int launchedNumVisibleTasks;
     public int launchedNumVisibleThumbnails;

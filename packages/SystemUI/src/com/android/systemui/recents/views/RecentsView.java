@@ -36,11 +36,13 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
@@ -64,14 +66,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private static final String TAG = "RecentsView";
     private static final boolean DEBUG = false;
 
-    private int mStackViewVisibility = View.VISIBLE;
-
     LayoutInflater mInflater;
     Handler mHandler;
 
-    ArrayList<TaskStack> mStacks;
     TaskStackView mTaskStackView;
     RecentsAppWidgetHostView mSearchBar;
+    boolean mAwaitingFirstLayout = true;
+    boolean mLastTaskLaunchedWasFreeform;
 
     RecentsTransitionHelper mTransitionHelper;
     RecentsViewTouchHandler mTouchHandler;
@@ -131,10 +132,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.setCallbacks(this);
             addView(mTaskStackView);
         }
-        mTaskStackView.setVisibility(mStackViewVisibility);
 
         // Trigger a new layout
         requestLayout();
+    }
+
+    /**
+     * Returns whether the last task launched was in the freeform stack or not.
+     */
+    public boolean isLastTaskLaunchedFreeform() {
+        return mLastTaskLaunchedWasFreeform;
     }
 
     /** Gets the next task in the stack - or if the last - the top task */
@@ -325,6 +332,17 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mDragView.layout(left, top, left + mDragView.getMeasuredWidth(),
                     top + mDragView.getMeasuredHeight());
         }
+
+        if (mAwaitingFirstLayout) {
+            mAwaitingFirstLayout = false;
+
+            // If launched via dragging from the nav bar, then we should translate the whole view
+            // down offscreen
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            if (launchState.launchedViaDragGesture) {
+                setTranslationY(getMeasuredHeight());
+            }
+        }
     }
 
     @Override
@@ -378,6 +396,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
             final TaskStack stack, final Task task, final boolean lockToTask,
             final Rect bounds, int destinationStack) {
+        mLastTaskLaunchedWasFreeform = SystemServicesProxy.isFreeformStack(task.key.stackId);
         mTransitionHelper.launchTaskFromRecents(stack, task, stackView, tv, lockToTask, bounds,
                 destinationStack);
     }
@@ -467,7 +486,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     public final void onBusEvent(DraggingInRecentsEvent event) {
-        setStackViewVisibility(View.VISIBLE);
         setTranslationY(event.distanceFromTop - mTaskStackView.getTaskViews().get(0).getY());
     }
 
@@ -501,11 +519,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
-    public void setStackViewVisibility(int stackViewVisibility) {
-        mStackViewVisibility = stackViewVisibility;
-        if (mTaskStackView != null) {
-            mTaskStackView.setVisibility(stackViewVisibility);
-            invalidate();
+    public final void onBusEvent(RecentsVisibilityChangedEvent event) {
+        if (!event.visible) {
+            // Reset the view state
+            mAwaitingFirstLayout = true;
+            mLastTaskLaunchedWasFreeform = false;
         }
     }
 }

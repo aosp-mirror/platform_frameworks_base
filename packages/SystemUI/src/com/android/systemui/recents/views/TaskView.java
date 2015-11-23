@@ -153,7 +153,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Gets the task */
-    Task getTask() {
+    public Task getTask() {
         return mTask;
     }
 
@@ -251,6 +251,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mActionButtonView.setAlpha(1f);
             mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
         }
+        setVisibility(View.VISIBLE);
     }
 
     /**
@@ -275,12 +276,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask,
-                                             boolean occludesLaunchTarget, int offscreenY) {
+    void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask, boolean hideTask,
+            boolean occludesLaunchTarget, int offscreenY) {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         int initialDim = getDim();
-        if (launchState.launchedHasConfigurationChanged) {
+        if (hideTask) {
+            setVisibility(View.INVISIBLE);
+        } else if (launchState.launchedHasConfigurationChanged) {
             // Just load the views as-is
         } else if (launchState.launchedFromAppWithThumbnail) {
             if (isTaskViewLaunchTargetTask) {
