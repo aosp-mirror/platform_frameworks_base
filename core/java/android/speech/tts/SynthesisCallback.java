@@ -63,9 +63,9 @@ public interface SynthesisCallback {
      *
      * @param sampleRateInHz Sample rate in HZ of the generated audio.
      * @param audioFormat Audio format of the generated audio. Must be one of
-     *         {@link android.media.AudioFormat.ENCODING_PCM_8BIT} or
-     *         {@link android.media.AudioFormat.ENCODING_PCM_16BIT}. Or
-     *         {@link android.media.AudioFormat.ENCODING_PCM_FLOAT} when targetting Android N and
+     *         {@link AudioFormat#ENCODING_PCM_8BIT} or
+     *         {@link AudioFormat#ENCODING_PCM_16BIT}. Can also be
+     *         {@link AudioFormat#ENCODING_PCM_FLOAT} when targetting Android N and
      *         above.
      * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
      * @return {@link TextToSpeech#SUCCESS}, {@link TextToSpeech#ERROR} or
