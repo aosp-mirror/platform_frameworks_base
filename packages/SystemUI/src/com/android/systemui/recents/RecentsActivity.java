@@ -406,24 +406,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mRecentsView.disableLayersForOneFrame();
         }
 
+        if (launchState.startHidden) {
+            launchState.startHidden = false;
+            mRecentsView.setStackViewVisibility(View.INVISIBLE);
+        } else {
+            mRecentsView.setStackViewVisibility(View.VISIBLE);
+        }
+
         // Notify that recents is now visible
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
 
         MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        final RecentsActivityLaunchState state = Recents.getConfiguration().getLaunchState();
-        if (state.startHidden) {
-            state.startHidden = false;
-            mRecentsView.setStackViewVisibility(View.INVISIBLE);
-        } else {
-            mRecentsView.setStackViewVisibility(View.VISIBLE);
-        }
     }
 
     @Override
