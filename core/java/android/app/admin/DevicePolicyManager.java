@@ -365,8 +365,8 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
 
     /**
-     * A integer extra indicating indicating the predominant color to show during the provisioning.
-     * Refer to {@link android.graphics#Color} for how the color is represented.
+     * A integer extra indicating the predominant color to show during the provisioning.
+     * Refer to {@link android.graphics.Color} for how the color is represented.
      *
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE} or
      * {@link #ACTION_PROVISION_MANAGED_DEVICE}.
