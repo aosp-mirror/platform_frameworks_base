@@ -168,6 +168,20 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     /**
+     * @hide
+     */
+    public int getRsrq() {
+        return mRsrq;
+    }
+
+    /**
+     * @hide
+     */
+    public int getRssnr() {
+        return mRssnr;
+    }
+
+    /**
      * Get signal strength as dBm
      */
     @Override
