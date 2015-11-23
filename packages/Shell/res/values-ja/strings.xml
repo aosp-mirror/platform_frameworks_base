@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"バグレポートには、個人の非公開情報など、システムのさまざまなログファイルのデータが含まれます。共有する場合は信頼するアプリとユーザーのみを選択してください。"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"このメッセージを次回も表示する"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"バグレポート"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"バグレポート ファイルを読み取ることができませんでした"</string>
 </resources>

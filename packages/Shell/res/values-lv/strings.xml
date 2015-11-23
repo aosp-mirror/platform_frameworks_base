@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Kļūdu pārskatā ir iekļauti dati no dažādiem sistēmas žurnālfailiem, tostarp personas dati un privāta informācija. Kļūdu pārskatus ieteicams kopīgot tikai ar uzticamām lietotnēm un lietotājiem."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Rādīt šo ziņojumu nākamajā reizē"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Kļūdu ziņojumi"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Nevarēja nolasīt kļūdas pārskata failu."</string>
 </resources>

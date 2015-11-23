@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Bug reports contain data from the system\'s various log files, including personal and private information. Only share bug reports with apps and people that you trust."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Show this message next time"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Bug reports"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Bug report file could not be read"</string>
 </resources>

@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Алдааны репорт нь хувийн болон нууц мэдээлэл зэргийг агуулсан системийн төрөл бүрийн лог файлын датаг агуулна. Алдааны репортыг зөвхөн итгэлтэй апп болон хүмүүст хуваалцана уу."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Энэ мессежийг дараагийн удаа харуулах"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Гэмтлийн тухай тайлан"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Алдааны тайлангийн файлыг уншиж чадахгүй байна"</string>
 </resources>

@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Villutilkynningar innihalda gögn úr hinum ýmsu annálsskrám kerfisins, þ. á m. persónuleg gögn og trúnaðarupplýsingar. Deildu villutilkynningum eingöngu með forritum og fólki sem þú treystir."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Sýna þessi skilaboð næst"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Villutilkynningar"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Ekki var hægt að lesa úr villuskýrslunni"</string>
 </resources>

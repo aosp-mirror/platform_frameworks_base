@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Laporan bug berisi data dari berbagai file log sistem, termasuk informasi pribadi dan rahasia. Hanya bagikan laporan bug dengan aplikasi dan orang yang Anda percaya."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Tampilkan pesan ini lain kali"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Laporan bug"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"File laporan bug tidak dapat dibaca"</string>
 </resources>

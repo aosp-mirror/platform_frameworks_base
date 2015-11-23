@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Các báo cáo lỗi chứa dữ liệu từ nhiều tệp nhật ký khác nhau của hệ thống, bao gồm cả thông tin cá nhân và riêng tư. Chỉ chia sẻ báo cáo lỗi với các ứng dụng và những người mà bạn tin tưởng."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Hiển thị thông báo này vào lần tới"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Báo cáo lỗi"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Không thể đọc tệp báo cáo lỗi"</string>
 </resources>

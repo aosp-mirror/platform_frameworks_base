@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Riktų ataskaitose pateikiami duomenys iš įvairių sistemos žurnalo failų, įskaitant asmeninę ir privačią informaciją. Riktų ataskaitas bendrinkite tik su patikimomis programomis ir žmonėmis."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Rodyti šį pranešimą kitą kartą"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Riktų ataskaitos"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Nepavyko sukurti pranešimo apie riktą failo"</string>
 </resources>
