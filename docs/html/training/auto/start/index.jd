@@ -220,7 +220,7 @@ $ sudo apt-get install libsdl2-2.0-0 libsdl2-ttf-2.0-0 libportaudio2 libpng12-0
 
 <ol>
   <li>On the mobile device, enable Android Auto developer mode by starting the Android Auto
-    companion app, and then tapping the header image 10 times.
+    companion app, and then tapping the <i>Android Auto</i> toolbar title 10 times.
     This step is only required the first time you run the companion app.
   </li>
   <li>If the server is not already running, select <strong>Start head unit server</strong>
