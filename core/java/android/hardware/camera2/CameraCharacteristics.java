@@ -2178,11 +2178,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * (8-14 bits is expected), or by the point where the sensor response
      * becomes too non-linear to be useful.  The default value for this is
      * maximum representable value for a 16-bit raw sample (2^16 - 1).</p>
+     * <p>The white level values of captured images may vary for different
+     * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}). This key
+     * represents a coarse approximation for such case. It is recommended
+     * to use {@link CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL android.sensor.dynamicWhiteLevel} for captures when supported
+     * by the camera device, which provides more accurate white level values.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt; 255 (8-bit output)</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
     public static final Key<Integer> SENSOR_INFO_WHITE_LEVEL =
@@ -2520,12 +2527,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * layout key (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}), i.e. the
      * nth value given corresponds to the black level offset for the nth
      * color channel listed in the CFA.</p>
+     * <p>The black level values of captured images may vary for different
+     * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}). This key
+     * represents a coarse approximation for such case. It is recommended to
+     * use {@link CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL android.sensor.dynamicBlackLevel} or use pixels from
+     * {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} directly for captures when
+     * supported by the camera device, which provides more accurate black
+     * level values. For raw capture in particular, it is recommended to use
+     * pixels from {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} to calculate black
+     * level values for each frame.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 for each.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
     public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN =
@@ -2578,6 +2597,32 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
             new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
+
+    /**
+     * <p>List of disjoint rectangles indicating the sensor
+     * optically shielded black pixel regions.</p>
+     * <p>In most camera sensors, the active array is surrounded by some
+     * optically shielded pixel areas. By blocking light, these pixels
+     * provides a reliable black reference for black level compensation
+     * in active array region.</p>
+     * <p>This key provides a list of disjoint rectangles specifying the
+     * regions of optically shielded (with metal shield) black pixel
+     * regions if the camera device is capable of reading out these black
+     * pixels in the output raw images. In comparison to the fixed black
+     * level values reported by {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern}, this key
+     * may provide a more accurate way for the application to calculate
+     * black level of each captured raw images.</p>
+     * <p>When this key is reported, the {@link CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL android.sensor.dynamicBlackLevel} and
+     * {@link CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL android.sensor.dynamicWhiteLevel} will also be reported.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL
+     * @see CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL
+     */
+    @PublicKey
+    public static final Key<android.graphics.Rect[]> SENSOR_OPTICAL_BLACK_REGIONS =
+            new Key<android.graphics.Rect[]>("android.sensor.opticalBlackRegions", android.graphics.Rect[].class);
 
     /**
      * <p>List of lens shading modes for {@link CaptureRequest#SHADING_MODE android.shading.mode} that are supported by this camera device.</p>
