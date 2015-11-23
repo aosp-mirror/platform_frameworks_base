@@ -17,12 +17,14 @@
 #ifndef _ANDROID_GRAPHICS_NINE_PATCH_PEEKER_H_
 #define _ANDROID_GRAPHICS_NINE_PATCH_PEEKER_H_
 
-#include "SkImageDecoder.h"
+#include "SkPngChunkReader.h"
 #include <androidfw/ResourceTypes.h>
+
+class SkImageDecoder;
 
 using namespace android;
 
-class NinePatchPeeker : public SkImageDecoder::Peeker {
+class NinePatchPeeker : public SkPngChunkReader {
 private:
     // the host lives longer than we do, so a raw ptr is safe
     SkImageDecoder* mHost;
@@ -42,7 +44,7 @@ public:
         free(mPatch);
     }
 
-    virtual bool peek(const char tag[], const void* data, size_t length);
+    bool readChunk(const char tag[], const void* data, size_t length) override;
 
     Res_png_9patch* mPatch;
     size_t mPatchSize;
