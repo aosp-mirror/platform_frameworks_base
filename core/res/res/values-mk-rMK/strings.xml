@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"За содржината на апликацијата да биде подостапна, може да се инсталираат скрипти."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Набљудувај го напишаниот текст"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Опфаќа лични податоци како што се броеви на кредитни картички и лозинки."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Контролирајте го зголемувањето на екранот"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Контролирајте го нивото на зумирање и позиционирање на екранот."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"да стане статусна лента"</string>
@@ -1501,4 +1503,5 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> е избрана</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> се избрани</item>
     </plurals>
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Разно"</string>
 </resources>

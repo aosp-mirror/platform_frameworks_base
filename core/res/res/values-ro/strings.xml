@@ -253,6 +253,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Pot fi instalate scripturi pentru a face conținutul aplicațiilor mai accesibil."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Remarcă textul pe care îl introduceți"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlați mărirea afișajului"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlați nivelul de zoom și poziționarea afișajului."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"dezactivare sau modificare bare de stare"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite aplicației să dezactiveze bara de stare sau să adauge și să elimine pictograme de sistem."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"să fie bara de stare"</string>
@@ -1517,4 +1519,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selectat</item>
     </plurals>
+    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
+    <skip />
 </resources>

@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Tập lệnh có thể được cài đặt để làm cho nội dung ứng dụng dễ truy cập hơn."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Xem nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kiểm soát vị trí và mức thu phóng của màn hình."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"trở thành thanh trạng thái"</string>
@@ -1499,4 +1501,5 @@
       <item quantity="other">Đã chọn <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Đã chọn <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Khác"</string>
 </resources>

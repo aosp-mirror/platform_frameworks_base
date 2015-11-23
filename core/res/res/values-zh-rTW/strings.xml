@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"可能會安裝程式碼，使應用程式內容更易於存取。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"記錄您輸入的文字"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包括個人資料，如信用卡號碼和密碼。"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控管顯示畫面放大功能"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"控管顯示畫面的縮放等級和位置。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"以狀態列顯示"</string>
@@ -1499,4 +1501,6 @@
       <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
     </plurals>
+    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
+    <skip />
 </resources>

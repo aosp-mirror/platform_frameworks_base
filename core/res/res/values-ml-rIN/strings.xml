@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"അപ്ലിക്കേഷൻ ഉള്ളടക്കം കൂടുതൽ ആക്‌സസ്സുചെയ്യാൻ കഴിയുന്നതാക്കാൻ സ്‌ക്രിപ്റ്റുകൾ ഇൻസ്റ്റാളുചെയ്യാനിടയുണ്ട്."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"നിങ്ങൾ ടൈപ്പുചെയ്യുന്ന വാചകം നിരീക്ഷിക്കുക"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ക്രെഡിറ്റ് കാർഡ് നമ്പറുകളും പാസ്‌വേഡുകളും പോലുള്ള വ്യക്തിഗത ഡാറ്റ ഉൾപ്പെടുന്നു."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ഡിസ്പ്ലേ മാഗ്നിഫിക്കേഷൻ നിയന്ത്രിക്കുക"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ഡിസ്പ്ലേയുടെ സൂം നിലയും പൊസിഷനിംഗും നിയന്ത്രിക്കുക."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>
@@ -1499,4 +1501,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
     </plurals>
+    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
+    <skip />
 </resources>

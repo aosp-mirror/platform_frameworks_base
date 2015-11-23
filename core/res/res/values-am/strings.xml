@@ -252,6 +252,8 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"የመተግበሪያ ይዘት ይበልጥ የሚገኙ ለማድረግ ስክሪፕቶች ሊጫኑ ይችላሉ።"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"የሚተይቡት ጽሑፍ ይመልከቱ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"እንደ የክሬዲት ካርድ ቁጥሮች እና የይለፍ ቃላት ያሉ የግል ውሂብ ያካትታል።"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"የመቆጣጠሪያ ማሳያ እንዲጎላ አደራረግ"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"የማሳያውን የማጉያ ደረጃ እና አቀማመጥ ይቆጣጠሩ።"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"የሁኔቴ አሞሌ አቦዝን ወይም ቀይር"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"የስርዓት አዶዎችን ወደ ሁኔታ አሞሌ ላለማስቻል ወይም ለማከል እና ለማስወገድ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"የሁኔታ አሞሌ መሆን"</string>
@@ -1499,4 +1501,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ተመርጧል</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ተመርጠዋል</item>
     </plurals>
+    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
+    <skip />
 </resources>
