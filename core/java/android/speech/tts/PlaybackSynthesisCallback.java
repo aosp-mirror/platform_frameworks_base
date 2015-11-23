@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.media.AudioFormat;
 import android.speech.tts.TextToSpeechService.AudioOutputParams;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
@@ -122,6 +123,13 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
     public int start(int sampleRateInHz, int audioFormat, int channelCount) {
         if (DBG) Log.d(TAG, "start(" + sampleRateInHz + "," + audioFormat + "," + channelCount
                 + ")");
+        if (audioFormat != AudioFormat.ENCODING_PCM_8BIT ||
+            audioFormat != AudioFormat.ENCODING_PCM_16BIT ||
+            audioFormat != AudioFormat.ENCODING_PCM_FLOAT) {
+            Log.w(TAG, "Audio format encoding " + audioFormat + " not supported. Please use one " +
+                       "of AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT or " +
+                       "AudioFormat.ENCODING_PCM_FLOAT");
+        }
 
         int channelConfig = BlockingAudioTrack.getChannelConfig(channelCount);
 
