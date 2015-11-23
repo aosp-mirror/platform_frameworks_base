@@ -27,8 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"दुई-पक्षीय"</string>
     <string name="label_orientation" msgid="2853142581990496477">"अभिमुखिकरण"</string>
     <string name="label_pages" msgid="7768589729282182230">"पृष्ठहरू"</string>
-    <!-- no translation found for destination_default_text (5422708056807065710) -->
-    <skip />
+    <string name="destination_default_text" msgid="5422708056807065710">"कुनै मुद्रक चयन गर्नुहोस्"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"सबै <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> को सीमा"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"उदाहरण १-५,८,११-१३"</string>
