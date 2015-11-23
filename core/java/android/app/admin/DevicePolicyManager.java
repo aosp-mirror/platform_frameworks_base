@@ -2847,6 +2847,24 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the device owner user id. Note this method will still return the device owner user id
+     * even if it's running on a different user. If there is no device owner this method return
+     * {@link UserHandle.USER_NULL}.
+     *
+     * @hide
+     */
+    public int getDeviceOwnerUserId() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerUserId();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get device owner user id");
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
+    /**
      * @hide
      * @deprecated Do not use
      * @removed
