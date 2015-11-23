@@ -1250,9 +1250,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
 
-    boolean isFullscreen(int screenWidth, int screenHeight) {
-        return mFrame.left <= 0 && mFrame.top <= 0 &&
-                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
+    boolean isObscuringFullscreen(final DisplayInfo displayInfo) {
+        Task task = getTask();
+        if (task != null && task.mStack != null && !task.mStack.isFullscreen()) {
+            return false;
+        }
+        if (!isOpaqueDrawn() || !isFrameFullscreen(displayInfo)) {
+            return false;
+        }
+        return true;
+    }
+
+    boolean isFrameFullscreen(final DisplayInfo displayInfo) {
+        return mFrame.left <= 0 && mFrame.top <= 0
+                && mFrame.right >= displayInfo.appWidth && mFrame.bottom >= displayInfo.appHeight;
     }
 
     boolean isConfigChanged() {

@@ -1106,7 +1106,7 @@ class WindowStateAnimator {
             applyDecorRect(w.mDecorFrame);
         }
 
-        final boolean fullscreen = w.isFullscreen(displayInfo.appWidth, displayInfo.appHeight);
+        final boolean fullscreen = w.isFrameFullscreen(displayInfo);
         final boolean isFreeformResizing =
                 w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
         final Rect clipRect = mTmpClipRect;
