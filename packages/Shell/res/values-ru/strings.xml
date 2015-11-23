@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Отчеты об ошибках содержат данные различных системных журналов и могут включать личную информацию. Рекомендуем открывать к ним доступ только лицам и приложениям, заслуживающим доверие."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Показать это сообщение в следующий раз"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Отчеты об ошибках"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Не удалось открыть отчет об ошибке"</string>
 </resources>

@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"דוחות על באגים כוללים נתונים מקובצי היומן השונים במערכת, כולל מידע אישי ופרטי. שתף דוחות באגים רק עם אפליקציות ואנשים שאתה סומך עליהם."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"הצג את ההודעה הזו בפעם הבאה"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"דוחות באגים"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"לא ניתן היה לקרוא את קובץ הדוח על הבאג"</string>
 </resources>

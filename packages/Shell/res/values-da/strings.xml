@@ -23,4 +23,5 @@
     <string name="bugreport_confirm" msgid="5130698467795669780">"Fejlrapporter indeholder data fra systemets forskellige logfiler, f.eks. personlige og private oplysninger. Del kun fejlrapporter med apps og personer, du har tillid til."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne underretning næste gang"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Fejlrapporter"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Fejlrapportfilen kunne ikke læses"</string>
 </resources>
