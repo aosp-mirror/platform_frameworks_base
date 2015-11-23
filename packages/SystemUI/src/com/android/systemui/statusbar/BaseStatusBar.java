@@ -2092,7 +2092,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         Notification n = notification.getNotification();
         mNotificationData.updateRanking(ranking);
 
-        boolean applyInPlace = !entry.cacheContentViews(mContext, notification.getNotification());
+        boolean applyInPlace = entry.cacheContentViews(mContext, notification.getNotification());
         boolean shouldInterrupt = shouldInterrupt(entry, notification);
         boolean alertAgain = alertAgain(entry, n);
         if (DEBUG) {
