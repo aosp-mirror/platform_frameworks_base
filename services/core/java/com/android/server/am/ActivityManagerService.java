@@ -1646,7 +1646,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case START_USER_SWITCH_UI_MSG: {
-                mUserController.showUserSwitchDialog(msg.arg1, (String) msg.obj);
+                mUserController.showUserSwitchDialog((Pair<UserInfo, UserInfo>) msg.obj);
                 break;
             }
             case DISMISS_DIALOG_UI_MSG: {
@@ -20251,25 +20251,27 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean switchUser(final int userId) {
-        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
-        String userName;
+    public boolean switchUser(final int targetUserId) {
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
+        UserInfo currentUserInfo;
+        UserInfo targetUserInfo;
         synchronized (this) {
-            UserInfo userInfo = mUserController.getUserInfo(userId);
-            if (userInfo == null) {
-                Slog.w(TAG, "No user info for user #" + userId);
+            int currentUserId = mUserController.getCurrentUserIdLocked();
+            currentUserInfo = mUserController.getUserInfo(currentUserId);
+            targetUserInfo = mUserController.getUserInfo(targetUserId);
+            if (targetUserInfo == null) {
+                Slog.w(TAG, "No user info for user #" + targetUserId);
                 return false;
             }
-            if (userInfo.isManagedProfile()) {
-                Slog.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
+            if (targetUserInfo.isManagedProfile()) {
+                Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
                 return false;
             }
-            userName = userInfo.name;
-            mUserController.setTargetUserIdLocked(userId);
+            mUserController.setTargetUserIdLocked(targetUserId);
         }
+        Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
         mUiHandler.removeMessages(START_USER_SWITCH_UI_MSG);
-        mUiHandler.sendMessage(mUiHandler.obtainMessage(START_USER_SWITCH_UI_MSG, userId, 0,
-                userName));
+        mUiHandler.sendMessage(mUiHandler.obtainMessage(START_USER_SWITCH_UI_MSG, userNames));
         return true;
     }
 

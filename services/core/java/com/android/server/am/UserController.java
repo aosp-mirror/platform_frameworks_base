@@ -61,6 +61,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -641,10 +642,10 @@ final class UserController {
         return true;
     }
 
-    void showUserSwitchDialog(int userId, String userName) {
+    void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
         // The dialog will show and then initiate the user switch by calling startUserInForeground
-        Dialog d = new UserSwitchingDialog(mService, mService.mContext, userId, userName,
-                true /* above system */);
+        Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromToUserPair.first,
+                fromToUserPair.second, true /* above system */);
         d.show();
     }
 
