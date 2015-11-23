@@ -342,6 +342,13 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns whether the given stack id is the docked stack id.
+     */
+    public static boolean isDockedStack(int stackId) {
+        return stackId == DOCKED_STACK_ID;
+    }
+
+    /**
      * Returns whether the given stack id is the freeform workspace stack id.
      */
     public static boolean isFreeformStack(int stackId) {

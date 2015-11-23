@@ -74,18 +74,17 @@ class FilteredTaskList {
         if (!prevFilteredTasks.equals(mFilteredTasks)) {
             return true;
         } else {
-            // If the tasks are exactly the same pre/post filter, then just reset it
-            mFilter = null;
             return false;
         }
     }
 
-    /** Resets this FilteredTaskList. */
+    /**
+     * Resets the task list, but does not remove the filter.
+     */
     void reset() {
         mTasks.clear();
         mFilteredTasks.clear();
         mTaskIndices.clear();
-        mFilter = null;
     }
 
     /** Removes the task filter and returns the previous touch state */
@@ -294,8 +293,18 @@ public class TaskStack {
     FilteredTaskList mTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
-    ArrayList<TaskGrouping> mGroups = new ArrayList<TaskGrouping>();
-    HashMap<Integer, TaskGrouping> mAffinitiesGroups = new HashMap<Integer, TaskGrouping>();
+    ArrayList<TaskGrouping> mGroups = new ArrayList<>();
+    HashMap<Integer, TaskGrouping> mAffinitiesGroups = new HashMap<>();
+
+    public TaskStack() {
+        // Ensure that we only show non-docked tasks
+        mTaskList.setFilter(new TaskFilter() {
+            @Override
+            public boolean acceptTask(Task t, int index) {
+                return !SystemServicesProxy.isDockedStack(t.key.stackId);
+            }
+        });
+    }
 
     /** Sets the callbacks for this task stack. */
     public void setCallbacks(TaskStackCallbacks cb) {
@@ -399,7 +408,7 @@ public class TaskStack {
 
     /** Gets the task keys */
     public ArrayList<Task.TaskKey> getTaskKeys() {
-        ArrayList<Task.TaskKey> taskKeys = new ArrayList<Task.TaskKey>();
+        ArrayList<Task.TaskKey> taskKeys = new ArrayList<>();
         ArrayList<Task> tasks = mTaskList.getTasks();
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
