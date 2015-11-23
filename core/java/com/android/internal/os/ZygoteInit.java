@@ -346,7 +346,7 @@ public class ZygoteInit {
                 long startTime = SystemClock.uptimeMillis();
                 TypedArray ar = mResources.obtainTypedArray(
                         com.android.internal.R.array.preloaded_drawables);
-                int N = preloadDrawables(runtime, ar);
+                int N = preloadDrawables(ar);
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
@@ -354,10 +354,21 @@ public class ZygoteInit {
                 startTime = SystemClock.uptimeMillis();
                 ar = mResources.obtainTypedArray(
                         com.android.internal.R.array.preloaded_color_state_lists);
-                N = preloadColorStateLists(runtime, ar);
+                N = preloadColorStateLists(ar);
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
+
+                if (mResources.getBoolean(
+                        com.android.internal.R.bool.config_freeformWindowManagement)) {
+                    startTime = SystemClock.uptimeMillis();
+                    ar = mResources.obtainTypedArray(
+                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
+                    N = preloadDrawables(ar);
+                    ar.recycle();
+                    Log.i(TAG, "...preloaded " + N + " resource in "
+                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
+                }
             }
             mResources.finishPreloading();
         } catch (RuntimeException e) {
@@ -365,7 +376,7 @@ public class ZygoteInit {
         }
     }
 
-    private static int preloadColorStateLists(VMRuntime runtime, TypedArray ar) {
+    private static int preloadColorStateLists(TypedArray ar) {
         int N = ar.length();
         for (int i=0; i<N; i++) {
             int id = ar.getResourceId(i, 0);
@@ -385,7 +396,7 @@ public class ZygoteInit {
     }
 
 
-    private static int preloadDrawables(VMRuntime runtime, TypedArray ar) {
+    private static int preloadDrawables(TypedArray ar) {
         int N = ar.length();
         for (int i=0; i<N; i++) {
             int id = ar.getResourceId(i, 0);
