@@ -226,9 +226,7 @@ public class RankingHelper implements RankingConfig {
             r = new Record();
             r.pkg = pkg;
             r.uid = uid;
-            r.topics.put(Notification.TOPIC_DEFAULT,
-                    new Topic(new Notification.Topic(Notification.TOPIC_DEFAULT,
-                            mContext.getString(R.string.default_notification_topic_label))));
+            r.topics.put(Notification.TOPIC_DEFAULT, new Topic(createDefaultTopic()));
             mRecords.put(key, r);
         }
         return r;
@@ -406,6 +404,9 @@ public class RankingHelper implements RankingConfig {
     }
 
     private Topic getOrCreateTopic(Record r, Notification.Topic topic) {
+        if (topic == null) {
+            topic = createDefaultTopic();
+        }
         Topic t = r.topics.get(topic.getId());
         if (t != null) {
             return t;
@@ -414,6 +415,11 @@ public class RankingHelper implements RankingConfig {
             r.topics.put(topic.getId(), t);
             return t;
         }
+    }
+
+    private Notification.Topic createDefaultTopic() {
+        return new Notification.Topic(Notification.TOPIC_DEFAULT,
+                mContext.getString(R.string.default_notification_topic_label));
     }
 
     public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
