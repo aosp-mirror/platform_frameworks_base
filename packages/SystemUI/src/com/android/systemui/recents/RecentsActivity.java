@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
+import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -87,29 +88,30 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
 
-    RecentsPackageMonitor mPackageMonitor;
-    long mLastTabKeyEventTime;
-    boolean mFinishedOnStartup;
+    private RecentsPackageMonitor mPackageMonitor;
+    private long mLastTabKeyEventTime;
+    private boolean mFinishedOnStartup;
+    private boolean mIgnoreAltTabRelease;
 
     // Top level views
-    RecentsView mRecentsView;
-    SystemBarScrimViews mScrimViews;
-    ViewStub mEmptyViewStub;
-    View mEmptyView;
+    private RecentsView mRecentsView;
+    private SystemBarScrimViews mScrimViews;
+    private ViewStub mEmptyViewStub;
+    private View mEmptyView;
 
     // Resize task debug
-    RecentsResizeTaskDialog mResizeTaskDebugDialog;
+    private RecentsResizeTaskDialog mResizeTaskDebugDialog;
 
     // Search AppWidget
-    AppWidgetProviderInfo mSearchWidgetInfo;
-    RecentsAppWidgetHost mAppWidgetHost;
-    RecentsAppWidgetHostView mSearchWidgetHostView;
+    private AppWidgetProviderInfo mSearchWidgetInfo;
+    private RecentsAppWidgetHost mAppWidgetHost;
+    private RecentsAppWidgetHostView mSearchWidgetHostView;
 
     // Runnables to finish the Recents activity
-    FinishRecentsRunnable mFinishLaunchHomeRunnable;
+    private FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     // The trigger to automatically launch the current task
-    DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
+    private DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
         @Override
         public void run() {
             dismissRecentsToFocusedTask();
@@ -434,6 +436,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     protected void onStop() {
         super.onStop();
 
+        // Reset some states
+        mIgnoreAltTabRelease = false;
+
         // Notify that recents is now hidden
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, false));
@@ -504,10 +509,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 boolean hasRepKeyTimeElapsed = (SystemClock.elapsedRealtime() -
                         mLastTabKeyEventTime) > altTabKeyDelay;
                 if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
-                    // As we iterate to the next/previous task, cancel any current/lagging window
-                    // transition animations
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
-
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
                     if (backward) {
@@ -516,6 +517,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                         EventBus.getDefault().send(new FocusNextTaskViewEvent());
                     }
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
+
+                    // In the case of another ALT event, don't ignore the next release
+                    if (event.isAltPressed()) {
+                        mIgnoreAltTabRelease = false;
+                    }
                 }
                 return true;
             }
@@ -590,7 +596,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final void onBusEvent(HideRecentsEvent event) {
         if (event.triggeredFromAltTab) {
             // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
-            dismissRecentsToFocusedTaskOrHome();
+            if (!mIgnoreAltTabRelease) {
+                dismissRecentsToFocusedTaskOrHome();
+            }
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
             dismissRecentsToHome(true /* animated */);
@@ -711,6 +719,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public final void onBusEvent(DebugFlagsChangedEvent event) {
         // Just finish recents so that we can reload the flags anew on the next instantiation
         finish();
+    }
+
+    public final void onBusEvent(StackViewScrolledEvent event) {
+        // Once the user has scrolled while holding alt-tab, then we should ignore the release of
+        // the key
+        mIgnoreAltTabRelease = true;
     }
 
     private void refreshSearchWidgetView() {

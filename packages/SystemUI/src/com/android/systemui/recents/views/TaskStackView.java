@@ -40,6 +40,8 @@ import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
@@ -100,6 +102,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStackViewsDirty = true;
     boolean mStackViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
+    boolean mEnterAnimationComplete = false;
     boolean mStartEnterAnimationRequestedAfterLayout;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
 
@@ -288,6 +291,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackViewsDirty = true;
         mStackViewsClipDirty = true;
         mAwaitingFirstLayout = true;
+        mEnterAnimationComplete = false;
         if (mUIDozeTrigger != null) {
             mUIDozeTrigger.stopDozing();
             mUIDozeTrigger.resetTrigger();
@@ -604,15 +608,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /**
      * Sets the focused task to the provided (bounded taskIndex).
+     *
+     * @return whether or not the stack will scroll as a part of this focus change
      */
-    private void setFocusedTask(int taskIndex, boolean scrollToTask, final boolean animated) {
-        setFocusedTask(taskIndex, scrollToTask, animated, true);
+    private boolean setFocusedTask(int taskIndex, boolean scrollToTask, final boolean animated) {
+        return setFocusedTask(taskIndex, scrollToTask, animated, true);
     }
 
     /**
      * Sets the focused task to the provided (bounded taskIndex).
+     *
+     * @return whether or not the stack will scroll as a part of this focus change
      */
-    private void setFocusedTask(int taskIndex, boolean scrollToTask, final boolean animated,
+    private boolean setFocusedTask(int taskIndex, boolean scrollToTask, final boolean animated,
                                 final boolean requestViewFocus) {
         // Find the next task to focus
         int newFocusedTaskIndex = mStack.getTaskCount() > 0 ?
@@ -628,6 +636,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
 
+        boolean willScroll = false;
         mFocusedTaskIndex = newFocusedTaskIndex;
         if (mFocusedTaskIndex != -1) {
             Runnable focusTaskRunnable = new Runnable() {
@@ -648,18 +657,33 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     newScroll -= 0.5f;
                 }
                 newScroll = mStackScroller.getBoundedStackScroll(newScroll);
-                mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll,
-                        focusTaskRunnable);
+                if (Float.compare(newScroll, mStackScroller.getStackScroll()) != 0) {
+                    mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll,
+                            focusTaskRunnable);
+                    willScroll = true;
+
+                    // Cancel any running enter animations at this point when we scroll as well
+                    if (!mEnterAnimationComplete) {
+                        final List<TaskView> taskViews = getTaskViews();
+                        for (TaskView tv : taskViews) {
+                            tv.cancelEnterRecentsAnimation();
+                        }
+                    }
+                } else {
+                    focusTaskRunnable.run();
+                }
                 mLayoutAlgorithm.animateFocusState(TaskStackLayoutAlgorithm.STATE_FOCUSED);
             } else {
                 focusTaskRunnable.run();
             }
         }
+        return willScroll;
     }
 
     /**
      * Sets the focused task relative to the currently focused task.
      *
+     * @param forward whether to go to the next task in the stack (along the curve) or the previous
      * @param stackTasksOnly if set, will ensure that the traversal only goes along stack tasks, and
      *                       if the currently focused task is not a stack task, will set the focus
      *                       to the first visible stack task
@@ -667,6 +691,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *                            focus.
      */
     public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated) {
+        setRelativeFocusedTask(forward, stackTasksOnly, animated, false);
+    }
+
+    /**
+     * Sets the focused task relative to the currently focused task.
+     *
+     * @param forward whether to go to the next task in the stack (along the curve) or the previous
+     * @param stackTasksOnly if set, will ensure that the traversal only goes along stack tasks, and
+     *                       if the currently focused task is not a stack task, will set the focus
+     *                       to the first visible stack task
+     * @param animated determines whether to actually draw the highlight along with the change in
+     *                            focus.
+     * @param cancelWindowAnimations if set, will attempt to cancel window animations if a scroll
+     *                               happens
+     */
+    public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated,
+                                       boolean cancelWindowAnimations) {
         int newIndex = -1;
         if (mFocusedTaskIndex != -1) {
             if (stackTasksOnly) {
@@ -703,7 +744,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         if (newIndex != -1) {
-            setFocusedTask(newIndex, true, animated);
+            boolean willScroll = setFocusedTask(newIndex, true, animated);
+            if (willScroll && cancelWindowAnimations) {
+                // As we iterate to the next/previous task, cancel any current/lagging window
+                // transition animations
+                EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
+            }
         }
     }
 
@@ -1416,6 +1462,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(IterateRecentsEvent event) {
         mLayoutAlgorithm.animateFocusState(mLayoutAlgorithm.getDefaultFocusState());
+    }
+
+    public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
+        mEnterAnimationComplete = true;
     }
 
     /**
