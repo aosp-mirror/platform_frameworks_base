@@ -75,7 +75,7 @@ public class SubscriptionManager {
 
     /**
      * Indicates the caller wants the default phone id.
-     * Used in SubscriptionController and PhoneBase but do we really need it???
+     * Used in SubscriptionController and Phone but do we really need it???
      * @hide
      */
     public static final int DEFAULT_PHONE_INDEX = Integer.MAX_VALUE;
