@@ -973,7 +973,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (newFragment != null) {
             transaction.add(R.id.embedded_content_container, newFragment, FRAGMENT_TAG);
         }
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         getFragmentManager().executePendingTransactions();
     }
 
