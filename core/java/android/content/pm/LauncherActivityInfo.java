@@ -41,7 +41,6 @@ public class LauncherActivityInfo {
     private ComponentName mComponentName;
     private ResolveInfo mResolveInfo;
     private UserHandle mUser;
-    private long mFirstInstallTime;
 
     /**
      * Create a launchable activity object for a given ResolveInfo and user.
@@ -50,14 +49,12 @@ public class LauncherActivityInfo {
      * @param info ResolveInfo from which to create the LauncherActivityInfo.
      * @param user The UserHandle of the profile to which this activity belongs.
      */
-    LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user,
-            long firstInstallTime) {
+    LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user) {
         this(context);
         mResolveInfo = info;
         mActivityInfo = info.activityInfo;
         mComponentName = LauncherApps.getComponentName(info);
         mUser = user;
-        mFirstInstallTime = firstInstallTime;
     }
 
     LauncherActivityInfo(Context context) {
@@ -136,7 +133,7 @@ public class LauncherActivityInfo {
 
     /**
      * Returns the drawable for this activity, without any badging for the profile.
-     * @param resource id of the drawable.
+     * @param iconRes id of the drawable.
      * @param density The preferred density of the icon, zero for default density. Use
      * density DPI values from {@link DisplayMetrics}.
      * @see DisplayMetrics
@@ -179,7 +176,13 @@ public class LauncherActivityInfo {
      * @return The time of installation of the package, in milliseconds.
      */
     public long getFirstInstallTime() {
-        return mFirstInstallTime;
+        try {
+            return mPm.getPackageInfo(mActivityInfo.packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
+        } catch (NameNotFoundException nnfe) {
+            // Sorry, can't find package
+            return 0;
+        }
     }
 
     /**

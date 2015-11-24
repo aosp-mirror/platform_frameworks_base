@@ -155,15 +155,7 @@ public class LauncherApps {
         final int count = activities.size();
         for (int i = 0; i < count; i++) {
             ResolveInfo ri = activities.get(i);
-            long firstInstallTime = 0;
-            try {
-                firstInstallTime = mPm.getPackageInfo(ri.activityInfo.packageName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
-            } catch (NameNotFoundException nnfe) {
-                // Sorry, can't find package
-            }
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri, user,
-                    firstInstallTime);
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri, user);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
                         + lai.getComponentName());
@@ -189,15 +181,7 @@ public class LauncherApps {
         try {
             ResolveInfo ri = mService.resolveActivity(intent, user);
             if (ri != null) {
-                long firstInstallTime = 0;
-                try {
-                    firstInstallTime = mPm.getPackageInfo(ri.activityInfo.packageName,
-                            PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
-                } catch (NameNotFoundException nnfe) {
-                    // Sorry, can't find package
-                }
-                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ri, user,
-                        firstInstallTime);
+                LauncherActivityInfo info = new LauncherActivityInfo(mContext, ri, user);
                 return info;
             }
         } catch (RemoteException re) {
