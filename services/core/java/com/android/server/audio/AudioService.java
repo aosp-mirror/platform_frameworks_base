@@ -62,7 +62,6 @@ import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
-import android.media.IRemoteControlDisplay;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.MediaPlayer;
@@ -667,8 +666,7 @@ public class AudioService extends IAudioService.Stub {
         mSettingsObserver = new SettingsObserver();
         createStreamStates();
 
-        mMediaFocusControl = new MediaFocusControl(mAudioHandler.getLooper(),
-                mContext, mVolumeController, this);
+        mMediaFocusControl = new MediaFocusControl(mContext);
 
         readAndSetLowRamDevice();
 
@@ -5235,36 +5233,6 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    //==========================================================================================
-    // RemoteControlDisplay / RemoteControlClient / Remote info
-    //==========================================================================================
-    public boolean registerRemoteController(IRemoteControlDisplay rcd, int w, int h,
-            ComponentName listenerComp) {
-        return mMediaFocusControl.registerRemoteController(rcd, w, h, listenerComp);
-    }
-
-    public boolean registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
-        return mMediaFocusControl.registerRemoteControlDisplay(rcd, w, h);
-    }
-
-    public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {
-        mMediaFocusControl.unregisterRemoteControlDisplay(rcd);
-    }
-
-    public void remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay rcd, int w, int h) {
-        mMediaFocusControl.remoteControlDisplayUsesBitmapSize(rcd, w, h);
-    }
-
-    public void remoteControlDisplayWantsPlaybackPositionSync(IRemoteControlDisplay rcd,
-            boolean wantsSync) {
-        mMediaFocusControl.remoteControlDisplayWantsPlaybackPositionSync(rcd, wantsSync);
-    }
-
-    @Override
-    public void setRemoteStreamVolume(int index) {
-        enforceVolumeController("set the remote stream volume");
-        mMediaFocusControl.setRemoteStreamVolume(index);
-    }
 
     //==========================================================================================
     // Audio Focus
