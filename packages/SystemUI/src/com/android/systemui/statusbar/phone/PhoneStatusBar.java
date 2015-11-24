@@ -1134,7 +1134,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public boolean onLongClick(View v) {
             if (mRecents != null) {
-                mRecents.dockTopTask(false /* draggingInRecents */);
+                mRecents.dockTopTask(false /* draggingInRecents */, null /* initialBounds */);
                 return true;
             }
             return false;

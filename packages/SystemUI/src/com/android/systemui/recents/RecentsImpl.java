@@ -537,12 +537,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         showRelativeAffiliatedTask(false);
     }
 
-    public void dockTopTask(boolean draggingInRecents) {
+    public void dockTopTask(boolean draggingInRecents, Rect initialBounds) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
         if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
             ssp.moveTaskToDockedStack(topTask.id,
-                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
+                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, initialBounds);
             showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */);
         }
     }

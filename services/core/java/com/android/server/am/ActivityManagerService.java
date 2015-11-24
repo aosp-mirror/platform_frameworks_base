@@ -4317,7 +4317,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (launchStackId != INVALID_STACK_ID) {
                 if (launchStackId == DOCKED_STACK_ID && bOptions != null) {
                     ActivityOptions activityOptions = new ActivityOptions(bOptions);
-                    mWindowManager.setDockedStackCreateMode(activityOptions.getDockCreateMode());
+                    mWindowManager.setDockedStackCreateState(activityOptions.getDockCreateMode(),
+                            null /* initialBounds */);
                 }
                 if (task.stack.mStackId != launchStackId) {
                     mStackSupervisor.moveTaskToStackLocked(
@@ -9280,9 +9281,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      *                   {@link android.app.ActivityManager#DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT}
      * @param toTop If the task and stack should be moved to the top.
      * @param animate Whether we should play an animation for the moving the task
+     * @param initialBounds If the docked stack gets created, it will use these bounds for the
+     *                      docked stack. Pass {@code null} to use default bounds.
      */
     @Override
-    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate) {
+    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
+            Rect initialBounds) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "moveTaskToDockedStack()");
         synchronized (this) {
@@ -9290,10 +9294,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToDockedStack: moving task=" + taskId
                         + " to createMode=" + createMode + " toTop=" + toTop);
-                mWindowManager.setDockedStackCreateMode(createMode);
-                mStackSupervisor.moveTaskToStackLocked(
-                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack",
-                        animate);
+                mWindowManager.setDockedStackCreateState(createMode, initialBounds);
+                mStackSupervisor.moveTaskToStackLocked(taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS,
+                        "moveTaskToDockedStack", animate);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

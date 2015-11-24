@@ -301,22 +301,26 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mStartPosition + touchY - mStartY;
     }
 
-    public void resizeStack(int position) {
-        mTmpRect.set(0, 0, mDisplayWidth, mDisplayHeight);
-        switch (mDockSide) {
+    public void calculateBoundsForPosition(int position, int dockSide, Rect outRect) {
+        outRect.set(0, 0, mDisplayWidth, mDisplayHeight);
+        switch (dockSide) {
             case WindowManager.DOCKED_LEFT:
-                mTmpRect.right = position;
+                outRect.right = position;
                 break;
             case WindowManager.DOCKED_TOP:
-                mTmpRect.bottom = position;
+                outRect.bottom = position;
                 break;
             case WindowManager.DOCKED_RIGHT:
-                mTmpRect.left = position + mDividerWindowWidth - 2 * mDividerInsets;
+                outRect.left = position + mDividerWindowWidth - 2 * mDividerInsets;
                 break;
             case WindowManager.DOCKED_BOTTOM:
-                mTmpRect.top = position + mDividerWindowWidth - 2 * mDividerInsets;
+                outRect.top = position + mDividerWindowWidth - 2 * mDividerInsets;
                 break;
         }
+    }
+
+    public void resizeStack(int position) {
+        calculateBoundsForPosition(position, mDockSide, mTmpRect);
         if (mTmpRect.equals(mLastResizeRect)) {
             return;
         }

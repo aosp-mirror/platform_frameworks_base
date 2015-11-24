@@ -339,6 +339,9 @@ public class AppTransition implements Dump {
         mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
         mNextAppTransitionPackage = null;
         mNextAppTransitionAnimationsSpecs.clear();
+        mNextAppTransitionAnimationsSpecsFuture = null;
+        mDefaultNextAppTransitionAnimationSpec = null;
+        mAnimationFinishedCallback = null;
     }
 
     void freeze() {
@@ -1327,17 +1330,10 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void clearAppTransitionState() {
-        mNextAppTransitionPackage = null;
-        mNextAppTransitionAnimationsSpecs.clear();
-        mDefaultNextAppTransitionAnimationSpec = null;
-        mAnimationFinishedCallback = null;
-    }
-
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
             IRemoteCallback startedCallback) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionEnter = enterAnim;
@@ -1352,7 +1348,7 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
             putDefaultNextAppTransitionCoordinates(startX, startY, startX + startWidth,
                     startY + startHeight, null);
@@ -1363,7 +1359,7 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionClipReveal(int startX, int startY,
                                                 int startWidth, int startHeight) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CLIP_REVEAL;
             putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
             postAnimationCallback();
@@ -1373,7 +1369,7 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
                                            IRemoteCallback startedCallback, boolean scaleUp) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN;
             mNextAppTransitionScaleUp = scaleUp;
@@ -1388,7 +1384,7 @@ public class AppTransition implements Dump {
     void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX, int startY,
             int targetWidth, int targetHeight, IRemoteCallback startedCallback, boolean scaleUp) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
             mNextAppTransitionScaleUp = scaleUp;
@@ -1405,7 +1401,7 @@ public class AppTransition implements Dump {
             IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
             boolean scaleUp) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
             mNextAppTransitionScaleUp = scaleUp;
@@ -1436,7 +1432,7 @@ public class AppTransition implements Dump {
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
             boolean scaleUp) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
             mNextAppTransitionAnimationsSpecsFuture = specsFuture;
@@ -1447,7 +1443,7 @@ public class AppTransition implements Dump {
 
     void overrideInPlaceAppTransition(String packageName, int anim) {
         if (isTransitionSet()) {
-            clearAppTransitionState();
+            clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionInPlace = anim;
