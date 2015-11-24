@@ -105,6 +105,7 @@ public class Task {
     public Bitmap thumbnail;
     public boolean lockToThisTask;
     public boolean lockToTaskEnabled;
+    public boolean isHistorical;
     public Bitmap icon;
     public String iconFilename;
     public Rect bounds;
@@ -117,8 +118,8 @@ public class Task {
 
     public Task(TaskKey key, int taskAffiliation, int taskAffiliationColor,
                 String activityTitle, String contentDescription, Drawable activityIcon,
-                int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
-                String iconFilename, Rect bounds) {
+                int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled,
+                boolean isHistorical, Bitmap icon, String iconFilename, Rect bounds) {
         boolean isInAffiliationGroup = (taskAffiliation != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
         this.key = key;
@@ -132,6 +133,7 @@ public class Task {
                 Color.WHITE) > 3f;
         this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
         this.lockToTaskEnabled = lockToTaskEnabled;
+        this.isHistorical = isHistorical;
         this.icon = icon;
         this.iconFilename = iconFilename;
         this.bounds = bounds;
@@ -149,6 +151,10 @@ public class Task {
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
         this.lockToThisTask = o.lockToThisTask;
         this.lockToTaskEnabled = o.lockToTaskEnabled;
+        this.isHistorical = o.isHistorical;
+        this.icon = o.icon;
+        this.iconFilename = o.iconFilename;
+        this.bounds = o.bounds;
     }
 
     /** Set the callbacks */

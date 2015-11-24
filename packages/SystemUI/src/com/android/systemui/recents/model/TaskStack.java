@@ -198,14 +198,14 @@ public class TaskStack {
 
     /** Task stack callbacks */
     public interface TaskStackCallbacks {
-        /* Notifies when a task has been added to the stack */
-        void onStackTaskAdded(TaskStack stack, Task t);
         /* Notifies when a task has been removed from the stack */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
                                        Task newFrontMostTask);
     }
 
-
+    /**
+     * The various possible dock states when dragging and dropping a task.
+     */
     public enum DockState implements DropTarget {
         NONE(-1, 96, null, null),
         LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
@@ -287,10 +287,19 @@ public class TaskStack {
         }
     }
 
+    // A comparator that sorts tasks by their last active time
+    private Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR = new Comparator<Task>() {
+        @Override
+        public int compare(Task o1, Task o2) {
+            return Long.compare(o1.key.lastActiveTime, o2.key.lastActiveTime);
+        }
+    };
+
     // The task offset to apply to a task id as a group affiliation
     static final int IndividualTaskIdOffset = 1 << 16;
 
-    FilteredTaskList mTaskList = new FilteredTaskList();
+    FilteredTaskList mStackTaskList = new FilteredTaskList();
+    FilteredTaskList mHistoryTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
 
     ArrayList<TaskGrouping> mGroups = new ArrayList<>();
@@ -298,10 +307,16 @@ public class TaskStack {
 
     public TaskStack() {
         // Ensure that we only show non-docked tasks
-        mTaskList.setFilter(new TaskFilter() {
+        mStackTaskList.setFilter(new TaskFilter() {
             @Override
             public boolean acceptTask(Task t, int index) {
-                return !SystemServicesProxy.isDockedStack(t.key.stackId);
+                return !t.isHistorical && !SystemServicesProxy.isDockedStack(t.key.stackId);
+            }
+        });
+        mHistoryTaskList.setFilter(new TaskFilter() {
+            @Override
+            public boolean acceptTask(Task t, int index) {
+                return t.isHistorical && !SystemServicesProxy.isDockedStack(t.key.stackId);
             }
         });
     }
@@ -314,17 +329,10 @@ public class TaskStack {
     /** Resets this TaskStack. */
     public void reset() {
         mCb = null;
-        mTaskList.reset();
+        mStackTaskList.reset();
+        mHistoryTaskList.reset();
         mGroups.clear();
         mAffinitiesGroups.clear();
-    }
-
-    /** Adds a new task */
-    public void addTask(Task t) {
-        mTaskList.add(t);
-        if (mCb != null) {
-            mCb.onStackTaskAdded(this, t);
-        }
     }
 
     /**
@@ -332,11 +340,11 @@ public class TaskStack {
      */
     public void moveTaskToStack(Task task, int newStackId) {
         // Find the index to insert into
-        ArrayList<Task> taskList = mTaskList.getTasks();
+        ArrayList<Task> taskList = mStackTaskList.getTasks();
         int taskCount = taskList.size();
         if (!task.isFreeformTask() && (newStackId == FREEFORM_WORKSPACE_STACK_ID)) {
             // Insert freeform tasks at the front
-            mTaskList.moveTaskToStack(task, taskCount, newStackId);
+            mStackTaskList.moveTaskToStack(task, taskCount, newStackId);
         } else if (task.isFreeformTask() && (newStackId == FULLSCREEN_WORKSPACE_STACK_ID)) {
             // Insert after the first stacked task
             int insertIndex = 0;
@@ -346,14 +354,14 @@ public class TaskStack {
                     break;
                 }
             }
-            mTaskList.moveTaskToStack(task, insertIndex, newStackId);
+            mStackTaskList.moveTaskToStack(task, insertIndex, newStackId);
         }
     }
 
     /** Does the actual work associated with removing the task. */
-    void removeTaskImpl(Task t) {
+    void removeTaskImpl(FilteredTaskList taskList, Task t) {
         // Remove the task from the list
-        mTaskList.remove(t);
+        taskList.remove(t);
         // Remove it from the group as well, and if it is empty, remove the group
         TaskGrouping group = t.group;
         group.removeTask(t);
@@ -366,10 +374,10 @@ public class TaskStack {
 
     /** Removes a task */
     public void removeTask(Task t) {
-        if (mTaskList.contains(t)) {
-            boolean wasFrontMostTask = (getFrontMostTask() == t);
-            removeTaskImpl(t);
-            Task newFrontMostTask = getFrontMostTask();
+        if (mStackTaskList.contains(t)) {
+            boolean wasFrontMostTask = (getStackFrontMostTask() == t);
+            removeTaskImpl(mStackTaskList, t);
+            Task newFrontMostTask = getStackFrontMostTask();
             if (newFrontMostTask != null && newFrontMostTask.lockToTaskEnabled) {
                 newFrontMostTask.lockToThisTask = true;
             }
@@ -377,61 +385,88 @@ public class TaskStack {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask);
             }
-        }
-    }
-
-    /** Sets a few tasks in one go */
-    public void setTasks(List<Task> tasks) {
-        ArrayList<Task> taskList = mTaskList.getTasks();
-        int taskCount = taskList.size();
-        for (int i = taskCount - 1; i >= 0; i--) {
-            Task t = taskList.get(i);
-            removeTaskImpl(t);
+        } else if (mHistoryTaskList.contains(t)) {
+            removeTaskImpl(mHistoryTaskList, t);
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, false, null);
             }
         }
-        mTaskList.set(tasks);
-        for (Task t : tasks) {
-            if (mCb != null) {
-                mCb.onStackTaskAdded(this, t);
+    }
+
+    /**
+     * Sets a few tasks in one go, without calling any callbacks.
+     */
+    public void setTasks(List<Task> tasks) {
+        ArrayList<Task> stackTasks = new ArrayList<>();
+        ArrayList<Task> historyTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.isHistorical) {
+                historyTasks.add(task);
+            } else {
+                stackTasks.add(task);
             }
         }
+        mStackTaskList.set(stackTasks);
+        mHistoryTaskList.set(historyTasks);
     }
 
     /** Gets the front task */
-    public Task getFrontMostTask() {
-        if (mTaskList.size() == 0) return null;
-        return mTaskList.getTasks().get(mTaskList.size() - 1);
+    public Task getStackFrontMostTask() {
+        if (mStackTaskList.size() == 0) return null;
+        return mStackTaskList.getTasks().get(mStackTaskList.size() - 1);
     }
 
     /** Gets the task keys */
     public ArrayList<Task.TaskKey> getTaskKeys() {
         ArrayList<Task.TaskKey> taskKeys = new ArrayList<>();
-        ArrayList<Task> tasks = mTaskList.getTasks();
+        ArrayList<Task> tasks = computeAllTasksList();
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
-            taskKeys.add(tasks.get(i).key);
+            Task task = tasks.get(i);
+            taskKeys.add(task.key);
         }
         return taskKeys;
     }
 
-    /** Gets the tasks */
-    public ArrayList<Task> getTasks() {
-        return mTaskList.getTasks();
-    }
-
-    /** Gets the number of tasks */
-    public int getTaskCount() {
-        return mTaskList.size();
+    /**
+     * Returns the set of "active" (non-historical) tasks in the stack that have been used recently.
+     */
+    public ArrayList<Task> getStackTasks() {
+        return mStackTaskList.getTasks();
     }
 
     /**
-     * Returns the task in this stack which is the launch target.
+     * Returns the set of tasks that are inactive. These tasks will be presented in a separate
+     * history view.
+     */
+    public ArrayList<Task> getHistoricalTasks() {
+        return mHistoryTaskList.getTasks();
+    }
+
+    /**
+     * Computes a set of all the active and historical tasks ordered by their last active time.
+     */
+    public ArrayList<Task> computeAllTasksList() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.addAll(mStackTaskList.getTasks());
+        tasks.addAll(mHistoryTaskList.getTasks());
+        Collections.sort(tasks, LAST_ACTIVE_TIME_COMPARATOR);
+        return tasks;
+    }
+
+    /**
+     * Returns the number of tasks in the active stack.
+     */
+    public int getStackTaskCount() {
+        return mStackTaskList.size();
+    }
+
+    /**
+     * Returns the task in stack tasks which is the launch target.
      */
     public Task getLaunchTarget() {
-        ArrayList<Task> tasks = mTaskList.getTasks();
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
@@ -443,36 +478,19 @@ public class TaskStack {
     }
 
     /** Returns the index of this task in this current task stack */
-    public int indexOfTask(Task t) {
-        return mTaskList.indexOf(t);
+    public int indexOfStackTask(Task t) {
+        return mStackTaskList.indexOf(t);
     }
 
     /** Finds the task with the specified task id. */
     public Task findTaskWithId(int taskId) {
-        ArrayList<Task> tasks = mTaskList.getTasks();
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            Task task = tasks.get(i);
+        ArrayList<Task> tasks = computeAllTasksList();
+        for (Task task : tasks) {
             if (task.key.id == taskId) {
                 return task;
             }
         }
         return null;
-    }
-
-    /**
-     * Returns whether this stack has freeform tasks.
-     */
-    public boolean hasFreeformTasks() {
-        ArrayList<Task> tasks = mTaskList.getTasks();
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            Task task = tasks.get(i);
-            if (task.isFreeformTask()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /******** Grouping ********/
@@ -500,7 +518,7 @@ public class TaskStack {
         if (RecentsDebugFlags.Static.EnableSimulatedTaskGroups) {
             HashMap<Task.TaskKey, Task> taskMap = new HashMap<Task.TaskKey, Task>();
             // Sort all tasks by increasing firstActiveTime of the task
-            ArrayList<Task> tasks = mTaskList.getTasks();
+            ArrayList<Task> tasks = mStackTaskList.getTasks();
             Collections.sort(tasks, new Comparator<Task>() {
                 @Override
                 public int compare(Task task, Task task2) {
@@ -560,11 +578,11 @@ public class TaskStack {
                     taskIndex++;
                 }
             }
-            mTaskList.set(tasks);
+            mStackTaskList.set(tasks);
         } else {
             // Create the task groups
             HashMap<Task.TaskKey, Task> tasksMap = new HashMap<Task.TaskKey, Task>();
-            ArrayList<Task> tasks = mTaskList.getTasks();
+            ArrayList<Task> tasks = mStackTaskList.getTasks();
             int taskCount = tasks.size();
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
@@ -636,8 +654,12 @@ public class TaskStack {
 
     @Override
     public String toString() {
-        String str = "Tasks:\n";
-        for (Task t : mTaskList.getTasks()) {
+        String str = "Stack Tasks:\n";
+        for (Task t : mStackTaskList.getTasks()) {
+            str += "  " + t.toString() + "\n";
+        }
+        str += "Historical Tasks:\n";
+        for (Task t : mHistoryTaskList.getTasks()) {
             str += "  " + t.toString() + "\n";
         }
         return str;

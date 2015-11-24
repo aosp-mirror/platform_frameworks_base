@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -202,14 +201,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         TaskStack stack = plan.getTaskStack();
         launchState.launchedWithNoRecentTasks = !plan.hasTasks();
-        if (!launchState.launchedWithNoRecentTasks) {
-            mRecentsView.setTaskStack(stack);
-        }
+        mRecentsView.setTaskStack(stack);
 
         // Mark the task that is the launch target
         int launchTaskIndexInStack = 0;
         if (launchState.launchedToTaskId != -1) {
-            ArrayList<Task> tasks = stack.getTasks();
+            ArrayList<Task> tasks = stack.getStackTasks();
             int taskCount = tasks.size();
             for (int j = 0; j < taskCount; j++) {
                 Task t = tasks.get(j);
@@ -261,7 +258,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             MetricsLogger.count(this, "overview_source_home", 1);
         }
         // Keep track of the total stack task count
-        int taskCount = stack.getTaskCount();
+        int taskCount = stack.getStackTaskCount();
         MetricsLogger.histogram(this, "overview_task_count", taskCount);
     }
 

@@ -115,9 +115,8 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     private LayoutInflater mLayoutInflater;
     private final List<Row> mRows = new ArrayList<>();
 
-    public RecentsHistoryAdapter(Context context, TaskStack stack) {
+    public RecentsHistoryAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
-        updateTasks(context, stack.getTasks());
     }
 
     /**
@@ -144,6 +143,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             }
             mRows.add(new TaskRow(task));
         }
+        notifyDataSetChanged();
     }
 
     @Override

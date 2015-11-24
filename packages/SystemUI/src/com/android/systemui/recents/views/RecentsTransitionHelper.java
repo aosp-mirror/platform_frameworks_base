@@ -160,9 +160,9 @@ public class RecentsTransitionHelper {
         if (ssp.startActivityFromRecents(mContext, task.key.id, task.activityLabel, opts)) {
             // Keep track of the index of the task launch
             int taskIndexFromFront = 0;
-            int taskIndex = stack.indexOfTask(task);
+            int taskIndex = stack.indexOfStackTask(task);
             if (taskIndex > -1) {
-                taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
+                taskIndexFromFront = stack.getStackTaskCount() - taskIndex - 1;
             }
             EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
         } else {
@@ -275,7 +275,7 @@ public class RecentsTransitionHelper {
         // Otherwise, for freeform tasks, create a new animation spec for each task we have to
         // launch
         TaskStack stack = stackView.getStack();
-        ArrayList<Task> tasks = stack.getTasks();
+        ArrayList<Task> tasks = stack.getStackTasks();
         int taskCount = tasks.size();
         for (int i = taskCount - 1; i >= 0; i--) {
             Task t = tasks.get(i);

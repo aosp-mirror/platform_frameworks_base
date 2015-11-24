@@ -182,7 +182,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         boolean found = false;
         if (mTaskStackView != null) {
             TaskStack stack = mTaskStackView.getStack();
-            ArrayList<Task> taskList = stack.getTasks();
+            ArrayList<Task> taskList = stack.getStackTasks();
             // Iterate the stack views and try and find the focused task
             for (int j = taskList.size() - 1; j >= 0; --j) {
                 Task task = taskList.get(j);
@@ -348,10 +348,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     MeasureSpec.makeMeasureSpec(taskRect.height(), MeasureSpec.AT_MOST));
         }
 
+        // Measure the history button with the full space above the stack, but width-constrained
+        // to the stack
         Rect stackRect = mTaskStackView.mLayoutAlgorithm.mCurrentStackRect;
         measureChild(mHistoryButton,
                 MeasureSpec.makeMeasureSpec(stackRect.width(), MeasureSpec.EXACTLY),
-                heightMeasureSpec);
+                MeasureSpec.makeMeasureSpec(mTaskStackView.mLayoutAlgorithm.getStackTopOffset(),
+                        MeasureSpec.EXACTLY));
         setMeasuredDimension(width, height);
     }
 
@@ -381,10 +384,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     top + mDragView.getMeasuredHeight());
         }
 
+        // Layout the history button left-aligned with the stack, but offset from the top of the
+        // view
         Rect stackRect = mTaskStackView.mLayoutAlgorithm.mCurrentStackRect;
-        mHistoryButton.layout(stackRect.left, stackRect.top,
+        mHistoryButton.layout(stackRect.left, top + mSystemInsets.top,
                 stackRect.left + mHistoryButton.getMeasuredWidth(),
-                stackRect.top + mHistoryButton.getMeasuredHeight());
+                top + mSystemInsets.top + mHistoryButton.getMeasuredHeight());
 
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;

@@ -23,8 +23,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.util.Log;
+import com.android.systemui.Prefs;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
@@ -45,7 +47,8 @@ public class RecentsTaskLoadPlan {
     private static String TAG = "RecentsTaskLoadPlan";
     private static boolean DEBUG = false;
 
-    private static int INVALID_TASK_ID = -1;
+    private static int MIN_NUM_TASKS = 5;
+    private static int SESSION_BEGIN_TIME = 60 /* s/min */ * 60 /* min/hr */ * 6 /* hrs */;
 
     /** The set of conditions to load tasks. */
     public static class Options {
@@ -99,6 +102,7 @@ public class RecentsTaskLoadPlan {
     public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
         if (DEBUG) Log.d(TAG, "preloadPlan");
 
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
@@ -107,6 +111,10 @@ public class RecentsTaskLoadPlan {
         if (mRawTasks == null) {
             preloadRawTasks(isTopTaskHome);
         }
+
+        long lastStackActiveTime = Prefs.getLong(mContext,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
+        long newLastStackActiveTime = -1;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
@@ -115,13 +123,27 @@ public class RecentsTaskLoadPlan {
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
                     t.userId, t.firstActiveTime, t.lastActiveTime);
 
+            // This task is only shown in the stack if it statisfies the historical time or min
+            // number of tasks constraints. Freeform tasks are also always shown.
+            boolean isStackTask = true;
+            if (debugFlags.isHistoryEnabled()) {
+                boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
+                isStackTask = !isFreeformTask && (!isHistoricalTask(t) ||
+                        (t.lastActiveTime >= lastStackActiveTime &&
+                                i >= (taskCount - MIN_NUM_TASKS)));
+                if (isStackTask && newLastStackActiveTime < 0) {
+                    newLastStackActiveTime = t.lastActiveTime;
+                }
+            }
+
             // Load the label, icon, and color
             String activityLabel = loader.getAndUpdateActivityLabel(taskKey, t.taskDescription,
                     ssp);
             String contentDescription = loader.getAndUpdateContentDescription(taskKey,
                     activityLabel, ssp, res);
-            Drawable activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, ssp,
-                    res, false);
+            Drawable activityIcon = isStackTask
+                    ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, ssp, res, false)
+                    : null;
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
 
             Bitmap icon = t.taskDescription != null
@@ -132,7 +154,7 @@ public class RecentsTaskLoadPlan {
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel,
                     contentDescription, activityIcon, activityColor, (i == (taskCount - 1)),
-                    config.lockToAppEnabled, icon, iconFilename, t.bounds);
+                    config.lockToAppEnabled, !isStackTask, icon, iconFilename, t.bounds);
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
             if (DEBUG) {
                 Log.d(TAG, activityLabel + " bounds: " + t.bounds);
@@ -143,6 +165,10 @@ public class RecentsTaskLoadPlan {
             } else {
                 stackTasks.add(task);
             }
+        }
+        if (debugFlags.isHistoryEnabled() && newLastStackActiveTime != -1) {
+            Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+                    newLastStackActiveTime);
         }
 
         // Initialize the stacks
@@ -168,7 +194,7 @@ public class RecentsTaskLoadPlan {
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
-        ArrayList<Task> tasks = mStack.getTasks();
+        ArrayList<Task> tasks = mStack.getStackTasks();
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
@@ -214,8 +240,15 @@ public class RecentsTaskLoadPlan {
     /** Returns whether there are any tasks in any stacks. */
     public boolean hasTasks() {
         if (mStack != null) {
-            return mStack.getTaskCount() > 0;
+            return mStack.getStackTaskCount() > 0;
         }
         return false;
+    }
+
+    /**
+     * Returns whether this task is considered a task to be shown in the history.
+     */
+    private boolean isHistoricalTask(ActivityManager.RecentTaskInfo t) {
+        return t.lastActiveTime < (System.currentTimeMillis() - SESSION_BEGIN_TIME);
     }
 }

@@ -170,7 +170,12 @@ public class TaskStackLayoutAlgorithm {
     // The offset from the top when scrolled to the top of the stack
     private int mFocusedPeekHeight;
 
-    // The offset from the bottom of the stack to the bottom of the bounds
+    // The offset from the top of the stack to the top of the bounds when the stack is scrolled to
+    // the end
+    private int mStackTopOffset;
+
+    // The offset from the bottom of the stack to the bottom of the bounds when the stack is
+    // scrolled to the front
     private int mStackBottomOffset;
 
     // The paths defining the motion of the tasks when the stack is focused and unfocused
@@ -211,6 +216,7 @@ public class TaskStackLayoutAlgorithm {
     FreeformWorkspaceLayoutAlgorithm mFreeformLayoutAlgorithm;
 
     public TaskStackLayoutAlgorithm(Context context, TaskStackView stackView) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = context.getResources();
         mStackView = stackView;
 
@@ -219,7 +225,8 @@ public class TaskStackLayoutAlgorithm {
         mUnfocusedRange = new Range(res.getFloat(R.integer.recents_layout_unfocused_range_min),
                 res.getFloat(R.integer.recents_layout_unfocused_range_max));
         mFocusState = getDefaultFocusState();
-        mFocusedPeekHeight = res.getDimensionPixelSize(R.dimen.recents_layout_focused_peek_size);
+        mFocusedPeekHeight = ssp.hasFreeformWorkspaceSupport() ?
+                0 : res.getDimensionPixelSize(R.dimen.recents_layout_focused_peek_size);
 
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
@@ -262,6 +269,13 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Returns the stack top offset, used for measuring the history button space.
+     */
+    public int getStackTopOffset() {
+        return mStackTopOffset;
+    }
+
+    /**
      * Computes the stack and task rects.  The given task stack bounds is the whole bounds not
      * including the search bar.
      */
@@ -276,6 +290,7 @@ public class TaskStackLayoutAlgorithm {
 
         // The freeform height is the visible height (not including system insets) - padding above
         // freeform and below stack - gap between the freeform and stack
+        mStackTopOffset = mFocusedPeekHeight + heightPadding;
         mStackBottomOffset = mSystemInsets.bottom + heightPadding;
         int ffHeight = (taskStackBounds.height() - 2 * heightPadding - mStackBottomOffset) / 2;
         mFreeformRect.set(taskStackBounds.left + widthPadding,
@@ -333,7 +348,7 @@ public class TaskStackLayoutAlgorithm {
         mTaskIndexMap.clear();
 
         // Return early if we have no tasks
-        ArrayList<Task> tasks = stack.getTasks();
+        ArrayList<Task> tasks = stack.getStackTasks();
         if (tasks.isEmpty()) {
             mFrontMostTaskP = 0;
             mMinScrollP = mMaxScrollP = 0;
@@ -638,17 +653,13 @@ public class TaskStackLayoutAlgorithm {
      * Creates a new path for the focused curve.
      */
     private Path constructFocusedCurve() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         int taskBarHeight = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_task_bar_height);
 
         // Initialize the focused curve. This curve is a piecewise curve composed of several
         // quadradic beziers that goes from (0,1) through (0.5, peek height offset),
         // (0.667, next task offset), (0.833, bottom task offset), and (1,0).
-        float peekHeightPct = 0f;
-        if (!ssp.hasFreeformWorkspaceSupport()) {
-            peekHeightPct = (float) mFocusedPeekHeight / mCurrentStackRect.height();
-        }
+        float peekHeightPct = (float) mFocusedPeekHeight / mCurrentStackRect.height();
         Path p = new Path();
         p.moveTo(0f, 1f);
         p.lineTo(0.5f, 1f - peekHeightPct);
@@ -662,8 +673,6 @@ public class TaskStackLayoutAlgorithm {
      * Creates a new path for the unfocused curve.
      */
     private Path constructUnfocusedCurve() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-
         // Initialize the unfocused curve. This curve is a piecewise curve composed of two quadradic
         // beziers that goes from (0,1) through (0.5, peek height offset) and ends at (1,0).  This
         // ensures that we match the range, at which 0.5 represents the stack scroll at the current
@@ -672,10 +681,7 @@ public class TaskStackLayoutAlgorithm {
         // there is a tangent at (0.5, peek height offset).
         float cpoint1X = 0.4f;
         float cpoint1Y = 1f;
-        float peekHeightPct = 0f;
-        if (!ssp.hasFreeformWorkspaceSupport()) {
-            peekHeightPct = (float) mFocusedPeekHeight / mCurrentStackRect.height();
-        }
+        float peekHeightPct = (float) mFocusedPeekHeight / mCurrentStackRect.height();
         float slope = ((1f - peekHeightPct) - cpoint1Y) / (0.5f - cpoint1X);
         float b = 1f - slope * cpoint1X;
         float cpoint2X = 0.75f;

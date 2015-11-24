@@ -29,8 +29,6 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.RecentsActivity;
-import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -43,6 +41,7 @@ public class RecentsHistoryView extends LinearLayout {
     private static final boolean DEBUG = false;
 
     private RecyclerView mRecyclerView;
+    private RecentsHistoryAdapter mAdapter;
     private boolean mIsVisible;
 
     private Interpolator mFastOutSlowInInterpolator;
@@ -65,6 +64,7 @@ public class RecentsHistoryView extends LinearLayout {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = context.getResources();
+        mAdapter = new RecentsHistoryAdapter(context);
         mHistoryTransitionDuration = res.getInteger(R.integer.recents_history_transition_duration);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
@@ -85,8 +85,7 @@ public class RecentsHistoryView extends LinearLayout {
                 .withLayer()
                 .start();
 
-        mRecyclerView.setAdapter(new RecentsHistoryAdapter(getContext(), stack));
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mAdapter.updateTasks(getContext(), stack.computeAllTasksList());
         mIsVisible = true;
     }
 
@@ -138,6 +137,8 @@ public class RecentsHistoryView extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mRecyclerView = (RecyclerView) findViewById(R.id.list);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     @Override

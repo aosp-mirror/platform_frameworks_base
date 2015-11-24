@@ -16,7 +16,7 @@
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/recents_history_button_height"
+    android:layout_height="match_parent"
     android:gravity="start|center_vertical"
     android:text="@string/recents_show_history_button_label"
     android:textSize="14sp"

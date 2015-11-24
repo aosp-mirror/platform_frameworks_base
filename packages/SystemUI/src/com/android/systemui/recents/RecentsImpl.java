@@ -381,7 +381,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
             loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
-            if (stack.getTaskCount() > 0) {
+            if (stack.getStackTaskCount() > 0) {
                 // We try and draw the thumbnail transition bitmap in parallel before
                 // toggle/show recents is called
                 preCacheThumbnailTransitionBitmapAsync(topTask, stack, mDummyStackView);
@@ -415,7 +415,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
-        if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
+        if (focusedStack == null || focusedStack.getStackTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task
@@ -423,7 +423,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
         // Find the task in the recents list
         boolean isTopTaskHome = SystemServicesProxy.isHomeStack(runningTask.stackId);
-        ArrayList<Task> tasks = focusedStack.getTasks();
+        ArrayList<Task> tasks = focusedStack.getStackTasks();
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
@@ -467,7 +467,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
-        if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
+        if (focusedStack == null || focusedStack.getStackTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task (can't determine affiliated tasks in this case)
@@ -476,7 +476,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (SystemServicesProxy.isHomeStack(runningTask.stackId)) return;
 
         // Find the task in the recents list
-        ArrayList<Task> tasks = focusedStack.getTasks();
+        ArrayList<Task> tasks = focusedStack.getStackTasks();
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
@@ -685,7 +685,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (topTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
             stackView.getScroller().setStackScrollToInitialState();
-            ArrayList<Task> tasks = stack.getTasks();
+            ArrayList<Task> tasks = stack.getStackTasks();
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 Task task = tasks.get(i);
                 if (SystemServicesProxy.isFreeformStack(task.key.stackId)) {
@@ -741,7 +741,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             TaskStackView stackView, int runningTaskId, Task runningTaskOut) {
         // Find the running task in the TaskStack
         Task task = null;
-        ArrayList<Task> tasks = stack.getTasks();
+        ArrayList<Task> tasks = stack.getStackTasks();
         if (runningTaskId != -1) {
             // Otherwise, try and find the task with the
             int taskCount = tasks.size();
@@ -827,7 +827,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             return;
         }
 
-        boolean hasRecentTasks = stack.getTaskCount() > 0;
+        boolean hasRecentTasks = stack.getStackTaskCount() > 0;
         boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 
         if (useThumbnailTransition) {
