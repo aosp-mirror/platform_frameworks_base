@@ -144,6 +144,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     boolean mBootCompleted;
     boolean mCanReuseTaskStackViews = true;
     boolean mDraggingInRecents;
+    boolean mReloadTasks;
 
     // Task launching
     Rect mSearchBarBounds = new Rect();
@@ -168,7 +169,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         public void run() {
             // When this fires, then the user has not released alt-tab for at least
             // FAST_ALT_TAB_DELAY_MS milliseconds
-            showRecents(mTriggeredFromAltTab, false /* draggingInRecents */, true /* animate */);
+            showRecents(mTriggeredFromAltTab, false /* draggingInRecents */, true /* animate */,
+                    false /* reloadTasks */);
         }
     });
 
@@ -252,9 +254,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
     @Override
     public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
-            boolean animate) {
+            boolean animate, boolean reloadTasks) {
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
+        mReloadTasks = reloadTasks;
         if (mFastAltTabTrigger.hasTriggered()) {
             // We are calling this from the doze trigger, so just fall through to show Recents
             mFastAltTabTrigger.resetTrigger();
@@ -543,7 +546,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
             ssp.moveTaskToDockedStack(topTask.id,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, initialBounds);
-            showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */);
+            showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */,
+                    true /* reloadTasks*/);
         }
     }
 
@@ -800,12 +804,13 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
-        // should always preload the tasks now
-        if (mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
+        // should always preload the tasks now. If we are dragging in recents, reload them as
+        // the stacks might have changed.
+        if (mReloadTasks || mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
             // Create a new load plan if preloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
-        if (mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
+        if (mReloadTasks || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
             loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
