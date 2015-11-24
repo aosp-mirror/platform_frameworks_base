@@ -16,6 +16,9 @@
 
 package com.android.server.print;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -750,6 +753,33 @@ final class RemotePrintService implements DeathRecipient {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     service.mSpooler.writePrintJobData(fd, printJobId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+
+        @Override
+        public void setProgress(@NonNull PrintJobId printJobId,
+                @FloatRange(from=0.0, to=1.0) float progress) {
+            RemotePrintService service = mWeakService.get();
+            if (service != null) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    service.mSpooler.setProgress(printJobId, progress);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+
+        @Override
+        public void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
+            RemotePrintService service = mWeakService.get();
+            if (service != null) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    service.mSpooler.setStatus(printJobId, status);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

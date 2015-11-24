@@ -28745,7 +28745,9 @@ package android.print {
     method public java.lang.String getLabel();
     method public android.print.PageRange[] getPages();
     method public android.print.PrinterId getPrinterId();
+    method public float getProgress();
     method public int getState();
+    method public java.lang.CharSequence getStatus();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.print.PrintJobInfo> CREATOR;
     field public static final int STATE_BLOCKED = 4; // 0x4
@@ -28864,6 +28866,8 @@ package android.printservice {
     method public boolean isFailed();
     method public boolean isQueued();
     method public boolean isStarted();
+    method public void setProgress(float);
+    method public void setStatus(java.lang.CharSequence);
     method public boolean setTag(java.lang.String);
     method public boolean start();
   }

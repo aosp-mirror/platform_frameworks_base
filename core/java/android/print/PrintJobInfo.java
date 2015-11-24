@@ -16,9 +16,14 @@
 
 package android.print;
 
+import android.annotation.FloatRange;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
 
@@ -149,9 +154,6 @@ public final class PrintJobInfo implements Parcelable {
     /** How many copies to print. */
     private int mCopies;
 
-    /** Reason for the print job being in its current state. */
-    private String mStateReason;
-
     /** The pages to print */
     private PageRange[] mPageRanges;
 
@@ -161,6 +163,12 @@ public final class PrintJobInfo implements Parcelable {
     /** Information about the printed document. */
     private PrintDocumentInfo mDocumentInfo;
 
+    /** The progress made on printing this job or -1 if not set. */
+    private float mProgress;
+
+    /** A short string describing the status of this job. */
+    private CharSequence mStatus;
+
     /** Advanced printer specific options. */
     private Bundle mAdvancedOptions;
 
@@ -169,7 +177,7 @@ public final class PrintJobInfo implements Parcelable {
 
     /** @hide*/
     public PrintJobInfo() {
-        /* do nothing */
+        mProgress = -1;
     }
 
     /** @hide */
@@ -183,10 +191,11 @@ public final class PrintJobInfo implements Parcelable {
         mTag = other.mTag;
         mCreationTime = other.mCreationTime;
         mCopies = other.mCopies;
-        mStateReason = other.mStateReason;
         mPageRanges = other.mPageRanges;
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
+        mProgress = other.mProgress;
+        mStatus = other.mStatus;
         mCanceling = other.mCanceling;
         mAdvancedOptions = other.mAdvancedOptions;
     }
@@ -201,7 +210,6 @@ public final class PrintJobInfo implements Parcelable {
         mTag = parcel.readString();
         mCreationTime = parcel.readLong();
         mCopies = parcel.readInt();
-        mStateReason = parcel.readString();
         Parcelable[] parcelables = parcel.readParcelableArray(null);
         if (parcelables != null) {
             mPageRanges = new PageRange[parcelables.length];
@@ -211,6 +219,8 @@ public final class PrintJobInfo implements Parcelable {
         }
         mAttributes = (PrintAttributes) parcel.readParcelable(null);
         mDocumentInfo = (PrintDocumentInfo) parcel.readParcelable(null);
+        mProgress = parcel.readFloat();
+        mStatus = parcel.readCharSequence();
         mCanceling = (parcel.readInt() == 1);
         mAdvancedOptions = parcel.readBundle();
     }
@@ -227,7 +237,7 @@ public final class PrintJobInfo implements Parcelable {
     /**
      * Sets the unique print job id.
      *
-     * @param The job id.
+     * @param id The job id.
      *
      * @hide
      */
@@ -265,7 +275,7 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
-     * Sets the unique target pritner id.
+     * Sets the unique target printer id.
      *
      * @param printerId The target printer id.
      *
@@ -323,6 +333,30 @@ public final class PrintJobInfo implements Parcelable {
      */
     public void setState(int state) {
         mState = state;
+    }
+
+    /**
+     * Sets the progress of the print job.
+     *
+     * @param progress the progress of the job
+     *
+     * @hide
+     */
+    public void setProgress(@FloatRange(from=0.0, to=1.0) float progress) {
+        Preconditions.checkArgumentInRange(progress, 0, 1, "progress");
+
+        mProgress = progress;
+    }
+
+    /**
+     * Sets the status of the print job.
+     *
+     * @param status the status of the job, can be null
+     *
+     * @hide
+     */
+    public void setStatus(@Nullable CharSequence status) {
+        mStatus = status;
     }
 
     /**
@@ -413,30 +447,6 @@ public final class PrintJobInfo implements Parcelable {
             throw new IllegalArgumentException("Copies must be more than one.");
         }
         mCopies = copyCount;
-    }
-
-    /**
-     * Gets the reason for the print job being in the current state.
-     *
-     * @return The reason, or null if there is no reason or the
-     * reason is unknown.
-     *
-     * @hide
-     */
-    public String getStateReason() {
-        return mStateReason;
-    }
-
-    /**
-     * Sets the reason for the print job being in the current state.
-     *
-     * @param stateReason The reason, or null if there is no reason
-     * or the reason is unknown.
-     *
-     * @hide
-     */
-    public void setStateReason(String stateReason) {
-        mStateReason = stateReason;
     }
 
     /**
@@ -604,10 +614,11 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeString(mTag);
         parcel.writeLong(mCreationTime);
         parcel.writeInt(mCopies);
-        parcel.writeString(mStateReason);
         parcel.writeParcelableArray(mPageRanges, flags);
         parcel.writeParcelable(mAttributes, flags);
         parcel.writeParcelable(mDocumentInfo, 0);
+        parcel.writeFloat(mProgress);
+        parcel.writeCharSequence(mStatus);
         parcel.writeInt(mCanceling ? 1 : 0);
         parcel.writeBundle(mAdvancedOptions);
     }
@@ -631,6 +642,9 @@ public final class PrintJobInfo implements Parcelable {
         builder.append(", pages: " + (mPageRanges != null
                 ? Arrays.toString(mPageRanges) : null));
         builder.append(", hasAdvancedOptions: " + (mAdvancedOptions != null));
+        builder.append(", progress: " + mProgress);
+        builder.append(", status: " + (mStatus != null
+                ? mStatus.toString() : null));
         builder.append("}");
         return builder.toString();
     }
@@ -663,6 +677,28 @@ public final class PrintJobInfo implements Parcelable {
                 return "STATE_UNKNOWN";
             }
         }
+    }
+
+    /**
+     * Get the progress that has been made printing this job.
+     *
+     * @return the print progress or -1 if not set
+     * @hide
+     */
+    @TestApi
+    public float getProgress() {
+        return mProgress;
+    }
+
+    /**
+     * Get the status of this job.
+     *
+     * @return the status of this job or null if not set
+     * @hide
+     */
+    @TestApi
+    public @Nullable CharSequence getStatus() {
+        return mStatus;
     }
 
     /**
@@ -708,6 +744,28 @@ public final class PrintJobInfo implements Parcelable {
          */
         public void setPages(PageRange[] pages) {
             mPrototype.mPageRanges = pages;
+        }
+
+        /**
+         * Sets the progress of the print job.
+         *
+         * @param progress the progress of the job
+         * @hide
+         */
+        public void setProgress(@FloatRange(from=0.0, to=1.0) float progress) {
+            Preconditions.checkArgumentInRange(progress, 0, 1, "progress");
+
+            mPrototype.mProgress = progress;
+        }
+
+        /**
+         * Sets the status of the print job.
+         *
+         * @param status the status of the job, can be null
+         * @hide
+         */
+        public void setStatus(@Nullable CharSequence status) {
+            mPrototype.mStatus = status;
         }
 
         /**

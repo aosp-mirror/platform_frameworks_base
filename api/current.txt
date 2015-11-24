@@ -28864,6 +28864,8 @@ package android.printservice {
     method public boolean isFailed();
     method public boolean isQueued();
     method public boolean isStarted();
+    method public void setProgress(float);
+    method public void setStatus(java.lang.CharSequence);
     method public boolean setTag(java.lang.String);
     method public boolean start();
   }

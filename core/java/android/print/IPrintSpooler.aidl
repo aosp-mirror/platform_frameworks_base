@@ -41,6 +41,23 @@ oneway interface IPrintSpooler {
     void createPrintJob(in PrintJobInfo printJob);
     void setPrintJobState(in PrintJobId printJobId, int status, String stateReason,
             IPrintSpoolerCallbacks callback, int sequence);
+
+    /**
+     * Set the progress of this print job
+     *
+     * @param printJobId The print job to update
+     * @param progress The new progress
+     */
+    void setProgress(in PrintJobId printJobId, in float progress);
+
+    /**
+     * Set the status of this print job
+     *
+     * @param printJobId The print job to update
+     * @param status The new status, can be null
+     */
+    void setStatus(in PrintJobId printJobId, in CharSequence status);
+
     void setPrintJobTag(in PrintJobId printJobId, String tag, IPrintSpoolerCallbacks callback,
             int sequence);
     void writePrintJobData(in ParcelFileDescriptor fd, in PrintJobId printJobId);
