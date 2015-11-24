@@ -192,6 +192,16 @@
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
     <integer name="recents_svelte_level">0</integer>
 
+    <!-- Recents: The relative range of visible tasks from the current scroll position
+         while the stack is focused. -->
+    <item name="recents_layout_focused_range_min" format="float" type="integer">-4</item>
+    <item name="recents_layout_focused_range_max" format="float" type="integer">3</item>
+
+    <!-- Recents: The relative range of visible tasks from the current scroll position
+         while the stack is not focused. -->
+    <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
+    <item name="recents_layout_unfocused_range_max" format="float" type="integer">2.5</item>
+
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
 

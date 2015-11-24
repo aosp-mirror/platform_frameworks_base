@@ -353,7 +353,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Update the stack transforms
-        TaskViewTransform prevTransform = null;
+        TaskViewTransform frontTransform = null;
         for (int i = taskCount - 1; i >= 0; i--) {
             Task task = tasks.get(i);
             if (task.isFreeformTask()) {
@@ -361,7 +361,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
 
             TaskViewTransform transform = mLayoutAlgorithm.getStackTransform(task, stackScroll,
-                    taskTransforms.get(i), prevTransform);
+                    taskTransforms.get(i), frontTransform);
             if (DEBUG) {
                 Log.d(TAG, "updateStackTransform: " + i + ", " + transform.visible);
             }
@@ -386,7 +386,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 transform.translationY = Math.min(transform.translationY,
                         mLayoutAlgorithm.mCurrentStackRect.bottom);
             }
-            prevTransform = transform;
+            frontTransform = transform;
         }
         if (visibleRangeOut != null) {
             visibleRangeOut[0] = frontMostVisibleIndex;
