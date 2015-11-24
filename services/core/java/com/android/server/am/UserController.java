@@ -501,7 +501,7 @@ class UserController implements Handler.Callback {
         // purposefully block sending BOOT_COMPLETED until after all
         // PRE_BOOT receivers are finished to avoid ANR'ing apps
         final UserInfo info = getUserInfo(userId);
-        if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
+        if (!Objects.equals(info.lastLoggedInFingerprint, Build.DATE)) {
             // Suppress double notifications for managed profiles that
             // were unlocked automatically as part of their parent user
             // being unlocked.
