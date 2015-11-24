@@ -102,13 +102,13 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
-    public boolean hasDeviceOwner() {
-        return !TextUtils.isEmpty(mDevicePolicyManager.getDeviceOwner());
+    public boolean isDeviceManaged() {
+        return mDevicePolicyManager.isDeviceManaged();
     }
 
     @Override
     public String getDeviceOwnerName() {
-        return mDevicePolicyManager.getDeviceOwnerName();
+        return mDevicePolicyManager.getDeviceOwnerNameOnAnyUser();
     }
 
     @Override

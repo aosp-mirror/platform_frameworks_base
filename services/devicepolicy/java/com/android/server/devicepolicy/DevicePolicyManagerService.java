@@ -2045,9 +2045,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void updateDeviceOwnerLocked() {
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            if (getDeviceOwner() != null) {
+            // TODO This is to prevent DO from getting "clear data"ed, but it should also check the
+            // user id and also protect all other DAs too.
+            final ComponentName deviceOwnerComponent = mOwners.getDeviceOwnerComponent();
+            if (deviceOwnerComponent != null) {
                 mInjector.getIActivityManager()
-                        .updateDeviceOwner(getDeviceOwner().getPackageName());
+                        .updateDeviceOwner(deviceOwnerComponent.getPackageName());
             }
         } catch (RemoteException e) {
             // Not gonna happen.
@@ -2248,6 +2251,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Build and show a warning notification
             int smallIconId;
             String contentText;
+            // TODO Why does it use the DO name?  The cert APIs are all for PO. b/25772443
             final String ownerName = getDeviceOwnerName();
             if (isManagedProfile(userHandle.getIdentifier())) {
                 contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_administrator);
@@ -4600,22 +4604,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public ComponentName getDeviceOwner() {
+    public ComponentName getDeviceOwnerComponent(boolean callingUserOnly) {
         if (!mHasFeature) {
             return null;
         }
+        if (!callingUserOnly) {
+            enforceManageUsers();
+        }
         synchronized (this) {
+            if (!mOwners.hasDeviceOwner()) {
+                return null;
+            }
+            if (callingUserOnly && mInjector.userHandleGetCallingUserId() !=
+                    mOwners.getDeviceOwnerUserId()) {
+                return null;
+            }
             return mOwners.getDeviceOwnerComponent();
         }
     }
 
     @Override
+    public int getDeviceOwnerUserId() {
+        if (!mHasFeature) {
+            return UserHandle.USER_NULL;
+        }
+        enforceManageUsers();
+        synchronized (this) {
+            return mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerUserId() : UserHandle.USER_NULL;
+        }
+    }
+
+    /**
+     * Returns the "name" of the device owner.  It'll work for non-DO users too, but requires
+     * MANAGE_USERS.
+     */
+    @Override
     public String getDeviceOwnerName() {
         if (!mHasFeature) {
             return null;
         }
-        // TODO: Do we really need it?  getDeviceOwner() doesn't require it.
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        enforceManageUsers();
         synchronized (this) {
             if (!mOwners.hasDeviceOwner()) {
                 return null;
@@ -4630,7 +4658,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // Returns the active device owner or null if there is no device owner.
     @VisibleForTesting
     ActiveAdmin getDeviceOwnerAdminLocked() {
-        ComponentName component = getDeviceOwner();
+        ComponentName component = mOwners.getDeviceOwnerComponent();
         if (component == null) {
             return null;
         }
@@ -4659,16 +4687,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (NameNotFoundException e) {
             throw new SecurityException(e);
         }
-        if (!mOwners.hasDeviceOwner() || !getDeviceOwner().getPackageName().equals(packageName)
-                || (mOwners.getDeviceOwnerUserId() != UserHandle.getUserId(callingUid))) {
-            throw new SecurityException("clearDeviceOwner can only be called by the device owner");
-        }
         synchronized (this) {
+            if (!mOwners.hasDeviceOwner()
+                    || !mOwners.getDeviceOwnerComponent().getPackageName().equals(packageName)
+                    || (mOwners.getDeviceOwnerUserId() != UserHandle.getUserId(callingUid))) {
+                throw new SecurityException(
+                        "clearDeviceOwner can only be called by the device owner");
+            }
+
             final ActiveAdmin admin = getDeviceOwnerAdminLocked();
             if (admin != null) {
                 admin.disableCamera = false;
                 admin.userRestrictions = null;
             }
+
             clearUserPoliciesLocked(new UserHandle(UserHandle.USER_SYSTEM));
 
             mOwners.clearDeviceOwner();
@@ -4857,7 +4889,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        enforceManageUsers();
         ComponentName profileOwner = getProfileOwner(userHandle);
         if (profileOwner == null) {
             return null;
@@ -4987,13 +5019,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void enforceManageUsers() {
+        final int callingUid = mInjector.binderGetCallingUid();
+        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID) || callingUid == 0)) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        }
+    }
+
     private void enforceCrossUserPermission(int userHandle) {
         if (userHandle < 0) {
             throw new IllegalArgumentException("Invalid userId " + userHandle);
         }
         final int callingUid = mInjector.binderGetCallingUid();
         if (userHandle == UserHandle.getUserId(callingUid)) return;
-        if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
+        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID) || callingUid == 0)) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, "Must be system or have"
                     + " INTERACT_ACROSS_USERS_FULL permission");
@@ -6619,8 +6658,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 updateReceivedTime);
 
         synchronized (this) {
-            final String deviceOwnerPackage = getDeviceOwner() == null ? null :
-                    getDeviceOwner().getPackageName();
+            final String deviceOwnerPackage =
+                    mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerComponent().getPackageName()
+                            : null;
             if (deviceOwnerPackage == null) {
                 return;
             }

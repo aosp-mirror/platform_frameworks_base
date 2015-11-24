@@ -228,7 +228,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallerRoot = (installerUid == Process.ROOT_UID);
         final boolean forcePermissionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0;
-        mIsInstallerDeviceOwner = (dpm != null) && dpm.isDeviceOwnerApp(installerPackageName);
+        mIsInstallerDeviceOwner = (dpm != null) && dpm.isDeviceOwnerAppOnCallingUser(
+                installerPackageName);
         if ((isPermissionGranted
                         || isInstallerRoot
                         || mIsInstallerDeviceOwner)
