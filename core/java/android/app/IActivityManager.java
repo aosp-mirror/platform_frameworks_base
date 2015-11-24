@@ -142,8 +142,8 @@ public interface IActivityManager extends IInterface {
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
-    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate)
-            throws RemoteException;
+    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
+            Rect initialBounds) throws RemoteException;
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) throws RemoteException;
     public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode) throws RemoteException;
     public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException;

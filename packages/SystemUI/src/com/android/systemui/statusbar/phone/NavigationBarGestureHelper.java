@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -170,7 +171,18 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             if (touchSlopExceeded && mDivider.getView().getWindowManagerProxy().getDockSide()
                     == DOCKED_INVALID) {
                 mDragMode = calculateDragMode();
-                mRecentsComponent.dockTopTask(mDragMode == DRAG_MODE_RECENTS);
+                Rect initialBounds = null;
+                if (mDragMode == DRAG_MODE_DIVIDER) {
+                    initialBounds = new Rect();
+                    mDivider.getView().calculateBoundsForPosition(mIsVertical
+                                    ? (int) event.getRawX()
+                                    : (int) event.getRawY(),
+                            mDivider.getView().isHorizontalDivision()
+                                    ? DOCKED_TOP
+                                    : DOCKED_LEFT,
+                            initialBounds);
+                }
+                mRecentsComponent.dockTopTask(mDragMode == DRAG_MODE_RECENTS, initialBounds);
                 if (mDragMode == DRAG_MODE_DIVIDER) {
                     mDivider.getView().startDragging();
                 }
@@ -193,12 +205,12 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mVelocityTracker.computeCurrentVelocity(1000);
         if (mDockWindowTouchSlopExceeded) {
             if (mDragMode == DRAG_MODE_DIVIDER) {
-                mDivider.getView().stopDragging(!mIsVertical
-                                ? (int) event.getRawY()
-                                : (int) event.getRawX(),
-                        !mIsVertical
-                                ? mVelocityTracker.getYVelocity()
-                                : mVelocityTracker.getXVelocity());
+                mDivider.getView().stopDragging(mIsVertical
+                                ? (int) event.getRawX()
+                                : (int) event.getRawY(),
+                        mIsVertical
+                                ? mVelocityTracker.getXVelocity()
+                                : mVelocityTracker.getYVelocity());
             } else if (mDragMode == DRAG_MODE_RECENTS) {
                 mRecentsComponent.onDraggingInRecentsEnded(mVelocityTracker.getYVelocity());
             }

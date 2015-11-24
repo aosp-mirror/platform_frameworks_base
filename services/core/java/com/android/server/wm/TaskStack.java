@@ -387,7 +387,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             if (dockedStack != null) {
                 dockedStack.getRawBounds(mTmpRect2);
             }
-            final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
+            final boolean dockedOnTopOrLeft = mService.mDockedStackCreateMode
                     == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(mTmpRect, bounds, mStackId, mTmpRect2,
                     mDisplayContent.mDividerControllerLocked.getContentWidth(),
@@ -451,7 +451,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
      *                         close to the side of the dock.
      * @param dockOnTopOrLeft If the docked stack is on the top or left side of the screen.
      */
-    private static void getStackDockedModeBounds(
+    private void getStackDockedModeBounds(
             Rect displayRect, Rect outBounds, int stackId, Rect dockedBounds, int dockDividerWidth,
             boolean dockOnTopOrLeft) {
         final boolean dockedStack = stackId == DOCKED_STACK_ID;
@@ -459,6 +459,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
         outBounds.set(displayRect);
         if (dockedStack) {
+            if (mService.mDockedStackCreateBounds != null) {
+                outBounds.set(mService.mDockedStackCreateBounds);
+                return;
+            }
             // The initial bounds of the docked stack when it is created half the screen space and
             // its bounds can be adjusted after that. The bounds of all other stacks are adjusted
             // to occupy whatever screen space the docked stack isn't occupying.
@@ -505,7 +509,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final Rect bounds = new Rect();
         mDisplayContent.getLogicalDisplayRect(bounds);
         if (!fullscreen) {
-            final boolean dockedOnTopOrLeft = WindowManagerService.sDockedStackCreateMode
+            final boolean dockedOnTopOrLeft = mService.mDockedStackCreateMode
                     == DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
             getStackDockedModeBounds(bounds, bounds, FULLSCREEN_WORKSPACE_STACK_ID, dockedBounds,
                     mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);

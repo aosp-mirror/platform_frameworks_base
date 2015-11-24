@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -363,8 +364,8 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public void dockTopTask(boolean draggingInRecents) {
-        mImpl.dockTopTask(draggingInRecents);
+    public void dockTopTask(boolean draggingInRecents, Rect initialBounds) {
+        mImpl.dockTopTask(draggingInRecents, initialBounds);
         if (draggingInRecents) {
             mDraggingInRecentsCurrentUser = sSystemServicesProxy.getCurrentUser();
         }

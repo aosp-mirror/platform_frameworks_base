@@ -482,7 +482,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private boolean mKeyguardWaitingForActivityDrawn;
 
-    static int sDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    int mDockedStackCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    Rect mDockedStackCreateBounds;
 
     private final SparseIntArray mTmpTaskIds = new SparseIntArray();
 
@@ -4631,9 +4632,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return (stack != null && stack.isVisibleLocked());
     }
 
-    public void setDockedStackCreateMode(int mode) {
+    public void setDockedStackCreateState(int mode, Rect bounds) {
         synchronized (mWindowMap) {
-            sDockedStackCreateMode = mode;
+            mDockedStackCreateMode = mode;
+            mDockedStackCreateBounds = bounds;
         }
     }
 

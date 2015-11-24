@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.graphics.Rect;
 import android.view.Display;
 import android.view.View;
 
@@ -31,7 +32,7 @@ public interface RecentsComponent {
     /**
      * Docks the top-most task and opens recents.
      */
-    void dockTopTask(boolean draggingInRecents);
+    void dockTopTask(boolean draggingInRecents, Rect initialBounds);
 
     /**
      * Called during a drag-from-navbar-in gesture.

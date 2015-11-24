@@ -312,11 +312,12 @@ public class SystemServicesProxy {
     }
 
     /** Docks an already resumed task to the side of the screen. */
-    public void moveTaskToDockedStack(int taskId, int createMode) {
+    public void moveTaskToDockedStack(int taskId, int createMode, Rect initialBounds) {
         if (mIam == null) return;
 
         try {
-            mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */, false /* animate */);
+            mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */, false /* animate */,
+                    initialBounds);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
