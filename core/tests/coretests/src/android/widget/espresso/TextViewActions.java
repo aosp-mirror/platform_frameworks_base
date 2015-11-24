@@ -184,6 +184,8 @@ public final class TextViewActions {
      * text view.
      */
     private static final class HandleCoordinates implements CoordinatesProvider {
+        // Must be larger than Editor#LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS.
+        private final static float LINE_SLOP_MULTIPLIER = 0.6f;
         private final TextView mTextView;
         private final Handle mHandleType;
         private final int mIndex;
@@ -213,6 +215,11 @@ public final class TextViewActions {
         private float[] locateHandlePointsTextIndex(View view) {
             final int currentOffset = mHandleType == Handle.SELECTION_START ?
                     mTextView.getSelectionStart() : mTextView.getSelectionEnd();
+
+            final Layout layout = mTextView.getLayout();
+            final int currentLine = layout.getLineForOffset(currentOffset);
+            final int targetLine = layout.getLineForOffset(mIndex);
+
             final float[] currentCoordinates =
                     (new TextCoordinates(currentOffset)).calculateCoordinates(mTextView);
             final float[] targetCoordinates =
@@ -220,7 +227,13 @@ public final class TextViewActions {
             final Rect bounds = new Rect();
             view.getBoundsOnScreen(bounds);
             final float diffX = bounds.centerX() - currentCoordinates[0];
-            final float diffY = bounds.centerY() - currentCoordinates[1];
+            final float verticalOffset = bounds.height() * 0.7f;
+            float diffY = bounds.top + verticalOffset - currentCoordinates[1];
+            if (currentLine > targetLine) {
+                diffY -= mTextView.getLineHeight() * LINE_SLOP_MULTIPLIER;
+            } else if (currentLine < targetLine) {
+                diffY += mTextView.getLineHeight() * LINE_SLOP_MULTIPLIER;
+            }
             return new float[] {targetCoordinates[0] + diffX, targetCoordinates[1] + diffY};
         }
     }
