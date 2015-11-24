@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.media.IAudioService;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager.WakeLock;
@@ -217,6 +218,7 @@ public class DpmMockContext extends MockContext {
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
+    public final WifiManager wifiManager;
     public final SettingsForMock settings;
     public final MockContentResolver contentResolver;
 
@@ -249,6 +251,7 @@ public class DpmMockContext extends MockContext {
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);
+        wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
 
         // Package manager is huge, so we use a partial mock instead.
@@ -303,6 +306,8 @@ public class DpmMockContext extends MockContext {
                 return userManager;
             case Context.POWER_SERVICE:
                 return powerManager;
+            case Context.WIFI_SERVICE:
+                return wifiManager;
         }
         throw new UnsupportedOperationException();
     }

@@ -26,10 +26,12 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.test.MoreAsserts;
 import android.util.Pair;
 
 import org.mockito.ArgumentCaptor;
@@ -1174,5 +1176,65 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(mContext.userManagerInternal);
 
         // TODO Make sure restrictions are written to the file.
+    }
+
+    public void testGetMacAddress() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+
+        // In this test, change the caller user to "system".
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Make sure admin1 is installed on system user.
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        // Test 1. Caller doesn't have DO or DA.
+        try {
+            dpm.getWifiMacAddress();
+            fail();
+        } catch (SecurityException e) {
+            MoreAsserts.assertContainsRegex("No active admin owned", e.getMessage());
+        }
+
+        // DO needs to be an DA.
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        assertTrue(dpm.isAdminActive(admin1));
+
+        // Test 2. Caller has DA, but not DO.
+        try {
+            dpm.getWifiMacAddress();
+            fail();
+        } catch (SecurityException e) {
+            MoreAsserts.assertContainsRegex("No active admin owned", e.getMessage());
+        }
+
+        // Test 3. Caller has PO, but not DO.
+        assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
+        try {
+            dpm.getWifiMacAddress();
+            fail();
+        } catch (SecurityException e) {
+            MoreAsserts.assertContainsRegex("No active admin owned", e.getMessage());
+        }
+
+        // Remove PO.
+        dpm.clearProfileOwner(admin1);
+
+        // Test 4, Caller is DO now.
+        assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
+
+        // 4-1.  But no WifiInfo.
+        assertNull(dpm.getWifiMacAddress());
+
+        // 4-2.  Returns WifiInfo, but with the default MAC.
+        when(mContext.wifiManager.getConnectionInfo()).thenReturn(new WifiInfo());
+        assertNull(dpm.getWifiMacAddress());
+
+        // 4-3. With a real MAC address.
+        final WifiInfo wi = new WifiInfo();
+        wi.setMacAddress("11:22:33:44:55:66");
+        when(mContext.wifiManager.getConnectionInfo()).thenReturn(wi);
+        assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress());
     }
 }

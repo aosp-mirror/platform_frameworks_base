@@ -4649,4 +4649,21 @@ public class DevicePolicyManager {
             return false;
         }
     }
+
+    /**
+     * Called by device owner to get the MAC address of the Wi-Fi device.
+     *
+     * @return the MAC address of the Wi-Fi device, or null when the information is not
+     * available. (For example, Wi-Fi hasn't been enabled, or the device doesn't support Wi-Fi.)
+     *
+     * <p>The address will be in the {@code XX:XX:XX:XX:XX:XX} format.
+     */
+    public String getWifiMacAddress() {
+        try {
+            return mService.getWifiMacAddress();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return null;
+        }
+    }
 }
