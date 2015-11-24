@@ -19,6 +19,7 @@ package android.content.pm;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -31,7 +32,7 @@ import java.util.List;
 interface ILauncherApps {
     void addOnAppsChangedListener(in IOnAppsChangedListener listener);
     void removeOnAppsChangedListener(in IOnAppsChangedListener listener);
-    List<ResolveInfo> getLauncherActivities(String packageName, in UserHandle user);
+    ParceledListSlice getLauncherActivities(String packageName, in UserHandle user);
     ResolveInfo resolveActivity(in Intent intent, in UserHandle user);
     void startActivityAsUser(in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
