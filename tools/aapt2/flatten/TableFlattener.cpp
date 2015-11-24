@@ -108,15 +108,19 @@ struct MapFlattenVisitor : public RawValueVisitor {
     SymbolWriter* mSymbols;
     FlatEntry* mEntry;
     BigBuffer* mBuffer;
+    StringPool* mSourcePool;
+    StringPool* mCommentPool;
     bool mUseExtendedChunks;
+
     size_t mEntryCount = 0;
     Maybe<uint32_t> mParentIdent;
     Maybe<ResourceNameRef> mParentName;
 
     MapFlattenVisitor(SymbolWriter* symbols, FlatEntry* entry, BigBuffer* buffer,
+                      StringPool* sourcePool, StringPool* commentPool,
                       bool useExtendedChunks) :
-            mSymbols(symbols), mEntry(entry), mBuffer(buffer),
-            mUseExtendedChunks(useExtendedChunks) {
+            mSymbols(symbols), mEntry(entry), mBuffer(buffer), mSourcePool(sourcePool),
+            mCommentPool(commentPool), mUseExtendedChunks(useExtendedChunks) {
     }
 
     void flattenKey(Reference* key, ResTable_map* outEntry) {
@@ -156,6 +160,32 @@ struct MapFlattenVisitor : public RawValueVisitor {
         flattenValue(value, outEntry);
         outEntry->value.size = util::hostToDevice16(sizeof(outEntry->value));
         mEntryCount++;
+    }
+
+    void flattenMetaData(Value* value) {
+        if (!mUseExtendedChunks) {
+            return;
+        }
+
+        Reference key(ResourceId{ ExtendedResTableMapTypes::ATTR_SOURCE_PATH });
+        StringPool::Ref sourcePathRef = mSourcePool->makeRef(
+                util::utf8ToUtf16(value->getSource().path));
+        BinaryPrimitive val(Res_value::TYPE_INT_DEC,
+                            static_cast<uint32_t>(sourcePathRef.getIndex()));
+        flattenEntry(&key, &val);
+
+        if (value->getSource().line) {
+            key.id = ResourceId(ExtendedResTableMapTypes::ATTR_SOURCE_LINE);
+            val.value.data = static_cast<uint32_t>(value->getSource().line.value());
+            flattenEntry(&key, &val);
+        }
+
+        if (!value->getComment().empty()) {
+            key.id = ResourceId(ExtendedResTableMapTypes::ATTR_COMMENT);
+            StringPool::Ref commentRef = mCommentPool->makeRef(value->getComment());
+            val.value.data = static_cast<uint32_t>(commentRef.getIndex());
+            flattenEntry(&key, &val);
+        }
     }
 
     void visit(Attribute* attr) override {
@@ -211,6 +241,7 @@ struct MapFlattenVisitor : public RawValueVisitor {
 
         for (Style::Entry& entry : style->entries) {
             flattenEntry(&entry.key, entry.value.get());
+            flattenMetaData(&entry.key);
         }
     }
 
@@ -218,6 +249,7 @@ struct MapFlattenVisitor : public RawValueVisitor {
         for (auto& attrRef : styleable->entries) {
             BinaryPrimitive val(Res_value{});
             flattenEntry(&attrRef, &val);
+            flattenMetaData(&attrRef);
         }
     }
 
@@ -227,6 +259,7 @@ struct MapFlattenVisitor : public RawValueVisitor {
             flattenValue(item.get(), outEntry);
             outEntry->value.size = util::hostToDevice16(sizeof(outEntry->value));
             mEntryCount++;
+            flattenMetaData(item.get());
         }
     }
 
@@ -270,6 +303,7 @@ struct MapFlattenVisitor : public RawValueVisitor {
 
             Reference key(q);
             flattenEntry(&key, plural->values[i].get());
+            flattenMetaData(plural->values[i].get());
         }
     }
 };
@@ -389,7 +423,8 @@ private:
         } else {
             const size_t beforeEntry = buffer->size();
             ResTable_entry_ext* outEntry = writeEntry<ResTable_entry_ext, false>(entry, buffer);
-            MapFlattenVisitor visitor(mSymbols, entry, buffer, mOptions.useExtendedChunks);
+            MapFlattenVisitor visitor(mSymbols, entry, buffer, mSourcePool, mSourcePool,
+                                      mOptions.useExtendedChunks);
             entry->value->accept(&visitor);
             outEntry->count = util::hostToDevice32(visitor.mEntryCount);
             if (visitor.mParentName) {

@@ -91,6 +91,13 @@ private:
                                               const ConfigDescription& config,
                                               const android::ResTable_map_entry* map);
 
+    /**
+     * If the mapEntry is a special type that denotes meta data (source, comment), then it is
+     * read and added to the Value.
+     * Returns true if the mapEntry was meta data.
+     */
+    bool collectMetaData(const android::ResTable_map& mapEntry, Value* value);
+
     IAaptContext* mContext;
     ResourceTable* mTable;
 

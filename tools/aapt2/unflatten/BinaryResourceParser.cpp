@@ -575,11 +575,10 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
 
         Source source = mSource;
         if (sourceBlock) {
-            size_t len;
-            const char* str = mSourcePool.string8At(util::deviceToHost32(sourceBlock->path.index),
-                                                    &len);
-            if (str) {
-                source.path.assign(str, len);
+            StringPiece path = util::getString8(mSourcePool,
+                                                util::deviceToHost32(sourceBlock->path.index));
+            if (!path.empty()) {
+                source.path = path.toString();
             }
             source.line = util::deviceToHost32(sourceBlock->line);
         }
@@ -728,6 +727,16 @@ std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& n
     }
 
     for (const ResTable_map& mapEntry : map) {
+        if (Res_INTERNALID(util::deviceToHost32(mapEntry.name.ident))) {
+            if (style->entries.empty()) {
+                mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                  << "out-of-sequence meta data in style");
+                return {};
+            }
+            collectMetaData(mapEntry, &style->entries.back().key);
+            continue;
+        }
+
         style->entries.emplace_back();
         Style::Entry& styleEntry = style->entries.back();
 
@@ -811,11 +820,53 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
     return attr;
 }
 
+static bool isMetaDataEntry(const ResTable_map& mapEntry) {
+    switch (util::deviceToHost32(mapEntry.name.ident)) {
+    case ExtendedResTableMapTypes::ATTR_SOURCE_PATH:
+    case ExtendedResTableMapTypes::ATTR_SOURCE_LINE:
+    case ExtendedResTableMapTypes::ATTR_COMMENT:
+        return true;
+    }
+    return false;
+}
+
+bool BinaryResourceParser::collectMetaData(const ResTable_map& mapEntry, Value* value) {
+    switch (util::deviceToHost32(mapEntry.name.ident)) {
+    case ExtendedResTableMapTypes::ATTR_SOURCE_PATH:
+        value->setSource(Source(util::getString8(mSourcePool,
+                                                 util::deviceToHost32(mapEntry.value.data))));
+        return true;
+        break;
+
+    case ExtendedResTableMapTypes::ATTR_SOURCE_LINE:
+        value->setSource(value->getSource().withLine(util::deviceToHost32(mapEntry.value.data)));
+        return true;
+        break;
+
+    case ExtendedResTableMapTypes::ATTR_COMMENT:
+        value->setComment(util::getString(mSourcePool, util::deviceToHost32(mapEntry.value.data)));
+        return true;
+        break;
+    }
+    return false;
+}
+
 std::unique_ptr<Array> BinaryResourceParser::parseArray(const ResourceNameRef& name,
                                                         const ConfigDescription& config,
                                                         const ResTable_map_entry* map) {
     std::unique_ptr<Array> array = util::make_unique<Array>();
+    Source source;
     for (const ResTable_map& mapEntry : map) {
+        if (isMetaDataEntry(mapEntry)) {
+            if (array->items.empty()) {
+                mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                  << "out-of-sequence meta data in array");
+                return {};
+            }
+            collectMetaData(mapEntry, array->items.back().get());
+            continue;
+        }
+
         array->items.push_back(parseValue(name, config, &mapEntry.value, 0));
     }
     return array;
@@ -826,6 +877,16 @@ std::unique_ptr<Styleable> BinaryResourceParser::parseStyleable(const ResourceNa
                                                                 const ResTable_map_entry* map) {
     std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
     for (const ResTable_map& mapEntry : map) {
+        if (isMetaDataEntry(mapEntry)) {
+            if (styleable->entries.empty()) {
+                mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                  << "out-of-sequence meta data in styleable");
+                return {};
+            }
+            collectMetaData(mapEntry, &styleable->entries.back());
+            continue;
+        }
+
         if (util::deviceToHost32(mapEntry.name.ident) == 0) {
             // The map entry's key (attribute) is not set. This must be
             // a symbol reference, so resolve it.
@@ -849,11 +910,24 @@ std::unique_ptr<Plural> BinaryResourceParser::parsePlural(const ResourceNameRef&
                                                           const ConfigDescription& config,
                                                           const ResTable_map_entry* map) {
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
+    Item* lastEntry = nullptr;
     for (const ResTable_map& mapEntry : map) {
+        if (isMetaDataEntry(mapEntry)) {
+            if (!lastEntry) {
+                mContext->getDiagnostics()->error(DiagMessage(mSource)
+                                                  << "out-of-sequence meta data in plural");
+                return {};
+            }
+            collectMetaData(mapEntry, lastEntry);
+            continue;
+        }
+
         std::unique_ptr<Item> item = parseValue(name, config, &mapEntry.value, 0);
         if (!item) {
             return {};
         }
+
+        lastEntry = item.get();
 
         switch (util::deviceToHost32(mapEntry.name.ident)) {
             case ResTable_map::ATTR_ZERO:

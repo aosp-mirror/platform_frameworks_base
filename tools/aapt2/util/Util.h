@@ -158,6 +158,15 @@ inline StringPiece16 getString(const android::ResStringPool& pool, size_t idx) {
     return StringPiece16();
 }
 
+inline StringPiece getString8(const android::ResStringPool& pool, size_t idx) {
+    size_t len;
+    const char* str = pool.string8At(idx, &len);
+    if (str != nullptr) {
+        return StringPiece(str, len);
+    }
+    return StringPiece();
+}
+
 /**
  * Checks that the Java string format contains no non-positional arguments (arguments without
  * explicitly specifying an index) when there are more than one argument. This is an error

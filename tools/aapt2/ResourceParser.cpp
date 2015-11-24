@@ -919,6 +919,7 @@ bool ResourceParser::parseStyleItem(xml::XmlPullParser* parser, Style* style) {
     }
 
     transformReferenceFromNamespace(parser, u"", &maybeKey.value());
+    maybeKey.value().setSource(source);
 
     std::unique_ptr<Item> value = parseXml(parser, 0, kAllowRawString);
     if (!value) {

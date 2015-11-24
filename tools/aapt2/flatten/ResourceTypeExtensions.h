@@ -67,6 +67,28 @@ struct ExtendedTypes {
 };
 
 /**
+ * New types for a ResTable_map.
+ */
+struct ExtendedResTableMapTypes {
+    enum {
+        /**
+         * Type that contains the source path of the next item in the map.
+         */
+        ATTR_SOURCE_PATH = Res_MAKEINTERNAL(0xffff),
+
+        /**
+         * Type that contains the source line of the next item in the map.
+         */
+        ATTR_SOURCE_LINE = Res_MAKEINTERNAL(0xfffe),
+
+        /**
+         * Type that contains the comment of the next item in the map.
+         */
+        ATTR_COMMENT = Res_MAKEINTERNAL(0xfffd)
+    };
+};
+
+/**
  * Followed by exportedSymbolCount ExportedSymbol structs, followed by the string pool.
  */
 struct FileExport_header {
