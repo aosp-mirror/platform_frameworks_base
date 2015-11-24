@@ -75,6 +75,7 @@ TEST(RecordingCanvas, drawText) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
     });
 
@@ -95,6 +96,7 @@ TEST(RecordingCanvas, drawText_strikeThruAndUnderline) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
                 paint.setUnderlineText(i != 0);
@@ -126,6 +128,7 @@ TEST(RecordingCanvas, drawText_forceAlignLeft) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setTextAlign(SkPaint::kLeft_Align);
         TestUtils::drawTextToCanvas(&canvas, "test text", paint, 25, 25);
         paint.setTextAlign(SkPaint::kCenter_Align);
@@ -135,12 +138,17 @@ TEST(RecordingCanvas, drawText_forceAlignLeft) {
     });
 
     int count = 0;
-    playbackOps(*dl, [&count](const RecordedOp& op) {
+    float lastX = FLT_MAX;
+    playbackOps(*dl, [&count, &lastX](const RecordedOp& op) {
         count++;
         ASSERT_EQ(RecordedOpId::TextOp, op.opId);
         EXPECT_EQ(SkPaint::kLeft_Align, op.paint->getTextAlign())
                 << "recorded drawText commands must force kLeft_Align on their paint";
-        EXPECT_EQ(SkPaint::kGlyphID_TextEncoding, op.paint->getTextEncoding()); // verify TestUtils
+
+        // verify TestUtils alignment offsetting (TODO: move asserts to Canvas base class)
+        EXPECT_GT(lastX, ((const TextOp&)op).x)
+                << "x coordinate should reduce across each of the draw commands, from alignment";
+        lastX = ((const TextOp&)op).x;
     });
     ASSERT_EQ(3, count);
 }
@@ -332,6 +340,40 @@ TEST(RecordingCanvas, insertReorderBarrier) {
     EXPECT_EQ(1u, chunks[1].beginOpIndex);
     EXPECT_EQ(2u, chunks[1].endOpIndex);
     EXPECT_TRUE(chunks[1].reorderChildren);
+}
+
+TEST(RecordingCanvas, refPaint) {
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setTextSize(20);
+    paint.setTextAlign(SkPaint::kLeft_Align);
+    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [&paint](RecordingCanvas& canvas) {
+        paint.setColor(SK_ColorBLUE);
+        // first three should use same paint
+        canvas.drawRect(0, 0, 200, 10, paint);
+        SkPaint paintCopy(paint);
+        canvas.drawRect(0, 10, 200, 20, paintCopy);
+        TestUtils::drawTextToCanvas(&canvas, "helloworld", paint, 50, 25);
+
+        // only here do we use different paint ptr
+        paint.setColor(SK_ColorRED);
+        canvas.drawRect(0, 20, 200, 30, paint);
+    });
+    auto ops = dl->getOps();
+    ASSERT_EQ(4u, ops.size());
+
+    // first three are the same
+    EXPECT_NE(nullptr, ops[0]->paint);
+    EXPECT_NE(&paint, ops[0]->paint);
+    EXPECT_EQ(ops[0]->paint, ops[1]->paint);
+    EXPECT_EQ(ops[0]->paint, ops[2]->paint);
+
+    // last is different, but still copied / non-null
+    EXPECT_NE(nullptr, ops[3]->paint);
+    EXPECT_NE(ops[0]->paint, ops[3]->paint);
+    EXPECT_NE(&paint, ops[3]->paint);
 }
 
 } // namespace uirenderer

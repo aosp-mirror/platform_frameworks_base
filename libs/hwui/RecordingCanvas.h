@@ -205,10 +205,6 @@ private:
         return dstBuffer;
     }
 
-    inline char* refText(const char* text, size_t byteLength) {
-        return (char*) refBuffer<uint8_t>((uint8_t*)text, byteLength);
-    }
-
     inline const SkPath* refPath(const SkPath* path) {
         if (!path) return nullptr;
 
@@ -220,13 +216,8 @@ private:
     }
 
     /**
-     * Returns a RenderThread-safe, const copy of the SkPaint parameter passed in (with deduping
-     * based on paint generation ID)
-     *
-     * Note that this forces Left_Align, since drawText glyph rendering expects left alignment,
-     * since alignment offsetting has been done at a higher level. This is done to essentially all
-     * copied paints, since the deduping can mean a paint is shared by drawText commands and other
-     * types (which wouldn't care about alignment).
+     * Returns a RenderThread-safe, const copy of the SkPaint parameter passed in
+     * (with deduping based on paint hash / equality check)
      */
     inline const SkPaint* refPaint(const SkPaint* paint) {
         if (!paint) return nullptr;
@@ -246,11 +237,8 @@ private:
         // In the unlikely event that 2 unique paints have the same hash we do a
         // object equality check to ensure we don't erroneously dedup them.
         if (cachedPaint == nullptr || *cachedPaint != *paint) {
-            SkPaint* copy = new SkPaint(*paint);
-            copy->setTextAlign(SkPaint::kLeft_Align);
-
-            cachedPaint = copy;
-            mDisplayList->paints.emplace_back(copy);
+            cachedPaint = new SkPaint(*paint);
+            mDisplayList->paints.emplace_back(cachedPaint);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
             refBitmapsInShader(cachedPaint->getShader());

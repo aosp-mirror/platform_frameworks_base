@@ -37,44 +37,56 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
 }
 
 void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
-        const SkPaint& inPaint, float x, float y) {
-   // copy to force TextEncoding (which JNI layer would have done)
-   SkPaint paint(inPaint);
-   paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        const SkPaint& paint, float x, float y) {
+    // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
+    LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
+            "must use glyph encoding");
 
-   SkMatrix identity;
-   identity.setIdentity();
-   SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
-   SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &identity);
+    SkMatrix identity;
+    identity.setIdentity();
+    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
+    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &identity);
 
-   float totalAdvance = 0;
-   std::vector<glyph_t> glyphs;
-   std::vector<float> positions;
-   Rect bounds;
-   while (*text != '\0') {
-       SkUnichar unichar = SkUTF8_NextUnichar(&text);
-       glyph_t glyph = autoCache.getCache()->unicharToGlyph(unichar);
-       autoCache.getCache()->unicharToGlyph(unichar);
+    float totalAdvance = 0;
+    std::vector<glyph_t> glyphs;
+    std::vector<float> positions;
+    Rect bounds;
+    while (*text != '\0') {
+        SkUnichar unichar = SkUTF8_NextUnichar(&text);
+        glyph_t glyph = autoCache.getCache()->unicharToGlyph(unichar);
+        autoCache.getCache()->unicharToGlyph(unichar);
 
-       // push glyph and its relative position
-       glyphs.push_back(glyph);
-       positions.push_back(totalAdvance);
-       positions.push_back(0);
+        // push glyph and its relative position
+        glyphs.push_back(glyph);
+        positions.push_back(totalAdvance);
+        positions.push_back(0);
 
-       // compute bounds
-       SkGlyph skGlyph = autoCache.getCache()->getUnicharMetrics(unichar);
-       Rect glyphBounds(skGlyph.fWidth, skGlyph.fHeight);
-       glyphBounds.translate(totalAdvance + skGlyph.fLeft, skGlyph.fTop);
-       bounds.unionWith(glyphBounds);
+        // compute bounds
+        SkGlyph skGlyph = autoCache.getCache()->getUnicharMetrics(unichar);
+        Rect glyphBounds(skGlyph.fWidth, skGlyph.fHeight);
+        glyphBounds.translate(totalAdvance + skGlyph.fLeft, skGlyph.fTop);
+        bounds.unionWith(glyphBounds);
 
-       // advance next character
-       SkScalar skWidth;
-       paint.getTextWidths(&glyph, sizeof(glyph), &skWidth, NULL);
-       totalAdvance += skWidth;
-   }
-   bounds.translate(x, y);
-   canvas->drawText(glyphs.data(), positions.data(), glyphs.size(), paint, x, y,
-           bounds.left, bounds.top, bounds.right, bounds.bottom, totalAdvance);
+        // advance next character
+        SkScalar skWidth;
+        paint.getTextWidths(&glyph, sizeof(glyph), &skWidth, NULL);
+        totalAdvance += skWidth;
+    }
+
+    // apply alignment via x parameter (which JNI layer would have done)
+    if (paint.getTextAlign() == SkPaint::kCenter_Align) {
+        x -= totalAdvance / 2;
+    } else if (paint.getTextAlign() == SkPaint::kRight_Align) {
+        x -= totalAdvance;
+    }
+
+    bounds.translate(x, y);
+
+    // Force left alignment, since alignment offset is already baked in
+    SkPaint alignPaintCopy(paint);
+    alignPaintCopy.setTextAlign(SkPaint::kLeft_Align);
+    canvas->drawText(glyphs.data(), positions.data(), glyphs.size(), alignPaintCopy, x, y,
+                bounds.left, bounds.top, bounds.right, bounds.bottom, totalAdvance);
 }
 
 } /* namespace uirenderer */
