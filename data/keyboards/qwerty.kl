@@ -81,7 +81,7 @@ key 38    L
 key 39    SEMICOLON
 key 40    APOSTROPHE
 key 14    DEL
-        
+
 key 44    Z
 key 45    X
 key 46    C
@@ -93,7 +93,7 @@ key 51    COMMA
 key 52    PERIOD
 key 53    SLASH
 key 28    ENTER
-        
+
 key 56    ALT_LEFT
 key 100   ALT_RIGHT
 key 42    SHIFT_LEFT
@@ -101,7 +101,7 @@ key 54    SHIFT_RIGHT
 key 15    TAB
 key 57    SPACE
 key 150   EXPLORER
-key 155   ENVELOPE        
+key 155   ENVELOPE
 
 key 12    MINUS
 key 13    EQUALS
@@ -110,3 +110,16 @@ key 215   AT
 # On an AT keyboard: ESC, F10
 key 1     BACK
 key 68    MENU
+
+# App switch = Overview key
+key 580   APP_SWITCH
+
+# Media control keys
+key 160   MEDIA_CLOSE
+key 161   MEDIA_EJECT
+key 163   MEDIA_NEXT
+key 164   MEDIA_PLAY_PAUSE
+key 165   MEDIA_PREVIOUS
+key 166   MEDIA_STOP
+key 167   MEDIA_RECORD
+key 168   MEDIA_REWIND
