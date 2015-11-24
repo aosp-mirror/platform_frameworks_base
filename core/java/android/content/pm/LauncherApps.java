@@ -142,19 +142,17 @@ public class LauncherApps {
      * @return List of launchable activities. Can be an empty list but will not be null.
      */
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
-        List<ResolveInfo> activities = null;
+        ParceledListSlice<ResolveInfo> activities = null;
         try {
             activities = mService.getLauncherActivities(packageName, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService");
+            throw new RuntimeException("Failed to call LauncherAppsService", re);
         }
         if (activities == null) {
             return Collections.EMPTY_LIST;
         }
         ArrayList<LauncherActivityInfo> lais = new ArrayList<LauncherActivityInfo>();
-        final int count = activities.size();
-        for (int i = 0; i < count; i++) {
-            ResolveInfo ri = activities.get(i);
+        for (ResolveInfo ri : activities.getList()) {
             LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri, user);
             if (DEBUG) {
                 Log.v(TAG, "Returning activity for profile " + user + " : "
@@ -185,7 +183,7 @@ public class LauncherApps {
                 return info;
             }
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService");
+            throw new RuntimeException("Failed to call LauncherAppsService", re);
         }
         return null;
     }
@@ -240,7 +238,7 @@ public class LauncherApps {
         try {
             return mService.isPackageEnabled(packageName, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService");
+            throw new RuntimeException("Failed to call LauncherAppsService", re);
         }
     }
 
@@ -256,7 +254,7 @@ public class LauncherApps {
         try {
             return mService.isActivityEnabled(component, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService");
+            throw new RuntimeException("Failed to call LauncherAppsService", re);
         }
     }
 

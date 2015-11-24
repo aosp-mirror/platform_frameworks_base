@@ -26,6 +26,7 @@ import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
@@ -187,11 +188,11 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public List<ResolveInfo> getLauncherActivities(String packageName, UserHandle user)
+        public ParceledListSlice<ResolveInfo> getLauncherActivities(String packageName, UserHandle user)
                 throws RemoteException {
             ensureInUserProfiles(user, "Cannot retrieve activities for unrelated profile " + user);
             if (!isUserEnabled(user)) {
-                return new ArrayList<ResolveInfo>();
+                return null;
             }
 
             final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -201,7 +202,7 @@ public class LauncherAppsService extends SystemService {
             try {
                 List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent, 0 /* flags */,
                         user.getIdentifier());
-                return apps;
+                return new ParceledListSlice<>(apps);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
