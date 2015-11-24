@@ -247,4 +247,93 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('a')));
         onView(withId(R.id.textview)).check(hasSelection("h"));
     }
+
+    @SmallTest
+    public void testSelectionHandles_snapToWordBoundary() throws Exception {
+        final String text = "abcd efg hijk lmn opqr";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('f')));
+        onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('d') + 1));
+        onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
+
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('c')));
+        onView(withId(R.id.textview)).check(hasSelection("abcd efg hijk"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('d')));
+        onView(withId(R.id.textview)).check(hasSelection("d efg hijk"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('b')));
+        onView(withId(R.id.textview)).check(hasSelection("bcd efg hijk"));
+
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('n')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('o')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('q')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn opqr"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('p')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn o"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('r')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn opq"));
+    }
+
+    @SmallTest
+    public void testSelectionHandles_snapToWordBoundary_multiLine() throws Exception {
+        final String text = "abcd efg\n" + "hijk lmn\n" + "opqr stu";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('m')));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('c')));
+        onView(withId(R.id.textview)).check(hasSelection("abcd efg\nhijk lmn"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('g')));
+        onView(withId(R.id.textview)).check(hasSelection("g\nhijk lmn"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('m')));
+        onView(withId(R.id.textview)).check(hasSelection("lmn"));
+
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('u')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn\nopqr stu"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('p')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk lmn\no"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('i')));
+        onView(withId(R.id.textview)).check(hasSelection("hijk"));
+    }
 }
