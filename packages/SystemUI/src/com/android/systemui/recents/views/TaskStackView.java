@@ -38,10 +38,13 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
@@ -60,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -151,7 +153,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         setStack(stack);
         mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
-        mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context);
+        mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, this);
         mFilterAlgorithm = new TaskStackViewFilterAlgorithm(this, mViewPool);
         mStackScroller = new TaskStackViewScroller(context, mLayoutAlgorithm);
         mStackScroller.setCallbacks(this);
@@ -295,6 +297,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mUIDozeTrigger.resetTrigger();
         }
         mStackScroller.reset();
+        mLayoutAlgorithm.reset();
     }
 
     /** Requests that the views be synchronized with the model */
@@ -643,10 +646,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             if (scrollToTask) {
                 // TODO: Center the newly focused task view, only if not freeform
-                float newScroll = mLayoutAlgorithm.getStackScrollForTask(newFocusedTask) - 0.5f;
+                RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+                float newScroll = mLayoutAlgorithm.getStackScrollForTask(newFocusedTask);
+                if (!debugFlags.isFullscreenThumbnailsEnabled()) {
+                    newScroll -= 0.5f;
+                }
                 newScroll = mStackScroller.getBoundedStackScroll(newScroll);
                 mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll,
                         focusTaskRunnable);
+                mLayoutAlgorithm.animateFocusState(TaskStackLayoutAlgorithm.STATE_FOCUSED);
             } else {
                 focusTaskRunnable.run();
             }
@@ -686,8 +694,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     }
                 }
             } else {
-                // No restrictions, lets just move to the new task
-                newIndex = mFocusedTaskIndex + (forward ? -1 : 1);
+                // No restrictions, lets just move to the new task (looping forward/backwards if
+                // necessary)
+                int taskCount = mStack.getTaskCount();
+                newIndex = (mFocusedTaskIndex + (forward ? -1 : 1) + taskCount) % taskCount;
             }
         } else {
             // We don't have a focused task, so focus the first visible task view
@@ -1500,6 +1510,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Animate the other views into place
         requestSynchronizeStackViewsWithModel(175);
+    }
+
+    public final void onBusEvent(StackViewScrolledEvent event) {
+        mLayoutAlgorithm.updateFocusStateOnScroll(event.yMovement);
+    }
+
+    public final void onBusEvent(IterateRecentsEvent event) {
+        mLayoutAlgorithm.animateFocusState(mLayoutAlgorithm.getDefaultFocusState());
     }
 
     /**

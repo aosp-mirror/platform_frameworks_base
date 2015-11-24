@@ -75,7 +75,7 @@ public class RecentsActivityLaunchState {
      */
     public int getInitialFocusTaskIndex(int numTasks) {
         RecentsDebugFlags flags = Recents.getDebugFlags();
-        if (flags.isFastToggleRecentsEnabled() && !launchedWithAltTab) {
+        if (flags.isPageOnToggleEnabled() && !launchedWithAltTab) {
             // If we are fast toggling, then focus the next task depending on when you are on home
             // or coming in from another app
             if (launchedFromHome) {

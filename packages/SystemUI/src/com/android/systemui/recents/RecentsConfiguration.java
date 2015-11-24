@@ -180,7 +180,8 @@ public class RecentsConfiguration {
      * Constrain the width of the landscape stack to the smallest width of the device.
      */
     private int getInsetToSmallestWidth(int availableWidth) {
-        if (availableWidth > smallestWidth) {
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        if (!debugFlags.isFullscreenThumbnailsEnabled() && (availableWidth > smallestWidth)) {
             return (availableWidth - smallestWidth) / 2;
         }
         return 0;

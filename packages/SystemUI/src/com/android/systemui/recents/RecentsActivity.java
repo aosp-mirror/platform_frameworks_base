@@ -585,7 +585,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public final void onBusEvent(IterateRecentsEvent event) {
         // Focus the next task
         EventBus.getDefault().send(new FocusNextTaskViewEvent());
-        mIterateTrigger.poke();
+
+        // Start dozing after the recents button is clicked
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        if (debugFlags.isFastToggleRecentsEnabled()) {
+            if (!mIterateTrigger.isDozing()) {
+                mIterateTrigger.startDozing();
+            } else {
+                mIterateTrigger.poke();
+            }
+        }
     }
 
     public final void onBusEvent(UserInteractionEvent event) {
@@ -622,19 +631,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 });
             }
         }
-        ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                // If we are not launching with alt-tab and fast-toggle is enabled, then start
-                // the dozer now
-                RecentsConfiguration config = Recents.getConfiguration();
-                RecentsActivityLaunchState launchState = config.getLaunchState();
-                RecentsDebugFlags flags = Recents.getDebugFlags();
-                if (flags.isFastToggleRecentsEnabled() && !launchState.launchedWithAltTab) {
-                    mIterateTrigger.startDozing();
-                }
-            }
-        });
         mRecentsView.startEnterRecentsAnimation(ctx);
         ctx.postAnimationTrigger.decrement();
     }

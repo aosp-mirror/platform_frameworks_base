@@ -54,6 +54,7 @@ import android.app.IActivityController;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -72,6 +73,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
@@ -836,8 +838,8 @@ final class ActivityStack {
         }
     }
 
-    public final Bitmap screenshotActivities(ActivityRecord who) {
-        if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "screenshotActivities: " + who);
+    public final Bitmap screenshotActivitiesLocked(ActivityRecord who) {
+        if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "screenshotActivitiesLocked: " + who);
         if (who.noDisplay) {
             if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tNo display");
             return null;
@@ -852,10 +854,21 @@ final class ActivityStack {
 
         int w = mService.mThumbnailWidth;
         int h = mService.mThumbnailHeight;
+        float scale = 1f;
         if (w > 0) {
             if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tTaking screenshot");
+
+            // When this flag is set, we currently take the fullscreen screenshot of the activity
+            // but scaled inversely by the density.  This gives us a "good-enough" fullscreen
+            // thumbnail to use within SystemUI without using enormous amounts of memory on high
+            // density devices.
+            if (mService.mTakeFullscreenScreenshots) {
+                Context context = mService.mContext;
+                w = h = -1;
+                scale = (1f / Math.max(1f, context.getResources().getDisplayMetrics().density));
+            }
             return mWindowManager.screenshotApplications(who.appToken, Display.DEFAULT_DISPLAY,
-                    w, h);
+                    w, h, scale);
         }
         Slog.e(TAG, "Invalid thumbnail dimensions: " + w + "x" + h);
         return null;
@@ -914,7 +927,7 @@ final class ActivityStack {
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
         if (mService.mHasRecents
                 && (next == null || next.noDisplay || next.task != prev.task || uiSleeping)) {
-            prev.updateThumbnailLocked(screenshotActivities(prev), null);
+            prev.updateThumbnailLocked(screenshotActivitiesLocked(prev), null);
         }
         stopFullyDrawnTraceIfNeeded();
 

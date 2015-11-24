@@ -834,7 +834,7 @@ final class TaskRecord {
         if (stack != null) {
             final ActivityRecord resumedActivity = stack.mResumedActivity;
             if (resumedActivity != null && resumedActivity.task == this) {
-                final Bitmap thumbnail = stack.screenshotActivities(resumedActivity);
+                final Bitmap thumbnail = stack.screenshotActivitiesLocked(resumedActivity);
                 setLastThumbnailLocked(thumbnail);
             }
         }
