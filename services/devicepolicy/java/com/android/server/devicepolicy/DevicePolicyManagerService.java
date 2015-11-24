@@ -71,6 +71,8 @@ import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1119,6 +1121,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         Looper getMyLooper() {
             return Looper.myLooper();
+        }
+
+        WifiManager getWifiManager() {
+            return mContext.getSystemService(WifiManager.class);
         }
 
         long binderClearCallingIdentity() {
@@ -6869,6 +6875,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getWifiMacAddress() {
+        // Make sure caller has DO.
+        synchronized (this) {
+            getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            final WifiInfo wifiInfo = mInjector.getWifiManager().getConnectionInfo();
+            if (wifiInfo == null) {
+                return null;
+            }
+            return wifiInfo.hasRealMacAddress() ? wifiInfo.getMacAddress() : null;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
     /**
