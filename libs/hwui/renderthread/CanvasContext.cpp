@@ -237,7 +237,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     if (CC_LIKELY(mSwapHistory.size())) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
         const SwapHistory& lastSwap = mSwapHistory.back();
-        int vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
+        nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
         // The slight fudge-factor is to deal with cases where
         // the vsync was estimated due to being slow handling the signal.
         // See the logic in TimeLord#computeFrameTimeNanos or in
