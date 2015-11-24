@@ -46,6 +46,7 @@ public class RecentsActivityLaunchState {
         launchedReuseTaskStackViews = false;
         // Set this flag to indicate that the configuration has changed since Recents last launched
         launchedHasConfigurationChanged = true;
+        launchedViaDragGesture = false;
     }
 
     /** Returns whether the status bar scrim should be animated when shown for the first time. */

@@ -448,6 +448,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         launchState.launchedToTaskId = -1;
         launchState.launchedWithAltTab = false;
         launchState.launchedHasConfigurationChanged = false;
+        launchState.launchedViaDragGesture = false;
 
         MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
     }
