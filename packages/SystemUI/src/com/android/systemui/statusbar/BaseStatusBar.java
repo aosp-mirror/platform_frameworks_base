@@ -1550,7 +1550,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setUserExpanded(userExpanded);
         }
         row.setUserLocked(userLocked);
-        row.setEntry(entry);
+        row.updateStatusBarNotification(entry.notification);
         applyRemoteInput(entry);
         return true;
     }
@@ -2184,8 +2184,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         mNotificationClicker.register(entry.row, sbn);
 
-        entry.row.setEntry(entry);
-        entry.row.notifyContentUpdated();
+        entry.row.updateStatusBarNotification(entry.notification);
         entry.row.resetHeight();
 
         applyRemoteInput(entry);

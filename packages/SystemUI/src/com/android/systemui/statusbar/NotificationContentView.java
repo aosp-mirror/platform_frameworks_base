@@ -448,19 +448,6 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    public void notifyContentUpdated() {
-        updateSingleLineView();
-        selectLayout(false /* animate */, true /* force */);
-        if (mContractedChild != null) {
-            mContractedWrapper.notifyContentUpdated();
-            mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
-        }
-        if (mExpandedChild != null) {
-            mExpandedWrapper.notifyContentUpdated();
-        }
-        updateRoundRectClipping();
-    }
-
     public boolean isContentExpandable() {
         return mExpandedChild != null;
     }
@@ -493,9 +480,21 @@ public class NotificationContentView extends FrameLayout {
         updateSingleLineView();
     }
 
-    public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
+    public void onNotificationUpdated(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
         updateSingleLineView();
+        selectLayout(false /* animate */, true /* force */);
+        if (mContractedChild != null) {
+            mContractedWrapper.notifyContentUpdated();
+            mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
+        }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.notifyContentUpdated();
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.notifyContentUpdated();
+        }
+        updateRoundRectClipping();
     }
 
     private void updateSingleLineView() {

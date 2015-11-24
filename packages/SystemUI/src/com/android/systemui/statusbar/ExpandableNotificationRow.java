@@ -101,7 +101,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private FalsingManager mFalsingManager;
 
     private boolean mJustClicked;
-    private NotificationData.Entry mEntry;
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnClickListener mExpandClickListener = new OnClickListener() {
@@ -171,10 +170,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    private void setStatusBarNotification(StatusBarNotification statusBarNotification) {
+    public void updateStatusBarNotification(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
-        mPrivateLayout.setStatusBarNotification(statusBarNotification);
+        mPrivateLayout.onNotificationUpdated(statusBarNotification);
+        mPublicLayout.onNotificationUpdated(statusBarNotification);
         updateVetoButton();
+        if (mIsSummaryWithChildren) {
+            recreateNotificationHeader();
+        }
         onChildrenCountChanged();
     }
 
@@ -389,11 +392,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 ((Chronometer) chronometer).setStarted(running);
             }
         }
-    }
-
-    public void setEntry(NotificationData.Entry entry) {
-        mEntry = entry;
-        setStatusBarNotification(entry.notification);
     }
 
     public CharSequence getSubText() {
@@ -687,17 +685,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void onChildrenCountChanged() {
-        final boolean isSummaryWithChildren = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
+        mIsSummaryWithChildren = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
                 && mGroupManager.hasGroupChildren(mStatusBarNotification);
-        if (isSummaryWithChildren) {
+        if (mIsSummaryWithChildren) {
             if (mChildrenContainer == null) {
                 mChildrenContainerStub.inflate();
             }
-            if (!mIsSummaryWithChildren) {
+            if (mNotificationHeader == null) {
                 recreateNotificationHeader();
             }
         }
-        mIsSummaryWithChildren  = isSummaryWithChildren;
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateHeaderChildCount();
         updateChildrenVisibility(true);
@@ -913,14 +910,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    public void notifyContentUpdated() {
-        mPublicLayout.notifyContentUpdated();
-        mPrivateLayout.notifyContentUpdated();
-        if (mIsSummaryWithChildren) {
-            recreateNotificationHeader();
-        }
-    }
-
     private void recreateNotificationHeader() {
         final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
                 getStatusBarNotification().getNotification());
@@ -935,6 +924,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         } else {
             header.reapply(getContext(), mNotificationHeader);
         }
+        updateHeaderChildCount();
     }
 
     public boolean isMaxExpandHeightInitialized() {
