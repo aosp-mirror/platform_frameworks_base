@@ -285,6 +285,10 @@ public class UserRestrictionsUtils {
      * <p>Note this method is called by {@link UserManagerService} while holding
      * {@code mRestrictionLock}. Be aware when calling into other services, which could cause
      * a deadlock.
+     *
+     * <p>See also {@link
+     * com.android.providers.settings.SettingsProvider#isGlobalOrSecureSettingRestrictedForUser},
+     * which should be in sync with this method.
      */
     private static void applyUserRestrictionLR(Context context, int userId, String key,
             boolean newValue) {
@@ -306,7 +310,7 @@ public class UserRestrictionsUtils {
                 case UserManager.DISALLOW_CONFIG_WIFI:
                     if (newValue) {
                         android.provider.Settings.Secure.putIntForUser(cr,
-                                android.provider.Settings.Secure
+                                android.provider.Settings.Global
                                         .WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0, userId);
                     }
                     break;
@@ -315,9 +319,6 @@ public class UserRestrictionsUtils {
                         android.provider.Settings.Secure.putIntForUser(cr,
                                 android.provider.Settings.Secure.LOCATION_MODE,
                                 android.provider.Settings.Secure.LOCATION_MODE_OFF,
-                                userId);
-                        android.provider.Settings.Secure.putStringForUser(cr,
-                                android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
                                 userId);
                     }
                     // Send out notifications as some clients may want to reread the
