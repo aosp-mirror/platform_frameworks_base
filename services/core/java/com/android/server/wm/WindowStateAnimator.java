@@ -446,7 +446,7 @@ class WindowStateAnimator {
             }
         }
 
-        if (!mWin.mExiting) {
+        if (!mWin.shouldDestroySurfaceWhenAnimationFinishes()) {
             return;
         }
 
@@ -454,12 +454,13 @@ class WindowStateAnimator {
             return;
         }
 
-        if (WindowManagerService.localLOGV) Slog.v(
-                TAG, "Exit animation finished in " + this
-                + ": remove=" + mWin.mRemoveOnExit);
+        if (localLOGV) Slog.v(TAG, "Exit animation finished in " + this + ": remove="
+                + mWin.mRemoveOnExit);
         if (mSurfaceController != null && mSurfaceController.hasSurface()) {
-            mService.mDestroySurface.add(mWin);
-            mWin.mDestroying = true;
+            mService.scheduleSurfaceDestroy(mWin);
+            if (mWin.mExiting) {
+                mWin.mDestroying = true;
+            }
             hide("finishExit");
         }
         mWin.mExiting = false;
@@ -645,7 +646,7 @@ class WindowStateAnimator {
                 return null;
             }
 
-            if (WindowManagerService.localLOGV) {
+            if (localLOGV) {
                 Slog.v(TAG, "Got surface: " + mSurfaceController
                         + ", set left=" + w.mFrame.left + " top=" + w.mFrame.top
                         + ", animLayer=" + mAnimLayer);
@@ -666,7 +667,7 @@ class WindowStateAnimator {
                     mAnimLayer);
             mLastHidden = true;
 
-            if (WindowManagerService.localLOGV) Slog.v(
+            if (localLOGV) Slog.v(
                     TAG, "Created surface " + this);
         }
         return mSurfaceController;
@@ -973,7 +974,7 @@ class WindowStateAnimator {
                 //Slog.i(TAG, "Not applying alpha transform");
             }
 
-            if ((DEBUG_SURFACE_TRACE || WindowManagerService.localLOGV)
+            if ((DEBUG_SURFACE_TRACE || localLOGV)
                     && (mShownAlpha == 1.0 || mShownAlpha == 0.0)) Slog.v(
                     TAG, "computeShownFrameLocked: Animating " + this + " mAlpha=" + mAlpha
                     + " self=" + (selfTransformation ? mTransformation.getAlpha() : "null")
@@ -994,7 +995,7 @@ class WindowStateAnimator {
             return;
         }
 
-        if (WindowManagerService.localLOGV) Slog.v(
+        if (localLOGV) Slog.v(
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
