@@ -190,6 +190,9 @@ public class RecentsTransitionHelper {
                 };
             }
             try {
+                synchronized (this) {
+                    mAppTransitionAnimationSpecs = SPECS_WAITING;
+                }
                 WindowManagerGlobal.getWindowManagerService()
                         .overridePendingAppTransitionMultiThumbFuture(transitionFuture,
                                 callback, true /* scaleUp */);
