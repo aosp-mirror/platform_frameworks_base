@@ -200,16 +200,10 @@ public class TaskStack {
     /** Task stack callbacks */
     public interface TaskStackCallbacks {
         /* Notifies when a task has been added to the stack */
-        public void onStackTaskAdded(TaskStack stack, Task t);
+        void onStackTaskAdded(TaskStack stack, Task t);
         /* Notifies when a task has been removed from the stack */
-        public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
+        void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
                                        Task newFrontMostTask);
-        /* Notifies when all task has been removed from the stack */
-        public void onStackAllTasksRemoved(TaskStack stack, ArrayList<Task> removedTasks);
-        /** Notifies when the stack was filtered */
-        public void onStackFiltered(TaskStack newStack, ArrayList<Task> curTasks, Task t);
-        /** Notifies when the stack was un-filtered */
-        public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curTasks);
     }
 
 
@@ -377,20 +371,6 @@ public class TaskStack {
         }
     }
 
-    /** Removes all tasks */
-    public void removeAllTasks() {
-        ArrayList<Task> taskList = new ArrayList<Task>(mTaskList.getTasks());
-        int taskCount = taskList.size();
-        for (int i = taskCount - 1; i >= 0; i--) {
-            Task t = taskList.get(i);
-            removeTaskImpl(t);
-        }
-        if (mCb != null) {
-            // Notify that all tasks have been removed
-            mCb.onStackAllTasksRemoved(this, taskList);
-        }
-    }
-
     /** Sets a few tasks in one go */
     public void setTasks(List<Task> tasks) {
         ArrayList<Task> taskList = mTaskList.getTasks();
@@ -484,41 +464,6 @@ public class TaskStack {
             }
         }
         return false;
-    }
-
-    /******** Filtering ********/
-
-    /** Filters the stack into tasks similar to the one specified */
-    public void filterTasks(final Task t) {
-        ArrayList<Task> oldStack = new ArrayList<Task>(mTaskList.getTasks());
-
-        // Set the task list filter
-        boolean filtered = mTaskList.setFilter(new TaskFilter() {
-            @Override
-            public boolean acceptTask(Task at, int i) {
-                return t.key.getComponent().getPackageName().equals(
-                        at.key.getComponent().getPackageName());
-            }
-        });
-        if (filtered && mCb != null) {
-            mCb.onStackFiltered(this, oldStack, t);
-        }
-    }
-
-    /** Unfilters the current stack */
-    public void unfilterTasks() {
-        ArrayList<Task> oldStack = new ArrayList<Task>(mTaskList.getTasks());
-
-        // Unset the filter, then update the virtual scroll
-        mTaskList.removeFilter();
-        if (mCb != null) {
-            mCb.onStackUnfiltered(this, oldStack);
-        }
-    }
-
-    /** Returns whether tasks are currently filtered */
-    public boolean hasFilteredTasks() {
-        return mTaskList.hasFilter();
     }
 
     /******** Grouping ********/

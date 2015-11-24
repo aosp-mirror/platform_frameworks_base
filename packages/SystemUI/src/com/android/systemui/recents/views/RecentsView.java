@@ -66,18 +66,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     private int mStackViewVisibility = View.VISIBLE;
 
-    /** The RecentsView callbacks */
-    public interface RecentsViewCallbacks {
-        public void onAllTaskViewsDismissed();
-    }
-
     LayoutInflater mInflater;
     Handler mHandler;
 
     ArrayList<TaskStack> mStacks;
     TaskStackView mTaskStackView;
     RecentsAppWidgetHostView mSearchBar;
-    RecentsViewCallbacks mCb;
 
     RecentsTransitionHelper mTransitionHelper;
     RecentsViewTouchHandler mTouchHandler;
@@ -114,11 +108,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mTouchHandler = new RecentsViewTouchHandler(this);
-    }
-
-    /** Sets the callbacks */
-    public void setCallbacks(RecentsViewCallbacks cb) {
-        mCb = cb;
     }
 
     /** Set/get the bsp root node */
@@ -377,24 +366,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return super.verifyDrawable(who);
     }
 
-    /** Unfilters any filtered stacks */
-    public boolean unfilterFilteredStacks() {
-        if (mStacks != null) {
-            // Check if there are any filtered stacks and unfilter them before we back out of Recents
-            boolean stacksUnfiltered = false;
-            int numStacks = mStacks.size();
-            for (int i = 0; i < numStacks; i++) {
-                TaskStack stack = mStacks.get(i);
-                if (stack.hasFilteredTasks()) {
-                    stack.unfilterTasks();
-                    stacksUnfiltered = true;
-                }
-            }
-            return stacksUnfiltered;
-        }
-        return false;
-    }
-
     public void disableLayersForOneFrame() {
         if (mTaskStackView != null) {
             mTaskStackView.disableLayersForOneFrame();
@@ -409,55 +380,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             final Rect bounds, int destinationStack) {
         mTransitionHelper.launchTaskFromRecents(stack, task, stackView, tv, lockToTask, bounds,
                 destinationStack);
-    }
-
-    @Override
-    public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks) {
-        /* TODO: Not currently enabled
-        if (removedTasks != null) {
-            int taskCount = removedTasks.size();
-            for (int i = 0; i < taskCount; i++) {
-                onTaskViewDismissed(removedTasks.get(i));
-            }
-        }
-        */
-
-        mCb.onAllTaskViewsDismissed();
-
-        // Keep track of all-deletions
-        MetricsLogger.count(getContext(), "overview_task_all_dismissed", 1);
-    }
-
-    @Override
-    public void onTaskStackFilterTriggered() {
-        // Hide the search bar
-        if (mSearchBar != null) {
-            int filterDuration = getResources().getInteger(
-                    R.integer.recents_filter_animate_current_views_duration);
-            mSearchBar.animate()
-                    .alpha(0f)
-                    .setStartDelay(0)
-                    .setInterpolator(mFastOutSlowInInterpolator)
-                    .setDuration(filterDuration)
-                    .withLayer()
-                    .start();
-        }
-    }
-
-    @Override
-    public void onTaskStackUnfilterTriggered() {
-        // Show the search bar
-        if (mSearchBar != null) {
-            int filterDuration = getResources().getInteger(
-                    R.integer.recents_filter_animate_new_views_duration);
-            mSearchBar.animate()
-                    .alpha(1f)
-                    .setStartDelay(0)
-                    .setInterpolator(mFastOutSlowInInterpolator)
-                    .setDuration(filterDuration)
-                    .withLayer()
-                    .start();
-        }
     }
 
     /**** EventBus Events ****/

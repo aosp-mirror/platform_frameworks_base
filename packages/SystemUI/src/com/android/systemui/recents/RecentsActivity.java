@@ -53,6 +53,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
@@ -79,8 +80,7 @@ import java.util.ArrayList;
 /**
  * The main Recents activity that is started from AlternateRecentsComponent.
  */
-public class RecentsActivity extends Activity implements RecentsView.RecentsViewCallbacks,
-        ViewTreeObserver.OnPreDrawListener {
+public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreDrawListener {
 
     private final static String TAG = "RecentsActivity";
     private final static boolean DEBUG = false;
@@ -112,7 +112,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
         @Override
         public void run() {
-            dismissRecentsToFocusedTask(false);
+            dismissRecentsToFocusedTask();
         }
     });
 
@@ -259,12 +259,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /**
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
-    boolean dismissRecentsToFocusedTask(boolean checkFilteredStackState) {
+    boolean dismissRecentsToFocusedTask() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
-            // If we currently have filtered stacks, then unfilter those first
-            if (checkFilteredStackState &&
-                    mRecentsView.unfilterFilteredStacks()) return true;
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask()) return true;
         }
@@ -274,12 +271,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /**
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
-    boolean dismissRecentsToFocusedTaskOrHome(boolean checkFilteredStackState) {
+    boolean dismissRecentsToFocusedTaskOrHome() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
-            // If we currently have filtered stacks, then unfilter those first
-            if (checkFilteredStackState &&
-                mRecentsView.unfilterFilteredStacks()) return true;
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask()) return true;
             // If none of the other cases apply, then just go Home
@@ -348,7 +342,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Set the Recents layout
         setContentView(R.layout.recents);
         mRecentsView = (RecentsView) findViewById(R.id.recents_view);
-        mRecentsView.setCallbacks(this);
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -557,7 +550,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onBackPressed() {
         // Dismiss Recents to the focused Task or Home
-        dismissRecentsToFocusedTaskOrHome(true);
+        dismissRecentsToFocusedTaskOrHome();
     }
 
     /**** RecentsResizeTaskDialog ****/
@@ -569,17 +562,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         return mResizeTaskDebugDialog;
     }
 
-    /**** RecentsView.RecentsViewCallbacks Implementation ****/
-
-    @Override
-    public void onAllTaskViewsDismissed() {
-        mFinishLaunchHomeRunnable.run();
-    }
-
     /**** EventBus events ****/
 
     public final void onBusEvent(ToggleRecentsEvent event) {
-        dismissRecentsToFocusedTaskOrHome(true /* checkFilteredStackState */);
+        dismissRecentsToFocusedTaskOrHome();
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
@@ -604,10 +590,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public final void onBusEvent(HideRecentsEvent event) {
         if (event.triggeredFromAltTab) {
             // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
-            dismissRecentsToFocusedTaskOrHome(false /* checkFilteredStackState */);
+            dismissRecentsToFocusedTaskOrHome();
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
-            dismissRecentsToHome(true /* checkFilteredStackState */);
+            dismissRecentsToHome(true /* animated */);
         } else {
             // Do nothing
         }
@@ -681,6 +667,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Remove the task from activity manager
         SystemServicesProxy ssp = Recents.getSystemServices();
         ssp.removeTask(event.task.key.id);
+    }
+
+    public final void onBusEvent(AllTaskViewsDismissedEvent event) {
+        // Just go straight home (no animation necessary because there are no more task views)
+        dismissRecentsToHome(false /* animated */);
+
+        // Keep track of all-deletions
+        MetricsLogger.count(this, "overview_task_all_dismissed", 1);
     }
 
     public final void onBusEvent(ResizeTaskEvent event) {

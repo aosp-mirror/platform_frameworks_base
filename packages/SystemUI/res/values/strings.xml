@@ -698,8 +698,6 @@
     <string name="recents_search_bar_label">search</string>
     <!-- Recents: Launch error string. [CHAR LIMIT=NONE] -->
     <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
-    <!-- Recents: Dismiss all button. [CHAR LIMIT=NONE] -->
-    <string name="recents_dismiss_all_message">Dismiss all applications</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>

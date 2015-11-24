@@ -43,6 +43,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
+import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
@@ -82,14 +83,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     interface TaskStackViewCallbacks {
         public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
                 boolean lockToTask, Rect bounds, int destinationStack);
-        public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks);
-        public void onTaskStackFilterTriggered();
-        public void onTaskStackUnfilterTriggered();
     }
 
     TaskStack mStack;
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
-    TaskStackViewFilterAlgorithm mFilterAlgorithm;
     TaskStackViewScroller mStackScroller;
     TaskStackViewTouchHandler mTouchHandler;
     TaskStackViewCallbacks mCb;
@@ -154,7 +151,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
         mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, this);
-        mFilterAlgorithm = new TaskStackViewFilterAlgorithm(this, mViewPool);
         mStackScroller = new TaskStackViewScroller(context, mLayoutAlgorithm);
         mStackScroller.setCallbacks(this);
         mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
@@ -1040,20 +1036,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    /** Requests this task stack to start it's dismiss-all animation. */
-    public void startDismissAllAnimation(final Runnable postAnimationRunnable) {
-        // Clear the focused task
-        resetFocusedTask();
-        List<TaskView> taskViews = getTaskViews();
-        int taskViewCount = taskViews.size();
-        int count = 0;
-        for (int i = taskViewCount - 1; i >= 0; i--) {
-            TaskView tv = taskViews.get(i);
-            tv.startDeleteTaskAnimation(i > 0 ? null : postAnimationRunnable, count * 50);
-            count++;
-        }
-    }
-
     /** Animates a task view in this stack as it launches. */
     public void startLaunchTaskAnimation(TaskView tv, Runnable r, boolean lockToTask) {
         Task launchTargetTask = tv.getTask();
@@ -1179,97 +1161,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
 
-        // If there are no remaining tasks, then either unfilter the current stack, or just close
-        // the activity if there are no filtered stacks
+        // If there are no remaining tasks, then just close recents
         if (mStack.getTaskCount() == 0) {
-            boolean shouldFinishActivity = true;
-            if (mStack.hasFilteredTasks()) {
-                mStack.unfilterTasks();
-                shouldFinishActivity = (mStack.getTaskCount() == 0);
-            }
+            boolean shouldFinishActivity = (mStack.getTaskCount() == 0);
             if (shouldFinishActivity) {
-                mCb.onAllTaskViewsDismissed(null);
+                EventBus.getDefault().send(new AllTaskViewsDismissedEvent());
             }
         }
-    }
-
-    @Override
-    public void onStackAllTasksRemoved(TaskStack stack, final ArrayList<Task> removedTasks) {
-        // Announce for accessibility
-        String msg = getContext().getString(R.string.accessibility_recents_all_items_dismissed);
-        announceForAccessibility(msg);
-
-        startDismissAllAnimation(new Runnable() {
-            @Override
-            public void run() {
-                // Notify that all tasks have been removed
-                mCb.onAllTaskViewsDismissed(removedTasks);
-            }
-        });
-    }
-
-    @Override
-    public void onStackFiltered(TaskStack newStack, final ArrayList<Task> curTasks,
-                                Task filteredTask) {
-        /*
-        // Stash the scroll and filtered task for us to restore to when we unfilter
-        mStashedScroll = getStackScroll();
-
-        // Calculate the current task transforms
-        ArrayList<TaskViewTransform> curTaskTransforms =
-                getStackTransforms(curTasks, getStackScroll(), null, true);
-
-        // Update the task offsets
-        mLayoutAlgorithm.updateTaskOffsets(mStack.getTasks());
-
-        // Scroll the item to the top of the stack (sans-peek) rect so that we can see it better
-        updateLayout(false);
-        float overlapHeight = mLayoutAlgorithm.getTaskOverlapHeight();
-        setStackScrollRaw((int) (newStack.indexOfTask(filteredTask) * overlapHeight));
-        boundScrollRaw();
-
-        // Compute the transforms of the items in the new stack after setting the new scroll
-        final ArrayList<Task> tasks = mStack.getTasks();
-        final ArrayList<TaskViewTransform> taskTransforms =
-                getStackTransforms(mStack.getTasks(), getStackScroll(), null, true);
-
-        // Animate
-        mFilterAlgorithm.startFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
-
-        // Notify any callbacks
-        mCb.onTaskStackFilterTriggered();
-        */
-    }
-
-    @Override
-    public void onStackUnfiltered(TaskStack newStack, final ArrayList<Task> curTasks) {
-        /*
-        // Calculate the current task transforms
-        final ArrayList<TaskViewTransform> curTaskTransforms =
-                getStackTransforms(curTasks, getStackScroll(), null, true);
-
-        // Update the task offsets
-        mLayoutAlgorithm.updateTaskOffsets(mStack.getTasks());
-
-        // Restore the stashed scroll
-        updateLayout(false);
-        setStackScrollRaw(mStashedScroll);
-        boundScrollRaw();
-
-        // Compute the transforms of the items in the new stack after restoring the stashed scroll
-        final ArrayList<Task> tasks = mStack.getTasks();
-        final ArrayList<TaskViewTransform> taskTransforms =
-                getStackTransforms(tasks, getStackScroll(), null, true);
-
-        // Animate
-        mFilterAlgorithm.startFilteringAnimation(curTasks, curTaskTransforms, tasks, taskTransforms);
-
-        // Clear the saved vars
-        mStashedScroll = 0;
-
-        // Notify any callbacks
-        mCb.onTaskStackUnfilterTriggered();
-        */
     }
 
     /**** ViewPoolConsumer Implementation ****/
