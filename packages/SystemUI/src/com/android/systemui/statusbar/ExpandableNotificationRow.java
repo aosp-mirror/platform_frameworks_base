@@ -101,6 +101,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private FalsingManager mFalsingManager;
 
     private boolean mJustClicked;
+    private boolean mIconAnimationRunning;
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnClickListener mExpandClickListener = new OnClickListener() {
@@ -126,6 +127,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
         setIconAnimationRunning(running, mPrivateLayout);
+        setIconAnimationRunningForChild(running, mNotificationHeader);
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mChildrenContainer.getNotificationChildren();
+            for (int i = 0; i < notificationChildren.size(); i++) {
+                ExpandableNotificationRow child = notificationChildren.get(i);
+                child.setIconAnimationRunning(running);
+            }
+        }
+        mIconAnimationRunning = running;
     }
 
     private void setIconAnimationRunning(boolean running, NotificationContentView layout) {
@@ -177,6 +188,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         updateVetoButton();
         if (mIsSummaryWithChildren) {
             recreateNotificationHeader();
+        }
+        if (mIconAnimationRunning) {
+            setIconAnimationRunning(true);
         }
         onChildrenCountChanged();
     }
