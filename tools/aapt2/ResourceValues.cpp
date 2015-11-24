@@ -15,9 +15,9 @@
  */
 
 #include "Resource.h"
+#include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-
 #include "util/Util.h"
 #include "flatten/ResourceTypeExtensions.h"
 
@@ -216,7 +216,7 @@ void BinaryPrimitive::print(std::ostream* out) const {
             *out << "(null)";
             break;
         case android::Res_value::TYPE_INT_DEC:
-            *out << "(integer) " << value.data;
+            *out << "(integer) " << static_cast<int32_t>(value.data);
             break;
         case android::Res_value::TYPE_INT_HEX:
             *out << "(integer) " << std::hex << value.data << std::dec;
@@ -237,7 +237,10 @@ void BinaryPrimitive::print(std::ostream* out) const {
     }
 }
 
-Attribute::Attribute(bool w, uint32_t t) : weak(w), typeMask(t) {
+Attribute::Attribute(bool w, uint32_t t) :
+        weak(w), typeMask(t),
+        minInt(std::numeric_limits<int32_t>::min()),
+        maxInt(std::numeric_limits<int32_t>::max()) {
 }
 
 bool Attribute::isWeak() const {
@@ -359,6 +362,81 @@ void Attribute::print(std::ostream* out) const {
     if (weak) {
         *out << " [weak]";
     }
+}
+
+static void buildAttributeMismatchMessage(DiagMessage* msg, const Attribute* attr,
+                                          const Item* value) {
+    *msg << "expected";
+    if (attr->typeMask & android::ResTable_map::TYPE_BOOLEAN) {
+        *msg << " boolean";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_COLOR) {
+        *msg << " color";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_DIMENSION) {
+        *msg << " dimension";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_ENUM) {
+        *msg << " enum";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_FLAGS) {
+        *msg << " flags";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_FLOAT) {
+        *msg << " float";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_FRACTION) {
+        *msg << " fraction";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_INTEGER) {
+        *msg << " integer";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_REFERENCE) {
+        *msg << " reference";
+    }
+
+    if (attr->typeMask & android::ResTable_map::TYPE_STRING) {
+        *msg << " string";
+    }
+
+    *msg << " but got " << *value;
+}
+
+bool Attribute::matches(const Item* item, DiagMessage* outMsg) const {
+    android::Res_value val = {};
+    item->flatten(&val);
+
+    // Always allow references.
+    const uint32_t mask = typeMask | android::ResTable_map::TYPE_REFERENCE;
+    if (!(mask & ResourceUtils::androidTypeToAttributeTypeMask(val.dataType))) {
+        if (outMsg) {
+            buildAttributeMismatchMessage(outMsg, this, item);
+        }
+        return false;
+
+    } else if (ResourceUtils::androidTypeToAttributeTypeMask(val.dataType) &
+            android::ResTable_map::TYPE_INTEGER) {
+        if (static_cast<int32_t>(util::deviceToHost32(val.data)) < minInt) {
+            if (outMsg) {
+                *outMsg << *item << " is less than minimum integer " << minInt;
+            }
+            return false;
+        } else if (static_cast<int32_t>(util::deviceToHost32(val.data)) > maxInt) {
+            if (outMsg) {
+                *outMsg << *item << " is greater than maximum integer " << maxInt;
+            }
+            return false;
+        }
+    }
+    return true;
 }
 
 Style* Style::clone(StringPool* newPool) const {

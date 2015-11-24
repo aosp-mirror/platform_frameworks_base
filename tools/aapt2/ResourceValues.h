@@ -17,9 +17,10 @@
 #ifndef AAPT_RESOURCE_VALUES_H
 #define AAPT_RESOURCE_VALUES_H
 
-#include "util/Maybe.h"
+#include "Diagnostics.h"
 #include "Resource.h"
 #include "StringPool.h"
+#include "util/Maybe.h"
 
 #include <array>
 #include <androidfw/ResourceTypes.h>
@@ -233,8 +234,8 @@ struct Attribute : public BaseValue<Attribute> {
 
 	bool weak;
     uint32_t typeMask;
-    uint32_t minInt;
-    uint32_t maxInt;
+    int32_t minInt;
+    int32_t maxInt;
     std::vector<Symbol> symbols;
 
     Attribute(bool w, uint32_t t = 0u);
@@ -243,6 +244,7 @@ struct Attribute : public BaseValue<Attribute> {
     Attribute* clone(StringPool* newPool) const override;
     void printMask(std::ostream* out) const;
     void print(std::ostream* out) const override;
+    bool matches(const Item* item, DiagMessage* outMsg) const;
 };
 
 struct Style : public BaseValue<Style> {

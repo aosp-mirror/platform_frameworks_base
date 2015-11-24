@@ -138,6 +138,22 @@ TEST_F(ResourceParserTest, ParseAttr) {
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_ANY), attr->typeMask);
 }
 
+TEST_F(ResourceParserTest, ParseAttrWithMinMax) {
+    std::string input = "<attr name=\"foo\" min=\"10\" max=\"23\" format=\"integer\"/>";
+    ASSERT_TRUE(testParse(input));
+
+    Attribute* attr = test::getValue<Attribute>(&mTable, u"@attr/foo");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_INTEGER), attr->typeMask);
+    EXPECT_EQ(10, attr->minInt);
+    EXPECT_EQ(23, attr->maxInt);
+}
+
+TEST_F(ResourceParserTest, FailParseAttrWithMinMaxButNotInteger) {
+    std::string input = "<attr name=\"foo\" min=\"10\" max=\"23\" format=\"string\"/>";
+    ASSERT_FALSE(testParse(input));
+}
+
 TEST_F(ResourceParserTest, ParseUseAndDeclOfAttr) {
     std::string input = "<declare-styleable name=\"Styleable\">\n"
                         "  <attr name=\"foo\" />\n"

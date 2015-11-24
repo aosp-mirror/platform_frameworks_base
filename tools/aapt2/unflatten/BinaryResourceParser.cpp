@@ -771,12 +771,20 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
         attr->typeMask = util::deviceToHost32(typeMaskIter->value.data);
     }
 
-    if (attr->typeMask & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) {
-        for (const ResTable_map& mapEntry : map) {
-            if (Res_INTERNALID(util::deviceToHost32(mapEntry.name.ident))) {
-                continue;
+    for (const ResTable_map& mapEntry : map) {
+        if (Res_INTERNALID(util::deviceToHost32(mapEntry.name.ident))) {
+            switch (util::deviceToHost32(mapEntry.name.ident)) {
+            case ResTable_map::ATTR_MIN:
+                attr->minInt = static_cast<int32_t>(mapEntry.value.data);
+                break;
+            case ResTable_map::ATTR_MAX:
+                attr->maxInt = static_cast<int32_t>(mapEntry.value.data);
+                break;
             }
+            continue;
+        }
 
+        if (attr->typeMask & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) {
             Attribute::Symbol symbol;
             symbol.value = util::deviceToHost32(mapEntry.value.data);
             if (util::deviceToHost32(mapEntry.name.ident) == 0) {
@@ -799,7 +807,7 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
         }
     }
 
-    // TODO(adamlesinski): Find min, max, i80n, etc attributes.
+    // TODO(adamlesinski): Find i80n, attributes.
     return attr;
 }
 
@@ -848,22 +856,22 @@ std::unique_ptr<Plural> BinaryResourceParser::parsePlural(const ResourceNameRef&
         }
 
         switch (util::deviceToHost32(mapEntry.name.ident)) {
-            case android::ResTable_map::ATTR_ZERO:
+            case ResTable_map::ATTR_ZERO:
                 plural->values[Plural::Zero] = std::move(item);
                 break;
-            case android::ResTable_map::ATTR_ONE:
+            case ResTable_map::ATTR_ONE:
                 plural->values[Plural::One] = std::move(item);
                 break;
-            case android::ResTable_map::ATTR_TWO:
+            case ResTable_map::ATTR_TWO:
                 plural->values[Plural::Two] = std::move(item);
                 break;
-            case android::ResTable_map::ATTR_FEW:
+            case ResTable_map::ATTR_FEW:
                 plural->values[Plural::Few] = std::move(item);
                 break;
-            case android::ResTable_map::ATTR_MANY:
+            case ResTable_map::ATTR_MANY:
                 plural->values[Plural::Many] = std::move(item);
                 break;
-            case android::ResTable_map::ATTR_OTHER:
+            case ResTable_map::ATTR_OTHER:
                 plural->values[Plural::Other] = std::move(item);
                 break;
         }

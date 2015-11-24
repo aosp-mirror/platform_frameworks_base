@@ -711,6 +711,46 @@ bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* o
         }
     }
 
+    Maybe<int32_t> maybeMin, maybeMax;
+
+    if (Maybe<StringPiece16> maybeMinStr = xml::findAttribute(parser, u"min")) {
+        StringPiece16 minStr = util::trimWhitespace(maybeMinStr.value());
+        if (!minStr.empty()) {
+            android::Res_value value;
+            if (android::ResTable::stringToInt(minStr.data(), minStr.size(), &value)) {
+                maybeMin = static_cast<int32_t>(value.data);
+            }
+        }
+
+        if (!maybeMin) {
+            mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                         << "invalid 'min' value '" << minStr << "'");
+            return false;
+        }
+    }
+
+    if (Maybe<StringPiece16> maybeMaxStr = xml::findAttribute(parser, u"max")) {
+        StringPiece16 maxStr = util::trimWhitespace(maybeMaxStr.value());
+        if (!maxStr.empty()) {
+            android::Res_value value;
+            if (android::ResTable::stringToInt(maxStr.data(), maxStr.size(), &value)) {
+                maybeMax = static_cast<int32_t>(value.data);
+            }
+        }
+
+        if (!maybeMax) {
+            mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                         << "invalid 'max' value '" << maxStr << "'");
+            return false;
+        }
+    }
+
+    if ((maybeMin || maybeMax) && (typeMask & android::ResTable_map::TYPE_INTEGER) == 0) {
+        mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
+                     << "'min' and 'max' can only be used when format='integer'");
+        return false;
+    }
+
     struct SymbolComparator {
         bool operator()(const Attribute::Symbol& a, const Attribute::Symbol& b) {
             return a.symbol.name.value() < b.symbol.name.value();
@@ -794,6 +834,13 @@ bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* o
     std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(weak);
     attr->symbols = std::vector<Attribute::Symbol>(items.begin(), items.end());
     attr->typeMask = typeMask ? typeMask : uint32_t(android::ResTable_map::TYPE_ANY);
+    if (maybeMin) {
+        attr->minInt = maybeMin.value();
+    }
+
+    if (maybeMax) {
+        attr->maxInt = maybeMax.value();
+    }
     outResource->value = std::move(attr);
     return true;
 }

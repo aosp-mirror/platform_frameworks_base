@@ -61,7 +61,7 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
         if (iter != sr.entry->values.end() && iter->config == kDefaultConfig) {
             // This resource has an Attribute.
             if (Attribute* attr = valueCast<Attribute>(iter->value.get())) {
-                symbol->attribute = std::unique_ptr<Attribute>(attr->clone(nullptr));
+                symbol->attribute = util::make_unique<Attribute>(*attr);
             } else {
                 return {};
             }
@@ -76,7 +76,6 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
     }
     return symbol.get();
 }
-
 
 static std::shared_ptr<ISymbolTable::Symbol> lookupAttributeInTable(const android::ResTable& table,
                                                                     ResourceId id) {
@@ -103,29 +102,40 @@ static std::shared_ptr<ISymbolTable::Symbol> lookupAttributeInTable(const androi
 
     if (s->attribute) {
         for (size_t i = 0; i < (size_t) count; i++) {
-            if (!Res_INTERNALID(entry[i].map.name.ident)) {
-                android::ResTable::resource_name entryName;
-                if (!table.getResourceName(entry[i].map.name.ident, false, &entryName)) {
-                    table.unlockBag(entry);
-                    return nullptr;
+            const android::ResTable_map& mapEntry = entry[i].map;
+            if (Res_INTERNALID(mapEntry.name.ident)) {
+                switch (mapEntry.name.ident) {
+                case android::ResTable_map::ATTR_MIN:
+                    s->attribute->minInt = static_cast<int32_t>(mapEntry.value.data);
+                    break;
+                case android::ResTable_map::ATTR_MAX:
+                    s->attribute->maxInt = static_cast<int32_t>(mapEntry.value.data);
+                    break;
                 }
-
-                const ResourceType* parsedType = parseResourceType(
-                        StringPiece16(entryName.type, entryName.typeLen));
-                if (!parsedType) {
-                    table.unlockBag(entry);
-                    return nullptr;
-                }
-
-                Attribute::Symbol symbol;
-                symbol.symbol.name = ResourceNameRef(
-                        StringPiece16(entryName.package, entryName.packageLen),
-                        *parsedType,
-                        StringPiece16(entryName.name, entryName.nameLen)).toResourceName();
-                symbol.symbol.id = ResourceId(entry[i].map.name.ident);
-                symbol.value = entry[i].map.value.data;
-                s->attribute->symbols.push_back(std::move(symbol));
+                continue;
             }
+
+            android::ResTable::resource_name entryName;
+            if (!table.getResourceName(mapEntry.name.ident, false, &entryName)) {
+                table.unlockBag(entry);
+                return nullptr;
+            }
+
+            const ResourceType* parsedType = parseResourceType(
+                    StringPiece16(entryName.type, entryName.typeLen));
+            if (!parsedType) {
+                table.unlockBag(entry);
+                return nullptr;
+            }
+
+            Attribute::Symbol symbol;
+            symbol.symbol.name = ResourceName(
+                    StringPiece16(entryName.package, entryName.packageLen),
+                    *parsedType,
+                    StringPiece16(entryName.name, entryName.nameLen));
+            symbol.symbol.id = ResourceId(mapEntry.name.ident);
+            symbol.value = mapEntry.value.data;
+            s->attribute->symbols.push_back(std::move(symbol));
         }
     }
     table.unlockBag(entry);

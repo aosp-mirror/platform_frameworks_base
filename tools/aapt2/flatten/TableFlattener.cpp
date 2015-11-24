@@ -165,6 +165,18 @@ struct MapFlattenVisitor : public RawValueVisitor {
             flattenEntry(&key, &val);
         }
 
+        if (attr->minInt != std::numeric_limits<int32_t>::min()) {
+            Reference key(ResourceId{ ResTable_map::ATTR_MIN });
+            BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->minInt));
+            flattenEntry(&key, &val);
+        }
+
+        if (attr->maxInt != std::numeric_limits<int32_t>::max()) {
+            Reference key(ResourceId{ ResTable_map::ATTR_MAX });
+            BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->maxInt));
+            flattenEntry(&key, &val);
+        }
+
         for (Attribute::Symbol& s : attr->symbols) {
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, s.value);
             flattenEntry(&s.symbol, &val);

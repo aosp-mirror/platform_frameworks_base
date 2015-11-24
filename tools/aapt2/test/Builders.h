@@ -36,6 +36,10 @@ private:
 public:
     ResourceTableBuilder() = default;
 
+    StringPool* getStringPool() {
+        return &mTable->stringPool;
+    }
+
     ResourceTableBuilder& setPackageId(const StringPiece16& packageName, uint8_t id) {
         ResourceTablePackage* package = mTable->createPackage(packageName, id);
         assert(package);

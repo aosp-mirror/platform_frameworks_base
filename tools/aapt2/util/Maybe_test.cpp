@@ -119,4 +119,14 @@ TEST(MaybeTest, MoveAssign) {
     }
 }
 
+TEST(MaybeTest, Equality) {
+    Maybe<int> a = 1;
+    Maybe<int> b = 1;
+    Maybe<int> c;
+
+    EXPECT_EQ(a, b);
+    EXPECT_EQ(b, a);
+    EXPECT_NE(a, c);
+}
+
 } // namespace aapt
