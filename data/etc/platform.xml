@@ -44,6 +44,7 @@
 
     <permission name="android.permission.BLUETOOTH_STACK" >
         <group gid="net_bt_stack" />
+        <group gid="wakelock" />
     </permission>
 
     <permission name="android.permission.NET_TUNNELING" >
