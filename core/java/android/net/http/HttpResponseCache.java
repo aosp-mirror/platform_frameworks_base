@@ -36,7 +36,8 @@ import java.util.Map;
  * saving time and bandwidth. This class supports {@link
  * java.net.HttpURLConnection} and {@link javax.net.ssl.HttpsURLConnection};
  * there is no platform-provided cache for {@code DefaultHttpClient} or
- * {@code AndroidHttpClient}.
+ * {@code AndroidHttpClient}. Installation and instances are thread
+ * safe.
  *
  * <h3>Installing an HTTP response cache</h3>
  * Enable caching of all of your application's HTTP requests by installing the
