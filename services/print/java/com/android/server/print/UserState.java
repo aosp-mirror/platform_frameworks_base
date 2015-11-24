@@ -343,9 +343,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     public void createPrinterDiscoverySession(IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
-            if (mActiveServices.isEmpty()) {
-                return;
-            }
+
             if (mPrinterDiscoverySession == null) {
                 // If we do not have a session, tell all service to create one.
                 mPrinterDiscoverySession = new PrinterDiscoverySessionMediator(mContext) {
