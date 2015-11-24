@@ -5376,6 +5376,10 @@ public final class ViewRootImpl implements ViewParent,
                 if (what == DragEvent.ACTION_DRAG_ENDED) {
                     setLocalDragState(null);
                     mAttachInfo.mDragToken = null;
+                    if (mAttachInfo.mDragSurface != null) {
+                        mAttachInfo.mDragSurface.release();
+                        mAttachInfo.mDragSurface = null;
+                    }
                 }
             }
         }
