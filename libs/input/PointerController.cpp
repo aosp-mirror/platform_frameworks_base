@@ -91,7 +91,14 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 
     mLocked.buttonState = 0;
 
+    mPolicy->loadPointerIcon(&mLocked.pointerIcon);
+
     loadResources();
+
+    if (mLocked.pointerIcon.isValid()) {
+        mLocked.pointerIconChanged = true;
+        updatePointerLocked();
+    }
 }
 
 PointerController::~PointerController() {
@@ -325,6 +332,23 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
     }
 }
 
+void PointerController::reloadPointerResources() {
+    AutoMutex _l(mLock);
+
+    loadResources();
+
+    if (mLocked.presentation == PRESENTATION_POINTER) {
+        mLocked.additionalMouseResources.clear();
+        mLocked.animationResources.clear();
+        mPolicy->loadPointerIcon(&mLocked.pointerIcon);
+        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
+                                              &mLocked.animationResources);
+    }
+
+    mLocked.presentationChanged = true;
+    updatePointerLocked();
+}
+
 void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_t orientation) {
     AutoMutex _l(mLock);
 
@@ -413,15 +437,6 @@ void PointerController::updatePointerShape(int32_t iconId) {
         mLocked.presentationChanged = true;
         updatePointerLocked();
     }
-}
-
-void PointerController::setPointerIcon(const SpriteIcon& icon) {
-    AutoMutex _l(mLock);
-
-    mLocked.pointerIcon = icon.copy();
-    mLocked.pointerIconChanged = true;
-
-    updatePointerLocked();
 }
 
 void PointerController::handleMessage(const Message& message) {

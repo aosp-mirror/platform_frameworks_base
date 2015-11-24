@@ -4920,6 +4920,15 @@ public final class Settings {
                 "accessibility_autoclick_delay";
 
         /**
+         * Whether or not larger size icons are used for the pointer of mouse/trackpad for
+         * accessibility.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String ACCESSIBILITY_LARGE_POINTER_ICON =
+                "accessibility_large_pointer_icon";
+
+        /**
          * The timeout for considering a press to be a long press in milliseconds.
          * @hide
          */

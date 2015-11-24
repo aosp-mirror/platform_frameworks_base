@@ -62,6 +62,7 @@ protected:
     virtual ~PointerControllerPolicyInterface() { }
 
 public:
+    virtual void loadPointerIcon(SpriteIcon* icon) = 0;
     virtual void loadPointerResources(PointerResources* outResources) = 0;
     virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
             std::map<int32_t, PointerAnimation>* outAnimationResources) = 0;
@@ -105,8 +106,8 @@ public:
 
     void updatePointerShape(int32_t iconId);
     void setDisplayViewport(int32_t width, int32_t height, int32_t orientation);
-    void setPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
+    void reloadPointerResources();
 
 private:
     static const size_t MAX_RECYCLED_SPRITES = 12;

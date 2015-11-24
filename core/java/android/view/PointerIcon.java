@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.os.UserHandle;
+import android.provider.Settings;
 import com.android.internal.util.XmlUtils;
 
 import android.annotation.XmlRes;
@@ -199,9 +201,14 @@ public final class PointerIcon implements Parcelable {
             styleIndex = getSystemIconStyleIndex(STYLE_DEFAULT);
         }
 
+        int accessibilityConfig = Settings.Secure.getIntForUser(
+                    context.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
+                    0, UserHandle.USER_CURRENT);
+        int defStyle = (accessibilityConfig == 1) ?
+                com.android.internal.R.style.LargePointer : com.android.internal.R.style.Pointer;
         TypedArray a = context.obtainStyledAttributes(null,
                 com.android.internal.R.styleable.Pointer,
-                com.android.internal.R.attr.pointerStyle, 0);
+                0, defStyle);
         int resourceId = a.getResourceId(styleIndex, -1);
         a.recycle();
 

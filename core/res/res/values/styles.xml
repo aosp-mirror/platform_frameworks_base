@@ -1368,6 +1368,42 @@ please see styles_device_defaults.xml.
         <item name="pointerIconGrabbing">@drawable/pointer_grabbing_icon</item>
     </style>
 
+    <style name="LargePointer">
+        <item name="pointerIconArrow">@drawable/pointer_arrow_large_icon</item>
+        <item name="pointerIconSpotHover">@drawable/pointer_spot_hover_icon</item>
+        <item name="pointerIconSpotTouch">@drawable/pointer_spot_touch_icon</item>
+        <item name="pointerIconSpotAnchor">@drawable/pointer_spot_anchor_icon</item>
+        <item name="pointerIconHand">@drawable/pointer_hand_large_icon</item>
+        <item name="pointerIconContextMenu">@drawable/pointer_context_menu_large_icon</item>
+        <item name="pointerIconHelp">@drawable/pointer_help_large_icon</item>
+        <!-- TODO: create large wait icon. -->
+        <item name="pointerIconWait">@drawable/pointer_wait_icon</item>
+        <item name="pointerIconCell">@drawable/pointer_cell_large_icon</item>
+        <item name="pointerIconCrosshair">@drawable/pointer_crosshair_large_icon</item>
+        <item name="pointerIconText">@drawable/pointer_text_large_icon</item>
+        <item name="pointerIconVerticalText">@drawable/pointer_vertical_text_large_icon</item>
+        <item name="pointerIconAlias">@drawable/pointer_alias_large_icon</item>
+        <item name="pointerIconCopy">@drawable/pointer_copy_large_icon</item>
+        <item name="pointerIconAllScroll">@drawable/pointer_all_scroll_large_icon</item>
+        <item name="pointerIconNodrop">@drawable/pointer_nodrop_large_icon</item>
+        <item name="pointerIconHorizontalDoubleArrow">
+            @drawable/pointer_horizontal_double_arrow_large_icon
+        </item>
+        <item name="pointerIconVerticalDoubleArrow">
+            @drawable/pointer_vertical_double_arrow_large_icon
+        </item>
+        <item name="pointerIconTopRightDiagonalDoubleArrow">
+            @drawable/pointer_top_right_diagonal_double_arrow_large_icon
+        </item>
+        <item name="pointerIconTopLeftDiagonalDoubleArrow">
+            @drawable/pointer_top_left_diagonal_double_arrow_large_icon
+        </item>
+        <item name="pointerIconZoomIn">@drawable/pointer_zoom_in_large_icon</item>
+        <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_large_icon</item>
+        <item name="pointerIconGrab">@drawable/pointer_grab_large_icon</item>
+        <item name="pointerIconGrabbing">@drawable/pointer_grabbing_large_icon</item>
+    </style>
+
     <!-- Wifi dialog styles -->
     <!-- @hide -->
     <style name="wifi_item">

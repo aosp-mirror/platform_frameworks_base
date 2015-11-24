@@ -207,6 +207,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native String nativeDump(long ptr);
     private static native void nativeMonitor(long ptr);
     private static native void nativeSetPointerIconShape(long ptr, int iconId);
+    private static native void nativeReloadPointerIcons(long ptr);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -306,12 +307,14 @@ public class InputManagerService extends IInputManager.Stub
 
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
+        registerAccessibilityLargePointerSettingObserver();
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 updatePointerSpeedFromSettings();
                 updateShowTouchesFromSettings();
+                nativeReloadPointerIcons(mPtr);
             }
         }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
 
@@ -1348,6 +1351,17 @@ public class InputManagerService extends IInputManager.Stub
                 }, UserHandle.USER_ALL);
     }
 
+    private void registerAccessibilityLargePointerSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        nativeReloadPointerIcons(mPtr);
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
     private int getShowTouchesSetting(int defaultValue) {
         int result = defaultValue;
         try {
@@ -1417,11 +1431,11 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-  // Binder call
-  @Override
-  public void setPointerIconShape(int iconId) {
-      nativeSetPointerIconShape(mPtr, iconId);
-  }
+    // Binder call
+    @Override
+    public void setPointerIconShape(int iconId) {
+        nativeSetPointerIconShape(mPtr, iconId);
+    }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

@@ -205,6 +205,7 @@ public:
     void setInteractive(bool interactive);
     void reloadCalibration();
     void setPointerIconShape(int32_t iconId);
+    void reloadPointerIcons();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -242,6 +243,7 @@ public:
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
+    virtual void loadPointerIcon(SpriteIcon* icon);
     virtual void loadPointerResources(PointerResources* outResources);
     virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
             std::map<int32_t, PointerAnimation>* outAnimationResources);
@@ -476,22 +478,6 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
                 v.logicalRight - v.logicalLeft,
                 v.logicalBottom - v.logicalTop,
                 v.orientation);
-
-        JNIEnv* env = jniEnv();
-        jobject pointerIconObj = env->CallObjectMethod(mServiceObj,
-                gServiceClassInfo.getPointerIcon);
-        if (!checkAndClearExceptionFromCallback(env, "getPointerIcon")) {
-            PointerIcon pointerIcon;
-            status_t status = android_view_PointerIcon_load(env, pointerIconObj,
-                    mContextObj, &pointerIcon);
-            if (!status && !pointerIcon.isNullIcon()) {
-                controller->setPointerIcon(SpriteIcon(pointerIcon.bitmap,
-                        pointerIcon.hotSpotX, pointerIcon.hotSpotY));
-            } else {
-                controller->setPointerIcon(SpriteIcon());
-            }
-            env->DeleteLocalRef(pointerIconObj);
-        }
 
         updateInactivityTimeoutLocked(controller);
     }
@@ -789,12 +775,19 @@ void NativeInputManager::reloadCalibration() {
 }
 
 void NativeInputManager::setPointerIconShape(int32_t iconId) {
-  AutoMutex _l(mLock);
-  sp<PointerController> controller = mLocked.pointerController.promote();
-  if (controller != NULL) {
-        // Use 0 (the default icon) for ARROW.
+    AutoMutex _l(mLock);
+    sp<PointerController> controller = mLocked.pointerController.promote();
+    if (controller != NULL) {
         controller->updatePointerShape(iconId);
-  }
+    }
+}
+
+void NativeInputManager::reloadPointerIcons() {
+    AutoMutex _l(mLock);
+    sp<PointerController> controller = mLocked.pointerController.promote();
+    if (controller != NULL) {
+        controller->reloadPointerResources();
+    }
 }
 
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
@@ -1034,6 +1027,25 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
         result = false;
     }
     return result;
+}
+
+void NativeInputManager::loadPointerIcon(SpriteIcon* icon) {
+    JNIEnv* env = jniEnv();
+
+    ScopedLocalRef<jobject> pointerIconObj(env, env->CallObjectMethod(
+            mServiceObj, gServiceClassInfo.getPointerIcon));
+    if (checkAndClearExceptionFromCallback(env, "getPointerIcon")) {
+        return;
+    }
+
+    PointerIcon pointerIcon;
+    status_t status = android_view_PointerIcon_load(env, pointerIconObj.get(),
+                                                    mContextObj, &pointerIcon);
+    if (!status && !pointerIcon.isNullIcon()) {
+        *icon = SpriteIcon(pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
+    } else {
+        *icon = SpriteIcon();
+    }
 }
 
 void NativeInputManager::loadPointerResources(PointerResources* outResources) {
@@ -1420,6 +1432,11 @@ static void nativeSetPointerIconShape(JNIEnv* /* env */, jclass /* clazz */, jlo
     im->setPointerIconShape(iconId);
 }
 
+static void nativeReloadPointerIcons(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->reloadPointerIcons();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -1480,6 +1497,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeMonitor },
     { "nativeSetPointerIconShape", "(JI)V",
             (void*) nativeSetPointerIconShape },
+    { "nativeReloadPointerIcons", "(J)V",
+            (void*) nativeReloadPointerIcons },
 };
 
 #define FIND_CLASS(var, className) \
