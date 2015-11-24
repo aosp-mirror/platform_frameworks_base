@@ -52,7 +52,7 @@ public class EventLog {
     private static HashMap<String, Integer> sTagCodes = null;
     private static HashMap<Integer, String> sTagNames = null;
 
-    /** A previously logged event read from the logs. */
+    /** A previously logged event read from the logs. Instances are thread safe. */
     public static final class Event {
         private final ByteBuffer mBuffer;
 
