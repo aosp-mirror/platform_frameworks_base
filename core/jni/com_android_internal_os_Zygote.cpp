@@ -605,10 +605,32 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint debug_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose, jstring instructionSet, jstring appDataDir) {
-    // Grant CAP_WAKE_ALARM to the Bluetooth process.
     jlong capabilities = 0;
+
+    // Grant CAP_WAKE_ALARM to the Bluetooth process.
     if (uid == AID_BLUETOOTH) {
-        capabilities |= (1LL << CAP_WAKE_ALARM);
+      capabilities |= (1LL << CAP_WAKE_ALARM);
+    }
+
+    // Grant CAP_BLOCK_SUSPEND to processes that belong to GID "wakelock"
+    bool gid_wakelock_found = false;
+    if (gid == AID_WAKELOCK) {
+      gid_wakelock_found = true;
+    } else if (gids != NULL) {
+      jsize gids_num = env->GetArrayLength(gids);
+      ScopedIntArrayRO ar(env, gids);
+      if (ar.get() == NULL) {
+        RuntimeAbort(env, __LINE__, "Bad gids array");
+      }
+      for (int i = 0; i < gids_num; i++) {
+        if (ar[i] == AID_WAKELOCK) {
+          gid_wakelock_found = true;
+          break;
+        }
+      }
+    }
+    if (gid_wakelock_found) {
+      capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
