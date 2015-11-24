@@ -43,9 +43,9 @@ import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
+import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
-import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
@@ -58,6 +58,7 @@ import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
+import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -401,13 +402,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             mRecentsView.disableLayersForOneFrame();
         }
 
-        if (launchState.startHidden) {
-            launchState.startHidden = false;
-            mRecentsView.setStackViewVisibility(View.INVISIBLE);
-        } else {
-            mRecentsView.setStackViewVisibility(View.VISIBLE);
-        }
-
         // Notify that recents is now visible
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
@@ -630,13 +624,17 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
-        mRecentsView.setStackViewVisibility(View.VISIBLE);
+        EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(true));
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+        mRecentsView.invalidate();
     }
 
     public final void onBusEvent(ExitRecentsWindowFirstAnimationFrameEvent event) {
-        mRecentsView.setStackViewVisibility(View.INVISIBLE);
+        if (mRecentsView.isLastTaskLaunchedFreeform()) {
+            EventBus.getDefault().send(new UpdateFreeformTaskViewVisibilityEvent(false));
+        }
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
+        mRecentsView.invalidate();
     }
 
     public final void onBusEvent(CancelEnterRecentsWindowAnimationEvent event) {

@@ -881,8 +881,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         launchState.launchedNumVisibleTasks = vr.numVisibleTasks;
         launchState.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
         launchState.launchedHasConfigurationChanged = false;
-        launchState.startHidden = topTask != null && topTask.stackId == FREEFORM_WORKSPACE_STACK_ID
-                || mDraggingInRecents;
+        launchState.launchedViaDragGesture = mDraggingInRecents;
 
         Intent intent = new Intent();
         intent.setClassName(RECENTS_PACKAGE, RECENTS_ACTIVITY);

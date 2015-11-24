@@ -48,6 +48,7 @@ import com.android.systemui.recents.events.component.RecentsVisibilityChangedEve
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
+import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
@@ -298,6 +299,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         mStackScroller.reset();
         mLayoutAlgorithm.reset();
+        requestLayout();
     }
 
     /** Requests that the views be synchronized with the model */
@@ -985,9 +987,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean occludesLaunchTarget = (launchTargetTask != null) &&
-                    launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
-            tv.prepareEnterRecentsAnimation(task.isLaunchTarget, occludesLaunchTarget,
+            boolean hideTask = false;
+            boolean occludesLaunchTarget = false;
+            if (launchTargetTask != null) {
+                occludesLaunchTarget = launchTargetTask.group.isTaskAboveTask(task,
+                        launchTargetTask);
+                hideTask = SystemServicesProxy.isFreeformStack(launchTargetTask.key.stackId) &&
+                        SystemServicesProxy.isFreeformStack(task.key.stackId);
+            }
+            tv.prepareEnterRecentsAnimation(task.isLaunchTarget, hideTask, occludesLaunchTarget,
                     offscreenY);
         }
 
@@ -1466,6 +1474,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         mEnterAnimationComplete = true;
+    }
+
+    public final void onBusEvent(UpdateFreeformTaskViewVisibilityEvent event) {
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = 0; i < taskViewCount; i++) {
+            TaskView tv = taskViews.get(i);
+            Task task = tv.getTask();
+            if (SystemServicesProxy.isFreeformStack(task.key.stackId)) {
+                tv.setVisibility(event.visible ? View.VISIBLE : View.INVISIBLE);
+            }
+        }
     }
 
     /**
