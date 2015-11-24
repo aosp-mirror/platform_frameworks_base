@@ -420,7 +420,7 @@ final class Session extends IWindowSession.Stub
                 }
 
                 mService.mDragState.mDragResult = false;
-                mService.mDragState.endDragLw();
+                mService.mDragState.cancelDragLw();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
