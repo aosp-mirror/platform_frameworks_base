@@ -46,7 +46,6 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import javax.net.ssl.DistinguishedNameParser;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
