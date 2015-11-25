@@ -197,7 +197,7 @@ public:
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
 
     static void drawTextToCanvas(TestCanvas* canvas, const char* text,
-            const SkPaint& inPaint, float x, float y);
+            const SkPaint& paint, float x, float y);
 
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {

@@ -184,6 +184,7 @@ TEST(OpReorderer, textStrikethroughBatching) {
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(20);
         textPaint.setStrikeThruText(true);
+        textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < LOOPS; i++) {
             TestUtils::drawTextToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
         }
