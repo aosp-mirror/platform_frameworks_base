@@ -1225,7 +1225,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void unbindCurrentClientLocked(
             /* @InputMethodClient.UnbindReason */ final int unbindClientReason) {
         if (mCurClient != null) {
-            if (DEBUG) Slog.v(TAG, "unbindCurrentInputLocked: client = "
+            if (DEBUG) Slog.v(TAG, "unbindCurrentInputLocked: client="
                     + mCurClient.client.asBinder());
             if (mBoundToMethod) {
                 mBoundToMethod = false;
@@ -1290,8 +1290,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurId, mCurSeq, mCurUserActionNotificationSequenceNumber);
     }
 
-    InputBindResult startInputLocked(IInputMethodClient client,
-            IInputContext inputContext, EditorInfo attribute, int controlFlags) {
+    InputBindResult startInputLocked(
+            /* @InputMethodClient.StartInputReason */ final int startInputReason,
+            IInputMethodClient client, IInputContext inputContext, EditorInfo attribute,
+            int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
@@ -1320,8 +1322,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return startInputUncheckedLocked(cs, inputContext, attribute, controlFlags);
     }
 
-    InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
-            IInputContext inputContext, @NonNull EditorInfo attribute, int controlFlags) {
+    InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
+            @NonNull EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
@@ -1340,7 +1342,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // If the client is changing, we need to switch over to the new
             // one.
             unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_SWITCH_CLIENT);
-            if (DEBUG) Slog.v(TAG, "switching to client: client = "
+            if (DEBUG) Slog.v(TAG, "switching to client: client="
                     + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
 
             // If the screen is on, inform the new client it is active
@@ -1442,15 +1444,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public InputBindResult startInput(IInputMethodClient client,
-            IInputContext inputContext, EditorInfo attribute, int controlFlags) {
+    public InputBindResult startInput(
+            /* @InputMethodClient.StartInputReason */ final int startInputReason,
+            IInputMethodClient client, IInputContext inputContext, EditorInfo attribute,
+            int controlFlags) {
         if (!calledFromValidUser()) {
             return null;
         }
         synchronized (mMethodMap) {
+            if (DEBUG) {
+                Slog.v(TAG, "startInput: reason="
+                        + InputMethodClient.getStartInputReason(startInputReason)
+                        + " client = " + client.asBinder()
+                        + " inputContext=" + inputContext
+                        + " attribute=" + attribute
+                        + " controlFlags=#" + Integer.toHexString(controlFlags));
+            }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return startInputLocked(client, inputContext, attribute, controlFlags);
+                return startInputLocked(startInputReason, client, inputContext, attribute,
+                        controlFlags);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2151,17 +2164,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public InputBindResult windowGainedFocus(IInputMethodClient client, IBinder windowToken,
-            int controlFlags, int softInputMode, int windowFlags,
-            EditorInfo attribute, IInputContext inputContext) {
+    public InputBindResult windowGainedFocus(
+            /* @InputMethodClient.StartInputReason */ final int startInputReason,
+            IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
+            int windowFlags, EditorInfo attribute, IInputContext inputContext) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
-
         InputBindResult res = null;
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mMethodMap) {
-                if (DEBUG) Slog.v(TAG, "windowGainedFocus: " + client.asBinder()
+                if (DEBUG) Slog.v(TAG, "windowGainedFocus: reason="
+                        + InputMethodClient.getStartInputReason(startInputReason)
+                        + " client=" + client.asBinder()
+                        + " inputContext=" + inputContext
+                        + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags)
                         + " softInputMode=#" + Integer.toHexString(softInputMode)
                         + " windowFlags=#" + Integer.toHexString(windowFlags));

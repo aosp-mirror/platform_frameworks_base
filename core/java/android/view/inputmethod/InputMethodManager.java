@@ -436,7 +436,8 @@ public final class InputMethodManager {
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                     }
-                    startInputInner(null, 0, 0, 0);
+                    startInputInner(InputMethodClient.START_INPUT_REASON_BOUND_TO_IMMS,
+                            null, 0, 0, 0);
                     return;
                 }
                 case MSG_UNBIND: {
@@ -461,7 +462,9 @@ public final class InputMethodManager {
                         startInput = mActive;
                     }
                     if (startInput) {
-                        startInputInner(null, 0, 0, 0);
+                        startInputInner(
+                                InputMethodClient.START_INPUT_REASON_UNBOUND_FROM_IMMS, null, 0, 0,
+                                0);
                     }
                     return;
                 }
@@ -494,7 +497,10 @@ public final class InputMethodManager {
                             // In that case, we really should not call
                             // mServedInputConnection.finishComposingText.
                             if (checkFocusNoStartInput(mHasBeenInactive, false)) {
-                                startInputInner(null, 0, 0, 0);
+                                final int reason = active ?
+                                        InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS :
+                                        InputMethodClient.START_INPUT_REASON_DEACTIVATED_BY_IMMS;
+                                startInputInner(reason, null, 0, 0, 0);
                             }
                         }
                     }
@@ -1118,18 +1124,23 @@ public final class InputMethodManager {
             
             mServedConnecting = true;
         }
-        
-        startInputInner(null, 0, 0, 0);
+
+        startInputInner(InputMethodClient.START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API, null, 0,
+                0, 0);
     }
-    
-    boolean startInputInner(IBinder windowGainingFocus, int controlFlags, int softInputMode,
+
+    boolean startInputInner(@InputMethodClient.StartInputReason final int startInputReason,
+            IBinder windowGainingFocus, int controlFlags, int softInputMode,
             int windowFlags) {
         final View view;
         synchronized (mH) {
             view = mServedView;
             
             // Make sure we have a window token for the served view.
-            if (DEBUG) Log.v(TAG, "Starting input: view=" + view);
+            if (DEBUG) {
+                Log.v(TAG, "Starting input: view=" + view +
+                        " reason=" + InputMethodClient.getStartInputReason(startInputReason));
+            }
             if (view == null) {
                 if (DEBUG) Log.v(TAG, "ABORT input: no served view!");
                 return false;
@@ -1157,7 +1168,7 @@ public final class InputMethodManager {
             vh.post(new Runnable() {
                 @Override
                 public void run() {
-                    startInputInner(null, 0, 0, 0);
+                    startInputInner(startInputReason, null, 0, 0, 0);
                 }
             });
             return false;
@@ -1221,11 +1232,11 @@ public final class InputMethodManager {
                         + Integer.toHexString(controlFlags));
                 InputBindResult res;
                 if (windowGainingFocus != null) {
-                    res = mService.windowGainedFocus(mClient, windowGainingFocus,
+                    res = mService.windowGainedFocus(startInputReason, mClient, windowGainingFocus,
                             controlFlags, softInputMode, windowFlags,
                             tba, servedContext);
                 } else {
-                    res = mService.startInput(mClient,
+                    res = mService.startInput(startInputReason, mClient,
                             servedContext, tba, controlFlags);
                 }
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
@@ -1352,7 +1363,7 @@ public final class InputMethodManager {
      */
     public void checkFocus() {
         if (checkFocusNoStartInput(false, true)) {
-            startInputInner(null, 0, 0, 0);
+            startInputInner(InputMethodClient.START_INPUT_REASON_CHECK_FOCUS, null, 0, 0, 0);
         }
     }
 
@@ -1440,8 +1451,8 @@ public final class InputMethodManager {
             // should be done in conjunction with telling the system service
             // about the window gaining focus, to help make the transition
             // smooth.
-            if (startInputInner(rootView.getWindowToken(),
-                    controlFlags, softInputMode, windowFlags)) {
+            if (startInputInner(InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN,
+                    rootView.getWindowToken(), controlFlags, softInputMode, windowFlags)) {
                 return;
             }
         }
@@ -1451,8 +1462,10 @@ public final class InputMethodManager {
         synchronized (mH) {
             try {
                 if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
-                mService.windowGainedFocus(mClient, rootView.getWindowToken(),
-                        controlFlags, softInputMode, windowFlags, null, null);
+                mService.windowGainedFocus(
+                        InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
+                        rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
+                        null);
             } catch (RemoteException e) {
             }
         }
