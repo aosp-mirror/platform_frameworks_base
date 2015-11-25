@@ -27,9 +27,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="top"
-            android:layout_marginStart="@dimen/notification_content_margin_start"
-            android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:paddingStart="@dimen/notification_content_margin_start"
+            android:paddingEnd="@dimen/notification_content_margin_end"
             android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:clipToPadding="false"
             android:orientation="vertical"
             >
         <LinearLayout
@@ -56,18 +57,9 @@
                 android:layout_height="1dp"
                 android:layout_marginStart="-16dp"
                 android:layout_marginEnd="-16dp"
-                android:clipChildren="false"
                 android:id="@+id/action_divider"
                 android:visibility="gone"
                 android:background="@drawable/notification_template_divider" />
-        <include
-                layout="@layout/notification_material_action_list"
-                android:id="@+id/actions"
-                android:layout_marginStart="-16dp"
-                android:layout_marginEnd="-16dp"
-                android:clipChildren="false"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
+        <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
 </FrameLayout>
