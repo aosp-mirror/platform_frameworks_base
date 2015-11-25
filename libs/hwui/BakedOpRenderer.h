@@ -91,21 +91,6 @@ private:
     const LightInfo mLightInfo;
 };
 
-/**
- * Provides all "onBitmapOp(...)" style static methods for every op type, which convert the
- * RecordedOps and their state to Glops, and renders them with the provided BakedOpRenderer.
- *
- * This dispatcher is separate from the renderer so that the dispatcher / renderer interaction is
- * minimal through public BakedOpRenderer APIs.
- */
-class BakedOpDispatcher {
-public:
-    // Declares all "onBitmapOp(...)" style methods for every op type
-#define DISPATCH_METHOD(Type) \
-        static void on##Type(BakedOpRenderer& renderer, const Type& op, const BakedOpState& state);
-    MAP_OPS(DISPATCH_METHOD);
-};
-
 }; // namespace uirenderer
 }; // namespace android
 
