@@ -761,7 +761,7 @@ public class EventBus extends BroadcastReceiver {
         } catch (IllegalAccessException e) {
             Log.e(TAG, "Failed to invoke method", e.getCause());
         } catch (InvocationTargetException e) {
-            Log.e(TAG, "Failed to invoke method", e.getCause());
+            throw new RuntimeException("Failed to invoke method", e);
         }
     }
 

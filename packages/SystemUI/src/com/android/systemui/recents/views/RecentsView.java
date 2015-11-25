@@ -483,7 +483,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     public final void onBusEvent(DraggingInRecentsEvent event) {
-        setTranslationY(event.distanceFromTop - mTaskStackView.getTaskViews().get(0).getY());
+        if (mTaskStackView.getTaskViews().size() > 0) {
+            setTranslationY(event.distanceFromTop - mTaskStackView.getTaskViews().get(0).getY());
+        }
     }
 
     public final void onBusEvent(DraggingInRecentsEndedEvent event) {
