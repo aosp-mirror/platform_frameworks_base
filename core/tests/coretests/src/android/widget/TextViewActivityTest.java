@@ -211,4 +211,40 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('r') + 1));
         onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijk\nlmn\nopqr"));
     }
+
+    @SmallTest
+    public void testSelectionHandles_doesNotPassAnotherHandle() throws Exception {
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('l')));
+        onView(withId(R.id.textview)).check(hasSelection("g"));
+
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasSelection("e"));
+    }
+
+    @SmallTest
+    public void testSelectionHandles_doesNotPassAnotherHandle_multiLine() throws Exception {
+        final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n" + "opqr";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('r') + 1));
+        onView(withId(R.id.textview)).check(hasSelection("k"));
+
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasSelection("h"));
+    }
 }
