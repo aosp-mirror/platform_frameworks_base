@@ -144,6 +144,7 @@
             android:name=".BugreportReceiver"
             android:permission="android.permission.DUMP">
             <intent-filter>
+                <action android:name="android.intent.action.BUGREPORT_STARTED" />
                 <action android:name="android.intent.action.BUGREPORT_FINISHED" />
             </intent-filter>
         </receiver>

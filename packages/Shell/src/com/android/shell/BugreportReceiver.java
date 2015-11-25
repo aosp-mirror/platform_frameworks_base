@@ -17,6 +17,8 @@
 package com.android.shell;
 
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
+import static com.android.shell.BugreportProgressService.EXTRA_ORIGINAL_INTENT;
+import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
 import static com.android.shell.BugreportProgressService.getFileExtra;
 
 import java.io.File;
@@ -50,13 +52,16 @@ public class BugreportReceiver extends BroadcastReceiver {
         // Clean up older bugreports in background
         cleanupOldFiles(intent);
 
-        // Delegate to service.
+        // Delegate intent handling to service.
         Intent serviceIntent = new Intent(context, BugreportProgressService.class);
-        serviceIntent.putExtras(intent.getExtras());
+        serviceIntent.putExtra(EXTRA_ORIGINAL_INTENT, intent);
         context.startService(serviceIntent);
     }
 
     private void cleanupOldFiles(Intent intent) {
+        if (!INTENT_BUGREPORT_FINISHED.equals(intent.getAction())) {
+            return;
+        }
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         final PendingResult result = goAsync();
         new AsyncTask<Void, Void, Void>() {
