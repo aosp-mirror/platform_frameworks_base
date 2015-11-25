@@ -276,7 +276,9 @@ LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuimicro
 LOCAL_MODULE_STEM_64 := hwuimicro64
 LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
-LOCAL_CFLAGS := $(hwui_cflags)
+LOCAL_CFLAGS := \
+        $(hwui_cflags) \
+        -DHWUI_NULL_GPU
 LOCAL_C_INCLUDES += bionic/benchmarks/
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_null_gpu

@@ -121,7 +121,7 @@ public:
     }
 
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(RenderProperties& props, TestCanvas& canvas)> setup = nullptr) {
+            std::function<void(RenderProperties& props, TestCanvas& canvas)> setup) {
 #if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
@@ -140,22 +140,6 @@ public:
         return node;
     }
 
-    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(RenderProperties& props)> setup) {
-        return createNode(left, top, right, bottom,
-                [&setup](RenderProperties& props, TestCanvas& canvas) {
-            setup(props);
-        });
-    }
-
-    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(TestCanvas& canvas)> setup) {
-        return createNode(left, top, right, bottom,
-                [&setup](RenderProperties& props, TestCanvas& canvas) {
-            setup(canvas);
-        });
-    }
-
     static void recordNode(RenderNode& node,
             std::function<void(TestCanvas&)> contentCallback) {
        TestCanvas canvas(node.stagingProperties().getWidth(),
@@ -164,6 +148,13 @@ public:
        node.setStagingDisplayList(canvas.finishRecording());
     }
 
+    /**
+     * Forces a sync of a tree of RenderNode, such that every descendant will have its staging
+     * properties and DisplayList moved to the render copies.
+     *
+     * Note: does not check dirtiness bits, so any non-staging DisplayLists will be discarded.
+     * For this reason, this should generally only be called once on a tree.
+     */
     static void syncHierarchyPropertiesAndDisplayList(sp<RenderNode>& node) {
         syncHierarchyPropertiesAndDisplayListImpl(node.get());
     }

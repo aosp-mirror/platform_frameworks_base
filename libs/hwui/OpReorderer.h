@@ -124,9 +124,6 @@ public:
             uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter);
 
-    OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList,
-            const Vector3& lightCenter);
-
     virtual ~OpReorderer() {}
 
     /**
@@ -202,15 +199,17 @@ private:
         return BakedOpState::tryConstruct(mAllocator, *mCanvasState.currentSnapshot(), recordedOp);
     }
 
-    // should always be surrounded by a save/restore pair
+    // should always be surrounded by a save/restore pair, and not called if DisplayList is null
     void deferNodePropsAndOps(RenderNode& node);
-
-    void deferShadow(const RenderNodeOp& casterOp);
-
-    void deferDisplayList(const DisplayList& displayList);
 
     template <typename V>
     void defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes);
+
+    void deferShadow(const RenderNodeOp& casterOp);
+
+    void deferProjectedChildren(const RenderNode& renderNode);
+
+    void deferNodeOps(const RenderNode& renderNode);
 
     void deferRenderNodeOp(const RenderNodeOp& op);
 

@@ -55,6 +55,7 @@ class DeferredDisplayList;
 class DeferredLayerUpdater;
 class DisplayListOp;
 class DrawOp;
+class DrawRenderNodeOp;
 class RenderNode;
 class StateOp;
 

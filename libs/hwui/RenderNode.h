@@ -51,20 +51,22 @@ class OpReorderer;
 class Rect;
 class SkiaShader;
 
-
 #if HWUI_NEW_OPS
 class OffscreenBuffer;
+struct RenderNodeOp;
 typedef OffscreenBuffer layer_t;
+typedef RenderNodeOp renderNodeOp_t;
 #else
 class Layer;
 typedef Layer layer_t;
+typedef DrawRenderNodeOp renderNodeOp_t;
 #endif
 
 class ClipRectOp;
+class DrawRenderNodeOp;
 class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
-class DrawRenderNodeOp;
 class TreeInfo;
 
 namespace proto {
@@ -85,6 +87,7 @@ class RenderNode;
  */
 class RenderNode : public VirtualLightRefBase {
 friend class TestUtils; // allow TestUtils to access syncDisplayList / syncProperties
+friend class OpReorderer;
 public:
     enum DirtyPropertyMask {
         GENERIC         = 1 << 1,
@@ -221,8 +224,8 @@ private:
         PositiveZChildren
     };
 
-    void computeOrderingImpl(DrawRenderNodeOp* opState,
-            std::vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
+    void computeOrderingImpl(renderNodeOp_t* opState,
+            std::vector<renderNodeOp_t*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
     template <class T>
@@ -305,7 +308,7 @@ private:
      */
 
     // for projection surfaces, contains a list of all children items
-    std::vector<DrawRenderNodeOp*> mProjectedNodes;
+    std::vector<renderNodeOp_t*> mProjectedNodes;
 
     // How many references our parent(s) have to us. Typically this should alternate
     // between 2 and 1 (when a staging push happens we inc first then dec)

@@ -34,7 +34,7 @@ public:
         canvas.insertReorderBarrier(true);
 
         card = TestUtils::createNode(50, 50, 250, 250,
-                [](TestCanvas& canvas) {
+                [](RenderProperties& props, TestCanvas& canvas) {
             canvas.drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
             SkRegion region;

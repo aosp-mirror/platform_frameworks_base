@@ -44,7 +44,7 @@ public:
                 SkColor color = COLORS[static_cast<int>((y / dp(116))) % 4];
                 sp<RenderNode> card = TestUtils::createNode(x, y,
                         x + dp(100), y + dp(100),
-                        [color](TestCanvas& canvas) {
+                        [color](RenderProperties& props, TestCanvas& canvas) {
                     canvas.drawColor(color, SkXfermode::kSrcOver_Mode);
                 });
                 canvas.drawRenderNode(card.get());

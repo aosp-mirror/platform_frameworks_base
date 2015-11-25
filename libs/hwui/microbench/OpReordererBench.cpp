@@ -19,10 +19,12 @@
 #include "BakedOpState.h"
 #include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
+#include "LayerUpdateQueue.h"
 #include "OpReorderer.h"
 #include "RecordedOp.h"
 #include "RecordingCanvas.h"
 #include "utils/TestUtils.h"
+#include "Vector.h"
 #include "microbench/MicroBench.h"
 
 #include <vector>
@@ -30,26 +32,38 @@
 using namespace android;
 using namespace android::uirenderer;
 
-auto sReorderingDisplayList = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-    SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
-    SkPaint paint;
+const LayerUpdateQueue sEmptyLayerUpdateQueue;
+const Vector3 sLightCenter = {100, 100, 100};
 
-    // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
-    // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
-    canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    for (int i = 0; i < 30; i++) {
-        canvas.translate(0, 10);
-        canvas.drawRect(0, 0, 10, 10, paint);
-        canvas.drawBitmap(bitmap, 5, 0, nullptr);
-    }
-    canvas.restore();
-});
+static std::vector<sp<RenderNode>> createTestNodeList() {
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
+        SkPaint paint;
+
+        // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
+        // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        for (int i = 0; i < 30; i++) {
+            canvas.translate(0, 10);
+            canvas.drawRect(0, 0, 10, 10, paint);
+            canvas.drawBitmap(bitmap, 5, 0, nullptr);
+        }
+        canvas.restore();
+    });
+    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
+    std::vector<sp<RenderNode>> vec;
+    vec.emplace_back(node);
+    return vec;
+}
 
 BENCHMARK_NO_ARG(BM_OpReorderer_defer);
 void BM_OpReorderer_defer::Run(int iters) {
+    auto nodes = createTestNodeList();
     StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        OpReorderer reorderer(200, 200, *sReorderingDisplayList, (Vector3) { 100, 100, 100 });
+        OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+                nodes, sLightCenter);
         MicroBench::DoNotOptimize(&reorderer);
     }
     StopBenchmarkTiming();
@@ -58,13 +72,16 @@ void BM_OpReorderer_defer::Run(int iters) {
 BENCHMARK_NO_ARG(BM_OpReorderer_deferAndRender);
 void BM_OpReorderer_deferAndRender::Run(int iters) {
     TestUtils::runOnRenderThread([this, iters](renderthread::RenderThread& thread) {
+        auto nodes = createTestNodeList();
+        BakedOpRenderer::LightInfo lightInfo = {50.0f, 128, 128 };
+
         RenderState& renderState = thread.renderState();
         Caches& caches = Caches::getInstance();
-        BakedOpRenderer::LightInfo lightInfo = { 50.0f, 128, 128 };
 
         StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
-            OpReorderer reorderer(200, 200, *sReorderingDisplayList, (Vector3) { 100, 100, 100 });
+            OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+                    nodes, sLightCenter);
 
             BakedOpRenderer renderer(caches, renderState, true, lightInfo);
             reorderer.replayBakedOps<BakedOpDispatcher>(renderer);

@@ -321,6 +321,49 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
     EXPECT_EQ(3, count);
 }
 
+TEST(RecordingCanvas, drawRenderNode_projection) {
+    sp<RenderNode> background = TestUtils::createNode(50, 50, 150, 150,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+    {
+        background->mutateStagingProperties().setProjectionReceiver(false);
+
+        // NO RECEIVER PRESENT
+        auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200,
+                    [&background](RecordingCanvas& canvas) {
+            canvas.drawRect(0, 0, 100, 100, SkPaint());
+            canvas.drawRenderNode(background.get());
+            canvas.drawRect(0, 0, 100, 100, SkPaint());
+        });
+        EXPECT_EQ(-1, dl->projectionReceiveIndex)
+                << "no projection receiver should have been observed";
+    }
+    {
+        background->mutateStagingProperties().setProjectionReceiver(true);
+
+        // RECEIVER PRESENT
+        auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200,
+                    [&background](RecordingCanvas& canvas) {
+            canvas.drawRect(0, 0, 100, 100, SkPaint());
+            canvas.drawRenderNode(background.get());
+            canvas.drawRect(0, 0, 100, 100, SkPaint());
+        });
+
+        ASSERT_EQ(3u, dl->getOps().size()) << "Must be three ops";
+        auto op = dl->getOps()[1];
+        EXPECT_EQ(RecordedOpId::RenderNodeOp, op->opId);
+        EXPECT_EQ(1, dl->projectionReceiveIndex)
+                << "correct projection receiver not identified";
+
+        // verify the behavior works even though projection receiver hasn't been sync'd yet
+        EXPECT_TRUE(background->stagingProperties().isProjectionReceiver());
+        EXPECT_FALSE(background->properties().isProjectionReceiver());
+    }
+}
+
 TEST(RecordingCanvas, insertReorderBarrier) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());

@@ -132,7 +132,7 @@ public:
     DisplayList();
     ~DisplayList();
 
-    // index of DisplayListOp restore, after which projected descendents should be drawn
+    // index of DisplayListOp restore, after which projected descendants should be drawn
     int projectionReceiveIndex;
 
     const LsaVector<Chunk>& getChunks() const { return chunks; }
