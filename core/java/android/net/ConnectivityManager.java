@@ -2484,6 +2484,22 @@ public class ConnectivityManager {
     }
 
     /**
+     * Helper function to requests a network with a particular legacy type.
+     *
+     * This is temporarily public @hide so it can be called by system code that uses the
+     * NetworkRequest API to request networks but relies on CONNECTIVITY_ACTION broadcasts for
+     * instead network notifications.
+     *
+     * TODO: update said system code to rely on NetworkCallbacks and make this method private.
+     *
+     * @hide
+     */
+    public void requestNetwork(NetworkCapabilities nc, NetworkCallback networkCallback,
+            int timeoutMs, int legacyType) {
+        sendRequestForNetwork(nc, networkCallback, timeoutMs, REQUEST, legacyType);
+    }
+
+    /**
      * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
      *
      * This {@link NetworkRequest} will live until released via
@@ -2513,8 +2529,8 @@ public class ConnectivityManager {
      *         {@code NetworkCapabilities}.
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback) {
-        sendRequestForNetwork(request.networkCapabilities, networkCallback, 0,
-                REQUEST, inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
+        requestNetwork(request.networkCapabilities, networkCallback, 0,
+                inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
     }
 
     /**
@@ -2537,12 +2553,15 @@ public class ConnectivityManager {
      *                        this request.
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
      *                  before {@link NetworkCallback#unavailable} is called.
+     *
+     * TODO: Make timeouts work and then unhide this method.
+     *
      * @hide
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs) {
-        sendRequestForNetwork(request.networkCapabilities, networkCallback, timeoutMs,
-                REQUEST, inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
+        requestNetwork(request.networkCapabilities, networkCallback, timeoutMs,
+                inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
     }
 
     /**
