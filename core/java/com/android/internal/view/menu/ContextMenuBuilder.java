@@ -17,7 +17,6 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.util.EventLog;
@@ -35,7 +34,7 @@ import android.view.View;
  * <p>
  * To use this class, instantiate it via {@link #ContextMenuBuilder(Context)},
  * and optionally populate it with any of your custom items.  Finally,
- * call {@link #show(View, IBinder)} which will populate the menu
+ * call {@link #showDialog(View, IBinder)} which will populate the menu
  * with a view's context menu items and show the context menu.
  */
 public class ContextMenuBuilder extends MenuBuilder implements ContextMenu {
@@ -75,7 +74,7 @@ public class ContextMenuBuilder extends MenuBuilder implements ContextMenu {
      * @return If the context menu was shown, the {@link MenuDialogHelper} for
      *         dismissing it. Otherwise, null.
      */
-    public MenuDialogHelper show(View originalView, IBinder token) {
+    public MenuDialogHelper showDialog(View originalView, IBinder token) {
         if (originalView != null) {
             // Let relevant views and their populate context listeners populate
             // the context menu

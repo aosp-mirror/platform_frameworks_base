@@ -174,26 +174,38 @@ public interface ViewParent {
     public void focusableViewAvailable(View v);
 
     /**
-     * Bring up a context menu for the specified view or its ancestors.
-     *
-     * <p>In most cases, a subclass does not need to override this.  However, if
+     * Shows the context menu for the specified view or its ancestors.
+     * <p>
+     * In most cases, a subclass does not need to override this. However, if
      * the subclass is added directly to the window manager (for example,
      * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
-     * then it should override this and show the context menu.</p>
-     * 
-     * @param originalView The source view where the context menu was first invoked
-     * @return true if a context menu was displayed
+     * then it should override this and show the context menu.
+     *
+     * @param originalView the source view where the context menu was first
+     *                     invoked
+     * @return {@code true} if the context menu was shown, {@code false}
+     *         otherwise
+     * @see #showContextMenuForChild(View, float, float)
      */
     public boolean showContextMenuForChild(View originalView);
 
     /**
-     * Bring up a context menu for the specified view at the given x/y offset from
-     * the top left corner.
+     * Shows the context menu for the specified view or its ancestors anchored
+     * to the specified view-relative coordinate.
+     * <p>
+     * In most cases, a subclass does not need to override this. However, if
+     * the subclass is added directly to the window manager (for example,
+     * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
+     * then it should override this and show the context menu.
      *
-     * @param originalView
-     * @param x The x offset at which to open the menu
-     * @param y The y offset at which to open the menu
-     * @return true if a context menu was displayed
+     * @param originalView the source view where the context menu was first
+     *                     invoked
+     * @param x the X coordinate in pixels relative to the original view to
+     *          which the menu should be anchored
+     * @param y the Y coordinate in pixels relative to the original view to
+     *          which the menu should be anchored
+     * @return {@code true} if the context menu was shown, {@code false}
+     *         otherwise
      */
     public boolean showContextMenuForChild(View originalView, float x, float y);
 

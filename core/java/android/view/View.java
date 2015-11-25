@@ -5505,20 +5505,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Bring up the context menu for this view.
+     * Shows the context menu for this view.
      *
-     * @return Whether a context menu was displayed.
+     * @return {@code true} if the context menu was shown, {@code false}
+     *         otherwise
+     * @see #showContextMenu(float, float)
      */
     public boolean showContextMenu() {
         return getParent().showContextMenuForChild(this);
     }
 
     /**
-     * Bring up the context menu for this view, referring to the item under the specified point.
+     * Shows the context menu for this view anchored to the specified
+     * view-relative coordinate.
      *
-     * @param x The referenced x coordinate.
-     * @param y The referenced y coordinate.
-     * @return Whether a context menu was displayed.
+     * @param x the X coordinate in pixels relative to the view to which the
+     *          menu should be anchored
+     * @param y the Y coordinate in pixels relative to the view to which the
+     *          menu should be anchored
+     * @return {@code true} if the context menu was shown, {@code false}
+     *         otherwise
      */
     public boolean showContextMenu(float x, float y) {
         return getParent().showContextMenuForChild(this, x, y);

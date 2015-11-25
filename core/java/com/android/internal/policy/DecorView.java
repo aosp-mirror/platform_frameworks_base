@@ -21,8 +21,7 @@ import com.android.internal.view.FloatingActionMode;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
-import com.android.internal.view.menu.MenuDialogHelper;
-import com.android.internal.view.menu.MenuPopupHelper;
+import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorCaptionView;
@@ -659,30 +658,23 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
-        // Reuse the context menu builder
-        if (mWindow.mContextMenu == null) {
-            mWindow.mContextMenu = new ContextMenuBuilder(getContext());
-            mWindow.mContextMenu.setCallback(mWindow.mContextMenuCallback);
-        } else {
-            mWindow.mContextMenu.clearAll();
-        }
-
-        final MenuDialogHelper helper = mWindow.mContextMenu.show(originalView,
-                originalView.getWindowToken());
-        if (helper != null) {
-            helper.setPresenterCallback(mWindow.mContextMenuCallback);
-        } else if (mWindow.mContextMenuHelper != null) {
-            // No menu to show, but if we have a menu currently showing it just became blank.
-            // Close it.
-            mWindow.mContextMenuHelper.dismiss();
-        }
-        mWindow.mContextMenuHelper = helper;
-        return helper != null;
+        return showContextMenuForChildInternal(originalView, 0, 0, false);
     }
 
     @Override
     public boolean showContextMenuForChild(View originalView, float x, float y) {
-        // Reuse the context menu builder
+        return showContextMenuForChildInternal(originalView, x, y, true);
+    }
+
+    private boolean showContextMenuForChildInternal(View originalView,
+            float x, float y, boolean isPopup) {
+        // Only allow one context menu at a time.
+        if (mWindow.mContextMenuHelper != null) {
+            mWindow.mContextMenuHelper.dismiss();
+            mWindow.mContextMenuHelper = null;
+        }
+
+        // Reuse the context menu builder.
         if (mWindow.mContextMenu == null) {
             mWindow.mContextMenu = new ContextMenuBuilder(getContext());
             mWindow.mContextMenu.setCallback(mWindow.mContextMenuCallback);
@@ -690,16 +682,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mWindow.mContextMenu.clearAll();
         }
 
-        final MenuPopupHelper helper = mWindow.mContextMenu.showPopup(
-                getContext(), originalView, x, y);
-        if (helper != null) {
-            helper.setCallback(mWindow.mContextMenuCallback);
-        } else if (mWindow.mContextMenuPopupHelper != null) {
-            // No menu to show, but if we have a menu currently showing it just became blank.
-            // Close it.
-            mWindow.mContextMenuPopupHelper.dismiss();
+        final MenuHelper helper;
+        if (isPopup) {
+            helper = mWindow.mContextMenu.showPopup(getContext(), originalView, x, y);
+        } else {
+            helper = mWindow.mContextMenu.showDialog(originalView, originalView.getWindowToken());
         }
-        mWindow.mContextMenuPopupHelper = helper;
+
+        if (helper != null) {
+            helper.setPresenterCallback(mWindow.mContextMenuCallback);
+        }
+
+        mWindow.mContextMenuHelper = helper;
         return helper != null;
     }
 
