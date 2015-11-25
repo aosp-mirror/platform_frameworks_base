@@ -75,6 +75,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -1721,7 +1722,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public DeviceAdminInfo findAdmin(ComponentName adminName, int userHandle) {
+    public DeviceAdminInfo findAdmin(ComponentName adminName, int userHandle,
+            boolean throwForMissiongPermission) {
         if (!mHasFeature) {
             return null;
         }
@@ -1736,8 +1738,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Unknown admin: " + adminName);
         }
 
+        final ResolveInfo ri = infos.get(0);
+
+        if (!permission.BIND_DEVICE_ADMIN.equals(ri.activityInfo.permission)) {
+            final String message = "DeviceAdminReceiver " + adminName + " must be protected with"
+                    + permission.BIND_DEVICE_ADMIN;
+            Slog.w(LOG_TAG, message);
+            if (throwForMissiongPermission &&
+                    ri.activityInfo.applicationInfo.targetSdkVersion > Build.VERSION_CODES.M) {
+                throw new IllegalArgumentException(message);
+            }
+        }
+
         try {
-            return new DeviceAdminInfo(mContext, infos.get(0));
+            return new DeviceAdminInfo(mContext, ri);
         } catch (XmlPullParserException e) {
             Slog.w(LOG_TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName,
                     e);
@@ -1928,7 +1942,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     String name = parser.getAttributeValue(null, "name");
                     try {
                         DeviceAdminInfo dai = findAdmin(
-                                ComponentName.unflattenFromString(name), userHandle);
+                                ComponentName.unflattenFromString(name), userHandle,
+                                /* throwForMissionPermission= */ false);
                         if (VERBOSE_LOG
                                 && (UserHandle.getUserId(dai.getActivityInfo().applicationInfo.uid)
                                 != userHandle)) {
@@ -2319,7 +2334,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceCrossUserPermission(userHandle);
 
         DevicePolicyData policy = getUserData(userHandle);
-        DeviceAdminInfo info = findAdmin(adminReceiver, userHandle);
+        DeviceAdminInfo info = findAdmin(adminReceiver, userHandle,
+                /* throwForMissionPermission= */ true);
         if (info == null) {
             throw new IllegalArgumentException("Bad admin: " + adminReceiver);
         }
