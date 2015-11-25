@@ -316,6 +316,7 @@ public class TaskStackLayoutAlgorithm {
             Log.d(TAG, "\tmFreeformRect: " + mFreeformRect);
             Log.d(TAG, "\tmFreeformStackRect: " + mFreeformStackRect);
             Log.d(TAG, "\tmStackRect: " + mStackRect);
+            Log.d(TAG, "\tmCurrentStackRect: " + mCurrentStackRect);
             Log.d(TAG, "\tmTaskRect: " + mTaskRect);
             Log.d(TAG, "\tmSystemInsets: " + mSystemInsets);
         }
@@ -375,7 +376,7 @@ public class TaskStackLayoutAlgorithm {
                 float normX = mUnfocusedCurveInterpolator.getX(bottomOffsetPct);
                 mMinScrollP = 0;
                 mMaxScrollP = Math.max(mMinScrollP,
-                        (mNumStackTasks - 1) - mUnfocusedRange.getAbsoluteX(normX));
+                        (mNumStackTasks - 1) - Math.max(0, mUnfocusedRange.getAbsoluteX(normX)));
             }
         }
 
@@ -570,7 +571,7 @@ public class TaskStackLayoutAlgorithm {
             p = (mMinScrollP - stackScroll) / mNumStackTasks;
             int centerYOffset = (mCurrentStackRect.top - mTaskRect.top) +
                     (mCurrentStackRect.height() - mTaskRect.height()) / 2;
-            y = (int) (centerYOffset + (p * mCurrentStackRect.height()));
+            y = centerYOffset + getYForDeltaP(p, 0);
             z = mMaxTranslationZ;
             relP = p;
 
