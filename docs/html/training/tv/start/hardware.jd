@@ -100,10 +100,6 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
     <td>{@code android.hardware.camera}</td>
   </tr>
   <tr>
-    <td>Bluetooth</td>
-    <td>{@code android.hardware.bluetooth}</td>
-  </tr>
-  <tr>
     <td>Near Field Communications (NFC)</td>
     <td>{@code android.hardware.nfc}</td>
   </tr>
@@ -158,8 +154,6 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
 &lt;uses-feature android:name="android.hardware.telephony"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.camera"
-        android:required="false"/&gt;
-&lt;uses-feature android:name="android.hardware.bluetooth"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.nfc"
         android:required="false"/&gt;
