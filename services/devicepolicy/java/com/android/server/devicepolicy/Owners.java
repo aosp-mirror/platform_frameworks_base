@@ -23,6 +23,7 @@ import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -50,6 +51,9 @@ import libcore.io.IoUtils;
 /**
  * Stores and restores state for the Device and Profile owners. By definition there can be
  * only one device owner, but there may be a profile owner for each user.
+ *
+ * <p>This class is not thread safe.  (i.e. access to this class must always be synchronized
+ * in the caller side.)
  */
 class Owners {
     private static final String TAG = "DevicePolicyManagerService";
@@ -78,8 +82,8 @@ class Owners {
 
     private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
 
-    private final Context mContext;
     private final UserManager mUserManager;
+    private final UserManagerInternal mUserManagerInternal;
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
@@ -92,44 +96,48 @@ class Owners {
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;
 
-    public Owners(Context context) {
-        mContext = context;
-        mUserManager = context.getSystemService(UserManager.class);
+    public Owners(Context context, UserManager userManager,
+            UserManagerInternal userManagerInternal) {
+        mUserManager = userManager;
+        mUserManagerInternal = userManagerInternal;
     }
 
     /**
      * Load configuration from the disk.
      */
     void load() {
-        synchronized (this) {
-            // First, try to read from the legacy file.
-            final File legacy = getLegacyConfigFileWithTestOverride();
+        // First, try to read from the legacy file.
+        final File legacy = getLegacyConfigFileWithTestOverride();
 
-            if (readLegacyOwnerFile(legacy)) {
-                if (DEBUG) {
-                    Log.d(TAG, "Legacy config file found.");
-                }
+        final List<UserInfo> users = mUserManager.getUsers();
 
-                // Legacy file exists, write to new files and remove the legacy one.
-                writeDeviceOwner();
-                for (int userId : getProfileOwnerKeys()) {
-                    writeProfileOwner(userId);
-                }
-                if (DEBUG) {
-                    Log.d(TAG, "Deleting legacy config file");
-                }
-                if (!legacy.delete()) {
-                    Slog.e(TAG, "Failed to remove the legacy setting file");
-                }
-            } else {
-                // No legacy file, read from the new format files.
-                new DeviceOwnerReadWriter().readFromFileLocked();
-
-                final List<UserInfo> users = mUserManager.getUsers();
-                for (UserInfo ui : users) {
-                    new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
-                }
+        if (readLegacyOwnerFile(legacy)) {
+            if (DEBUG) {
+                Log.d(TAG, "Legacy config file found.");
             }
+
+            // Legacy file exists, write to new files and remove the legacy one.
+            writeDeviceOwner();
+            for (int userId : getProfileOwnerKeys()) {
+                writeProfileOwner(userId);
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Deleting legacy config file");
+            }
+            if (!legacy.delete()) {
+                Slog.e(TAG, "Failed to remove the legacy setting file");
+            }
+        } else {
+            // No legacy file, read from the new format files.
+            new DeviceOwnerReadWriter().readFromFileLocked();
+
+            for (UserInfo ui : users) {
+                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
+            }
+        }
+        mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
+        for (UserInfo ui : users) {
+            mUserManagerInternal.setUserManaged(ui.id, hasProfileOwner(ui.id));
         }
         if (hasDeviceOwner() && hasProfileOwner(getDeviceOwnerUserId())) {
             Slog.w(TAG, String.format("User %d has both DO and PO, which is not supported",
@@ -169,21 +177,27 @@ class Owners {
             boolean userRestrictionsMigrated) {
         mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated);
         mDeviceOwnerUserId = userId;
+
+        mUserManagerInternal.setDeviceManaged(true);
     }
 
     void clearDeviceOwner() {
         mDeviceOwner = null;
         mDeviceOwnerUserId = UserHandle.USER_NULL;
+
+        mUserManagerInternal.setDeviceManaged(false);
     }
 
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
         // For a newly set PO, there's no need for migration.
         mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
                 /* userRestrictionsMigrated =*/ true));
+        mUserManagerInternal.setUserManaged(userId, true);
     }
 
     void removeProfileOwner(int userId) {
         mProfileOwners.remove(userId);
+        mUserManagerInternal.setUserManaged(userId, false);
     }
 
     ComponentName getProfileOwnerComponent(int userId) {

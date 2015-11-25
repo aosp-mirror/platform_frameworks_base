@@ -69,4 +69,16 @@ public abstract class UserManagerInternal {
 
     /** Remove a {@link UserRestrictionsListener}. */
     public abstract void removeUserRestrictionsListener(UserRestrictionsListener listener);
+
+    /**
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
+     * whether the device is managed by device owner.
+     */
+    public abstract void setDeviceManaged(boolean isManaged);
+
+    /**
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
+     * whether the user is managed by profile owner.
+     */
+    public abstract void setUserManaged(int userId, boolean isManaged);
 }

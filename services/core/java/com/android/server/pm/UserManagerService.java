@@ -24,7 +24,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -216,14 +215,15 @@ public class UserManagerService extends IUserManager.Stub {
     private final SparseArray<Bundle> mAppliedUserRestrictions = new SparseArray<>();
 
     /**
-     * User restrictions set by {@link DevicePolicyManager} that should be applied to all users,
-     * including guests.
+     * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
+     * that should be applied to all users, including guests.
      */
     @GuardedBy("mRestrictionsLock")
     private Bundle mDevicePolicyGlobalUserRestrictions;
 
     /**
-     * User restrictions set by {@link DevicePolicyManager} for each user.
+     * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
+     * for each user.
      */
     @GuardedBy("mRestrictionsLock")
     private final SparseArray<Bundle> mDevicePolicyLocalUserRestrictions = new SparseArray<>();
@@ -247,6 +247,12 @@ public class UserManagerService extends IUserManager.Stub {
     private IAppOpsService mAppOpsService;
 
     private final LocalService mLocalService;
+
+    @GuardedBy("mUsersLock")
+    private boolean mIsDeviceManaged;
+
+    @GuardedBy("mUsersLock")
+    private final SparseBooleanArray mIsUserManaged = new SparseBooleanArray();
 
     @GuardedBy("mUserRestrictionsListeners")
     private final ArrayList<UserRestrictionsListener> mUserRestrictionsListeners =
@@ -509,11 +515,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (!userInfo.isAdmin()) {
                 return false;
             }
+            // restricted profile can be created if there is no DO set and the admin user has no PO;
+            return !mIsDeviceManaged && !mIsUserManaged.get(userId);
         }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        // restricted profile can be created if there is no DO set and the admin user has no PO
-        return !dpm.isDeviceManaged() && dpm.getProfileOwnerAsUser(userId) == null;
     }
 
     /*
@@ -1596,11 +1600,10 @@ public class UserManagerService extends IUserManager.Stub {
                 if (UserManager.isSplitSystemUser()
                         && !isGuest && !isManagedProfile && getPrimaryUser() == null) {
                     flags |= UserInfo.FLAG_PRIMARY;
-                    DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
-                            mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                    if (devicePolicyManager == null
-                            || !devicePolicyManager.isDeviceManaged()) {
-                        flags |= UserInfo.FLAG_ADMIN;
+                    synchronized (mUsersLock) {
+                        if (!mIsDeviceManaged) {
+                            flags |= UserInfo.FLAG_ADMIN;
+                        }
                     }
                 }
                 userId = getNextAvailableId();
@@ -1865,6 +1868,13 @@ public class UserManagerService extends IUserManager.Stub {
         // Remove this user from the list
         synchronized (mUsersLock) {
             mUsers.remove(userHandle);
+            mIsUserManaged.delete(userHandle);
+        }
+        synchronized (mRestrictionsLock) {
+            mBaseUserRestrictions.remove(userHandle);
+            mAppliedUserRestrictions.remove(userHandle);
+            mCachedEffectiveUserRestrictions.remove(userHandle);
+            mDevicePolicyLocalUserRestrictions.remove(userHandle);
         }
         // Remove user file
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
@@ -2376,9 +2386,10 @@ public class UserManagerService extends IUserManager.Stub {
                     if (user == null) {
                         continue;
                     }
+                    final int userId = user.id;
                     pw.print("  "); pw.print(user);
                     pw.print(" serialNo="); pw.print(user.serialNumber);
-                    if (mRemovingUserIds.get(mUsers.keyAt(i))) {
+                    if (mRemovingUserIds.get(userId)) {
                         pw.print(" <removing> ");
                     }
                     if (user.partial) {
@@ -2403,6 +2414,8 @@ public class UserManagerService extends IUserManager.Stub {
                         sb.append(" ago");
                         pw.println(sb);
                     }
+                    pw.print("    Has profile owner: ");
+                    pw.println(mIsUserManaged.get(userId));
                     pw.println("    Restrictions:");
                     synchronized (mRestrictionsLock) {
                         UserRestrictionsUtils.dumpRestrictions(
@@ -2426,6 +2439,10 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("  Guest restrictions:");
             synchronized (mGuestRestrictions) {
                 UserRestrictionsUtils.dumpRestrictions(pw, "    ", mGuestRestrictions);
+            }
+            synchronized (mUsersLock) {
+                pw.println();
+                pw.println("  Device managed: " + mIsDeviceManaged);
             }
         }
     }
@@ -2505,6 +2522,20 @@ public class UserManagerService extends IUserManager.Stub {
         public void removeUserRestrictionsListener(UserRestrictionsListener listener) {
             synchronized (mUserRestrictionsListeners) {
                 mUserRestrictionsListeners.remove(listener);
+            }
+        }
+
+        @Override
+        public void setDeviceManaged(boolean isManaged) {
+            synchronized (mUsersLock) {
+                mIsDeviceManaged = isManaged;
+            }
+        }
+
+        @Override
+        public void setUserManaged(int userId, boolean isManaged) {
+            synchronized (mUsersLock) {
+                mIsUserManaged.put(userId, isManaged);
             }
         }
     }

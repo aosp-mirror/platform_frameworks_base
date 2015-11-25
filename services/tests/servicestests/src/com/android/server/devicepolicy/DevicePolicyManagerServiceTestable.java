@@ -52,7 +52,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         private final File mProfileOwnerBase;
 
         public OwnersTestable(DpmMockContext context) {
-            super(context);
+            super(context, context.userManager, context.userManagerInternal);
             mLegacyFile = new File(context.dataDir, LEGACY_FILE);
             mDeviceOwnerFile = new File(context.dataDir, DEVICE_OWNER_FILE);
             mProfileOwnerBase = new File(context.dataDir, PROFILE_OWNER_FILE_BASE);
