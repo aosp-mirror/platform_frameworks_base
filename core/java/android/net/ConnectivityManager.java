@@ -2494,9 +2494,10 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    public void requestNetwork(NetworkCapabilities nc, NetworkCallback networkCallback,
+    public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs, int legacyType) {
-        sendRequestForNetwork(nc, networkCallback, timeoutMs, REQUEST, legacyType);
+        sendRequestForNetwork(request.networkCapabilities, networkCallback, timeoutMs, REQUEST,
+                legacyType);
     }
 
     /**
@@ -2529,7 +2530,7 @@ public class ConnectivityManager {
      *         {@code NetworkCapabilities}.
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback) {
-        requestNetwork(request.networkCapabilities, networkCallback, 0,
+        requestNetwork(request, networkCallback, 0,
                 inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
     }
 
@@ -2560,7 +2561,7 @@ public class ConnectivityManager {
      */
     public void requestNetwork(NetworkRequest request, NetworkCallback networkCallback,
             int timeoutMs) {
-        requestNetwork(request.networkCapabilities, networkCallback, timeoutMs,
+        requestNetwork(request, networkCallback, timeoutMs,
                 inferLegacyTypeForNetworkCapabilities(request.networkCapabilities));
     }
 
