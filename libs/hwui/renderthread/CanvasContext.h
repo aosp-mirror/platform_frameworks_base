@@ -28,6 +28,7 @@
 #include "renderthread/RenderThread.h"
 
 #if HWUI_NEW_OPS
+#include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
 #endif
 

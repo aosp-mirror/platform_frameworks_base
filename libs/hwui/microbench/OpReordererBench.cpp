@@ -17,6 +17,7 @@
 #include <benchmark/Benchmark.h>
 
 #include "BakedOpState.h"
+#include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
 #include "OpReorderer.h"
 #include "RecordedOp.h"

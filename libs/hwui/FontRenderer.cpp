@@ -29,8 +29,9 @@
 
 
 #if HWUI_NEW_OPS
-#include "BakedOpState.h"
+#include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
+#include "BakedOpState.h"
 #else
 #include "OpenGLRenderer.h"
 #endif

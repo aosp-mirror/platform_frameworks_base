@@ -101,6 +101,7 @@ hwui_cflags += -Wno-free-nonheap-object
 
 ifeq (true, $(HWUI_NEW_OPS))
     hwui_src_files += \
+        BakedOpDispatcher.cpp \
         BakedOpRenderer.cpp \
         OpReorderer.cpp \
         RecordingCanvas.cpp
