@@ -52,6 +52,7 @@ public class KeyButtonView extends ImageView {
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
+    private boolean mLongClicked;
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -60,9 +61,11 @@ public class KeyButtonView extends ImageView {
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
                     performLongClick();
+                    mLongClicked = true;
                 } else if (mSupportsLongpress) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                    mLongClicked = true;
                 }
             }
         }
@@ -155,6 +158,7 @@ public class KeyButtonView extends ImageView {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
+                mLongClicked = false;
                 setPressed(true);
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_DOWN, 0, mDownTime);
@@ -181,7 +185,7 @@ public class KeyButtonView extends ImageView {
                 removeCallbacks(mCheckLongPress);
                 break;
             case MotionEvent.ACTION_UP:
-                final boolean doIt = isPressed();
+                final boolean doIt = isPressed() && !mLongClicked;
                 setPressed(false);
                 if (mCode != 0) {
                     if (doIt) {
