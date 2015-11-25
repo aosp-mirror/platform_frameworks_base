@@ -2321,88 +2321,102 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
-        NetworkRequestInfo nri = mNetworkRequests.get(request);
-        if (nri != null) {
-            if (Process.SYSTEM_UID != callingUid && nri.mUid != callingUid) {
-                if (DBG) log("Attempt to release unowned NetworkRequest " + request);
-                return;
-            }
-            if (DBG) log("releasing NetworkRequest " + request);
-            nri.unlinkDeathRecipient();
-            mNetworkRequests.remove(request);
-            mNetworkRequestInfoLogs.log("RELEASE " + nri);
-            if (nri.isRequest) {
-                // Find all networks that are satisfying this request and remove the request
-                // from their request lists.
-                // TODO - it's my understanding that for a request there is only a single
-                // network satisfying it, so this loop is wasteful
-                boolean wasKept = false;
-                for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                    if (nai.networkRequests.get(nri.request.requestId) != null) {
-                        nai.networkRequests.remove(nri.request.requestId);
-                        if (DBG) {
-                            log(" Removing from current network " + nai.name() +
-                                    ", leaving " + nai.networkRequests.size() +
-                                    " requests.");
-                        }
-                        if (unneeded(nai)) {
-                            if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
-                            teardownUnneededNetwork(nai);
-                        } else {
-                            // suspect there should only be one pass through here
-                            // but if any were kept do the check below
-                            wasKept |= true;
-                        }
-                    }
-                }
-
-                NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
-                if (nai != null) {
-                    mNetworkForRequestId.remove(nri.request.requestId);
-                }
-                // Maintain the illusion.  When this request arrived, we might have pretended
-                // that a network connected to serve it, even though the network was already
-                // connected.  Now that this request has gone away, we might have to pretend
-                // that the network disconnected.  LegacyTypeTracker will generate that
-                // phantom disconnect for this type.
-                if (nri.request.legacyType != TYPE_NONE && nai != null) {
-                    boolean doRemove = true;
-                    if (wasKept) {
-                        // check if any of the remaining requests for this network are for the
-                        // same legacy type - if so, don't remove the nai
-                        for (int i = 0; i < nai.networkRequests.size(); i++) {
-                            NetworkRequest otherRequest = nai.networkRequests.valueAt(i);
-                            if (otherRequest.legacyType == nri.request.legacyType &&
-                                    isRequest(otherRequest)) {
-                                if (DBG) log(" still have other legacy request - leaving");
-                                doRemove = false;
-                            }
-                        }
-                    }
-
-                    if (doRemove) {
-                        mLegacyTypeTracker.remove(nri.request.legacyType, nai, false);
-                    }
-                }
-
-                for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
-                    nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST,
-                            nri.request);
-                }
-            } else {
-                // listens don't have a singular affectedNetwork.  Check all networks to see
-                // if this listen request applies and remove it.
-                for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                    nai.networkRequests.remove(nri.request.requestId);
-                    if (nri.request.networkCapabilities.hasSignalStrength() &&
-                            nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
-                        updateSignalStrengthThresholds(nai, "RELEASE", nri.request);
-                    }
-                }
-            }
-            callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_RELEASED);
+    private void handleTimedOutNetworkRequest(final NetworkRequestInfo nri) {
+        if (mNetworkRequests.get(nri.request) != null && mNetworkForRequestId.get(
+                nri.request.requestId) == null) {
+            handleRemoveNetworkRequest(nri, Process.SYSTEM_UID,
+                    ConnectivityManager.CALLBACK_UNAVAIL);
         }
+    }
+
+    private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
+        final NetworkRequestInfo nri = mNetworkRequests.get(request);
+        if (nri != null) {
+            handleRemoveNetworkRequest(nri, callingUid, ConnectivityManager.CALLBACK_RELEASED);
+        }
+    }
+
+    private void handleRemoveNetworkRequest(
+            final NetworkRequestInfo nri, final int callingUid, final int whichCallback) {
+        if (Process.SYSTEM_UID != callingUid && nri.mUid != callingUid) {
+            if (DBG) log("Attempt to release unowned NetworkRequest " + nri.request);
+            return;
+        }
+        final String logCallbackType = ConnectivityManager.getCallbackName(whichCallback);
+        if (DBG) log("releasing NetworkRequest " + nri.request + " (" + logCallbackType + ")");
+        nri.unlinkDeathRecipient();
+        mNetworkRequests.remove(nri.request);
+        mNetworkRequestInfoLogs.log("RELEASE " + nri + " (" + logCallbackType + ")");
+        if (nri.isRequest) {
+            // Find all networks that are satisfying this request and remove the request
+            // from their request lists.
+            // TODO - it's my understanding that for a request there is only a single
+            // network satisfying it, so this loop is wasteful
+            boolean wasKept = false;
+            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                if (nai.networkRequests.get(nri.request.requestId) != null) {
+                    nai.networkRequests.remove(nri.request.requestId);
+                    if (DBG) {
+                        log(" Removing from current network " + nai.name() +
+                                ", leaving " + nai.networkRequests.size() +
+                                " requests.");
+                    }
+                    if (unneeded(nai)) {
+                        if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
+                        teardownUnneededNetwork(nai);
+                    } else {
+                        // suspect there should only be one pass through here
+                        // but if any were kept do the check below
+                        wasKept |= true;
+                    }
+                }
+            }
+
+            NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
+            if (nai != null) {
+                mNetworkForRequestId.remove(nri.request.requestId);
+            }
+            // Maintain the illusion.  When this request arrived, we might have pretended
+            // that a network connected to serve it, even though the network was already
+            // connected.  Now that this request has gone away, we might have to pretend
+            // that the network disconnected.  LegacyTypeTracker will generate that
+            // phantom disconnect for this type.
+            if (nri.request.legacyType != TYPE_NONE && nai != null) {
+                boolean doRemove = true;
+                if (wasKept) {
+                    // check if any of the remaining requests for this network are for the
+                    // same legacy type - if so, don't remove the nai
+                    for (int i = 0; i < nai.networkRequests.size(); i++) {
+                        NetworkRequest otherRequest = nai.networkRequests.valueAt(i);
+                        if (otherRequest.legacyType == nri.request.legacyType &&
+                                isRequest(otherRequest)) {
+                            if (DBG) log(" still have other legacy request - leaving");
+                            doRemove = false;
+                        }
+                    }
+                }
+
+                if (doRemove) {
+                    mLegacyTypeTracker.remove(nri.request.legacyType, nai, false);
+                }
+            }
+
+            for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
+                nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST,
+                        nri.request);
+            }
+        } else {
+            // listens don't have a singular affectedNetwork.  Check all networks to see
+            // if this listen request applies and remove it.
+            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                nai.networkRequests.remove(nri.request.requestId);
+                if (nri.request.networkCapabilities.hasSignalStrength() &&
+                        nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
+                    updateSignalStrengthThresholds(nai, "RELEASE", nri.request);
+                }
+            }
+        }
+        callCallbackForRequest(nri, null, whichCallback);
     }
 
     public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
@@ -2550,6 +2564,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT:
                 case EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT: {
                     handleRegisterNetworkRequestWithIntent(msg);
+                    break;
+                }
+                case EVENT_TIMEOUT_NETWORK_REQUEST: {
+                    NetworkRequestInfo nri = (NetworkRequestInfo) msg.obj;
+                    handleTimedOutNetworkRequest(nri);
                     break;
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT: {
