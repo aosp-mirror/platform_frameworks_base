@@ -65,7 +65,7 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
     @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType)
             throws CertificateException {
-        throw new CertificateException("Client authentication not supported");
+        mDelegate.checkClientTrusted(chain, authType);
     }
 
     @Override
@@ -149,6 +149,6 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
 
     @Override
     public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
+        return mDelegate.getAcceptedIssuers();
     }
 }
