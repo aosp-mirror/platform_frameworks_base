@@ -30,6 +30,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.ContainerEncryptionParams;
+import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
@@ -85,9 +86,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.UserIcons;
+import libcore.util.EmptyArray;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +100,8 @@ import java.util.Objects;
 public class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
     private final static boolean DEBUG_ICONS = false;
+
+    private static final int DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES = 16384; // 16KB
 
     // Default flags to use with PackageManager when no flags are given.
     private final static int sDefaultFlags = PackageManager.GET_SHARED_LIBRARY_FILES;
@@ -624,6 +629,80 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
+    }
+
+    /** @hide */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<EphemeralApplicationInfo> getEphemeralApplications() {
+        try {
+            ParceledListSlice<EphemeralApplicationInfo> slice =
+                    mPM.getEphemeralApplications(mContext.getUserId());
+            if (slice != null) {
+                return slice.getList();
+            }
+            return Collections.emptyList();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public Drawable getEphemeralApplicationIcon(String packageName) {
+        try {
+            Bitmap bitmap = mPM.getEphemeralApplicationIcon(
+                    packageName, mContext.getUserId());
+            if (bitmap != null) {
+                return new BitmapDrawable(null, bitmap);
+            }
+            return null;
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public boolean isEphemeralApplication() {
+        try {
+            return mPM.isEphemeralApplication(
+                    mContext.getPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "System server is dead", e);
+        }
+        return false;
+    }
+
+    @Override
+    public int getEphemeralCookieMaxSizeBytes() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
+    }
+
+    @Override
+    public @NonNull byte[] getEphemeralCookie() {
+        try {
+            final byte[] cookie = mPM.getEphemeralApplicationCookie(
+                    mContext.getPackageName(), mContext.getUserId());
+            if (cookie != null) {
+                return cookie;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "System server is dead", e);
+        }
+        return EmptyArray.BYTE;
+    }
+
+    @Override
+    public boolean setEphemeralCookie(@NonNull  byte[] cookie) {
+        try {
+            return mPM.setEphemeralApplicationCookie(
+                    mContext.getPackageName(), cookie, mContext.getUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "System server is dead", e);
+        }
+        return false;
     }
 
     @Override

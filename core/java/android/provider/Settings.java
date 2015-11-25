@@ -7792,6 +7792,24 @@ public final class Settings {
         public static final String LTE_SERVICE_FORCED = "lte_service_forced";
 
         /**
+         * Ephemeral app cookie max size in bytes.
+         * <p>
+         * Type: int
+         * @hide
+         */
+        public static final String EPHEMERAL_COOKIE_MAX_SIZE_BYTES =
+                "ephemeral_cookie_max_size_bytes";
+
+        /**
+         * The duration for caching uninstalled ephemeral apps.
+         * <p>
+         * Type: long
+         * @hide
+         */
+        public static final String UNINSTALLED_EPHEMERAL_APP_CACHE_DURATION_MILLIS =
+                "uninstalled_ephemeral_app_cache_duration_millis";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *

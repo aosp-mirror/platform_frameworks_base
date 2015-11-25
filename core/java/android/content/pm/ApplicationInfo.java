@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
@@ -383,13 +382,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_HARDWARE_ACCELERATED = 1<<29;
 
     /**
-     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
-     * and for most purposes is considered as not installed.
-     * {@hide}
-     */
-    public static final int FLAG_EPHEMERAL = 1<<30;
-
-    /**
      * Value for {@link #flags}: true if code from this application will need to be
      * loaded into other applications' processes. On devices that support multiple
      * instruction sets, this implies the code might be loaded into a process that's
@@ -462,8 +454,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;
 
     /**
-     * Value for {@link #flags}: {@code true} if the application has any IntentFiler with some
-     * data URI using HTTP or HTTPS with an associated VIEW action.
+     * Value for {@link #privateFlags}: {@code true} if the application has any IntentFiler
+     * with some data URI using HTTP or HTTPS with an associated VIEW action.
      *
      * {@hide}
      */
@@ -492,6 +484,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@hide}
      */
     public static final int PRIVATE_FLAG_AUTOPLAY = 1 << 7;
+
+    /**
+     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
+     * and for most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_EPHEMERAL = 1<<8;
 
     /**
      * When set, at least one component inside this application is encryption aware.
@@ -1078,6 +1077,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isAutoPlayApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_AUTOPLAY) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isEphemeralApp() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_EPHEMERAL) != 0;
     }
 
     /**

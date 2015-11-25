@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
+import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
@@ -47,6 +48,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -513,4 +515,10 @@ interface IPackageManager {
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
     String getPermissionControllerPackageName();
+
+    ParceledListSlice getEphemeralApplications(int userId);
+    byte[] getEphemeralApplicationCookie(String packageName, int userId);
+    boolean setEphemeralApplicationCookie(String packageName, in byte[] cookie, int userId);
+    Bitmap getEphemeralApplicationIcon(String packageName, int userId);
+    boolean isEphemeralApplication(String packageName, int userId);
 }

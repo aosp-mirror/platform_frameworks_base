@@ -2777,6 +2777,12 @@
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
 
+
+    <!-- Allows the holder to access the ephemeral applications on the device.
+    @hide -->
+    <permission android:name="android.permission.ACCESS_EPHEMERAL_APPS"
+            android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

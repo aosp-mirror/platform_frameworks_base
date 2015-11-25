@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
+import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -284,6 +286,38 @@ public class MockPackageManager extends PackageManager {
     @Override
     public List<ApplicationInfo> getInstalledApplications(int flags) {
         throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public List<EphemeralApplicationInfo> getEphemeralApplications() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public Drawable getEphemeralApplicationIcon(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte[] getEphemeralCookie() {
+        return new byte[0];
+    }
+
+    @Override
+    public boolean isEphemeralApplication() {
+        return false;
+    }
+
+    @Override
+    public int getEphemeralCookieMaxSizeBytes() {
+        return 0;
+    }
+
+    @Override
+    public boolean setEphemeralCookie(@NonNull byte[] cookie) {
+        return false;
     }
 
     @Override

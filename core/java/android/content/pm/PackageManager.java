@@ -47,8 +47,10 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.util.AndroidException;
 
+import android.util.Log;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
@@ -2858,6 +2860,83 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract List<ApplicationInfo> getInstalledApplications(int flags);
+
+    /**
+     * Gets the ephemeral applications the user recently used. Requires
+     * holding "android.permission.ACCESS_EPHEMERAL_APPS".
+     *
+     * @return The ephemeral app list.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS)
+    public abstract List<EphemeralApplicationInfo> getEphemeralApplications();
+
+    /**
+     * Gets the icon for an ephemeral application.
+     *
+     * @param packageName The app package name.
+     *
+     * @hide
+     */
+    public abstract Drawable getEphemeralApplicationIcon(String packageName);
+
+    /**
+     * Gets whether the caller is an ephemeral app.
+     *
+     * @return Whether caller is an ephemeral app.
+     *
+     * @see #setEphemeralCookie(byte[])
+     * @see #getEphemeralCookie()
+     * @see #getEphemeralCookieMaxSizeBytes()
+     */
+    public abstract boolean isEphemeralApplication();
+
+    /**
+     * Gets the maximum size in bytes of the cookie data an ephemeral app
+     * can store on the device.
+     *
+     * @return The max cookie size in bytes.
+     *
+     * @see #isEphemeralApplication()
+     * @see #setEphemeralCookie(byte[])
+     * @see #getEphemeralCookie()
+     */
+    public abstract int getEphemeralCookieMaxSizeBytes();
+
+    /**
+     * Gets the ephemeral application cookie for this app. Non
+     * ephemeral apps and apps that were ephemeral but were upgraded
+     * to non-ephemeral can still access this API. For ephemeral apps
+     * this cooke is cached for some time after uninstall while for
+     * normal apps the cookie is deleted after the app is uninstalled.
+     * The cookie is always present while the app is installed.
+     *
+     * @return The cookie.
+     *
+     * @see #isEphemeralApplication()
+     * @see #setEphemeralCookie(byte[])
+     * @see #getEphemeralCookieMaxSizeBytes()
+     */
+    public abstract @NonNull byte[] getEphemeralCookie();
+
+    /**
+     * Sets the ephemeral application cookie for the calling app. Non
+     * ephemeral apps and apps that were ephemeral but were upgraded
+     * to non-ephemeral can still access this API. For ephemeral apps
+     * this cooke is cached for some time after uninstall while for
+     * normal apps the cookie is deleted after the app is uninstalled.
+     * The cookie is always present while the app is installed. The
+     * cookie size is limited by {@link #getEphemeralCookieMaxSizeBytes()}.
+     *
+     * @param cookie The cookie data.
+     * @return True if the cookie was set.
+     *
+     * @see #isEphemeralApplication()
+     * @see #getEphemeralCookieMaxSizeBytes()
+     * @see #getEphemeralCookie();
+     */
+    public abstract boolean setEphemeralCookie(@NonNull  byte[] cookie);
 
     /**
      * Get a list of shared libraries that are available on the

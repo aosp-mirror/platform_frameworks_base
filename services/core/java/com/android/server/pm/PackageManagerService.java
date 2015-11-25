@@ -105,6 +105,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
+import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
@@ -144,6 +145,7 @@ import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Debug;
@@ -200,6 +202,7 @@ import android.util.SparseIntArray;
 import android.util.Xml;
 import android.view.Display;
 
+import com.android.internal.annotations.GuardedBy;
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
@@ -207,7 +210,6 @@ import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
 import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.EphemeralResolveInfo;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
@@ -511,6 +513,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // If a recursive restorecon of /data/data/<pkg> is needed.
     private boolean mShouldRestoreconData = SELinuxMMAC.shouldRestorecon();
+
+    private final EphemeralApplicationRegistry mEphemeralApplicationRegistry;
 
     public static final class SharedLibraryEntry {
         public final String path;
@@ -1394,6 +1398,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                                             >= Build.VERSION_CODES.M) {
                                 grantRequestedRuntimePermissions(res.pkg, args.user.getIdentifier(),
                                         args.installGrantPermissions);
+                            }
+
+                            synchronized (mPackages) {
+                                mEphemeralApplicationRegistry.onPackageInstalledLPw(res.pkg);
                             }
 
                             // Determine the set of users who are adding this
@@ -2405,6 +2413,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mEphemeralInstallerComponent = null;
                 mEphemeralResolverConnection = null;
             }
+
+            mEphemeralApplicationRegistry = new EphemeralApplicationRegistry(this);
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
@@ -5782,6 +5792,82 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             return new ParceledListSlice<ApplicationInfo>(list);
         }
+    }
+
+    @Override
+    public ParceledListSlice<EphemeralApplicationInfo> getEphemeralApplications(int userId) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS,
+                "getEphemeralApplications");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "getEphemeralApplications");
+        synchronized (mPackages) {
+            List<EphemeralApplicationInfo> ephemeralApps = mEphemeralApplicationRegistry
+                    .getEphemeralApplicationsLPw(userId);
+            if (ephemeralApps != null) {
+                return new ParceledListSlice<>(ephemeralApps);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isEphemeralApplication(String packageName, int userId) {
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "isEphemeral");
+        if (!isCallerSameApp(packageName)) {
+            return false;
+        }
+        synchronized (mPackages) {
+            PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg != null) {
+                return pkg.applicationInfo.isEphemeralApp();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public byte[] getEphemeralApplicationCookie(String packageName, int userId) {
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "getCookie");
+        if (!isCallerSameApp(packageName)) {
+            return null;
+        }
+        synchronized (mPackages) {
+            return mEphemeralApplicationRegistry.getEphemeralApplicationCookieLPw(
+                    packageName, userId);
+        }
+    }
+
+    @Override
+    public boolean setEphemeralApplicationCookie(String packageName, byte[] cookie, int userId) {
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "setCookie");
+        if (!isCallerSameApp(packageName)) {
+            return false;
+        }
+        synchronized (mPackages) {
+            return mEphemeralApplicationRegistry.setEphemeralApplicationCookieLPw(
+                    packageName, cookie, userId);
+        }
+    }
+
+    @Override
+    public Bitmap getEphemeralApplicationIcon(String packageName, int userId) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS,
+                "getEphemeralApplicationIcon");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
+                "getEphemeralApplicationIcon");
+        synchronized (mPackages) {
+            return mEphemeralApplicationRegistry.getEphemeralApplicationIconLPw(
+                    packageName, userId);
+        }
+    }
+
+    private boolean isCallerSameApp(String packageName) {
+        PackageParser.Package pkg = mPackages.get(packageName);
+        return pkg != null
+                && UserHandle.getAppId(Binder.getCallingUid()) == pkg.applicationInfo.uid;
     }
 
     public List<ApplicationInfo> getPersistentApplications(int flags) {
@@ -12270,8 +12356,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
-            final boolean oldIsEphemeral
-                    = ((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_EPHEMERAL) != 0);
+            final boolean oldIsEphemeral = oldPackage.applicationInfo.isEphemeralApp();
             if (isEphemeral && !oldIsEphemeral) {
                 // can't downgrade from full to ephemeral
                 Slog.w(TAG, "Can't replace app with ephemeral: " + pkgName);
@@ -13090,11 +13175,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static boolean isEphemeral(PackageParser.Package pkg) {
-        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EPHEMERAL) != 0;
+        return pkg.applicationInfo.isEphemeralApp();
     }
 
     private static boolean isEphemeral(PackageSetting ps) {
-        return (ps.pkgFlags & ApplicationInfo.FLAG_EPHEMERAL) != 0;
+        return ps.pkg != null && isEphemeral(ps.pkg);
     }
 
     private static boolean isSystemApp(PackageParser.Package pkg) {
@@ -13295,11 +13380,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean removedForAllUsers = false;
         boolean systemUpdate = false;
 
+        PackageParser.Package uninstalledPkg;
+
         // for the uninstall-updates case and restricted profiles, remember the per-
         // userhandle installed state
         int[] allUsers;
         boolean[] perUserInstalled;
         synchronized (mPackages) {
+            uninstalledPkg = mPackages.get(packageName);
             PackageSetting ps = mSettings.mPackages.get(packageName);
             allUsers = sUserManager.getUserIds();
             perUserInstalled = new boolean[allUsers.length];
@@ -13314,8 +13402,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     true, allUsers, perUserInstalled,
                     flags | REMOVE_CHATTY, info, true);
             systemUpdate = info.isRemovedPackageSystemUpdate;
-            if (res && !systemUpdate && mPackages.get(packageName) == null) {
-                removedForAllUsers = true;
+            synchronized (mPackages) {
+                if (res) {
+                    if (!systemUpdate && mPackages.get(packageName) == null) {
+                        removedForAllUsers = true;
+                    }
+                    mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPkg);
+                }
             }
             if (DEBUG_REMOVE) Slog.d(TAG, "delete res: systemUpdate=" + systemUpdate
                     + " removedForAllUsers=" + removedForAllUsers);
@@ -16837,6 +16930,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mUserNeedsBadging.delete(userHandle);
             mSettings.removeUserLPw(userHandle);
             mPendingBroadcasts.remove(userHandle);
+            mEphemeralApplicationRegistry.onUserRemovedLPw(userHandle);
         }
         synchronized (mInstallLock) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
