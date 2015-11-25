@@ -3522,7 +3522,8 @@ public class Editor {
         }
     }
 
-    private abstract class HandleView extends View implements TextViewPositionListener {
+    @VisibleForTesting
+    public abstract class HandleView extends View implements TextViewPositionListener {
         protected Drawable mDrawable;
         protected Drawable mDrawableLtr;
         protected Drawable mDrawableRtl;
@@ -3553,8 +3554,9 @@ public class Editor {
         // a different line.
         protected int mPreviousLineTouched = UNSET_LINE;
 
-        public HandleView(Drawable drawableLtr, Drawable drawableRtl) {
+        private HandleView(Drawable drawableLtr, Drawable drawableRtl, final int id) {
             super(mTextView.getContext());
+            setId(id);
             mContainer = new PopupWindow(mTextView.getContext(), null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
@@ -3916,7 +3918,7 @@ public class Editor {
         private Runnable mHider;
 
         public InsertionHandleView(Drawable drawable) {
-            super(drawable, drawable);
+            super(drawable, drawable, com.android.internal.R.id.insertion_handle);
         }
 
         @Override
@@ -4101,7 +4103,7 @@ public class Editor {
         private final int[] mTextViewLocation = new int[2];
 
         public SelectionStartHandleView(Drawable drawableLtr, Drawable drawableRtl) {
-            super(drawableLtr, drawableRtl);
+            super(drawableLtr, drawableRtl, com.android.internal.R.id.selection_start_handle);
             ViewConfiguration viewConfiguration = ViewConfiguration.get(
                     mTextView.getContext());
             mTextViewEdgeSlop = viewConfiguration.getScaledTouchSlop() * 4;
@@ -4341,7 +4343,7 @@ public class Editor {
         private final int[] mTextViewLocation = new int[2];
 
         public SelectionEndHandleView(Drawable drawableLtr, Drawable drawableRtl) {
-            super(drawableLtr, drawableRtl);
+            super(drawableLtr, drawableRtl, com.android.internal.R.id.selection_end_handle);
             ViewConfiguration viewConfiguration = ViewConfiguration.get(
                     mTextView.getContext());
             mTextViewEdgeSlop = viewConfiguration.getScaledTouchSlop() * 4;

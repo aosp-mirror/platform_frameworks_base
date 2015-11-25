@@ -19,6 +19,8 @@ package android.widget;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.doubleTapAndDragOnText;
 import static android.widget.espresso.TextViewActions.doubleClickOnTextAtIndex;
+import static android.widget.espresso.TextViewActions.dragHandle;
+import static android.widget.espresso.TextViewActions.Handle;
 import static android.widget.espresso.TextViewActions.longPressAndDragOnText;
 import static android.widget.espresso.TextViewActions.longPressOnTextAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
@@ -29,11 +31,16 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.pressKey;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.allOf;
 
 import com.android.frameworks.coretests.R;
 
+import android.support.test.espresso.ViewInteraction;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.KeyEvent;
@@ -156,5 +163,27 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         // Ideally, we'll wait using the UiController, but I guess this works for now.
         Thread.sleep(100);
         assertFloatingToolbarIsDisplayed(getActivity());
+    }
+
+    private static ViewInteraction onHandleView(int id) {
+        return onView(allOf(withId(id), isAssignableFrom(Editor.HandleView.class)))
+                .inRoot(withDecorView(hasDescendant(withId(id))));
+    }
+
+    @SmallTest
+    public void testSelectionHandles() throws Exception {
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasSelection("abcd efg"));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('k') + 1));
+        onView(withId(R.id.textview)).check(hasSelection("abcd efg hijk"));
     }
 }

@@ -17,7 +17,7 @@
 package android.widget.espresso;
 
 import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
-
+import android.graphics.Rect;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
@@ -27,6 +27,7 @@ import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.util.HumanReadables;
 import android.text.Layout;
 import android.view.View;
+import android.widget.Editor;
 import android.widget.TextView;
 
 /**
@@ -95,11 +96,12 @@ public final class TextViewActions {
      */
     public static ViewAction longPressAndDragOnText(int startIndex, int endIndex) {
         return actionWithAssertions(
-                new DragOnTextViewActions(
-                        DragOnTextViewActions.Drag.LONG_PRESS,
+                new DragAction(
+                        DragAction.Drag.LONG_PRESS,
                         new TextCoordinates(startIndex),
                         new TextCoordinates(endIndex),
-                        Press.FINGER));
+                        Press.FINGER,
+                        TextView.class));
     }
 
     /**
@@ -116,11 +118,12 @@ public final class TextViewActions {
      */
     public static ViewAction doubleTapAndDragOnText(int startIndex, int endIndex) {
         return actionWithAssertions(
-                new DragOnTextViewActions(
-                        DragOnTextViewActions.Drag.DOUBLE_TAP,
+                new DragAction(
+                        DragAction.Drag.DOUBLE_TAP,
                         new TextCoordinates(startIndex),
                         new TextCoordinates(endIndex),
-                        Press.FINGER));
+                        Press.FINGER,
+                        TextView.class));
     }
 
     /**
@@ -137,11 +140,89 @@ public final class TextViewActions {
      */
     public static ViewAction mouseDragOnText(int startIndex, int endIndex) {
         return actionWithAssertions(
-                new DragOnTextViewActions(
-                        DragOnTextViewActions.Drag.MOUSE_DOWN,
+                new DragAction(
+                        DragAction.Drag.MOUSE_DOWN,
                         new TextCoordinates(startIndex),
                         new TextCoordinates(endIndex),
-                        Press.PINPOINT));
+                        Press.PINPOINT,
+                        TextView.class));
+    }
+
+    public enum Handle {
+        SELECTION_START,
+        SELECTION_END,
+        INSERTION
+    };
+
+    /**
+     * Returns an action that tap then drags on the handle from the current position to endIndex on
+     * the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     * @param handleType Type of the handle
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction dragHandle(TextView textView, Handle handleType, int endIndex) {
+        final int currentOffset = handleType == Handle.SELECTION_START ?
+                textView.getSelectionStart() : textView.getSelectionEnd();
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.TAP,
+                        new HandleCoordinates(textView, handleType, currentOffset),
+                        new HandleCoordinates(textView, handleType, endIndex),
+                        Press.FINGER,
+                        Editor.HandleView.class));
+    }
+
+    /**
+     * A provider of the x, y coordinates of the handle that points the specified text index in a
+     * text view.
+     */
+    private static final class HandleCoordinates implements CoordinatesProvider {
+        private final TextView mTextView;
+        private final Handle mHandleType;
+        private final int mIndex;
+        private final String mActionDescription;
+
+        public HandleCoordinates(TextView textView, Handle handleType, int index) {
+            mTextView = textView;
+            mHandleType = handleType;
+            mIndex = index;
+            mActionDescription = "Could not locate " + handleType.toString()
+                    + " handle that points text index: " + index;
+        }
+
+        @Override
+        public float[] calculateCoordinates(View view) {
+            try {
+                return locateHandlePointsTextIndex(view);
+            } catch (StringIndexOutOfBoundsException e) {
+                throw new PerformException.Builder()
+                        .withActionDescription(mActionDescription)
+                        .withViewDescription(HumanReadables.describe(view))
+                        .withCause(e)
+                        .build();
+            }
+        }
+
+        private float[] locateHandlePointsTextIndex(View view) {
+            final int currentOffset = mHandleType == Handle.SELECTION_START ?
+                    mTextView.getSelectionStart() : mTextView.getSelectionEnd();
+            final float[] currentCoordinates =
+                    (new TextCoordinates(currentOffset)).calculateCoordinates(mTextView);
+            final float[] targetCoordinates =
+                    (new TextCoordinates(mIndex)).calculateCoordinates(mTextView);
+            final Rect bounds = new Rect();
+            view.getBoundsOnScreen(bounds);
+            final float diffX = bounds.centerX() - currentCoordinates[0];
+            final float diffY = bounds.centerY() - currentCoordinates[1];
+            return new float[] {targetCoordinates[0] + diffX, targetCoordinates[1] + diffY};
+        }
     }
 
     /**

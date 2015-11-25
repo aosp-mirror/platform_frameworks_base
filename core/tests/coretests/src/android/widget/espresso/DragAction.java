@@ -34,26 +34,25 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.TextView;
 
 import org.hamcrest.Matcher;
 
 
 /**
- * Drags on text in a TextView using touch events.<br>
+ * Drags on a View using touch events.<br>
  * <br>
  * View constraints:
  * <ul>
- * <li>must be a TextView displayed on screen
+ * <li>must be displayed on screen
  * <ul>
  */
-public final class DragOnTextViewActions implements ViewAction {
+public final class DragAction implements ViewAction {
     public interface Dragger extends Swiper {
         UiController wrapUiController(UiController uiController);
     }
 
     /**
-     * Executes different "drag on text" types to given positions.
+     * Executes different drag types to given positions.
      */
     public enum Drag implements Dragger {
 
@@ -82,12 +81,41 @@ public final class DragOnTextViewActions implements ViewAction {
 
             @Override
             public String toString() {
-                return "mouse down and drag to select";
+                return "mouse down and drag";
             }
 
             @Override
             public UiController wrapUiController(UiController uiController) {
                 return new MouseUiController(uiController);
+            }
+        },
+
+        /**
+         * Starts a drag with a tap.
+         */
+        TAP {
+            private DownMotionPerformer downMotion = new DownMotionPerformer() {
+                @Override
+                public MotionEvent perform(
+                        UiController uiController, float[] coordinates, float[] precision) {
+                    MotionEvent downEvent = MotionEvents.sendDown(
+                            uiController, coordinates, precision)
+                            .down;
+                    return downEvent;
+                }
+            };
+
+            @Override
+            public Status sendSwipe(
+                    UiController uiController,
+                    float[] startCoordinates, float[] endCoordinates, float[] precision) {
+                return sendLinearDrag(
+                        uiController, downMotion, startCoordinates, endCoordinates, precision);
+            }
+
+            @Override
+            public String toString() {
+                return "tap and drag";
             }
         },
 
@@ -121,7 +149,7 @@ public final class DragOnTextViewActions implements ViewAction {
 
             @Override
             public String toString() {
-                return "long press and drag to select";
+                return "long press and drag";
             }
         },
 
@@ -166,7 +194,7 @@ public final class DragOnTextViewActions implements ViewAction {
 
             @Override
             public String toString() {
-                return "double-tap and drag to select";
+                return "double-tap and drag";
             }
         };
 
@@ -258,22 +286,25 @@ public final class DragOnTextViewActions implements ViewAction {
     private final CoordinatesProvider mStartCoordinatesProvider;
     private final CoordinatesProvider mEndCoordinatesProvider;
     private final PrecisionDescriber mPrecisionDescriber;
+    private final Class<? extends View> mViewClass;
 
-    public DragOnTextViewActions(
+    public DragAction(
             Dragger dragger,
             CoordinatesProvider startCoordinatesProvider,
             CoordinatesProvider endCoordinatesProvider,
-            PrecisionDescriber precisionDescriber) {
+            PrecisionDescriber precisionDescriber,
+            Class<? extends View> viewClass) {
         mDragger = checkNotNull(dragger);
         mStartCoordinatesProvider = checkNotNull(startCoordinatesProvider);
         mEndCoordinatesProvider = checkNotNull(endCoordinatesProvider);
         mPrecisionDescriber = checkNotNull(precisionDescriber);
+        mViewClass = viewClass;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Matcher<View> getConstraints() {
-        return allOf(isCompletelyDisplayed(), isAssignableFrom(TextView.class));
+        return allOf(isCompletelyDisplayed(), isAssignableFrom(mViewClass));
     }
 
     @Override
