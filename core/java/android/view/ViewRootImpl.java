@@ -1974,6 +1974,15 @@ public final class ViewRootImpl implements ViewParent,
         final List<View> partialLayoutViews = mAttachInfo.mPartialLayoutViews;
         final boolean didPartialLayout;
         if (!partialLayoutViews.isEmpty()) {
+            // Measurement or layout of views may result in changes to the list
+            // of partial-layout views. Swap in an "empty" list to prevent
+            // concurrent modification of the list being traversed.
+            if (mAttachInfo.mEmptyPartialLayoutViews == null) {
+                mAttachInfo.mPartialLayoutViews = new ArrayList<>();
+            } else {
+                mAttachInfo.mPartialLayoutViews = mAttachInfo.mEmptyPartialLayoutViews;
+            }
+
             final int count = partialLayoutViews.size();
             mInLayout = true;
             for (int i = 0; i < count; i++) {
@@ -1992,9 +2001,12 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             mInLayout = false;
-            partialLayoutViews.clear();
             didPartialLayout = true;
             triggerGlobalLayoutListener = true;
+
+            // The traversal list becomes the new empty list.
+            partialLayoutViews.clear();
+            mAttachInfo.mEmptyPartialLayoutViews = partialLayoutViews;
         } else {
             didPartialLayout = false;
         }

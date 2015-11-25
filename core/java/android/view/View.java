@@ -22369,7 +22369,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Used to track views that need (at least) a partial relayout at their current size
          * during the next traversal.
          */
-        final List<View> mPartialLayoutViews = new ArrayList<View>();
+        List<View> mPartialLayoutViews = new ArrayList<>();
+
+        /**
+         * Swapped with mPartialLayoutViews during layout to avoid concurrent
+         * modification. Lazily assigned during ViewRootImpl layout.
+         */
+        List<View> mEmptyPartialLayoutViews;
 
         /**
          * Used to track the identity of the current drag operation.
