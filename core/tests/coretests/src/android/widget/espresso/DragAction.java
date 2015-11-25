@@ -206,6 +206,9 @@ public final class DragAction implements ViewAction {
         /** Length of time a drag should last for, in milliseconds. */
         private static final int DRAG_DURATION = 1500;
 
+        /** Duration between the last move event and the up event, in milliseconds. */
+        private static final int WAIT_BEFORE_SENDING_UP = 400;
+
         private static Status sendLinearDrag(
                 UiController uiController, DownMotionPerformer downMotion,
                 float[] startCoordinates, float[] endCoordinates, float[] precision) {
@@ -235,6 +238,10 @@ public final class DragAction implements ViewAction {
                         uiController.loopMainThreadForAtLeast(timeUntilDesired);
                     }
                 }
+
+                // Wait before sending up because some drag handling logic may discard move events
+                // that has been sent immediately before the up event. e.g. HandleView.
+                uiController.loopMainThreadForAtLeast(WAIT_BEFORE_SENDING_UP);
 
                 if (!MotionEvents.sendUp(uiController, downEvent, endCoordinates)) {
                     String logMessage = "Injection of up event as part of the drag failed. " +
