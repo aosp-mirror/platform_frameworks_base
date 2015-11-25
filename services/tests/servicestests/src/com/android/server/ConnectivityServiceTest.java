@@ -1077,7 +1077,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         NETWORK_CAPABILITIES,
         LINK_PROPERTIES,
         LOSING,
-        LOST
+        LOST,
+        UNAVAILABLE
     }
 
     private static class CallbackInfo {
@@ -1123,6 +1124,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         @Override
         public void onAvailable(Network network) {
             setLastCallback(CallbackState.AVAILABLE, network, null);
+        }
+
+        @Override
+        public void onUnavailable() {
+            setLastCallback(CallbackState.UNAVAILABLE, null, null);
         }
 
         @Override
@@ -2234,6 +2240,79 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(cellNetworkCallback);
         mCm.unregisterNetworkCallback(validatedWifiCallback);
         mCm.unregisterNetworkCallback(defaultCallback);
+    }
+
+    /**
+     * Validate that a satisfied network request does not trigger onUnavailable() once the
+     * time-out period expires.
+     */
+    @SmallTest
+    public void testSatisfiedNetworkRequestDoesNotTriggerOnUnavailable() {
+        NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
+                NetworkCapabilities.TRANSPORT_WIFI).build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.requestNetwork(nr, networkCallback, 10);
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        networkCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+
+        // pass timeout and validate that UNAVAILABLE is not called
+        try {
+            Thread.sleep(15);
+        } catch (InterruptedException e) {
+        }
+        networkCallback.assertNoCallback();
+    }
+
+    /**
+     * Validate that when a time-out is specified for a network request the onUnavailable()
+     * callback is called when time-out expires. Then validate that if network request is
+     * (somehow) satisfied - the callback isn't called later.
+     */
+    @SmallTest
+    public void testTimedoutNetworkRequest() {
+        NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
+                NetworkCapabilities.TRANSPORT_WIFI).build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.requestNetwork(nr, networkCallback, 10);
+
+        // pass timeout and validate that UNAVAILABLE is called
+        networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
+
+        // create a network satisfying request - validate that request not triggered
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        networkCallback.assertNoCallback();
+    }
+
+    /**
+     * Validate that when a network request is unregistered (cancelled) the time-out for that
+     * request doesn't trigger the onUnavailable() callback.
+     */
+    @SmallTest
+    public void testTimedoutAfterUnregisteredNetworkRequest() {
+        NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
+                NetworkCapabilities.TRANSPORT_WIFI).build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.requestNetwork(nr, networkCallback, 10);
+
+        // remove request
+        mCm.unregisterNetworkCallback(networkCallback);
+
+        // pass timeout and validate that no callbacks
+        // Note: doesn't validate that nothing called from CS since even if called the CM already
+        // unregisters the callback and won't pass it through!
+        try {
+            Thread.sleep(15);
+        } catch (InterruptedException e) {
+        }
+        networkCallback.assertNoCallback();
+
+        // create a network satisfying request - validate that request not triggered
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        networkCallback.assertNoCallback();
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {

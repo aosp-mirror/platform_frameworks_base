@@ -2591,14 +2591,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "request NetworkCapabilities", ConnectivityManager.CALLBACK_CAP_CHANGED);
     }
 
+    private void handleTimedOutNetworkRequest(final NetworkRequestInfo nri) {
+        if (mNetworkRequests.get(nri.request) != null && mNetworkForRequestId.get(
+                nri.request.requestId) == null) {
+            handleRemoveNetworkRequest(nri, ConnectivityManager.CALLBACK_UNAVAIL);
+        }
+    }
+
     private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
         final NetworkRequestInfo nri = getNriForAppRequest(
                 request, callingUid, "release NetworkRequest");
-        if (nri == null) return;
+        if (nri != null) {
+            handleRemoveNetworkRequest(nri, ConnectivityManager.CALLBACK_RELEASED);
+        }
+    }
 
-        if (VDBG || (DBG && nri.request.isRequest())) log("releasing " + request);
+    private void handleRemoveNetworkRequest(final NetworkRequestInfo nri, final int whichCallback) {
+        final String logCallbackType = ConnectivityManager.getCallbackName(whichCallback);
+        if (VDBG || (DBG && nri.request.isRequest())) {
+            log("releasing " + nri.request + " (" + logCallbackType + ")");
+        }
         nri.unlinkDeathRecipient();
-        mNetworkRequests.remove(request);
+        mNetworkRequests.remove(nri.request);
         synchronized (mUidToNetworkRequestCount) {
             int requests = mUidToNetworkRequestCount.get(nri.mUid, 0);
             if (requests < 1) {
@@ -2692,7 +2706,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_RELEASED, 0);
+        callCallbackForRequest(nri, null, whichCallback, 0);
     }
 
     @Override
@@ -2927,6 +2941,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT:
                 case EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT: {
                     handleRegisterNetworkRequestWithIntent(msg);
+                    break;
+                }
+                case EVENT_TIMEOUT_NETWORK_REQUEST: {
+                    NetworkRequestInfo nri = (NetworkRequestInfo) msg.obj;
+                    handleTimedOutNetworkRequest(nri);
                     break;
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT: {
