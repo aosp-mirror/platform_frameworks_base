@@ -1337,6 +1337,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"تم إلغاء تسهيل الدخول."</string>
     <string name="user_switched" msgid="3768006783166984410">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"جارٍ التبديل إلى <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"جارٍ الخروج <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"المالك"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خطأ"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"لا يسمح المشرف بإجراء هذا التغيير"</string>
@@ -1469,6 +1470,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"تم تثبيت الحزمة عن طريق المشرف"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>

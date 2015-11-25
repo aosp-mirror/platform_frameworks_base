@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"無障礙功能已取消。"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"正在登出 <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"擁有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"錯誤"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"您的管理員不允許這項變更"</string>
@@ -1433,6 +1434,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
+    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"不可更改應用程式尺寸，請使用兩隻手指捲動應用程式。"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>

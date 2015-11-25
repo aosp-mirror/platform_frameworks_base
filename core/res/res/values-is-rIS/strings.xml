@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hætt við aukið aðgengi."</string>
     <string name="user_switched" msgid="3768006783166984410">"Núverandi notandi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Skiptir yfir á <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"Skráir <xliff:g id="NAME">%1$s</xliff:g> út…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigandi"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Villa"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Stjórnandinn þinn leyfir ekki þessa breytingu."</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Biðja um PIN-númer til að losa"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Biðja um opnunarmynstur til að losa"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Biðja um aðgangsorð til að losa"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Uppsett af kerfisstjóra"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Uppfært af kerfisstjóranum"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eytt af kerfisstjóra"</string>
@@ -1501,6 +1504,5 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> valið</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valin</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Ýmislegt"</string>
 </resources>

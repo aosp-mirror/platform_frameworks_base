@@ -253,7 +253,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Терип жаткан текстти текшерүү"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредиттик карта номурлары жана сырсөздөр сыяктуу өздүк берилиштерди камтыйт."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Дисплейди чоңойтууну башкаруу"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Дисплейдин чен өлчөмүн өзгөртүү деңгээли жана жайгаштыруу."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Экрандагы сүрөттүн өлчөмүн өзгөртүү жана жайгаштыруу."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"абал тилкесин өчүрүү же өзгөртүү"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Колдонмого абал тилкесин өчүрүү же тутум сүрөтчөлөрүн кошуу же алып салуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"абал тилкесинин милдетин аткаруу"</string>
@@ -1306,6 +1306,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Атайын мүмкүнчүлүктөр иштетилген жок."</string>
     <string name="user_switched" msgid="3768006783166984410">"Учурдагы колдонуучу <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> дегенге которулууда…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> чыгууда…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Ээси"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ката"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Мындай өзгөртүүгө администраторуңуз тарабынан тыюу салынган."</string>
@@ -1434,6 +1435,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Администраторуңуз тарабынан орнотулган"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Администраторуңуз жаңырткан"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
@@ -1502,6 +1505,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> тандалды</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> тандалды</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Калган-каткандар"</string>
 </resources>

@@ -253,7 +253,7 @@
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Pot fi instalate scripturi pentru a face conținutul aplicațiilor mai accesibil."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Remarcă textul pe care îl introduceți"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
-    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlați mărirea afișajului"</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlați mărirea pe afișaj"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlați nivelul de zoom și poziționarea afișajului."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"dezactivare sau modificare bare de stare"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite aplicației să dezactiveze bara de stare sau să adauge și să elimine pictograme de sistem."</string>
@@ -1313,6 +1313,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"Se deconectează utilizatorul <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Eroare"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Această modificare nu este permisă de administratorul dvs."</string>
@@ -1442,6 +1443,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicită codul PIN înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicită modelul pentru deblocare înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicită parola înainte de a anula fixarea"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalat de administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
@@ -1519,6 +1522,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selectat</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
 </resources>
