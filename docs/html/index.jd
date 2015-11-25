@@ -10,8 +10,8 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 <section class="dac-hero-carousel">
 
 <!-- <article class="dac-expand dac-hero dac-invert active" style="background-color: rgb(38, 50, 56);"> -->
-<article class="dac-expand dac-hero dac-invert dac-darken mprev summit active" style="background-color: #75d1ff;">
-<a href="https://androiddevsummit.withgoogle.com/">
+<article class="dac-expand dac-hero dac-invert dac-darken mprev active" style="background-color: #75d1ff;">
+<a href="about/versions/marshmallow/index.html">
   <div class="wrap" style="max-width:1100px;margin-top:0">
     <div class="cols dac-hero-content">
       <div class="col-8of16 col-push-6of16 dac-hero-figure mprev">
@@ -19,21 +19,19 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
       <div class="col-8of16 col-pull-7of16">
         <div class="dac-hero-tag"></div>
 
-        <h1 class="dac-hero-title" style="white-space:nowrap;">Android Developer Summit</h1>
+        <h1 class="dac-hero-title" style="white-space:nowrap;">Android 6.0 Marshmallow</h1>
         </div>
         <div class="col-6of16 col-push-1of16">
-        <p class="dac-hero-description" style="color:white;"><span style="white-space:nowrap;"><strong>November 23-24;
-          Mountain View, CA</strong></span><br />
-        Over 16 hours of deep Android technical content, streamed live. </p>
+        <p class="dac-hero-description" style="color:white"><strong>The
+        official Android 6.0 SDK is now available!</strong>
+        Explore&nbsp;what's&nbsp;new &mdash; runtime permissions,
+        Doze and App Standby power-saving features, new
+        assist technology, and more.</p>
 
-        <a class="dac-hero-cta" href="https://androiddevsummit.withgoogle.com/schedule">
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/marshmallow/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          See the schedule
-        </a><br />
-        <a class="dac-hero-cta" href="https://androiddevsummit.withgoogle.com/stream">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Get updates to watch live
-        </a>
+          Learn more
+        </a><br>
       </div>
       </div>
     </div>
@@ -55,7 +53,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Browse Samples
       </a></div>
-      <div><a href="{@docRoot}/www.youtube.com/user/androiddevelopers">
+      <div><a href="https://www.youtube.com/user/androiddevelopers">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Watch Videos
       </a></div>
