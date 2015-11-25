@@ -381,7 +381,25 @@ class WindowSurfacePlacer {
         }
 
         // Destroy the surface of any windows that are no longer visible.
-        final boolean wallpaperDestroyed = mService.destroySurfacesLocked();
+        boolean wallpaperDestroyed = false;
+        i = mService.mDestroySurface.size();
+        if (i > 0) {
+            do {
+                i--;
+                WindowState win = mService.mDestroySurface.get(i);
+                win.mDestroying = false;
+                if (mService.mInputMethodWindow == win) {
+                    mService.mInputMethodWindow = null;
+                }
+                if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
+                    wallpaperDestroyed = true;
+                }
+                if (!win.shouldSaveSurface()) {
+                    win.mWinAnimator.destroySurfaceLocked();
+                }
+            } while (i > 0);
+            mService.mDestroySurface.clear();
+        }
 
         // Time to remove any exiting tokens?
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {

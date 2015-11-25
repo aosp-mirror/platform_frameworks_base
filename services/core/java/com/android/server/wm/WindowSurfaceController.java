@@ -296,8 +296,10 @@ class WindowSurfaceController {
     }
 
     boolean showRobustlyInTransaction() {
-        if (SHOW_TRANSACTIONS) logSurface("SHOW (performLayout)", null);
-        if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this + " during relayout");
+        if (SHOW_TRANSACTIONS) logSurface(
+                "SHOW (performLayout)", null);
+        if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
+                + " during relayout");
 
         if (mHiddenForCrop) {
             return false;
