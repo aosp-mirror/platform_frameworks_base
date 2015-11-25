@@ -2658,7 +2658,43 @@ nSystemGetPointerSize(JNIEnv *_env, jobject _this) {
     return (jint)sizeof(void*);
 }
 
+static jobject
+nAllocationGetByteBuffer(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
+                        jlongArray strideArr, jint xBytesSize,
+                        jint dimY, jint dimZ) {
+    if (kLogApi) {
+        ALOGD("nAllocationGetByteBuffer, con(%p), alloc(%p)", (RsContext)con, (RsAllocation)alloc);
+    }
 
+    jlong *jStridePtr = _env->GetLongArrayElements(strideArr, nullptr);
+    if (jStridePtr == nullptr) {
+        ALOGE("Failed to get Java array elements: strideArr");
+        return 0;
+    }
+
+    size_t strideIn = xBytesSize;
+    void* ptr = nullptr;
+    if (alloc != 0) {
+        ptr = rsAllocationGetPointer((RsContext)con, (RsAllocation)alloc, 0,
+                                     RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X, 0, 0,
+                                     &strideIn, sizeof(size_t));
+    }
+
+    jobject byteBuffer = nullptr;
+    if (ptr != nullptr) {
+        size_t bufferSize = strideIn;
+        jStridePtr[0] = strideIn;
+        if (dimY > 0) {
+            bufferSize *= dimY;
+        }
+        if (dimZ > 0) {
+            bufferSize *= dimZ;
+        }
+        byteBuffer = _env->NewDirectByteBuffer(ptr, (jlong) bufferSize);
+    }
+    _env->ReleaseLongArrayElements(strideArr, jStridePtr, 0);
+    return byteBuffer;
+}
 // ---------------------------------------------------------------------------
 
 
@@ -2814,6 +2850,7 @@ static const JNINativeMethod methods[] = {
 {"rsnMeshGetIndices",                "(JJ[J[II)V",                            (void*)nMeshGetIndices },
 
 {"rsnSystemGetPointerSize",          "()I",                                   (void*)nSystemGetPointerSize },
+{"rsnAllocationGetByteBuffer",       "(JJ[JIII)Ljava/nio/ByteBuffer;",        (void*)nAllocationGetByteBuffer },
 };
 
 static int registerFuncs(JNIEnv *_env)
