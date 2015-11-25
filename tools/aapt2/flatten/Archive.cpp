@@ -18,7 +18,7 @@
 #include "util/Files.h"
 #include "util/StringPiece.h"
 
-#include <fstream>
+#include <cstdio>
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,70 +30,85 @@ namespace {
 
 struct DirectoryWriter : public IArchiveWriter {
     std::string mOutDir;
-    std::vector<std::unique_ptr<ArchiveEntry>> mEntries;
+    std::unique_ptr<FILE, decltype(fclose)*> mFile = { nullptr, fclose };
 
-    explicit DirectoryWriter(const StringPiece& outDir) : mOutDir(outDir.toString()) {
+    bool open(IDiagnostics* diag, const StringPiece& outDir) {
+        mOutDir = outDir.toString();
+        file::FileType type = file::getFileType(mOutDir);
+        if (type == file::FileType::kNonexistant) {
+            diag->error(DiagMessage() << "directory " << mOutDir << " does not exist");
+            return false;
+        } else if (type != file::FileType::kDirectory) {
+            diag->error(DiagMessage() << mOutDir << " is not a directory");
+            return false;
+        }
+        return true;
     }
 
-    ArchiveEntry* writeEntry(const StringPiece& path, uint32_t flags,
-                             const BigBuffer& buffer) override {
+    bool startEntry(const StringPiece& path, uint32_t flags) override {
+        if (mFile) {
+            return false;
+        }
+
         std::string fullPath = mOutDir;
         file::appendPath(&fullPath, path);
         file::mkdirs(file::getStem(fullPath));
 
-        std::ofstream fout(fullPath, std::ofstream::binary);
-        if (!fout) {
-            return nullptr;
+        mFile = { fopen(fullPath.data(), "wb"), fclose };
+        if (!mFile) {
+            return false;
         }
-
-        if (!util::writeAll(fout, buffer)) {
-            return nullptr;
-        }
-
-        mEntries.push_back(util::make_unique<ArchiveEntry>(fullPath, flags, buffer.size()));
-        return mEntries.back().get();
+        return true;
     }
 
-    ArchiveEntry* writeEntry(const StringPiece& path, uint32_t flags, android::FileMap* fileMap,
-                             size_t offset, size_t len) override {
-        std::string fullPath = mOutDir;
-        file::appendPath(&fullPath, path);
-        file::mkdirs(file::getStem(fullPath));
-
-        std::ofstream fout(fullPath, std::ofstream::binary);
-        if (!fout) {
-            return nullptr;
+    bool writeEntry(const BigBuffer& buffer) override {
+        if (!mFile) {
+            return false;
         }
 
-        if (!fout.write((const char*) fileMap->getDataPtr() + offset, len)) {
-            return nullptr;
+        for (const BigBuffer::Block& b : buffer) {
+            if (fwrite(b.buffer.get(), 1, b.size, mFile.get()) != b.size) {
+                mFile.reset(nullptr);
+                return false;
+            }
         }
-
-        mEntries.push_back(util::make_unique<ArchiveEntry>(fullPath, flags, len));
-        return mEntries.back().get();
+        return true;
     }
 
-    virtual ~DirectoryWriter() {
+    bool writeEntry(const void* data, size_t len) override {
+        if (fwrite(data, 1, len, mFile.get()) != len) {
+            mFile.reset(nullptr);
+            return false;
+        }
+        return true;
+    }
 
+    bool finishEntry() override {
+        if (!mFile) {
+            return false;
+        }
+        mFile.reset(nullptr);
+        return true;
     }
 };
 
 struct ZipFileWriter : public IArchiveWriter {
-    FILE* mFile;
+    std::unique_ptr<FILE, decltype(fclose)*> mFile = { nullptr, fclose };
     std::unique_ptr<ZipWriter> mWriter;
-    std::vector<std::unique_ptr<ArchiveEntry>> mEntries;
 
-    explicit ZipFileWriter(const StringPiece& path) {
-        mFile = fopen(path.data(), "w+b");
-        if (mFile) {
-            mWriter = util::make_unique<ZipWriter>(mFile);
+    bool open(IDiagnostics* diag, const StringPiece& path) {
+        mFile = { fopen(path.data(), "w+b"), fclose };
+        if (!mFile) {
+            diag->error(DiagMessage() << "failed to open " << path << ": " << strerror(errno));
+            return false;
         }
+        mWriter = util::make_unique<ZipWriter>(mFile.get());
+        return true;
     }
 
-    ArchiveEntry* writeEntry(const StringPiece& path, uint32_t flags,
-                             const BigBuffer& buffer) override {
+    bool startEntry(const StringPiece& path, uint32_t flags) override {
         if (!mWriter) {
-            return nullptr;
+            return false;
         }
 
         size_t zipFlags = 0;
@@ -107,75 +122,63 @@ struct ZipFileWriter : public IArchiveWriter {
 
         int32_t result = mWriter->StartEntry(path.data(), zipFlags);
         if (result != 0) {
-            return nullptr;
+            return false;
         }
+        return true;
+    }
 
+    bool writeEntry(const void* data, size_t len) override {
+        int32_t result = mWriter->WriteBytes(data, len);
+        if (result != 0) {
+            return false;
+        }
+        return true;
+    }
+
+    bool writeEntry(const BigBuffer& buffer) override {
         for (const BigBuffer::Block& b : buffer) {
-            result = mWriter->WriteBytes(reinterpret_cast<const uint8_t*>(b.buffer.get()), b.size);
+            int32_t result = mWriter->WriteBytes(b.buffer.get(), b.size);
             if (result != 0) {
-                return nullptr;
+                return false;
             }
         }
-
-        result = mWriter->FinishEntry();
-        if (result != 0) {
-            return nullptr;
-        }
-
-        mEntries.push_back(util::make_unique<ArchiveEntry>(path.toString(), flags, buffer.size()));
-        return mEntries.back().get();
+        return true;
     }
 
-    ArchiveEntry* writeEntry(const StringPiece& path, uint32_t flags, android::FileMap* fileMap,
-                             size_t offset, size_t len) override {
-        if (!mWriter) {
-            return nullptr;
-        }
-
-        size_t zipFlags = 0;
-        if (flags & ArchiveEntry::kCompress) {
-            zipFlags |= ZipWriter::kCompress;
-        }
-
-        if (flags & ArchiveEntry::kAlign) {
-            zipFlags |= ZipWriter::kAlign32;
-        }
-
-        int32_t result = mWriter->StartEntry(path.data(), zipFlags);
+    bool finishEntry() override {
+        int32_t result = mWriter->FinishEntry();
         if (result != 0) {
-            return nullptr;
+            return false;
         }
-
-        result = mWriter->WriteBytes((const char*) fileMap->getDataPtr() + offset, len);
-        if (result != 0) {
-            return nullptr;
-        }
-
-        result = mWriter->FinishEntry();
-        if (result != 0) {
-            return nullptr;
-        }
-
-        mEntries.push_back(util::make_unique<ArchiveEntry>(path.toString(), flags, len));
-        return mEntries.back().get();
+        return true;
     }
 
     virtual ~ZipFileWriter() {
         if (mWriter) {
             mWriter->Finish();
-            fclose(mFile);
         }
     }
 };
 
 } // namespace
 
-std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(const StringPiece& path) {
-    return util::make_unique<DirectoryWriter>(path);
+std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(IDiagnostics* diag,
+                                                             const StringPiece& path) {
+
+    std::unique_ptr<DirectoryWriter> writer = util::make_unique<DirectoryWriter>();
+    if (!writer->open(diag, path)) {
+        return {};
+    }
+    return std::move(writer);
 }
 
-std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(const StringPiece& path) {
-    return util::make_unique<ZipFileWriter>(path);
+std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(IDiagnostics* diag,
+                                                           const StringPiece& path) {
+    std::unique_ptr<ZipFileWriter> writer = util::make_unique<ZipFileWriter>();
+    if (!writer->open(diag, path)) {
+        return {};
+    }
+    return std::move(writer);
 }
 
 } // namespace aapt
