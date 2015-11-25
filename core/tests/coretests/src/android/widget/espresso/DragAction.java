@@ -252,9 +252,9 @@ public final class DragAction implements ViewAction {
         private static float[][] interpolate(float[] start, float[] end) {
             float[][] res = new float[DRAG_STEP_COUNT][2];
 
-            for (int i = 1; i < DRAG_STEP_COUNT + 1; i++) {
-                res[i - 1][0] = start[0] + (end[0] - start[0]) * i / (DRAG_STEP_COUNT + 2f);
-                res[i - 1][1] = start[1] + (end[1] - start[1]) * i / (DRAG_STEP_COUNT + 2f);
+            for (int i = 0; i < DRAG_STEP_COUNT; i++) {
+                res[i][0] = start[0] + (end[0] - start[0]) * i / (DRAG_STEP_COUNT - 1f);
+                res[i][1] = start[1] + (end[1] - start[1]) * i / (DRAG_STEP_COUNT - 1f);
             }
 
             return res;
