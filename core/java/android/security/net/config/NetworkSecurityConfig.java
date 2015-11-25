@@ -134,6 +134,17 @@ public final class NetworkSecurityConfig {
         return null;
     }
 
+    /** @hide */
+    public TrustAnchor findTrustAnchorByIssuerAndSignature(X509Certificate cert) {
+        for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
+            TrustAnchor anchor = ref.findByIssuerAndSignature(cert);
+            if (anchor != null) {
+                return anchor;
+            }
+        }
+        return null;
+    }
+
     /**
      * Return a {@link Builder} for the default {@code NetworkSecurityConfig}.
      *
