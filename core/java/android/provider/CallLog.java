@@ -413,6 +413,14 @@ public class CallLog {
         public static final String POST_DIAL_DIGITS = "post_dial_digits";
 
         /**
+         * Indicates that the entry will be copied from primary user to other users.
+         * <P>Type: INTEGER</P>
+         *
+         * @hide
+         */
+        public static final String ADD_FOR_ALL_USERS = "add_for_all_users";
+
+        /**
          * If a successful call is made that is longer than this duration, update the phone number
          * in the ContactsProvider with the normalized version of the number, based on the user's
          * current country code.
@@ -444,7 +452,7 @@ public class CallLog {
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
             return addCall(ci, context, number, "", presentation, callType, features, accountHandle,
-                    start, duration, dataUsage, false, false);
+                    start, duration, dataUsage, false, null, false);
         }
 
 
@@ -467,7 +475,9 @@ public class CallLog {
          *                  the call.
          * @param addForAllUsers If true, the call is added to the call log of all currently
          *        running users. The caller must have the MANAGE_USERS permission if this is true.
-         *
+         * @param userToBeInsertedTo {@link UserHandle} of user that the call is going to be
+         *                           inserted to. null if it is inserted to the current user. The
+         *                           value is ignored if @{link addForAllUsers} is true.
          * @result The URI of the call log entry belonging to the user that made or received this
          *        call.
          * {@hide}
@@ -475,9 +485,10 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 String postDialDigits, int presentation, int callType, int features,
                 PhoneAccountHandle accountHandle, long start, int duration, Long dataUsage,
-                boolean addForAllUsers) {
+                boolean addForAllUsers, UserHandle userToBeInsertedTo) {
             return addCall(ci, context, number, postDialDigits, presentation, callType, features,
-                    accountHandle, start, duration, dataUsage, addForAllUsers, false);
+                    accountHandle, start, duration, dataUsage, addForAllUsers, userToBeInsertedTo,
+                    false);
         }
 
         /**
@@ -501,6 +512,9 @@ public class CallLog {
          *                  the call.
          * @param addForAllUsers If true, the call is added to the call log of all currently
          *        running users. The caller must have the MANAGE_USERS permission if this is true.
+         * @param userToBeInsertedTo {@link UserHandle} of user that the call is going to be
+         *                           inserted to. null if it is inserted to the current user. The
+         *                           value is ignored if @{link addForAllUsers} is true.
          * @param is_read Flag to show if the missed call log has been read by the user or not.
          *                Used for call log restore of missed calls.
          *
@@ -511,7 +525,7 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 String postDialDigits, int presentation, int callType, int features,
                 PhoneAccountHandle accountHandle, long start, int duration, Long dataUsage,
-                boolean addForAllUsers, boolean is_read) {
+                boolean addForAllUsers, UserHandle userToBeInsertedTo, boolean is_read) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
@@ -575,6 +589,7 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
+            values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
             if (callType == MISSED_TYPE) {
                 values.put(IS_READ, Integer.valueOf(is_read ? 1 : 0));
@@ -650,9 +665,13 @@ public class CallLog {
                     }
                 }
             } else {
-                result = addEntryAndRemoveExpiredEntries(context, CONTENT_URI, values);
+                Uri uri = CONTENT_URI;
+                if (userToBeInsertedTo != null) {
+                    uri = ContentProvider
+                            .maybeAddUserId(CONTENT_URI, userToBeInsertedTo.getIdentifier());
+                }
+                result = addEntryAndRemoveExpiredEntries(context, uri, values);
             }
-
             return result;
         }
 
