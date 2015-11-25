@@ -1071,7 +1071,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         Owners newOwners() {
-            return new Owners(mContext);
+            return new Owners(mContext, getUserManager(), getUserManagerInternal());
         }
 
         UserManager getUserManager() {
@@ -2150,20 +2150,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void ensureDeviceOwnerUserStarted() {
-        if (mOwners.hasDeviceOwner()) {
-            final int userId = mOwners.getDeviceOwnerUserId();
-            if (VERBOSE_LOG) {
-                Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
+        final int userId;
+        synchronized (this) {
+            if (!mOwners.hasDeviceOwner()) {
+                return;
             }
-            if (userId != UserHandle.USER_SYSTEM) {
-                try {
-                    mInjector.getIActivityManager().startUserInBackground(userId);
+            userId = mOwners.getDeviceOwnerUserId();
+        }
+        if (VERBOSE_LOG) {
+            Log.v(LOG_TAG, "Starting non-system DO user: " + userId);
+        }
+        if (userId != UserHandle.USER_SYSTEM) {
+            try {
+                mInjector.getIActivityManager().startUserInBackground(userId);
 
-                    // STOPSHIP Prevent the DO user from being killed.
+                // STOPSHIP Prevent the DO user from being killed.
 
-                } catch (RemoteException e) {
-                    Slog.w(LOG_TAG, "Exception starting user", e);
-                }
+            } catch (RemoteException e) {
+                Slog.w(LOG_TAG, "Exception starting user", e);
             }
         }
     }
@@ -4584,7 +4588,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " for device owner");
         }
         synchronized (this) {
-            enforceCanSetDeviceOwner(userId);
+            enforceCanSetDeviceOwnerLocked(userId);
 
             // Shutting down backup manager service permanently.
             long ident = mInjector.binderClearCallingIdentity();
@@ -4751,7 +4755,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " not installed for userId:" + userHandle);
         }
         synchronized (this) {
-            enforceCanSetProfileOwner(userHandle);
+            enforceCanSetProfileOwnerLocked(userHandle);
             mOwners.setProfileOwner(who, ownerName, userHandle);
             mOwners.writeProfileOwner(userHandle);
             return true;
@@ -4953,7 +4957,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * - SYSTEM_UID
      * - adb if there are not accounts.
      */
-    private void enforceCanSetProfileOwner(int userHandle) {
+    private void enforceCanSetProfileOwnerLocked(int userHandle) {
         UserInfo info = mUserManager.getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -4995,7 +4999,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The device owner can only be set before the setup phase of the primary user has completed,
      * except for adb if no accounts or additional users are present on the device.
      */
-    private void enforceCanSetDeviceOwner(int userId) {
+    private void enforceCanSetDeviceOwnerLocked(int userId) {
         if (mOwners.hasDeviceOwner()) {
             throw new IllegalStateException("Trying to set the device owner, but device owner "
                     + "is already set.");
@@ -6819,20 +6823,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isProvisioningAllowed(String action) {
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE.equals(action)) {
-            if (mOwners.hasDeviceOwner()) {
-                if (!mInjector.userManagerIsSplitSystemUser()) {
-                    // Only split-system-user systems support managed-profiles in combination with
-                    // device-owner.
-                    return false;
-                }
-                if (mOwners.getDeviceOwnerUserId() != UserHandle.USER_SYSTEM) {
-                    // Only system device-owner supports managed-profiles. Non-system device-owner
-                    // doesn't.
-                    return false;
-                }
-                if (callingUserId == UserHandle.USER_SYSTEM) {
-                    // Managed-profiles cannot be setup on the system user, only regular users.
-                    return false;
+            synchronized (this) {
+                if (mOwners.hasDeviceOwner()) {
+                    if (!mInjector.userManagerIsSplitSystemUser()) {
+                        // Only split-system-user systems support managed-profiles in combination with
+                        // device-owner.
+                        return false;
+                    }
+                    if (mOwners.getDeviceOwnerUserId() != UserHandle.USER_SYSTEM) {
+                        // Only system device-owner supports managed-profiles. Non-system device-owner
+                        // doesn't.
+                        return false;
+                    }
+                    if (callingUserId == UserHandle.USER_SYSTEM) {
+                        // Managed-profiles cannot be setup on the system user, only regular users.
+                        return false;
+                    }
                 }
             }
             if (getProfileOwner(callingUserId) != null) {
@@ -6877,8 +6883,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isDeviceOwnerProvisioningAllowed(int callingUserId) {
-        if (mOwners.hasDeviceOwner()) {
-            return false;
+        synchronized (this) {
+            if (mOwners.hasDeviceOwner()) {
+                return false;
+            }
         }
         if (getProfileOwner(callingUserId) != null) {
             return false;
