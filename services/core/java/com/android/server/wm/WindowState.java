@@ -1605,8 +1605,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Already showing.
             return false;
         }
-        if (!mHasSurface) {
-            mDestroying = false;
+        if (!mHasSurface && mDestroySurfaceWhenHidden) {
+            // This is a window that doesn't retain the surface when it's hidden, so immediately
+            // when we want to show it again, we need to create the surface for it.
             mWinAnimator.createSurfaceLocked();
         }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
