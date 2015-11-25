@@ -39,6 +39,7 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
+import android.support.provider.DocumentArchiveHelper;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
@@ -93,6 +94,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     private StorageManager mStorageManager;
     private Handler mHandler;
+    private DocumentArchiveHelper mArchiveHelper;
 
     private final Object mRootsLock = new Object();
 
@@ -106,6 +108,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public boolean onCreate() {
         mStorageManager = (StorageManager) getContext().getSystemService(Context.STORAGE_SERVICE);
         mHandler = new Handler();
+        mArchiveHelper = new DocumentArchiveHelper(this, (char) 0);
 
         updateVolumes();
         return true;
@@ -321,8 +324,12 @@ public class ExternalStorageProvider extends DocumentsProvider {
             }
         }
 
-        final String displayName = file.getName();
         final String mimeType = getTypeForFile(file);
+        if (mArchiveHelper.isSupportedArchiveType(mimeType)) {
+            flags |= Document.FLAG_ARCHIVE;
+        }
+
+        final String displayName = file.getName();
         if (mimeType.startsWith("image/")) {
             flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
@@ -333,6 +340,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         row.add(Document.COLUMN_SIZE, file.length());
         row.add(Document.COLUMN_MIME_TYPE, mimeType);
         row.add(Document.COLUMN_FLAGS, flags);
+        row.add(DocumentArchiveHelper.COLUMN_LOCAL_FILE_PATH, file.getPath());
 
         // Only publish dates reasonably after epoch
         long lastModified = file.lastModified();
@@ -361,6 +369,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public boolean isChildDocument(String parentDocId, String docId) {
         try {
+            if (mArchiveHelper.isArchivedDocument(docId)) {
+                return mArchiveHelper.isChildDocument(parentDocId, docId);
+            }
+
             final File parent = getFileForDocId(parentDocId).getCanonicalFile();
             final File doc = getFileForDocId(docId).getCanonicalFile();
             return FileUtils.contains(parent, doc);
@@ -468,6 +480,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.queryDocument(documentId, projection);
+        }
+
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         includeFile(result, documentId, null);
         return result;
@@ -477,6 +493,11 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public Cursor queryChildDocuments(
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(parentDocumentId) ||
+                mArchiveHelper.isSupportedArchiveType(getDocumentType(parentDocumentId))) {
+            return mArchiveHelper.queryChildDocuments(parentDocumentId, projection, sortOrder);
+        }
+
         final File parent = getFileForDocId(parentDocumentId);
         final MatrixCursor result = new DirectoryCursor(
                 resolveDocumentProjection(projection), parentDocumentId, parent);
@@ -514,6 +535,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     @Override
     public String getDocumentType(String documentId) throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.getDocumentType(documentId);
+        }
+
         final File file = getFileForDocId(documentId);
         return getTypeForFile(file);
     }
@@ -522,6 +547,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(
             String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.openDocument(documentId, mode, signal);
+        }
+
         final File file = getFileForDocId(documentId);
         final File visibleFile = getFileForDocId(documentId, true);
 
