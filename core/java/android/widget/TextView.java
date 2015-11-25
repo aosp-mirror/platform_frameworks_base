@@ -7225,6 +7225,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // of the intended optimizations as part of requestLayoutForChild.
         nullLayouts();
         requestLayout();
+        invalidate();
     }
 
     @Override
