@@ -130,7 +130,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         int prevDayKey = -1;
         mRows.clear();
         for (Task task : tasksMostRecent) {
-            if (SystemServicesProxy.isFreeformStack(task.key.stackId)) {
+            if (task.isFreeformTask()) {
                 continue;
             }
 

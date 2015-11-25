@@ -162,6 +162,8 @@ public class TaskStackLayoutAlgorithm {
     public Rect mCurrentStackRect = new Rect();
     // This is the current system insets
     public Rect mSystemInsets = new Rect();
+    // This is the bounds of the history button above the stack rect
+    public Rect mHistoryButtonRect = new Rect();
 
     // The visible ranges when the stack is focused and unfocused
     private Range mUnfocusedRange;
@@ -225,8 +227,7 @@ public class TaskStackLayoutAlgorithm {
         mUnfocusedRange = new Range(res.getFloat(R.integer.recents_layout_unfocused_range_min),
                 res.getFloat(R.integer.recents_layout_unfocused_range_max));
         mFocusState = getDefaultFocusState();
-        mFocusedPeekHeight = ssp.hasFreeformWorkspaceSupport() ?
-                0 : res.getDimensionPixelSize(R.dimen.recents_layout_focused_peek_size);
+        mFocusedPeekHeight = res.getDimensionPixelSize(R.dimen.recents_layout_focused_peek_size);
 
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
@@ -269,13 +270,6 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
-     * Returns the stack top offset, used for measuring the history button space.
-     */
-    public int getStackTopOffset() {
-        return mStackTopOffset;
-    }
-
-    /**
      * Computes the stack and task rects.  The given task stack bounds is the whole bounds not
      * including the search bar.
      */
@@ -305,15 +299,20 @@ public class TaskStackLayoutAlgorithm {
                 taskStackBounds.top + heightPadding,
                 taskStackBounds.right - widthPadding,
                 taskStackBounds.bottom);
+        mCurrentStackRect = ssp.hasFreeformWorkspaceSupport() ? mFreeformStackRect : mStackRect;
+        mHistoryButtonRect.set(mCurrentStackRect.left, mCurrentStackRect.top - heightPadding,
+                mCurrentStackRect.right, mCurrentStackRect.top + mFocusedPeekHeight);
 
         // Anchor the task rect to the top-center of the non-freeform stack rect
         float aspect = (float) (taskStackBounds.width() - mSystemInsets.left - mSystemInsets.right)
                 / (taskStackBounds.height() - mSystemInsets.bottom);
         int width = mStackRect.width();
-        int height = debugFlags.isFullscreenThumbnailsEnabled() ? (int) (width / aspect) : width;
+        int minHeight = mCurrentStackRect.height() - mFocusedPeekHeight - mStackBottomOffset;
+        int height = debugFlags.isFullscreenThumbnailsEnabled()
+                ? (int) Math.min(width / aspect, minHeight)
+                : width;
         mTaskRect.set(mStackRect.left, mStackRect.top,
                 mStackRect.left + width, mStackRect.top + height);
-        mCurrentStackRect = ssp.hasFreeformWorkspaceSupport() ? mFreeformStackRect : mStackRect;
 
         // Short circuit here if the stack rects haven't changed so we don't do all the work below
         if (lastStackRect.equals(mCurrentStackRect)) {

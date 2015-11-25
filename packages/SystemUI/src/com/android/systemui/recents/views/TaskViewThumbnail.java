@@ -45,6 +45,8 @@ import com.android.systemui.recents.model.Task;
  */
 public class TaskViewThumbnail extends View {
 
+    private Task mTask;
+
     // Drawing
     int mCornerRadius;
     float mDimAlpha;
@@ -52,6 +54,7 @@ public class TaskViewThumbnail extends View {
     Paint mDrawPaint = new Paint();
     RectF mBitmapRect = new RectF();
     RectF mLayoutRect = new RectF();
+    float mBitmapScale = 1f;
     BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
@@ -165,7 +168,16 @@ public class TaskViewThumbnail extends View {
     /** Updates the thumbnail shader's scale transform. */
     void updateThumbnailScale() {
         if (mBitmapShader != null) {
-            mScaleMatrix.setRectToRect(mBitmapRect, mLayoutRect, Matrix.ScaleToFit.FILL);
+            if (mTask.isFreeformTask()) {
+                // For freeform tasks, we scale the bitmap rect to fit in the layout rect
+                mBitmapScale = Math.min(mLayoutRect.width() / mBitmapRect.width(),
+                        mLayoutRect.height() / mBitmapRect.height());
+            } else {
+                // For stack tasks, we scale the bitmap to fit the width
+                mBitmapScale = Math.max(1f, mLayoutRect.width() / mBitmapRect.width());
+            }
+
+            mScaleMatrix.setScale(mBitmapScale, mBitmapScale);
             mBitmapShader.setLocalMatrix(mScaleMatrix);
         }
     }
@@ -202,6 +214,7 @@ public class TaskViewThumbnail extends View {
 
     /** Binds the thumbnail view to the task */
     void rebindToTask(Task t) {
+        mTask = t;
         if (t.thumbnail != null) {
             setThumbnail(t.thumbnail);
         } else {
@@ -211,6 +224,7 @@ public class TaskViewThumbnail extends View {
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
+        mTask = null;
         setThumbnail(null);
     }
 

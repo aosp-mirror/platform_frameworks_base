@@ -110,7 +110,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
             transformOut.rect.offset(transformOut.translationX, transformOut.translationY);
             Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
             transformOut.visible = true;
-            transformOut.p = 0;
+            transformOut.p = 1f;
 
             if (DEBUG) {
                 Log.d(TAG, "getTransform: " + task.key + ", " + transformOut);

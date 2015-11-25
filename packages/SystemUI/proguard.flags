@@ -21,11 +21,6 @@
     public <init>(android.os.Bundle);
 }
 
--keep class com.android.systemui.recents.views.TaskStackLayoutAlgorithm {
-    public float getFocusState();
-    public void setFocusState(float);
-}
-
 -keep class com.android.systemui.recents.views.TaskView {
     public int getDim();
     public void setDim(int);

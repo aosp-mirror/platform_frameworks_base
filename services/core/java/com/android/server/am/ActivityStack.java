@@ -859,13 +859,11 @@ final class ActivityStack {
             if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tTaking screenshot");
 
             // When this flag is set, we currently take the fullscreen screenshot of the activity
-            // but scaled inversely by the density.  This gives us a "good-enough" fullscreen
-            // thumbnail to use within SystemUI without using enormous amounts of memory on high
-            // density devices.
+            // but scaled to half the size.  This gives us a "good-enough" fullscreen thumbnail to
+            // use within SystemUI while keeping memory usage low.
             if (mService.mTakeFullscreenScreenshots) {
-                Context context = mService.mContext;
                 w = h = -1;
-                scale = (1f / Math.max(1f, context.getResources().getDisplayMetrics().density));
+                scale = 0.5f;
             }
             return mWindowManager.screenshotApplications(who.appToken, Display.DEFAULT_DISPLAY,
                     w, h, scale);

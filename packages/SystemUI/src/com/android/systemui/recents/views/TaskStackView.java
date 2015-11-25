@@ -551,6 +551,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Updates the clip for each of the task views from back to front.
      */
     void clipTaskViews(boolean forceUpdate) {
+        RecentsConfiguration config = Recents.getConfiguration();
+
         // Update the clip on each task child
         List<TaskView> taskViews = getTaskViews();
         TaskView tmpTv = null;
@@ -588,6 +590,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
             tv.getViewBounds().setClipBottom(clipBottom, forceUpdate);
+            if (!config.useHardwareLayers) {
+                tv.mThumbnailView.updateThumbnailVisibility(clipBottom - tv.getPaddingBottom());
+            }
         }
         mStackViewsClipDirty = false;
     }

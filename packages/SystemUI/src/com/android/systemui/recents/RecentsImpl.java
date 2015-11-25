@@ -688,7 +688,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             ArrayList<Task> tasks = stack.getStackTasks();
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 Task task = tasks.get(i);
-                if (SystemServicesProxy.isFreeformStack(task.key.stackId)) {
+                if (task.isFreeformTask()) {
                     mTmpTransform = stackView.getStackAlgorithm().getStackTransform(task,
                             stackView.getScroller().getStackScroll(), mTmpTransform, null);
                     Rect toTaskRect = new Rect();

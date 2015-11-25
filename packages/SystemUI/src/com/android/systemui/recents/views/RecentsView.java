@@ -350,10 +350,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Measure the history button with the full space above the stack, but width-constrained
         // to the stack
-        Rect stackRect = mTaskStackView.mLayoutAlgorithm.mCurrentStackRect;
+        Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
         measureChild(mHistoryButton,
-                MeasureSpec.makeMeasureSpec(stackRect.width(), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mTaskStackView.mLayoutAlgorithm.getStackTopOffset(),
+                MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(historyButtonRect.height(),
                         MeasureSpec.EXACTLY));
         setMeasuredDimension(width, height);
     }
@@ -386,10 +386,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Layout the history button left-aligned with the stack, but offset from the top of the
         // view
-        Rect stackRect = mTaskStackView.mLayoutAlgorithm.mCurrentStackRect;
-        mHistoryButton.layout(stackRect.left, top + mSystemInsets.top,
-                stackRect.left + mHistoryButton.getMeasuredWidth(),
-                top + mSystemInsets.top + mHistoryButton.getMeasuredHeight());
+        Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
+        mHistoryButton.layout(historyButtonRect.left, historyButtonRect.top,
+                historyButtonRect.right, historyButtonRect.bottom);
 
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
@@ -454,7 +453,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
             final TaskStack stack, final Task task, final boolean lockToTask,
             final Rect bounds, int destinationStack) {
-        mLastTaskLaunchedWasFreeform = SystemServicesProxy.isFreeformStack(task.key.stackId);
+        mLastTaskLaunchedWasFreeform = task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(stack, task, stackView, tv, lockToTask, bounds,
                 destinationStack);
     }
