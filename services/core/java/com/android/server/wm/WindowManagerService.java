@@ -110,6 +110,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
@@ -405,7 +406,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Windows whose surface should be destroyed.
      */
-    final ArrayList<WindowState> mDestroySurface = new ArrayList<>();
+    private final ArrayList<WindowState> mDestroySurface = new ArrayList<>();
 
     /**
      * Windows with a preserved surface waiting to be destroyed. These windows
@@ -442,11 +443,11 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState[] mRebuildTmp = new WindowState[20];
 
     /**
-     * Stores for each user whether screencapture is disabled
+     * Stores for each user whether screencapture is disabled for all their windows.
      * This array is essentially a cache for all userId for
      * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled}
      */
-    SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<>();
+    private SparseBooleanArray mScreenCaptureDisabled = new SparseBooleanArray();
 
     IInputMethodManager mInputMethodManager;
 
@@ -2108,25 +2109,11 @@ public class WindowManagerService extends IWindowManager.Stub
         executeAppTransition();
     }
 
-    /**
-     * Returns whether screen capture is disabled for all windows of a specific user.
-     */
-    boolean isScreenCaptureDisabledLocked(int userId) {
-        Boolean disabled = mScreenCaptureDisabled.get(userId);
-        if (disabled == null) {
-            return false;
-        }
-        return disabled;
-    }
-
     boolean isSecureLocked(WindowState w) {
-        if ((w.mAttrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+        if ((w.mAttrs.flags & FLAG_SECURE) != 0) {
             return true;
         }
-        if (isScreenCaptureDisabledLocked(UserHandle.getUserId(w.mOwnerUid))) {
-            return true;
-        }
-        return false;
+        return mScreenCaptureDisabled.get(UserHandle.getUserId(w.mOwnerUid));
     }
 
     /**
@@ -2650,8 +2637,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.i(TAG, "Relayout " + win + ": oldVis=" + oldVisibility
                         + " newVis=" + viewVisibility, stack);
             }
-            if (viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || !win.mAppToken.clientHidden)) {
+            final AppWindowToken appToken = win.mAppToken;
+            final boolean visible = viewVisibility == View.VISIBLE
+                    && (appToken == null ? win.mPolicyVisibility : !appToken.clientHidden);
+            if (visible) {
                 result = relayoutVisibleWindow(outConfig, result, win, winAnimator, attrChanges,
                         oldVisibility);
                 try {
@@ -2737,8 +2726,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWallpaperControllerLocked.updateWallpaperOffset(
                         win, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
             }
-            if (win.mAppToken != null) {
-                win.mAppToken.updateReportedVisibilityLocked();
+            if (appToken != null) {
+                appToken.updateReportedVisibilityLocked();
             }
             if (winAnimator.mReportSurfaceResized) {
                 winAnimator.mReportSurfaceResized = false;
@@ -2865,7 +2854,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.setDragResizing();
             // We can only change top level windows to the full-screen surface when
             // resizing (as we only have one full-screen surface). So there is no need
-            // to preserve and destroy windows which are attached to another, they 
+            // to preserve and destroy windows which are attached to another, they
             // will keep their surface and its size may change over time.
             if (win.mHasSurface && win.mAttachedWindow == null) {
                 winAnimator.preserveSurfaceLocked();
@@ -10152,12 +10141,31 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean isDockedStackResizingLocked() {
-        return getDefaultDisplayContentLocked().getDockedDividerController().isResizing();
-    }
-
     static int dipToPixel(int dip, DisplayMetrics displayMetrics) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
+    }
+
+    void scheduleSurfaceDestroy(WindowState win) {
+        mDestroySurface.add(win);
+    }
+
+    boolean destroySurfacesLocked() {
+        boolean wallpaperDestroyed = false;
+        for (int i = mDestroySurface.size() - 1; i >= 0; i--) {
+            WindowState win = mDestroySurface.get(i);
+            win.mDestroying = false;
+            if (mInputMethodWindow == win) {
+                mInputMethodWindow = null;
+            }
+            if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
+                wallpaperDestroyed = true;
+            }
+            if (!win.shouldSaveSurface()) {
+                win.mWinAnimator.destroySurfaceLocked();
+            }
+        }
+        mDestroySurface.clear();
+        return wallpaperDestroyed;
     }
 
     private final class LocalService extends WindowManagerInternal {
