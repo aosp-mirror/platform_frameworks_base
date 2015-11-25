@@ -28,6 +28,7 @@ import android.security.keymaster.OperationResult;
 
 import libcore.util.EmptyArray;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -385,7 +386,38 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     @Override
     protected final int engineUpdate(ByteBuffer input, ByteBuffer output)
             throws ShortBufferException {
-        return super.engineUpdate(input, output);
+        if (input == null) {
+            throw new NullPointerException("input == null");
+        }
+        if (output == null) {
+            throw new NullPointerException("output == null");
+        }
+
+        int inputSize = input.remaining();
+        byte[] outputArray;
+        if (input.hasArray()) {
+            outputArray =
+                    engineUpdate(
+                            input.array(), input.arrayOffset() + input.position(), inputSize);
+            input.position(input.position() + inputSize);
+        } else {
+            byte[] inputArray = new byte[inputSize];
+            input.get(inputArray);
+            outputArray = engineUpdate(inputArray, 0, inputSize);
+        }
+
+        int outputSize = (outputArray != null) ? outputArray.length : 0;
+        if (outputSize > 0) {
+            int outputBufferAvailable = output.remaining();
+            try {
+                output.put(outputArray);
+            } catch (BufferOverflowException e) {
+                throw new ShortBufferException(
+                        "Output buffer too small. Produced: " + outputSize + ", available: "
+                                + outputBufferAvailable);
+            }
+        }
+        return outputSize;
     }
 
     @Override
@@ -511,7 +543,38 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
     @Override
     protected final int engineDoFinal(ByteBuffer input, ByteBuffer output)
             throws ShortBufferException, IllegalBlockSizeException, BadPaddingException {
-        return super.engineDoFinal(input, output);
+        if (input == null) {
+            throw new NullPointerException("input == null");
+        }
+        if (output == null) {
+            throw new NullPointerException("output == null");
+        }
+
+        int inputSize = input.remaining();
+        byte[] outputArray;
+        if (input.hasArray()) {
+            outputArray =
+                    engineDoFinal(
+                            input.array(), input.arrayOffset() + input.position(), inputSize);
+            input.position(input.position() + inputSize);
+        } else {
+            byte[] inputArray = new byte[inputSize];
+            input.get(inputArray);
+            outputArray = engineDoFinal(inputArray, 0, inputSize);
+        }
+
+        int outputSize = (outputArray != null) ? outputArray.length : 0;
+        if (outputSize > 0) {
+            int outputBufferAvailable = output.remaining();
+            try {
+                output.put(outputArray);
+            } catch (BufferOverflowException e) {
+                throw new ShortBufferException(
+                        "Output buffer too small. Produced: " + outputSize + ", available: "
+                                + outputBufferAvailable);
+            }
+        }
+        return outputSize;
     }
 
     @Override
