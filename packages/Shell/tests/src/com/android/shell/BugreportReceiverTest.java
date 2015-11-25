@@ -18,8 +18,8 @@ package com.android.shell;
 
 import static android.test.MoreAsserts.assertContainsRegex;
 import static com.android.shell.ActionSendMultipleConsumerActivity.UI_NAME;
-import static com.android.shell.BugreportReceiver.EXTRA_BUGREPORT;
-import static com.android.shell.BugreportReceiver.EXTRA_SCREENSHOT;
+import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
+import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;

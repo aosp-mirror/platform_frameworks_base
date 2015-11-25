@@ -147,5 +147,9 @@
                 <action android:name="android.intent.action.BUGREPORT_FINISHED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".BugreportProgressService"
+            android:exported="false"/>
     </application>
 </manifest>
