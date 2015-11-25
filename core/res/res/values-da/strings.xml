@@ -853,7 +853,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Midnat"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Vælg alle"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Markér alt"</string>
     <string name="cut" msgid="3092569408438626261">"Klip"</string>
     <string name="copy" msgid="2681946229533511987">"Kopier"</string>
     <string name="paste" msgid="5629880836805036433">"Indsæt"</string>
@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hjælpefunktioner er annulleret."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Skifter til <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> logges ud…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Ejer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fejl"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Din administrator har ikke givet tilladelse til at foretage denne ændring"</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bed om oplåsningsmønster ved deaktivering"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bed om adgangskode inden frigørelse"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installeret af din administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opdateret af administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet af din administrator"</string>

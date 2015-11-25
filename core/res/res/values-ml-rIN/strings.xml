@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"പ്രവേശനക്ഷമത റദ്ദാക്കി."</string>
     <string name="user_switched" msgid="3768006783166984410">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ലോഗൌട്ട് ചെയ്യുന്നു…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ഉടമ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"പിശക്"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ഈ മാറ്റം നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അനുവദിച്ചതല്ല"</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇൻസ്റ്റാളുചെയ്‌തു"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അപ്‌ഡേറ്റുചെയ്‌തു"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
@@ -1501,6 +1504,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"പലവക"</string>
 </resources>

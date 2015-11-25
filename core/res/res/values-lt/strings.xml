@@ -1321,6 +1321,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pritaikymo neįgaliesiems režimas atšauktas."</string>
     <string name="user_switched" msgid="3768006783166984410">"Dabartinis naudotojas: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Perjungiama į <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"Atsijungiama (<xliff:g id="NAME">%1$s</xliff:g>)…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Savininkas"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Klaida"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Administratorius neleidžia atlikti šio pakeitimo"</string>
@@ -1451,6 +1452,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prašyti PIN kodo prieš atsegant"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Prašyti atrakinimo piešinio prieš atsegant"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Prašyti slaptažodžio prieš atsegant"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Įdiegė administratorius"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>

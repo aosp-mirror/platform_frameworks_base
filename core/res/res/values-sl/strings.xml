@@ -1321,6 +1321,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Omogočanje pripomočkov za ljudi s posebnimi potrebami preklicano."</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Preklop na uporabnika <xliff:g id="NAME">%1$s</xliff:g> …"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"Odjavljanje uporabnika <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="owner_name" msgid="2716755460376028154">"Lastnik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Napaka"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Skrbnik ne dovoli te spremembe"</string>
@@ -1451,6 +1452,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zahtevaj PIN pred odpenjanjem"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred odpenjanjem vprašaj za vzorec za odklepanje"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred odpenjanjem vprašaj za geslo"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Namestil skrbnik"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisal skrbnik"</string>
@@ -1537,6 +1540,5 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> izbrani</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> izbranih</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Razno"</string>
 </resources>

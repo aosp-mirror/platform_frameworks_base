@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g>님을 로그아웃하는 중…"</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"관리자가 이 변경을 허용하지 않습니다."</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"관리자가 설치함"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
@@ -1501,6 +1504,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>개 선택됨</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"기타"</string>
 </resources>

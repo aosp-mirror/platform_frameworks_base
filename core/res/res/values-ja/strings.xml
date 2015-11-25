@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> をログアウトしています…"</string>
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"エラー"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"この変更は管理者によって許可されていません"</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"管理者によってインストールされました"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"管理者によって更新されています"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"管理者によって削除されました"</string>
@@ -1501,6 +1504,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件選択済み</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件選択済み</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"その他"</string>
 </resources>

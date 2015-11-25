@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"მარტივი წვდომა გაუქმდა."</string>
     <string name="user_switched" msgid="3768006783166984410">"ამჟამინდელი მომხმარებელი <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>-ზე გადართვა…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g>-ის ანგარიშიდან გასვლა…"</string>
     <string name="owner_name" msgid="2716755460376028154">"მფლობელი"</string>
     <string name="error_message_title" msgid="4510373083082500195">"შეცდომა"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ეს ცვლილება თქვენი დომენის ადმინისტრატორის მიერ ნებადართული არ არის."</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ფიქსაციის მოხსნამდე PIN-ის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ფიქსაციის მოხსნამდე განბლოკვის ნიმუშის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"თქვენი ადმინისტრატორის მიერ დაყენებული"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>
@@ -1501,6 +1504,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> შერჩეული</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> შერჩეული</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"სხვადასხვა"</string>
 </resources>

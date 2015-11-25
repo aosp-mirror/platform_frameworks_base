@@ -916,7 +916,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Riattivala in Impostazioni di sistema &gt; Applicazioni &gt; Scaricate."</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Upgrade di Android..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Aggiornamento di Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Avvio di Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ottimizzazione archiviazione."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1305,6 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilità annullata."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utente corrente <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Passaggio a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"Disconnessione di <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Errore"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Questa modifica non è consentita dal tuo amministratore"</string>
@@ -1433,6 +1434,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installato dall\'amministratore"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminato dall\'amministratore"</string>
@@ -1501,6 +1504,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementi selezionati</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento selezionato</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Vari"</string>
 </resources>

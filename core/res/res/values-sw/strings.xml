@@ -1307,6 +1307,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ufikivu umeghairiwa."</string>
     <string name="user_switched" msgid="3768006783166984410">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Inabadili kwenda <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"Inamwondoa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Mmiliki"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hitilafu"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Mabadiliko haya hayaruhusiwi na msimamizi wako"</string>
@@ -1435,6 +1436,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Omba PIN kabla hujabandua"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Omba mchoro wa kufungua kabla hujabandua"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Omba nenosiri kabla hujabandua"</string>
+    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Programu haiwezi kurekebishwa ukubwa, sogeza kwa kutumia vidole viwili."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Kilisakinishwa na msimamizi wako"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
@@ -1503,6 +1505,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
     </plurals>
-    <!-- no translation found for default_notification_topic_label (227586145791870829) -->
-    <skip />
+    <string name="default_notification_topic_label" msgid="227586145791870829">"Anuwai"</string>
 </resources>

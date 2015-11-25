@@ -1307,6 +1307,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"បាន​បោះបង់​ភាព​ងាយស្រួល។"</string>
     <string name="user_switched" msgid="3768006783166984410">"អ្នក​ប្រើ​បច្ចុប្បន្ន <xliff:g id="NAME">%1$s</xliff:g> ។"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"កំពុង​ប្ដូរ​ទៅ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"កំពុងចេញ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ម្ចាស់"</string>
     <string name="error_message_title" msgid="4510373083082500195">"កំហុស"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ការ​ផ្លាស់ប្ដូរ​នេះ​មិន​ត្រូវ​បាន​អនុញ្ញាត​ដោយ​អ្នក​គ្រប់គ្រង​របស់​អ្នក​ទេ"</string>
@@ -1435,6 +1436,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
+    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"បានដំឡើងដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"បានធ្វើបច្ចុប្បន្នភាពដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"បានលុបដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
