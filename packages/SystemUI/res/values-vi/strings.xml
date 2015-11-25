@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"khóa màn hình"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"tìm kiếm"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Không thể khởi động <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Bỏ qua tất cả các ứng dụng"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Phân tách ngang"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Phân tách dọc"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tùy chỉnh phân tách"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Hiển thị giây đồng hồ trong thanh trạng thái. Có thể ảnh hưởng đến thời lượng pin."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Sắp xếp lại Cài đặt nhanh"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Hiển thị độ sáng trong Cài đặt nhanh"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Bật đánh số trang"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Bật đánh số trang qua nút Tổng quan"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Bật chuyển đổi nhanh"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Bật đánh số trang qua nút Tổng quan"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Bật thời gian chờ khởi chạy trong khi đánh số trang"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Bật ảnh chụp toàn màn hình"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Bật ảnh chụp toàn màn hình trong Tổng quan"</string>
     <string name="experimental" msgid="6198182315536726162">"Thử nghiệm"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bật Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Để kết nối bàn phím với máy tính bảng, trước tiên, bạn phải bật Bluetooth."</string>

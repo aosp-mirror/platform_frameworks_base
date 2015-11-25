@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"bliv i app"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"søg"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> kunne ikke startes."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Luk alle applikationer"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Opdel vandret"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Opdel lodret"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Opdel brugerdefineret"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statuslinjen. Dette kan påvirke batteriets levetid."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Hurtige indstillinger"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Hurtige indstillinger"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Aktivér sideopdeling"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Aktivér sideopdeling via knappen Oversigt"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Aktivér hurtigt skift"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Aktivér sideopdeling via knappen Oversigt"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Aktivér åbningstimeout ved sideinddeling"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Aktivér skærmbilleder i fuld størrelse"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Aktivér skærmbilleder i fuld størrelse i Oversigt"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>

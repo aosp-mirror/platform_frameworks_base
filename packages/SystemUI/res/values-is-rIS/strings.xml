@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"skjáfesting"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"leita"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ekki var hægt að ræsa <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Fjarlægja öll forrit"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Lárétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Lóðrétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Sérsniðin skipting"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Sýna sekúndur á klukku í stöðustikunni. Getur haft áhrif á endingu rafhlöðu."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Endurraða flýtistillingum"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Sýna birtustig í flýtistillingum"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Kveikja á síðuskoðun"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Virkja síðuskoðun með yfirlitshnappinum"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Kveikja á flýtiskiptingum"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Virkja síðuskoðun með yfirlitshnappinum"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Kveikja á tímamörkum ræsingar þegar flett er"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Kveikja á skjámyndum sem fylla upp í skjáinn"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Kveikja á skjámyndum sem fylla upp í skjáinn í yfirliti"</string>
     <string name="experimental" msgid="6198182315536726162">"Tilraunastillingar"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Kveikja á Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Til að geta tengt lyklaborðið við spjaldtölvuna þarftu fyrst að kveikja á Bluetooth."</string>

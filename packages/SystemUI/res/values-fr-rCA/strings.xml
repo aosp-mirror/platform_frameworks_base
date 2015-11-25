@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"épinglage d\'écran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Supprimer toutes les applications"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Séparation horizontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Séparation verticale"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Séparation personnalisée"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Afficher les secondes sur l\'horloge dans la barre d\'état. Cela peut réduire l\'autonomie de la pile."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Réorganiser les paramètres rapides"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Afficher la luminosité dans les paramètres rapides"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Activer la mise en page"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Activer la mise en page à l\'aide du bouton Aperçu"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Activer le basculement rapide"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Activer la pagination à l\'aide du bouton Aperçu"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Activer le délai avant expiration du lancement pendant la mise en page"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Activer les saisies d\'écran plein écran"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Activer les saisies d\'écran plein écran dans Aperçu"</string>
     <string name="experimental" msgid="6198182315536726162">"Fonctions expérimentales"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activer Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pour connecter votre clavier à votre tablette, vous devez d\'abord activer la connectivité Bluetooth."</string>

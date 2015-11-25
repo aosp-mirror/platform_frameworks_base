@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"اسکرین کو پن کرنا"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"تلاش کریں"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> کو شروع نہیں کیا جا سکا۔"</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"سبھی ایپلیکیشنز کو برخاست کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"بلحاظ افقی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"بلحاظ عمودی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"بلحاظ حسب ضرورت الگ کریں"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"گھڑی کے سیکنڈز اسٹیٹس بار میں دکھائیں۔ اس کا بیٹری کی زندگی پر اثر پڑ سکتا ہے۔"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"فوری ترتیبات کو دوبارہ ترتیب دیں"</string>
     <string name="show_brightness" msgid="6613930842805942519">"فوری ترتیبات میں چمکیلا پن دکھائیں"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"پیجنگ فعال کریں"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"مجموعی جائزہ بٹن کے ذریعے پیجنگ فعال کریں"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"تیز ٹوگل فعال کریں"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"مجموعی جائزہ بٹن کے ذریعے پیجنگ فعال کریں"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"پیجنگ کے دوران لانچ ٹائم آؤٹ فعال کریں"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"فل اسکرین کے اسکرین شاٹس فعال کریں"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"مجموعی جائزے میں فل اسکرین کے اسکرین شاٹس فعال کریں"</string>
     <string name="experimental" msgid="6198182315536726162">"تجرباتی"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"بلوٹوتھ آن کریں؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"اپنے کی بورڈ کو اپنے ٹیبلٹ کے ساتھ منسلک کرنے کیلئے پہلے آپ کو اپنا بلو ٹوتھ آن کرنا ہو گا۔"</string>

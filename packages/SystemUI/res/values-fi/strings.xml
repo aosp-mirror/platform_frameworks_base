@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"näytön kiinnitys"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"haku"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Sovelluksen <xliff:g id="APP">%s</xliff:g> käynnistäminen epäonnistui."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Hylkää kaikki sovellukset"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Vaakasuuntainen jako"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Pystysuuntainen jako"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Muokattu jako"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Näytä sekunnit tilapalkin kellossa. Tämä voi vaikuttaa akun kestoon."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Järjestä pika-asetukset uudelleen"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Näytä kirkkaus pika-asetuksissa"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Ota sivutus käyttöön"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Ottaa sivutuksen käyttöön Yleiskatsaus-painikkeen avulla."</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Ota käyttöön nopea päälle/pois-toiminto."</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Ota sivutus käyttöön Yleiskatsaus-painikkeen avulla."</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Ottaa käynnistyksen aikakatkaisun käyttöön sivutuksen aikana."</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Salli koko ruudun kuvakaappaukset"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Sallii koko ruudun kuvakaappaukset Viimeisimmät-näkymässä."</string>
     <string name="experimental" msgid="6198182315536726162">"Kokeellinen"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Otetaanko Bluetooth käyttöön?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Jotta voit yhdistää näppäimistön tablettiisi, sinun on ensin otettava Bluetooth käyttöön."</string>
