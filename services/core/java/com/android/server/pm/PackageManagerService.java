@@ -9414,6 +9414,17 @@ public class PackageManagerService extends IPackageManager.Stub
         mPackageUsage.writeNow(mPackages);
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
+
+        // This is the last chance to write out pending restriction settings
+        synchronized (mPackages) {
+            if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
+                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+                for (int userId : mDirtyUsers) {
+                    mSettings.writePackageRestrictionsLPr(userId);
+                }
+                mDirtyUsers.clear();
+            }
+        }
     }
 
     @Override
