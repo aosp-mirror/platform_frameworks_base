@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"پین کردن صفحه"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"جستجو"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> شروع نشد."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"رد کردن همه برنامه‌ها"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسیم افقی"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسیم عمودی"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"سفارشی کردن تقسیم"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ترتیب مجدد در تنظیمات سریع"</string>
     <string name="show_brightness" msgid="6613930842805942519">"نمایش روشنایی در تنظیمات سریع"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"فعال کردن صفحه‌بندی"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"فعال کردن صفحه‌بندی از طریق دکمه «نمای کلی»"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"فعال کردن جابه‌جایی سریع"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"فعال کردن صفحه‌بندی از طریق دکمه «نمای کلی»"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"فعال کردن مهلت زمانی راه‌اندازی هنگام صفحه‌بندی"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"فعال کردن عکس‌های صفحه‌نمایش تمام‌صفحه"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"فعال کردن عکس‌های صفحه‌نمایش تمام‌صفحه در مرور کلی"</string>
     <string name="experimental" msgid="6198182315536726162">"آزمایشی"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"بلوتوث روشن شود؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"برای مرتبط کردن صفحه‌کلید با رایانه لوحی، ابتدا باید بلوتوث را روشن کنید."</string>

@@ -294,7 +294,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"én-appsmodus"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Søk"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Kunne ikke starte <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Avvis alle apper"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Del horisontalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Del vertikalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Del tilpasset"</string>
@@ -438,8 +437,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statusfeltet på klokken. Det kan påvirke batteritiden."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omorganiser hurtiginnstillingene"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i hurtiginnstillingene"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Slå på paginering"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Slå på paginering via Oversikt-knappen"</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Slå på hurtigveksling"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"Slå på paginering via Oversikt-knappen"</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Slå på tidsavbrudd mens paginering pågår"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Slå på skjermdumper av fullskjerm"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Slå på skjermdumper av fullskjerm i Oversikt"</string>
     <string name="experimental" msgid="6198182315536726162">"På forsøksstadiet"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå på Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"For å koble tastaturet til nettbrettet ditt må du først slå på Bluetooth."</string>

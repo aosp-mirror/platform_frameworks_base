@@ -298,7 +298,6 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"تثبيت الشاشة"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"بحث"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"تعذر بدء <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"تجاهل كل التطبيقات"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"تقسيم مخصص"</string>
@@ -442,8 +441,12 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"عرض ثواني الساعة في شريط الحالة. قد يؤثر ذلك في عمر البطارية."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"إعادة ترتيب الإعدادات السريعة"</string>
     <string name="show_brightness" msgid="6613930842805942519">"عرض السطوع في الإعدادات السريعة"</string>
+    <string name="overview_page_on_toggle" msgid="7332906295136546986">"تمكين الترحيل"</string>
+    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"تمكين الترحيل عبر زر \"نظرة عامة\""</string>
     <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"تمكين التبديل السريع"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="5477262463217629262">"تمكين الترحيل عبر زر \"نظرة عامة\""</string>
+    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"تمكين مهلة الإطلاق أثناء الترحيل"</string>
+    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"تمكين اللقطات بملء الشاشة"</string>
+    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"تمكين اللقطات بملء الشاشة في النظرة العامة"</string>
     <string name="experimental" msgid="6198182315536726162">"إعدادات تجريبية"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"تشغيل البلوتوث؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تشغيل بلوتوث أولاً."</string>
