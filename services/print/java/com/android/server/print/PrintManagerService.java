@@ -228,6 +228,11 @@ public final class PrintManagerService extends SystemService {
                     return null;
                 }
                 userState = getOrCreateUserStateLocked(resolvedUserId);
+
+                // The user state might be updated via the same observer-set as the caller of this
+                // interface. If the caller is called back first the user state is not yet updated
+                // and the user gets and inconsistent view. Hence force an update.
+                userState.updateIfNeededLocked();
             }
             final long identity = Binder.clearCallingIdentity();
             try {
