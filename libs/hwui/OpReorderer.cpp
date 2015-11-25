@@ -330,6 +330,7 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
     for (int i = layers.entries().size() - 1; i >= 0; i--) {
         RenderNode* layerNode = layers.entries()[i].renderNode;
         const Rect& layerDamage = layers.entries()[i].damage;
+        layerNode->computeOrdering();
 
         // map current light center into RenderNode's coordinate space
         Vector3 lightCenter = mCanvasState.currentSnapshot()->getRelativeLightCenter();
@@ -339,7 +340,7 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
                 layerDamage, lightCenter, nullptr, layerNode);
 
         if (layerNode->getDisplayList()) {
-            deferDisplayList(*(layerNode->getDisplayList()));
+            deferNodeOps(*layerNode);
         }
         restoreForLayer();
     }
@@ -347,25 +348,12 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
     // Defer Fbo0
     for (const sp<RenderNode>& node : nodes) {
         if (node->nothingToDraw()) continue;
+        node->computeOrdering();
 
         int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
         deferNodePropsAndOps(*node);
         mCanvasState.restoreToCount(count);
     }
-}
-
-OpReorderer::OpReorderer(int viewportWidth, int viewportHeight, const DisplayList& displayList,
-        const Vector3& lightCenter)
-        : mCanvasState(*this) {
-    ATRACE_NAME("prepare drawing commands");
-    // Prepare to defer Fbo0
-    mLayerReorderers.emplace_back(viewportWidth, viewportHeight,
-            Rect(viewportWidth, viewportHeight));
-    mLayerStack.push_back(0);
-    mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
-            0, 0, viewportWidth, viewportHeight, lightCenter);
-
-    deferDisplayList(displayList);
 }
 
 void OpReorderer::onViewportInitialized() {}
@@ -462,10 +450,10 @@ void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
                     Matrix4::identity(),
                     saveLayerBounds,
                     &saveLayerPaint));
-            deferDisplayList(*(node.getDisplayList()));
+            deferNodeOps(node);
             onEndLayerOp(*new (mAllocator) EndLayerOp());
         } else {
-            deferDisplayList(*(node.getDisplayList()));
+            deferNodeOps(node);
         }
     }
 }
@@ -610,18 +598,53 @@ void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
     }
 }
 
+void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
+    const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
+    int count = mCanvasState.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+
+    // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
+    const DisplayList& displayList = *(renderNode.getDisplayList());
+
+    const RecordedOp* op = (displayList.getOps()[displayList.projectionReceiveIndex]);
+    const RenderNodeOp* backgroundOp = static_cast<const RenderNodeOp*>(op);
+    const RenderProperties& backgroundProps = backgroundOp->renderNode->properties();
+
+    // Transform renderer to match background we're projecting onto
+    // (by offsetting canvas by translationX/Y of background rendernode, since only those are set)
+    mCanvasState.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
+
+    // If the projection receiver has an outline, we mask projected content to it
+    // (which we know, apriori, are all tessellated paths)
+    mCanvasState.setProjectionPathMask(mAllocator, projectionReceiverOutline);
+
+    // draw projected nodes
+    for (size_t i = 0; i < renderNode.mProjectedNodes.size(); i++) {
+        RenderNodeOp* childOp = renderNode.mProjectedNodes[i];
+
+        int restoreTo = mCanvasState.save(SkCanvas::kMatrix_SaveFlag);
+        mCanvasState.concatMatrix(childOp->transformFromCompositingAncestor);
+        deferRenderNodeOp(*childOp);
+        mCanvasState.restoreToCount(restoreTo);
+    }
+
+    mCanvasState.restoreToCount(count);
+}
+
 /**
  * Used to define a list of lambdas referencing private OpReorderer::onXXXXOp() methods.
  *
- * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas. E.g. a
- * BitmapOp op then would be dispatched to OpReorderer::onBitmapOp(const BitmapOp&)
+ * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas.
+ * E.g. a BitmapOp op then would be dispatched to OpReorderer::onBitmapOp(const BitmapOp&)
  */
 #define OP_RECEIVER(Type) \
         [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.on##Type(static_cast<const Type&>(op)); },
-void OpReorderer::deferDisplayList(const DisplayList& displayList) {
+void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
     static std::function<void(OpReorderer& reorderer, const RecordedOp&)> receivers[] = {
         MAP_OPS(OP_RECEIVER)
     };
+
+    // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
+    const DisplayList& displayList = *(renderNode.getDisplayList());
     for (const DisplayList::Chunk& chunk : displayList.getChunks()) {
         FatVector<ZRenderNodeOpPair, 16> zTranslatedNodes;
         buildZSortedChildList(&zTranslatedNodes, displayList, chunk);
@@ -630,6 +653,12 @@ void OpReorderer::deferDisplayList(const DisplayList& displayList) {
         for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
             const RecordedOp* op = displayList.getOps()[opIndex];
             receivers[op->opId](*this, *op);
+
+            if (CC_UNLIKELY(!renderNode.mProjectedNodes.empty()
+                    && displayList.projectionReceiveIndex >= 0
+                    && static_cast<int>(opIndex) == displayList.projectionReceiveIndex)) {
+                deferProjectedChildren(renderNode);
+            }
         }
         defer3dChildren(ChildrenSelectMode::Positive, zTranslatedNodes);
     }

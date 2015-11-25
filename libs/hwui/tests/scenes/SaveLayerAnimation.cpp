@@ -32,7 +32,7 @@ public:
         canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode); // background
 
         card = TestUtils::createNode(0, 0, 200, 200,
-                [](TestCanvas& canvas) {
+                [](RenderProperties& props, TestCanvas& canvas) {
             canvas.saveLayerAlpha(0, 0, 200, 200, 128, SkCanvas::kClipToLayer_SaveFlag);
             canvas.drawColor(0xFF00FF00, SkXfermode::kSrcOver_Mode); // outer, unclipped
             canvas.saveLayerAlpha(50, 50, 150, 150, 128, SkCanvas::kClipToLayer_SaveFlag);

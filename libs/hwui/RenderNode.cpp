@@ -487,7 +487,7 @@ void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayL
             info.damageAccumulator->pushTransform(&op->localMatrix);
             bool childFunctorsNeedLayer = functorsNeedLayer; // TODO! || op->mRecordedWithPotentialStencilClip;
 #else
-            info.damageAccumulator->pushTransform(&op->mTransformFromParent);
+            info.damageAccumulator->pushTransform(&op->localMatrix);
             bool childFunctorsNeedLayer = functorsNeedLayer
                     // Recorded with non-rect clip, or canvas-rotated by parent
                     || op->mRecordedWithPotentialStencilClip;
@@ -658,7 +658,6 @@ void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform)
  * which are flagged to not draw in the standard draw loop.
  */
 void RenderNode::computeOrdering() {
-#if !HWUI_NEW_OPS
     ATRACE_CALL();
     mProjectedNodes.clear();
 
@@ -666,43 +665,41 @@ void RenderNode::computeOrdering() {
     // transform properties are applied correctly to top level children
     if (mDisplayList == nullptr) return;
     for (unsigned int i = 0; i < mDisplayList->getChildren().size(); i++) {
-        DrawRenderNodeOp* childOp = mDisplayList->getChildren()[i];
+        renderNodeOp_t* childOp = mDisplayList->getChildren()[i];
         childOp->renderNode->computeOrderingImpl(childOp, &mProjectedNodes, &mat4::identity());
     }
-#endif
 }
 
 void RenderNode::computeOrderingImpl(
-        DrawRenderNodeOp* opState,
-        std::vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
+        renderNodeOp_t* opState,
+        std::vector<renderNodeOp_t*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
-#if !HWUI_NEW_OPS
     mProjectedNodes.clear();
     if (mDisplayList == nullptr || mDisplayList->isEmpty()) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
     Matrix4 localTransformFromProjectionSurface(*transformFromProjectionSurface);
-    localTransformFromProjectionSurface.multiply(opState->mTransformFromParent);
+    localTransformFromProjectionSurface.multiply(opState->localMatrix);
 
     if (properties().getProjectBackwards()) {
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
-        opState->mSkipInOrderDraw = true;
-        opState->mTransformFromCompositingAncestor = localTransformFromProjectionSurface;
+        opState->skipInOrderDraw = true;
+        opState->transformFromCompositingAncestor = localTransformFromProjectionSurface;
         compositedChildrenOfProjectionSurface->push_back(opState);
     } else {
         // standard in order draw
-        opState->mSkipInOrderDraw = false;
+        opState->skipInOrderDraw = false;
     }
 
     if (mDisplayList->getChildren().size() > 0) {
         const bool isProjectionReceiver = mDisplayList->projectionReceiveIndex >= 0;
         bool haveAppliedPropertiesToProjection = false;
         for (unsigned int i = 0; i < mDisplayList->getChildren().size(); i++) {
-            DrawRenderNodeOp* childOp = mDisplayList->getChildren()[i];
+            renderNodeOp_t* childOp = mDisplayList->getChildren()[i];
             RenderNode* child = childOp->renderNode;
 
-            std::vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
+            std::vector<renderNodeOp_t*>* projectionChildren = nullptr;
             const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
                 // if receiving projections, collect projecting descendant
@@ -723,7 +720,6 @@ void RenderNode::computeOrderingImpl(
             child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
         }
     }
-#endif
 }
 
 class DeferOperationHandler {
@@ -793,10 +789,10 @@ void RenderNode::buildZSortedChildList(const DisplayList::Chunk& chunk,
 
         if (!MathUtils::isZero(childZ) && chunk.reorderChildren) {
             zTranslatedNodes.push_back(ZDrawRenderNodeOpPair(childZ, childOp));
-            childOp->mSkipInOrderDraw = true;
+            childOp->skipInOrderDraw = true;
         } else if (!child->properties().getProjectBackwards()) {
             // regular, in order drawing DisplayList
-            childOp->mSkipInOrderDraw = false;
+            childOp->skipInOrderDraw = false;
         }
     }
 
@@ -913,7 +909,7 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
-                caster->issueDrawShadowOperation(casterOp->mTransformFromParent, handler);
+                caster->issueDrawShadowOperation(casterOp->localMatrix, handler);
 
                 lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
                 shadowIndex++;
@@ -927,10 +923,10 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
 
         DrawRenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
 
-        renderer.concatMatrix(childOp->mTransformFromParent);
-        childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        renderer.concatMatrix(childOp->localMatrix);
+        childOp->skipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, properties().getClipToBounds());
-        childOp->mSkipInOrderDraw = true;
+        childOp->skipInOrderDraw = true;
 
         renderer.restoreToCount(restoreTo);
         drawIndex++;
@@ -967,14 +963,14 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
 
     // draw projected nodes
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
-        DrawRenderNodeOp* childOp = mProjectedNodes[i];
+        renderNodeOp_t* childOp = mProjectedNodes[i];
 
         // matrix save, concat, and restore can be done safely without allocating operations
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
-        renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
-        childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        renderer.concatMatrix(childOp->transformFromCompositingAncestor);
+        childOp->skipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, properties().getClipToBounds());
-        childOp->mSkipInOrderDraw = true;
+        childOp->skipInOrderDraw = true;
         renderer.restoreToCount(restoreTo);
     }
 

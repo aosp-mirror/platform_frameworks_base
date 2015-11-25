@@ -1386,19 +1386,19 @@ public:
             : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
             , renderNode(renderNode)
             , mRecordedWithPotentialStencilClip(!clipIsSimple || !transformFromParent.isSimple())
-            , mTransformFromParent(transformFromParent)
-            , mSkipInOrderDraw(false) {}
+            , localMatrix(transformFromParent)
+            , skipInOrderDraw(false) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) override {
-        if (renderNode->isRenderable() && !mSkipInOrderDraw) {
+        if (renderNode->isRenderable() && !skipInOrderDraw) {
             renderNode->defer(deferStruct, level + 1);
         }
     }
 
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) override {
-        if (renderNode->isRenderable() && !mSkipInOrderDraw) {
+        if (renderNode->isRenderable() && !skipInOrderDraw) {
             renderNode->replay(replayStruct, level + 1);
         }
     }
@@ -1439,7 +1439,7 @@ private:
     /**
      * Records transform vs parent, used for computing total transform without rerunning DL contents
      */
-    const mat4 mTransformFromParent;
+    const mat4 localMatrix;
 
     /**
      * Holds the transformation between the projection surface ViewGroup and this RenderNode
@@ -1449,8 +1449,8 @@ private:
      *
      * Note: doesn't include transformation within the RenderNode, or its properties.
      */
-    mat4 mTransformFromCompositingAncestor;
-    bool mSkipInOrderDraw;
+    mat4 transformFromCompositingAncestor;
+    bool skipInOrderDraw;
 };
 
 /**

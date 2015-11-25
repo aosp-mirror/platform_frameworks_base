@@ -97,7 +97,17 @@ struct RenderNodeOp : RecordedOp {
     RenderNodeOp(BASE_PARAMS_PAINTLESS, RenderNode* renderNode)
             : SUPER_PAINTLESS(RenderNodeOp)
             , renderNode(renderNode) {}
-    RenderNode * renderNode; // not const, since drawing modifies it (somehow...)
+    RenderNode * renderNode; // not const, since drawing modifies it
+
+    /**
+     * Holds the transformation between the projection surface ViewGroup and this RenderNode
+     * drawing instance. Represents any translations / transformations done within the drawing of
+     * the compositing ancestor ViewGroup's draw, before the draw of the View represented by this
+     * DisplayList draw instance.
+     *
+     * Note: doesn't include transformation within the RenderNode, or its properties.
+     */
+    Matrix4 transformFromCompositingAncestor;
     bool skipInOrderDraw = false;
 };
 

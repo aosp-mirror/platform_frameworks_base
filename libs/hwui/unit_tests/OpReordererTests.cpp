@@ -111,25 +111,29 @@ TEST(OpReorderer, simple) {
         }
     };
 
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 100, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(25, 25);
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
-    OpReorderer reorderer(100, 200, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+            createSyncedNodeList(node), sLightCenter);
     SimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
 }
 
 TEST(OpReorderer, simpleRejection) {
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op); // intersection should be empty
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
-    OpReorderer reorderer(200, 200, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
 
     FailRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -147,7 +151,8 @@ TEST(OpReorderer, simpleBatching) {
         }
     };
 
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
@@ -161,7 +166,8 @@ TEST(OpReorderer, simpleBatching) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(200, 200, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
     SimpleBatchingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
@@ -179,7 +185,8 @@ TEST(OpReorderer, textStrikethroughBatching) {
             EXPECT_TRUE(mIndex++ < LOOPS) << "Text should be beneath all strikethrough rects";
         }
     };
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 2000, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 200, 2000,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint textPaint;
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(20);
@@ -188,7 +195,8 @@ TEST(OpReorderer, textStrikethroughBatching) {
             TestUtils::drawTextToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
         }
     });
-    OpReorderer reorderer(200, 2000, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 2000), 200, 2000,
+            createSyncedNodeList(node), sLightCenter);
     TextStrikethroughTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
@@ -214,14 +222,16 @@ TEST(OpReorderer, renderNode) {
         }
     };
 
-    sp<RenderNode> child = TestUtils::createNode(10, 10, 110, 110, [](RecordingCanvas& canvas) {
+    auto child = TestUtils::createNode(10, 10, 110, 110,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     });
 
     RenderNode* childPtr = child.get();
-    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200, [childPtr](RecordingCanvas& canvas) {
+    auto parent = TestUtils::createNode(0, 0, 200, 200,
+            [childPtr](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
@@ -249,7 +259,8 @@ TEST(OpReorderer, clipped) {
         }
     };
 
-    sp<RenderNode> node = TestUtils::createNode(0, 0, 200, 200, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
     });
@@ -291,13 +302,14 @@ TEST(OpReorderer, saveLayerSimple) {
         }
     };
 
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 10, 190, 190, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRect(10, 10, 190, 190, SkPaint());
         canvas.restore();
     });
-
-    OpReorderer reorderer(200, 200, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
     SaveLayerSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
@@ -354,7 +366,8 @@ TEST(OpReorderer, saveLayerNested) {
         }
     };
 
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(800, 800, [](RecordingCanvas& canvas) {
+    auto node = TestUtils::createNode(0, 0, 800, 800,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(0, 0, 800, 800, 128, SkCanvas::kClipToLayer_SaveFlag);
         {
             canvas.drawRect(0, 0, 800, 800, SkPaint());
@@ -367,14 +380,16 @@ TEST(OpReorderer, saveLayerNested) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(800, 800, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(800, 800), 800, 800,
+            createSyncedNodeList(node), sLightCenter);
     SaveLayerNestedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
 }
 
 TEST(OpReorderer, saveLayerContentRejection) {
-    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        auto node = TestUtils::createNode(0, 0, 200, 200,
+                [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op);
         canvas.saveLayerAlpha(200, 200, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
@@ -385,7 +400,8 @@ TEST(OpReorderer, saveLayerContentRejection) {
         canvas.restore();
         canvas.restore();
     });
-    OpReorderer reorderer(200, 200, *dl, sLightCenter);
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
 
     FailRenderer renderer;
     // should see no ops, even within the layer, since the layer should be rejected
@@ -424,7 +440,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
         }
     };
 
-    sp<RenderNode> node = TestUtils::createNode(10, 10, 110, 110,
+    auto node = TestUtils::createNode(10, 10, 110, 110,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
@@ -562,7 +578,7 @@ static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) 
 }
 static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, float z) {
     auto node = TestUtils::createNode(0, 0, 100, 100,
-            [expectedDrawOrder](RecordingCanvas& canvas) {
+            [expectedDrawOrder](RenderProperties& props, RecordingCanvas& canvas) {
         drawOrderedRect(&canvas, expectedDrawOrder);
     });
     node->mutateStagingProperties().setTranslationZ(z);
@@ -579,7 +595,7 @@ TEST(OpReorderer, zReorder) {
     };
 
     auto parent = TestUtils::createNode(0, 0, 100, 100,
-            [](RecordingCanvas& canvas) {
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
         drawOrderedRect(&canvas, 1);
         canvas.insertReorderBarrier(true);
@@ -600,10 +616,93 @@ TEST(OpReorderer, zReorder) {
     EXPECT_EQ(10, renderer.getIndex());
 };
 
+TEST(OpReorderer, projectionReorder) {
+    static const int scrollX = 5;
+    static const int scrollY = 10;
+    class ProjectionReorderTestRenderer : public TestRendererBase {
+    public:
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            const int index = mIndex++;
+
+            Matrix4 expectedMatrix;
+            switch (index) {
+            case 0:
+                EXPECT_EQ(Rect(100, 100), op.unmappedBounds);
+                EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
+                expectedMatrix.loadIdentity();
+                break;
+            case 1:
+                EXPECT_EQ(Rect(-10, -10, 60, 60), op.unmappedBounds);
+                EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
+                expectedMatrix.loadTranslate(50, 50, 0); // TODO: should scroll be respected here?
+                break;
+            case 2:
+                EXPECT_EQ(Rect(100, 50), op.unmappedBounds);
+                EXPECT_EQ(SK_ColorBLUE, op.paint->getColor());
+                expectedMatrix.loadTranslate(-scrollX, 50 - scrollY, 0);
+                break;
+            default:
+                ADD_FAILURE();
+            }
+            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, state.computedState.transform);
+        }
+    };
+
+    /**
+     * Construct a tree of nodes, where the root (A) has a receiver background (B), and a child (C)
+     * with a projecting child (P) of its own. P would normally draw between B and C's "background"
+     * draw, but because it is projected backwards, it's drawn in between B and C.
+     *
+     * The parent is scrolled by scrollX/scrollY, but this does not affect the background
+     * (which isn't affected by scroll).
+     */
+    auto receiverBackground = TestUtils::createNode(0, 0, 100, 100,
+            [](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setProjectionReceiver(true);
+        // scroll doesn't apply to background, so undone via translationX/Y
+        // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
+        properties.setTranslationX(scrollX);
+        properties.setTranslationY(scrollY);
+
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+    });
+    auto projectingRipple = TestUtils::createNode(50, 0, 100, 50,
+            [](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setProjectBackwards(true);
+        properties.setClipToBounds(false);
+        SkPaint paint;
+        paint.setColor(SK_ColorDKGRAY);
+        canvas.drawRect(-10, -10, 60, 60, paint);
+    });
+    auto child = TestUtils::createNode(0, 50, 100, 100,
+            [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
+        SkPaint paint;
+        paint.setColor(SK_ColorBLUE);
+        canvas.drawRect(0, 0, 100, 50, paint);
+        canvas.drawRenderNode(projectingRipple.get());
+    });
+    auto parent = TestUtils::createNode(0, 0, 100, 100,
+            [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
+        canvas.drawRenderNode(receiverBackground.get());
+        canvas.drawRenderNode(child.get());
+        canvas.restore();
+    });
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+            createSyncedNodeList(parent), sLightCenter);
+    ProjectionReorderTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(3, renderer.getIndex());
+}
+
 // creates a 100x100 shadow casting node with provided translationZ
 static sp<RenderNode> createWhiteRectShadowCaster(float translationZ) {
     return TestUtils::createNode(0, 0, 100, 100,
-            [translationZ] (RenderProperties& properties, RecordingCanvas& canvas) {
+            [translationZ](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setTranslationZ(translationZ);
         properties.mutableOutline().setRoundRect(0, 0, 100, 100, 0.0f, 1.0f);
         SkPaint paint;
@@ -630,8 +729,8 @@ TEST(OpReorderer, shadow) {
         }
     };
 
-    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200,
-            [] (RecordingCanvas& canvas) {
+    auto parent = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
     });
@@ -666,8 +765,8 @@ TEST(OpReorderer, shadowSaveLayer) {
         }
     };
 
-    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200,
-            [] (RecordingCanvas& canvas) {
+    auto parent = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         // save/restore outside of reorderBarrier, so they don't get moved out of place
         canvas.translate(20, 10);
         int count = canvas.saveLayerAlpha(30, 50, 130, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
@@ -706,7 +805,7 @@ RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
         }
     };
 
-    sp<RenderNode> parent = TestUtils::createNode(50, 60, 150, 160,
+    auto parent = TestUtils::createNode(50, 60, 150, 160,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         canvas.insertReorderBarrier(true);
@@ -749,8 +848,8 @@ TEST(OpReorderer, shadowLayering) {
             EXPECT_TRUE(index == 2 || index == 3);
         }
     };
-    sp<RenderNode> parent = TestUtils::createNode(0, 0, 200, 200,
-            [] (RecordingCanvas& canvas) {
+    auto parent = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0001f).get());
@@ -954,7 +1053,7 @@ TEST(OpReorderer, renderPropSaveLayerAlphaRotate) {
     SaveLayerAlphaData observedData;
     testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
         // Translate and rotate the view so that the only visible part is the top left corner of
-        // the view. It will form an isoceles right triangle with a long side length of 200 at the
+        // the view. It will form an isosceles right triangle with a long side length of 200 at the
         // bottom of the viewport.
         properties.setTranslationX(100);
         properties.setTranslationY(100);
