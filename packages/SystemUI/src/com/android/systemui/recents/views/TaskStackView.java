@@ -42,8 +42,12 @@ import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
+import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
+import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
+import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
+import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
@@ -81,6 +85,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     private final static String TAG = "TaskStackView";
     private final static boolean DEBUG = false;
+
+    // The thresholds at which to show/hide the history button.
+    private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
+    private static final float HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
     /** The TaskView callbacks */
     interface TaskStackViewCallbacks {
@@ -1017,6 +1025,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     false /* requestViewFocus */);
         }
 
+        // Update the history button visibility
+        if (mStackScroller.getStackScroll() < SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
+            EventBus.getDefault().send(new ShowHistoryButtonEvent());
+        }
+
         // Start dozing
         mUIDozeTrigger.startDozing();
     }
@@ -1333,10 +1346,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/
 
     @Override
-    public void onScrollChanged(float p) {
+    public void onScrollChanged(float prevScroll, float curScroll) {
         mUIDozeTrigger.poke();
         requestSynchronizeStackViewsWithModel();
         postInvalidateOnAnimation();
+
+        if (prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
+                curScroll <= SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
+            EventBus.getDefault().send(new ShowHistoryButtonEvent());
+        } else if (prevScroll < HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD &&
+                curScroll >= HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD) {
+            EventBus.getDefault().send(new HideHistoryButtonEvent());
+        }
     }
 
     /**** EventBus Events ****/
@@ -1496,15 +1517,30 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    public final void onBusEvent(ShowHistoryEvent event) {
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
+            tv.animate().alpha(0f).setDuration(200).start();
+        }
+    }
+
+    public final void onBusEvent(HideHistoryEvent event) {
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
+            tv.animate().alpha(1f).setDuration(200).start();
+        }
+    }
+
     /**
      * Removes the task from the stack, and updates the focus to the next task in the stack if the
      * removed TaskView was focused.
      */
     private void removeTaskViewFromStack(TaskView tv) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         Task task = tv.getTask();
-        int taskIndex = mStack.indexOfTask(task);
-        boolean taskWasFocused = tv.isFocusedTask();
 
         // Reset the previously focused task before it is removed from the stack
         resetFocusedTask();

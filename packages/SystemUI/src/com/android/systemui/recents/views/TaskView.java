@@ -71,7 +71,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     ObjectAnimator mTaskProgressAnimator;
     float mMaxDimScale;
     int mDimAlpha;
-    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1f);
+    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(3f);
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
     Paint mDimLayerPaint = new Paint();
     float mActionButtonTranslationZ;
@@ -263,15 +263,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         toTransform.alpha = 0f;
         toTransform.translationY += 200;
         toTransform.translationZ = 0;
-    }
-
-    /**
-     * When we are un/filtering, this method will setup the transform that we are animating from,
-     * in order to show the task.
-     */
-    void prepareTaskTransformForFilterTaskVisible(TaskViewTransform fromTransform) {
-        // Fade the view in
-        fromTransform.alpha = 0f;
     }
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
@@ -617,12 +608,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Compute the dim as a function of the scale of this view. */
     int getDimFromTaskProgress() {
-        // TODO: Temporarily disable the dim on the stack
-        /*
-        float dim = mMaxDimScale * mDimInterpolator.getInterpolation(1f - mTaskProgress);
+        float x = mTaskProgress < 0 ? 1f : mDimInterpolator.getInterpolation(1f - mTaskProgress);
+        float dim = mMaxDimScale * x;
         return (int) (dim * 255);
-        */
-        return 0;
     }
 
     /** Update the dim as a function of the scale of this view. */

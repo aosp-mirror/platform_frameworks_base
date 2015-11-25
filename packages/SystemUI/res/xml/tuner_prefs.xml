@@ -102,6 +102,11 @@
             android:title="@string/overview_fullscreen_thumbnails"
             android:summary="@string/overview_fullscreen_thumbnails_desc" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="overview_show_history"
+            android:title="@string/overview_show_history"
+            android:summary="@string/overview_show_history_desc" />
+
     </PreferenceScreen>
 
     <SwitchPreference
