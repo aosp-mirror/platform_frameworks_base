@@ -194,14 +194,6 @@ class Task implements DimLayer.DimLayerUser {
                 bounds = mTmpRect;
                 mFullscreen = true;
             } else {
-                if ((mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
-                        && mStack.mStackId != PINNED_STACK_ID) || bounds.isEmpty()) {
-                    // ensure bounds are entirely within the display rect
-                    if (!bounds.intersect(mTmpRect)) {
-                        // Can't set bounds outside the containing display...Sorry!
-                        return BOUNDS_CHANGE_NONE;
-                    }
-                }
                 mFullscreen = mTmpRect.equals(bounds);
             }
         }
