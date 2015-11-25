@@ -552,6 +552,32 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
+    private class OmniSettingsObserver extends ContentObserver {
+        OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_ROTATION),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ACCELEROMETER_ROTATION),
+                    false, this, UserHandle.USER_ALL);
+
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            mStatusBarWindowManager.updateKeyguardScreenRotation();
+        }
+    }
+    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
     private int mInteractingWindows;
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
@@ -773,6 +799,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         SettingsObserver observer = new SettingsObserver(mHandler);
         observer.observe();
+        mOmniSettingsObserver.observe();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCastController,
@@ -3914,6 +3941,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLockscreenWallpaper.setCurrentUser(newUserId);
         mScrimController.setCurrentUser(newUserId);
         updateMediaMetaData(true, false);
+        mOmniSettingsObserver.update();
     }
 
     private void setControllerUsers() {

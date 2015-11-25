@@ -3750,6 +3750,13 @@ public final class Settings {
         public static final String LOCKSCREEN_MEDIA_METADATA = "lockscreen_media_metadata";
 
         /**
+         * Control whether the accelerometer will be used to change lockscreen
+         * orientation.  If 0, it will not be used; if 1, it will be used by default.
+         * @hide
+         */
+        public static final String LOCKSCREEN_ROTATION = "lockscreen_rotation";
+
+        /**
          * Network traffic indicator, goes from least to greatest significant bitwise
          * 0 = Display up-stream traffic if set
          * 1 = Display down-stream traffic if set
