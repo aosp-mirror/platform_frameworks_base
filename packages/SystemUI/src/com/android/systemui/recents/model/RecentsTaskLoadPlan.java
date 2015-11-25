@@ -128,7 +128,7 @@ public class RecentsTaskLoadPlan {
             boolean isStackTask = true;
             if (debugFlags.isHistoryEnabled()) {
                 boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
-                isStackTask = !isFreeformTask && (!isHistoricalTask(t) ||
+                isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
                         (t.lastActiveTime >= lastStackActiveTime &&
                                 i >= (taskCount - MIN_NUM_TASKS)));
                 if (isStackTask && newLastStackActiveTime < 0) {

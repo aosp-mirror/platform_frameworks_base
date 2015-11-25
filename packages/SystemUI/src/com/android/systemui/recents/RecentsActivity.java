@@ -724,18 +724,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         getResizeTaskDebugDialog().showResizeTaskDialog(event.task, mRecentsView);
     }
 
-    public final void onBusEvent(DragStartEvent event) {
-        // Lock the orientation while dragging
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-
-        // TODO: docking requires custom accessibility actions
-    }
-
-    public final void onBusEvent(DragEndEvent event) {
-        // Unlock the orientation when dragging completes
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_BEHIND);
-    }
-
     public final void onBusEvent(LaunchTaskSucceededEvent event) {
         MetricsLogger.histogram(this, "overview_task_launch_index", event.taskIndexFromStackFront);
     }

@@ -19,7 +19,6 @@ package com.android.systemui.recents.events.ui.dragndrop;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.views.DragView;
 import com.android.systemui.recents.views.DropTarget;
 import com.android.systemui.recents.views.TaskView;
 
@@ -30,15 +29,13 @@ public class DragEndEvent extends EventBus.Event {
 
     public final Task task;
     public final TaskView taskView;
-    public final DragView dragView;
     public final DropTarget dropTarget;
     public final ReferenceCountedTrigger postAnimationTrigger;
 
-    public DragEndEvent(Task task, TaskView taskView, DragView dragView, DropTarget dropTarget,
+    public DragEndEvent(Task task, TaskView taskView, DropTarget dropTarget,
             ReferenceCountedTrigger postAnimationTrigger) {
         this.task = task;
         this.taskView = taskView;
-        this.dragView = dragView;
         this.dropTarget = dropTarget;
         this.postAnimationTrigger = postAnimationTrigger;
     }

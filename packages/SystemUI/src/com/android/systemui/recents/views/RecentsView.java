@@ -81,7 +81,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     RecentsTransitionHelper mTransitionHelper;
     RecentsViewTouchHandler mTouchHandler;
-    DragView mDragView;
     TaskStack.DockState[] mVisibleDockStates = {
             TaskStack.DockState.LEFT,
             TaskStack.DockState.TOP,
@@ -341,13 +340,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
         }
 
-        if (mDragView != null) {
-            Rect taskRect = mTaskStackView.mLayoutAlgorithm.mTaskRect;
-            mDragView.measure(
-                    MeasureSpec.makeMeasureSpec(taskRect.width(), MeasureSpec.AT_MOST),
-                    MeasureSpec.makeMeasureSpec(taskRect.height(), MeasureSpec.AT_MOST));
-        }
-
         // Measure the history button with the full space above the stack, but width-constrained
         // to the stack
         Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
@@ -377,11 +369,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         if (mTaskStackView != null && mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.layout(left, top, left + getMeasuredWidth(), top + getMeasuredHeight());
-        }
-
-        if (mDragView != null) {
-            mDragView.layout(left, top, left + mDragView.getMeasuredWidth(),
-                    top + mDragView.getMeasuredHeight());
         }
 
         // Layout the history button left-aligned with the stack, but offset from the top of the
@@ -461,10 +448,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /**** EventBus Events ****/
 
     public final void onBusEvent(DragStartEvent event) {
-        // Add the drag view
-        mDragView = event.dragView;
-        addView(mDragView);
-
         updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
                 TaskStack.DockState.NONE.viewState.dockAreaAlpha);
     }
@@ -480,65 +463,17 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     public final void onBusEvent(final DragEndEvent event) {
-        final Runnable cleanUpRunnable = new Runnable() {
-            @Override
-            public void run() {
-                // Remove the drag view
-                removeView(mDragView);
-                mDragView = null;
-            }
-        };
-
         // Animate the overlay alpha back to 0
         updateVisibleDockRegions(null, -1);
 
-        if (event.dropTarget == null) {
-            // No drop targets for hit, so just animate the task back to its place
-            event.postAnimationTrigger.increment();
-            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    cleanUpRunnable.run();
-                }
-            });
-            // Animate the task back to where it was before then clean up afterwards
-            TaskViewTransform taskTransform = new TaskViewTransform();
-            TaskStackLayoutAlgorithm layoutAlgorithm = mTaskStackView.getStackAlgorithm();
-            layoutAlgorithm.getStackTransform(event.task,
-                    mTaskStackView.getScroller().getStackScroll(), taskTransform, null);
-            event.dragView.animate()
-                    .scaleX(taskTransform.scale)
-                    .scaleY(taskTransform.scale)
-                    .translationX((layoutAlgorithm.mTaskRect.left - event.dragView.getLeft())
-                            + taskTransform.translationX)
-                    .translationY((layoutAlgorithm.mTaskRect.top - event.dragView.getTop())
-                            + taskTransform.translationY)
-                    .setDuration(175)
-                    .setInterpolator(mFastOutSlowInInterpolator)
-                    .withEndAction(event.postAnimationTrigger.decrementAsRunnable())
-                    .start();
-
-        } else if (event.dropTarget instanceof TaskStack.DockState) {
+        // Handle the case where we drop onto a dock region
+        if (event.dropTarget instanceof TaskStack.DockState) {
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
-
-            // For now, just remove the drag view and the original task
-            // TODO: Animate the task to the drop target rect before launching it above
-            cleanUpRunnable.run();
 
             // Dock the task and launch it
             SystemServicesProxy ssp = Recents.getSystemServices();
             ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);
             launchTask(event.task, null, INVALID_STACK_ID);
-
-        } else {
-            // We dropped on another drop target, so just add the cleanup to the post animation
-            // trigger
-            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    cleanUpRunnable.run();
-                }
-            });
         }
     }
 

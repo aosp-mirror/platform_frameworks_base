@@ -16,6 +16,10 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1420,7 +1424,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
+    private AnimatorSet mDropAnimation;
+
     public final void onBusEvent(DragStartEvent event) {
+        // Cancel the existing drop animation
+        Utilities.cancelAnimationWithoutCallbacks(mDropAnimation);
+
         if (event.task.isFreeformTask()) {
             // Animate to the front of the stack
             mStackScroller.animateScroll(mStackScroller.getStackScroll(),
@@ -1441,56 +1450,84 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(final DragEndEvent event) {
-        if (event.dropTarget != mFreeformWorkspaceDropTarget &&
-                event.dropTarget != mStackDropTarget) {
-            return;
-        }
-        if (event.task.isFreeformTask() && event.dropTarget == mFreeformWorkspaceDropTarget) {
-            // TODO: Animate back into view
-            return;
-        }
-        if (!event.task.isFreeformTask() && event.dropTarget == mStackDropTarget) {
-            // TODO: Animate back into view
+        // We don't handle drops on the dock regions
+        if (event.dropTarget instanceof TaskStack.DockState) {
             return;
         }
 
-        // Move the task to the right position in the stack (ie. the front of the stack if freeform
-        // or the front of the stack if fullscreen).  Note, we MUST move the tasks before we update
-        // their stack ids, otherwise, the keys will have changed.
-        if (event.dropTarget == mFreeformWorkspaceDropTarget) {
-            mStack.moveTaskToStack(event.task, FREEFORM_WORKSPACE_STACK_ID);
-            updateLayout(true);
-        } else if (event.dropTarget == mStackDropTarget) {
-            mStack.moveTaskToStack(event.task, FULLSCREEN_WORKSPACE_STACK_ID);
-            updateLayout(true);
+        boolean isFreeformTask = event.task.isFreeformTask();
+        boolean hasChangedStacks =
+                (!isFreeformTask && event.dropTarget == mFreeformWorkspaceDropTarget) ||
+                        (isFreeformTask && event.dropTarget == mStackDropTarget);
+        if (hasChangedStacks) {
+            ArrayList<Animator> animations = new ArrayList<>();
+
+            // Move the task to the right position in the stack (ie. the front of the stack if
+            // freeform or the front of the stack if fullscreen).  Note, we MUST move the tasks
+            // before we update their stack ids, otherwise, the keys will have changed.
+            if (event.dropTarget == mFreeformWorkspaceDropTarget) {
+                mStack.moveTaskToStack(event.task, FREEFORM_WORKSPACE_STACK_ID);
+                updateLayout(true);
+
+                // Update the clipping to match the scaled bitmap rect
+                TaskViewThumbnail thumbnailView = event.taskView.mThumbnailView;
+                float thumbnailScale = thumbnailView.computeThumbnailScale(true);
+                RectF bitmapRect = thumbnailView.getScaledBitmapRect(thumbnailScale);
+                AnimateableViewBounds viewBounds = event.taskView.getViewBounds();
+                int clipRight = (int) (thumbnailView.getMeasuredWidth() - bitmapRect.width());
+                int clipBottom = (int) (thumbnailView.getMeasuredHeight() - bitmapRect.height());
+                animations.add(ObjectAnimator.ofFloat(thumbnailView, TaskViewThumbnail.BITMAP_SCALE,
+                        thumbnailView.getBitmapScale(), thumbnailScale));
+                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_BOTTOM,
+                        viewBounds.getClipBottom(), clipBottom));
+                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_RIGHT,
+                        viewBounds.getClipRight(), clipRight));
+            } else if (event.dropTarget == mStackDropTarget) {
+                mStack.moveTaskToStack(event.task, FULLSCREEN_WORKSPACE_STACK_ID);
+                updateLayout(true);
+
+                // Reset the clipping when animating to the stack
+                TaskViewThumbnail thumbnailView = event.taskView.mThumbnailView;
+                float thumbnailScale = thumbnailView.computeThumbnailScale(false);
+                AnimateableViewBounds viewBounds = event.taskView.getViewBounds();
+                animations.add(ObjectAnimator.ofFloat(thumbnailView, TaskViewThumbnail.BITMAP_SCALE,
+                        thumbnailView.getBitmapScale(), thumbnailScale));
+                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_BOTTOM,
+                        viewBounds.getClipBottom(), 0));
+                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_RIGHT,
+                        viewBounds.getClipRight(), 0));
+            }
+
+            // Move the task to the new stack in the system after the animation completes
+            event.postAnimationTrigger.increment();
+            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    SystemServicesProxy ssp = Recents.getSystemServices();
+                    ssp.moveTaskToStack(event.task.key.id, event.task.key.stackId);
+                }
+            });
+
+            // Animate the normal properties of the view
+            mDropAnimation = new AnimatorSet();
+            mDropAnimation.playTogether(animations);
+            mDropAnimation.setDuration(250);
+            mDropAnimation.setInterpolator(mFastOutSlowInInterpolator);
+            mDropAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    event.postAnimationTrigger.decrement();
+                }
+            });
+            mDropAnimation.start();
         }
 
         event.postAnimationTrigger.increment();
-        event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                SystemServicesProxy ssp = Recents.getSystemServices();
-                ssp.moveTaskToStack(event.task.key.id, event.task.key.stackId);
-            }
-        });
+        event.taskView.animate()
+                .withEndAction(event.postAnimationTrigger.decrementAsRunnable());
 
-        // Animate the drag view to the new position
-        mLayoutAlgorithm.getStackTransform(event.task, mStackScroller.getStackScroll(),
-                mTmpTransform, null);
-        event.dragView.animate()
-                .scaleX(mTmpTransform.scale)
-                .scaleY(mTmpTransform.scale)
-                .translationX((mLayoutAlgorithm.mTaskRect.left - event.dragView.getLeft())
-                        + mTmpTransform.translationX)
-                .translationY((mLayoutAlgorithm.mTaskRect.top - event.dragView.getTop())
-                        + mTmpTransform.translationY)
-                .setDuration(175)
-                .setInterpolator(mFastOutSlowInInterpolator)
-                .withEndAction(event.postAnimationTrigger.decrementAsRunnable())
-                .start();
-
-        // Animate the other views into place
-        requestSynchronizeStackViewsWithModel(175);
+        // Animate the tack view back into position
+        requestSynchronizeStackViewsWithModel(250);
     }
 
     public final void onBusEvent(StackViewScrolledEvent event) {
