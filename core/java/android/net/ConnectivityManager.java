@@ -1028,12 +1028,24 @@ public class ConnectivityManager {
      * Guess what the network request was trying to say so that the resulting
      * network is accessible via the legacy (deprecated) API such as
      * requestRouteToHost.
-     * This means we should try to be fairly preceise about transport and
+     *
+     * This means we should try to be fairly precise about transport and
      * capability but ignore things such as networkSpecifier.
      * If the request has more than one transport or capability it doesn't
      * match the old legacy requests (they selected only single transport/capability)
      * so this function cannot map the request to a single legacy type and
      * the resulting network will not be available to the legacy APIs.
+     *
+     * This code is only called from the requestNetwork API (L and above).
+     *
+     * Setting a legacy type causes CONNECTIVITY_ACTION broadcasts, which are expensive
+     * because they wake up lots of apps - see http://b/23350688 . So we currently only
+     * do this for SUPL requests, which are the only ones that we know need it. If
+     * omitting these broadcasts causes unacceptable app breakage, then for backwards
+     * compatibility we can send them:
+     *
+     * if (targetSdkVersion < Build.VERSION_CODES.M) &&        // legacy API unsupported >= M
+     *     targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP))  // requestNetwork not present < L
      *
      * TODO - This should be removed when the legacy APIs are removed.
      */
@@ -1043,6 +1055,14 @@ public class ConnectivityManager {
         }
 
         if (!netCap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            return TYPE_NONE;
+        }
+
+        // Do this only for SUPL, until GpsLocationProvider is fixed. http://b/25876485 .
+        if (!netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
+            // NOTE: if this causes app breakage, we should not just comment out this early return;
+            // instead, we should make this early return conditional on the requesting app's target
+            // SDK version, as described in the comment above.
             return TYPE_NONE;
         }
 
@@ -1062,7 +1082,7 @@ public class ConnectivityManager {
             type = "enableDUN";
             result = TYPE_MOBILE_DUN;
         } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
-           type = "enableSUPL";
+            type = "enableSUPL";
             result = TYPE_MOBILE_SUPL;
         // back out this hack for mms as they no longer need this and it's causing
         // device slowdowns - b/23350688 (note, supl still needs this)
