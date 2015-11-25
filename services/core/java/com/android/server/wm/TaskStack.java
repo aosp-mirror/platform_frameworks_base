@@ -143,11 +143,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 bounds = mTmpRect;
                 mFullscreen = true;
             } else {
-                // ensure bounds are entirely within the display rect
-                if (!bounds.intersect(mTmpRect)) {
-                    // Can't set bounds outside the containing display.. Sorry!
-                    return false;
-                }
                 mFullscreen = mTmpRect.equals(bounds);
             }
         }

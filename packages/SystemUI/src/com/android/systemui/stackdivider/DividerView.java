@@ -317,6 +317,18 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 outRect.top = position + mDividerWindowWidth - 2 * mDividerInsets;
                 break;
         }
+        if (outRect.left > outRect.right) {
+            outRect.left = outRect.right;
+        }
+        if (outRect.top > outRect.bottom) {
+            outRect.top = outRect.bottom;
+        }
+        if (outRect.right < outRect.left) {
+            outRect.right = outRect.left;
+        }
+        if (outRect.bottom < outRect.top) {
+            outRect.bottom = outRect.top;
+        }
     }
 
     public void resizeStack(int position) {
