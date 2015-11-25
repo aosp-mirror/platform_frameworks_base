@@ -300,10 +300,11 @@ public abstract class BaseActivity extends Activity {
 
     void onDirectoryCreated(DocumentInfo doc) {
         checkArgument(doc.isDirectory());
-        openDirectory(doc);
+        openContainerDocument(doc);
     }
 
-    void openDirectory(DocumentInfo doc) {
+    void openContainerDocument(DocumentInfo doc) {
+        checkArgument(doc.isContainer());
         mState.stack.push(doc);
         mState.stackTouched = true;
         onCurrentDirectoryChanged(ANIM_DOWN);

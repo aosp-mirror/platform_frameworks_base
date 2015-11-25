@@ -421,8 +421,8 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public void onDocumentPicked(DocumentInfo doc, DocumentContext context) {
         final FragmentManager fm = getFragmentManager();
-        if (doc.isDirectory()) {
-            openDirectory(doc);
+        if (doc.isContainer()) {
+            openContainerDocument(doc);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
             new ExistingFinishTask(doc.derivedUri).executeOnExecutor(getExecutorForCurrentDirectory());

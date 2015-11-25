@@ -311,8 +311,8 @@ public class FilesActivity extends BaseActivity {
 
     @Override
     public void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings) {
-        if (doc.isDirectory()) {
-            openDirectory(doc);
+        if (doc.isContainer()) {
+            openContainerDocument(doc);
         } else {
             openDocument(doc, siblings);
         }
