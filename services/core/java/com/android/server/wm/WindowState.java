@@ -411,10 +411,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     final private Rect mTmpRect = new Rect();
 
-    // This window often remains added but hidden, so we want to destroy its surface when it's not
-    // visible.
-    private final boolean mDestroySurfaceWhenHidden;
-
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
@@ -462,7 +458,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mSubLayer = 0;
             mInputWindowHandle = null;
             mWinAnimator = null;
-            mDestroySurfaceWhenHidden = false;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -561,7 +556,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mInputWindowHandle = new InputWindowHandle(
                 mAppToken != null ? mAppToken.mInputApplicationHandle : null, this,
                 displayContent.getDisplayId());
-        mDestroySurfaceWhenHidden = mAttrs.type == TYPE_DOCK_DIVIDER;
     }
 
     void attach() {
@@ -1319,10 +1313,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHasSurface = hasSurface;
     }
 
-    boolean shouldDestroySurfaceWhenAnimationFinishes() {
-        return mExiting || (mDestroySurfaceWhenHidden && !mPolicyVisibilityAfterAnim);
-    }
-
     private final class DeadWindowEventReceiver extends InputEventReceiver {
         DeadWindowEventReceiver(InputChannel inputChannel) {
             super(inputChannel, mService.mH.getLooper());
@@ -1605,11 +1595,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Already showing.
             return false;
         }
-        if (!mHasSurface && mDestroySurfaceWhenHidden) {
-            // This is a window that doesn't retain the surface when it's hidden, so immediately
-            // when we want to show it again, we need to create the surface for it.
-            mWinAnimator.createSurfaceLocked();
-        }
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "doAnimation: mPolicyVisibility="
@@ -1645,7 +1630,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 doAnimation = false;
             }
         }
-        final boolean current = doAnimation ? mPolicyVisibilityAfterAnim : mPolicyVisibility;
+        boolean current = doAnimation ? mPolicyVisibilityAfterAnim
+                : mPolicyVisibility;
         if (!current) {
             // Already hiding.
             return false;
@@ -1656,9 +1642,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 doAnimation = false;
             }
         }
-        mPolicyVisibilityAfterAnim = false;
-        if (!doAnimation) {
+        if (doAnimation) {
+            mPolicyVisibilityAfterAnim = false;
+        } else {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility false: " + this);
+            mPolicyVisibilityAfterAnim = false;
             mPolicyVisibility = false;
             // Window is no longer visible -- make sure if we were waiting
             // for it to be displayed before enabling the display, that
