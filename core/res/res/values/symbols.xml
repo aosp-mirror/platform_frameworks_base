@@ -221,6 +221,9 @@
   <java-symbol type="id" name="profile_badge_line2" />
   <java-symbol type="id" name="profile_badge_line3" />
   <java-symbol type="id" name="transitionPosition" />
+  <java-symbol type="id" name="selection_start_handle" />
+  <java-symbol type="id" name="selection_end_handle" />
+  <java-symbol type="id" name="insertion_handle" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
