@@ -435,8 +435,9 @@ void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
             refPaint(paint), refBitmap(*bitmap)));
 }
 void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
+    auto&& stagingProps = renderNode->stagingProperties();
     RenderNodeOp* op = new (alloc()) RenderNodeOp(
-            Rect(0, 0, renderNode->getWidth(), renderNode->getHeight()), // are these safe? they're theoretically dynamic
+            Rect(stagingProps.getWidth(), stagingProps.getHeight()),
             *(mState.currentSnapshot()->transform),
             mState.getRenderTargetClipBounds(),
             renderNode);

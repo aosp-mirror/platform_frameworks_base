@@ -1383,7 +1383,10 @@ class DrawRenderNodeOp : public DrawBoundedOp {
     friend class TestUtils;
 public:
     DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent, bool clipIsSimple)
-            : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
+            : DrawBoundedOp(0, 0,
+                    renderNode->stagingProperties().getWidth(),
+                    renderNode->stagingProperties().getHeight(),
+                    nullptr)
             , renderNode(renderNode)
             , mRecordedWithPotentialStencilClip(!clipIsSimple || !transformFromParent.isSimple())
             , localMatrix(transformFromParent)
