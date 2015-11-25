@@ -46,17 +46,13 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
             throw new NullPointerException("config must not be null");
         }
         mNetworkSecurityConfig = config;
-        // TODO: Create our own better KeyStoreImpl
         try {
+            TrustedCertificateStoreAdapter certStore = new TrustedCertificateStoreAdapter(config);
+            // Provide an empty KeyStore since TrustManagerImpl doesn't support null KeyStores.
+            // TrustManagerImpl will use certStore to lookup certificates.
             KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
             store.load(null);
-            int certNum = 0;
-            for (TrustAnchor anchor : mNetworkSecurityConfig.getTrustAnchors()) {
-                store.setEntry(String.valueOf(certNum++),
-                        new KeyStore.TrustedCertificateEntry(anchor.certificate),
-                        null);
-            }
-            mDelegate = new TrustManagerImpl(store);
+            mDelegate = new TrustManagerImpl(store, null, certStore);
         } catch (GeneralSecurityException | IOException e) {
             throw new RuntimeException(e);
         }
