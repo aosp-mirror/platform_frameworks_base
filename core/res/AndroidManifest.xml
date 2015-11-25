@@ -33,6 +33,7 @@
     <protected-broadcast android:name="android.intent.action.TIME_TICK" />
     <protected-broadcast android:name="android.intent.action.TIMEZONE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.DATE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.PRE_BOOT_COMPLETED" />
     <protected-broadcast android:name="android.intent.action.BOOT_COMPLETED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_INSTALL" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_ADDED" />
@@ -76,6 +77,7 @@
     <protected-broadcast android:name="android.intent.action.USER_BACKGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_FOREGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_SWITCHED" />
+    <protected-broadcast android:name="android.intent.action.USER_INITIALIZE" />
     <protected-broadcast android:name="android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
