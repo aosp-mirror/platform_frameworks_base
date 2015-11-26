@@ -61,8 +61,8 @@ public class BugreportReceiver extends BroadcastReceiver {
 
     private static final String AUTHORITY = "com.android.shell";
 
-    private static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
-    private static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
+    static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
+    static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
 
     /**
      * Always keep the newest 8 bugreport files; 4 reports and 4 screenshots are
