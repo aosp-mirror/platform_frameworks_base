@@ -78,6 +78,12 @@ class DocumentLoader {
             if (parentHandle == CursorHelper.DUMMY_HANDLE_FOR_ROOT) {
                 parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
             }
+            // TODO: Handle nit race around here.
+            // 1. getObjectHandles.
+            // 2. putNewDocument.
+            // 3. startAddingChildDocuemnts.
+            // 4. stopAddingChildDocuments - It removes the new document added at the step 2,
+            //     because it is not updated between start/stopAddingChildDocuments.
             task = new LoaderTask(mDatabase, parent, mMtpManager.getObjectHandles(
                     parent.mDeviceId, parent.mStorageId, parentHandle));
             task.fillDocuments(loadDocuments(

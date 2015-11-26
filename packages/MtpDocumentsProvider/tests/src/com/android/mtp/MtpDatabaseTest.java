@@ -20,9 +20,16 @@ import android.database.Cursor;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.io.FileNotFoundException;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static com.android.mtp.MtpDatabaseInternal.strings;
 
 @SmallTest
 public class MtpDatabaseTest extends AndroidTestCase {
@@ -692,7 +699,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         }
     }
 
-    public void _testFailToReplaceExisitingUnmappedRoots() {
+    public void testFailToReplaceExisitingUnmappedRoots() {
         // The client code should not be able to replace rows before resolving 'unmapped' rows.
         // Add one.
         mDatabase.startAddingRootDocuments(0);
@@ -700,18 +707,147 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 new MtpRoot(0, 100, "Device", "Storage A", 0, 0, ""),
         });
         mDatabase.clearMapping();
+        final Cursor oldCursor = mDatabase.queryRoots(strings(Root.COLUMN_ROOT_ID));
+        assertEquals(1, oldCursor.getCount());
+
         // Add one.
+        mDatabase.startAddingRootDocuments(0);
         mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
-                new MtpRoot(0, 100, "Device", "Storage B", 1000, 1000, ""),
+                new MtpRoot(0, 101, "Device", "Storage B", 1000, 1000, ""),
         });
         // Add one more before resolving unmapped documents.
-        try {
-            mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
-                    new MtpRoot(0, 100, "Device", "Storage B", 1000, 1000, ""),
-            });
-            fail();
-        } catch (Throwable e) {
-            assertTrue(e instanceof Error);
+        mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
+                new MtpRoot(0, 102, "Device", "Storage B", 1000, 1000, ""),
+        });
+        mDatabase.stopAddingRootDocuments(0);
+
+        // Because the roots shares the same name, the roots should have new IDs.
+        final Cursor newCursor = mDatabase.queryRoots(strings(Root.COLUMN_ROOT_ID));
+        assertEquals(2, newCursor.getCount());
+        oldCursor.moveToNext();
+        newCursor.moveToNext();
+        assertFalse(oldCursor.getString(0).equals(newCursor.getString(0)));
+        newCursor.moveToNext();
+        assertFalse(oldCursor.getString(0).equals(newCursor.getString(0)));
+
+        oldCursor.close();
+        newCursor.close();
+    }
+
+    public void testQueryDocument() {
+        mDatabase.startAddingRootDocuments(0);
+        mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
+                new MtpRoot(0, 100, "Device", "Storage A", 0, 0, ""),
+        });
+        mDatabase.stopAddingRootDocuments(0);
+
+        final Cursor cursor = mDatabase.queryDocument("1", strings(Document.COLUMN_DISPLAY_NAME));
+        assertEquals(1, cursor.getCount());
+        cursor.moveToNext();
+        assertEquals("Device Storage A", cursor.getString(0));
+        cursor.close();
+    }
+
+    public void testGetParentId() throws FileNotFoundException {
+        mDatabase.startAddingRootDocuments(0);
+        mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
+                new MtpRoot(0, 100, "Device", "Storage A", 0, 0, ""),
+        });
+        mDatabase.stopAddingRootDocuments(0);
+
+        mDatabase.startAddingChildDocuments("1");
+        mDatabase.putChildDocuments(
+                0,
+                "1",
+                new MtpObjectInfo[] {
+                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
+                });
+        mDatabase.stopAddingChildDocuments("1");
+
+        assertEquals("1", mDatabase.getParentId("2"));
+    }
+
+    public void testDeleteDocument() {
+        mDatabase.startAddingRootDocuments(0);
+        mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
+                new MtpRoot(0, 100, "Device", "Storage A", 0, 0, ""),
+        });
+        mDatabase.stopAddingRootDocuments(0);
+
+        mDatabase.startAddingChildDocuments("1");
+        mDatabase.putChildDocuments(
+                0,
+                "1",
+                new MtpObjectInfo[] {
+                        createDocument(200, "dir", MtpConstants.FORMAT_ASSOCIATION, 1024),
+                });
+        mDatabase.stopAddingChildDocuments("1");
+
+        mDatabase.startAddingChildDocuments("2");
+        mDatabase.putChildDocuments(
+                0,
+                "2",
+                new MtpObjectInfo[] {
+                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
+                });
+        mDatabase.stopAddingChildDocuments("2");
+
+        mDatabase.deleteDocument("2");
+
+        {
+            // Do not query deleted documents.
+            final Cursor cursor =
+                    mDatabase.queryChildDocuments(strings(Document.COLUMN_DOCUMENT_ID), "1");
+            assertEquals(0, cursor.getCount());
+            cursor.close();
+        }
+
+        {
+            // Child document should be deleted also.
+            final Cursor cursor =
+                    mDatabase.queryDocument("3", strings(Document.COLUMN_DOCUMENT_ID));
+            assertEquals(0, cursor.getCount());
+            cursor.close();
+        }
+    }
+
+    public void testPutNewDocument() throws FileNotFoundException {
+        mDatabase.startAddingRootDocuments(0);
+        mDatabase.putRootDocuments(0, resources, new MtpRoot[] {
+                new MtpRoot(0, 100, "Device", "Storage A", 0, 0, ""),
+        });
+        mDatabase.stopAddingRootDocuments(0);
+
+        assertEquals(
+                "2",
+                mDatabase.putNewDocument(
+                        0, "1", createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024)));
+
+        {
+            final Cursor cursor =
+                    mDatabase.queryChildDocuments(strings(Document.COLUMN_DOCUMENT_ID), "1");
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals("2", cursor.getString(0));
+            cursor.close();
+        }
+
+        // The new document should not be mapped with existing invalidated document.
+        mDatabase.clearMapping();
+        mDatabase.startAddingChildDocuments("1");
+        mDatabase.putNewDocument(
+                0,
+                "1",
+                createDocument(201, "note.txt", MtpConstants.FORMAT_TEXT, 1024));
+        mDatabase.stopAddingChildDocuments("1");
+
+        {
+            final Cursor cursor =
+                    mDatabase.queryChildDocuments(strings(Document.COLUMN_DOCUMENT_ID), "1");
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals("3", cursor.getString(0));
+            cursor.close();
         }
     }
 }
