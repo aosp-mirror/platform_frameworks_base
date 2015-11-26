@@ -5567,8 +5567,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // InputMethodManager fetches input methods for current user.
             // So this can only be set when calling user is the current user
             // or parent is current user in case of managed profiles.
-            InputMethodManager inputMethodManager = (InputMethodManager) mContext
-                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager inputMethodManager =
+                    mContext.getSystemService(InputMethodManager.class);
             List<InputMethodInfo> enabledImes = inputMethodManager.getEnabledInputMethodList();
 
             if (enabledImes != null) {
@@ -5646,8 +5646,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // If we have a permitted list add all system input methods.
             if (result != null) {
-                InputMethodManager inputMethodManager = (InputMethodManager) mContext
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager inputMethodManager =
+                        mContext.getSystemService(InputMethodManager.class);
                 List<InputMethodInfo> imes = inputMethodManager.getInputMethodList();
                 long id = mInjector.binderClearCallingIdentity();
                 try {

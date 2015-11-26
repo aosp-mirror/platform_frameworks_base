@@ -223,7 +223,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     public void systemReady() {
-        mIm = (InputManager)mContext.getSystemService(Context.INPUT_SERVICE);
+        mIm = mContext.getSystemService(InputManager.class);
         mSettingObserver = new SettingsObserver(mH);
 
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);

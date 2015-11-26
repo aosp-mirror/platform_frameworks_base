@@ -152,8 +152,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     private Runnable mShowImeRunnable = new Runnable() {
         public void run() {
-            InputMethodManager imm = (InputMethodManager)
-                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
 
             if (imm != null) {
                 imm.showSoftInputUnchecked(0, null);
@@ -912,8 +911,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             post(mShowImeRunnable);
         } else {
             removeCallbacks(mShowImeRunnable);
-            InputMethodManager imm = (InputMethodManager)
-                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
 
             if (imm != null) {
                 imm.hideSoftInputFromWindow(getWindowToken(), 0);
@@ -1768,8 +1766,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             super.onWindowFocusChanged(hasWindowFocus);
 
             if (hasWindowFocus && mSearchView.hasFocus() && getVisibility() == VISIBLE) {
-                InputMethodManager inputManager = (InputMethodManager) getContext()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager inputManager =
+                        getContext().getSystemService(InputMethodManager.class);
                 inputManager.showSoftInput(this, 0);
                 // If in landscape mode, then make sure that
                 // the ime is in front of the dropdown.

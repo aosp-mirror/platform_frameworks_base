@@ -61,8 +61,7 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         setText("");
         mMatches = (TextView) mCustomView.findViewById(
                 com.android.internal.R.id.matches);
-        mInput = (InputMethodManager)
-                context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        mInput = context.getSystemService(InputMethodManager.class);
         mResources = context.getResources();
     }
 
