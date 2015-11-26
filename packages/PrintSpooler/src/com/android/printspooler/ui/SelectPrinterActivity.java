@@ -33,10 +33,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.database.ContentObserver;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.print.PrintManager;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
@@ -84,9 +86,7 @@ public final class SelectPrinterActivity extends Activity {
 
     private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
-    /**
-     * If there are any enabled print services
-     */
+    /** If there are any enabled print services */
     private boolean mHasEnabledPrintServices;
 
     private final ArrayList<PrintServiceInfo> mAddPrinterServices =
@@ -97,6 +97,9 @@ public final class SelectPrinterActivity extends Activity {
     private ListView mListView;
 
     private AnnounceFilterResult mAnnounceFilterResult;
+
+    /** Monitor if new print services get enabled or disabled */
+    private ContentObserver mPrintServicesObserver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -227,12 +230,48 @@ public final class SelectPrinterActivity extends Activity {
         return false;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    /**
+     * Adjust the UI if the enabled print services changed.
+     */
+    private synchronized void onPrintServicesUpdate() {
         updateServicesWithAddPrinterActivity();
         updateEmptyView((DestinationAdapter)mListView.getAdapter());
         invalidateOptionsMenu();
+    }
+
+    /**
+     * Register listener for changes to the enabled print services.
+     */
+    private void registerServiceMonitor() {
+        mPrintServicesObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                onPrintServicesUpdate();
+            }
+        };
+
+        getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ENABLED_PRINT_SERVICES), false,
+                mPrintServicesObserver);
+    }
+
+    /**
+     * Unregister {@link #mPrintServicesObserver listener for changes to the enabled print services}
+     * or nothing if the listener is not registered.
+     */
+    private void unregisterServiceMonitorIfNeeded() {
+        if (mPrintServicesObserver != null) {
+            getContentResolver().unregisterContentObserver(mPrintServicesObserver);
+
+            mPrintServicesObserver = null;
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        registerServiceMonitor();
+        onPrintServicesUpdate();
     }
 
     @Override
@@ -241,6 +280,12 @@ public final class SelectPrinterActivity extends Activity {
             mAnnounceFilterResult.remove();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        unregisterServiceMonitorIfNeeded();
+        super.onStop();
     }
 
     @Override
