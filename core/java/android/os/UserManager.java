@@ -779,6 +779,24 @@ public class UserManager {
         }
     }
 
+     /**
+     * @hide
+     * Returns whether the given user has been disallowed from performing certain actions
+     * or setting certain settings through UserManager. This method disregards restrictions
+     * set by device policy.
+     * @param restrictionKey the string key representing the restriction
+     * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     */
+    public boolean hasBaseUserRestriction(String restrictionKey, UserHandle userHandle) {
+        try {
+            return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get base user restrictions for user " +
+                    userHandle.getIdentifier(), re);
+            return false;
+        }
+    }
+
     /**
      * This will no longer work.  Device owners and profile owners should use
      * {@link DevicePolicyManager#addUserRestriction(ComponentName, String)} instead.

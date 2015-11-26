@@ -784,6 +784,15 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean hasBaseUserRestriction(String restrictionKey, int userId) {
+        checkManageUsersPermission("hasBaseUserRestriction");
+        synchronized (mRestrictionsLock) {
+            Bundle bundle = mBaseUserRestrictions.get(userId);
+            return (bundle != null && bundle.getBoolean(restrictionKey, false));
+        }
+    }
+
+    @Override
     public void setUserRestriction(String key, boolean value, int userId) {
         checkManageUsersPermission("setUserRestriction");
         synchronized (mRestrictionsLock) {

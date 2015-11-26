@@ -54,6 +54,7 @@ interface IUserManager {
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);
     Bundle getUserRestrictions(int userHandle);
+    boolean hasBaseUserRestriction(String restrictionKey, int userHandle);
     boolean hasUserRestriction(in String restrictionKey, int userHandle);
     void setUserRestriction(String key, boolean value, int userId);
     void setApplicationRestrictions(in String packageName, in Bundle restrictions,
