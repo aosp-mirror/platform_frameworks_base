@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerService.TAG;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
 
+import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
 import android.os.Message;
 import android.os.RemoteException;
@@ -49,9 +50,7 @@ class AppWindowToken extends WindowToken {
     // All of the windows and child windows that are included in this
     // application token.  Note this list is NOT sorted!
     final WindowList allAppWindows = new WindowList();
-    final AppWindowAnimator mAppAnimator;
-
-    final WindowAnimator mAnimator;
+    @NonNull final AppWindowAnimator mAppAnimator;
 
     final boolean voiceInteraction;
 
@@ -145,7 +144,6 @@ class AppWindowToken extends WindowToken {
         appToken = _token;
         voiceInteraction = _voiceInteraction;
         mInputApplicationHandle = new InputApplicationHandle(this);
-        mAnimator = service.mAnimator;
         mAppAnimator = new AppWindowAnimator(this);
     }
 
