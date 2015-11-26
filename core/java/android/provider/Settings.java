@@ -4420,7 +4420,18 @@ public final class Settings {
          * to receive changes in this value.
          */
         public static final String LOCATION_MODE = "location_mode";
+        /**
+         * Stores the previous location mode when {@link #LOCATION_MODE} is set to
+         * {@link #LOCATION_MODE_OFF}
+         * @hide
+         */
+        public static final String LOCATION_PREVIOUS_MODE = "location_previous_mode";
 
+        /**
+         * Sets all location providers to the previous states before location was turned off.
+         * @hide
+         */
+        public static final int LOCATION_MODE_PREVIOUS = -1;
         /**
          * Location access disabled.
          */
@@ -5795,6 +5806,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_INPUT_METHODS);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
+            CLONE_TO_MANAGED_PROFILE.add(LOCATION_PREVIOUS_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
             CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);
@@ -5882,6 +5894,28 @@ public final class Settings {
         }
 
         /**
+         * Saves the current location mode into {@link #LOCATION_PREVIOUS_MODE}.
+         */
+        private static final boolean saveLocationModeForUser(ContentResolver cr, int userId) {
+            final int mode = getLocationModeForUser(cr, userId);
+            return putIntForUser(cr, Settings.Secure.LOCATION_PREVIOUS_MODE, mode, userId);
+        }
+
+        /**
+         * Restores the current location mode from {@link #LOCATION_PREVIOUS_MODE}.
+         */
+        private static final boolean restoreLocationModeForUser(ContentResolver cr, int userId) {
+            int mode = getIntForUser(cr, Settings.Secure.LOCATION_PREVIOUS_MODE,
+                    LOCATION_MODE_HIGH_ACCURACY, userId);
+            // Make sure that the previous mode is never "off". Otherwise the user won't be able to
+            // turn on location any longer.
+            if (mode == LOCATION_MODE_OFF) {
+                mode = LOCATION_MODE_HIGH_ACCURACY;
+            }
+            return setLocationModeForUser(cr, mode, userId);
+        }
+
+        /**
          * Thread-safe method for setting the location mode to one of
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
@@ -5899,7 +5933,11 @@ public final class Settings {
                 boolean gps = false;
                 boolean network = false;
                 switch (mode) {
+                    case LOCATION_MODE_PREVIOUS:
+                        // Retrieve the actual mode and set to that mode.
+                        return restoreLocationModeForUser(cr, userId);
                     case LOCATION_MODE_OFF:
+                        saveLocationModeForUser(cr, userId);
                         break;
                     case LOCATION_MODE_SENSORS_ONLY:
                         gps = true;
