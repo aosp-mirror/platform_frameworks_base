@@ -180,7 +180,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
         mProfileManager = bluetoothManager.getProfileManager();
         bluetoothManager.getEventManager().registerCallback(new BluetoothCallbackHandler());
 
-        InputManager im = (InputManager) context.getSystemService(Context.INPUT_SERVICE);
+        InputManager im = context.getSystemService(InputManager.class);
         im.registerOnTabletModeChangedListener(this, mHandler);
         mInTabletMode = im.isInTabletMode();
 
