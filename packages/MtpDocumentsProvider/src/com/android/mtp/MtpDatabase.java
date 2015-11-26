@@ -22,6 +22,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -34,6 +35,7 @@ import android.provider.DocumentsContract.Root;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
@@ -305,6 +307,32 @@ class MtpDatabase {
         }
     }
 
+    /**
+     * Returns the set of device ID stored in the database.
+     */
+    int[] getDeviceIds() {
+        final Cursor cursor = mDatabase.query(
+                true,
+                TABLE_DOCUMENTS,
+                strings(COLUMN_DEVICE_ID),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        try {
+            final int[] ids = new int[cursor.getCount()];
+            for (int i = 0; i < ids.length; i++) {
+                cursor.moveToNext();
+                ids[i] = cursor.getInt(0);
+            }
+            return ids;
+        } finally {
+            cursor.close();
+        }
+    }
+
     private boolean deleteDocumentsAndRoots(String selection, String[] args) {
         mDatabase.beginTransaction();
         try {
@@ -349,6 +377,11 @@ class MtpDatabase {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             throw new UnsupportedOperationException();
         }
+    }
+
+    @VisibleForTesting
+    static void deleteDatabase(Context context) {
+        context.deleteDatabase(DATABASE_NAME);
     }
 
     /**

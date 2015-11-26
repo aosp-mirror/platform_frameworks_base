@@ -24,7 +24,7 @@ import android.provider.DocumentsContract.Root;
  */
 class MtpDatabaseConstants {
     static final int DATABASE_VERSION = 1;
-    static final String DATABASE_NAME = null;
+    static final String DATABASE_NAME = "database";
 
     static final int FLAG_DATABASE_IN_MEMORY = 1;
     static final int FLAG_DATABASE_IN_FILE = 0;

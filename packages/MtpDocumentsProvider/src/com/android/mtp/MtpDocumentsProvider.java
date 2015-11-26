@@ -20,7 +20,6 @@ import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.graphics.Point;
 import android.media.MediaFile;
 import android.mtp.MtpConstants;
@@ -58,11 +57,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
+    private final Object mDeviceListLock = new Object();
+
     private static MtpDocumentsProvider sSingleton;
 
     private MtpManager mMtpManager;
     private ContentResolver mResolver;
-    @GuardedBy("mDeviceToolkits")
+    @GuardedBy("mDeviceListLock")
     private Map<Integer, DeviceToolkit> mDeviceToolkits;
     private RootScanner mRootScanner;
     private Resources mResources;
@@ -84,6 +85,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
+        resume();
         return true;
     }
 
@@ -99,6 +101,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = database;
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
+        resume();
     }
 
     @Override
@@ -196,7 +199,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     @Override
     public void onTrimMemory(int level) {
-        synchronized (mDeviceToolkits) {
+        synchronized (mDeviceListLock) {
             for (final DeviceToolkit toolkit : mDeviceToolkits.values()) {
                 toolkit.mDocumentLoader.clearCompletedTasks();
             }
@@ -234,47 +237,26 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     void openDevice(int deviceId) throws IOException {
-        synchronized (mDeviceToolkits) {
+        synchronized (mDeviceListLock) {
             mMtpManager.openDevice(deviceId);
-            mDeviceToolkits.put(deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
+            mDeviceToolkits.put(
+                    deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
         }
         mRootScanner.resume();
     }
 
     void closeDevice(int deviceId) throws IOException, InterruptedException {
-        // TODO: Flush the device before closing (if not closed externally).
-        synchronized (mDeviceToolkits) {
-            getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
-            mDeviceToolkits.remove(deviceId);
+        synchronized (mDeviceListLock) {
+            closeDeviceInternal(deviceId);
             mDatabase.removeDeviceRows(deviceId);
-            mMtpManager.closeDevice(deviceId);
         }
         mRootScanner.notifyChange();
-        if (!hasOpenedDevices()) {
-            mRootScanner.pause();
-        }
-    }
-
-    synchronized void closeAllDevices() throws InterruptedException {
-        boolean closed = false;
-        for (int deviceId : mMtpManager.getOpenedDeviceIds()) {
-            try {
-                mDatabase.removeDeviceRows(deviceId);
-                mMtpManager.closeDevice(deviceId);
-                getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
-                closed = true;
-            } catch (IOException d) {
-                Log.d(TAG, "Failed to close the MTP device: " + deviceId);
-            }
-        }
-        if (closed) {
-            mRootScanner.notifyChange();
-            mRootScanner.pause();
-        }
     }
 
     boolean hasOpenedDevices() {
-        return mMtpManager.getOpenedDeviceIds().length != 0;
+        synchronized (mDeviceListLock) {
+            return mMtpManager.getOpenedDeviceIds().length != 0;
+        }
     }
 
     /**
@@ -282,14 +264,18 @@ public class MtpDocumentsProvider extends DocumentsProvider {
      */
     @Override
     public void shutdown() {
-        try {
-            closeAllDevices();
-        } catch (InterruptedException e) {
-            // It should fail unit tests by throwing runtime exception.
-            throw new RuntimeException(e.getMessage());
-        } finally {
-            mDatabase.close();
-            super.shutdown();
+        synchronized (mDeviceListLock) {
+            try {
+                for (final int id : mMtpManager.getOpenedDeviceIds()) {
+                    closeDeviceInternal(id);
+                }
+            } catch (InterruptedException|IOException e) {
+                // It should fail unit tests by throwing runtime exception.
+                throw new RuntimeException(e);
+            } finally {
+                mDatabase.close();
+                super.shutdown();
+            }
         }
     }
 
@@ -300,8 +286,35 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 false);
     }
 
+    /**
+     * Reopens MTP devices based on database state.
+     */
+    private void resume() {
+        synchronized (mDeviceListLock) {
+            mDatabase.getMapper().clearMapping();
+            final int[] ids = mDatabase.getDeviceIds();
+            for (final int id : ids) {
+                try {
+                    openDevice(id);
+                } catch (IOException exception) {
+                    mDatabase.removeDeviceRows(id);
+                }
+            }
+        }
+    }
+
+    private void closeDeviceInternal(int deviceId) throws IOException, InterruptedException {
+        // TODO: Flush the device before closing (if not closed externally).
+        getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
+        mDeviceToolkits.remove(deviceId);
+        mMtpManager.closeDevice(deviceId);
+        if (!hasOpenedDevices()) {
+            mRootScanner.pause();
+        }
+    }
+
     private DeviceToolkit getDeviceToolkit(int deviceId) throws FileNotFoundException {
-        synchronized (mDeviceToolkits) {
+        synchronized (mDeviceListLock) {
             final DeviceToolkit toolkit = mDeviceToolkits.get(deviceId);
             if (toolkit == null) {
                 throw new FileNotFoundException();

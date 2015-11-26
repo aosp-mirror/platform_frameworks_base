@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.FileNotFoundException;
@@ -45,17 +46,16 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void setUp() throws IOException {
         mResolver = new TestContentResolver();
         mMtpManager = new TestMtpManager(getContext());
-        mProvider = new MtpDocumentsProvider();
-        mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        mProvider.onCreateForTesting(mResources, mMtpManager, mResolver, mDatabase);
     }
 
     @Override
     public void tearDown() {
         mProvider.shutdown();
+        MtpDatabase.deleteDatabase(getContext());
     }
 
     public void testOpenAndCloseDevice() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mMtpManager.setRoots(0, new MtpRoot[] {
                 new MtpRoot(
@@ -76,6 +76,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testOpenAndCloseErrorDevice() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         try {
             mProvider.openDevice(1);
             fail();
@@ -107,6 +108,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryRoots() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mMtpManager.addValidDevice(1);
         mMtpManager.setRoots(0, new MtpRoot[] {
@@ -163,6 +165,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryRoots_error() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mMtpManager.addValidDevice(1);
         // Not set roots for device 0 so that MtpManagerMock#getRoots throws IOException.
@@ -195,6 +198,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryDocument() throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
 
@@ -234,6 +238,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testQueryDocument_directory()
             throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
 
@@ -271,6 +276,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testQueryDocument_forRoot()
             throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
 
@@ -297,6 +303,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryChildDocuments() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
 
@@ -332,6 +339,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryChildDocuments_cursorError() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
         try {
@@ -343,6 +351,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testQueryChildDocuments_documentError() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
         setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "") });
@@ -356,6 +365,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     }
 
     public void testDeleteDocument() throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
         setupRoots(0, new MtpRoot[] {
@@ -377,6 +387,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testDeleteDocument_error()
             throws IOException, InterruptedException, TimeoutException {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(0);
         mProvider.openDevice(0);
         setupRoots(0, new MtpRoot[] {
@@ -398,6 +409,40 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(0, mResolver.getChangeCount(
                 DocumentsContract.buildChildDocumentsUri(
                         MtpDocumentsProvider.AUTHORITY, "1")));
+    }
+
+    @MediumTest
+    public void testPauseAndResume() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
+        mMtpManager.addValidDevice(0);
+        mProvider.openDevice(0);
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")});
+
+        {
+            final Cursor cursor = mProvider.queryRoots(
+                    strings(DocumentsContract.Root.COLUMN_ROOT_ID));
+            cursor.moveToNext();
+            assertEquals(1, cursor.getInt(0));
+        }
+
+        mProvider.shutdown();
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
+
+        {
+            // We can still fetch roots after relaunching the provider.
+            final Cursor cursor = mProvider.queryRoots(
+                    strings(DocumentsContract.Root.COLUMN_ROOT_ID));
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals(1, cursor.getInt(0));
+            assertEquals(1, mMtpManager.getOpenedDeviceIds().length);
+        }
+    }
+
+    private void setupProvider(int flag) {
+        mDatabase = new MtpDatabase(getContext(), flag);
+        mProvider = new MtpDocumentsProvider();
+        mProvider.onCreateForTesting(mResources, mMtpManager, mResolver, mDatabase);
     }
 
     private String[] getStrings(Cursor cursor) {
