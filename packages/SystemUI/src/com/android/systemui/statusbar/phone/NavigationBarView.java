@@ -143,7 +143,7 @@ public class NavigationBarView extends LinearLayout {
     private final OnClickListener mImeSwitcherClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            ((InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE))
+            mContext.getSystemService(InputMethodManager.class)
                     .showInputMethodPicker(true /* showAuxiliarySubtypes */);
         }
     };

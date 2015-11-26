@@ -556,8 +556,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         // Make sure the IME is not on the way of preview as
         // the user may have used it to type copies or range.
-        InputMethodManager imm = (InputMethodManager) getSystemService(
-                Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = getSystemService(InputMethodManager.class);
         imm.hideSoftInputFromWindow(mDestinationSpinner.getWindowToken(), 0);
     }
 

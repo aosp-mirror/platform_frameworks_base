@@ -505,8 +505,7 @@ public class SearchDialog extends Dialog {
 
         // We made sure the IME was displayed, so also make sure it is closed
         // when we go away.
-        InputMethodManager imm = (InputMethodManager)getContext()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (imm != null) {
             imm.hideSoftInputFromWindow(
                     getWindow().getDecorView().getWindowToken(), 0);
@@ -643,8 +642,7 @@ public class SearchDialog extends Dialog {
     public void onBackPressed() {
         // If the input method is covering the search dialog completely,
         // e.g. in landscape mode with no hard keyboard, dismiss just the input method
-        InputMethodManager imm = (InputMethodManager)getContext()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (imm != null && imm.isFullscreenMode() &&
                 imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0)) {
             return;

@@ -446,8 +446,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             String candidateLocale = null;
             if (hashCode == 0) {
                 // Spell checker language settings == "auto"
-                final InputMethodManager imm =
-                        (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                final InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                 if (imm != null) {
                     final InputMethodSubtype currentInputMethodSubtype =
                             imm.getCurrentInputMethodSubtype();

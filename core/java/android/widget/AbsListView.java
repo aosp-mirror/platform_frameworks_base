@@ -5755,8 +5755,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // The editor is off in its own window; we need to be
             // the one that does this.
             if (editorAction == EditorInfo.IME_ACTION_DONE) {
-                InputMethodManager imm = (InputMethodManager)
-                        getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm =
+                        getContext().getSystemService(InputMethodManager.class);
                 if (imm != null) {
                     imm.hideSoftInputFromWindow(getWindowToken(), 0);
                 }
