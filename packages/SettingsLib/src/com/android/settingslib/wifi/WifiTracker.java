@@ -19,8 +19,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkRequest;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -62,6 +66,9 @@ public class WifiTracker {
     private final Context mContext;
     private final WifiManager mWifiManager;
     private final IntentFilter mFilter;
+    private final ConnectivityManager mConnectivityManager;
+    private final NetworkRequest mNetworkRequest;
+    private WifiTrackerNetworkCallback mNetworkCallback;
 
     private final AtomicBoolean mConnected = new AtomicBoolean(false);
     private final WifiListener mListener;
@@ -104,13 +111,15 @@ public class WifiTracker {
     public WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
             boolean includeSaved, boolean includeScans, boolean includePasspoints) {
         this(context, wifiListener, workerLooper, includeSaved, includeScans, includePasspoints,
-                (WifiManager) context.getSystemService(Context.WIFI_SERVICE), Looper.myLooper());
+                context.getSystemService(WifiManager.class),
+                context.getSystemService(ConnectivityManager.class), Looper.myLooper());
     }
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
             boolean includeSaved, boolean includeScans, boolean includePasspoints,
-            WifiManager wifiManager, Looper currentLooper) {
+            WifiManager wifiManager, ConnectivityManager connectivityManager,
+            Looper currentLooper) {
         if (!includeSaved && !includeScans) {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
@@ -127,6 +136,7 @@ public class WifiTracker {
         mIncludeScans = includeScans;
         mIncludePasspoints = includePasspoints;
         mListener = wifiListener;
+        mConnectivityManager = connectivityManager;
 
         // check if verbose logging has been turned on or off
         sVerboseLogging = mWifiManager.getVerboseLoggingLevel();
@@ -139,7 +149,11 @@ public class WifiTracker {
         mFilter.addAction(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
         mFilter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
         mFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mFilter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+
+        mNetworkRequest = new NetworkRequest.Builder()
+                .clearCapabilities()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .build();
     }
 
     /**
@@ -192,6 +206,9 @@ public class WifiTracker {
         resumeScanning();
         if (!mRegistered) {
             mContext.registerReceiver(mReceiver, mFilter);
+            // NetworkCallback objects cannot be reused. http://b/20701525 .
+            mNetworkCallback = new WifiTrackerNetworkCallback();
+            mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
             mRegistered = true;
         }
     }
@@ -207,6 +224,7 @@ public class WifiTracker {
             mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_NETWORK_INFO);
             mContext.unregisterReceiver(mReceiver);
+            mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
             mRegistered = false;
         }
         pauseScanning();
@@ -461,12 +479,12 @@ public class WifiTracker {
             mMainHandler.sendEmptyMessage(MainHandler.MSG_RESUME_SCANNING);
         }
 
-        mLastInfo = mWifiManager.getConnectionInfo();
         if (networkInfo != null) {
             mLastNetworkInfo = networkInfo;
         }
 
         WifiConfiguration connectionConfig = null;
+        mLastInfo = mWifiManager.getConnectionInfo();
         if (mLastInfo != null) {
             connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
         }
@@ -532,11 +550,20 @@ public class WifiTracker {
                 mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
                 mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO, info)
                         .sendToTarget();
-            } else if (WifiManager.RSSI_CHANGED_ACTION.equals(action)) {
-                mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO);
             }
         }
     };
+
+    private final class WifiTrackerNetworkCallback extends ConnectivityManager.NetworkCallback {
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities nc) {
+            if (network.equals(mWifiManager.getCurrentNetwork())) {
+                // We don't send a NetworkInfo object along with this message, because even if we
+                // fetch one from ConnectivityManager, it might be older than the most recent
+                // NetworkInfo message we got via a WIFI_STATE_CHANGED broadcast.
+                mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO);
+            }
+        }
+    }
 
     private final class MainHandler extends Handler {
         private static final int MSG_CONNECTED_CHANGED = 0;
