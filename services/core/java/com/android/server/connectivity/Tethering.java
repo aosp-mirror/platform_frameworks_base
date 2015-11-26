@@ -33,7 +33,9 @@ import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.os.Binder;
@@ -213,6 +215,7 @@ public class Tethering extends BaseNetworkObserver {
         checkDunRequired();
     }
 
+    @Override
     public void interfaceStatusChanged(String iface, boolean up) {
         if (VDBG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
         boolean found = false;
@@ -248,6 +251,7 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
+    @Override
     public void interfaceLinkStateChanged(String iface, boolean up) {
         if (VDBG) Log.d(TAG, "interfaceLinkStateChanged " + iface + ", " + up);
         interfaceStatusChanged(iface, up);
@@ -280,6 +284,7 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
+    @Override
     public void interfaceAdded(String iface) {
         if (VDBG) Log.d(TAG, "interfaceAdded " + iface);
         boolean found = false;
@@ -311,6 +316,7 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
+    @Override
     public void interfaceRemoved(String iface) {
         if (VDBG) Log.d(TAG, "interfaceRemoved " + iface);
         synchronized (mPublicSync) {
@@ -638,7 +644,7 @@ public class Tethering extends BaseNetworkObserver {
         return values;
     }
 
-    public void checkDunRequired() {
+    private void checkDunRequired() {
         int secureSetting = 2;
         TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (tm != null) {
@@ -1135,10 +1141,8 @@ public class Tethering extends BaseNetworkObserver {
         static final int CMD_TETHER_MODE_UNREQUESTED = 2;
         // upstream connection change - do the right thing
         static final int CMD_UPSTREAM_CHANGED        = 3;
-        // we received notice that the cellular DUN connection is up
-        static final int CMD_CELL_CONNECTION_RENEW   = 4;
         // we don't have a valid upstream conn, check again after a delay
-        static final int CMD_RETRY_UPSTREAM          = 5;
+        static final int CMD_RETRY_UPSTREAM          = 4;
 
         // This indicates what a timeout event relates to.  A state that
         // sends itself a delayed timeout event and handles incoming timeout events
@@ -1157,13 +1161,12 @@ public class Tethering extends BaseNetworkObserver {
 
         private ArrayList<TetherInterfaceSM> mNotifyList;
 
-        private int mCurrentConnectionSequence;
         private int mMobileApnReserved = ConnectivityManager.TYPE_NONE;
+        private ConnectivityManager.NetworkCallback mMobileUpstreamCallback;
 
         private String mUpstreamIfaceName = null;
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
-        private static final int CELL_CONNECTION_RENEW_MS    = 40000;
 
         TetherMasterSM(String name, Looper looper) {
             super(name, looper);
@@ -1190,58 +1193,69 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         class TetherMasterUtilState extends State {
-            protected final static boolean TRY_TO_SETUP_MOBILE_CONNECTION = true;
             protected final static boolean WAIT_FOR_NETWORK_TO_SETTLE     = false;
 
             @Override
             public boolean processMessage(Message m) {
                 return false;
             }
-            protected String enableString(int apnType) {
-                switch (apnType) {
-                case ConnectivityManager.TYPE_MOBILE_DUN:
-                    return Phone.FEATURE_ENABLE_DUN_ALWAYS;
-                case ConnectivityManager.TYPE_MOBILE:
-                case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                    return Phone.FEATURE_ENABLE_HIPRI;
-                }
-                return null;
-            }
+
             protected boolean turnOnUpstreamMobileConnection(int apnType) {
-                boolean retValue = true;
-                if (apnType == ConnectivityManager.TYPE_NONE) return false;
-                if (apnType != mMobileApnReserved) turnOffUpstreamMobileConnection();
-                int result = PhoneConstants.APN_REQUEST_FAILED;
-                String enableString = enableString(apnType);
-                if (enableString == null) return false;
-                result = getConnectivityManager().startUsingNetworkFeature(
-                        ConnectivityManager.TYPE_MOBILE, enableString);
-                switch (result) {
-                case PhoneConstants.APN_ALREADY_ACTIVE:
-                case PhoneConstants.APN_REQUEST_STARTED:
-                    mMobileApnReserved = apnType;
-                    Message m = obtainMessage(CMD_CELL_CONNECTION_RENEW);
-                    m.arg1 = ++mCurrentConnectionSequence;
-                    sendMessageDelayed(m, CELL_CONNECTION_RENEW_MS);
-                    break;
-                case PhoneConstants.APN_REQUEST_FAILED:
-                default:
-                    retValue = false;
-                    break;
+                if (apnType == ConnectivityManager.TYPE_NONE) { return false; }
+
+                if (apnType != mMobileApnReserved) {
+                    // Unregister any previous mobile upstream callback because
+                    // this request, if any, will be different.
+                    turnOffUpstreamMobileConnection();
                 }
 
-                return retValue;
-            }
-            protected boolean turnOffUpstreamMobileConnection() {
-                // ignore pending renewal requests
-                ++mCurrentConnectionSequence;
-                if (mMobileApnReserved != ConnectivityManager.TYPE_NONE) {
-                    getConnectivityManager().stopUsingNetworkFeature(
-                            ConnectivityManager.TYPE_MOBILE, enableString(mMobileApnReserved));
-                    mMobileApnReserved = ConnectivityManager.TYPE_NONE;
+                if (mMobileUpstreamCallback != null) {
+                    // Looks like we already filed a request for this apnType.
+                    return true;
                 }
+
+                switch (apnType) {
+                    case ConnectivityManager.TYPE_MOBILE_DUN:
+                    case ConnectivityManager.TYPE_MOBILE:
+                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
+                        mMobileApnReserved = apnType;
+                        break;
+                    default:
+                        return false;
+                }
+
+                NetworkRequest.Builder builder = new NetworkRequest.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+                if (apnType == ConnectivityManager.TYPE_MOBILE_DUN) {
+                    builder.addCapability(NetworkCapabilities.NET_CAPABILITY_DUN)
+                           .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+                } else {
+                    builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+                }
+                NetworkRequest mobileUpstreamRequest = builder.build();
+                // Other mechanisms notice network and interface changes and act upon them.
+                // TODO, imminently: replace with a proper NetworkCallback-based scheme.
+                //
+                // TODO: Change the timeout from 0 (no onUnavailable callback) to use some
+                // moderate callback time (once timeout callbacks are implemented). This might
+                // be useful for updating some UI. Additionally, we should definitely log a
+                // message to aid in any subsequent debugging.
+                mMobileUpstreamCallback = new ConnectivityManager.NetworkCallback();
+                if (DBG) Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
+                getConnectivityManager().requestNetwork(
+                        mobileUpstreamRequest, mMobileUpstreamCallback, 0, apnType);
+
                 return true;
             }
+
+            protected void turnOffUpstreamMobileConnection() {
+                if (mMobileUpstreamCallback != null) {
+                    getConnectivityManager().unregisterNetworkCallback(mMobileUpstreamCallback);
+                    mMobileUpstreamCallback = null;
+                }
+                mMobileApnReserved = ConnectivityManager.TYPE_NONE;
+            }
+
             protected boolean turnOnMasterTetherSettings() {
                 try {
                     mNMService.setIpForwardingEnabled(true);
@@ -1304,35 +1318,39 @@ public class Tethering extends BaseNetworkObserver {
                 }
 
                 if (DBG) {
-                    Log.d(TAG, "chooseUpstreamType(" + tryCell + "), preferredApn ="
-                            + mPreferredUpstreamMobileApn + ", got type=" + upType);
+                    Log.d(TAG, "chooseUpstreamType(" + tryCell + "),"
+                            + " preferredApn="
+                            + ConnectivityManager.getNetworkTypeName(mPreferredUpstreamMobileApn)
+                            + ", got type="
+                            + ConnectivityManager.getNetworkTypeName(upType));
                 }
 
-                // if we're on DUN, put our own grab on it
-                if (upType == ConnectivityManager.TYPE_MOBILE_DUN ||
-                        upType == ConnectivityManager.TYPE_MOBILE_HIPRI) {
-                    turnOnUpstreamMobileConnection(upType);
-                } else if (upType != ConnectivityManager.TYPE_NONE) {
-                    /* If we've found an active upstream connection that's not DUN/HIPRI
-                     * we should stop any outstanding DUN/HIPRI start requests.
-                     *
-                     * If we found NONE we don't want to do this as we want any previous
-                     * requests to keep trying to bring up something we can use.
-                     */
-                    turnOffUpstreamMobileConnection();
+                switch (upType) {
+                    case ConnectivityManager.TYPE_MOBILE_DUN:
+                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
+                        // If we're on DUN, put our own grab on it.
+                        turnOnUpstreamMobileConnection(upType);
+                        break;
+                    case ConnectivityManager.TYPE_NONE:
+                        if (tryCell &&
+                                turnOnUpstreamMobileConnection(mPreferredUpstreamMobileApn)) {
+                            // We think mobile should be coming up; don't set a retry.
+                        } else {
+                            sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
+                        }
+                        break;
+                    default:
+                        /* If we've found an active upstream connection that's not DUN/HIPRI
+                         * we should stop any outstanding DUN/HIPRI start requests.
+                         *
+                         * If we found NONE we don't want to do this as we want any previous
+                         * requests to keep trying to bring up something we can use.
+                         */
+                        turnOffUpstreamMobileConnection();
+                        break;
                 }
 
-                if (upType == ConnectivityManager.TYPE_NONE) {
-                    boolean tryAgainLater = true;
-                    if ((tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) &&
-                            (turnOnUpstreamMobileConnection(mPreferredUpstreamMobileApn) == true)) {
-                        // we think mobile should be coming up - don't set a retry
-                        tryAgainLater = false;
-                    }
-                    if (tryAgainLater) {
-                        sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
-                    }
-                } else {
+                if (upType != ConnectivityManager.TYPE_NONE) {
                     LinkProperties linkProperties =
                             getConnectivityManager().getLinkProperties(upType);
                     if (linkProperties != null) {
@@ -1578,17 +1596,6 @@ public class Tethering extends BaseNetworkObserver {
                         mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
                         chooseUpstreamType(mTryCell);
                         mTryCell = !mTryCell;
-                        break;
-                    case CMD_CELL_CONNECTION_RENEW:
-                        // make sure we're still using a requested connection - may have found
-                        // wifi or something since then.
-                        if (mCurrentConnectionSequence == message.arg1) {
-                            if (VDBG) {
-                                Log.d(TAG, "renewing mobile connection - requeuing for another " +
-                                        CELL_CONNECTION_RENEW_MS + "ms");
-                            }
-                            turnOnUpstreamMobileConnection(mMobileApnReserved);
-                        }
                         break;
                     case CMD_RETRY_UPSTREAM:
                         chooseUpstreamType(mTryCell);
