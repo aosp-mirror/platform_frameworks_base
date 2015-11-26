@@ -287,6 +287,9 @@ public class MediaSessionService extends SystemService implements Monitor {
      * 6. We need to tell the session to do any final cleanup (onDestroy)
      */
     private void destroySessionLocked(MediaSessionRecord session) {
+        if (DEBUG) {
+            Log.d(TAG, "Destroying session : " + session.toString());
+        }
         int userId = session.getUserId();
         UserRecord user = mUserRecords.get(userId);
         if (user != null) {
