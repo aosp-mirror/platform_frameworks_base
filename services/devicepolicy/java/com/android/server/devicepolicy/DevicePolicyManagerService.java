@@ -3095,12 +3095,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceCrossUserPermission(userHandle);
 
         synchronized (this) {
-
-            // The active password is stored in the user that runs the launcher
-            // If the user this is called from is part of a profile group, that is the parent
-            // of the group.
-            UserInfo parent = getProfileParent(userHandle);
-            int id = (parent == null) ? userHandle : parent.id;
+            int id = getCredentialOwner(userHandle);
             DevicePolicyData policy = getUserDataUnchecked(id);
 
             // This API can only be called by an active device admin,
@@ -3130,10 +3125,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
 
-            // The active password is stored in the parent.
-            UserInfo parent = getProfileParent(userHandle);
-            int id = (parent == null) ? userHandle : parent.id;
-            DevicePolicyData policy = getUserDataUnchecked(id);
+            int credentialOwnerId = getCredentialOwner(userHandle);
+            DevicePolicyData policy = getUserDataUnchecked(credentialOwnerId);
 
             return policy.mFailedPasswordAttempts;
         }
@@ -3224,7 +3217,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            if (mUserManager.getCredentialOwnerProfile(userHandle) != userHandle) {
+            if (getCredentialOwner(userHandle) != userHandle) {
                 throw new SecurityException("You can not change password for this profile because"
                     + " it shares the password with the owner profile");
             }
@@ -4490,9 +4483,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 UserInfo user = mUserManager.getUserInfo(userHandle);
                 final List<UserInfo> profiles;
-                if (user.isManagedProfile()) {
-                    // If we are being asked about a managed profile just return
-                    // keyguard features disabled by admins in the profile.
+                if (user.isManagedProfile() || StorageManager.isFileBasedEncryptionEnabled()) {
+                    // If we are being asked about a managed profile or the main user profile has a
+                    // separate lock from the work profile, just return keyguard features disabled
+                    // by admins in the profile.
                     profiles = Collections.singletonList(user);
                 } else {
                     // Otherwise return those set by admins in the user
@@ -5056,10 +5050,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private UserInfo getProfileParent(int userHandle) {
+    private int getCredentialOwner(int userHandle) {
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            return mUserManager.getProfileParent(userHandle);
+            return mUserManager.getCredentialOwnerProfile(userHandle);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
