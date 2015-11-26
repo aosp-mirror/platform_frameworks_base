@@ -10216,6 +10216,36 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, true,
+                "setPackageSuspended for user " + userId);
+
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mPackages) {
+                final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+                if (pkgSetting != null) {
+                    if (pkgSetting.getSuspended(userId) != suspended) {
+                        pkgSetting.setSuspended(suspended, userId);
+                        mSettings.writePackageRestrictionsLPr(userId);
+                    }
+
+                    // TODO:
+                    // * broadcast a PACKAGE_(UN)SUSPENDED intent for launchers to pick up
+                    // * remove app from recents (kill app it if it is running)
+                    // * erase existing notifications for this app
+                    return true;
+                }
+
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    @Override
     public void verifyPendingInstall(int id, int verificationCode) throws RemoteException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
@@ -13789,6 +13819,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         true,  //stopped
                         true,  //notLaunched
                         false, //hidden
+                        false, //suspended
                         null, null, null,
                         false, // blockUninstall
                         ps.readUserState(userId).domainVerificationStatus, 0);

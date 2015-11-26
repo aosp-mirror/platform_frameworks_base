@@ -749,6 +749,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId) {
+        return false;
+    }
+
+    @Override
     public int getMoveStatus(int moveId) {
         return 0;
     }

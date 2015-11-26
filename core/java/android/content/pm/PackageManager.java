@@ -4684,6 +4684,21 @@ public abstract class PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Puts the package in a suspended state, making the package un-runnable,
+     * but it doesn't remove the data or the actual package file. The application notifications
+     * will be hidden and also the application will not show up in recents.
+     *
+     * @param packageName The name of the package to set the suspended status.
+     * @param suspended If set to {@code true} than the package will be suspended, if set to
+     * {@code false} the package will be unsuspended.
+     * @param userId The user id.
+     *
+     * @hide
+     */
+    public abstract boolean setPackageSuspendedAsUser(
+            String packageName, boolean suspended, int userId);
+
     /** {@hide} */
     public static boolean isMoveStatusFinished(int status) {
         return (status < 0 || status > 100);

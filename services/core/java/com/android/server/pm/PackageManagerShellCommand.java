@@ -109,6 +109,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runQueryIntentServices();
                 case "query-receivers":
                     return runQueryIntentReceivers();
+                case "suspend":
+                    return runSuspend(true);
+                case "unsuspend":
+                    return runSuspend(false);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -136,6 +140,41 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
         return 0;
+    }
+
+    private int runSuspend(boolean suspendedState) {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_SYSTEM;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+
+        try {
+            mInterface.setPackageSuspendedAsUser(packageName, suspendedState, userId);
+            ApplicationInfo appInfo = mInterface.getApplicationInfo(
+                    packageName, 0, userId);
+
+            pw.println("Package " + packageName + " new suspended state: "
+                    + ((appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0));
+            return 0;
+        } catch (RemoteException e) {
+            pw.println(e.toString());
+            return 1;
+        }
     }
 
     private int runInstallAbandon() throws RemoteException {
@@ -1017,7 +1056,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");
-        pw.println("    Prints all test packages; optionally only those targetting TARGET-PACKAGE");
+        pw.println("    Prints all test packages; optionally only those targeting TARGET-PACKAGE");
         pw.println("    Options:");
         pw.println("      -f: dump the name of the .apk file containing the test package");
         pw.println("  list libraries");
@@ -1051,6 +1090,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Prints all services that can handle the given Intent.");
         pw.println("  query-receivers [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given Intent.");
+        pw.println("  suspend [--user USER_ID] TARGET-PACKAGE");
+        pw.println("    Suspends the specified package (as user).");
+        pw.println("  unsuspend [--user USER_ID] TARGET-PACKAGE");
+        pw.println("    Unsuspends the specified package (as user).");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }

@@ -1858,6 +1858,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId) {
+        try {
+            return mPM.setPackageSuspendedAsUser(packageName, suspended, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+        return false;
+    }
+
+    @Override
     public void getPackageSizeInfo(String packageName, int userHandle,
             IPackageStatsObserver observer) {
         try {

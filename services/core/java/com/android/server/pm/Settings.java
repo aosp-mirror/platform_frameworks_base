@@ -195,6 +195,7 @@ final class Settings {
     private static final String ATTR_BLOCKED = "blocked";
     // New name for the above attribute.
     private static final String ATTR_HIDDEN = "hidden";
+    private static final String ATTR_SUSPENDED = "suspended";
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
@@ -661,6 +662,7 @@ final class Settings {
                                     true, // stopped,
                                     true, // notLaunched
                                     false, // hidden
+                                    false, // suspended
                                     null, null, null,
                                     false, // blockUninstall
                                     INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
@@ -1423,6 +1425,7 @@ final class Settings {
                                 false,  // stopped
                                 false,  // notLaunched
                                 false,  // hidden
+                                false,  // suspended
                                 null, null, null,
                                 false, // blockUninstall
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
@@ -1488,6 +1491,9 @@ final class Settings {
                     final String hiddenStr = parser.getAttributeValue(null, ATTR_HIDDEN);
                     hidden = hiddenStr == null
                             ? hidden : Boolean.parseBoolean(hiddenStr);
+                    final String suspendedStr = parser.getAttributeValue(null, ATTR_SUSPENDED);
+                    final boolean suspended = suspendedStr == null
+                            ? false : Boolean.parseBoolean(suspendedStr);
                     final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
@@ -1528,8 +1534,8 @@ final class Settings {
                     }
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched, hidden,
-                            enabledCaller, enabledComponents, disabledComponents, blockUninstall,
-                            verifState, linkGeneration);
+                            suspended, enabledCaller, enabledComponents, disabledComponents,
+                            blockUninstall, verifState, linkGeneration);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1763,6 +1769,7 @@ final class Settings {
                 if (ustate.stopped || ustate.notLaunched || !ustate.installed
                         || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
                         || ustate.hidden
+                        || ustate.suspended
                         || (ustate.enabledComponents != null
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
@@ -1785,6 +1792,9 @@ final class Settings {
                     }
                     if (ustate.hidden) {
                         serializer.attribute(null, ATTR_HIDDEN, "true");
+                    }
+                    if (ustate.suspended) {
+                        serializer.attribute(null, ATTR_SUSPENDED, "true");
                     }
                     if (ustate.blockUninstall) {
                         serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
@@ -4022,6 +4032,7 @@ final class Settings {
                 pw.print(",");
                 pw.print(ps.getInstalled(user.id) ? "I" : "i");
                 pw.print(ps.getHidden(user.id) ? "B" : "b");
+                pw.print(ps.getSuspended(user.id) ? "SU" : "su");
                 pw.print(ps.getStopped(user.id) ? "S" : "s");
                 pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
                 pw.print(",");
@@ -4221,6 +4232,8 @@ final class Settings {
             pw.print(ps.getInstalled(user.id));
             pw.print(" hidden=");
             pw.print(ps.getHidden(user.id));
+            pw.print(" suspended=");
+            pw.print(ps.getSuspended(user.id));
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));
             pw.print(" notLaunched=");

@@ -808,6 +808,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public boolean setPackageSuspendedAsUser(String packageName, boolean hidden, int userId) {
+        return false;
+    }
+
     /**
      * @hide
      */

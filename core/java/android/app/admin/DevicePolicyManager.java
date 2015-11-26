@@ -3092,6 +3092,48 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device or profile owners for setting the package suspended for this user.
+     * A suspended package will not be started by the package manager, its notifications will
+     * be hidden and it will not show up in recents. The package must already be installed.
+     *
+     * @param admin The name of the admin component to check.
+     * @param packageName The package name of the app to suspend or unsuspend.
+     * @param suspended If set to {@code true} than the package will be suspended, if set to
+     * {@code false} the package will be unsuspended.
+     * @return boolean {@code true} if the operation was successfully performed, {@code false}
+     * otherwise.
+     */
+    public boolean setPackageSuspended(@NonNull ComponentName admin, String packageName,
+            boolean suspended) {
+        if (mService != null) {
+            try {
+                return mService.setPackageSuspended(admin, packageName, suspended);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed talking with device policy service", re);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by device or profile owners to determine if a package is suspended.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The name of the package to retrieve the suspended status of.
+     * @return boolean {@code true} if the package is suspended, {@code false} otherwise.
+     */
+    public boolean getPackageSuspended(@NonNull ComponentName admin, String packageName) {
+        if (mService != null) {
+            try {
+                return mService.getPackageSuspended(admin, packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Sets the enabled state of the profile. A profile should be enabled only once it is ready to
      * be used. Only the profile owner can call this.
      *

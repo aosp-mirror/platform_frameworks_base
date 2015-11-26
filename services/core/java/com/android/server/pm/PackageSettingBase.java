@@ -332,6 +332,14 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).hidden = hidden;
     }
 
+    boolean getSuspended(int userId) {
+        return readUserState(userId).suspended;
+    }
+
+    void setSuspended(boolean suspended, int userId) {
+        modifyUserState(userId).suspended = suspended;
+    }
+
     boolean getBlockUninstall(int userId) {
         return readUserState(userId).blockUninstall;
     }
@@ -341,7 +349,7 @@ abstract class PackageSettingBase extends SettingBase {
     }
 
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden,
+            boolean notLaunched, boolean hidden, boolean suspended,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
             ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState,
             int linkGeneration) {
@@ -351,6 +359,7 @@ abstract class PackageSettingBase extends SettingBase {
         state.stopped = stopped;
         state.notLaunched = notLaunched;
         state.hidden = hidden;
+        state.suspended = suspended;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;

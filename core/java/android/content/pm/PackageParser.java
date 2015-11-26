@@ -4883,6 +4883,11 @@ public class PackageParser {
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
+        if (state.suspended) {
+            ai.flags |= ApplicationInfo.FLAG_SUSPENDED;
+        } else {
+            ai.flags &= ~ApplicationInfo.FLAG_SUSPENDED;
+        }
         if (state.hidden) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         } else {

@@ -29,6 +29,7 @@ public class PackageUserState {
     public boolean notLaunched;
     public boolean installed;
     public boolean hidden; // Is the app restricted by owner / admin
+    public boolean suspended;
     public int enabled;
     public boolean blockUninstall;
 
@@ -43,6 +44,7 @@ public class PackageUserState {
     public PackageUserState() {
         installed = true;
         hidden = false;
+        suspended = false;
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
         domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
@@ -54,6 +56,7 @@ public class PackageUserState {
         notLaunched = o.notLaunched;
         enabled = o.enabled;
         hidden = o.hidden;
+        suspended = o.suspended;
         lastDisableAppCaller = o.lastDisableAppCaller;
         disabledComponents = o.disabledComponents != null
                 ? new ArraySet<>(o.disabledComponents) : null;

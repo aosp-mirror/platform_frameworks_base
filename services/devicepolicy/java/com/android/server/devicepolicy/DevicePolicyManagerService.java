@@ -5783,6 +5783,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public boolean setPackageSuspended(ComponentName who, String packageName,
+            boolean suspended) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = mInjector.binderClearCallingIdentity();
+            try {
+                return mIPackageManager.setPackageSuspendedAsUser(
+                        packageName, suspended, callingUserId);
+            } catch (RemoteException re) {
+                // Shouldn't happen.
+                Slog.e(LOG_TAG, "Failed talking to the package manager", re);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public boolean getPackageSuspended(ComponentName who, String packageName) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        int callingUserId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            long id = mInjector.binderClearCallingIdentity();
+            try {
+                ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(
+                        packageName, 0, callingUserId);
+                return appInfo != null &&
+                        (appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0;
+            } catch (RemoteException re) {
+                // Shouldn't happen.
+                Slog.e(LOG_TAG, "Failed talking to the package manager", re);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+            return false;
+        }
+    }
+
+    @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
