@@ -2540,7 +2540,7 @@ public class ConnectivityManager {
      * This function behaves identically to the non-timedout version, but if a suitable
      * network is not found within the given time (in milliseconds) the
      * {@link NetworkCallback#unavailable} callback is called.  The request must
-     * still be released normally by calling {@link releaseNetworkRequest}.
+     * still be released normally by calling {@link unregisterNetworkCallback}.
      *
      * <p>This method requires the caller to hold either the
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
