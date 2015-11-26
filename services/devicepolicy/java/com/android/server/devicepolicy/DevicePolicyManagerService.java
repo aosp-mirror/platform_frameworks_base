@@ -6823,6 +6823,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isProvisioningAllowed(String action) {
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         if (DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE.equals(action)) {
+            if (!hasFeatureManagedUsers()) {
+                return false;
+            }
             synchronized (this) {
                 if (mOwners.hasDeviceOwner()) {
                     if (!mInjector.userManagerIsSplitSystemUser()) {
@@ -6845,13 +6848,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Managed user cannot have a managed profile.
                 return false;
             }
-            try {
-                if (!mIPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS)) {
-                    return false;
-                }
-            } catch (RemoteException e) {
-                return false;
-            }
             final long ident = mInjector.binderClearCallingIdentity();
             try {
                 if (!mUserManager.canAddMoreManagedProfiles(callingUserId, true)) {
@@ -6864,8 +6860,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE.equals(action)) {
             return isDeviceOwnerProvisioningAllowed(callingUserId);
         } else if (DevicePolicyManager.ACTION_PROVISION_MANAGED_USER.equals(action)) {
+            if (!hasFeatureManagedUsers()) {
+                return false;
+            }
             if (!mInjector.userManagerIsSplitSystemUser()) {
                 // ACTION_PROVISION_MANAGED_USER only supported on split-user systems.
+                return false;
+            }
+            if (callingUserId == UserHandle.USER_SYSTEM) {
+                // System user cannot be a managed user.
                 return false;
             }
             if (hasUserSetupCompleted(callingUserId)) {
@@ -6899,6 +6902,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         return true;
+    }
+
+    private boolean hasFeatureManagedUsers() {
+        try {
+            return mIPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     @Override
