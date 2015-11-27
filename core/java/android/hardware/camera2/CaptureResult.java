@@ -3329,8 +3329,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
-    public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_DYNAMIC_BLACK_LEVEL =
-            new Key<android.hardware.camera2.params.BlackLevelPattern>("android.sensor.dynamicBlackLevel", android.hardware.camera2.params.BlackLevelPattern.class);
+    public static final Key<float[]> SENSOR_DYNAMIC_BLACK_LEVEL =
+            new Key<float[]>("android.sensor.dynamicBlackLevel", float[].class);
 
     /**
      * <p>Maximum raw value output by sensor for this frame.</p>
