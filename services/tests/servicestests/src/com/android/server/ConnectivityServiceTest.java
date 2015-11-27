@@ -591,6 +591,12 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
+        // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
+        // http://b/25897652 .
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+
         mServiceContext = new MockContext(getContext());
         mService = new WrappedConnectivityService(mServiceContext,
                 mock(INetworkManagementService.class),
