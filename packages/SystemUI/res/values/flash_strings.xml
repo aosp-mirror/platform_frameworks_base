@@ -112,6 +112,11 @@
     <string name="accessibility_quick_settings_sync_changed_off">Sync turned off</string>
     <string name="accessibility_quick_settings_sync_changed_on">Sync turned on</string>
 
+    <!-- Music QS Tile -->
+    <string name="quick_settings_music_label">Music</string>
+    <string name="quick_settings_music_play">Play</string>
+    <string name="quick_settings_music_pause">Pause</string>
+
     <!-- Heads up snooze toast -->
     <string name="heads_up_snooze_message_one_minute">Heads-up notification from <xliff:g id="string">%s</xliff:g> are snoozing for 1 minute.</string>
     <string name="heads_up_snooze_message">Heads-up notification from <xliff:g id="string">%s</xliff:g> are snoozing for <xliff:g id="number">%d</xliff:g> minutes.</string>
