@@ -47,9 +47,6 @@ class KeyStoreCertificateSource implements CertificateSource {
                 Set<X509Certificate> certificates = new ArraySet<>(mKeyStore.size());
                 for (Enumeration<String> en = mKeyStore.aliases(); en.hasMoreElements();) {
                     String alias = en.nextElement();
-                    if (!mKeyStore.isCertificateEntry(alias)) {
-                        continue;
-                    }
                     X509Certificate cert = (X509Certificate) mKeyStore.getCertificate(alias);
                     if (cert != null) {
                         certificates.add(cert);
