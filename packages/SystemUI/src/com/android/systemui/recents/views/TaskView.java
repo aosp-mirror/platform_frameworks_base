@@ -22,8 +22,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -244,6 +242,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void resetViewProperties() {
         setDim(0);
         setLayerType(View.LAYER_TYPE_NONE, null);
+        setVisibility(View.VISIBLE);
+        getViewBounds().reset();
         TaskViewTransform.reset(this);
         if (mActionButtonView != null) {
             mActionButtonView.setScaleX(1f);
@@ -251,18 +251,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mActionButtonView.setAlpha(1f);
             mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
         }
-        setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * When we are un/filtering, this method will set up the transform that we are animating to,
-     * in order to hide the task.
-     */
-    void prepareTaskTransformForFilterTaskHidden(TaskViewTransform toTransform) {
-        // Fade the view out and slide it away
-        toTransform.alpha = 0f;
-        toTransform.translationY += 200;
-        toTransform.translationZ = 0;
     }
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
@@ -296,8 +284,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
         // Apply the current dim
         setDim(initialDim);
-        // Prepare the thumbnail view alpha
-        mThumbnailView.prepareEnterRecentsAnimation(isTaskViewLaunchTargetTask);
     }
 
     /** Animates this task view as it enters recents */
@@ -425,9 +411,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 R.dimen.recents_task_view_affiliate_group_enter_offset);
 
         if (isLaunchingTask) {
-            // Animate the thumbnail alpha back into full opacity for the window animation out
-            mThumbnailView.startLaunchTaskAnimation(postAnimRunnable);
-
             // Animate the dim
             if (mDimAlpha > 0) {
                 ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
@@ -637,7 +620,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mIsFocused = isFocused;
         mIsFocusAnimated = animated;
         mHeaderView.onTaskViewFocusChanged(isFocused, animated);
-        mThumbnailView.onFocusChanged(isFocused);
         if (isFocused) {
             if (requestViewFocus && !isFocused()) {
                 requestFocus();
@@ -746,54 +728,20 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Start listening for drag events
             setClipViewInStack(false);
 
+            // Enlarge the view slightly
             final float finalScale = getScaleX() * 1.05f;
-            final int width = getWidth();
-            final int height = getHeight();
-            Bitmap dragBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(dragBitmap);
-            mThumbnailView.draw(c);
-            mHeaderView.draw(c);
-            c.setBitmap(null);
+            animate()
+                    .scaleX(finalScale)
+                    .scaleY(finalScale)
+                    .setDuration(175)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .start();
 
-            // The downTouchPos is relative to the currently transformed TaskView, but we will be
-            // dragging a copy of the full task view, which makes it easier for us to animate them
-            // when the user drops
-            mDownTouchPos.x += ((1f - getScaleX()) * width) / 2;
-            mDownTouchPos.y += ((1f - getScaleY()) * height) / 2;
+            mDownTouchPos.x += ((1f - getScaleX()) * getWidth()) / 2;
+            mDownTouchPos.y += ((1f - getScaleY()) * getHeight()) / 2;
 
-            // Initiate the drag
-            final DragView dragView = new DragView(getContext(), dragBitmap, mDownTouchPos);
-            dragView.setOutlineProvider(new ViewOutlineProvider() {
-                @Override
-                public void getOutline(View view, Outline outline) {
-                    outline.setRect(0, 0, width, height);
-                }
-            });
-            dragView.setScaleX(getScaleX());
-            dragView.setScaleY(getScaleY());
-            dragView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    // Hide this task view after the drag view is attached
-                    setVisibility(View.INVISIBLE);
-                    // Animate the alpha slightly to indicate dragging
-                    dragView.setElevation(getElevation());
-                    dragView.setTranslationZ(getTranslationZ());
-                    dragView.animate()
-                            .scaleX(finalScale)
-                            .scaleY(finalScale)
-                            .setDuration(175)
-                            .setInterpolator(mFastOutSlowInInterpolator)
-                            .start();
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    // Do nothing
-                }
-            });
             EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
-            EventBus.getDefault().send(new DragStartEvent(mTask, this, dragView));
+            EventBus.getDefault().send(new DragStartEvent(mTask, this, mDownTouchPos));
             return true;
         }
         return false;
@@ -806,9 +754,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
                 public void run() {
-                    // Show this task view
-                    setVisibility(View.VISIBLE);
-
                     // Animate the drag view back from where it is, to the view location, then after
                     // it returns, update the clip state
                     setClipViewInStack(true);

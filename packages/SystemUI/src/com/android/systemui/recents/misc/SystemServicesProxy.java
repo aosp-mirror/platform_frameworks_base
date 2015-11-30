@@ -409,7 +409,7 @@ public class SystemServicesProxy {
             return thumbnail;
         }
 
-        Bitmap thumbnail = SystemServicesProxy.getThumbnail(mAm, taskId);
+        Bitmap thumbnail = getThumbnail(taskId);
         if (thumbnail != null) {
             thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
@@ -429,8 +429,12 @@ public class SystemServicesProxy {
     /**
      * Returns a task thumbnail from the activity manager
      */
-    public static Bitmap getThumbnail(ActivityManager activityManager, int taskId) {
-        ActivityManager.TaskThumbnail taskThumbnail = activityManager.getTaskThumbnail(taskId);
+    public Bitmap getThumbnail(int taskId) {
+        if (mAm == null) {
+            return null;
+        }
+
+        ActivityManager.TaskThumbnail taskThumbnail = mAm.getTaskThumbnail(taskId);
         if (taskThumbnail == null) return null;
 
         Bitmap thumbnail = taskThumbnail.mainThumbnail;

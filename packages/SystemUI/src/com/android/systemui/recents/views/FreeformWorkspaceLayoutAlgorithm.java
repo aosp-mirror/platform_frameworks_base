@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.graphics.Rect;
 import android.util.Log;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -52,8 +53,8 @@ public class FreeformWorkspaceLayoutAlgorithm {
         int numFreeformTasks = stackLayout.mNumFreeformTasks;
         if (!freeformTasks.isEmpty()) {
             // Calculate the cell width/height depending on the number of freeform tasks
-            mFreeformCellXCount = Math.max(2, (int) Math.ceil(Math.sqrt(numFreeformTasks)));
-            mFreeformCellYCount = Math.max(2, (int) Math.ceil((float) numFreeformTasks /
+            mFreeformCellXCount = Math.max(1, (int) Math.ceil(Math.sqrt(numFreeformTasks)));
+            mFreeformCellYCount = Math.max(1, (int) Math.ceil((float) numFreeformTasks /
                     mFreeformCellXCount));
             // For now, make the cells square
             mFreeformCellWidth = Math.min(stackLayout.mFreeformRect.width() / mFreeformCellXCount,
@@ -94,15 +95,21 @@ public class FreeformWorkspaceLayoutAlgorithm {
     public TaskViewTransform getTransform(Task task, TaskViewTransform transformOut,
             TaskStackLayoutAlgorithm stackLayout) {
         if (mTaskIndexMap.containsKey(task.key)) {
-            // This is a freeform task, so lay it out in the freeform workspace
+            Rect taskRect = stackLayout.mTaskRect;
             int taskIndex = mTaskIndexMap.get(task.key);
-            int topOffset = (stackLayout.mFreeformRect.top - stackLayout.mTaskRect.top);
+            int topOffset = (stackLayout.mFreeformRect.top - taskRect.top);
             int x = taskIndex % mFreeformCellXCount;
             int y = taskIndex / mFreeformCellXCount;
-            float scale = (float) mFreeformCellWidth / stackLayout.mTaskRect.width();
-            int scaleXOffset = (int) (((1f - scale) * stackLayout.mTaskRect.width()) / 2);
-            int scaleYOffset = (int) (((1f - scale) * stackLayout.mTaskRect.height()) / 2);
-            transformOut.scale = scale * 0.9f;
+
+            int bitmapWidth = task.thumbnail.getWidth();
+            int bitmapHeight = task.thumbnail.getHeight();
+            float thumbnailScale = Math.min((float) mFreeformCellWidth / bitmapWidth,
+                    (float) mFreeformCellHeight / bitmapHeight);
+            float thumbnailWidth = bitmapWidth * thumbnailScale;
+            float thumbnailHeight = bitmapHeight * thumbnailScale;
+            int scaleXOffset = (int) (((1f - thumbnailScale) * thumbnailWidth) / 2);
+            int scaleYOffset = (int) (((1f - thumbnailScale) * thumbnailHeight) / 2);
+            transformOut.scale = thumbnailScale * 0.9f;
             transformOut.translationX = x * mFreeformCellWidth - scaleXOffset;
             transformOut.translationY = topOffset + y * mFreeformCellHeight - scaleYOffset;
             transformOut.translationZ = stackLayout.mMaxTranslationZ;
@@ -115,7 +122,6 @@ public class FreeformWorkspaceLayoutAlgorithm {
             if (DEBUG) {
                 Log.d(TAG, "getTransform: " + task.key + ", " + transformOut);
             }
-
             return transformOut;
         }
         return null;

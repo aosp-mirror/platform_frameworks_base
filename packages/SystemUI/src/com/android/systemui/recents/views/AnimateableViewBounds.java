@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.ObjectAnimator;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.util.IntProperty;
@@ -65,6 +64,15 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         mCornerRadius = cornerRadius;
     }
 
+    /**
+     * Resets the right and bottom clip for this view.
+     */
+    public void reset() {
+        mClipRect.setEmpty();
+        mSourceView.invalidateOutline();
+        updateClipBounds();
+    }
+
     @Override
     public void getOutline(View view, Outline outline) {
         outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
@@ -80,15 +88,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
             mAlpha = alpha;
             mSourceView.invalidateOutline();
         }
-    }
-
-    /**
-     * Animates the bottom clip.
-     */
-    public void animateClipBottom(int bottom) {
-        ObjectAnimator animator = ObjectAnimator.ofInt(this, CLIP_BOTTOM, getClipBottom(), bottom);
-        animator.setDuration(150);
-        animator.start();
     }
 
     /** Sets the bottom clip. */

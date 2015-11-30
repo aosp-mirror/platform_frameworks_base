@@ -64,8 +64,8 @@ public class RecentsViewTouchHandler {
 
     private Task mDragTask;
     private TaskView mTaskView;
-    private DragView mDragView;
 
+    private Point mTaskViewOffset = new Point();
     private Point mDownPos = new Point();
     private boolean mDragging;
 
@@ -115,13 +115,16 @@ public class RecentsViewTouchHandler {
         mDragging = true;
         mDragTask = event.task;
         mTaskView = event.taskView;
-        mDragView = event.dragView;
         mDropTargets.clear();
 
-        float x = mDownPos.x - mDragView.getTopLeftOffset().x;
-        float y = mDownPos.y - mDragView.getTopLeftOffset().y;
-        mDragView.setTranslationX(x);
-        mDragView.setTranslationY(y);
+        int[] recentsViewLocation = new int[2];
+        mRv.getLocationInWindow(recentsViewLocation);
+        mTaskViewOffset.set(mTaskView.getLeft() - recentsViewLocation[0] + event.tlOffset.x,
+                mTaskView.getTop() - recentsViewLocation[1] + event.tlOffset.y);
+        float x = mDownPos.x - mTaskViewOffset.x;
+        float y = mDownPos.y - mTaskViewOffset.y;
+        mTaskView.setTranslationX(x);
+        mTaskView.setTranslationY(y);
 
         RecentsConfiguration config = Recents.getConfiguration();
         if (!config.hasDockedTasks) {
@@ -140,7 +143,6 @@ public class RecentsViewTouchHandler {
         mDragging = false;
         mDragTask = null;
         mTaskView = null;
-        mDragView = null;
         mLastDropTarget = null;
     }
 
@@ -160,8 +162,8 @@ public class RecentsViewTouchHandler {
                     int height = mRv.getMeasuredHeight();
                     float evX = ev.getX();
                     float evY = ev.getY();
-                    float x = evX - mDragView.getTopLeftOffset().x;
-                    float y = evY - mDragView.getTopLeftOffset().y;
+                    float x = evX - mTaskViewOffset.x;
+                    float y = evY - mTaskViewOffset.y;
 
                     DropTarget currentDropTarget = null;
                     for (DropTarget target : mDropTargets) {
@@ -176,8 +178,8 @@ public class RecentsViewTouchHandler {
                                 currentDropTarget));
                     }
 
-                    mDragView.setTranslationX(x);
-                    mDragView.setTranslationY(y);
+                    mTaskView.setTranslationX(x);
+                    mTaskView.setTranslationY(y);
                 }
                 break;
             }
@@ -187,7 +189,7 @@ public class RecentsViewTouchHandler {
                     ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(
                             mRv.getContext(), null, null, null);
                     postAnimationTrigger.increment();
-                    EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView, mDragView,
+                    EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView,
                             mLastDropTarget, postAnimationTrigger));
                     postAnimationTrigger.decrement();
                     break;
