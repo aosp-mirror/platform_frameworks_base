@@ -127,7 +127,7 @@ page.title=Testing Support Library
     4.10) tests. However, you should avoid mixing JUnit 3 and and JUnit 4 test code in the same
     package, as this might cause unexpected results. If you are creating an instrumented JUnit 4
     test class to run on a device or emulator, your test class must be prefixed with the
-    {@code &#64;RunWith(AndroidJUnit4.class)} annotation.
+    {@code @RunWith(AndroidJUnit4.class)} annotation.
   </p>
 
   <p>The following code snippet shows how you might write an instrumented JUnit 4 test to validate
@@ -193,14 +193,14 @@ public class CalculatorInstrumentationTest
   </p>
 
   <ul>
-    <li><a href="{@docRoot}reference/android/support/test/filters/RequiresDevice.html">{@code &#64;RequiresDevice}</a>:
+    <li><a href="{@docRoot}reference/android/support/test/filters/RequiresDevice.html">{@code @RequiresDevice}</a>:
     Specifies that the test should run only on physical devices, not on emulators.
     </li>
 
-    <li><a href="{@docRoot}reference/android/support/test/filters/SdkSuppress.html">{@code &#64;SdkSupress}</a>:
+    <li><a href="{@docRoot}reference/android/support/test/filters/SdkSuppress.html">{@code @SdkSupress}</a>:
     Suppresses the test from running on a lower Android API level than the given level. For
     example, to suppress tests on all API levels lower than 18 from running, use the annotation
-    {@code &#64;SDKSupress(minSdkVersion=18)}.
+    {@code @SDKSupress(minSdkVersion=18)}.
     </li>
 
     <li>{@link android.test.suitebuilder.annotation.SmallTest &#64;SmallTest},
@@ -440,7 +440,7 @@ onView(withId(R.id.changeTextBt)).perform(click());</pre>
   </p>
 
   <p>
-    The {@code uiautomatorviewer} tool is located in the {@code &lt;android-sdk&gt;/tools/}
+    The {@code uiautomatorviewer} tool is located in the {@code <android-sdk>/tools/}
     directory.
   </p>
 
@@ -570,7 +570,7 @@ allAppsButton.clickAndWaitForNewWindow();</pre>
   <p>
     After downloading, the tool installs the Support Repository files to your existing Android
     SDK directory. The library files are located in the following subdirectory of your SDK:
-    {@code &lt;sdk&gt;/extras/android/m2repository} directory.
+    {@code <sdk>/extras/android/m2repository} directory.
   </p>
 
   <p>

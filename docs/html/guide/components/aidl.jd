@@ -140,7 +140,7 @@ java.util.List} interface.</p>
     <p>All elements in the {@link java.util.Map} must be one of the supported data types in this
 list or one of the other AIDL-generated interfaces or parcelables you've declared.  Generic maps,
 (such as those of the form
-{@code Map&lt;String,Integer&gt;} are not supported. The actual concrete class that the other side
+{@code Map<String,Integer>} are not supported. The actual concrete class that the other side
 receives is always a {@link java.util.HashMap}, although the method is generated to
 use the {@link java.util.Map} interface.</p>
   </li>

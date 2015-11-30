@@ -150,7 +150,7 @@ android.app.Activity#onCreate onCreate()} メソッドを呼び出します。
 
 <p>アプリのメインのアクティビティは、{@link
 android.content.Intent#ACTION_MAIN MAIN} アクションと {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} カテゴリを含む <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> を使用してマニフェストで宣言する必要があります。
+<intent-filter>}</a> を使用してマニフェストで宣言する必要があります。
 次に例を示します。</p> 
 
 <pre>

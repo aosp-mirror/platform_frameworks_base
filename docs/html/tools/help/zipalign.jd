@@ -51,7 +51,7 @@ Your Application</a>.</p>
 
 <pre>zipalign -c -v &lt;alignment> existing.apk</pre>
 
-<p>The {@code &lt;alignment>} is an integer that defines the byte-alignment boundaries. 
+<p>The {@code <alignment>} is an integer that defines the byte-alignment boundaries.
 This must always be 4 (which provides 32-bit alignment) or else it effectively 
 does nothing.</p>
 

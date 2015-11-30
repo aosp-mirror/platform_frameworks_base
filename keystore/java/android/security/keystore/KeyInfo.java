@@ -38,32 +38,30 @@ import javax.crypto.SecretKey;
  * <p><h3>Example: Symmetric Key</h3>
  * The following example illustrates how to obtain a {@code KeyInfo} describing the provided Android
  * Keystore {@link SecretKey}.
- * <pre> {@code
+ * <pre>{@code
  * SecretKey key = ...; // Android Keystore key
  *
  * SecretKeyFactory factory = SecretKeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
  * KeyInfo keyInfo;
- * try &#123;
+ * try {
  *     keyInfo = (KeyInfo) factory.getKeySpec(key, KeyInfo.class);
- * &#125; catch (InvalidKeySpecException e) &#123;
+ * } catch (InvalidKeySpecException e) {
  *     // Not an Android KeyStore key.
- * &#125;
- * }</pre>
+ * }}</pre>
  *
  * <p><h3>Example: Private Key</h3>
  * The following example illustrates how to obtain a {@code KeyInfo} describing the provided
  * Android KeyStore {@link PrivateKey}.
- * <pre> {@code
+ * <pre>{@code
  * PrivateKey key = ...; // Android KeyStore key
  *
  * KeyFactory factory = KeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
  * KeyInfo keyInfo;
- * try &#123;
+ * try {
  *     keyInfo = factory.getKeySpec(key, KeyInfo.class);
- * &#125; catch (InvalidKeySpecException e) &#123;
+ * } catch (InvalidKeySpecException e) {
  *     // Not an Android KeyStore key.
- * &#125;
- * }</pre>
+ * }}</pre>
  */
 public class KeyInfo implements KeySpec {
     private final String mKeystoreAlias;

@@ -81,7 +81,7 @@ android:id} specified for the {@link android.view.ViewStub} is valid only until 
 android.view.ViewStub} layout is visible/inflated.)</p>
 
 <p class="note"><strong>Note:</strong> One drawback of {@link android.view.ViewStub} is that it
-doesn’t currently support the {@code &lt;merge/&gt;} tag in the layouts to be inflated.</p>
+doesn’t currently support the {@code <merge>} tag in the layouts to be inflated.</p>
 
 
 

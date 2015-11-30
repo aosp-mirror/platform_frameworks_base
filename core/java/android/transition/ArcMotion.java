@@ -36,13 +36,12 @@ import android.util.AttributeSet;
  * arc between two points.
  * </p>
  * <p>This may be used in XML as an element inside a transition.</p>
- * <pre>
- * {@code
- * &lt;changeBounds>
- *   &lt;arcMotion android:minimumHorizontalAngle="15"
+ * <pre>{@code
+ * <changeBounds>
+ *   <arcMotion android:minimumHorizontalAngle="15"
  *              android:minimumVerticalAngle="0"
  *              android:maximumAngle="90"/>
- * &lt;/changeBounds>}
+ * </changeBounds>}
  * </pre>
  */
 public class ArcMotion extends PathMotion {

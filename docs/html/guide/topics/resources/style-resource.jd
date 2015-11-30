@@ -23,7 +23,7 @@ an entire {@link android.app.Activity} or application (from within the manifest 
 <p class="note"><strong>Note:</strong> A style is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine style resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
@@ -61,7 +61,7 @@ In XML: <code>@[package:]style/<em>style_name</em></code>
       <p>No attributes.</p>
     </dd>
   <dt id="style-element"><code>&lt;style&gt;</code></dt>
-    <dd>Defines a single style. Contains {@code &lt;item&gt;} elements.
+    <dd>Defines a single style. Contains {@code <item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>name</code></dt>

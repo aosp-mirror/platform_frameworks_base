@@ -58,7 +58,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 <p>In this example, the name of the module is the same as that of the prebuilt library.</p>
 
 <p>The build system places a copy of your prebuilt shared library into {@code $PROJECT/obj/local},
-and another copy, stripped of debug information, into {@code $PROJECT/libs/&lt;abi&gt;}. Here,
+and another copy, stripped of debug information, into {@code $PROJECT/libs/<abi>}. Here,
 {@code $PROJECT} is the root directory of your project.</p>
 
 <h2 id="rp">Referencing the Prebuilt Library from Other Modules</h2>
@@ -111,7 +111,7 @@ value of the {@code LOCAL_C_INCLUDES} for the module dependent on it.</p>
 <h2 id="dp">Debugging Prebuilt Libraries</h2>
 <p>We recommend that you provide prebuilt shared libraries containing debug symbols. The NDK build
 system always strips the symbols from the version of the library that it installs into
-{@code $PROJECT/libs/&lt;abi&gt;/}, but you can use the debug version for debugging with
+{@code $PROJECT/libs/<abi>/}, but you can use the debug version for debugging with
 {@code ndk-gdb}.</p>
 
 <h2 id="sa">Selecting ABIs for Prebuilt Libraries</h2>

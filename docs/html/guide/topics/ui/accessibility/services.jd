@@ -111,7 +111,7 @@ configuration using an instance of this class and {@link
 android.accessibilityservice.AccessibilityService#setServiceInfo setServiceInfo()} at runtime.
 However, not all configuration options are available using this method.</p>
 
-<p>Beginning with Android 4.0, you can include a {@code &lt;meta-data&gt;} element in your manifest
+<p>Beginning with Android 4.0, you can include a {@code <meta-data>} element in your manifest
 with a reference to a configuration file, which allows you to set the full range of options for
 your accessibility service, as shown in the following example:</p>
 
@@ -125,7 +125,7 @@ your accessibility service, as shown in the following example:</p>
 </pre>
 
 <p>This meta-data element refers to an XML file that you create in your application’s resource
-directory ({@code &lt;project_dir&gt;/res/xml/accessibility_service_config.xml}). The following code
+directory ({@code <project_dir>/res/xml/accessibility_service_config.xml}). The following code
 shows example contents for the service configuration file:</p>
 
 <pre>
@@ -445,7 +445,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
 <p>The API Demo project contains two samples which can be used as a starting point for generating
 accessibility services
-({@code &lt;sdk&gt;/samples/&lt;platform&gt;/ApiDemos/src/com/example/android/apis/accessibility}):
+({@code <sdk>/samples/<platform>/ApiDemos/src/com/example/android/apis/accessibility}):
 </p>
 
 <ul>

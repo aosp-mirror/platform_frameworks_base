@@ -285,7 +285,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      若應用程式將遊戲手把用作主要輸入方式，會使用 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 宣示說明標籤宣告相應的需求。(<a href="{@docRoot}training/tv/games/index.html#gamepad">進行了解</a>)
+      若應用程式將遊戲手把用作主要輸入方式，會使用 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> 宣示說明標籤宣告相應的需求。(<a href="{@docRoot}training/tv/games/index.html#gamepad">進行了解</a>)
     </p>
   </td>
 </tr>

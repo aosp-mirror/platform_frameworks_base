@@ -30,7 +30,7 @@ sub-directory of the top-level {@code $NDK/apps/} directory. For example:</p>
 $NDK/apps/&lt;myapp&gt;/Application.mk
 </pre>
 
-<p>Here, {@code &lt;myapp&gt;} is a short name used to describe your app to the NDK build system. It
+<p>Here, {@code <myapp>} is a short name used to describe your app to the NDK build system. It
 doesn't actually go into your generated shared libraries or your final packages.</p>
 
 <h2 id="var">Variables</h2>
@@ -39,7 +39,7 @@ doesn't actually go into your generated shared libraries or your final packages.
 uses this information to place stripped-down versions of the generated JNI shared libraries
 into a specific location known to the APK-generating tools.</p>
 
-<p>If you place your {@code Application.mk} file under {@code $NDK/apps/&lt;myapp&gt;/}, you must
+<p>If you place your {@code Application.mk} file under {@code $NDK/apps/<myapp>/}, you must
 define this variable. If you place it under {@code $PROJECT/jni/}, it is optional.
 
 <h4>APP_OPTIM</h4>
@@ -54,7 +54,7 @@ information during debugging. For example, the build system optimizes out some v
 preventing you from inspecting them. Also, code re-ordering can make it more difficult to step
 through the code; stack traces may not be reliable.</p>
 
-<p>Declaring {@code android:debuggable} in your application manifest's {@code &lt;application&gt;}
+<p>Declaring {@code android:debuggable} in your application manifest's {@code <application>}
 tag will cause this variable to default to {@code debug} instead of {@code release}. Override this
 default value by setting {@code APP_OPTIM} to {@code release}.</p>
 

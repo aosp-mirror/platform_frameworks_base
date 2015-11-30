@@ -89,7 +89,7 @@ name with the {@code ‘test’} keyword, or use any classes in the {@code junit
 {@code junit.extensions} package.</p>
 
 <p>To create a basic JUnit 4 test class, create a Java class that contains one or more test methods.
-A test method begins with the {@code &#64;Test} annotation and contains the code to exercise
+A test method begins with the {@code @Test} annotation and contains the code to exercise
 and verify a single functionality in the component that you want to test.</p>
 
 <p>The following example shows how you might implement a local unit test class. The test method
@@ -125,32 +125,32 @@ special processing, such as:</p>
 
 <ul>
 <li>
-{@code &#64;Before}: Use this annotation to specify a block of code with test setup operations. This
-code block will be invoked before each test. You can have multiple {@code &#64;Before} methods but
+{@code @Before}: Use this annotation to specify a block of code with test setup operations. This
+code block will be invoked before each test. You can have multiple {@code @Before} methods but
 the order which these methods are called is not fixed.
 </li>
 <li>
-{@code &#64;After}: This annotation specifies a block of code with test tear-down operations. This
-code block will be called after every test method. You can define multiple {@code &#64;After}
+{@code @After}: This annotation specifies a block of code with test tear-down operations. This
+code block will be called after every test method. You can define multiple {@code @After}
 operations in your test code. Use this annotation to release any resources from memory.
 </li>
 <li>
-{@code &#64;Test}: Use this annotation to mark a test method. A single test class can contain
+{@code @Test}: Use this annotation to mark a test method. A single test class can contain
 multiple test methods, each prefixed with this annotation.
 </li>
 <li>
-{@code &#64;BeforeClass}: Use this annotation to specify static methods to be invoked only once per
+{@code @BeforeClass}: Use this annotation to specify static methods to be invoked only once per
 test class. This testing step is useful for expensive operations such as connecting to a database.
 </li>
 <li>
-{@code &#64;AfterClass}: Use this annotation to specify static methods to be invoked only after all
+{@code @AfterClass}: Use this annotation to specify static methods to be invoked only after all
 tests in the class have been run. This testing step is useful for releasing any resources allocated
-in the {@code &#64;BeforeClass} block.
+in the {@code @BeforeClass} block.
 </li>
 <li>
-{@code &#64;Test(timeout=&lt;milliseconds&gt;)}: Specifies a timeout period for the test. If the
+{@code @Test(timeout=<milliseconds>)}: Specifies a timeout period for the test. If the
 test starts but does not complete within the given timeout period, it automatically fails. You must
-specify the timeout period in milliseconds, for example: {@code &#64;Test(timeout=5000)}.
+specify the timeout period in milliseconds, for example: {@code @Test(timeout=5000)}.
 </li>
 </ul>
 
@@ -179,11 +179,11 @@ Include the Mockito library dependency in your {@code build.gradle} file, as des
 <a href="#setup">Set Up Your Testing Environment</a>.
 </li>
 <li>At the beginning of your unit test class definition, add the
-{@code &#64;RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
+{@code @RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
 runner to validate that your usage of the framework is correct and simplifies the initialization of
 your mock objects.
 </li>
-<li>To create a mock object for an Android dependency, add the {@code &#64;Mock} annotation before
+<li>To create a mock object for an Android dependency, add the {@code @Mock} annotation before
 the field declaration.</li>
 <li>To stub the behavior of the dependency, you can specify a condition and return
 value when the condition is met by using the {@code when()} and {@code thenReturn()} methods.
@@ -298,5 +298,5 @@ command with the {@code --continue} option.</p>
 
 <p>If there are failing tests, the command will display links to HTML reports (one per build
 variant). You can find the generated HTML test result reports in the
-{@code &lt;path_to_your_project&gt;/app/build/reports/tests/} directory, and the corresponding XML
-files in the {@code &lt;path_to_your_project&gt;/app/build/test-results/} directory.</p>
+{@code <path_to_your_project>/app/build/reports/tests/} directory, and the corresponding XML
+files in the {@code <path_to_your_project>/app/build/test-results/} directory.</p>

@@ -92,7 +92,7 @@ depends on EGL.</li>
 {@code .so} extension. For example, the actual file name for the
 {@code log} library is {@code liblog.so}.</li>
 <li>The library resides in the following directory, NDK root:
-{@code &lt;ndk&gt;/platforms/android-&lt;sdk_version&gt;/arch-&lt;abi&gt;/usr/lib/}.</li>
+{@code <ndk>/platforms/android-<sdk_version>/arch-<abi>/usr/lib/}.</li>
 </ul>
 
 <pre class="no-pretty-print">

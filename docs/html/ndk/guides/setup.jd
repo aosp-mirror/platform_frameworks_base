@@ -61,7 +61,7 @@ the directory that contains the NDK.</li>
 <p>To confirm that you have installed the NDK, set it up correctly, and properly configured Eclipse,
 follow these steps:</p>
 <ol type="1">
-<li>Import the hello-jni sample from {@code &lt;ndk&gt;/samples/}, as you would any other Android
+<li>Import the hello-jni sample from {@code <ndk>/samples/}, as you would any other Android
 project.</li>
 <li>In the <i>Project Explorer</i> pane, right-click the project name (<i>HelloJni</i>). A
 context menu appears.</li>

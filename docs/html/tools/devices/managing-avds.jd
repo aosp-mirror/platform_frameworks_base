@@ -56,7 +56,7 @@ is currently not documented.</p>
   you have designed your app to support. For instance, you should create an AVD for each
   API level equal to and higher than the minimum version you've specified in your manifest
   <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html" style="white-space: nowrap;"
-  >{@code &lt;uses-sdk>}</a> tag.</p>
+  >{@code <uses-sdk>}</a> tag.</p>
 
   <p>To create an AVD based on an existing device definition:</p>
 

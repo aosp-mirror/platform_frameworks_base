@@ -149,7 +149,7 @@ android.app.Activity#onCreate onCreate()} 方法。
 </p>
 
 <p>您的应用的主Activity必须使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a>（包括 {@link
+<intent-filter>}</a>（包括 {@link
 android.content.Intent#ACTION_MAIN MAIN} 操作和
 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 类别）在宣示说明中声明。例如：</p> 
 

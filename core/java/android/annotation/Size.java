@@ -31,7 +31,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <p>
  * Example:
  * <pre>{@code
- *  public void getLocationInWindow(&#64;Size(2) int[] location) {
+ *  public void getLocationInWindow(@Size(2) int[] location) {
  *      ...
  *  }
  * }</pre>

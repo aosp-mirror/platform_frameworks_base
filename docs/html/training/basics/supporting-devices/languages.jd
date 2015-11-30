@@ -106,10 +106,10 @@ href="{@docRoot}guide/topics/resources/localization.html">Localization</a>.
 <h2 id="UseString">Use the String Resources</h2>
 
 <p>You can reference your string resources in your source code and other XML files using the
-resource name defined by the {@code &lt;string>} element's {@code name} attribute.</p>
+resource name defined by the {@code <string>} element's {@code name} attribute.</p>
 
 <p>In your source code, you can refer to a string resource with the syntax {@code
-R.string.&lt;string_name>}. There are a variety of methods that accept a string resource this
+R.string.<string_name>}. There are a variety of methods that accept a string resource this
 way.</p>
   
 <p>For example:</p>
@@ -123,8 +123,8 @@ TextView textView = new TextView(this);
 textView.setText(R.string.hello_world);
 </pre>
 
-<p>In other XML files, you can refer to a string resource with the syntax {@code
-&#64;string/&lt;string_name>} whenever the XML attribute accepts a string value.</p>
+<p>In other XML files, you can refer to a string resource with the syntax
+<code>@string/&lt;string_name&gt;</code> whenever the XML attribute accepts a string value.</p>
 
 <p>For example:</p>
 

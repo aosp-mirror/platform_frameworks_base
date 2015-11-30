@@ -28,12 +28,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Denotes that the annotated element should be a float or double in the given range
  * <p>
  * Example:
- * <pre>{@code
+ * <pre><code>
  *  &#64;FloatRange(from=0.0,to=1.0)
  *  public float getAlpha() {
  *      ...
  *  }
- * }</pre>
+ * </code></pre>
  *
  * @hide
  */

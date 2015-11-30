@@ -46,7 +46,7 @@ please see themes_device_defaults.xml.
          with API level 14, the default system theme is supplied by {@link #Theme_DeviceDefault},
          which might apply a different style on different devices. If you want to ensure that your
          app consistently uses the Holo theme at all times, you must explicitly declare it in your
-         manifest. For example, {@code &lt;application android:theme="@android:style/Theme.Holo"&gt;}.
+         manifest. For example, {@code <application android:theme="@android:style/Theme.Holo">}.
          For more information, read <a
          href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo
          Everywhere</a>.</p>

@@ -914,7 +914,7 @@ public final class NfcAdapter {
      *
      * <p>If you want to prevent the Android OS from sending default NDEF
      * messages completely (for all activities), you can include a
-     * {@code &lt;meta-data>} element inside the {@code &lt;application>}
+     * {@code <meta-data>} element inside the {@code <application>}
      * element of your AndroidManifest.xml file, like this:
      * <pre>
      * &lt;application ...>
@@ -1022,7 +1022,7 @@ public final class NfcAdapter {
      *
      * <p>If you want to prevent the Android OS from sending default NDEF
      * messages completely (for all activities), you can include a
-     * {@code &lt;meta-data>} element inside the {@code &lt;application>}
+     * {@code <meta-data>} element inside the {@code <application>}
      * element of your AndroidManifest.xml file, like this:
      * <pre>
      * &lt;application ...>

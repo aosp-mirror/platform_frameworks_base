@@ -881,7 +881,7 @@ action and specify the contact with a {@code content:} URI as the intent data.</
 <dd>{@link android.content.Intent#ACTION_VIEW}</dd>
 
 <dt><b>Data URI Scheme</b></dt>
-<dd>{@code content:&lt;URI>}</dd>
+<dd>{@code content:<URI>}</dd>
 
 <dt><b>MIME Type</b></dt>
 <dd>None. The type is inferred from contact URI.
@@ -922,7 +922,7 @@ constants in {@link android.provider.ContactsContract.Intents.Insert}.</p>
 <dd>{@link android.content.Intent#ACTION_EDIT}</dd>
 
 <dt><b>Data URI Scheme</b></dt>
-<dd>{@code content:&lt;URI>}</dd>
+<dd>{@code content:<URI>}</dd>
 
 <dt><b>MIME Type</b></dt>
 <dd>The type is inferred from contact URI.
@@ -1497,9 +1497,9 @@ specify the URI location of the file in the intent data.</p>
 <dt><b>Data URI Scheme</b></dt>
 <dd>
   <dl>
-    <dt>{@code file:<em>&lt;URI></em>}
-    <dt>{@code content:<em>&lt;URI></em>}
-    <dt>{@code http:<em>&lt;URL></em>}
+    <dt><code>file:<em>&lt;URI&gt;</em></code>
+    <dt><code>content:<em>&lt;URI&gt;</em></code>
+    <dt><code>http:<em>&lt;URL&gt;</em></code>
   </dl>
 </dd>
 
@@ -1830,8 +1830,8 @@ begins the phone call; the user does not need to press the <em>Call</em> button.
 <dt><b>Data URI Scheme</b></dt>
 <dd>
 <ul>
-  <li>{@code tel:&lt;phone-number>}</li>
-  <li>{@code voicemail:&lt;phone-number>}</li>
+  <li>{@code tel:<phone-number>}</li>
+  <li>{@code voicemail:<phone-number>}</li>
 </ul>
 </dd>
 
@@ -2042,10 +2042,10 @@ details such as the phone number, subject, and message body using the extra keys
 <dt><b>Data URI Scheme</b></dt>
 <dd>
   <dl>
-    <dt>{@code sms:<em>&lt;phone_number></em>}
-    <dt>{@code smsto:<em>&lt;phone_number></em>}
-    <dt>{@code mms:<em>&lt;phone_number></em>}
-    <dt>{@code mmsto:<em>&lt;phone_number></em>}
+    <dt><code>sms:<em>&lt;phone_number&gt;</em></code>
+    <dt><code>smsto:<em>&lt;phone_number&gt;</em></code>
+    <dt><code>mms:<em>&lt;phone_number&gt;</em></code>
+    <dt><code>mmsto:<em>&lt;phone_number&gt;</em></code>
   </dl>
   <p>Each of these schemes are handled the same.
 </dd>
@@ -2158,8 +2158,8 @@ and specify the web URL in the intent data.</p>
   <dd>{@link android.content.Intent#ACTION_VIEW}<dd>
 
   <dt><b>Data URI Scheme</b></dt>
-  <dd>{@code http:<em>&lt;URL></em>}<br/>
-    {@code https:<em>&lt;URL></em>}</dd>
+  <dd><code>http:<em>&lt;URL&gt;</em></code><br/>
+    <code>https:<em>&lt;URL&gt;</em></code></dd>
 
   <dt><b>MIME Type</b></dt>
   <dd>

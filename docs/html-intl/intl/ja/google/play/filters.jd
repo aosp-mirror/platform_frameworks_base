@@ -208,14 +208,14 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 <table>
   <tr><th>マニフェスト要素</th><th>概要</th></tr>
   <tr>
-    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code &lt;compatible-screens&gt;}</a></nobr></td>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code <compatible-screens>}</a></nobr></td>
     <td>
-      <p>Google Play はデバイス画面サイズと密度が {@code &lt;compatible-screens&gt;} の要素の画面設定（{@code &lt;screen&gt;} 要素で宣言）のいずれにも適合しない場合、アプリをフィルタリングします。</p>
-      <p class="caution"><strong>警告:</strong> 通常は、<strong>このマニフェスト要素を使用すべきではありません</strong>。この要素を使用すると、指定していない画面サイズと密度のすべての組み合わせが除外されることになり、アプリの潜在的なユーザー ベースが大幅に減少する可能性があります。代わりに <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code &lt;supports-screens&gt;}</a> マニフェスト要素（<a href="#table1">表 1</a> に記載）を使用して、考慮に入れていない画面設定に対して、代替リソースを使用した画面の互換性モードを有効にすることをお勧めします。</p>
+      <p>Google Play はデバイス画面サイズと密度が {@code <compatible-screens>} の要素の画面設定（{@code <screen>} 要素で宣言）のいずれにも適合しない場合、アプリをフィルタリングします。</p>
+      <p class="caution"><strong>警告:</strong> 通常は、<strong>このマニフェスト要素を使用すべきではありません</strong>。この要素を使用すると、指定していない画面サイズと密度のすべての組み合わせが除外されることになり、アプリの潜在的なユーザー ベースが大幅に減少する可能性があります。代わりに <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code <supports-screens>}</a> マニフェスト要素（<a href="#table1">表 1</a> に記載）を使用して、考慮に入れていない画面設定に対して、代替リソースを使用した画面の互換性モードを有効にすることをお勧めします。</p>
     </td>
   </tr>
   <tr>
-    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code &lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code <supports-gl-texture>}</a></nobr></td>
     <td>
       <p>Google Play はアプリでサポートされる 1 つ以上の GL テクスチャ圧縮フォーマットがデバイスで同様にサポートされない場合、アプリをフィルタリングします。 </p>
     </td>
@@ -249,11 +249,11 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 
 <p>現時点では、Google Play では各 APK が次の設定に基づいて別々のフィルタを提供する際にのみ、同じアプリの複数の APK を公開できます。</p>
 <ul>
-  <li>OpenGL テクスチャ圧縮フォーマット <p><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code &lt;supports-gl-texture&gt;}</a> 要素の使用による。</p>
+  <li>OpenGL テクスチャ圧縮フォーマット <p><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code <supports-gl-texture>}</a> 要素の使用による。</p>
   </li>
-  <li>画面サイズ（画面密度も指定可能） <p><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code &lt;supports-screens&gt;}</a>要素または<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code &lt;compatible-screens&gt;}</a> 要素の使用による。</p>
+  <li>画面サイズ（画面密度も指定可能） <p><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code <supports-screens>}</a>要素または<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code <compatible-screens>}</a> 要素の使用による。</p>
   </li>
-  <li>API レベル <p><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> 要素の使用による。</p>
+  <li>API レベル <p><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> 要素の使用による。</p>
   </li>
   <li>CPU アーキテクチャ（ABI） <p>特定の CPU アーキテクチャ（ARM EABI v7 または x86 など）を対象とする<a href="{@docRoot}tools/sdk/ndk/index.html"> Android NDK</a> で構築されたネイティブ ライブラリの組み込みによる。</p>
   </li>

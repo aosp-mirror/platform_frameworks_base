@@ -20,10 +20,10 @@ specifications within a filter.</dd>
 <dd><dl class="attr">
 <dt><a name="nm"></a>{@code android:name}</dt>
 <dd>The name of the category.  Standard categories are defined in the 
-{@link android.content.Intent} class as {@code CATEGORY_<i>name</i>} 
+{@link android.content.Intent} class as <code>CATEGORY_<i>name</i></code>
 constants.  The name assigned here can be derived from those constants 
 by prefixing "{@code android.intent.category.}" to the 
-{@code <i>name</i>} that follows {@code CATEGORY_}.  For example,
+<code><i>name</i></code> that follows {@code CATEGORY_}.  For example,
 the string value for {@code CATEGORY_LAUNCHER} is 
 "{@code android.intent.category.LAUNCHER}".
 

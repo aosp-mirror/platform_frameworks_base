@@ -36,12 +36,12 @@ to do:</p>
 
 <ul>
 
-<li>Extend the {@code Request&lt;T&gt;} class, where
-{@code &lt;T&gt;} represents the type of parsed response
+<li>Extend the {@code Request<T>} class, where
+{@code <T>} represents the type of parsed response
 the request expects. So if your parsed response is a string, for example,
-create your custom request by extending {@code Request&lt;String&gt;}. See the Volley
+create your custom request by extending {@code Request<String>}. See the Volley
 toolbox classes {@code StringRequest} and {@code ImageRequest} for examples of
-extending {@code Request&lt;T&gt;}.</li>
+extending {@code Request<T>}.</li>
 
 <li>Implement the abstract methods {@code parseNetworkResponse()}
 and {@code deliverResponse()}, described in more detail below.</li>
@@ -74,7 +74,7 @@ protected Response&lt;T&gt; parseNetworkResponse(
 <ul>
 <li>{@code parseNetworkResponse()} takes as its parameter a {@code NetworkResponse}, which
 contains the response payload as a byte[], HTTP status code, and response headers.</li>
-<li>Your implementation must return a {@code Response&lt;T&gt;}, which contains your typed
+<li>Your implementation must return a {@code Response<T>}, which contains your typed
 response object and cache metadata or an error, such as in the case of a parse failure.</li>
 </ul>
 

@@ -140,7 +140,7 @@ page.title=Support Library Features
 </p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v4/} directory. The library does not contain user
+{@code <sdk>/extras/android/support/v4/} directory. The library does not contain user
 interface resources. To include it in your application project, follow the instructions for
 <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
 resources</a>.</p>
@@ -167,7 +167,7 @@ com.android.support:support-v4:21.0.0
 
 <p>
   After you download the Android Support Libraries, this library is located in the
-  {@code &lt;sdk&gt;/extras/android/support/multidex/} directory. The library does not contain
+  {@code <sdk>/extras/android/support/multidex/} directory. The library does not contain
   user interface resources. To include it in your application project, follow the instructions
   for
   <a href= "{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
@@ -228,7 +228,7 @@ com.android.support:multidex:1.0.0
 </ul>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/appcompat/} directory. The library contains user
+{@code <sdk>/extras/android/support/v7/appcompat/} directory. The library contains user
 interface resources. To include it in your application project, follow the instructions for
 <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries with
 resources</a>.</p>
@@ -249,7 +249,7 @@ on any app. These cards are useful for material design
 implementations, and are used extensively in layouts for TV apps.</p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/cardview/} directory. The library contains user interface
+{@code <sdk>/extras/android/support/v7/cardview/} directory. The library contains user interface
 resources. To include it in your application project, follow the instructions
 for <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding
 libraries with resources</a>.</p>
@@ -270,7 +270,7 @@ allows you to arrange user interface elements using a grid of rectangular cells.
 For detailed information about the v7 gridlayout library APIs, see the
 {@link android.support.v7.widget android.support.v7.widget} package in the API reference.</p>
 
-<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v7/gridlayout/}
+<p>This library is located in the {@code <sdk>/extras/android/support/v7/gridlayout/}
   directory . The library contains user
   interface resources. To include it in your application project, follow the instructions for
   <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries with
@@ -333,7 +333,7 @@ from an album cover, and use those colors to build a color-coordinated song
 title card.</p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/palette/} directory. The library does not contain
+{@code <sdk>/extras/android/support/v7/palette/} directory. The library does not contain
 user interface resources. To include it in your application project, follow the instructions for
 <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
 resources</a>.</p>
@@ -355,7 +355,7 @@ widget</a>, a view for efficiently displaying large data sets by providing a
 limited window of data items.</p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/recyclerview/} directory. The library contains
+{@code <sdk>/extras/android/support/v7/recyclerview/} directory. The library contains
 user interface resources. To include it in your application project, follow the instructions
 for <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding
 libraries with resources</a>.</p>
@@ -384,7 +384,7 @@ such as {@link android.support.v7.preference.CheckBoxPreference} and
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v7/preference} directory. For more information
+{@code <sdk>/extras/android/support/v7/preference} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -448,7 +448,7 @@ defaultConfig {
 </p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v13/} directory. The library does not contain user
+{@code <sdk>/extras/android/support/v13/} directory. The library does not contain user
 interface resources. To include it in your application project, follow the instructions for
 <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
 resources</a>.</p>
@@ -480,7 +480,7 @@ for preference interfaces such as
 </p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v14/} directory. The library does not contain user
+{@code <sdk>/extras/android/support/v14/} directory. The library does not contain user
 interface resources. To include it in your application project, follow the instructions for
 <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
 resources</a>.</p>
@@ -509,7 +509,7 @@ interface and classes, such as
 </p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v17/} directory. The library does not contain user
+{@code <sdk>/extras/android/support/v17/} directory. The library does not contain user
 interface resources. To include it in your application project, follow the instructions for
 <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
 resources</a>.</p>
@@ -551,7 +551,7 @@ com.android.support:preference-v17:23.0.0
 </ul>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/v17/leanback} directory. For more information
+{@code <sdk>/extras/android/support/v17/leanback} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -572,7 +572,7 @@ package provides APIs to support adding annotation metadata to your apps. </p>
 <p></p>
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/annotations} directory. For more information
+{@code <sdk>/extras/android/support/annotations} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -597,7 +597,7 @@ snackbars, and <a href="{@docRoot}design/building-blocks/tabs.html">tabs</a>.  <
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/design} directory. For more information
+{@code <sdk>/extras/android/support/design} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -625,7 +625,7 @@ Callback</a>.  </p>
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+{@code <sdk>/extras/android/support/customtabs} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -656,7 +656,7 @@ PercentRelativeLayout</a>.  </p>
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+{@code <sdk>/extras/android/support/customtabs} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>
@@ -686,7 +686,7 @@ RecommendationExtender</a>.  </p>
 
 
 <p>After you download the Android Support Libraries, this library is located in the
-{@code &lt;sdk&gt;/extras/android/support/customtabs} directory. For more information
+{@code <sdk>/extras/android/support/customtabs} directory. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
 with resources</a>. </p>

@@ -38,7 +38,7 @@ users and support devices that provide d-pad input in addition to or instead of 
 information about how to support d-pad input in your app, read <a href=
 "{@docRoot}guide/topics/ui/accessibility/apps.html#focus-nav">Enabling Focus Navigation</a>. If
 your app absolutely cannot function without a touchscreen, then instead use the <a href=
-"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> tag to
+"{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> tag to
 declare the required touchscreen type, ranging from {@code "android.hardware.faketouch"} for basic
 touch-style events to more advanced touch types such as {@code
 "android.hardware.touchscreen.multitouch.jazzhand"} for distinct input from multiple fingers.</p>
@@ -160,7 +160,7 @@ The value must be one of the following strings:
       <p class="note"><strong>Note:</strong> If some type of touch input is required for your app,
       you should instead use the
       <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
-      &lt;uses-feature>}</a> tag to declare the required touchscreen
+      <uses-feature>}</a> tag to declare the required touchscreen
       type, beginning with {@code "android.hardware.faketouch"} for basic touch-style events.</p>
    </td>
 </tr>

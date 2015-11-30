@@ -52,7 +52,7 @@ which allows you to use several recent platform APIs on older versions.</p>
 describes details about your app and 
 identifies which versions of Android it supports.   Specifically, the <code>minSdkVersion</code> 
 and <code>targetSdkVersion</code> attributes for the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk}</a> element
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> element
 identify the lowest API level with which your app is compatible and the highest API level against
 which you’ve designed and tested your app.</p>
 
@@ -128,7 +128,7 @@ naturally follow the latest look and feel of Android with each new release.</p>
 <p>To apply a theme to your entire app (all activities), add the <code>android:theme</code>
 attribute 
 to the <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
-&lt;application>}</a> element:</p>
+<application>}</a> element:</p>
 
 <pre>&lt;application android:theme="@style/CustomTheme"></pre>
 

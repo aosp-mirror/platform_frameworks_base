@@ -282,7 +282,7 @@ intent, it launches a picker that displays all matching document providers.</li>
 <li>Adding the category {@link android.content.Intent#CATEGORY_OPENABLE} to the
 intent filters the results to display only documents that can be opened, such as image files.</li>
 
-<li>The statement {@code intent.setType(&quot;image/*&quot;)} further filters to
+<li>The statement <code>intent.setType(&quot;image/*&quot;)</code> further filters to
 display only documents that have the image MIME data type.</li>
 </ul>
 
@@ -580,7 +580,7 @@ This restriction is important for security.</li>
 
 <li>The {@code android:enabled} attribute set to a boolean value defined in a resource
 file. The purpose of this attribute is to disable the provider on devices running Android 4.3 or lower.
-For example, {@code android:enabled=&quot;&#64;bool/atLeastKitKat&quot;}. In
+For example, <code>android:enabled=&quot;&#64;bool/atLeastKitKat&quot;</code>. In
 addition to including this attribute in the manifest, you need to do the following:
 <ul>
 <li>In your {@code bool.xml} resources file under {@code res/values/}, add

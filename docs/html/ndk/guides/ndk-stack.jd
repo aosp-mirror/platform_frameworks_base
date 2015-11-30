@@ -14,7 +14,7 @@ page.title=ndk-stack
 <p>The {@code ndk-stack} tool allows you to filter stack traces as they appear in the
 output of <a href="{@docRoot}tools/help/logcat.html">{@code adb logcat}</a>. It also replaces any
 address inside a shared library with the corresponding
-{@code &lt;source-file&gt;:&lt;line-number&gt;} values from your source code, making issues easier
+{@code <source-file>:<line-number>} values from your source code, making issues easier
 to pinpoint.</p>
 
 <p>For example, it translates something like:</p>
@@ -57,7 +57,7 @@ Stack frame #06  pc 0000d362  /system/lib/libc.so
 <h2>Usage</h2>
 <p>To use {@code ndk-stack}, you first need a directory containing symbolic versions of your app's
 shared libraries. If you use the NDK build system ({@code ndk-build}), these shared-library
-files reside under {@code $PROJECT_PATH/obj/local/&lt;abi&gt;}, where {@code &lt;abi&gt;} represents
+files reside under {@code $PROJECT_PATH/obj/local/<abi>}, where {@code <abi>} represents
 your device's ABI. By default, the system uses the {@code armeabi} ABI.</p>
 
 <p>There are two ways to use the tool. You can feed the logcat text as direct input to the program.

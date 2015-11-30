@@ -54,7 +54,7 @@ to include them when defining your {@code LOCAL_LDLIBS} variable. For more infor
 the C and C++ libraries, see <a href="#a3">Android API level 3</a>.</p>
 
 <p>The NDK often provides new headers and libraries for new Android releases. These files reside
-under {@code $NDK/platforms/android-&lt;level&gt;/&lt;abi&gt;/usr/include}. When the NDK does not
+under {@code $NDK/platforms/android-<level>/<abi>/usr/include}. When the NDK does not
 have a specific new group of headers and libraries for an Android API level, it means that
 an app targeting that level should use the most recently released NDK assets. For example,
 there was no new release of NDK headers or libraries for Android API levels 6 and 7. Therefore,
@@ -154,7 +154,7 @@ information on C++ library support, see
 
 <h4>Android-specific log support</h4>
 
-<p>{@code &lt;android/log.h&gt;} contains various definitions that an app can use to send log
+<p>{@code <android/log.h>} contains various definitions that an app can use to send log
 messages to the kernel from native code. For more information about these definitions, see the
 comments in {@code $NDK/platforms/android-3/arch-arm/usr/include/android/log.h}, where {@code $NDK}
 is the root of your NDK installation.</p>
@@ -214,7 +214,7 @@ in the OpenGL specification.</p>
 
 <p>Additionally, you must put a
 <a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> tag in your manifest file to indicate the version of
+<uses-feature>}</a> tag in your manifest file to indicate the version of
 <a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>
 that your application requires.</p>
 
@@ -234,7 +234,7 @@ program.</p>
 images and above.</p>
 
 <h4>OpenGL ES 2.0 library:</h4>
-<p>The standard OpenGL ES 2.0 headers {@code &lt;GLES2/gl2.h&gt;} and {@code &lt;GLES2/gl2ext.h&gt;}
+<p>The standard OpenGL ES 2.0 headers {@code <GLES2/gl2.h>} and {@code <GLES2/gl2ext.h>}
 contain the declarations needed for performing OpenGL ES 2.0 rendering calls from native code.
 These rendering calls provide the ability to use the GLSL language to define and use vertex and
 fragment shaders.</p>
@@ -255,9 +255,9 @@ supports the features it needs. For information on how to perform this query, se
 
 <p>Additionally, you must put a
 <a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> tag in your manifest file to indicate which version of OpenGL ES your
+<uses-feature>}</a> tag in your manifest file to indicate which version of OpenGL ES your
 application requires. For more information about the OpenGL ES settings for
-{@code &lt;uses-feature&gt;}, see
+{@code <uses-feature>}, see
 <a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>.</p>
 
 <p>The hello-gl2 sample application provies a basic example of how to use OpenGL ES 2.0 with the
@@ -296,7 +296,7 @@ characteristics.</li>
 <li>Call {@code AndroidBitmap_unlockPixels()} to unlock the buffer.</li>
 </ol>
 
-<p>To use {@code jnigraphics}, include the {@code &lt;bitmap.h&gt;} header in your source code, and
+<p>To use {@code jnigraphics}, include the {@code <bitmap.h>} header in your source code, and
 link against {@code jnigraphics} by including the following line in your
 <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file:</p>
 
@@ -368,19 +368,19 @@ platform via JNI.</p>
 
 <p>This release provides the following native headers:</p>
 <ul>
-<li>{@code &lt;native_activity.h&gt;}</li>
-<li>{@code &lt;looper.h&gt;}</li>
-<li>{@code &lt;input.h&gt;}</li>
-<li>{@code &lt;keycodes.h&gt;}</li>
-<li>{@code &lt;sensor.h&gt;}</li>
-<li>{@code &lt;rect.h&gt;}</li>
-<li>{@code &lt;window.h&gt;}</li>
-<li>{@code &lt;native_window.h&gt;}</li>
-<li>{@code &lt;native_window_jni.h&gt;}</li>
-<li>{@code &lt;configuration.h&gt;}</li>
-<li>{@code &lt;asset_manager.h&gt;}</li>
-<li>{@code &lt;storage_manager.h&gt;}</li>
-<li>{@code &lt;obb.h&gt;}</li>
+<li>{@code <native_activity.h>}</li>
+<li>{@code <looper.h>}</li>
+<li>{@code <input.h>}</li>
+<li>{@code <keycodes.h>}</li>
+<li>{@code <sensor.h>}</li>
+<li>{@code <rect.h>}</li>
+<li>{@code <window.h>}</li>
+<li>{@code <native_window.h>}</li>
+<li>{@code <native_window_jni.h>}</li>
+<li>{@code <configuration.h>}</li>
+<li>{@code <asset_manager.h>}</li>
+<li>{@code <storage_manager.h>}</li>
+<li>{@code <obb.h>}</li>
 </ul>
 
 <p>For more information about these headers, see the
@@ -403,8 +403,8 @@ images and above.</p>
 
 <h4>OpenMAX AL</h4>
 <p>Android native multimedia handling is based on Khronos Group OpenMAX AL 1.0.1 API.</p>
-<p>The standard OpenMAX AL headers {@code &lt;OMXAL/OpenMAXAL.h&gt;} and
-{@code &lt;OMXAL/OpenMAXAL_Platform.h&gt;} contain the declarations necessary for performing
+<p>The standard OpenMAX AL headers {@code <OMXAL/OpenMAXAL.h>} and
+{@code <OMXAL/OpenMAXAL_Platform.h>} contain the declarations necessary for performing
 multimedia output from the native side of Android.</p>
 
 <p>The NDK distribution of OpenMAX AL also provides Android-specific extensions. For information
@@ -448,9 +448,9 @@ supports the features it needs. For information on how to perform this query, se
 
 <p>Additionally, you must put a
 <a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> tag in your manifest file to indicate which version of OpenGL ES your
+<uses-feature>}</a> tag in your manifest file to indicate which version of OpenGL ES your
 application requires. For more information about the OpenGL ES settings for
-{@code &lt;uses-feature&gt;}, see
+{@code <uses-feature>}, see
 <a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>.</p>
 
 <p>The gles3jni sample application provides a basic example of how to use OpenGL ES 3.0 with the
@@ -487,9 +487,9 @@ supports the features it needs. For information on how to perform this query, se
 
 <p>Additionally, you must put a
 <a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> tag in your manifest file to indicate which version of OpenGL ES your
+<uses-feature>}</a> tag in your manifest file to indicate which version of OpenGL ES your
 application requires. For more information about the OpenGL ES settings for
-{@code &lt;uses-feature&gt;}, see
+{@code <uses-feature>}, see
 <a href="http://developer.android.com/guide/topics/graphics/opengl.html#manifest">OpenGL ES</a>.</p>
 
 <p>The gles3jni sample application provides a basic example of how to use OpenGL ES 3.1 with the

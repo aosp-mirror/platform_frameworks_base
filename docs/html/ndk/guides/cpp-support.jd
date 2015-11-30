@@ -188,7 +188,7 @@ LIBCXX_FORCE_REBUILD := true
 
 <h4>atomic support</h4>
 
-<p>If you include {@code &lt;atomic&gt;}, it's likely that you also need {@code libatomic}.
+<p>If you include {@code <atomic>}, it's likely that you also need {@code libatomic}.
 If you are using {@code ndk-build}, add the following line:</p>
 
 <pre>

@@ -78,7 +78,7 @@ to reclaim memory as soon as possible.</p>
 {@link android.graphics.Bitmap#recycle recycle()} only when you are sure that the
 bitmap is no longer being used. If you call {@link android.graphics.Bitmap#recycle recycle()}
 and later attempt to draw the bitmap, you will get the error:
-{@code &quot;Canvas: trying to use a recycled bitmap&quot;}.</p>
+<code>&quot;Canvas: trying to use a recycled bitmap&quot;</code>.</p>
 
 <p>The following code snippet gives an example of calling
 {@link android.graphics.Bitmap#recycle recycle()}. It uses reference counting

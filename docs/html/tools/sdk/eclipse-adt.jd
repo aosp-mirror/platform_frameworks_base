@@ -748,7 +748,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
         &gt; Rename</strong>.</li>
       <li>Updated XML Editor to improve double click handling.</li>
       <li>Added code completion improvements for custom views, theme references and class
-        references. For example, code completion in a {@code &lt;fragment android:name="" &gt;} tag
+        references. For example, code completion in a {@code <fragment android:name="" >} tag
         now suggests completion with a list of fragment classes. Similarly, code completion in the
         manifest now offers implementations suitable for the given tag.</li>
       <li>Updated the <strong>Project Import</strong> dialog so that it shows a table for all
@@ -1771,9 +1771,9 @@ classes (<a href="http://tools.android.com/recent/fragmentsupport">more info</a>
     opened files as well as on device size and orientation changes to
     ensure that large layouts are always fully visible unless you
     manually zoom in.</li>
-    <li>You can drop in an {@code &lt;include&gt;} element from the palette, which will pop up
+    <li>You can drop in an {@code <include>} element from the palette, which will pop up
     a layout chooser. When you select the layout to include, it is added with an {@code
-&lt;include&gt;}. Similarly, dropping images or image buttons will pop up image
+<include>}. Similarly, dropping images or image buttons will pop up image
     resource choosers (<a
 href="http://tools.android.com/recent/includetagdropsupport">more info</a>).</li>
     <li>The configuration chooser now applies the "Render Target" and
@@ -1796,7 +1796,7 @@ fields to change the focus.</li>
 <dd>
 <ul>
   <li>Code completion has been significantly improved. It now works
-  with {@code &lt;style&gt;} elements, completes dimensional units,
+  with {@code <style>} elements, completes dimensional units,
   sorts resource paths in values based on the attribute name, and more. There are also many fixes to
 handle text replacement (<a
 href="http://tools.android.com/recent/xmlcodecompletionimprovements">more info</a>).</li>

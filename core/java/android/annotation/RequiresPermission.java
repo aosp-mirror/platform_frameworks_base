@@ -29,26 +29,26 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <p/>
  * Example of requiring a single permission:
  * <pre>{@code
- *   &#64;RequiresPermission(Manifest.permission.SET_WALLPAPER)
+ *   {@literal @}RequiresPermission(Manifest.permission.SET_WALLPAPER)
  *   public abstract void setWallpaper(Bitmap bitmap) throws IOException;
  *
- *   &#64;RequiresPermission(ACCESS_COARSE_LOCATION)
+ *   {@literal @}RequiresPermission(ACCESS_COARSE_LOCATION)
  *   public abstract Location getLastKnownLocation(String provider);
  * }</pre>
  * Example of requiring at least one permission from a set:
  * <pre>{@code
- *   &#64;RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+ *   {@literal @}RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
  *   public abstract Location getLastKnownLocation(String provider);
  * }</pre>
  * Example of requiring multiple permissions:
  * <pre>{@code
- *   &#64;RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+ *   {@literal @}RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
  *   public abstract Location getLastKnownLocation(String provider);
  * }</pre>
  * Example of requiring separate read and write permissions for a content provider:
  * <pre>{@code
- *   &#64;RequiresPermission.Read(&#64;RequiresPermission(READ_HISTORY_BOOKMARKS))
- *   &#64;RequiresPermission.Write(&#64;RequiresPermission(WRITE_HISTORY_BOOKMARKS))
+ *   {@literal @}RequiresPermission.Read(@RequiresPermission(READ_HISTORY_BOOKMARKS))
+ *   {@literal @}RequiresPermission.Write(@RequiresPermission(WRITE_HISTORY_BOOKMARKS))
  *   public static final Uri BOOKMARKS_URI = Uri.parse("content://browser/bookmarks");
  * }</pre>
  *

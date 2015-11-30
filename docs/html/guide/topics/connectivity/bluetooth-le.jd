@@ -186,7 +186,7 @@ if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) 
 
 <p>Before your application can communicate over BLE, you need
 to verify that BLE is supported on the device, and if so, ensure that it is enabled.
-Note that this check is only necessary if {@code &lt;uses-feature.../&gt;}
+Note that this check is only necessary if {@code <uses-feature.../>}
 is set to false.</p>
 
 <p>If BLE is not supported, then you should gracefully disable any

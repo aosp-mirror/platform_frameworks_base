@@ -68,7 +68,7 @@ client-side code in your Android application.</p>
 <h2 id="AddingWebView">Adding a WebView to Your Application</h2>
 
 <p>To add a {@link android.webkit.WebView} to your Application, simply include the {@code
-&lt;WebView&gt;} element in your activity layout. For example, here's a layout file in which the
+<WebView>} element in your activity layout. For example, here's a layout file in which the
 {@link android.webkit.WebView} fills the screen:</p>
 
 <pre>
@@ -171,7 +171,7 @@ public class WebAppInterface {
 <p class="caution"><strong>Caution:</strong> If you've set your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
 to 17 or higher, <strong>you
-must add the {@code &#64;JavascriptInterface} annotation</strong> to any method that you want
+must add the <code>&#64;JavascriptInterface</code> annotation</strong> to any method that you want
 available to your JavaScript (the method must also be public). If you do not provide the
 annotation, the method is not accessible by your web page when running on Android 4.2 or
 higher.</p>

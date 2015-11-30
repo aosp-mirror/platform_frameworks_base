@@ -131,7 +131,7 @@ trainingnavtop=true
 &lt;/manifest&gt;
 </pre>
 
-<p class="note"><strong>Note:</strong> The {@code &lt;service&gt;} element in
+<p class="note"><strong>Note:</strong> The {@code <service>} element in
   the manifest doesn't need to include an intent filter, because your main
   activity creates an explicit intent by specifying the name of the class to use
   for the intent.</p>

@@ -9,8 +9,8 @@ parent.link=index.html
   <ul>
     <li>Resources can be referenced from code using integers from {@code R.java}, such as
 {@code R.drawable.myimage}</li>
-    <li>Resources can be referenced from resources using a special XML syntax, such as {@code
-&#64;drawable/myimage}</li>
+    <li>Resources can be referenced from resources using a special XML syntax, such as
+<code>@drawable/myimage</code></li>
     <li>You can also access your app resources with methods in
 {@link android.content.res.Resources}</li>
   </ul>
@@ -129,10 +129,10 @@ android.content.res.Resources#openRawResource(int) openRawResource()}.</p>
 </pre>
 
 <ul>
-  <li><em>{@code &lt;package_name&gt;}</em> is the name of the package in which the resource is located (not
+  <li><em>{@code <package_name>}</em> is the name of the package in which the resource is located (not
 required when referencing resources from your own package).</li>
-  <li><em>{@code &lt;resource_type&gt;}</em> is the {@code R} subclass for the resource type.</li>
-  <li><em>{@code &lt;resource_name&gt;}</em> is either the resource filename
+  <li><em>{@code <resource_type>}</em> is the {@code R} subclass for the resource type.</li>
+  <li><em>{@code <resource_name>}</em> is either the resource filename
 without the extension or the {@code android:name} attribute value in the XML element (for simple
 values).</li>
 </ul>
@@ -210,11 +210,11 @@ a <a href="string-resource.html">string resource</a> for the button text:</p>
 </pre>
 
 <ul>
-  <li>{@code &lt;package_name&gt;} is the name of the package in which the resource is located (not
+  <li>{@code <package_name>} is the name of the package in which the resource is located (not
 required when referencing resources from the same package)</li>
-  <li>{@code &lt;resource_type&gt;} is the
+  <li>{@code <resource_type>} is the
 {@code R} subclass for the resource type</li>
-  <li>{@code &lt;resource_name&gt;} is either the resource filename
+  <li>{@code <resource_name>} is either the resource filename
 without the extension or the {@code android:name} attribute value in the XML element (for simple
 values).</li>
 </ul>
@@ -295,7 +295,7 @@ current theme, instead of supplying a hard-coded value. Referencing a style attr
 essentially says, "use the style that is defined by this attribute, in the current theme."</p>
 
 <p>To reference a style attribute, the name syntax is almost identical to the normal resource
-format, but instead of the at-symbol ({@code &#64;}), use a question-mark ({@code ?}), and the
+format, but instead of the at-symbol (<code>&#64;</code>), use a question-mark ({@code ?}), and the
 resource type portion is optional. For instance:</p>
 
 <pre class="classic">

@@ -77,11 +77,11 @@ $ ndk-build clean
   <dt>{@code NDK_HOST_32BIT=1}</dt>
   <dd>Always use the toolchain in 32-bit mode (see <a href="#6432">64-bit and 32-bit
   Toolchains</a>).</dd>
-  <dt>{@code NDK_APPLICATION_MK=&lt;file&gt;}</dt>
+  <dt>{@code NDK_APPLICATION_MK=<file>}</dt>
   <dd>Build, using a specific <code>Application.mk</code> file pointed to by the
   {@code NDK_APPLICATION_MK} variable.</dd>
-  <dt>{@code -C &lt;project&gt;}</dt>
-  <dd>Build the native code for the project path located at {@code &lt;project&gt;}. Useful if you
+  <dt>{@code -C <project>}</dt>
+  <dd>Build the native code for the project path located at {@code <project>}. Useful if you
   don't want to {@code cd} to it in your terminal.</dd>
 </dl>
 
@@ -159,8 +159,8 @@ pick the native debug files generated with {@code NDK_DEBUG=1}.
 
 <h2 id="6432">64-Bit and 32-Bit Toolchains</h2>
 <p>Some toolchains come with both 64-bit and 32-bit versions. For example,
-directories {@code &lt;ndk&gt;/toolchain/&lt;name&gt;/prebuilt/} and
-{@code &lt;ndk&gt;/prebuilt/} may contain both {@code linux-x86} and
+directories {@code <ndk>/toolchain/<name>/prebuilt/} and
+{@code <ndk>/prebuilt/} may contain both {@code linux-x86} and
 {@code linux-x86_64} folders for Linux tools in 32-bit and 64-bit modes,
 respectively. The ndk-build script automatically chooses a 64-bit version of
 the toolchain if the host OS supports it. You can force the use of a 32-bit
@@ -182,7 +182,7 @@ $ export GNUMAKE=/usr/local/bin/gmake
 $ ndk-build
 </pre>
 
-<p>You can override other host prebuilt tools in {@code $NDK/prebuilt/&lt;OS&gt;/bin/}
+<p>You can override other host prebuilt tools in {@code $NDK/prebuilt/<OS>/bin/}
 with the following environment variables: </p>
 
 <pre class="no-pretty-print">

@@ -119,7 +119,7 @@ create a UI selector that matches a specific visible property. </p>
 <ol>
   <li>Launch the target app on a physical device.</li>
   <li>Connect the device to your development machine.</li>
-  <li>Open a terminal window and navigate to the {@code &lt;android-sdk&gt;/tools/} directory.</li>
+  <li>Open a terminal window and navigate to the {@code <android-sdk>/tools/} directory.</li>
   <li>Run the tool with this command:
 <pre>$ uiautomatorviewer</pre>
   </li>

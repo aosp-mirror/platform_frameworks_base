@@ -45,10 +45,10 @@ component belongs to, you can do so in the manifest file.</p>
 
 <p>The manifest entry for each type of component element&mdash;<a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
-&lt;service&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
-&lt;receiver&gt;}</a>, and <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
-&lt;provider&gt;}</a>&mdash;supports an {@code android:process} attribute that can specify a
+<activity>}</a>, <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+<service>}</a>, <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+<receiver>}</a>, and <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+<provider>}</a>&mdash;supports an {@code android:process} attribute that can specify a
 process in which that component should run. You can set this attribute so that each component runs
 in its own process or so that some components share a process while others do not.  You can also set
 {@code android:process} so that components of different applications run in the same
@@ -56,7 +56,7 @@ process&mdash;provided that the applications share the same Linux user ID and ar
 same certificates.</p>
 
 <p>The <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
-&lt;application&gt;}</a> element also supports an {@code android:process} attribute, to set a
+<application>}</a> element also supports an {@code android:process} attribute, to set a
 default value that applies to all components.</p>
 
 <p>Android might decide to shut down a process at some point, when memory is low and required by

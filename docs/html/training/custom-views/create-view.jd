@@ -84,7 +84,7 @@ enable this behavior in your custom view, you must:
 
 <ul>
     <li>Define custom attributes for your view in a {@code
-        &lt;declare-styleable&gt;
+        <declare-styleable>
         } resource element
     </li>
     <li>Specify values for the attributes in your XML layout</li>
@@ -97,7 +97,7 @@ enable this behavior in your custom view, you must:
     retrieving and applying the values at runtime.</p>
 
 <p>To define custom attributes, add {@code
-    &lt;declare-styleable&gt;
+    <declare-styleable>
     } resources to your project. It's customary to put these resources into a {@code
     res/values/attrs.xml} file. Here's
     an example of an {@code attrs.xml} file:
@@ -179,7 +179,7 @@ enable this behavior in your custom view, you must:
 
         <p>The Android resource compiler does a lot of work for you to make calling {@link
             android.content.res.Resources.Theme#obtainStyledAttributes obtainStyledAttributes()}
-            easier. For each {@code &lt;declare-styleable&gt;}
+            easier. For each {@code <declare-styleable>}
             resource in the res directory, the generated R.java defines both an array of attribute
             ids and a set of
             constants that define the index for each attribute in the array. You use the predefined

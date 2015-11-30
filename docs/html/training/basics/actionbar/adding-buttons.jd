@@ -45,7 +45,7 @@ href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. To
 actions to the action bar, create a new XML file in your project's
 {@code res/menu/} directory.</p>
 
-<p>Add an {@code &lt;item>} element for each item you want to include in the action bar.
+<p>Add an {@code <item>} element for each item you want to include in the action bar.
 For example:</p>
 
 <p class="code-caption">res/menu/main_activity_actions.xml</p>
@@ -77,9 +77,9 @@ Settings action should always appear in the overflow. (By default, all actions a
 overflow, but it's good practice to explicitly declare your design intentions for each action.)
 
 <p>The {@code icon} attribute requires a resource ID for an
-image. The name that follows {@code &#64;drawable/} must be the name of a bitmap image you've
+image. The name that follows {@code @drawable/} must be the name of a bitmap image you've
 saved in your project's {@code res/drawable/} directory. For example,
-{@code "&#64;drawable/ic_action_search"} refers to {@code ic_action_search.png}.
+{@code "@drawable/ic_action_search"} refers to {@code ic_action_search.png}.
 Likewise, the {@code title} attribute uses a string resource that's defined by an XML
 file in your project's {@code res/values/} directory, as discussed in <a
 href="{@docRoot}training/basics/firstapp/building-ui.html#Strings">Building a Simple User
@@ -139,7 +139,7 @@ the system calls your activity's {@link android.app.Activity#onOptionsItemSelect
 onOptionsItemSelected()} callback method. In your implementation of this method,
 call {@link android.view.MenuItem#getItemId getItemId()} on the given {@link android.view.MenuItem} to
 determine which item was pressed&mdash;the returned ID matches the value you declared in the
-corresponding {@code &lt;item>} element's {@code android:id} attribute.</p>
+corresponding {@code <item>} element's {@code android:id} attribute.</p>
 
 <pre>
 &#64;Override

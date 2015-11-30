@@ -133,8 +133,8 @@ bloqueio ou no aplicativo.
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>No Windows, talvez seja necessário executar {@code telnet 127.0.0.1 &lt;emulator-id&gt;} seguido de 
-{@code finger touch &lt;finger_id&gt;}.
+<p>No Windows, talvez seja necessário executar {@code telnet 127.0.0.1 <emulator-id>} seguido de
+{@code finger touch <finger_id>}.
 </p>
 </li>
 </ol>
@@ -192,7 +192,7 @@ manifesto.</p>
 </pre>
 
 <p>Para cada atividade que quiser expor ao {@code ChooserTargetService}, adicione um elemento 
-{@code &lt;meta-data&gt;} com o nome 
+{@code <meta-data>} com o nome
 {@code "android.service.chooser.chooser_target_service"} no manifesto do aplicativo.
 </p>
 

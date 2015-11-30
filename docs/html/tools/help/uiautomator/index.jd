@@ -46,14 +46,14 @@ adb shell uiautomator runtest &lt;JARS&gt; -c &lt;CLASSES&gt; [options]
 
 <tr>
 <td rowspan="7"><code>runtest</code></td>
-<td><nobr>{@code &lt;JARS&gt;}</nobr></td>
-<td><strong>Required</strong>. The {@code &lt;JARS&gt;} argument is the name of one or more JAR files that you deployed to the target device which contain your uiautomator testcases. You can list more than one JAR file by using a space as a separator.</td>
+<td><nobr>{@code <JARS>}</nobr></td>
+<td><strong>Required</strong>. The {@code <JARS>} argument is the name of one or more JAR files that you deployed to the target device which contain your uiautomator testcases. You can list more than one JAR file by using a space as a separator.</td>
 </tr>
 
 <tr>
 <td><nobr><code>-c &lt;CLASSES&gt; </code></nobr></td>
-<td><strong>Required (API 17 or lower)</strong>.The {@code &lt;CLASSES&gt;} 
-argument is a list of test classes or test methods in {@code &lt;JARS&gt;} to run. 
+<td><strong>Required (API 17 or lower)</strong>.The {@code <CLASSES>}
+argument is a list of test classes or test methods in {@code <JARS>} to run.
 <p>Each class or method must be fully 
 qualified with the package name, in one of these formats:
 <ul>
@@ -62,7 +62,7 @@ qualified with the package name, in one of these formats:
 </ul>
 You can list multiple classes or methods by using a space as a separator.</p>
 <p class="note"><strong>Note:</strong>This argument is not required for API 18 
-and higher. If not specified, all test cases in {@code &lt;JARS&gt;} will be run.
+and higher. If not specified, all test cases in {@code <JARS>} will be run.
 </p>
 </td>
 </tr>
@@ -100,7 +100,7 @@ and higher. If not specified, all test cases in {@code &lt;JARS&gt;} will be run
 </table>
 
 <h2 id="api">uiautomator API</h2>
-<p>The {@code uiautomator} API is bundled in the {@code uiautomator.jar} file under the {@code &lt;android-sdk&gt;/platforms/} directory.  The API includes these key classes, interfaces, and exceptions that allow you to capture and manipulate UI components on the target app:</p>
+<p>The {@code uiautomator} API is bundled in the {@code uiautomator.jar} file under the {@code <android-sdk>/platforms/} directory.  The API includes these key classes, interfaces, and exceptions that allow you to capture and manipulate UI components on the target app:</p>
 
 <h3 id="classes">Classes</h3>
 <table>

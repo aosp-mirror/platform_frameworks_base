@@ -257,7 +257,7 @@ android.widget.ListView}, and {@link android.widget.StackView} that are backed b
 such as from a content provider.</p>
 
 <p>The {@link android.appwidget.AppWidgetProviderInfo} class (defined in XML with an {@code
-&lt;appwidget-provider&gt;} element) also supports two new fields: {@link
+<appwidget-provider>} element) also supports two new fields: {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} and {@link
 android.appwidget.AppWidgetProviderInfo#previewImage}. The {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field lets you specify the view ID of the
@@ -535,9 +535,9 @@ see <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search
 
 <p>You can now enable the OpenGL renderer for your application by setting {@code
 android:hardwareAccelerated="true"} in your manifest element's <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element or for individual <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 elements.</p>
 
 <p>This flag helps applications by making them draw faster. This results in smoother animations,
@@ -683,7 +683,7 @@ whenever a key is combined with Ctrl key.  When creating an <a
 href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a>, you can register keyboard
 shortcuts by setting either the {@code android:alphabeticShortcut} or {@code
 android:numericShortcut} attribute for each <a
-href="{@docRoot}guide/topics/resources/menu-resource.html#item-element">{@code &lt;item&gt;}</a>
+href="{@docRoot}guide/topics/resources/menu-resource.html#item-element">{@code <item>}</a>
 element (or with {@link android.view.MenuItem#setShortcut setShortcut()}).</li>
 
 <li>Android 3.0 includes a new "virtual keyboard" device with the id {@link
@@ -715,9 +715,9 @@ specific view groups and across windows.</p>
 <li>The {@link android.R.attr#splitMotionEvents android:splitMotionEvents} attribute for view groups
 allows you to disable split touch events that occur between child views in a layout. For example:
 <pre>
-&lt;LinearLayout android:splitMotionEvents="false" ... >
+&lt;LinearLayout android:splitMotionEvents="false" ... &gt;
     ...
-&lt;/LinearLayout>
+&lt;/LinearLayout&gt;
 </pre>
 <p>This way, child views in the linear layout cannot split touch events&mdash;only one view can
 receive touch events at a time.</p>
@@ -727,14 +727,14 @@ receive touch events at a time.</p>
 allows you to disable split touch events across windows, by applying it to a theme for the activity
 or entire application. For example:
 <pre>
-&lt;style name="NoSplitMotionEvents" parent="android:Theme.Holo">
-    &lt;item name="android:windowEnableSplitTouch">false&lt;/item>
+&lt;style name="NoSplitMotionEvents" parent="android:Theme.Holo"&gt;
+    &lt;item name="android:windowEnableSplitTouch">false&lt;/item&gt;
     ...
-&lt;/style>
+&lt;/style&gt;
 </pre>
 <p>When this theme is applied to an <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> or <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>,
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> or <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>,
 only touch events within the current activity window are accepted. For example, by disabling split
 touch events across windows, the system bar cannot receive touch events at the same time as the
 activity. This does <em>not</em> affect whether views inside the activity can split touch
@@ -794,7 +794,7 @@ specification, the Browser allows web applications to access audio, image and vi
 capabilities of the device. For example, the following HTML provides an input for the user to
 capture a photo to upload:</p>
 <pre>
-&lt;input type="file" accept="image/*;capture=camera" />
+&lt;input type="file" accept="image/*;capture=camera" /&gt;
 </pre>
 <p>Or by excluding the {@code capture=camera} parameter, the user can choose to either capture a
 new image with the camera or select one from the device (such as from the Gallery application).</p>
@@ -850,7 +850,7 @@ parse mode is also compatible with the {@link org.json}'s default parser.</p>
 <h3>New feature constants</h3>
 
 <p>The <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 manfest element should be used to inform external entities (such as Google Play) of the set of
 hardware and software features on which your application depends. In this release, Android adds the
 following new constants that applications can declare with this element:</p>
@@ -868,14 +868,14 @@ impossible on faketouch devices (and multitouch gestures are definitely not poss
 <em>not</em> want your application filtered from devices with an emulated touchscreen, you
 should declare {@link
 android.content.pm.PackageManager#FEATURE_FAKETOUCH "android.hardware.faketouch"} with a <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element. This way, your application will be available to the greatest number of device types,
 including those that provide only an emulated touchscreen input.</p>
     <p>All devices that include a touchscreen also support {@link
 android.content.pm.PackageManager#FEATURE_FAKETOUCH "android.hardware.faketouch"}, because
 touchscreen capabilities are a superset of faketouch capabilities. Thus, unless you actually require
 a touchscreen, you should add a <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element for faketouch.</p>
   </li>
 </ul>
@@ -889,14 +889,14 @@ element for faketouch.</p>
   <li>{@link android.Manifest.permission#BIND_REMOTEVIEWS
 "android.permission.BIND_REMOTEVIEWS"}
   <p>This must be declared as a required permission in the <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> manifest
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> manifest
 element for an implementation of {@link android.widget.RemoteViewsService}. For example, when
 creating an App Widget that uses {@link android.widget.RemoteViewsService} to populate a
 collection view, the manifest entry may look like this:</p>
 <pre>
 &lt;service android:name=".widget.WidgetService"
     android:exported="false"
-    android:permission="android.permission.BIND_REMOTEVIEWS" />
+    android:permission="android.permission.BIND_REMOTEVIEWS" /&gt;
 </pre>
 </ul>
 

@@ -184,9 +184,9 @@ href="#Style">Styling the Action Bar</a>.</p>
 <p>By default, the system uses your application icon in the action bar, as specified by the <a
 href="{@docRoot}guide/topics/manifest/application-element.html#icon">{@code icon}</a>
 attribute in the <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
-&lt;application&gt;}</a> or <a
+<application>}</a> or <a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> element. However, if you also specify the <a
+<activity>}</a> element. However, if you also specify the <a
 href="{@docRoot}guide/topics/manifest/application-element.html#logo">{@code logo}</a>
 attribute, then the action bar uses the logo image instead of the icon.</p>
 
@@ -249,7 +249,7 @@ public boolean onCreateOptionsMenu(Menu menu) {
 
 <p>To request that an item appear directly in the action bar
 as an action button, include {@code
-showAsAction="ifRoom"} in the {@code &lt;item&gt;} tag. For example:</p>
+showAsAction="ifRoom"} in the {@code <item>} tag. For example:</p>
 
 <pre>
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"
@@ -269,7 +269,7 @@ overflow.</p>
 <div class="note" id="XmlAttributes">
 <p><strong>Using XML attributes from the support library</strong></p>
 Notice that the {@code showAsAction} attribute above uses a custom namespace defined in the
-{@code &lt;menu>} tag. This is necessary when using any XML attributes defined by the support
+{@code <menu>} tag. This is necessary when using any XML attributes defined by the support
 library, because these attributes do not exist in the Android framework on older devices.
 So you must use your own namespace as a prefix for all attributes defined by the support library.
 </p>
@@ -319,7 +319,7 @@ must always be visible to provide access to a critical feature.</p>
 <p>When the user presses an action, the system calls your activity's {@link
 android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} method. Using the
 {@link android.view.MenuItem} passed to this method, you can identify the action by calling {@link
-android.view.MenuItem#getItemId()}. This returns the unique ID provided by the {@code &lt;item&gt;}
+android.view.MenuItem#getItemId()}. This returns the unique ID provided by the {@code <item>}
 tag's {@code id} attribute so you can perform the appropriate action. For example:</p>
 
 <pre>
@@ -373,15 +373,15 @@ items on a narrow screen, while leaving room for navigation and title elements a
 <p>To enable split action bar when using the support library, you must do two things:</p>
 <ol>
   <li>Add {@code uiOptions="splitActionBarWhenNarrow"} to each
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element or to the
-<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element. This attribute is understood only by API level 14 and higher (it is ignored
 by older versions).</li>
   <li>To support older versions, add a <a
-  href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a>
+  href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
   element as a child of each
-  <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+  <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
   element that declares the same value for {@code "android.support.UI_OPTIONS"}.</li>
 </ol>
 
@@ -460,10 +460,10 @@ correct action when the user presses the <em>Up</em> button.</p>
     <p>Beginning in Android 4.1 (API level 16), you can declare the parent with the <a href=
 "{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code parentActivityName}</a>
 attribute in the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> element.</p>
+<activity>}</a> element.</p>
     <p>To support older devices with the support library, also
 include a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
-&lt;meta-data&gt;}</a> element that specifies
+<meta-data>}</a> element that specifies
 the parent activity as the value for {@code android.support.PARENT_ACTIVITY}. For example:</p>
 <pre>
 &lt;application ... >
@@ -681,7 +681,7 @@ unlike an action view, an action provider takes control of all the action's beha
 and an action provider can display a submenu when pressed.</p>
 
 <p>To declare an action provider, supply the {@code actionViewClass} attribute in the
-menu {@code &lt;item>} tag with a fully-qualified class name for an
+menu {@code <item>} tag with a fully-qualified class name for an
 {@link android.support.v4.view.ActionProvider}.</p>
 
 <p>You can build your own action provider by extending the {@link
@@ -709,7 +709,7 @@ onOptionsItemSelected()} when the user opens the list or selects one of the subm
 <h3 id="ShareActionProvider">Using the ShareActionProvider</h3>
 
 <p>To add a "share" action with {@link android.support.v7.widget.ShareActionProvider},
-define the {@code actionProviderClass} for an {@code &lt;item&gt;} tag with
+define the {@code actionProviderClass} for an {@code <item>} tag with
 the {@link android.support.v7.widget.ShareActionProvider} class. For example:</p>
 
 <pre>
@@ -1489,7 +1489,7 @@ the system uses the style property from the support library. The effect for each
 
 
 <p class="caution"><strong>Caution:</strong> Be certain that each theme and style declares a parent
-theme in the {@code &lt;style&gt;} tag, from which it inherits all styles not explicitly declared
+theme in the {@code <style>} tag, from which it inherits all styles not explicitly declared
 by your theme. When modifying the action bar, using a parent theme is important so that you can
 simply override the action bar styles you want to change without re-implementing the styles you
 want to leave alone (such as text size or padding in action items).</p>

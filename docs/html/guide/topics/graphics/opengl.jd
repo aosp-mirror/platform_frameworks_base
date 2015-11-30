@@ -242,7 +242,7 @@ shown below.</li>
   <li><strong>Texture compression requirements</strong> - If your application uses texture
 compression formats, you must declare the formats your application supports in your manifest file
 using <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a>. For more information about available texture compression
+<supports-gl-texture>}</a>. For more information about available texture compression
 formats, see <a href="#textures">Texture compression support</a>.
 
 <p>Declaring texture compression requirements in your manifest hides your application from users
@@ -250,7 +250,7 @@ with devices that do not support at least one of your declared compression types
 information on how Google Play filtering works for texture compressions, see the <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html#market-texture-filtering">
 Google Play and texture compression filtering</a> section of the {@code
-&lt;supports-gl-texture&gt;} documentation.</p>
+<supports-gl-texture>} documentation.</p>
   </li>
 </ul>
 
@@ -503,9 +503,9 @@ more information on checking for availability of the 3.0 API, see
 reducing memory requirements and making more efficient use of memory bandwidth. The Android
 framework provides support for the ETC1 compression format as a standard feature, including a {@link
 android.opengl.ETC1Util} utility class and the {@code etc1tool} compression tool (located in the
-Android SDK at {@code &lt;sdk&gt;/tools/}). For an example of an Android application that uses
+Android SDK at {@code <sdk>/tools/}). For an example of an Android application that uses
 texture compression, see the {@code CompressedTextureActivity} code sample in Android SDK
-({@code &lt;sdk&gt;/samples/&lt;version&gt;/ApiDemos/src/com/example/android/apis/graphics/}).</p>
+({@code <sdk>/samples/<version>/ApiDemos/src/com/example/android/apis/graphics/}).</p>
 
 <p class="caution"><strong>Caution:</strong> The ETC1 format is supported by most Android devices,
 but it not guaranteed to be available. To check if the ETC1 format is supported on a device, call

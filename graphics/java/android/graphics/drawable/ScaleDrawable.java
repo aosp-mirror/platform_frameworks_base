@@ -40,7 +40,7 @@ import java.io.IOException;
  * placed in its overall container.  Most often used to implement things like
  * progress bars.
  *
- * <p>It can be defined in an XML file with the <code>&lt;scale></code> element. For more
+ * <p>It can be defined in an XML file with the <code>&lt;scale&gt;</code> element. For more
  * information, see the guide to <a
  * href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.</p>
  *
