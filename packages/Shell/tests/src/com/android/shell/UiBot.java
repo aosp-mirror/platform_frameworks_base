@@ -42,32 +42,49 @@ final class UiBot {
     }
 
     /**
-     * Opens the system notification and clicks a given notification.
+     * Opens the system notification and gets a given notification.
      *
      * @param text Notificaton's text as displayed by the UI.
+     * @return notification object.
      */
-    public void clickOnNotification(String text) {
+    public UiObject getNotification(String text) {
         boolean opened = mDevice.openNotification();
         Log.v(TAG, "openNotification(): " + opened);
         boolean gotIt = mDevice.wait(Until.hasObject(By.pkg(SYSTEMUI_PACKAGED)), mTimeout);
         assertTrue("could not get system ui (" + SYSTEMUI_PACKAGED + ")", gotIt);
 
-        gotIt = mDevice.wait(Until.hasObject(By.text(text)), mTimeout);
-        assertTrue("object with text '(" + text + "') not visible yet", gotIt);
+        return getObject(text);
+    }
 
-        UiObject notification = getVisibleObject(text);
-
+    /**
+     * Opens the system notification and clicks a given notification.
+     *
+     * @param text Notificaton's text as displayed by the UI.
+     */
+    public void clickOnNotification(String text) {
+        UiObject notification = getNotification(text);
         click(notification, "bug report notification");
     }
 
     /**
-     * Gets an object which is guaranteed to be present in the current UI.\
+     * Gets an object that might not yet be available in current UI.
+     *
+     * @param text Object's text as displayed by the UI.
+     */
+    public UiObject getObject(String text) {
+        boolean gotIt = mDevice.wait(Until.hasObject(By.text(text)), mTimeout);
+        assertTrue("object with text '(" + text + "') not visible yet", gotIt);
+        return getVisibleObject(text);
+    }
+
+    /**
+     * Gets an object which is guaranteed to be present in the current UI.
      *
      * @param text Object's text as displayed by the UI.
      */
     public UiObject getVisibleObject(String text) {
         UiObject uiObject = mDevice.findObject(new UiSelector().text(text));
-        assertTrue("could not find object with text '(" + text + "')", uiObject.exists());
+        assertTrue("could not find object with text '" + text + "'", uiObject.exists());
         return uiObject;
     }
 

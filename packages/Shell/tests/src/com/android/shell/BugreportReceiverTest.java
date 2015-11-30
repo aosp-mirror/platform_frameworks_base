@@ -19,7 +19,12 @@ package com.android.shell;
 import static android.test.MoreAsserts.assertContainsRegex;
 import static com.android.shell.ActionSendMultipleConsumerActivity.UI_NAME;
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
+import static com.android.shell.BugreportProgressService.EXTRA_MAX;
+import static com.android.shell.BugreportProgressService.EXTRA_NAME;
+import static com.android.shell.BugreportProgressService.EXTRA_PID;
 import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
+import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
+import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTED;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -96,6 +101,33 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         cancelExistingNotifications();
     }
 
+    public void testFullWorkflow() throws Exception {
+        final String name = "BUG, Y U NO REPORT?";
+        // TODO: call method to remove property instead
+        SystemProperties.set("dumpstate.42.progress", "-1");
+
+        Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
+        intent.putExtra(EXTRA_PID, 42);
+        intent.putExtra(EXTRA_NAME, name);
+        intent.putExtra(EXTRA_MAX, 1000);
+        mContext.sendBroadcast(intent);
+
+        assertProgressNotification(name, "0.00%");
+
+        SystemProperties.set("dumpstate.42.progress", "108");
+        assertProgressNotification(name, "10.80%");
+
+        SystemProperties.set("dumpstate.42.progress", "500");
+        assertProgressNotification(name, "50.00%");
+
+        createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
+        createTextFile(SCREENSHOT_PATH, SCREENSHOT_CONTENT);
+        Bundle extras = sendBugreportFinishedIntent(42, PLAIN_TEXT_PATH, SCREENSHOT_PATH);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
+
+        // TODO: assert service is down
+    }
+
     public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
         createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
         createTextFile(SCREENSHOT_PATH, SCREENSHOT_CONTENT);
@@ -131,13 +163,32 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
     }
 
+    private void assertProgressNotification(String name, String percent) {
+        // TODO: it current looks for 3 distinct objects, without taking advantage of their
+        // relationship.
+        String title = mContext.getString(R.string.bugreport_in_progress_title);
+        Log.v(TAG, "Looking for progress notification title: '" + title+ "'");
+        mUiBot.getNotification(title);
+        Log.v(TAG, "Looking for progress notification details: '" + name + "-" + percent + "'");
+        mUiBot.getObject(name);
+        mUiBot.getObject(percent);
+    }
+
     /**
      * Sends a "bugreport finished" intent and waits for the result.
      *
      * @return extras sent to the bugreport finished consumer.
      */
     private Bundle sendBugreportFinishedIntent(String bugreportPath, String screenshotPath) {
-        Intent intent = new Intent("android.intent.action.BUGREPORT_FINISHED");
+        return sendBugreportFinishedIntent(null, bugreportPath, screenshotPath);
+    }
+
+    private Bundle sendBugreportFinishedIntent(Integer pid, String bugreportPath,
+            String screenshotPath) {
+        Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
+        if (pid != null) {
+            intent.putExtra(EXTRA_PID, pid);
+        }
         if (bugreportPath != null) {
             intent.putExtra(EXTRA_BUGREPORT, bugreportPath);
         }
