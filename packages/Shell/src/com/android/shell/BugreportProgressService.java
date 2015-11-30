@@ -41,6 +41,7 @@ import com.google.android.collect.Lists;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Notification;
+import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -98,6 +99,7 @@ public class BugreportProgressService extends Service {
 
     static final String INTENT_BUGREPORT_STARTED = "android.intent.action.BUGREPORT_STARTED";
     static final String INTENT_BUGREPORT_FINISHED = "android.intent.action.BUGREPORT_FINISHED";
+    static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
 
     static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
     static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
@@ -116,7 +118,11 @@ public class BugreportProgressService extends Service {
     private static final long INACTIVITY_TIMEOUT = 3 * DateUtils.MINUTE_IN_MILLIS;
 
     /** System property used for monitoring progress. */
-    private static final String PROGRESS_PROPERTY_TEMPLATE = "dumpstate.%d.progress";
+    private static final String PROPERTY_TEMPLATE_PROGRESS = "dumpstate.%d.progress";
+
+    /** System property (and value) used for stop dumpstate. */
+    private static final String PROPERTY_CTL_STOP = "ctl.stop";
+    private static final String BUGREPORT_SERVICE = "bugreport";
 
     /** Managed dumpstate processes (keyed by pid) */
     private final SparseArray<BugreportInfo> mProcesses = new SparseArray<>();
@@ -226,6 +232,9 @@ public class BugreportProgressService extends Service {
                     }
                     stopProgress(pid, intent);
                     break;
+                case INTENT_BUGREPORT_CANCEL:
+                    cancel(pid);
+                    break;
                 default:
                     Log.w(TAG, "Unsupported intent: " + action);
             }
@@ -280,6 +289,14 @@ public class BugreportProgressService extends Service {
             nf.setMaximumFractionDigits(2);
             final String percentText = nf.format((double) info.progress / info.max);
 
+            final Intent cancelIntent = new Intent(context, BugreportReceiver.class);
+            cancelIntent.setAction(INTENT_BUGREPORT_CANCEL);
+            cancelIntent.putExtra(EXTRA_PID, info.pid);
+            final Action cancelAction = new Action.Builder(null,
+                    context.getString(com.android.internal.R.string.cancel),
+                    PendingIntent.getBroadcast(context, info.pid, cancelIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT)).build();
+
             final String title = context.getString(R.string.bugreport_in_progress_title);
             final Notification notification = new Notification.Builder(context)
                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
@@ -288,10 +305,11 @@ public class BugreportProgressService extends Service {
                     .setContentText(info.name)
                     .setContentInfo(percentText)
                     .setProgress(info.max, info.progress, false)
-                    // TODO: .setOngoing(true) once it has a CANCEL action
+                    .setOngoing(true)
                     .setLocalOnly(true)
                     .setColor(context.getColor(
                             com.android.internal.R.color.system_notification_accent_color))
+                    .addAction(cancelAction)
                     .build();
 
             NotificationManager.from(context).notify(TAG, info.pid, notification);
@@ -319,6 +337,15 @@ public class BugreportProgressService extends Service {
         }
 
         /**
+         * Cancels a bugreport upon user's request.
+         */
+        private void cancel(int pid) {
+            Log.i(TAG, "Cancelling PID " + pid + " on user's request");
+            SystemProperties.set(PROPERTY_CTL_STOP, BUGREPORT_SERVICE);
+            stopProgress(pid, null);
+        }
+
+        /**
          * Poll {@link SystemProperties} to get the progress on each monitored process.
          */
         private void pollProgress() {
@@ -328,14 +355,8 @@ public class BugreportProgressService extends Service {
                 }
                 for (int i = 0; i < mProcesses.size(); i++) {
                     int pid = mProcesses.keyAt(i);
-                    String property = String.format(PROGRESS_PROPERTY_TEMPLATE, pid);
-                    int progress;
-                    try {
-                        progress = SystemProperties.getInt(property, 0);
-                    } catch (IllegalArgumentException e) {
-                        Log.v(TAG, "Could not read system property " + property, e);
-                        continue;
-                    }
+                    String property = String.format(PROPERTY_TEMPLATE_PROGRESS, pid);
+                    int progress = SystemProperties.getInt(property, 0);
                     if (progress == 0) {
                         Log.v(TAG, "System property " + property + " is not set yet");
                         continue;
