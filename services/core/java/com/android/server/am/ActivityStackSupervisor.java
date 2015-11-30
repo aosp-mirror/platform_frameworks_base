@@ -184,7 +184,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
-    static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = FIRST_SUPERVISOR_STACK_MSG + 14;
 
     private static final String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -2592,6 +2591,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mService.setFocusedActivityLocked(r, "startedActivity");
         }
         updateUserStackLocked(r.userId, targetStack);
+
+        if (!r.task.mResizeable && isStackDockedInEffect(targetStack.mStackId)) {
+            showNonResizeableDockToast(r.task.taskId);
+        }
+
         return ActivityManager.START_SUCCESS;
     }
 
@@ -3393,7 +3397,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         resumeTopActivitiesLocked();
 
         if (!task.mResizeable && isStackDockedInEffect(stackId)) {
-            showNonResizeableDockToast();
+            showNonResizeableDockToast(taskId);
         }
     }
 
@@ -4327,8 +4331,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void showNonResizeableDockToast() {
-        mHandler.sendEmptyMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST);
+    private void showNonResizeableDockToast(int taskId) {
+        mWindowManager.scheduleShowNonResizeableDockToast(taskId);
     }
 
     void showLockTaskToast() {
@@ -4643,13 +4647,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
                     }
                 } break;
-                case SHOW_NON_RESIZEABLE_DOCK_TOAST: {
-                    final Toast toast = Toast.makeText(
-                            mService.mContext,
-                            mService.mContext.getString(R.string.dock_non_resizeble_text),
-                            Toast.LENGTH_LONG);
-                    toast.show();
-                } break;
+
             }
         }
     }
