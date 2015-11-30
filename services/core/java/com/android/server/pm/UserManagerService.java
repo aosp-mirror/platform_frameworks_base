@@ -648,6 +648,7 @@ public class UserManagerService extends IUserManager.Stub {
     private void initDefaultGuestRestrictions() {
         synchronized (mGuestRestrictions) {
             if (mGuestRestrictions.isEmpty()) {
+                mGuestRestrictions.putBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
                 mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
                 mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
             }
@@ -1649,6 +1650,11 @@ public class UserManagerService extends IUserManager.Stub {
             }
             updateUserIds();
             Bundle restrictions = new Bundle();
+            if (isGuest) {
+                synchronized (mGuestRestrictions) {
+                    restrictions.putAll(mGuestRestrictions);
+                }
+            }
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.append(userId, restrictions);
             }

@@ -929,9 +929,6 @@ public class UserManager {
             if (guest != null) {
                 Settings.Secure.putStringForUser(context.getContentResolver(),
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
-
-                mService.setUserRestriction(DISALLOW_SMS, true, guest.id);
-                mService.setUserRestriction(DISALLOW_INSTALL_UNKNOWN_SOURCES, true, guest.id);
             }
         } catch (RemoteException re) {
             Log.w(TAG, "Could not create a user", re);
