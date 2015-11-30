@@ -1032,8 +1032,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected AbstractSynthesisCallback createSynthesisCallback() {
-            return new FileSynthesisCallback(mFileOutputStream.getChannel(),
-                    this, getCallerIdentity(), false);
+            return new FileSynthesisCallback(mFileOutputStream.getChannel(), this, false);
         }
 
         @Override
