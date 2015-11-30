@@ -204,7 +204,7 @@ you can set a scope to identify all code related to a specific action bar.   </p
 <p>With language injection, the Android Studio IDE allows you to work with islands of different
 languages embedded in the source code. This extends the syntax, error highlighting and coding
 assistance to the embedded language. This can be especially useful for checking regular expression
-values inline, and validating XML and SQL statements.</p>
+values inline and validating XML.</p>
 
 
 <h3>Code folding</h3>
