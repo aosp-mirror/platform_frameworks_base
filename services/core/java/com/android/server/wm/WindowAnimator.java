@@ -220,8 +220,8 @@ public class WindowAnimator {
 
         if (appShowWhenLocked != null) {
             allowWhenLocked |= appShowWhenLocked == win.mAppToken
-                    // Show all SHOW_WHEN_LOCKED windows while they're animating
-                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.isAnimatingLw()
+                    // Show all SHOW_WHEN_LOCKED windows if some apps are shown over lockscreen
+                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
                     // Show error dialogs over apps that dismiss keyguard.
                     || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
