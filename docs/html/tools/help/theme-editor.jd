@@ -104,9 +104,9 @@ side of the Theme Editor.</li>
 follow these steps:
 </p>
 <ol>
-<li>Click anywhere in the field containing the resource. The <em>Resources</em> dialog
-appears, containing a color picker, material-color palette, and other settings and
-information.</li>
+<li>Click the colored square next to the name of the resource you want to change.
+The <em>Resources</em> dialog appears, containing a color picker, material-color
+palette, and other settings and information.</li>
 <li>Change the color, opacity, and name of a theme's resources as desired.</p>
 <li>To ensure that your theme uses a color from the material
 palette, click <strong>CLOSEST MATERIAL COLOR</strong>, located next to <em>Custom
