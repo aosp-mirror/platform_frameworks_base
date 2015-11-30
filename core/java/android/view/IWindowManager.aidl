@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.IDockDividerVisibilityListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
@@ -290,10 +291,10 @@ interface IWindowManager
     /**
      * Create a screenshot of the applications currently displayed.
      *
-     * @param frameScale the scale to apply to the frame, only used when width = -1 and 
+     * @param frameScale the scale to apply to the frame, only used when width = -1 and
      *                   height = -1
      */
-    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight, 
+    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight,
             float frameScale);
 
     /**
@@ -348,4 +349,9 @@ interface IWindowManager
      * stack size.
      */
     void setDockedStackResizing(boolean resizing);
+
+    /**
+     * Registers a listener that will be called when the dock divider changes its visibility.
+     */
+    void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener);
 }

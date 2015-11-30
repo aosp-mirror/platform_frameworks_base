@@ -1877,6 +1877,11 @@
     <permission android:name="android.permission.MANAGE_APP_TOKENS"
         android:protectionLevel="signature" />
 
+    <!-- Allows System UI to register listeners for events from Window Manager.
+         @hide -->
+    <permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS"
+        android:protectionLevel="signature" />
+
     <!-- @hide Allows the application to temporarily freeze the screen for a
          full-screen transition. -->
     <permission android:name="android.permission.FREEZE_SCREEN"

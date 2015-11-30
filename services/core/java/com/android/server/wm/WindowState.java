@@ -730,7 +730,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleFrame.set(mContentFrame);
             mStableFrame.set(mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            if (isVisibleLw()) {
+            if (isVisibleLw() || mWinAnimator.isAnimating()) {
                 // We don't adjust the dock divider frame for reasons other than performance. The
                 // real reason is that if it gets adjusted before it is shown for the first time,
                 // it would get size (0, 0). This causes a problem when we finally show the dock

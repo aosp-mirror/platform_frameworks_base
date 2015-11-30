@@ -18,7 +18,11 @@ package com.android.server.wm;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
+import android.view.IDockDividerVisibilityListener;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -40,6 +44,8 @@ public class DockedStackDividerController {
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
     private final Rect mLastRect = new Rect();
+    private IDockDividerVisibilityListener mListener;
+    private boolean mLastVisibility = false;
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -67,12 +73,21 @@ public class DockedStackDividerController {
     }
 
     void reevaluateVisibility() {
-        if (mWindow == null) return;
+        if (mWindow == null) {
+            return;
+        }
         TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID);
-        if (stack != null && stack.isVisibleLocked()) {
-            mWindow.showLw(true /* doAnimation */);
-        } else {
-            mWindow.hideLw(true /* doAnimation */);
+        final boolean visible = stack != null && stack.isVisibleLocked();
+        if (mLastVisibility == visible) {
+            return;
+        }
+        mLastVisibility = visible;
+        if (mListener != null) {
+            try {
+                mListener.onDockDividerVisibilityChanged(visible);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "visibility call failed: " + e);
+            }
         }
     }
 
@@ -109,5 +124,12 @@ public class DockedStackDividerController {
                 break;
         }
         mLastRect.set(frame);
+    }
+
+    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
+        if (mListener != null && listener != null) {
+            throw new IllegalStateException("Dock divider visibility listener already set!");
+        }
+        mListener = listener;
     }
 }

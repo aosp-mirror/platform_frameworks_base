@@ -541,4 +541,8 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void endProlongedAnimations() {
     }
+
+    @Override
+    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
+    }
 }
