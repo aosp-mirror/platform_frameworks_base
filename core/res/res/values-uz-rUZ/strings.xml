@@ -1434,8 +1434,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Yechishda PIN-kod so‘ralsin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bo‘shatishdan oldin chizmali parol so‘ralsin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bo‘shatishdan oldin parol so‘ralsin"</string>
-    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
-    <skip />
+    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Oyna o‘lchamini o‘zgartirib bo‘lmaydi. Sahifani ikkita barmoq bilan aylantiring."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratoringiz tomonidan o‘rnatilgan"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>

@@ -1305,7 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Қол жетімділік өшірілді."</string>
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
-    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ішінен шығу орындалуда…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ішінен шығу…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Пайдаланушы"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Қателік"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Бұл өзгертуге әкімші рұқсат етпеген"</string>

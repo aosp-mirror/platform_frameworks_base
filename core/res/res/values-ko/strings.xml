@@ -1434,8 +1434,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
-    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
-    <skip />
+    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"앱에서 크기 조절이 불가능합니다. 두 손가락을 사용해 스크롤하세요."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"관리자가 설치함"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>

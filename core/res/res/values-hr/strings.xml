@@ -1443,8 +1443,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Traži PIN radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Traži uzorak za otključavanje radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Traži zaporku radi otkvačivanja"</string>
-    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
-    <skip />
+    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Veličina aplikacije ne može se mijenjati, pomičite je s dva prsta."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalirao administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurira vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao administrator"</string>

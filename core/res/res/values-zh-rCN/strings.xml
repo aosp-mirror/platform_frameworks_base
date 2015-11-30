@@ -1305,8 +1305,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消无障碍功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
-    <!-- no translation found for user_logging_out_message (8939524935808875155) -->
-    <skip />
+    <string name="user_logging_out_message" msgid="8939524935808875155">"正在将<xliff:g id="NAME">%1$s</xliff:g>退出帐号…"</string>
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
     <string name="error_message_title" msgid="4510373083082500195">"错误"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"您的管理员不允许进行此更改"</string>
@@ -1435,8 +1434,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消时要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消时要求输入密码"</string>
-    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
-    <skip />
+    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"无法调整这个应用的大小，请用双指滚动应用。"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理员安装"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
