@@ -29,6 +29,8 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -43,6 +45,7 @@ public class RecentsHistoryView extends LinearLayout {
     private RecyclerView mRecyclerView;
     private RecentsHistoryAdapter mAdapter;
     private boolean mIsVisible;
+    private Rect mSystemInsets = new Rect();
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
@@ -123,7 +126,8 @@ public class RecentsHistoryView extends LinearLayout {
      * Updates the system insets of this history view to the provided values.
      */
     public void setSystemInsets(Rect systemInsets) {
-        setPadding(systemInsets.left, systemInsets.top, systemInsets.right, systemInsets.bottom);
+        mSystemInsets.set(systemInsets.left, systemInsets.top, systemInsets.right, systemInsets.bottom);
+        requestLayout();
     }
 
     /**
@@ -139,6 +143,26 @@ public class RecentsHistoryView extends LinearLayout {
         mRecyclerView = (RecyclerView) findViewById(R.id.list);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        // Pad the view to align the history with the stack layout
+        Rect taskStackBounds = new Rect();
+        config.getTaskStackBounds(new Rect(0, 0, width, height), mSystemInsets.top,
+                mSystemInsets.right, new Rect() /* searchBarSpaceBounds */, taskStackBounds);
+        int stackWidthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
+        int stackHeightPadding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.recents_stack_top_padding);
+        mRecyclerView.setPadding(stackWidthPadding + mSystemInsets.left,
+                stackHeightPadding + mSystemInsets.top,
+                stackWidthPadding + mSystemInsets.right, mSystemInsets.bottom);
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override

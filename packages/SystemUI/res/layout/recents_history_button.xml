@@ -22,5 +22,9 @@
     android:textSize="14sp"
     android:textColor="#FFFFFF"
     android:textAllCaps="true"
+    android:shadowColor="#99000000"
+    android:shadowDx="0"
+    android:shadowDy="2"
+    android:shadowRadius="5"
     android:fontFamily="sans-serif-medium"
     android:visibility="invisible" />

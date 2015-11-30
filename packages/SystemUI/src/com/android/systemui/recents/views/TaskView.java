@@ -431,10 +431,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .setStartDelay(0)
                     .setDuration(taskViewExitToAppDuration)
                     .setInterpolator(mFastOutLinearInInterpolator)
+                    .withEndAction(postAnimRunnable)
                     .start();
         } else {
             // Hide the dismiss button
-            mHeaderView.startLaunchTaskDismissAnimation();
+            mHeaderView.startLaunchTaskDismissAnimation(postAnimRunnable);
             // If this is another view in the task grouping and is in front of the launch task,
             // animate it away first
             if (occludesLaunchTarget) {
@@ -670,21 +671,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     public void onTaskDataLoaded() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        RecentsConfiguration config = Recents.getConfiguration();
         if (mThumbnailView != null && mHeaderView != null) {
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask);
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
             mActionButtonView.setOnClickListener(this);
-
-            // Only enable long-click if we have a freeform workspace to drag to/from, or if we
-            // aren't already docked
-            if (ssp.hasFreeformWorkspaceSupport() || !config.hasDockedTasks) {
-                setOnLongClickListener(this);
-            } else {
-                setOnLongClickListener(null);
-            }
+            setOnLongClickListener(this);
         }
         mTaskDataLoaded = true;
     }
@@ -724,7 +717,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
     public boolean onLongClick(View v) {
-        if (v == this) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (v == this && !ssp.hasDockedTask()) {
             // Start listening for drag events
             setClipViewInStack(false);
 
