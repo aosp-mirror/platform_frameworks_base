@@ -93,6 +93,7 @@ interface INotificationManager
     AutomaticZenRule addAutomaticZenRule(in AutomaticZenRule automaticZenRule);
     boolean updateAutomaticZenRule(in AutomaticZenRule automaticZenRule);
     boolean removeAutomaticZenRule(String id);
+    boolean removeAutomaticZenRules(String packageName);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);

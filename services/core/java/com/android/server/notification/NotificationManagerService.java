@@ -1634,6 +1634,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean removeAutomaticZenRules(String packageName) throws RemoteException {
+            Preconditions.checkNotNull(packageName, "Package name is null");
+            enforceSystemOrSystemUI("removeAutomaticZenRules");
+
+            return mZenModeHelper.removeAutomaticZenRules(packageName, "removeAutomaticZenRules");
+        }
+
+        @Override
         public void setInterruptionFilter(String pkg, int filter) throws RemoteException {
             enforcePolicyAccess(pkg, "setInterruptionFilter");
             final int zen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);

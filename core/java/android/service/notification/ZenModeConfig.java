@@ -1110,7 +1110,7 @@ public class ZenModeConfig implements Parcelable {
             if (!Objects.equals(id, to.id)) {
                 d.addLine(item, "id", id, to.id);
             }
-            if (creationTime == to.creationTime) {
+            if (creationTime != to.creationTime) {
                 d.addLine(item, "creationTime", creationTime, to.creationTime);
             }
         }

@@ -5386,6 +5386,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     removeUriPermissionsForPackageLocked(packageName, userId, true);
                 }
 
+                // Remove all zen rules created by this package; revoke it's zen access.
+                INotificationManager inm = NotificationManager.getService();
+                inm.removeAutomaticZenRules(packageName);
+                inm.setNotificationPolicyAccessGranted(packageName, false);
+
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);

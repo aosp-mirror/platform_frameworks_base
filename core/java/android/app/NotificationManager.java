@@ -470,6 +470,20 @@ public class NotificationManager
     }
 
     /**
+     * Deletes all automatic zen rules owned by the given package.
+     *
+     * @hide
+     */
+    public boolean removeAutomaticZenRules(String packageName) {
+        INotificationManager service = getService();
+        try {
+            return service.removeAutomaticZenRules(packageName);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
      * Checks the ability to read/modify notification policy for the calling package.
      *
      * <p>
