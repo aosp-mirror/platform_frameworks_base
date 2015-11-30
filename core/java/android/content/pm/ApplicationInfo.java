@@ -487,6 +487,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_AUTOPLAY = 1 << 7;
 
     /**
+     * When set, at least one component inside this application is encryption aware.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE = 1 << 8;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */
@@ -1052,6 +1059,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isEncryptionAware() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE) != 0;
+    }
+
+    /** @hide */
+    public boolean isPartiallyEncryptionAware() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE) != 0;
     }
 
     /**

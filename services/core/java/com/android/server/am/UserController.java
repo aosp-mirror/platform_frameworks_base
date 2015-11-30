@@ -624,6 +624,23 @@ final class UserController {
             throw new SecurityException(msg);
         }
 
+        final long binderToken = Binder.clearCallingIdentity();
+        try {
+            return unlockUserCleared(userId, token);
+        } finally {
+            Binder.restoreCallingIdentity(binderToken);
+        }
+    }
+
+    boolean unlockUserCleared(final int userId, byte[] token) {
+        synchronized (mService) {
+            final UserState uss = mStartedUsers.get(userId);
+            if (uss.unlocked) {
+                // Bail early when already unlocked
+                return true;
+            }
+        }
+
         final UserInfo userInfo = getUserInfo(userId);
         final IMountService mountService = IMountService.Stub
                 .asInterface(ServiceManager.getService("mount"));
@@ -631,13 +648,18 @@ final class UserController {
             mountService.unlockUserKey(userId, userInfo.serialNumber, token);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to unlock: " + e.getMessage());
-            throw e.rethrowAsRuntimeException();
+            return false;
         }
 
         synchronized (mService) {
             final UserState uss = mStartedUsers.get(userId);
             updateUserUnlockedState(uss);
         }
+
+        final Intent intent = new Intent(Intent.ACTION_USER_UNLOCKED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mService.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
+                AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID, userId);
 
         return true;
     }
@@ -1011,7 +1033,7 @@ final class UserController {
         if ((flags & ActivityManager.FLAG_OR_STOPPED) != 0) {
             return true;
         }
-        if ((flags & ActivityManager.FLAG_WITH_AMNESIA) != 0) {
+        if ((flags & ActivityManager.FLAG_AND_LOCKED) != 0) {
             // If user is currently locked, we fall through to default "running"
             // behavior below
             if (state.unlocked) {

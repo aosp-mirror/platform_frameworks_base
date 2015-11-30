@@ -781,6 +781,7 @@ class MountService extends IMountService.Stub
     }
 
     private void handleSystemReady() {
+        initIfReadyAndConnected();
         resetIfReadyAndConnected();
 
         // Start scheduling nominally-daily fstrim operations
@@ -826,6 +827,22 @@ class MountService extends IMountService.Stub
         internal.state = VolumeInfo.STATE_MOUNTED;
         internal.path = Environment.getDataDirectory().getAbsolutePath();
         mVolumes.put(internal.id, internal);
+    }
+
+    private void initIfReadyAndConnected() {
+        Slog.d(TAG, "Thinking about init, mSystemReady=" + mSystemReady
+                + ", mDaemonConnected=" + mDaemonConnected);
+        if (mSystemReady && mDaemonConnected && StorageManager.isFileBasedEncryptionEnabled()) {
+            final List<UserInfo> users = mContext.getSystemService(UserManager.class)
+                    .getUsers();
+            for (UserInfo user : users) {
+                try {
+                    mCryptConnector.execute("cryptfs", "lock_user_key", user.id);
+                } catch (NativeDaemonConnectorException e) {
+                    Slog.w(TAG, "Failed to init vold", e);
+                }
+            }
+        }
     }
 
     private void resetIfReadyAndConnected() {
@@ -928,6 +945,7 @@ class MountService extends IMountService.Stub
     }
 
     private void handleDaemonConnected() {
+        initIfReadyAndConnected();
         resetIfReadyAndConnected();
 
         /*

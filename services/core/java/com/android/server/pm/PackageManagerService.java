@@ -2800,15 +2800,24 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public boolean isPackageFrozen(String packageName) {
+    public void checkPackageStartable(String packageName, int userId) {
+        final boolean userKeyUnlocked = isUserKeyUnlocked(userId);
+
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps != null) {
-                return ps.frozen;
+            if (ps == null) {
+                throw new SecurityException("Package " + packageName + " was not found!");
+            }
+
+            if (ps.frozen) {
+                throw new SecurityException("Package " + packageName + " is currently frozen!");
+            }
+
+            if (!userKeyUnlocked && !(ps.pkg.applicationInfo.isEncryptionAware()
+                    || ps.pkg.applicationInfo.isPartiallyEncryptionAware())) {
+                throw new SecurityException("Package " + packageName + " is not encryption aware!");
             }
         }
-        Slog.w(TAG, "Package " + packageName + " is missing; assuming frozen");
-        return true;
     }
 
     @Override
@@ -3143,29 +3152,36 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
-     * Augment the given flags depending on current user running state. This is
-     * purposefully done before acquiring {@link #mPackages} lock.
+     * Return if the user key is currently unlocked.
      */
-    private int augmentFlagsForUser(int flags, int userId) {
+    private boolean isUserKeyUnlocked(int userId) {
         if (StorageManager.isFileBasedEncryptionEnabled()) {
             final IMountService mount = IMountService.Stub
                     .asInterface(ServiceManager.getService("mount"));
             if (mount == null) {
-                // We must be early in boot, so the best we can do is assume the
-                // user is fully running.
-                Slog.w(TAG, "Early during boot, assuming not encrypted");
-                return flags;
+                Slog.w(TAG, "Early during boot, assuming locked");
+                return false;
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                if (!mount.isUserKeyUnlocked(userId)) {
-                    flags |= PackageManager.MATCH_ENCRYPTION_AWARE_ONLY;
-                }
+                return mount.isUserKeyUnlocked(userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Augment the given flags depending on current user running state. This is
+     * purposefully done before acquiring {@link #mPackages} lock.
+     */
+    private int augmentFlagsForUser(int flags, int userId) {
+        if (!isUserKeyUnlocked(userId)) {
+            flags |= PackageManager.MATCH_ENCRYPTION_AWARE_ONLY;
         }
         return flags;
     }

@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
@@ -388,6 +390,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    private void unlockUser(int userId, byte[] token) {
+        try {
+            ActivityManagerNative.getDefault().unlockUser(userId, token);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 
     private byte[] getCurrentHandle(int userId) {
         CredentialHash credential;
@@ -612,6 +621,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             byte[] hash = credentialUtil.toHash(credential, userId);
             if (Arrays.equals(hash, storedHash.hash)) {
                 unlockKeystore(credentialUtil.adjustForKeystore(credential), userId);
+                unlockUser(userId, null);
                 // migrate credential to GateKeeper
                 credentialUtil.setCredential(credential, null, userId);
                 if (!hasChallenge) {
@@ -664,6 +674,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
             // credential has matched
             unlockKeystore(credential, userId);
+            unlockUser(userId, null);
             if (shouldReEnroll) {
                 credentialUtil.setCredential(credential, credential, userId);
             }

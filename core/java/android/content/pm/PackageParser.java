@@ -3262,6 +3262,11 @@ public class PackageParser {
                     owner.applicationInfo.isEncryptionAware());
         }
 
+        if (a.info.encryptionAware) {
+            owner.applicationInfo.privateFlags |=
+                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE;
+        }
+
         sa.recycle();
 
         if (receiver && (owner.applicationInfo.privateFlags
@@ -3663,6 +3668,10 @@ public class PackageParser {
         p.info.encryptionAware = sa.getBoolean(
                 R.styleable.AndroidManifestProvider_encryptionAware,
                 owner.applicationInfo.isEncryptionAware());
+        if (p.info.encryptionAware) {
+            owner.applicationInfo.privateFlags |=
+                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE;
+        }
 
         sa.recycle();
 
@@ -3947,6 +3956,10 @@ public class PackageParser {
         s.info.encryptionAware = sa.getBoolean(
                 R.styleable.AndroidManifestService_encryptionAware,
                 owner.applicationInfo.isEncryptionAware());
+        if (s.info.encryptionAware) {
+            owner.applicationInfo.privateFlags |=
+                    ApplicationInfo.PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE;
+        }
 
         sa.recycle();
 
