@@ -88,11 +88,8 @@ status_t compileXmlFile(const Bundle* bundle,
         root->setUTF8(true);
     }
 
-    if (table->processBundleFormat(bundle, resourceName, target, root) != NO_ERROR) {
-        return UNKNOWN_ERROR;
-    }
-    
     bool hasErrors = false;
+    
     if ((options&XML_COMPILE_ASSIGN_ATTRIBUTE_IDS) != 0) {
         status_t err = root->assignResourceIds(assets, table);
         if (err != NO_ERROR) {
@@ -4758,9 +4755,9 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         newConfig.sdkVersion = sdkVersionToGenerate;
         sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
                 AaptGroupEntry(newConfig), target->getResourceType());
-        String8 resPath = String8::format("res/%s/%s.xml",
+        String8 resPath = String8::format("res/%s/%s",
                 newFile->getGroupEntry().toDirName(target->getResourceType()).string(),
-                String8(resourceName).string());
+                target->getSourceFile().getPathLeaf().string());
         resPath.convertToResPath();
 
         // Add a resource table entry.
@@ -4787,7 +4784,6 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         item.resourceName = resourceName;
         item.resPath = resPath;
         item.file = newFile;
-        item.xmlRoot = newRoot;
         mWorkQueue.push(item);
     }
 
@@ -4828,227 +4824,4 @@ void ResourceTable::getDensityVaryingResources(
             }
         }
     }
-}
-
-static String16 buildNamespace(const String16& package) {
-    return String16("http://schemas.android.com/apk/res/") + package;
-}
-
-static sp<XMLNode> findOnlyChildElement(const sp<XMLNode>& parent) {
-    const Vector<sp<XMLNode> >& children = parent->getChildren();
-    sp<XMLNode> onlyChild;
-    for (size_t i = 0; i < children.size(); i++) {
-        if (children[i]->getType() != XMLNode::TYPE_CDATA) {
-            if (onlyChild != NULL) {
-                return NULL;
-            }
-            onlyChild = children[i];
-        }
-    }
-    return onlyChild;
-}
-
-/**
- * Detects use of the `bundle' format and extracts nested resources into their own top level
- * resources. The bundle format looks like this:
- *
- * <!-- res/drawable/bundle.xml -->
- * <animated-vector xmlns:aapt="http://schemas.android.com/aapt">
- *   <aapt:attr name="android:drawable">
- *     <vector android:width="60dp"
- *             android:height="60dp">
- *       <path android:name="v"
- *             android:fillColor="#000000"
- *             android:pathData="M300,70 l 0,-70 70,..." />
- *     </vector>
- *   </aapt:attr>
- * </animated-vector>
- *
- * When AAPT sees the <aapt:attr> tag, it will extract its single element and its children
- * into a new high-level resource, assigning it a name and ID. Then value of the `name`
- * attribute must be a resource attribute. That resource attribute is inserted into the parent
- * with the reference to the extracted resource as the value.
- *
- * <!-- res/drawable/bundle.xml -->
- * <animated-vector android:drawable="@drawable/bundle_1.xml">
- * </animated-vector>
- *
- * <!-- res/drawable/bundle_1.xml -->
- * <vector android:width="60dp"
- *         android:height="60dp">
- *   <path android:name="v"
- *         android:fillColor="#000000"
- *         android:pathData="M300,70 l 0,-70 70,..." />
- * </vector>
- */
-status_t ResourceTable::processBundleFormat(const Bundle* bundle,
-                                            const String16& resourceName,
-                                            const sp<AaptFile>& target,
-                                            const sp<XMLNode>& root) {
-    Vector<sp<XMLNode> > namespaces;
-    if (root->getType() == XMLNode::TYPE_NAMESPACE) {
-        namespaces.push(root);
-    }
-    return processBundleFormatImpl(bundle, resourceName, target, root, &namespaces);
-}
-
-status_t ResourceTable::processBundleFormatImpl(const Bundle* bundle,
-                                                const String16& resourceName,
-                                                const sp<AaptFile>& target,
-                                                const sp<XMLNode>& parent,
-                                                Vector<sp<XMLNode> >* namespaces) {
-    const String16 kAaptNamespaceUri16("http://schemas.android.com/aapt");
-    const String16 kName16("name");
-    const String16 kAttr16("attr");
-    const String16 kAssetPackage16(mAssets->getPackage());
-
-    Vector<sp<XMLNode> >& children = parent->getChildren();
-    for (size_t i = 0; i < children.size(); i++) {
-        const sp<XMLNode>& child = children[i];
-
-        if (child->getType() == XMLNode::TYPE_CDATA) {
-            continue;
-        } else if (child->getType() == XMLNode::TYPE_NAMESPACE) {
-            namespaces->push(child);
-        }
-
-        if (child->getElementNamespace() != kAaptNamespaceUri16 ||
-                child->getElementName() != kAttr16) {
-            status_t result = processBundleFormatImpl(bundle, resourceName, target, child,
-                                                      namespaces);
-            if (result != NO_ERROR) {
-                return result;
-            }
-
-            if (child->getType() == XMLNode::TYPE_NAMESPACE) {
-                namespaces->pop();
-            }
-            continue;
-        }
-
-        // This is the <aapt:attr> tag. Look for the 'name' attribute.
-        SourcePos source(child->getFilename(), child->getStartLineNumber());
-
-        sp<XMLNode> nestedRoot = findOnlyChildElement(child);
-        if (nestedRoot == NULL) {
-            source.error("<%s:%s> must have exactly one child element",
-                         String8(child->getElementNamespace()).string(),
-                         String8(child->getElementName()).string());
-            return UNKNOWN_ERROR;
-        }
-
-        // Find the special attribute 'parent-attr'. This attribute's value contains
-        // the resource attribute for which this element should be assigned in the parent.
-        const XMLNode::attribute_entry* attr = child->getAttribute(String16(), kName16);
-        if (attr == NULL) {
-            source.error("inline resource definition must specify an attribute via 'name'");
-            return UNKNOWN_ERROR;
-        }
-
-        // Parse the attribute name.
-        const char* errorMsg = NULL;
-        String16 attrPackage, attrType, attrName;
-        bool result = ResTable::expandResourceRef(attr->string.string(),
-                                                  attr->string.size(),
-                                                  &attrPackage, &attrType, &attrName,
-                                                  &kAttr16, &kAssetPackage16,
-                                                  &errorMsg, NULL);
-        if (!result) {
-            source.error("invalid attribute name for 'name': %s", errorMsg);
-            return UNKNOWN_ERROR;
-        }
-
-        if (attrType != kAttr16) {
-            // The value of the 'name' attribute must be an attribute reference.
-            source.error("value of 'name' must be an attribute reference.");
-            return UNKNOWN_ERROR;
-        }
-
-        // Generate a name for this nested resource and try to add it to the table.
-        // We do this in a loop because the name may be taken, in which case we will
-        // increment a suffix until we succeed.
-        String8 nestedResourceName;
-        String8 nestedResourcePath;
-        int suffix = 1;
-        while (true) {
-            // This child element will be extracted into its own resource file.
-            // Generate a name and path for it from its parent.
-            nestedResourceName = String8::format("%s_%d",
-                        String8(resourceName).string(), suffix++);
-            nestedResourcePath = String8::format("res/%s/%s.xml",
-                        target->getGroupEntry().toDirName(target->getResourceType())
-                                               .string(),
-                        nestedResourceName.string());
-
-            // Lookup or create the entry for this name.
-            sp<Entry> entry = getEntry(kAssetPackage16,
-                                       String16(target->getResourceType()),
-                                       String16(nestedResourceName),
-                                       source,
-                                       false,
-                                       &target->getGroupEntry().toParams(),
-                                       true);
-            if (entry == NULL) {
-                return UNKNOWN_ERROR;
-            }
-
-            if (entry->getType() == Entry::TYPE_UNKNOWN) {
-                // The value for this resource has never been set,
-                // meaning we're good!
-                entry->setItem(source, String16(nestedResourcePath));
-                break;
-            }
-
-            // We failed (name already exists), so try with a different name
-            // (increment the suffix).
-        }
-
-        if (bundle->getVerbose()) {
-            source.printf("generating nested resource %s:%s/%s",
-                    mAssets->getPackage().string(), target->getResourceType().string(),
-                    nestedResourceName.string());
-        }
-
-        // Build the attribute reference and assign it to the parent.
-        String16 nestedResourceRef = String16(String8::format("@%s:%s/%s",
-                    mAssets->getPackage().string(), target->getResourceType().string(),
-                    nestedResourceName.string()));
-
-        String16 attrNs = buildNamespace(attrPackage);
-        if (parent->getAttribute(attrNs, attrName) != NULL) {
-            SourcePos(parent->getFilename(), parent->getStartLineNumber())
-                    .error("parent of nested resource already defines attribute '%s:%s'",
-                           String8(attrPackage).string(), String8(attrName).string());
-            return UNKNOWN_ERROR;
-        }
-
-        // Add the reference to the inline resource.
-        parent->addAttribute(attrNs, attrName, nestedResourceRef);
-
-        // Remove the <aapt:attr> child element from here.
-        children.removeAt(i);
-        i--;
-
-        // Append all namespace declarations that we've seen on this branch in the XML tree
-        // to this resource.
-        // We do this because the order of namespace declarations and prefix usage is determined
-        // by the developer and we do not want to override any decisions. Be conservative.
-        for (size_t nsIndex = namespaces->size(); nsIndex > 0; nsIndex--) {
-            const sp<XMLNode>& ns = namespaces->itemAt(nsIndex - 1);
-            sp<XMLNode> newNs = XMLNode::newNamespace(ns->getFilename(), ns->getNamespacePrefix(),
-                                                      ns->getNamespaceUri());
-            newNs->addChild(nestedRoot);
-            nestedRoot = newNs;
-        }
-
-        // Schedule compilation of the nested resource.
-        CompileResourceWorkItem workItem;
-        workItem.resPath = nestedResourcePath;
-        workItem.resourceName = String16(nestedResourceName);
-        workItem.xmlRoot = nestedRoot;
-        workItem.file = new AaptFile(target->getSourceFile(), target->getGroupEntry(),
-                                     target->getResourceType());
-        mWorkQueue.push(workItem);
-    }
-    return NO_ERROR;
 }
