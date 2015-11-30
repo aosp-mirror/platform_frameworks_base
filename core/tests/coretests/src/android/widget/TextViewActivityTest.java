@@ -34,12 +34,15 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 
 import com.android.frameworks.coretests.R;
 
+import android.support.test.espresso.NoMatchingRootException;
+import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.ViewInteraction;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -165,17 +168,20 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         assertFloatingToolbarIsDisplayed(getActivity());
     }
 
-    private static ViewInteraction onHandleView(int id) {
-        return onView(allOf(withId(id), isAssignableFrom(Editor.HandleView.class)))
-                .inRoot(withDecorView(hasDescendant(withId(id))));
-    }
-
     @SmallTest
     public void testSelectionHandles() throws Exception {
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        assertNoSelectionHandles();
+
         onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .check(matches(isDisplayed()));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .check(matches(isDisplayed()));
 
         final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
@@ -335,5 +341,26 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('i')));
         onView(withId(R.id.textview)).check(hasSelection("hijk"));
+    }
+
+    private static void assertNoSelectionHandles() {
+        try {
+            onHandleView(com.android.internal.R.id.selection_start_handle)
+                    .check(matches(isDisplayed()));
+        } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e) {
+            try {
+                onHandleView(com.android.internal.R.id.selection_end_handle)
+                        .check(matches(isDisplayed()));
+            } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e1) {
+                return;
+            }
+        }
+        throw new AssertionError("Selection handle found");
+    }
+
+    private static ViewInteraction onHandleView(int id)
+            throws NoMatchingRootException, NoMatchingViewException, AssertionError {
+        return onView(allOf(withId(id), isAssignableFrom(Editor.HandleView.class)))
+                .inRoot(withDecorView(hasDescendant(withId(id))));
     }
 }
