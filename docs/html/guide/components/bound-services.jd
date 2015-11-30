@@ -15,7 +15,11 @@ parent.link=services.html
       <li><a href="#Messenger">Using a Messenger</a></li>
     </ol>
   </li>
-  <li><a href="#Binding">Binding to a Service</a></li>
+  <li><a href="#Binding">Binding to a Service</a>
+    <ol>
+      <li><a href="#Additional_Notes">Additional notes</a></li>
+    </ol>
+  </li>
   <li><a href="#Lifecycle">Managing the Lifecycle of a Bound Service</a></li>
 </ol>
 
@@ -309,8 +313,11 @@ public class BindingActivity extends Activity {
 android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback. The next
 section provides more information about this process of binding to the service.</p>
 
-<p class="note"><strong>Note:</strong> The example above doesn't explicitly unbind from the service,
-but all clients should unbind at an appropriate time (such as when the activity pauses).</p>
+<p class="note"><strong>Note:</strong> In the example above, the
+{@link android.app.Activity#onStop onStop()} method unbinds the client from the service. Clients
+should unbind from services at appropriate times, as discussed in
+<a href="#Additional_Notes">Additional Notes</a>.
+</p>
 
 <p>For more sample code, see the <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
@@ -538,10 +545,11 @@ onServiceConnected()} callback method, you can begin making calls to the service
 the methods defined by the interface.</li>
   <li>To disconnect from the service, call {@link
 android.content.Context#unbindService unbindService()}.
-    <p>When your client is destroyed, it will unbind from the service, but you should always unbind
-when you're done interacting with the service or when your activity pauses so that the service can
-shutdown while its not being used. (Appropriate times to bind and unbind is discussed
-more below.)</p>
+  <p>If your client is still bound to a service when your app destroys the client, destruction
+causes the client to unbind. It is better practice to unbind the client as soon as it is done
+interacting with the service. Doing so allows the idle service to shut down. For more information
+about appropriate times to bind and unbind, see <a href="#Additional_Notes">Additional Notes</a>.
+</p>
   </li>
 </ol>
 
@@ -591,7 +599,7 @@ and {@link android.content.Context#BIND_NOT_FOREGROUND}, or {@code 0} for none.<
 </ul>
 
 
-<h3>Additional notes</h3>
+<h3 id="Additional_Notes">Additional notes</h3>
 
 <p>Here are some important notes about binding to a service:</p>
 <ul>
