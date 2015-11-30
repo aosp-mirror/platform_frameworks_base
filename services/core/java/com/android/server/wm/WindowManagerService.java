@@ -121,6 +121,7 @@ import android.view.DropPermissionHolder;
 import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.IDockDividerVisibilityListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -2689,8 +2690,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // need to see about starting one.
                     final boolean notExitingOrAnimating =
                             !win.mExiting && !win.isAnimatingWithSavedSurface();
-                    result |= notExitingOrAnimating
-                            ? RELAYOUT_RES_SURFACE_CHANGED : 0;
+                    result |= notExitingOrAnimating ? RELAYOUT_RES_SURFACE_CHANGED : 0;
                     if (notExitingOrAnimating) {
                         focusMayChange = tryStartingAnimation(win, winAnimator, isDefaultDisplay,
                                 focusMayChange);
@@ -3075,7 +3075,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO:
     }
 
-    boolean checkCallingPermission(String permission, String func) {
+    private boolean checkCallingPermission(String permission, String func) {
         // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == Process.myPid()) {
             return true;
@@ -10209,6 +10209,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void scheduleSurfaceDestroy(WindowState win) {
         mDestroySurface.add(win);
+    }
+
+    @Override
+    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
+        if (!checkCallingPermission(android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS,
+                "registerDockDividerVisibilityListener()")) {
+            return;
+        }
+        // TODO(multi-display): The listener is registered on the default display only.
+        final DockedStackDividerController controller =
+                getDefaultDisplayContentLocked().getDockedDividerController();
+        controller.registerDockDividerVisibilityListener(listener);
+        try {
+            listener.asBinder().linkToDeath(new IBinder.DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    getDefaultDisplayContentLocked().getDockedDividerController()
+                            .registerDockDividerVisibilityListener(null);
+                }
+            }, 0);
+        } catch (RemoteException e) {
+            controller.registerDockDividerVisibilityListener(null);
+        }
     }
 
     private final class LocalService extends WindowManagerInternal {

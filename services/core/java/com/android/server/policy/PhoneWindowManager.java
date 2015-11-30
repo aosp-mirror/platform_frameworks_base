@@ -2533,7 +2533,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         } else if (win.getAttrs().type == TYPE_DOCK_DIVIDER) {
-            if (transit == TRANSIT_ENTER) {
+            if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
                 return R.anim.fade_in;
             } else if (transit == TRANSIT_EXIT) {
                 return R.anim.fade_out;

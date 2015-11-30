@@ -17,10 +17,14 @@
 package com.android.systemui.stackdivider;
 
 import android.content.res.Configuration;
+import android.view.IDockDividerVisibilityListener;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -33,6 +37,8 @@ public class Divider extends SystemUI {
     private int mDividerWindowWidth;
     private DividerWindowManager mWindowManager;
     private DividerView mView;
+    private DockDividerVisibilityListener mDockDividerVisibilityListener;
+    private boolean mVisible = false;
 
     @Override
     public void start() {
@@ -41,6 +47,9 @@ public class Divider extends SystemUI {
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         update(mContext.getResources().getConfiguration());
         putComponent(Divider.class, this);
+        mDockDividerVisibilityListener = new DockDividerVisibilityListener();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ssp.registerDockDividerVisibilityListener(mDockDividerVisibilityListener);
     }
 
     @Override
@@ -56,6 +65,7 @@ public class Divider extends SystemUI {
     private void addDivider(Configuration configuration) {
         mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
+        mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
         final int width = landscape ? mDividerWindowWidth : MATCH_PARENT;
         final int height = landscape ? MATCH_PARENT : mDividerWindowWidth;
@@ -70,5 +80,24 @@ public class Divider extends SystemUI {
     private void update(Configuration configuration) {
         removeDivider();
         addDivider(configuration);
+    }
+
+    private void updateVisibility(final boolean visible) {
+        mView.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mVisible != visible) {
+                    mVisible = visible;
+                    mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+                }
+            }
+        });
+    }
+
+    class DockDividerVisibilityListener extends IDockDividerVisibilityListener.Stub {
+        @Override
+        public void onDockDividerVisibilityChanged(boolean visible) {
+            updateVisibility(visible);
+        }
     }
 }

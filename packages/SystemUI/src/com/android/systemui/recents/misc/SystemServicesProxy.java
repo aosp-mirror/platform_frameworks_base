@@ -56,6 +56,7 @@ import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.Pair;
 import android.view.Display;
+import android.view.IDockDividerVisibilityListener;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -843,6 +844,17 @@ public class SystemServicesProxy {
         }
         try {
             WindowManagerGlobal.getWindowManagerService().endProlongedAnimations();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
+        if (mWm == null) return;
+
+        try {
+            WindowManagerGlobal.getWindowManagerService().registerDockDividerVisibilityListener(
+                    listener);
         } catch (Exception e) {
             e.printStackTrace();
         }
