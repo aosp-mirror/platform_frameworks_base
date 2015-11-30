@@ -143,6 +143,9 @@ public class SettingsDrawerActivity extends Activity {
 
     public boolean openTile(DashboardTile tile) {
         closeDrawer();
+        if (tile == null) {
+            return false;
+        }
         int numUserHandles = tile.userHandle.size();
         if (numUserHandles > 1) {
             ProfileSelectDialog.show(getFragmentManager(), tile);
