@@ -109,7 +109,7 @@ public class AppWindowAnimator {
     public AppWindowAnimator(final AppWindowToken atoken) {
         mAppToken = atoken;
         mService = atoken.service;
-        mAnimator = atoken.mAnimator;
+        mAnimator = mService.mAnimator;
     }
 
     public void setAnimation(Animation anim, int width, int height, boolean skipFirstFrame) {
