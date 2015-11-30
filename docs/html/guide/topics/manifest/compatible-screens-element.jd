@@ -21,11 +21,11 @@ href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a
 
 <dt>description:</dt>
 <dd itemprop="description">Specifies each screen configuration with which the application is compatible. Only one instance
-of the {@code &lt;compatible-screens&gt;} element is allowed in the manifest, but it can
+of the <code>&lt;compatible-screens&gt;</code> element is allowed in the manifest, but it can
 contain multiple <code>&lt;screen&gt;</code> elements. Each <code>&lt;screen&gt;</code> element
 specifies a specific screen size-density combination with which the application is compatible.
 
-  <p>The Android system <em>does not</em> read the {@code &lt;compatible-screens&gt;} manifest
+  <p>The Android system <em>does not</em> read the {@code <compatible-screens>} manifest
 element (neither at install-time nor at runtime). This element is informational only and may be used
 by external services (such as Google Play) to better understand the application's compatibility
 with specific screen configurations and enable filtering for users. Any screen configuration that is
@@ -45,14 +45,14 @@ for different screen sizes and densities.</p>
 
   <p>If you want to set only a minimum screen <em>size</em> for your your application, then you
 should use the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element. For example, if you want your application to be available
+<supports-screens>}</a> element. For example, if you want your application to be available
 only for <em>large</em> and <em>xlarge</em> screen devices, the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element allows you to declare that your application does not
+<supports-screens>}</a> element allows you to declare that your application does not
 support <em>small</em> and <em>normal</em> screen sizes. External services (such as Google
 Play) will filter your application accordingly. You can also use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element to declare whether the system should resize your
+<supports-screens>}</a> element to declare whether the system should resize your
 application for different screen sizes.</p>
 
   <p>Also see the <a href="{@docRoot}google/play/filters.html">Filters on Google Play</a>
@@ -65,10 +65,10 @@ other manifest elements.</p>
 <dd>
   <dl class="tag-list">
 
-    <dt id="screen">{@code &lt;screen&gt;}</dt>
+    <dt id="screen">{@code <screen>}</dt>
     <dd>Specifies a single screen configuration with which the application is compatible.
       <p>At least one instance of this element must be placed inside the {@code
-&lt;compatible-screens&gt;} element. This element <em>must include both</em> the {@code
+<compatible-screens>} element. This element <em>must include both</em> the {@code
 android:screenSize} and {@code android:screenDensity} attributes (if you do not declare both
 attributes, then the element is ignored).</p>
 
@@ -108,7 +108,7 @@ href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple 
 <dt>example</dt>
 <dd>
 <p>If your application is compatible with only small and normal screens, regardless
-of screen density, then you must specify twelve different {@code &lt;screen&gt;} elements,
+of screen density, then you must specify twelve different {@code <screen>} elements,
 because each screen size has six different density configurations. You must declare each one of
 these; any combination of size and density that you do <em>not</em> specify is considered a screen
 configuration with which your application is <em>not</em> compatible. Here's what the manifest

@@ -26,20 +26,20 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * type and that its value should be one of the explicitly named constants.
  * <p>
  * Example:
- * <pre>{@code
+ * <pre><code>
  *  &#64;Retention(SOURCE)
- *  &#64;StringDef(&#123;
+ *  &#64;StringDef({
  *     POWER_SERVICE,
  *     WINDOW_SERVICE,
  *     LAYOUT_INFLATER_SERVICE
- *  &#125;)
- *  public &#64;interface ServiceName &#123;&#125;
+ *  })
+ *  public @interface ServiceName {}
  *  public static final String POWER_SERVICE = "power";
  *  public static final String WINDOW_SERVICE = "window";
  *  public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
  *  ...
- *  public abstract Object getSystemService(&#64;ServiceName String name);
- * }</pre>
+ *  public abstract Object getSystemService(@ServiceName String name);
+ * </code></pre>
  *
  * @hide
  */

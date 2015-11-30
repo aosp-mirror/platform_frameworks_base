@@ -29,10 +29,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * on the binder thread.
  * <p>
  * Example:
- * <pre>{@code
- *  (&#64;BinderThread
+ * <pre><code>
+ *  &#64;BinderThread
  *  public BeamShareData createBeamShareData() { ... }
- * }</pre>
+ * </code></pre>
  *
  * {@hide}
  */

@@ -50,7 +50,7 @@ import java.io.IOException;
  * {@code android.R.styleable#ScaleDrawable_scaleHeight scaleHeight}. At run
  * time, the level may be set via {@link #setLevel(int)}.
  * <p>
- * A scale drawable may be defined in an XML file with the {@code &lt;scale>}
+ * A scale drawable may be defined in an XML file with the {@code <scale>}
  * element. For more information, see the guide to
  * <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable
  * Resources</a>.

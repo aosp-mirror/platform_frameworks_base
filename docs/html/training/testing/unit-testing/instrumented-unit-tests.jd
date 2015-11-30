@@ -91,7 +91,7 @@ Your instrumented unit test class should be written as a JUnit 4 test class. To 
 creating JUnit 4 test classes and using JUnit 4 assertions and annotations, see
 <a href="local-unit-tests.html#build">Create a Local Unit Test Class</a>.
 </p>
-<p>To create an instrumented JUnit 4 test class, add the {@code &#64;RunWith(AndroidJUnit4.class)}
+<p>To create an instrumented JUnit 4 test class, add the {@code @RunWith(AndroidJUnit4.class)}
 annotation at the beginning of your test class definition. You also need to specify the
 <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
 {@code AndroidJUnitRunner}</a> class
@@ -168,8 +168,8 @@ To create a test suite for your unit tests, import the JUnit
 class="external-link">{@code RunWith}</a> and
 <a href="http://junit.sourceforge.net/javadoc/org/junit/runners/Suite.html"
 class="external-link">{@code Suite}</a> classes. In your test suite, add the
-{@code &#64;RunWith(Suite.class)} and the {@code &#64;Suite.SuitClasses()} annotations. In
-the {@code &#64;Suite.SuiteClasses()} annotation, list the individual test classes or test
+{@code @RunWith(Suite.class)} and the {@code @Suite.SuitClasses()} annotations. In
+the {@code @Suite.SuiteClasses()} annotation, list the individual test classes or test
 suites as arguments.
 </p>
 
@@ -245,6 +245,6 @@ window.</p>
 </pre>
 
 <p>You can find the generated HTML test result reports in the
-{@code &lt;path_to_your_project&gt;/app/build/outputs/reports/androidTests/connected/} directory,
+{@code <path_to_your_project>/app/build/outputs/reports/androidTests/connected/} directory,
 and the corresponding XML files in the
-{@code &lt;path_to_your_project&gt;/app/build/outputs/androidTest-results/connected/} directory.</p>
+{@code <path_to_your_project>/app/build/outputs/androidTest-results/connected/} directory.</p>

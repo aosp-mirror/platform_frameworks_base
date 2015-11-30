@@ -133,8 +133,8 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>Windows では、{@code telnet 127.0.0.1 &lt;emulator-id&gt;}、
-{@code finger touch &lt;finger_id&gt;} の順に実行する必要がある場合があります。
+<p>Windows では、{@code telnet 127.0.0.1 <emulator-id>}、
+{@code finger touch <finger_id>} の順に実行する必要がある場合があります。
 </p>
 </li>
 </ol>
@@ -192,7 +192,7 @@ adb -e emu finger touch &lt;finger_id&gt;
 </pre>
 
 <p>{@code ChooserTargetService} に公開するアクティビティごとに、 {@code "android.service.chooser.chooser_target_service"} という名前の
-{@code &lt;meta-data&gt;} 要素をアプリのマニフェストに追加します。
+{@code <meta-data>} 要素をアプリのマニフェストに追加します。
 
 </p>
 

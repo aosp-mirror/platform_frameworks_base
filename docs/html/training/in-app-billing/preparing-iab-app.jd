@@ -41,7 +41,7 @@ next.link=list-iab-products.html
 <li>Select <strong>Google Play Billing Library</strong>.</li>
 <li>Click <strong>Install packages</strong> to complete the download.</li>
 </ol>
-<p>The sample files will be installed to {@code &lt;sdk&gt;/extras/google/play_billing/}.</p>
+<p>The sample files will be installed to {@code <sdk>/extras/google/play_billing/}.</p>
 
 <h2 id="AddToDevConsole">Add Your Application to the Developer Console</h2>
 <p>The Google Play Developer Console is where you publish your In-app Billing application and  manage the various digital goods that are available for purchase from your application. When you create a new application entry in the Developer Console, it automatically generates a public license key for your application. You will need this key to establish a trusted connection from your application to the Google Play servers. You only need to generate this key once per application, and don’t need to repeat these steps when you update the APK file for your application.</p>

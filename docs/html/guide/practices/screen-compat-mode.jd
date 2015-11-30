@@ -18,7 +18,7 @@ parent.link=screens_support.html
 <ol>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
   <li><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a></li>
+<supports-screens>}</a></li>
 </ol>
 </div>
 </div>
@@ -123,7 +123,7 @@ and <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@cod
 android:targetSdkVersion}</a> to {@code "10"} or lower and <strong>does not explicitly
 declare support</strong> for large screens using the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element.</li>
+<supports-screens>}</a> element.</li>
 
   <li>Your application has set either <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
@@ -131,7 +131,7 @@ or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to {@code "11"} or higher and <strong>explicitly declares that it does
 not support</strong> large screens, using the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element.</li>
+<supports-screens>}</a> element.</li>
 </ul>
 
 <p>To completely disable the user option for screen compatibility mode and remove the icon in the
@@ -141,7 +141,7 @@ system bar, you can do one of the following:</p>
   <li><strong>Easiest:</strong>
     <p>In your manifest file, add the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element and specify the <a
+<supports-screens>}</a> element and specify the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html#xlarge">{@code
 android:xlargeScreens}</a> attribute to {@code "true"}:</p>
 <pre>
@@ -150,13 +150,13 @@ android:xlargeScreens}</a> attribute to {@code "true"}:</p>
   <p>That's it. This declares that your application supports all larger screen sizes, so the
 system will always resize your layout to fit the screen. This works regardless of what values
 you've set in the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>
 attributes.</p> 
   </li>
   
   <li><strong>Easy but has other effects:</strong>
     <p>In your manifest's <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>
 element, set <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to {@code "11"} or higher:</p>
@@ -171,10 +171,10 @@ href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> to your activitie
 Options Menu button in the system bar.</p>
   <p>If screen compatibility mode is still enabled after you change this, check your manifest's <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> and be sure that there are no attributes set {@code "false"}. The best
+<supports-screens>}</a> and be sure that there are no attributes set {@code "false"}. The best
 practice is to always explicitly declare your support for different screen sizes using the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element, so you should use this element anyway.</p>
+<supports-screens>}</a> element, so you should use this element anyway.</p>
   <p>For more information about updating your application to target Android 3.0 devices, read <a
 href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android
 3.0</a>.</p>
@@ -183,7 +183,7 @@ href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for And
   <li><strong>Most control</strong> (but you must compile against Android 3.2 or higher):
     <p>In your manifest file, add the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element and specify the {@code android:compatibleWidthLimitDp}
+<supports-screens>}</a> element and specify the {@code android:compatibleWidthLimitDp}
 attribute to any value <em>higher than</em> {@code "320"}:</p>
 <pre>
 &lt;supports-screens android:compatibleWidthLimitDp="720" /&gt;
@@ -206,7 +206,7 @@ your value for {@code android:compatibleWidthLimitDp} is larger than 320.</p>
 <p>When your application is targeting Android 3.2 (API level 13) or higher, you can affect
 whether compatibility mode is enabled for certain screens by using the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> element.</p>
+<supports-screens>}</a> element.</p>
 
 <p class="note"><strong>Note:</strong> Screen compatibility mode is <strong>not</strong> a mode in
 which you should want your application to run&mdash;it causes pixelation and blurring in your UI,
@@ -227,7 +227,7 @@ of the following ways:</p>
 <ul>
   <li>In your manifest file, add the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element and specify the <a
+<supports-screens>}</a> element and specify the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html#compatibleWidth">{@code
 android:compatibleWidthLimitDp}</a> attribute to {@code "320"}:</p>
 <pre>

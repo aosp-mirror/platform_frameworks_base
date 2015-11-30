@@ -27,7 +27,7 @@ available values, from which the user can select a new one.</p>
 <img src="{@docRoot}images/ui/spinner.png" alt="" />
 
 <p>You can add a spinner to your layout with the {@link android.widget.Spinner} object. You
-should usually do so in your XML layout with a {@code &lt;Spinner&gt;} element. For example:</p>
+should usually do so in your XML layout with a {@code <Spinner>} element. For example:</p>
 
 <pre>
 &lt;Spinner

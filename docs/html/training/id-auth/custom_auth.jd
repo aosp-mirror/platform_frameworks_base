@@ -148,7 +148,7 @@ android.app.Service#onBind onBind()}. The <a
 href="http://developer.android.com/resources/samples/SampleSyncAdapter/index.html">
 SampleSyncAdapter</a> contains a good example of an authenticator service.</p>
 
-<p>Don't forget to add a {@code &lt;service&gt;} tag to your manifest file
+<p>Don't forget to add a {@code <service>} tag to your manifest file
 and add an intent filter for the AccountAuthenticator intent and declare the account
 authenticator:</p>
 

@@ -29,7 +29,7 @@ LOCAL_STATIC_LIBRARIES := cpufeatures
 </pre>
 </li>
 
-<li>In your source code, include the {@code &lt;cpu-features.h&gt;} header file.</li>
+<li>In your source code, include the {@code <cpu-features.h>} header file.</li>
 
 <li>At the end of your <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file,
 insert an instruction to import the {@code android/cpufeatures} module. For example:

@@ -31,8 +31,8 @@ trainingnavtop=true
 будет поддерживать объекты Intent (намерения) {@link android.content.Intent#ACTION_SEND}, чтобы пользователи могли
 поделиться контентом из другого приложения и запускать ваше приложение для выполнения требуемого действия.</p>
 
-<p>Чтобы разрешить другим приложениям запускать ваши операции, вам нужно добавить в ваш файл манифеста элемент <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
- для соответствующего элемента <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.</p>
+<p>Чтобы разрешить другим приложениям запускать ваши операции, вам нужно добавить в ваш файл манифеста элемент <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
+ для соответствующего элемента <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>.</p>
 
 <p>Если ваше приложение установлено на устройстве, система идентифицирует ваши
 фильтры Intent и добавляет информацию во внутренний каталог намерений, поддерживаемый всеми установленными приложениями.
@@ -56,13 +56,13 @@ Intent.</p>
   <dt>Действие</dt>
     <dd>Строка, называющая действие, которое необходимо выполнить. Обычно это одно из определяемых платформой значений,
 например, {@link android.content.Intent#ACTION_SEND} или {@link android.content.Intent#ACTION_VIEW}.
-    <p>Это следует указать в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a>.
+    <p>Это следует указать в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a>.
 Указанное в этом элементе значение должно представлять собой полное имя строки действия, а не
 постоянное значение API-интерфейса (см. примеры ниже).</p></dd>
 
   <dt>Данные</dt>
     <dd>Описание данных, связанных с объектом Intent.
-    <p>Указывается в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a>. Используя один
+    <p>Указывается в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a>. Используя один
 или несколько атрибутов в этом элементе, вы можете указать только тип MIME, только префикс URI,
 только схему URI или из сочетание, а также другие индикаторы типа
 принимаемых данных.</p>
@@ -76,12 +76,12 @@ URI), вы должны указать только атрибут {@code androi
 с жестом пользователя или местом запуска. Система поддерживает несколько разных категорий,
 но большинство из них используется редко. Однако по умолчанию все неявные объекты Intent определяются с
 {@link android.content.Intent#CATEGORY_DEFAULT}.
-    <p>Это указывается в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+    <p>Это указывается в фильтре Intent с элементом <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a>
 .</p></dd>
 </dl>
 
 <p>В своем фильтре Intent вы можете декларировать критерии, принимаемые вашей операцией.
-Для этого нужно декларировать каждый из них с соответствующими элементами XML, вложенными в элемент <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+Для этого нужно декларировать каждый из них с соответствующими элементами XML, вложенными в элемент <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
 .</p>
 
 <p>Рассмотрим в качестве примера операцию с фильтром Intent, обрабатывающим объект {@link
@@ -100,11 +100,11 @@ android.content.Intent#ACTION_SEND}, для текстовых или графи
 
 <p>Каждый входящий объект Intent указывает только одно действие и только один тип данных, однако допускается декларирование нескольких
 экземпляров элементов <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> и <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a> в каждом
+<action>}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+<category>}</a> и <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+<data>}</a> в каждом
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a>.</p>
+<intent-filter>}</a>.</p>
 
 <p>Если поведение любых двух пар действий и данных является взаимоисключающим,
 необходимо создать отдельные фильтры Intent с указанием допустимых действий

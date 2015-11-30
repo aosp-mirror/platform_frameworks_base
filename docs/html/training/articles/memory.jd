@@ -319,7 +319,7 @@ megabytes. If your app tries to allocate more memory than is available here, it 
 <p>In very special situations, you can request a larger heap size by setting the <a
 href="{@docRoot}guide/topics/manifest/application-element.html#largeHeap">{@code largeHeap}</a>
 attribute to "true" in the manifest <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 tag. If you do so, you can call {@link
 android.app.ActivityManager#getLargeMemoryClass()} to get an estimate of the large heap size.</p>
 

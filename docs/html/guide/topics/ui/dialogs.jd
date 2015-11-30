@@ -484,7 +484,7 @@ you can instead display an {@link android.app.Activity} as a dialog
 instead of using the {@link android.app.Dialog} APIs. Simply create an activity and set its theme to
 {@link android.R.style#Theme_Holo_Dialog Theme.Holo.Dialog}
 in the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> manifest element:</p>
+<activity>}</a> manifest element:</p>
 
 <pre>
 &lt;activity android:theme="&#64;android:style/Theme.Holo.Dialog" >
@@ -754,7 +754,7 @@ as a dialog.</p>
 <p>To show an activity as a dialog only when on large screens,
 apply the {@link android.R.style#Theme_Holo_DialogWhenLarge Theme.Holo.DialogWhenLarge}
 theme to the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> manifest element:</p>
+<activity>}</a> manifest element:</p>
 
 <pre>
 &lt;activity android:theme="&#64;android:style/Theme.Holo.DialogWhenLarge" >

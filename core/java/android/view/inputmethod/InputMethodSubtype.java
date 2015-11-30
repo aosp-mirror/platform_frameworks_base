@@ -41,7 +41,7 @@ import java.util.Locale;
  * the specified subtype of the designated IME directly.
  *
  * <p>It should be defined in an XML resource file of the input method with the
- * <code>&lt;subtype&gt;</code> element, which resides within an {@code &lt;input-method>} element.
+ * <code>&lt;subtype&gt;</code> element, which resides within an {@code <input-method>} element.
  * For more information, see the guide to
  * <a href="{@docRoot}guide/topics/text/creating-input-method.html">
  * Creating an Input Method</a>.</p>

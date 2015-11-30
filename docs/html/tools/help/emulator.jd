@@ -166,7 +166,7 @@ Here's the command-line syntax of the options available to the {@code emulator} 
 </td></tr>
 <tr>
   <td><code>-data&nbsp;&lt;filepath&gt;</code></td>
-  <td>Use {@code &lt;filepath&gt;} as the working user-data disk image. </td>
+  <td>Use {@code <filepath>} as the working user-data disk image. </td>
   <td>Optionally, you can specify a path relative to the current working directory.
   If <code>-data</code> is not used, the emulator looks for a file named {@code userdata-qemu.img}
   in the storage area of the AVD being used (see <code>-avd</code>).
@@ -426,7 +426,7 @@ scale in direct relationship with &lt;delay&gt; values.</p>
   <td>Enable KVM acceleration of the emulator virtual machine.</td>
   <td>This option is only effective when your system is set up to use
   <a href="{@docRoot}tools/devices/emulator.html#vm-linux">KVM-based VM acceleration</a>.
-  You can optionally specify a memory size ({@code -m &lt;size&gt;}) for the VM, which should match
+  You can optionally specify a memory size ({@code -m <size>}) for the VM, which should match
   your emulator's memory size:</p>
   {@code -qemu -m 512 -enable-kvm}<br>
   {@code -qemu -m 1024 -enable-kvm}

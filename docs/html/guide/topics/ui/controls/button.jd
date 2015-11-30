@@ -73,7 +73,7 @@ android:drawableLeft}</a> attribute:
 an on-click event.</p>
 
 <p>To define the click event handler for a button, add the {@link
-android.R.attr#onClick android:onClick} attribute to the {@code &lt;Button&gt;} element in your XML
+android.R.attr#onClick android:onClick} attribute to the {@code <Button>} element in your XML
 layout. The value for this attribute must be the name of the method you want to call in response
 to a click event. The {@link android.app.Activity} hosting the layout must then implement the
 corresponding method.</p>
@@ -140,7 +140,7 @@ input controls.</p>
 <p>You can control exactly how your controls are styled using a theme that you apply to your
 entire application. For instance, to ensure that all devices running Android 4.0 and higher use
 the Holo theme in your app, declare {@code android:theme="@android:style/Theme.Holo"} in your
-manifest's {@code &lt;application&gt;} element. Also read the blog post, <a
+manifest's {@code <application>} element. Also read the blog post, <a
 href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo Everywhere</a>
 for information about using the Holo theme while supporting older devices.</p>
 

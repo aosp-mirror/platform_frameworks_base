@@ -128,7 +128,7 @@ custom action and custom data so that your application can open the suggested co
 <h2 id="CustomSearchableConfiguration">Modifying the searchable configuration</h2>
 
 <p>To add support for custom suggestions, add the {@code android:searchSuggestAuthority} attribute
-to the {@code &lt;searchable&gt;} element in your searchable configuration file. For example:</p>
+to the {@code <searchable>} element in your searchable configuration file. For example:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -608,7 +608,7 @@ include {@code android:includeInGlobalSearch} as "true".</p>
 
 <p>The only scenario in which additional work is necessary is when your content provider demands a
 read permission. In which case, you need to add a special
-{@code &lt;path-permission&gt;} element for the provider to grant Quick Search Box read access to
+{@code <path-permission>} element for the provider to grant Quick Search Box read access to
 your content provider. For example:</p>
 
 <pre>
@@ -622,7 +622,7 @@ your content provider. For example:</p>
 </pre>
 
 <p>In this example, the provider restricts read and write access to the content. The
-{@code &lt;path-permission>} element amends the restriction by granting read access to content
+{@code <path-permission>} element amends the restriction by granting read access to content
 inside the {@code "/search_suggest_query"} path prefix when the {@code
 "android.permission.GLOBAL_SEARCH"} permission exists. This grants access to Quick Search Box
 so that it may query your content provider for suggestions.</p>

@@ -133,8 +133,8 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>В Windows, возможно, потребуется выполнить команду {@code telnet 127.0.0.1 &lt;emulator-id&gt;}, а затем
-{@code finger touch &lt;finger_id&gt;}.
+<p>В Windows, возможно, потребуется выполнить команду {@code telnet 127.0.0.1 <emulator-id>}, а затем
+{@code finger touch <finger_id>}.
 </p>
 </li>
 </ol>
@@ -192,7 +192,7 @@ adb -e emu finger touch &lt;finger_id&gt;
 </pre>
 
 <p>Для каждого действия, которое необходимо сделать доступным для {@code ChooserTargetService}, добавьте в манифест вашего приложения элемент
-{@code &lt;meta-data&gt;} с именем
+{@code <meta-data>} с именем
 {@code "android.service.chooser.chooser_target_service"}.
 </p>
 

@@ -257,7 +257,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targe
 
 <p>When running on a device that includes an infrared (IR) transmitter, you can now transmit IR signals using the {@link android.hardware.ConsumerIrManager} APIs. To get an instance of {@link android.hardware.ConsumerIrManager}, call {@link android.content.Context#getSystemService getSystemService()} with {@link android.content.Context#CONSUMER_IR_SERVICE} as the argument. You can then query the device's supported IR frequencies with {@link android.hardware.ConsumerIrManager#getCarrierFrequencies()} and transmit signals by passing your desired frequency and signal pattern with {@link android.hardware.ConsumerIrManager#transmit transmit()}.</p>
 
-<p>You should always first check whether a device includes an IR transmitter by calling {@link android.hardware.ConsumerIrManager#hasIrEmitter()}, but if your app is compatible only with devices that do have one, you should include a <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a> element in your manifest for {@code "android.hardware.consumerir"} ({@link android.content.pm.PackageManager#FEATURE_CONSUMER_IR}).</p>
+<p>You should always first check whether a device includes an IR transmitter by calling {@link android.hardware.ConsumerIrManager#hasIrEmitter()}, but if your app is compatible only with devices that do have one, you should include a <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> element in your manifest for {@code "android.hardware.consumerir"} ({@link android.content.pm.PackageManager#FEATURE_CONSUMER_IR}).</p>
 
 
 
@@ -372,7 +372,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targe
 
 <p>Alternatively, you don't need to create a {@link android.transition.Scene} object at all, but can instead call {@link android.transition.TransitionManager#beginDelayedTransition beginDelayedTransition()}, specifying a {@link android.view.ViewGroup} that contains the views you want to change. Then add, remove, or reconfigure the target views. After the system lays out the changes as necessary, a transition starts to animate all the affected views.</p>
 
-<p>For additional control, you can define sets of transitions that should occur between pre-defined scenes, using an XML file in your project {@code res/transition/} directory. Inside a {@code &lt;transitionManager>} element, specify one or more {@code &lt;transition>} tags that each specify a scene (a reference to a layout file) and the transition to apply when entering and/or exiting that scene. Then inflate this set of transitions using {@link android.transition.TransitionInflater#inflateTransitionManager inflateTransitionManager()}. Use the returned {@link android.transition.TransitionManager} to execute each transition with {@link android.transition.TransitionManager#transitionTo transitionTo()}, passing a {@link android.transition.Scene} that is represented by one of the {@code &lt;transition>} tags. You can also define sets of transitions programmatically with the {@link android.transition.TransitionManager} APIs.</p>
+<p>For additional control, you can define sets of transitions that should occur between pre-defined scenes, using an XML file in your project {@code res/transition/} directory. Inside a {@code <transitionManager>} element, specify one or more {@code <transition>} tags that each specify a scene (a reference to a layout file) and the transition to apply when entering and/or exiting that scene. Then inflate this set of transitions using {@link android.transition.TransitionInflater#inflateTransitionManager inflateTransitionManager()}. Use the returned {@link android.transition.TransitionManager} to execute each transition with {@link android.transition.TransitionManager#transitionTo transitionTo()}, passing a {@link android.transition.Scene} that is represented by one of the {@code <transition>} tags. You can also define sets of transitions programmatically with the {@link android.transition.TransitionManager} APIs.</p>
 
 <p>When specifying a transition, you can use several predefined types defined by subclasses of {@link android.transition.Transition}, such as {@link android.transition.Fade} and {@link android.transition.ChangeBounds}. If you don't specify a transition type, the system uses {@link android.transition.AutoTransition} by default, which automatically fades, moves, and resizes views as necessary. Additionally, you can create custom transitions by extending any of these classes to perform the animations however you'd like. A custom transition can track any property changes you'd like, and create any animation you want to based on those changes. For example, you could provide a subclass of {@link android.transition.Transition} that listens for changes to the "rotation" property of a view then animate any changes.</p>
 
@@ -531,7 +531,7 @@ The new {@link android.app.Notification.Action} class defines the characteristic
 
 <h2 id="Permissions">App Permissions</h2>
 
-<p>The following are new permissions that your app must request with the <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code &lt;uses-permission>}</a> tag to use certain new APIs:</p>
+<p>The following are new permissions that your app must request with the <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code <uses-permission>}</a> tag to use certain new APIs:</p>
 
 <dl>
 <dt>{@link android.Manifest.permission#INSTALL_SHORTCUT}</dt>
@@ -550,7 +550,7 @@ The new {@link android.app.Notification.Action} class defines the characteristic
 
 <h2 id="DeviceFeatures">Device Features</h2>
 
-<p>The following are new device features that you can declare with the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a> tag to declare your app requirements and enable filtering on Google Play or check for at runtime:</p>
+<p>The following are new device features that you can declare with the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> tag to declare your app requirements and enable filtering on Google Play or check for at runtime:</p>
 
 <dl>
 <dt>{@link android.content.pm.PackageManager#FEATURE_CONSUMER_IR}</dt>

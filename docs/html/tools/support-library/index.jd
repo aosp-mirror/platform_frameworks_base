@@ -1323,7 +1323,7 @@ android.support.v4.app.TaskStackBuilder} to provide support for implementing the
 <a href="{@docRoot}design/index.html">Android Design</a> guidelines for navigation. These
 additions include a way to implement the action bar's <em>Up</em> button across versions.
 For an example implementation of this pattern, see the AppNavigation sample in
-({@code <em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/AppNavigation}).</li>
+(<code><em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/AppNavigation</code>).</li>
           <li>Added {@link android.support.v4.app.NotificationCompat.Builder} to provide a
 compatibility implementation of Android 3.0's {@link android.app.Notification.Builder} helper class
 for creating standardized system notifications.</li>

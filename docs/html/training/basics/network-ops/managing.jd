@@ -398,12 +398,12 @@ The sample application registers the
 {@link android.app.Activity#onCreate(android.os.Bundle) onCreate()}, 
 and it unregisters it in 
 {@link android.app.Activity#onDestroy onDestroy()}. This is more lightweight 
-than declaring a {@code &lt;receiver&gt;} in the manifest. When you declare a 
-{@code &lt;receiver&gt;} in the manifest, it can wake up your app at any time, 
+than declaring a {@code <receiver>} in the manifest. When you declare a
+{@code <receiver>} in the manifest, it can wake up your app at any time,
 even if you haven't run it for weeks. By registering and unregistering 
 {@code NetworkReceiver} within the main activity, you ensure that the app won't 
 be woken up after the user leaves the app. 
-If you do declare a {@code &lt;receiver&gt;} in the manifest and you know exactly 
+If you do declare a {@code <receiver>} in the manifest and you know exactly
 where you need it, you can use 
 {@link android.content.pm.PackageManager#setComponentEnabledSetting setComponentEnabledSetting()}
 to enable and disable it as appropriate.</p>

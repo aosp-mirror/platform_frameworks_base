@@ -159,7 +159,7 @@ when you touch a contact photo or status icon.</li>
       <li>Database API support, for client-side databases using SQL.</li>
       <li>Application cache support, for offline applications.</li>
       <li>Geolocation API support, to provide location information about the device.</li>
-      <li>{@code &lt;video>} tag support in fullscreen mode.</li>
+      <li>{@code <video>} tag support in fullscreen mode.</li>
     </ul>
   </li>
 </ul>

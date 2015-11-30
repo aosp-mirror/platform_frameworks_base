@@ -137,7 +137,7 @@ correct by getting a reference to its {@link android.view.ViewGroup.LayoutParams
 object, then call assertion methods to verify that the
 {@link android.widget.Button} object's width and height attributes match the
 expected values.</p>
-<p>The {@code &#64;MediumTest} annotation specifies how the test is categorized,
+<p>The {@code @MediumTest} annotation specifies how the test is categorized,
 relative to its absolute execution time. To learn more about using test size
 annotations, see <a href="#annotations">Apply Test Annotations</a>.</p>
 
@@ -185,7 +185,7 @@ and dragging of Views or the application screen.</p>
 <p class="caution"><strong>Caution: </strong>The {@link android.test.TouchUtils}
 methods are designed to send events to the UI thread safely from the test thread.
 You should not run {@link android.test.TouchUtils} directly in the UI thread or
-any test method annotated with {@code &#64;UIThread}. Doing so might
+any test method annotated with {@code @UIThread}. Doing so might
 raise the {@code WrongThreadException}.</p>
 
 <h2 id="annotations">Apply Test Annotations</h2>
@@ -202,8 +202,8 @@ android.test.suitebuilder.annotation.MediumTest &#64;MediumTest}</dt>
 <dd>Marks a test that should run as part of the large tests.</dd>
 </dl>
 <p>Typically, a short running test that take only a few milliseconds should be
-marked as a {@code &#64;SmallTest}. Longer running tests (100 milliseconds or
-more) are usually marked as {@code &#64;MediumTest}s or {@code &#64;LargeTest}s,
+marked as a {@code @SmallTest}. Longer running tests (100 milliseconds or
+more) are usually marked as {@code @MediumTest}s or {@code @LargeTest}s,
 depending on whether the test accesses resources on the local system only or
 remote resources over a network. For guidance on using test size annotations,
 see this <a href="https://plus.sandbox.google.com/+AndroidDevelopers/posts/TPy1EeSaSg8">Android Tools Protip</a>.</p>

@@ -158,7 +158,7 @@ runtime&mdash;you must declare the searchable configuration in XML.</p>
 
 <p>The searchable configuration file must include the <a
 href="{@docRoot}guide/topics/search/searchable-config.html#searchable-element">{@code
-&lt;searchable&gt;}</a> element as the root node and specify one
+<searchable>}</a> element as the root node and specify one
 or more attributes. For example:</p>
 
 <pre>
@@ -186,7 +186,7 @@ YouTube".</p>
 
 <p>The <a
 href="{@docRoot}guide/topics/search/searchable-config.html#searchable-element">{@code
-&lt;searchable&gt;}</a> element accepts several other attributes. However, you don't need
+<searchable>}</a> element accepts several other attributes. However, you don't need
 most attributes until you add features such as <a href="#SearchSuggestions">search suggestions</a>
 and <a href="#VoiceSearch">voice search</a>. For detailed information about the searchable
 configuration file, see the <a
@@ -216,15 +216,15 @@ search query. So, you must first declare your searchable activity in the Android
 <p>If you don't have one already, create an {@link android.app.Activity} that will perform
 searches and present results. You don't need to implement the search functionality yet&mdash;just
 create an activity that you can declare in the manifest. Inside the manifest's <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element:</p>
 <ol>
   <li>Declare the activity to accept the {@link android.content.Intent#ACTION_SEARCH} intent, in an
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a>
+<intent-filter>}</a>
 element.</li>
   <li>Specify the searchable configuration to use, in a <a
-href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element.</li>
 </ol>
 
@@ -243,17 +243,17 @@ element.</li>
 &lt;/application>
 </pre>
 
-<p>The {@code &lt;meta-data&gt;} element must include the {@code android:name} attribute with a
+<p>The {@code <meta-data>} element must include the {@code android:name} attribute with a
 value of {@code "android.app.searchable"} and the {@code android:resource} attribute with a
 reference to the searchable configuration file (in this example, it
 refers to the {@code res/xml/searchable.xml} file).</p>
 
 <p class="note"><strong>Note:</strong> The <a
 href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> does not need a <a
-href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> with the
+<intent-filter>}</a> does not need a <a
+href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a> with the
 {@code DEFAULT} value (which you usually see in <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> elements),
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> elements),
 because the system delivers the {@link android.content.Intent#ACTION_SEARCH} intent explicitly to
 your searchable activity, using its component name.</p>
 
@@ -416,10 +416,10 @@ SearchableActivity}, you must declare in the manifest that {@code SearchableActi
 searchable activity to use for the search dialog in {@code OtherActivity}.</p>
 
 <p>To declare the searchable activity for an activity's search dialog,
-add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
+add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element inside the respective activity's <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element.
-The <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element.
+The <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element must include the {@code android:value} attribute that specifies the searchable activity's
 class name and the {@code android:name} attribute with a value of {@code
 "android.app.default_searchable"}.</p>
@@ -452,7 +452,7 @@ search dialog:</p>
 </pre>
 
 <p>Because the {@code OtherActivity} now includes a <a
-href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element to declare which searchable activity to use for searches, the activity has enabled the
 search dialog.
 While the user is in this activity, the {@link
@@ -464,15 +464,15 @@ the {@link android.content.Intent#ACTION_SEARCH} intent.</p>
 by default, so you don't need to add this declaration to {@code SearchableActivity}.</p>
 
 <p>If you want every activity in your application to provide the search dialog, insert the above <a
-href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element as a child of the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element, instead of each <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>. This
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>. This
 way, every activity inherits the value, provides the search dialog, and delivers searches to
 the same searchable activity. (If you have multiple searchable activities, you can override the
 default searchable activity by placing a different <a
-href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data&gt;}</a>
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 declaration inside individual activities.)</p>
 
 <p>With the search dialog now enabled for your activities, your application is ready to perform

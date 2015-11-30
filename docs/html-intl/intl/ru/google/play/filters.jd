@@ -329,23 +329,23 @@ SDK не будет скомпилирован, если атрибут <code>ma
   <tr><th>Элемент манифеста</th><th>Сводная информация</th></tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a></nobr></td>
+<compatible-screens>}</a></nobr></td>
     <td>
       <p>Google Play отфильтровывает приложение, если размер и разрешение экрана устройства
-не соответствуют какой-либо конфигурации экрана(декларируемые элементом {@code &lt;screen&gt;}) в элементе {@code
-&lt;compatible-screens&gt;}.</p>
+не соответствуют какой-либо конфигурации экрана(декларируемые элементом {@code <screen>}) в элементе {@code
+<compatible-screens>}.</p>
       <p class="caution"><strong>Внимание!</strong> В обычной практике <strong>вы не должны использовать
 этот элемент манифеста</strong>. Применение этого элемента существенно
 сокращает число потенциальных пользователей вашего приложения, исключая все комбинации размеров
 и разрешения экрана, которые не указаны в списке. Вместо этого используйте элемент манифеста <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> (описанный выше в <a href="#table1">
+<supports-screens>}</a> (описанный выше в <a href="#table1">
 таблице 1</a>), чтобы определить режим совместимости для неучтенных альтернативными ресурсами
 конфигураций экранов.</p>
     </td>
   </tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a></nobr></td>
+<supports-gl-texture>}</a></nobr></td>
     <td>
       <p>Google Play будет отфильтровывать приложение, если не окажется ни одного формата
 сжатия GL-текстуры, поддерживаемого устройством. </p>
@@ -408,16 +408,16 @@ Android NDK?</a></p> </tr> <tr>
 <ul>
   <li>Форматы сжатия текстур OpenGL
     <p>Используя элемент <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a>.</p>
+<supports-gl-texture>}</a>.</p>
   </li>
   <li>Размер экрана (а в некоторых случаях и разрешение)
     <p>Используя элемент <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> или <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a>.</p>
+<supports-screens>}</a> или <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+<compatible-screens>}</a>.</p>
   </li>
   <li>Уровень API-интерфейса
     <p>Используя элемент <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk&gt;}</a>.</p>
+<uses-sdk>}</a>.</p>
   </li>
   <li>Архитектура процессора (ABI)
     <p>Включая специфичные библиотеки, созданные на основе <a href="{@docRoot}tools/sdk/ndk/index.html">Android
