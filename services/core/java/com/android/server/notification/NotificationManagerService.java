@@ -1289,10 +1289,11 @@ public class NotificationManagerService extends SystemService {
                     Binder.getCallingUid(), incomingUserId, true, false,
                     "getAppActiveNotifications", pkg);
 
-            final int N = mNotificationList.size();
-            final ArrayList<StatusBarNotification> list = new ArrayList<StatusBarNotification>(N);
+            final ArrayList<StatusBarNotification> list
+                    = new ArrayList<StatusBarNotification>(mNotificationList.size());
 
             synchronized (mNotificationList) {
+                final int N = mNotificationList.size();
                 for (int i = 0; i < N; i++) {
                     final StatusBarNotification sbn = mNotificationList.get(i).sbn;
                     if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
