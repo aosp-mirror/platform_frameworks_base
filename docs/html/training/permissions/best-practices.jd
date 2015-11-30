@@ -222,7 +222,9 @@ bad user experiences.
   {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
   in its manifest. You should test the app with each of these permissions
   turned on and off, to make sure the app can handle all permission
-  configurations gracefully.
+  configurations gracefully. Remember, beginning with Android 6.0 the user can
+  turn permissions on or off for <em>any</em> app, even an app that targets API
+  level 22 or lower.
   </li>
 
   <li>Use the <a href="{@docRoot}tools/help/adb.html">adb</a> tool to manage
