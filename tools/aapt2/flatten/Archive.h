@@ -17,6 +17,7 @@
 #ifndef AAPT_FLATTEN_ARCHIVE_H
 #define AAPT_FLATTEN_ARCHIVE_H
 
+#include "Diagnostics.h"
 #include "util/BigBuffer.h"
 #include "util/Files.h"
 #include "util/StringPiece.h"
@@ -42,15 +43,17 @@ struct ArchiveEntry {
 struct IArchiveWriter {
     virtual ~IArchiveWriter() = default;
 
-    virtual ArchiveEntry* writeEntry(const StringPiece& path, uint32_t flags,
-                                     const BigBuffer& buffer) = 0;
-    virtual ArchiveEntry* writeEntry(const StringPiece& path, uint32_t flags,
-                                     android::FileMap* fileMap, size_t offset, size_t len) = 0;
+    virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;
+    virtual bool writeEntry(const BigBuffer& buffer) = 0;
+    virtual bool writeEntry(const void* data, size_t len) = 0;
+    virtual bool finishEntry() = 0;
 };
 
-std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(const StringPiece& path);
+std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(IDiagnostics* diag,
+                                                             const StringPiece& path);
 
-std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(const StringPiece& path);
+std::unique_ptr<IArchiveWriter> createZipFileArchiveWriter(IDiagnostics* diag,
+                                                           const StringPiece& path);
 
 } // namespace aapt
 
