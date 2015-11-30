@@ -55,22 +55,20 @@ public class MtpDocumentsService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            // If intent is null, the service was restarted.
-            // TODO: Recover opened devices here.
-            return START_STICKY;
-        }
-        if (intent.getAction().equals(ACTION_OPEN_DEVICE)) {
-            final UsbDevice device = intent.<UsbDevice>getParcelableExtra(EXTRA_DEVICE);
-            try {
-                final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
-                provider.openDevice(device.getDeviceId());
-                return START_STICKY;
-            } catch (IOException error) {
-                Log.e(MtpDocumentsProvider.TAG, error.getMessage());
+        // If intent is null, the service was restarted.
+        if (intent != null) {
+            if (intent.getAction().equals(ACTION_OPEN_DEVICE)) {
+                final UsbDevice device = intent.<UsbDevice>getParcelableExtra(EXTRA_DEVICE);
+                try {
+                    final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
+                    provider.openDevice(device.getDeviceId());
+                    return START_STICKY;
+                } catch (IOException error) {
+                    Log.e(MtpDocumentsProvider.TAG, error.getMessage());
+                }
+            } else {
+                Log.e(MtpDocumentsProvider.TAG, "Received unknown intent action.");
             }
-        } else {
-            Log.w(MtpDocumentsProvider.TAG, "Received unknown intent action.");
         }
         stopSelfIfNeeded();
         return Service.START_NOT_STICKY;
@@ -78,14 +76,8 @@ public class MtpDocumentsService extends Service {
 
     @Override
     public void onDestroy() {
-        final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
         unregisterReceiver(mReceiver);
         mReceiver = null;
-        try {
-            provider.closeAllDevices();
-        } catch (InterruptedException e) {
-            Log.e(MtpDocumentsProvider.TAG, e.getMessage());
-        }
         super.onDestroy();
     }
 

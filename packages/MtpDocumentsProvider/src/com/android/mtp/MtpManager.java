@@ -32,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The model wrapping android.mtp API.
