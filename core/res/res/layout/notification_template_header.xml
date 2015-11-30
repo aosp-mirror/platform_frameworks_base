@@ -24,6 +24,7 @@
     android:clipChildren="false"
     android:layout_gravity="start|top"
     android:gravity="center_vertical"
+    android:paddingTop="5dp"
     android:paddingBottom="16dp"
     android:paddingStart="@dimen/notification_content_margin_start"
     android:paddingEnd="16dp">
@@ -49,7 +50,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
         android:layout_marginStart="3dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="2dp"
         android:singleLine="true"
         />
     <TextView
@@ -57,7 +58,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:text="@string/notification_header_divider_symbol"
         android:visibility="gone"/>
     <TextView
@@ -65,7 +67,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:visibility="gone"
         android:singleLine="true"/>
     <TextView
@@ -73,7 +76,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:text="@string/notification_header_divider_symbol"
         android:singleLine="true"
         android:visibility="gone"/>
@@ -82,16 +86,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:visibility="gone"
-        android:maxWidth="60dp"
+        android:maxWidth="72dp"
         android:singleLine="true"/>
     <TextView
         android:id="@+id/time_divider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.Notification.Info"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:text="@string/notification_header_divider_symbol"
         android:singleLine="true"
         android:visibility="gone"/>
@@ -99,7 +105,8 @@
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:layout="@layout/notification_template_part_time"
         android:visibility="gone"
         />
@@ -107,7 +114,8 @@
         android:id="@+id/chronometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
         android:layout="@layout/notification_template_part_chronometer"
         android:visibility="gone"
         />
@@ -116,7 +124,7 @@
         android:background="@null"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|center_vertical"
+        android:paddingTop="1dp"
         android:src="@drawable/ic_arrow_drop_down"
         android:visibility="gone"
         />
