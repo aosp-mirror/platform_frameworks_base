@@ -693,6 +693,12 @@ const Vector<sp<XMLNode> >& XMLNode::getChildren() const
     return mChildren;
 }
 
+
+Vector<sp<XMLNode> >& XMLNode::getChildren()
+{
+    return mChildren;
+}
+
 const String8& XMLNode::getFilename() const
 {
     return mFilename;
@@ -715,6 +721,18 @@ const XMLNode::attribute_entry* XMLNode::getAttribute(const String16& ns,
     }
 
     return NULL;
+}
+
+bool XMLNode::removeAttribute(const String16& ns, const String16& name)
+{
+    for (size_t i = 0; i < mAttributes.size(); i++) {
+        const attribute_entry& ae(mAttributes.itemAt(i));
+        if (ae.ns == ns && ae.name == name) {
+            removeAttribute(i);
+            return true;
+        }
+    }
+    return false;
 }
 
 XMLNode::attribute_entry* XMLNode::editAttribute(const String16& ns,

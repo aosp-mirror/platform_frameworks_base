@@ -1537,7 +1537,14 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     std::queue<CompileResourceWorkItem>& workQueue = table.getWorkQueue();
     while (!workQueue.empty()) {
         CompileResourceWorkItem& workItem = workQueue.front();
-        err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.file, &table, xmlFlags);
+        if (workItem.xmlRoot != NULL) {
+            err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.xmlRoot,
+                                 workItem.file, &table, xmlFlags);
+        } else {
+            err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.file,
+                                 &table, xmlFlags);
+        }
+
         if (err == NO_ERROR) {
             assets->addResource(workItem.resPath.getPathLeaf(),
                     workItem.resPath,

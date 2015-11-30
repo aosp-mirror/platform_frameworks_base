@@ -83,6 +83,7 @@ struct CompileResourceWorkItem {
     String16 resourceName;
     String8 resPath;
     sp<AaptFile> file;
+    sp<XMLNode> xmlRoot;
 };
 
 class ResourceTable : public ResTable::Accessor
@@ -205,6 +206,12 @@ public:
                              const String16& resourceName,
                              const sp<AaptFile>& file,
                              const sp<XMLNode>& root);
+
+    status_t processBundleFormat(const Bundle* bundle,
+                                 const String16& resourceName,
+                                 const sp<AaptFile>& file,
+                                 const sp<XMLNode>& parent);
+
 
     sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
             const bool isBase);
@@ -586,6 +593,11 @@ private:
                       Res_value* outValue);
     int getPublicAttributeSdkLevel(uint32_t attrId) const;
 
+    status_t processBundleFormatImpl(const Bundle* bundle,
+                                     const String16& resourceName,
+                                     const sp<AaptFile>& file,
+                                     const sp<XMLNode>& parent,
+                                     Vector<sp<XMLNode> >* namespaces);
 
     String16 mAssetsPackage;
     PackageType mPackageType;
