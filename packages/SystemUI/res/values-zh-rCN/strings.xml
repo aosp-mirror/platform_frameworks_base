@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"固定屏幕"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"无法启动<xliff:g id="APP">%s</xliff:g>。"</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"更多"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"历史记录"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
@@ -437,17 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在状态栏中显示时钟的秒数。这可能会影响电池的续航时间。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快速设置"</string>
     <string name="show_brightness" msgid="6613930842805942519">"在快速设置中显示亮度栏"</string>
-    <!-- no translation found for overview_page_on_toggle (7332906295136546986) -->
-    <skip />
-    <!-- no translation found for overview_page_on_toggle_desc (3350421878356386241) -->
-    <skip />
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"启用快速切换"</string>
-    <!-- no translation found for overview_fast_toggle_via_button_desc (8983671478896649561) -->
-    <skip />
-    <!-- no translation found for overview_fullscreen_thumbnails (3052584848522856237) -->
-    <skip />
-    <!-- no translation found for overview_fullscreen_thumbnails_desc (3588874352141119692) -->
-    <skip />
     <string name="experimental" msgid="6198182315536726162">"实验性"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要开启蓝牙吗？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"要将您的键盘连接到平板电脑，您必须先开启蓝牙。"</string>

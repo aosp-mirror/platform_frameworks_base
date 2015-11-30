@@ -283,7 +283,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Meldingen"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Zaklamp"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiele gegevens"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Gegevensgebruik"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datagebruik"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Resterende gegevens"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limiet overschreden"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> gebruikt"</string>
@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"scherm vastzetten"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"zoeken"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Kan <xliff:g id="APP">%s</xliff:g> niet starten."</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Meer"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"Geschiedenis"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontaal splitsen"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Verticaal splitsen"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Aangepast splitsen"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Klokseconden op de statusbalk weergeven. Kan van invloed zijn op de accuduur."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Snelle instellingen opnieuw indelen"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Helderheid weergeven in Snelle instellingen"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Paginering inschakelen"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Paginering via de knop Overzicht inschakelen"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Snel schakelen inschakelen"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Starttime-out tijdens paginering inschakelen"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Screenshots op volledig scherm inschakelen"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Screenshots op volledig scherm in Overzicht inschakelen"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimenteel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth inschakelen?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth inschakelen."</string>

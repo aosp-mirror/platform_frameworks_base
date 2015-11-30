@@ -296,6 +296,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"przypinanie ekranu"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"szukaj"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nie udało się uruchomić aplikacji <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Więcej"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"Historia"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podziel poziomo"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podziel pionowo"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podziel niestandardowo"</string>
@@ -439,12 +441,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Pokaż sekundy na zegarku na pasku stanu. Może mieć wpływ na czas pracy baterii."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Uporządkuj Szybkie ustawienia"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Pokaż jasność w Szybkich ustawieniach"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Włącz stronicowanie"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Włącz stronicowanie za pomocą przycisku Przegląd"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Włącz szybkie przełączanie"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Włącz limit czasu uruchomienia podczas stronicowania"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Włącz pełnoekranowe zrzuty ekranu"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Włącz pełnoekranowe zrzuty ekranu w widoku Przegląd"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperymentalne"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Włączyć Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Aby połączyć klawiaturę z tabletem, musisz najpierw włączyć Bluetooth."</string>

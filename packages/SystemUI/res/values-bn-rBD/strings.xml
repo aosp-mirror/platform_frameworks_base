@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"স্ক্রীন পিন করা"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"অনুসন্ধান"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> শুরু করা যায়নি৷"</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"আরো"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"ইতিহাস"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উল্লম্ব স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"কাস্টম স্প্লিট করুন"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"দ্রুত সেটিংসে পুনরায় সাজান"</string>
     <string name="show_brightness" msgid="6613930842805942519">"দ্রুত সেটিংসে উজ্জ্বলতা দেখান"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"পেজিং সক্ষম করুন"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"\'এক নজরে\' বোতামের মাধ্যমে পেজিং সক্ষম করুন"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"\'দ্রুত টগল করা\'র ব্যবস্থাটি সক্ষম করুন"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"পেজিং এর সময় \'লঞ্চ সময় সমাপ্ত\' সক্ষম করুন"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"পূর্ণস্ক্রীন স্ক্রীনশট সক্ষম করুন"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"\'এক নজরে\'র মধ্যে পূর্ণস্ক্রীন স্ক্রীনশট সক্ষম করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>

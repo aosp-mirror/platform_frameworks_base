@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixació de pantalla"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"cerca"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"No s\'ha pogut iniciar <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Més"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"Historial"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostra els segons del rellotge a la barra d\'estat. Això pot afectar la durada de la bateria."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Reorganitza Configuració ràpida"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostra la brillantor a Configuració ràpida"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Activa la paginació"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Activa la paginació mitjançant el botó Visió general"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Activa el canvi ràpid"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Activa el temps d\'espera de llançament durant la paginació"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Activa les captures de pantalla completa"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Activa les captures de pantalla completa a Visió general"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
