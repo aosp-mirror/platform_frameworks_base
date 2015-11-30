@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"ບໍ່​ສາ​ມາດ​ເລີ່ມ <xliff:g id="APP">%s</xliff:g> ໄດ້."</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"ເພີ່ມເຕີມ"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"ປະຫວັດ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ການ​ແຍກ​ລວງ​ຂວາງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ການ​ແຍກ​ລວງ​ຕັ້ງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ການ​ແຍກ​ກຳ​ນົດ​ເອງ"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ສະ​ແດງວິ​ນາ​ທີ​ໂມງ​ຢູ່​ໃນ​ແຖບ​ສະ​ຖາ​ນະ. ອາດ​ຈະ​ມີ​ຜົນ​ກະ​ທົບ​ຕໍ່​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ຈັດ​ວາງ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ​ຄືນ​ໃໝ່"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ສະ​ແດງ​ຄວາມ​ແຈ້ງ​ຢູ່​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"​ເປີດ​ໃຊ້​ງານ​ການ​ແບ່ງ​ໜ້າ"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"ເປີດນຳໃຊ້ການແບ່ງໜ້າຜ່ານປຸ່ມພາບລວມ"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"ເປີດນຳໃຊ້ການສັບປ່ຽນໄວ"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"​ເປີດ​ໃຊ້​ງານ​ການ​ໝົດ​ເວລາ​ການ​ເປີດ​ໃຊ້ ​ໃນ​ຂະນະ​ທີ່​ແບ່ງ​ໜ້າ"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"​ເປີດ​ໃຊ້ງານພາບ​ໜ້າ​ຈໍ​ແບບ​ເຕັມ​ຈໍ"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"​ເປີດ​ໃຊ້​ງານ​ພາບ​ໜ້າ​ຈໍ​ແບບ​ເຕັມ​ຈໍ​ໃນ​ໂໝດພາບ​ລວມ"</string>
     <string name="experimental" msgid="6198182315536726162">"ຍັງຢູ່ໃນການທົດລອງ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ເປີດ​ໃຊ້ Bluetooth ບໍ່?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ເພື່ອ​ເຊື່ອມ​ຕໍ່​ແປ້ນ​ພິມ​ຂອງ​ທ່ານ​ກັບ​ແທັບ​ເລັດ​ຂອງ​ທ່ານ, ກ່ອນ​ອື່ນ​ໝົດ​ທ່ານ​ຕ້ອງ​ເປີດ Bluetooth."</string>

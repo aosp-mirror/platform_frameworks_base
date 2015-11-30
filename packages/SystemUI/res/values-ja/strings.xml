@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"画面固定"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"検索"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>を開始できません。"</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"もっと見る"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"履歴"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"横に分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"縦に分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"分割（カスタム）"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ステータスバーに時計の秒を表示します。電池使用量に影響する可能性があります。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"クイック設定を並べ替え"</string>
     <string name="show_brightness" msgid="6613930842805942519">"クイック設定に明るさ調整バーを表示する"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"ページ切り替えを有効にする"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"[概要] ボタンによるページ切り替えを有効にします"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"高速切り替えを有効にする"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"ページ切り替え中の起動タイムアウトを有効にします"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"全画面スクリーンショットを有効にする"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"[概要] で全画面スクリーンショットを有効にします"</string>
     <string name="experimental" msgid="6198182315536726162">"試験運用版"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"BluetoothをONにしますか？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"タブレットでキーボードに接続するには、最初にBluetoothをONにする必要があります。"</string>

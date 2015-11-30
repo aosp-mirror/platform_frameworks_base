@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"မျက်နှာပြင် ပင်ထိုးမှု"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ကို မစနိုင်ပါ။"</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"နောက်ထပ်"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"မှတ်တမ်း"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ဒေါင်လိုက်ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"စိတ်ကြိုက် ပိုင်းမည်"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"အခြေအနေပြနေရာမှာ နာရီ စက္ကန့်များကို ပြပါ။ ဘက်ထရီ သက်တမ်းကို အကျိုးသက်ရောက်နိုင်တယ်။"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"အမြန် ဆက်တင်များကို ပြန်စီစဉ်ရန်"</string>
     <string name="show_brightness" msgid="6613930842805942519">"အမြန် ဆက်တင်များထဲက တောက်ပမှုကို ပြရန်"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"စာမျက်နှာပြောင်းမှု ဖွင့်ပါ"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"အနှစ်ချုပ်ကြည့်မှု မှတစ်ဆင့် စာမျက်နှာပြောင်းမှုကို ဖွင့်ပါ"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"အမြန်ဖွင့်/ပိတ်ခြင်း ဖွင့်ရန်"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"စာမျက်နှာပြောင်းမှု ဖွင့်တင်ရန်အတွက် ကန့်သတ်ချိန်ကို ဖွင့်ပါ"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"မျက်နှာပြင်အပြည့် လျှပ်တစ်ပြက်ပုံများကို ဖွင့်ပါ"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"အနှစ်ချုပ်ကြည့်မှုထဲတွင် မျက်နှာပြင်အပြည့် လျှပ်တစ်ပြက်ပုံများကို ဖွင့်ပါ"</string>
     <string name="experimental" msgid="6198182315536726162">"စမ်းသပ်ရေး"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ဘလူးတုသ် ဖွင့်ရမလား။"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>

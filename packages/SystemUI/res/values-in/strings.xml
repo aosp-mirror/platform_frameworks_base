@@ -294,6 +294,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pin ke layar"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"telusuri"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Tidak dapat memulai <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Lainnya"</string>
+    <string name="recents_history_label" msgid="3076213823382198287">"Riwayat"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Pisahkan Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Pisahkan Vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pisahkan Khusus"</string>
@@ -437,12 +439,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Tampilkan detik jam di bilah status. Dapat memengaruhi masa pakai baterai."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Atur Ulang Setelan Cepat"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Tampilkan kecerahan di Setelan Cepat"</string>
-    <string name="overview_page_on_toggle" msgid="7332906295136546986">"Aktifkan tampilan laman"</string>
-    <string name="overview_page_on_toggle_desc" msgid="3350421878356386241">"Mengaktifkan tampilan laman melalui tombol Ringkasan"</string>
-    <string name="overview_fast_toggle_via_button" msgid="8316769524084143500">"Mengaktifkan pengalih cepat"</string>
-    <string name="overview_fast_toggle_via_button_desc" msgid="8983671478896649561">"Aktifkan waktu tunggu peluncuran saat menampilkan laman"</string>
-    <string name="overview_fullscreen_thumbnails" msgid="3052584848522856237">"Aktifkan tangkapan layar untuk layar penuh"</string>
-    <string name="overview_fullscreen_thumbnails_desc" msgid="3588874352141119692">"Aktifkan tangkapan layar untuk layar penuh di Ringkasan"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Aktifkan Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Untuk menghubungkan keyboard dengan tablet, terlebih dahulu aktifkan Bluetooth."</string>
