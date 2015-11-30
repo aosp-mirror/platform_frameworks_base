@@ -102,6 +102,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_MERGE_CONFERENCE = 18;
     private static final int MSG_SWAP_CONFERENCE = 19;
     private static final int MSG_REJECT_WITH_MESSAGE = 20;
+    private static final int MSG_SILENCE = 21;
 
     private static Connection sNullConnection;
 
@@ -172,6 +173,11 @@ public abstract class ConnectionService extends Service {
             args.arg1 = callId;
             args.arg2 = message;
             mHandler.obtainMessage(MSG_REJECT_WITH_MESSAGE, args).sendToTarget();
+        }
+
+        @Override
+        public void silence(String callId) {
+            mHandler.obtainMessage(MSG_SILENCE, callId).sendToTarget();
         }
 
         @Override
@@ -316,6 +322,9 @@ public abstract class ConnectionService extends Service {
                 }
                 case MSG_DISCONNECT:
                     disconnect((String) msg.obj);
+                    break;
+                case MSG_SILENCE:
+                    silence((String) msg.obj);
                     break;
                 case MSG_HOLD:
                     hold((String) msg.obj);
@@ -702,6 +711,11 @@ public abstract class ConnectionService extends Service {
     private void reject(String callId, String rejectWithMessage) {
         Log.d(this, "reject %s with message", callId);
         findConnectionForAction(callId, "reject").onReject(rejectWithMessage);
+    }
+
+    private void silence(String callId) {
+        Log.d(this, "silence %s", callId);
+        findConnectionForAction(callId, "silence").onSilence();
     }
 
     private void disconnect(String callId) {
