@@ -31403,7 +31403,10 @@ package android.provider {
   public static final class Telephony.Sms.Intents {
     method public static android.telephony.SmsMessage[] getMessagesFromIntent(android.content.Intent);
     field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.provider.Telephony.ACTION_CHANGE_DEFAULT";
+    field public static final java.lang.String ACTION_DEFAULT_SMS_PACKAGE_CHANGED = "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED";
+    field public static final java.lang.String ACTION_EXTERNAL_PROVIDER_CHANGE = "android.provider.action.EXTERNAL_PROVIDER_CHANGE";
     field public static final java.lang.String DATA_SMS_RECEIVED_ACTION = "android.intent.action.DATA_SMS_RECEIVED";
+    field public static final java.lang.String EXTRA_IS_DEFAULT_SMS_APP = "android.provider.extra.IS_DEFAULT_SMS_APP";
     field public static final java.lang.String EXTRA_PACKAGE_NAME = "package";
     field public static final int RESULT_SMS_DUPLICATED = 5; // 0x5
     field public static final int RESULT_SMS_GENERIC_ERROR = 2; // 0x2
