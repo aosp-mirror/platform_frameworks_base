@@ -32,6 +32,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -83,8 +84,10 @@ public class CreateDirectoryFragment extends DialogFragment {
         editText.setOnEditorActionListener(
                 new OnEditorActionListener() {
                     @Override
-                    public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                        if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    public boolean onEditorAction(
+                            TextView view, int actionId, @Nullable KeyEvent event) {
+                        if (event != null
+                                && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                                 && event.hasNoModifiers()) {
                             createDirectory(editText.getText().toString());
                             dialog.dismiss();
