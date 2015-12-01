@@ -122,6 +122,7 @@ public class TaskViewTransform {
             } else {
                 anim.setUpdateListener(null);
             }
+            anim.setListener(null);
             anim.setStartDelay(startDelay)
                     .setDuration(duration)
                     .setInterpolator(interp)

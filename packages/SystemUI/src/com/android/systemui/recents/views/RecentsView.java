@@ -470,6 +470,25 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (event.dropTarget instanceof TaskStack.DockState) {
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
 
+            // Remove the task after it is docked
+            if (event.taskView.isFocusedTask()) {
+                mTaskStackView.resetFocusedTask();
+            }
+            event.taskView.animate()
+                    .alpha(0f)
+                    .setDuration(150)
+                    .setInterpolator(mFastOutLinearInInterpolator)
+                    .setUpdateListener(null)
+                    .setListener(null)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTaskStackView.getStack().removeTask(event.task);
+                        }
+                    })
+                    .withLayer()
+                    .start();
+
             // Dock the task and launch it
             SystemServicesProxy ssp = Recents.getSystemServices();
             ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);

@@ -1559,7 +1559,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
-            tv.animate().alpha(0f).setDuration(200).start();
+            tv.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .setUpdateListener(null)
+                    .setListener(null)
+                    .withLayer()
+                    .start();
         }
     }
 
@@ -1568,7 +1574,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
-            tv.animate().alpha(1f).setDuration(200).start();
+            tv.animate()
+                    .alpha(1f)
+                    .setDuration(200)
+                    .setUpdateListener(null)
+                    .setListener(null)
+                    .withLayer()
+                    .start();
         }
     }
 
@@ -1580,7 +1592,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Task task = tv.getTask();
 
         // Reset the previously focused task before it is removed from the stack
-        resetFocusedTask();
+        if (tv.isFocusedTask()) {
+            resetFocusedTask();
+        }
 
         // Announce for accessibility
         tv.announceForAccessibility(getContext().getString(

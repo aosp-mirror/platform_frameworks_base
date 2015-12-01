@@ -395,6 +395,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 .translationY(ctx.offscreenTranslationY)
                 .setStartDelay(0)
                 .setUpdateListener(null)
+                .setListener(null)
                 .setInterpolator(mFastOutLinearInInterpolator)
                 .setDuration(taskViewExitToHomeDuration)
                 .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())
@@ -443,6 +444,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .translationY(getTranslationY() + taskViewAffiliateGroupEnterOffset)
                     .setStartDelay(0)
                     .setUpdateListener(null)
+                    .setListener(null)
                     .setInterpolator(mFastOutLinearInInterpolator)
                     .setDuration(taskViewExitToAppDuration)
                     .start();
@@ -464,6 +466,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             .alpha(0f)
             .setStartDelay(delay)
             .setUpdateListener(null)
+            .setListener(null)
             .setInterpolator(mFastOutSlowInInterpolator)
             .setDuration(taskViewRemoveAnimDuration)
             .withEndAction(new Runnable() {
@@ -728,6 +731,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .scaleX(finalScale)
                     .scaleY(finalScale)
                     .setDuration(175)
+                    .setUpdateListener(null)
+                    .setListener(null)
                     .setInterpolator(mFastOutSlowInInterpolator)
                     .start();
 
