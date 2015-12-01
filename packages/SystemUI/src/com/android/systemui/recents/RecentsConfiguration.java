@@ -69,7 +69,6 @@ public class RecentsConfiguration {
     public final int smallestWidth;
 
     /** Misc **/
-    public boolean hasDockedTasks;
     public boolean useHardwareLayers;
     public boolean fakeShadows;
     public int svelteLevel;
@@ -112,7 +111,6 @@ public class RecentsConfiguration {
         // settings or via multi window
         lockToAppEnabled = !ssp.hasFreeformWorkspaceSupport() &&
                 ssp.getSystemSetting(context, Settings.System.LOCK_TO_APP_ENABLED) != 0;
-        hasDockedTasks = ssp.hasDockedTask();
 
         // Recompute some values based on the given state, since we can not rely on the resource
         // system to get certain values.

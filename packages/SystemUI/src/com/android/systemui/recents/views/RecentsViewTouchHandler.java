@@ -27,6 +27,7 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropTargetsEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
@@ -111,6 +112,7 @@ public class RecentsViewTouchHandler {
     /**** Events ****/
 
     public final void onBusEvent(DragStartEvent event) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         mRv.getParent().requestDisallowInterceptTouchEvent(true);
         mDragging = true;
         mDragTask = event.task;
@@ -127,7 +129,7 @@ public class RecentsViewTouchHandler {
         mTaskView.setTranslationY(y);
 
         RecentsConfiguration config = Recents.getConfiguration();
-        if (!config.hasDockedTasks) {
+        if (!ssp.hasDockedTask()) {
             // Add the dock state drop targets (these take priority)
             TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
             for (TaskStack.DockState dockState : dockStates) {
