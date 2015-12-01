@@ -253,6 +253,7 @@ public final class Call {
         private final PhoneAccountHandle mAccountHandle;
         private final int mCallCapabilities;
         private final int mCallProperties;
+        private final int mSupportedAudioRoutes;
         private final DisconnectCause mDisconnectCause;
         private final long mConnectTimeMillis;
         private final GatewayInfo mGatewayInfo;
@@ -448,6 +449,15 @@ public final class Call {
         }
 
         /**
+         * @return a bitmask of the audio routes available for the call.
+         *
+         * @hide
+         */
+        public int getSupportedAudioRoutes() {
+            return mSupportedAudioRoutes;
+        }
+
+        /**
          * @return For a {@link #STATE_DISCONNECTED} {@code Call}, the disconnect cause expressed
          * by {@link android.telecom.DisconnectCause}.
          */
@@ -513,6 +523,7 @@ public final class Call {
                         Objects.equals(mAccountHandle, d.mAccountHandle) &&
                         Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
                         Objects.equals(mCallProperties, d.mCallProperties) &&
+                        Objects.equals(mSupportedAudioRoutes, d.mSupportedAudioRoutes) &&
                         Objects.equals(mDisconnectCause, d.mDisconnectCause) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
@@ -534,6 +545,7 @@ public final class Call {
                     Objects.hashCode(mAccountHandle) +
                     Objects.hashCode(mCallCapabilities) +
                     Objects.hashCode(mCallProperties) +
+                    Objects.hashCode(mSupportedAudioRoutes) +
                     Objects.hashCode(mDisconnectCause) +
                     Objects.hashCode(mConnectTimeMillis) +
                     Objects.hashCode(mGatewayInfo) +
@@ -552,6 +564,7 @@ public final class Call {
                 PhoneAccountHandle accountHandle,
                 int capabilities,
                 int properties,
+                int audioRoutes,
                 DisconnectCause disconnectCause,
                 long connectTimeMillis,
                 GatewayInfo gatewayInfo,
@@ -566,6 +579,7 @@ public final class Call {
             mAccountHandle = accountHandle;
             mCallCapabilities = capabilities;
             mCallProperties = properties;
+            mSupportedAudioRoutes = audioRoutes;
             mDisconnectCause = disconnectCause;
             mConnectTimeMillis = connectTimeMillis;
             mGatewayInfo = gatewayInfo;
@@ -1008,6 +1022,7 @@ public final class Call {
                 parcelableCall.getAccountHandle(),
                 parcelableCall.getCapabilities(),
                 parcelableCall.getProperties(),
+                parcelableCall.getSupportedAudioRoutes(),
                 parcelableCall.getDisconnectCause(),
                 parcelableCall.getConnectTimeMillis(),
                 parcelableCall.getGatewayInfo(),

@@ -36,6 +36,7 @@ public final class ParcelableConnection implements Parcelable {
     private final PhoneAccountHandle mPhoneAccount;
     private final int mState;
     private final int mConnectionCapabilities;
+    private final int mSupportedAudioRoutes;
     private final Uri mAddress;
     private final int mAddressPresentation;
     private final String mCallerDisplayName;
@@ -55,6 +56,7 @@ public final class ParcelableConnection implements Parcelable {
             PhoneAccountHandle phoneAccount,
             int state,
             int capabilities,
+            int supportedAudioRoutes,
             Uri address,
             int addressPresentation,
             String callerDisplayName,
@@ -71,6 +73,7 @@ public final class ParcelableConnection implements Parcelable {
         mPhoneAccount = phoneAccount;
         mState = state;
         mConnectionCapabilities = capabilities;
+        mSupportedAudioRoutes = supportedAudioRoutes;
         mAddress = address;
         mAddressPresentation = addressPresentation;
         mCallerDisplayName = callerDisplayName;
@@ -97,6 +100,10 @@ public final class ParcelableConnection implements Parcelable {
     // Bit mask of actions a call supports, values are defined in {@link CallCapabilities}.
     public int getConnectionCapabilities() {
         return mConnectionCapabilities;
+    }
+
+    public int getSupportedAudioRoutes() {
+        return mSupportedAudioRoutes;
     }
 
     public Uri getHandle() {
@@ -189,11 +196,13 @@ public final class ParcelableConnection implements Parcelable {
             List<String> conferenceableConnectionIds = new ArrayList<>();
             source.readStringList(conferenceableConnectionIds);
             Bundle extras = source.readBundle(classLoader);
+            int supportedAudioRoutes = source.readInt();
 
             return new ParcelableConnection(
                     phoneAccount,
                     state,
                     capabilities,
+                    supportedAudioRoutes,
                     address,
                     addressPresentation,
                     callerDisplayName,
@@ -241,5 +250,6 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeParcelable(mDisconnectCause, 0);
         destination.writeStringList(mConferenceableConnectionIds);
         destination.writeBundle(mExtras);
+        destination.writeInt(mSupportedAudioRoutes);
     }
 }

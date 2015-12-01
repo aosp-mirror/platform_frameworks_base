@@ -44,8 +44,12 @@ public final class CallAudioState implements Parcelable {
      */
     public static final int ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
 
-    /** Bit mask of all possible audio routes. */
-    private static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
+    /**
+     * Bit mask of all possible audio routes.
+     *
+     * @hide
+     **/
+    public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
     private final boolean isMuted;
