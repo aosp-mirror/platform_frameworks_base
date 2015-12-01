@@ -48,6 +48,23 @@ public class WiFiConfigurationSerializer {
      */
     private static int STATE_VERSION = 1;
 
+    /**
+     * write the Network selecton status to Byte Array
+     */
+    private static void writeNetworkSelectionStatus(WifiConfiguration config, DataOutputStream dest)
+            throws IOException {
+        WifiConfiguration.NetworkSelectionStatus status = config.getNetworkSelectionStatus();
+
+        dest.writeInt(status.getNetworkSelectionStatus());
+        dest.writeInt(status.getNetworkSelectionDisableReason());
+        for (int index = WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLE;
+                index < WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_DISABLED_MAX;
+                index++) {
+            dest.writeInt(status.getDisableReasonCounter(index));
+        }
+        dest.writeLong(status.getDisableTime());
+        writeString(dest, status.getNetworkSelectionBSSID());
+    }
 
     /**
      * Marshals a WifiConfig object into a byte-array.
@@ -64,12 +81,11 @@ public class WiFiConfigurationSerializer {
                 out.writeInt(STATE_VERSION);
                 out.writeInt(wifiConfig.networkId);
                 out.writeInt(wifiConfig.status);
-                out.writeInt(wifiConfig.disableReason);
+                writeNetworkSelectionStatus(wifiConfig, out);
                 writeString(out, wifiConfig.SSID);
                 writeString(out, wifiConfig.BSSID);
                 out.writeInt(wifiConfig.apBand);
                 out.writeInt(wifiConfig.apChannel);
-                writeString(out, wifiConfig.autoJoinBSSID);
                 writeString(out, wifiConfig.FQDN);
                 writeString(out, wifiConfig.providerFriendlyName);
                 out.writeInt(wifiConfig.roamingConsortiumIds.length);
@@ -98,7 +114,6 @@ public class WiFiConfigurationSerializer {
 
                 writeString(out, wifiConfig.dhcpServer);
                 writeString(out, wifiConfig.defaultGwMacAddress);
-                out.writeInt(wifiConfig.autoJoinStatus);
                 out.writeInt(wifiConfig.selfAdded ? 1 : 0);
                 out.writeInt(wifiConfig.didSelfAdd ? 1 : 0);
                 out.writeInt(wifiConfig.validatedInternetAccess ? 1 : 0);
@@ -108,14 +123,9 @@ public class WiFiConfigurationSerializer {
                 out.writeInt(wifiConfig.lastUpdateUid);
                 writeString(out, wifiConfig.creatorName);
                 writeString(out, wifiConfig.lastUpdateName);
-                out.writeLong(wifiConfig.blackListTimestamp);
                 out.writeLong(wifiConfig.lastConnectionFailure);
                 out.writeLong(wifiConfig.lastRoamingFailure);
                 out.writeInt(wifiConfig.lastRoamingFailureReason);
-                out.writeLong(wifiConfig.roamingFailureBlackListTimeMilli);
-                out.writeLong(wifiConfig.numConnectionFailures);
-                out.writeLong(wifiConfig.numIpConfigFailures);
-                out.writeInt(wifiConfig.numAuthFailures);
                 out.writeInt(wifiConfig.numScorerOverride);
                 out.writeInt(wifiConfig.numScorerOverrideAndSwitchedNetwork);
                 out.writeInt(wifiConfig.numAssociation);
@@ -126,8 +136,6 @@ public class WiFiConfigurationSerializer {
                 out.writeInt(wifiConfig.numTicksAtBadRSSI);
                 out.writeInt(wifiConfig.numTicksAtNotHighRSSI);
                 out.writeInt(wifiConfig.numUserTriggeredJoinAttempts);
-                out.writeInt(wifiConfig.autoJoinUseAggressiveJoinAttemptThreshold);
-                out.writeInt(wifiConfig.autoJoinBailedDueToLowRssi ? 1 : 0);
                 out.writeInt(wifiConfig.userApproved);
                 out.writeInt(wifiConfig.numNoInternetAccessReports);
                 out.writeInt(wifiConfig.noInternetAccessExpected ? 1 : 0);
@@ -137,6 +145,23 @@ public class WiFiConfigurationSerializer {
             }
         }
         return baos.toByteArray();
+    }
+
+    /**
+     *
+     */
+    private static void readNetworkSelectionStatusFromByteArray(DataInputStream in,
+            WifiConfiguration config, int version) throws IOException {
+        WifiConfiguration.NetworkSelectionStatus status = config.getNetworkSelectionStatus();
+        status.setNetworkSelectionStatus(in.readInt());
+        status.setNetworkSelectionDisableReason(in.readInt());
+        for (int index = WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLE;
+                index < WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_DISABLED_MAX;
+                index++) {
+            status.setDisableReasonCounter(index, in.readInt());
+        }
+        status.setDisableTime(in.readLong());
+        status.setNetworkSelectionBSSID(readString(in, version));
     }
 
     /**
@@ -157,12 +182,11 @@ public class WiFiConfigurationSerializer {
 
             config.networkId = in.readInt();
             config.status = in.readInt();
-            config.disableReason = in.readInt();
+            readNetworkSelectionStatusFromByteArray(in, config, version);
             config.SSID = readString(in, version);
             config.BSSID = readString(in, version);
             config.apBand = in.readInt();
             config.apChannel = in.readInt();
-            config.autoJoinBSSID = readString(in, version);
             config.FQDN = readString(in, version);
             config.providerFriendlyName = readString(in, version);
             int numRoamingConsortiumIds = in.readInt();
@@ -195,7 +219,6 @@ public class WiFiConfigurationSerializer {
 
             config.dhcpServer = readString(in, version);
             config.defaultGwMacAddress = readString(in, version);
-            config.autoJoinStatus = in.readInt();
             config.selfAdded = in.readInt() != 0;
             config.didSelfAdd = in.readInt() != 0;
             config.validatedInternetAccess = in.readInt() != 0;
@@ -205,14 +228,10 @@ public class WiFiConfigurationSerializer {
             config.lastUpdateUid = in.readInt();
             config.creatorName = readString(in, version);
             config.lastUpdateName = readString(in, version);
-            config.blackListTimestamp = in.readLong();
             config.lastConnectionFailure = in.readLong();
             config.lastRoamingFailure = in.readLong();
             config.lastRoamingFailureReason = in.readInt();
             config.roamingFailureBlackListTimeMilli = in.readLong();
-            config.numConnectionFailures = in.readInt();
-            config.numIpConfigFailures = in.readInt();
-            config.numAuthFailures = in.readInt();
             config.numScorerOverride = in.readInt();
             config.numScorerOverrideAndSwitchedNetwork = in.readInt();
             config.numAssociation = in.readInt();
@@ -223,8 +242,6 @@ public class WiFiConfigurationSerializer {
             config.numTicksAtBadRSSI = in.readInt();
             config.numTicksAtNotHighRSSI = in.readInt();
             config.numUserTriggeredJoinAttempts = in.readInt();
-            config.autoJoinUseAggressiveJoinAttemptThreshold = in.readInt();
-            config.autoJoinBailedDueToLowRssi = in.readInt() != 0;
             config.userApproved = in.readInt();
             config.numNoInternetAccessReports = in.readInt();
             config.noInternetAccessExpected = in.readInt() != 0;

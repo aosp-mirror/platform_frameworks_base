@@ -394,33 +394,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
             summary.append(String.format(format, mConfig.providerFriendlyName));
         } else if (mConfig != null && mConfig.hasNoInternetAccess()) {
             summary.append(mContext.getString(R.string.wifi_no_internet));
-        } else if (mConfig != null && ((mConfig.status == WifiConfiguration.Status.DISABLED &&
-                mConfig.disableReason != WifiConfiguration.DISABLED_UNKNOWN_REASON)
-               || mConfig.autoJoinStatus
-                >= WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE)) {
-            if (mConfig.autoJoinStatus
-                    >= WifiConfiguration.AUTO_JOIN_DISABLED_ON_AUTH_FAILURE) {
-                if (mConfig.disableReason == WifiConfiguration.DISABLED_DHCP_FAILURE) {
-                    summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
-                } else if (mConfig.disableReason == WifiConfiguration.DISABLED_AUTH_FAILURE) {
+        } else if (mConfig != null && !mConfig.getNetworkSelectionStatus().isNetworkEnabled()) {
+            WifiConfiguration.NetworkSelectionStatus networkStatus =
+                    mConfig.getNetworkSelectionStatus();
+            switch (networkStatus.getNetworkSelectionDisableReason()) {
+                case WifiConfiguration.NetworkSelectionStatus.DISABLED_AUTHENTICATION_FAILURE:
                     summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
-                } else {
-                    summary.append(mContext.getString(R.string.wifi_disabled_wifi_failure));
-                }
-            } else {
-                switch (mConfig.disableReason) {
-                    case WifiConfiguration.DISABLED_AUTH_FAILURE:
-                        summary.append(mContext.getString(R.string.wifi_disabled_password_failure));
-                        break;
-                    case WifiConfiguration.DISABLED_DHCP_FAILURE:
-                    case WifiConfiguration.DISABLED_DNS_FAILURE:
-                        summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
-                        break;
-                    case WifiConfiguration.DISABLED_UNKNOWN_REASON:
-                    case WifiConfiguration.DISABLED_ASSOCIATION_REJECT:
-                        summary.append(mContext.getString(R.string.wifi_disabled_generic));
-                        break;
-                }
+                    break;
+                case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
+                case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
+                    summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
+                    break;
+                case WifiConfiguration.NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION:
+                    summary.append(mContext.getString(R.string.wifi_disabled_generic));
+                    break;
             }
         } else if (mRssi == Integer.MAX_VALUE) { // Wifi out of range
             summary.append(mContext.getString(R.string.wifi_not_in_range));
@@ -437,11 +424,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 summary.append(" f=" + Integer.toString(mInfo.getFrequency()));
             }
             summary.append(" " + getVisibilityStatus());
-            if (mConfig != null && mConfig.autoJoinStatus > 0) {
-                summary.append(" (" + mConfig.autoJoinStatus);
-                if (mConfig.blackListTimestamp > 0) {
+            if (mConfig != null && !mConfig.getNetworkSelectionStatus().isNetworkEnabled()) {
+                summary.append(" (" + mConfig.getNetworkSelectionStatus().getNetworkStatusString());
+                if (mConfig.getNetworkSelectionStatus().getDisableTime() > 0) {
                     long now = System.currentTimeMillis();
-                    long diff = (now - mConfig.blackListTimestamp)/1000;
+                    long diff = (now - mConfig.getNetworkSelectionStatus().getDisableTime()) / 1000;
                     long sec = diff%60; //seconds
                     long min = (diff/60)%60; //minutes
                     long hour = (min/60)%60; //hours
@@ -452,17 +439,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 }
                 summary.append(")");
             }
-            if (mConfig != null && mConfig.numIpConfigFailures > 0) {
-                summary.append(" ipf=").append(mConfig.numIpConfigFailures);
-            }
-            if (mConfig != null && mConfig.numConnectionFailures > 0) {
-                summary.append(" cf=").append(mConfig.numConnectionFailures);
-            }
-            if (mConfig != null && mConfig.numAuthFailures > 0) {
-                summary.append(" authf=").append(mConfig.numAuthFailures);
-            }
-            if (mConfig != null && mConfig.numNoInternetAccessReports > 0) {
-                summary.append(" noInt=").append(mConfig.numNoInternetAccessReports);
+
+            if (mConfig != null) {
+                WifiConfiguration.NetworkSelectionStatus networkStatus =
+                        mConfig.getNetworkSelectionStatus();
+                for (int index = WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLE;
+                        index < WifiConfiguration.NetworkSelectionStatus
+                        .NETWORK_SELECTION_DISABLED_MAX; index++) {
+                    if (networkStatus.getDisableReasonCounter(index) != 0) {
+                        summary.append(" " + WifiConfiguration.NetworkSelectionStatus
+                                .getNetworkDisableReasonString(index) + "="
+                                + networkStatus.getDisableReasonCounter(index));
+                    }
+                }
             }
         }
         return summary.toString();
@@ -508,10 +497,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         Map<String, ScanResult> list = mScanResultCache.snapshot();
         // TODO: sort list by RSSI or age
         for (ScanResult result : list.values()) {
-            if (result.seen == 0)
-                continue;
-
-            if (result.autoJoinStatus != ScanResult.ENABLED) numBlackListed++;
 
             if (result.frequency >= LOWER_FREQ_5GHZ
                     && result.frequency <= HIGHER_FREQ_5GHZ) {
@@ -525,8 +510,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 num24 = num24 + 1;
             }
 
-            // Ignore results seen, older than 20 seconds
-            if (now - result.seen > VISIBILITY_OUTDATED_AGE_IN_MILLI) continue;
 
             if (result.frequency >= LOWER_FREQ_5GHZ
                     && result.frequency <= HIGHER_FREQ_5GHZ) {
@@ -539,12 +522,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     if (bssid != null && result.BSSID.equals(bssid)) scans5GHz.append("*");
                     scans5GHz.append("=").append(result.frequency);
                     scans5GHz.append(",").append(result.level);
-                    if (result.autoJoinStatus != 0) {
-                        scans5GHz.append(",st=").append(result.autoJoinStatus);
-                    }
-                    if (result.numIpConfigFailures != 0) {
-                        scans5GHz.append(",ipf=").append(result.numIpConfigFailures);
-                    }
                     scans5GHz.append("}");
                     n5++;
                 }
@@ -559,12 +536,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     if (bssid != null && result.BSSID.equals(bssid)) scans24GHz.append("*");
                     scans24GHz.append("=").append(result.frequency);
                     scans24GHz.append(",").append(result.level);
-                    if (result.autoJoinStatus != 0) {
-                        scans24GHz.append(",st=").append(result.autoJoinStatus);
-                    }
-                    if (result.numIpConfigFailures != 0) {
-                        scans24GHz.append(",ipf=").append(result.numIpConfigFailures);
-                    }
                     scans24GHz.append("}");
                     n24++;
                 }
