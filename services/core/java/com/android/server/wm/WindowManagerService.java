@@ -2512,10 +2512,12 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "attached to a parent win=" + win);
                 }
 
-                win.mFrame.left = left;
-                win.mFrame.top = top;
-                win.mFrame.right = right;
-                win.mFrame.bottom = bottom;
+                win.mAttrs.x = left;
+                win.mAttrs.y = top;
+                win.mAttrs.width = right - left;
+                win.mAttrs.height = bottom - top;
+
+                win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
 
                 win.mWinAnimator.computeShownFrameLocked();
 
