@@ -174,7 +174,9 @@ public final class CreateInfo implements ICreateInfo {
         "android.text.format.DateFormat#is24HourFormat",
         "android.text.Hyphenator#getSystemHyphenatorLocation",
         "android.util.Xml#newPullParser",
+        "android.view.Choreographer#getInstance",
         "android.view.Choreographer#getRefreshRate",
+        "android.view.Choreographer#scheduleVsyncLocked",
         "android.view.Display#updateDisplayInfoLocked",
         "android.view.Display#getWindowManager",
         "android.view.LayoutInflater#rInflate",
@@ -298,6 +300,7 @@ public final class CreateInfo implements ICreateInfo {
         };
 
     private final static String[] PROMOTED_FIELDS = new String[] {
+        "android.view.Choreographer#mLastFrameTimeNanos",
         "android.widget.SimpleMonthView#mTitle",
         "android.widget.SimpleMonthView#mCalendar",
         "android.widget.SimpleMonthView#mDayOfWeekLabelCalendar"

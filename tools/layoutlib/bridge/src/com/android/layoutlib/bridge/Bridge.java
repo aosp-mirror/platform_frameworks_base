@@ -183,7 +183,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      */
     private static LayoutLog sCurrentLog = sDefaultLog;
 
-    private static final int LAST_SUPPORTED_FEATURE = Features.RECYCLER_VIEW_ADAPTER;
+    private static final int LAST_SUPPORTED_FEATURE = Features.CHOREOGRAPHER;
 
     @Override
     public int getApiLevel() {
