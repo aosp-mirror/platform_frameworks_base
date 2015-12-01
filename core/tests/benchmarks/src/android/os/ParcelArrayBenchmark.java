@@ -16,10 +16,11 @@
 
 package android.os;
 
+import com.google.caliper.AfterExperiment;
+import com.google.caliper.BeforeExperiment;
 import com.google.caliper.Param;
-import com.google.caliper.SimpleBenchmark;
 
-public class ParcelArrayBenchmark extends SimpleBenchmark {
+public class ParcelArrayBenchmark {
 
     @Param({ "1", "10", "100", "1000" })
     private int mSize;
@@ -34,7 +35,7 @@ public class ParcelArrayBenchmark extends SimpleBenchmark {
     private Parcel mIntParcel;
     private Parcel mLongParcel;
 
-    @Override
+    @BeforeExperiment
     protected void setUp() {
         mWriteParcel = Parcel.obtain();
 
@@ -50,7 +51,7 @@ public class ParcelArrayBenchmark extends SimpleBenchmark {
         mLongParcel.writeLongArray(mLongArray);
     }
 
-    @Override
+    @AfterExperiment
     protected void tearDown() {
         mWriteParcel.recycle();
         mWriteParcel = null;
@@ -118,5 +119,4 @@ public class ParcelArrayBenchmark extends SimpleBenchmark {
             mLongParcel.readLongArray(mLongArray);
         }
     }
-
 }

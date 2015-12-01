@@ -18,9 +18,7 @@ package android.os;
 
 import android.os.StrictMode.ThreadPolicy;
 
-import com.google.caliper.SimpleBenchmark;
-
-public class StrictModeBenchmark extends SimpleBenchmark {
+public class StrictModeBenchmark {
 
     private ThreadPolicy mOff = new ThreadPolicy.Builder().build();
     private ThreadPolicy mOn = new ThreadPolicy.Builder().detectAll().build();
