@@ -188,6 +188,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String WIFI_AP_STATE_CHANGED_ACTION =
         "android.net.wifi.WIFI_AP_STATE_CHANGED";
 
@@ -204,6 +205,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
 
     /**
@@ -222,6 +224,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     /**
      * Wi-Fi AP is currently being disabled. The state will change to
@@ -232,6 +235,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int WIFI_AP_STATE_DISABLING = 10;
     /**
      * Wi-Fi AP is disabled.
@@ -241,6 +245,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int WIFI_AP_STATE_DISABLED = 11;
     /**
      * Wi-Fi AP is currently being enabled. The state will change to
@@ -251,6 +256,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int WIFI_AP_STATE_ENABLING = 12;
     /**
      * Wi-Fi AP is enabled.
@@ -260,6 +266,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int WIFI_AP_STATE_ENABLED = 13;
     /**
      * Wi-Fi AP is in a failed state. This state will occur when an error occurs during
@@ -270,6 +277,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int WIFI_AP_STATE_FAILED = 14;
 
     /**
