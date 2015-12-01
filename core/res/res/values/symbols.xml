@@ -316,7 +316,12 @@
   <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_high" />
   <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_low" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />
-  <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_factor" />
+  <java-symbol type="integer" name="config_wifi_framework_RSSI_SCORE_OFFSET" />
+  <java-symbol type="integer" name="config_wifi_framework_RSSI_SCORE_SLOPE" />
+  <java-symbol type="integer" name="config_wifi_framework_SAME_BSSID_AWARD" />
+  <java-symbol type="integer" name="config_wifi_framework_LAST_SELECTION_AWARD" />
+  <java-symbol type="integer" name="config_wifi_framework_PASSPOINT_SECURITY_AWARD" />
+  <java-symbol type="integer" name="config_wifi_framework_SECURITY_AWARD" />
   <java-symbol type="integer" name="config_wifi_disconnected_short_scan_interval" />
   <java-symbol type="integer" name="config_wifi_disconnected_long_scan_interval" />
   <java-symbol type="integer" name="config_wifi_associated_short_scan_interval" />
