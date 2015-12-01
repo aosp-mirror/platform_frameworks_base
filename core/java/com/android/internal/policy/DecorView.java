@@ -151,6 +151,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final Interpolator mShowInterpolator;
     private final Interpolator mHideInterpolator;
     private final int mBarEnterExitDuration;
+    private final boolean mForceWindowDrawsStatusBarBackground;
+    private final int mSemiTransparentStatusBarColor;
 
     private final BackgroundFallback mBackgroundFallback = new BackgroundFallback();
 
@@ -197,6 +199,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         mBarEnterExitDuration = context.getResources().getInteger(
                 R.integer.dock_enter_exit_duration);
+        mForceWindowDrawsStatusBarBackground = context.getResources().getBoolean(
+                R.bool.config_forceWindowDrawsStatusBarBackground);
+        mSemiTransparentStatusBarColor = context.getResources().getColor(
+                R.color.system_bar_background_semi_transparent, null /* theme */);
 
         setWindow(window);
     }
@@ -884,14 +890,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             int navBarSize = navBarToRightEdge ? mLastRightInset : mLastBottomInset;
             updateColorViewInt(mNavigationColorViewState, sysUiVisibility,
                     mWindow.mNavigationBarColor, navBarSize, navBarToRightEdge,
-                    0 /* rightInset */, animate && !disallowAnimate);
+                    0 /* rightInset */, animate && !disallowAnimate, false /* force */);
 
             boolean statusBarNeedsRightInset = navBarToRightEdge
                     && mNavigationColorViewState.present;
             int statusBarRightInset = statusBarNeedsRightInset ? mLastRightInset : 0;
-            updateColorViewInt(mStatusColorViewState, sysUiVisibility, mWindow.mStatusBarColor,
-                    mLastTopInset, false /* matchVertical */, statusBarRightInset,
-                    animate && !disallowAnimate);
+            updateColorViewInt(mStatusColorViewState, sysUiVisibility,
+                    calculateStatusBarColor(), mLastTopInset,
+                    false /* matchVertical */, statusBarRightInset, animate && !disallowAnimate,
+                    mForceWindowDrawsStatusBarBackground);
         }
 
         // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
@@ -935,6 +942,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return insets;
     }
 
+    private int calculateStatusBarColor() {
+        int flags = mWindow.getAttributes().flags;
+        return (flags & FLAG_TRANSLUCENT_STATUS) != 0 ? mSemiTransparentStatusBarColor
+                : (flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0 ? mWindow.mStatusBarColor
+                : Color.BLACK;
+    }
+
     /**
      * Update a color view
      *
@@ -948,13 +962,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * @param animate if true, the change will be animated.
      */
     private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
-            int size, boolean verticalBar, int rightMargin, boolean animate) {
+            int size, boolean verticalBar, int rightMargin, boolean animate, boolean force) {
         state.present = size > 0 && (sysUiVis & state.systemUiHideFlag) == 0
                 && (mWindow.getAttributes().flags & state.hideWindowFlag) == 0
-                && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+                && ((mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
+                        || force);
         boolean show = state.present
                 && (color & Color.BLACK) != 0
-                && (mWindow.getAttributes().flags & state.translucentFlag) == 0;
+                && ((mWindow.getAttributes().flags & state.translucentFlag) == 0  || force);
 
         boolean visibilityChanged = false;
         View view = state.view;

@@ -111,7 +111,8 @@ public class StatusBarController extends BarController {
                 View.STATUS_BAR_UNHIDE,
                 View.STATUS_BAR_TRANSLUCENT,
                 StatusBarManager.WINDOW_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                View.STATUS_BAR_TRANSPARENT);
     }
 
     public AppTransitionListener getAppTransitionListener() {

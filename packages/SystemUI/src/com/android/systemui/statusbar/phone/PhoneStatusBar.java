@@ -2486,12 +2486,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             // update status bar mode
             final int sbMode = computeBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
-                    View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT);
+                    View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT,
+                    View.STATUS_BAR_TRANSPARENT);
 
             // update navigation bar mode
             final int nbMode = mNavigationBarView == null ? -1 : computeBarMode(
                     oldVal, newVal, mNavigationBarView.getBarTransitions(),
-                    View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT);
+                    View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT,
+                    View.NAVIGATION_BAR_TRANSPARENT);
             final boolean sbModeChanged = sbMode != -1;
             final boolean nbModeChanged = nbMode != -1;
             boolean checkBarModes = false;
@@ -2542,21 +2544,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
-            int transientFlag, int translucentFlag) {
-        final int oldMode = barMode(oldVis, transientFlag, translucentFlag);
-        final int newMode = barMode(newVis, transientFlag, translucentFlag);
+            int transientFlag, int translucentFlag, int transparentFlag) {
+        final int oldMode = barMode(oldVis, transientFlag, translucentFlag, transparentFlag);
+        final int newMode = barMode(newVis, transientFlag, translucentFlag, transparentFlag);
         if (oldMode == newMode) {
             return -1; // no mode change
         }
         return newMode;
     }
 
-    private int barMode(int vis, int transientFlag, int translucentFlag) {
-        int lightsOutTransparent = View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_TRANSPARENT;
+    private int barMode(int vis, int transientFlag, int translucentFlag, int transparentFlag) {
+        int lightsOutTransparent = View.SYSTEM_UI_FLAG_LOW_PROFILE | transparentFlag;
         return (vis & transientFlag) != 0 ? MODE_SEMI_TRANSPARENT
                 : (vis & translucentFlag) != 0 ? MODE_TRANSLUCENT
                 : (vis & lightsOutTransparent) == lightsOutTransparent ? MODE_LIGHTS_OUT_TRANSPARENT
-                : (vis & View.SYSTEM_UI_TRANSPARENT) != 0 ? MODE_TRANSPARENT
+                : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
                 : (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0 ? MODE_LIGHTS_OUT
                 : MODE_OPAQUE;
     }

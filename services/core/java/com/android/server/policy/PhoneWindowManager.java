@@ -209,7 +209,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.STATUS_BAR_TRANSLUCENT
             | View.NAVIGATION_BAR_TRANSLUCENT
-            | View.SYSTEM_UI_TRANSPARENT;
+            | View.STATUS_BAR_TRANSPARENT
+            | View.NAVIGATION_BAR_TRANSPARENT;
 
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -626,6 +627,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final LogDecelerateInterpolator mLogDecelerateInterpolator
             = new LogDecelerateInterpolator(100, 0);
 
+    private boolean mForceWindowDrawsStatusBarBackground;
+
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -806,7 +809,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             View.NAVIGATION_BAR_UNHIDE,
             View.NAVIGATION_BAR_TRANSLUCENT,
             StatusBarManager.WINDOW_NAVIGATION_BAR,
-            WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+            View.NAVIGATION_BAR_TRANSPARENT);
 
     private ImmersiveModeConfirmation mImmersiveModeConfirmation;
 
@@ -1587,6 +1591,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mScreenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
+        mForceWindowDrawsStatusBarBackground = mContext.getResources().getBoolean(
+                R.bool.config_forceWindowDrawsStatusBarBackground);
 
         mGlobalKeyManager = new GlobalKeyManager(mContext);
 
@@ -2049,10 +2055,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
 
-        if (ActivityManager.isHighEndGfx()
-                && (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-            attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        if (ActivityManager.isHighEndGfx()) {
+            if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
+                attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            }
+            if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
+                    || mForceWindowDrawsStatusBarBackground) {
+                attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+            }
         }
     }
 
@@ -3609,7 +3619,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final int sysui = mLastSystemUiFlags;
             boolean navVisible = (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
             boolean navTranslucent = (sysui
-                    & (View.NAVIGATION_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
+                    & (View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT)) != 0;
             boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
             boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
             boolean navAllowedHidden = immersive || immersiveSticky;
@@ -3677,7 +3687,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
             boolean statusBarTranslucent = (sysui
-                    & (View.STATUS_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
+                    & (View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT)) != 0;
             if (!isKeyguardShowing) {
                 statusBarTranslucent &= areTranslucentBarsAllowed();
             }
@@ -4008,7 +4018,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && (fl & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0
                         && (fl & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0
                         && (fl & WindowManager.LayoutParams.
-                                FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
+                                FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
+                        && !mForceWindowDrawsStatusBarBackground) {
                     // Ensure policy decor includes status bar
                     dcf.top = mStableTop;
                 }
@@ -6733,10 +6744,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean freeformStackVisible =
                 mWindowManagerInternal.isStackVisible(FREEFORM_WORKSPACE_STACK_ID);
         final boolean forceShowSystemBars = dockedStackVisible || freeformStackVisible;
-        // TODO(multi-window): Update to force opaque independently for status bar and nav bar.
-        // This will require refactoring the code to have separate vis flag for each bar so it can
-        // be adjusted independently.
-        final boolean forceOpaqueSystemBars = forceShowSystemBars;
+        final boolean forceOpaqueSystemBars = forceShowSystemBars && !mForceStatusBarFromKeyguard;
 
         // apply translucent bar vis flags
         WindowState transWin = isStatusBarKeyguard() && !mHideLockScreen
@@ -6764,6 +6772,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 || forceOpaqueSystemBars) {
             vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
                     | View.SYSTEM_UI_TRANSPARENT);
+        }
+
+        if (mForceWindowDrawsStatusBarBackground) {
+            vis |= View.STATUS_BAR_TRANSPARENT;
+            vis &= ~View.STATUS_BAR_TRANSLUCENT;
         }
 
         // update status bar

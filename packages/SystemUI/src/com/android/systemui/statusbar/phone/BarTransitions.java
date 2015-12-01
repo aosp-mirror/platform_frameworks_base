@@ -146,7 +146,8 @@ public class BarTransitions {
                 mWarning = 0xffff0000;
             } else {
                 mOpaque = context.getColor(R.color.system_bar_background_opaque);
-                mSemiTransparent = context.getColor(R.color.system_bar_background_semi_transparent);
+                mSemiTransparent = context.getColor(
+                        com.android.internal.R.color.system_bar_background_semi_transparent);
                 mTransparent = context.getColor(R.color.system_bar_background_transparent);
                 mWarning = context.getColor(com.android.internal.R.color.battery_saver_mode_color);
             }
