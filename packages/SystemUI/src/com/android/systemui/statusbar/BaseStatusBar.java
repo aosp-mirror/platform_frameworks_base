@@ -116,7 +116,8 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
-        ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment {
+        ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
+        ExpandableNotificationRow.OnExpandClickListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean MULTIUSER_DEBUG = false;
@@ -1301,6 +1302,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    @Override
+    public void onExpandClicked(View clickedView, boolean nowExpanded) {
+    }
+
     protected class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
@@ -1381,6 +1386,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     parent, false);
             row.setExpansionLogger(this, entry.notification.getKey());
             row.setGroupManager(mGroupManager);
+            row.setOnExpandClickListener(this);
         }
 
         workAroundBadLayerDrawableOpacity(row);
