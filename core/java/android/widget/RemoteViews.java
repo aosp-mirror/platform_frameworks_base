@@ -1666,6 +1666,7 @@ public class RemoteViews implements Parcelable, Filter {
             ViewGroup.LayoutParams layoutParams = target.getLayoutParams();
             if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
                 ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(end);
+                target.setLayoutParams(layoutParams);
             }
         }
 
