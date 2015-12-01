@@ -37,7 +37,6 @@ public class FailureDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
     private static final String TAG = "FailureDialogFragment";
 
-    private int mFailure;
     private int mTransferMode;
     private ArrayList<DocumentInfo> mFailedSrcList;
 
@@ -75,7 +74,6 @@ public class FailureDialogFragment extends DialogFragment
     public Dialog onCreateDialog(Bundle inState) {
         super.onCreate(inState);
 
-        mFailure = getArguments().getInt(CopyService.EXTRA_FAILURE);
         mTransferMode = getArguments().getInt(CopyService.EXTRA_TRANSFER_MODE);
         mFailedSrcList = getArguments().getParcelableArrayList(CopyService.EXTRA_SRC_LIST);
 

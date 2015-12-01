@@ -39,13 +39,15 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.RootInfo;
 
 import libcore.io.IoUtils;
 
@@ -72,6 +74,12 @@ public class CopyService extends IntentService {
     // TODO: Move it to a shared file when more operations are implemented.
     public static final int FAILURE_COPY = 1;
 
+    // Parameters of the copy job. Requests to an IntentService are serialized so this code only
+    // needs to deal with one job at a time.
+    // NOTE: This must be declared by concrete type as the concrete type
+    // is required by putParcelableArrayListExtra.
+    private final ArrayList<DocumentInfo> mFailedFiles = new ArrayList<>();
+
     private PowerManager mPowerManager;
 
     private NotificationManager mNotificationManager;
@@ -80,9 +88,6 @@ public class CopyService extends IntentService {
     // Jobs are serialized but a job ID is used, to avoid mixing up cancellation requests.
     private String mJobId;
     private volatile boolean mIsCancelled;
-    // Parameters of the copy job. Requests to an IntentService are serialized so this code only
-    // needs to deal with one job at a time.
-    private final ArrayList<DocumentInfo> mFailedFiles;
     private long mBatchSize;
     private long mBytesCopied;
     private long mStartTime;
@@ -97,10 +102,11 @@ public class CopyService extends IntentService {
     private ContentProviderClient mSrcClient;
     private ContentProviderClient mDstClient;
 
+    // For testing only.
+    @Nullable private TestOnlyListener mJobFinishedListener;
+
     public CopyService() {
         super("CopyService");
-
-        mFailedFiles = new ArrayList<DocumentInfo>();
     }
 
     /**
@@ -115,7 +121,11 @@ public class CopyService extends IntentService {
         final Resources res = activity.getResources();
         final Intent copyIntent = new Intent(activity, CopyService.class);
         copyIntent.putParcelableArrayListExtra(
-                EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(srcDocs));
+                EXTRA_SRC_LIST,
+                // Don't create a copy unless absolutely necessary :)
+                srcDocs instanceof ArrayList
+                    ? (ArrayList<DocumentInfo>) srcDocs
+                    : new ArrayList<DocumentInfo>(srcDocs));
         copyIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) dstStack);
         copyIntent.putExtra(EXTRA_TRANSFER_MODE, mode);
 
@@ -198,6 +208,11 @@ public class CopyService extends IntentService {
                         .setAutoCancel(true);
                 mNotificationManager.notify(mJobId, 0, errorBuilder.build());
             }
+
+            if (mJobFinishedListener != null) {
+                mJobFinishedListener.onFinished(mFailedFiles);
+            }
+
             if (DEBUG) Log.d(TAG, "Done cleaning up");
         }
     }
@@ -269,6 +284,26 @@ public class CopyService extends IntentService {
     }
 
     /**
+     * Sets a callback to be run when the next run job is finished.
+     * This is test ONLY instrumentation. The alternative is for us to add
+     * broadcast intents SOLELY for the purpose of testing.
+     * @param listener
+     */
+    @VisibleForTesting
+    void addFinishedListener(TestOnlyListener listener) {
+        this.mJobFinishedListener = listener;
+
+    }
+
+    /**
+     * Only used for testing. Is that obvious enough?
+     */
+    @VisibleForTesting
+    interface TestOnlyListener {
+        void onFinished(List<DocumentInfo> failed);
+    }
+
+    /**
      * Calculates the cumulative size of all the documents in the list. Directories are recursed
      * into and totaled up.
      *
@@ -279,7 +314,7 @@ public class CopyService extends IntentService {
     private long calculateFileSizes(List<DocumentInfo> srcs) throws RemoteException {
         long result = 0;
         for (DocumentInfo src : srcs) {
-            if (Document.MIME_TYPE_DIR.equals(src.mimeType)) {
+            if (src.isDirectory()) {
                 // Directories need to be recursed into.
                 result += calculateFileSizesHelper(src.derivedUri);
             } else {
@@ -412,8 +447,21 @@ public class CopyService extends IntentService {
      */
     private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo, int mode)
             throws RemoteException {
-        if (DEBUG) Log.d(TAG, "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")" +
-            " to " + dstDirInfo.displayName + " (" + dstDirInfo.derivedUri + ")");
+
+        String opDesc = mode == TRANSFER_MODE_COPY ? "copy" : "move";
+
+        // Guard unsupported recursive operation.
+        if (dstDirInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstDirInfo)) {
+            if (DEBUG) Log.d(TAG,
+                    "Skipping recursive " + opDesc + " of directory " + dstDirInfo.derivedUri);
+            mFailedFiles.add(srcInfo);
+            return;
+        }
+
+        if (DEBUG) Log.d(TAG,
+                "Performing " + opDesc + " of " + srcInfo.displayName
+                + " (" + srcInfo.derivedUri + ")" + " to " + dstDirInfo.displayName
+                + " (" + dstDirInfo.derivedUri + ")");
 
         // When copying within the same provider, try to use optimized copying and moving.
         // If not supported, then fallback to byte-by-byte copy/move.
@@ -450,11 +498,22 @@ public class CopyService extends IntentService {
             return;
         }
 
-        if (Document.MIME_TYPE_DIR.equals(srcInfo.mimeType)) {
+        if (srcInfo.isDirectory()) {
             copyDirectoryHelper(srcInfo.derivedUri, dstUri, mode);
         } else {
             copyFileHelper(srcInfo.derivedUri, dstUri, mode);
         }
+    }
+
+    /**
+     * Returns true if {@code doc} is a descendant of {@code parentDoc}.
+     */
+    boolean isDescendentOf(DocumentInfo doc, DocumentInfo parentDoc) throws RemoteException {
+        if (parentDoc.isDirectory() && doc.authority.equals(parentDoc.authority)) {
+            return DocumentsContract.isChildDocument(
+                    mDstClient, doc.derivedUri, parentDoc.derivedUri);
+        }
+        return false;
     }
 
     /**
