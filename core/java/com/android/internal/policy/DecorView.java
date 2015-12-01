@@ -1683,9 +1683,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mDecorCaptionView != null) {
             mDecorCaptionView.removeContentView();
         } else {
-            // This window doesn't have caption, so we need to just remove the
-            // children of the decor view.
-            removeAllViews();
+            // This window doesn't have caption, so we need to remove everything except our views
+            // we might have added.
+            for (int i = getChildCount() - 1; i >= 0; i--) {
+                View v = getChildAt(i);
+                if (v != mStatusColorViewState.view && v != mNavigationColorViewState.view
+                        && v != mStatusGuard && v != mNavigationGuard) {
+                    removeViewAt(i);
+                }
+            }
         }
     }
 
