@@ -7148,22 +7148,35 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public void getProcessStatesFromPids(/*in*/ int[] pids, /*out*/ int[] states) {
-            mActivityManagerService.getProcessStatesForPIDs(/*in*/ pids, /*out*/ states);
+            mActivityManagerService.getProcessStatesAndOomScoresForPIDs(
+                    /*in*/ pids, /*out*/ states, null);
+        }
+
+        @Override
+        public void getProcessStatesAndOomScoresFromPids(
+                /*in*/ int[] pids, /*out*/ int[] states, /*out*/ int[] scores) {
+            mActivityManagerService.getProcessStatesAndOomScoresForPIDs(
+                    /*in*/ pids, /*out*/ states, /*out*/ scores);
         }
     }
 
     /**
      * For each PID in the given input array, write the current process state
-     * for that process into the output array, or -1 to indicate that no
-     * process with the given PID exists.
+     * for that process into the states array, or -1 to indicate that no
+     * process with the given PID exists. If scores array is provided, write
+     * the oom score for the process into the scores array, with INVALID_ADJ
+     * indicating the PID doesn't exist.
      */
-    public void getProcessStatesForPIDs(/*in*/ int[] pids, /*out*/ int[] states) {
+    public void getProcessStatesAndOomScoresForPIDs(
+            /*in*/ int[] pids, /*out*/ int[] states, /*out*/ int[] scores) {
         if (pids == null) {
             throw new NullPointerException("pids");
         } else if (states == null) {
             throw new NullPointerException("states");
         } else if (pids.length != states.length) {
-            throw new IllegalArgumentException("input and output arrays have different lengths!");
+            throw new IllegalArgumentException("pids and states arrays have different lengths!");
+        } else if (scores != null && pids.length != scores.length) {
+            throw new IllegalArgumentException("pids and scores arrays have different lengths!");
         }
 
         synchronized (mPidsSelfLocked) {
@@ -7171,6 +7184,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ProcessRecord pr = mPidsSelfLocked.get(pids[i]);
                 states[i] = (pr == null) ? ActivityManager.PROCESS_STATE_NONEXISTENT :
                         pr.curProcState;
+                if (scores != null) {
+                    scores[i] = (pr == null) ? ProcessList.INVALID_ADJ : pr.curAdj;
+                }
             }
         }
     }
