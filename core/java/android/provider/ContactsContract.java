@@ -5915,6 +5915,14 @@ public final class ContactsContract {
                     "filter");
 
             /**
+             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
+             * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * parameters, otherwise it will throw UnsupportedOperationException.
+             */
+            public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    CONTENT_URI, "filter_enterprise");
+
+            /**
              * A boolean query parameter that can be used with {@link #CONTENT_FILTER_URI}.
              * If "1" or "true", display names are searched.  If "0" or "false", display names
              * are not searched.  Default is "1".
@@ -7395,6 +7403,14 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
+
+            /**
+             * Similar to {@link Phone#ENTERPRISE_CONTENT_FILTER_URI}, but allows users to filter
+             * callable data. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * parameters, otherwise it will throw UnsupportedOperationException.
+             */
+            public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    CONTENT_URI, "filter_enterprise");
         }
 
         /**
