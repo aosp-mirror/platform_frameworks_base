@@ -30,6 +30,10 @@ public final class CertificatesEntryRef {
         mOverridesPins = overridesPins;
     }
 
+    boolean overridesPins() {
+        return mOverridesPins;
+    }
+
     public Set<TrustAnchor> getTrustAnchors() {
         // TODO: cache this [but handle mutable sources]
         Set<TrustAnchor> anchors = new ArraySet<TrustAnchor>();
@@ -37,5 +41,14 @@ public final class CertificatesEntryRef {
             anchors.add(new TrustAnchor(cert, mOverridesPins));
         }
         return anchors;
+    }
+
+    public TrustAnchor findBySubjectAndPublicKey(X509Certificate cert) {
+        X509Certificate foundCert = mSource.findBySubjectAndPublicKey(cert);
+        if (foundCert == null) {
+            return null;
+        }
+
+        return new TrustAnchor(foundCert, mOverridesPins);
     }
 }

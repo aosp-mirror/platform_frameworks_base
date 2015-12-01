@@ -18,29 +18,18 @@ package android.security.net.config;
 
 import android.os.Environment;
 import android.os.UserHandle;
-import android.util.ArraySet;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Set;
-import libcore.io.IoUtils;
 
 /**
  * {@link CertificateSource} based on the user-installed trusted CA store.
  * @hide
  */
-public class UserCertificateSource implements CertificateSource {
+public final class UserCertificateSource extends DirectoryCertificateSource {
     private static final UserCertificateSource INSTANCE = new UserCertificateSource();
-    private Set<X509Certificate> mUserCerts = null;
-    private final Object mLock = new Object();
 
     private UserCertificateSource() {
+        super(new File(
+                Environment.getUserConfigDirectory(UserHandle.myUserId()), "cacerts-added"));
     }
 
     public static UserCertificateSource getInstance() {
@@ -48,45 +37,7 @@ public class UserCertificateSource implements CertificateSource {
     }
 
     @Override
-    public Set<X509Certificate> getCertificates() {
-        // TODO: loading all of these is wasteful, we should instead use a keystore style API.
-        synchronized (mLock) {
-            if (mUserCerts != null) {
-                return mUserCerts;
-            }
-            CertificateFactory certFactory;
-            try {
-                certFactory = CertificateFactory.getInstance("X.509");
-            } catch (CertificateException e) {
-                throw new RuntimeException("Failed to obtain X.509 CertificateFactory", e);
-            }
-            final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
-            final File userCaDir = new File(configDir, "cacerts-added");
-            Set<X509Certificate> userCerts = new ArraySet<X509Certificate>();
-            // If the user hasn't added any certificates the directory may not exist.
-            if (userCaDir.isDirectory()) {
-                for (String caFile : userCaDir.list()) {
-                    InputStream is = null;
-                    try {
-                        is = new BufferedInputStream(
-                                new FileInputStream(new File(userCaDir, caFile)));
-                        userCerts.add((X509Certificate) certFactory.generateCertificate(is));
-                    } catch (CertificateException | IOException e) {
-                        // Don't rethrow to be consistent with conscrypt's cert loading code.
-                        continue;
-                    } finally {
-                        IoUtils.closeQuietly(is);
-                    }
-                }
-            }
-            mUserCerts = userCerts;
-            return mUserCerts;
-        }
-    }
-
-    public void onCertificateStorageChange() {
-        synchronized (mLock) {
-            mUserCerts = null;
-        }
+    protected boolean isCertMarkedAsRemoved(String caFile) {
+        return false;
     }
 }
