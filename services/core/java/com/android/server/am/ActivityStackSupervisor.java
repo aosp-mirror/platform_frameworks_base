@@ -3114,7 +3114,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     for (int i = 0; i < count; i++) {
                         moveTaskToStackLocked(tasks.get(i).taskId,
                                 FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, FORCE_FOCUS, "resizeStack",
-                                true /* animate */);
+                                false /* animate */);
                     }
 
                     // stack shouldn't contain anymore activities, so nothing to resume.
@@ -3375,6 +3375,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         final ActivityStack stack = moveTaskToStackUncheckedLocked(
                 task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
+
+        if (!animate) {
+            stack.mNoAnimActivities.add(topActivity);
+        }
 
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
