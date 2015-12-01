@@ -133,14 +133,8 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
             return false;
         }
         X509Certificate anchorCert = chain.get(chain.size() - 1);
-        TrustAnchor chainAnchor = null;
-        // TODO: faster lookup
-        for (TrustAnchor anchor : mNetworkSecurityConfig.getTrustAnchors()) {
-            if (anchor.certificate.equals(anchorCert)) {
-                chainAnchor = anchor;
-                break;
-            }
-        }
+        TrustAnchor chainAnchor =
+                mNetworkSecurityConfig.findTrustAnchorBySubjectAndPublicKey(anchorCert);
         if (chainAnchor == null) {
             throw new CertificateException("Trusted chain does not end in a TrustAnchor");
         }

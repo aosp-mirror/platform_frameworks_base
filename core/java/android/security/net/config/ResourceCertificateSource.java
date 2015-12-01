@@ -27,26 +27,29 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Set;
 
+import com.android.org.conscrypt.TrustedCertificateIndex;
+
 /**
  * {@link CertificateSource} based on certificates contained in an application resource file.
  * @hide
  */
 public class ResourceCertificateSource implements CertificateSource {
-    private Set<X509Certificate> mCertificates;
-    private final int  mResourceId;
-    private Context mContext;
     private final Object mLock = new Object();
+    private final int  mResourceId;
+
+    private Set<X509Certificate> mCertificates;
+    private Context mContext;
+    private TrustedCertificateIndex mIndex;
 
     public ResourceCertificateSource(int resourceId, Context context) {
         mResourceId = resourceId;
         mContext = context.getApplicationContext();
     }
 
-    @Override
-    public Set<X509Certificate> getCertificates() {
+    private void ensureInitialized() {
         synchronized (mLock) {
             if (mCertificates != null) {
-                return mCertificates;
+                return;
             }
             Set<X509Certificate> certificates = new ArraySet<X509Certificate>();
             Collection<? extends Certificate> certs;
@@ -61,12 +64,30 @@ public class ResourceCertificateSource implements CertificateSource {
             } finally {
                 IoUtils.closeQuietly(in);
             }
+            TrustedCertificateIndex indexLocal = new TrustedCertificateIndex();
             for (Certificate cert : certs) {
-                    certificates.add((X509Certificate) cert);
+                certificates.add((X509Certificate) cert);
+                indexLocal.index((X509Certificate) cert);
             }
             mCertificates = certificates;
+            mIndex = indexLocal;
             mContext = null;
-            return mCertificates;
         }
+    }
+
+    @Override
+    public Set<X509Certificate> getCertificates() {
+        ensureInitialized();
+        return mCertificates;
+    }
+
+    @Override
+    public X509Certificate findBySubjectAndPublicKey(X509Certificate cert) {
+        ensureInitialized();
+        java.security.cert.TrustAnchor anchor = mIndex.findBySubjectAndPublicKey(cert);
+        if (anchor == null) {
+            return null;
+        }
+        return anchor.getTrustedCert();
     }
 }
