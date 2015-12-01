@@ -284,7 +284,7 @@ public class TaskViewHeader extends FrameLayout
     }
 
     /** Animates this task bar dismiss button when launching a task. */
-    void startLaunchTaskDismissAnimation() {
+    void startLaunchTaskDismissAnimation(final Runnable postAnimationRunanble) {
         if (mDismissButton.getVisibility() == View.VISIBLE) {
             int taskViewExitToAppDuration = mContext.getResources().getInteger(
                     R.integer.recents_task_exit_to_app_duration);
@@ -294,6 +294,7 @@ public class TaskViewHeader extends FrameLayout
                     .setStartDelay(0)
                     .setInterpolator(mFastOutSlowInInterpolator)
                     .setDuration(taskViewExitToAppDuration)
+                    .withEndAction(postAnimationRunanble)
                     .start();
         }
     }

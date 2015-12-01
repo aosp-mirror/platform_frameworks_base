@@ -19,16 +19,6 @@
     android:layout_height="match_parent"
     android:background="#99000000"
     android:orientation="vertical">
-    <TextView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:gravity="start"
-        android:text="@string/recents_history_label"
-        android:textSize="24sp"
-        android:textColor="#FFFFFF"
-        android:fontFamily="sans-serif-medium" />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
