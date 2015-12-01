@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <!-- Entry with a bad pin. Connections to this will only succeed if overridePins is set. -->
+  <domain-config>
+    <domain>android.com</domain>
+    <pin-set>
+      <pin digest="SHA-256">aaaaaaaaIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=</pin>
+    </pin-set>
+    <trust-anchors>
+      <certificates src="system" overridePins="false" />
+    </trust-anchors>
+  </domain-config>
+  <!-- override that contains all of the system CA store. This should completely override the
+       anchors in the domain config-above with ones that have overridePins set. -->
+  <debug-overrides>
+    <trust-anchors>
+      <certificates src="system" />
+    </trust-anchors>
+  </debug-overrides>
+</network-security-config>

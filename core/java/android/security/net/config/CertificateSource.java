@@ -22,4 +22,5 @@ import java.security.cert.X509Certificate;
 /** @hide */
 public interface CertificateSource {
     Set<X509Certificate> getCertificates();
+    X509Certificate findBySubjectAndPublicKey(X509Certificate cert);
 }

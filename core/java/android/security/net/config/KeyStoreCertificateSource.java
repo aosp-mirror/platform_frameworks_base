@@ -24,6 +24,8 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Set;
 
+import com.android.org.conscrypt.TrustedCertificateIndex;
+
 /**
  * {@link CertificateSource} which provides certificates from trusted certificate entries of a
  * {@link KeyStore}.
@@ -31,6 +33,7 @@ import java.util.Set;
 class KeyStoreCertificateSource implements CertificateSource {
     private final Object mLock = new Object();
     private final KeyStore mKeyStore;
+    private TrustedCertificateIndex mIndex;
     private Set<X509Certificate> mCertificates;
 
     public KeyStoreCertificateSource(KeyStore ks) {
@@ -39,24 +42,42 @@ class KeyStoreCertificateSource implements CertificateSource {
 
     @Override
     public Set<X509Certificate> getCertificates() {
+        ensureInitialized();
+        return mCertificates;
+    }
+
+    private void ensureInitialized() {
         synchronized (mLock) {
             if (mCertificates != null) {
-                return mCertificates;
+                return;
             }
+
             try {
+                TrustedCertificateIndex localIndex = new TrustedCertificateIndex();
                 Set<X509Certificate> certificates = new ArraySet<>(mKeyStore.size());
                 for (Enumeration<String> en = mKeyStore.aliases(); en.hasMoreElements();) {
                     String alias = en.nextElement();
                     X509Certificate cert = (X509Certificate) mKeyStore.getCertificate(alias);
                     if (cert != null) {
                         certificates.add(cert);
+                        localIndex.index(cert);
                     }
                 }
+                mIndex = localIndex;
                 mCertificates = certificates;
-                return mCertificates;
             } catch (KeyStoreException e) {
                 throw new RuntimeException("Failed to load certificates from KeyStore", e);
             }
         }
+    }
+
+    @Override
+    public X509Certificate findBySubjectAndPublicKey(X509Certificate cert) {
+        ensureInitialized();
+        java.security.cert.TrustAnchor anchor = mIndex.findBySubjectAndPublicKey(cert);
+        if (anchor == null) {
+            return null;
+        }
+        return anchor.getTrustedCert();
     }
 }
