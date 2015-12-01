@@ -1438,6 +1438,14 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public SharedPreferences getSharedPreferences(File arg0, int arg1) {
+        if (mSharedPreferences == null) {
+            mSharedPreferences = new BridgeSharedPreferences();
+        }
+        return mSharedPreferences;
+    }
+
+    @Override
     public Drawable getWallpaper() {
         // pass
         return null;

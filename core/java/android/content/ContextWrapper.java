@@ -172,6 +172,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public SharedPreferences getSharedPreferences(File file, int mode) {
+        return mBase.getSharedPreferences(file, mode);
+    }
+
+    @Override
     public FileInputStream openFileInput(String name)
         throws FileNotFoundException {
         return mBase.openFileInput(name);
