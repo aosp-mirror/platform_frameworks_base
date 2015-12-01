@@ -19,7 +19,6 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.Log;
 import android.view.animation.AnimationUtils;
@@ -189,7 +188,7 @@ public class TaskStackViewScroller {
     // TODO: Remove
     @Deprecated
     int progressToScrollRange(float p) {
-        return (int) (p * mLayoutAlgorithm.mCurrentStackRect.height());
+        return (int) (p * mLayoutAlgorithm.mStackRect.height());
     }
 
     /** Called from the view draw, computes the next scroll. */
