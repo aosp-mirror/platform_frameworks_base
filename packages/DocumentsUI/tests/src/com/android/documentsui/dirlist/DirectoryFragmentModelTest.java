@@ -29,7 +29,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ViewGroup;
 
 import com.android.documentsui.DirectoryResult;
-import com.android.documentsui.dirlist.DirectoryFragment.Model;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 

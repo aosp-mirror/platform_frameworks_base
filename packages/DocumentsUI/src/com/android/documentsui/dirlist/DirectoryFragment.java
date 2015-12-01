@@ -51,13 +51,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -72,7 +70,6 @@ import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
@@ -118,12 +115,9 @@ import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
-import com.android.internal.annotations.GuardedBy;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -131,8 +125,6 @@ import java.util.List;
  * Display the documents inside a single directory.
  */
 public class DirectoryFragment extends Fragment {
-
-    public static final String TAG = "DirectoryFragment";
 
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
@@ -144,6 +136,8 @@ public class DirectoryFragment extends Fragment {
     public static final int ANIM_UP = 4;
 
     public static final int REQUEST_COPY_DESTINATION = 1;
+
+    private static final String TAG = "DirectoryFragment";
 
     private static final int LOADER_ID = 42;
     private static final boolean DEBUG_ENABLE_DND = true;
@@ -475,19 +469,14 @@ public class DirectoryFragment extends Fragment {
                 data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_COPY));
     }
 
-    private int getEventAdapterPosition(MotionEvent e) {
-        View view = mRecView.findChildViewUnder(e.getX(), e.getY());
-        return view != null ? mRecView.getChildAdapterPosition(view) : RecyclerView.NO_POSITION;
-    }
-
     private boolean onSingleTapUp(MotionEvent e) {
         // Only respond to touch events.  Single-click mouse events are selection events and are
         // handled by the selection manager.  Tap events that occur while the selection manager is
         // active are also selection events.
         if (Events.isTouchEvent(e) && !mSelectionManager.hasSelection()) {
-            int position = getEventAdapterPosition(e);
-            if (position != RecyclerView.NO_POSITION) {
-                return handleViewItem(position);
+            String id = getModelId(e);
+            if (id != null) {
+                return handleViewItem(id);
             }
         }
         return false;
@@ -496,16 +485,16 @@ public class DirectoryFragment extends Fragment {
     protected boolean onDoubleTap(MotionEvent e) {
         if (Events.isMouseEvent(e)) {
             Log.d(TAG, "Handling double tap from mouse.");
-            int position = getEventAdapterPosition(e);
-            if (position != RecyclerView.NO_POSITION) {
-                return handleViewItem(position);
+            String id = getModelId(e);
+            if (id != null) {
+                return handleViewItem(id);
             }
         }
         return false;
     }
 
-    private boolean handleViewItem(int position) {
-        final Cursor cursor = mModel.getItem(position);
+    private boolean handleViewItem(String id) {
+        final Cursor cursor = mModel.getItem(id);
         checkNotNull(cursor, "Cursor cannot be null.");
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
@@ -928,7 +917,7 @@ public class DirectoryFragment extends Fragment {
             extends RecyclerView.ViewHolder
             implements View.OnKeyListener
     {
-        public String docId;  // The stable document id.
+        public String modelId;
         private ClickListener mClickListener;
         private View.OnKeyListener mKeyListener;
 
@@ -1071,7 +1060,8 @@ public class DirectoryFragment extends Fragment {
             final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
             final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-            holder.docId = docId;
+            // TODO(stable-id): factor the model ID construction code.
+            holder.modelId = docAuthority + "|" + docId;
             final View itemView = holder.itemView;
 
             holder.setSelected(isSelected(position));
@@ -1452,10 +1442,10 @@ public class DirectoryFragment extends Fragment {
                     return true;
 
                 case DragEvent.ACTION_DROP:
-                    int dstPosition = mRecView.getChildAdapterPosition(getContainingItemView(v));
+                    String dstId = getModelId(v);
                     DocumentInfo dstDir = null;
-                    if (dstPosition != android.widget.AdapterView.INVALID_POSITION) {
-                        Cursor dstCursor = mModel.getItem(dstPosition);
+                    if (dstId != null) {
+                        Cursor dstCursor = mModel.getItem(dstId);
                         checkNotNull(dstCursor, "Cursor cannot be null.");
                         dstDir = DocumentInfo.fromDirectoryCursor(dstCursor);
                         // TODO: Do not drop into the directory where the documents came from.
@@ -1467,10 +1457,37 @@ public class DirectoryFragment extends Fragment {
         }
     };
 
-    private View getContainingItemView(View view) {
+    /**
+     * Gets the model ID for a given motion event (using the event position)
+     */
+    private String getModelId(MotionEvent e) {
+        View view = mRecView.findChildViewUnder(e.getX(), e.getY());
+        if (view == null) {
+            return null;
+        }
+        RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(view);
+        if (vh instanceof DocumentHolder) {
+            return ((DocumentHolder) vh).modelId;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the model ID for a given RecyclerView item.
+     * @param view A View that is a document item view, or a child of a document item view.
+     * @return The Model ID for the given document, or null if the given view is not associated with
+     *     a document item view.
+     */
+    private String getModelId(View view) {
         while (true) {
             if (view.getLayoutParams() instanceof RecyclerView.LayoutParams) {
-                return view;
+                RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(view);
+                if (vh instanceof DocumentHolder) {
+                    return ((DocumentHolder) vh).modelId;
+                } else {
+                    return null;
+                }
             }
             ViewParent parent = view.getParent();
             if (parent == null || !(parent instanceof View)) {
@@ -1499,22 +1516,22 @@ public class DirectoryFragment extends Fragment {
     };
 
     private List<DocumentInfo> getDraggableDocuments(View currentItemView) {
-        int position = mRecView.getChildAdapterPosition(getContainingItemView(currentItemView));
-        if (position == android.widget.AdapterView.INVALID_POSITION) {
+        String modelId = getModelId(currentItemView);
+        if (modelId == null) {
             return Collections.EMPTY_LIST;
         }
 
         final List<DocumentInfo> selectedDocs =
                 mModel.getDocuments(mSelectionManager.getSelection());
         if (!selectedDocs.isEmpty()) {
-            if (!isSelected(position)) {
+            if (!isSelected(modelId)) {
                 // There is a selection that does not include the current item, drag nothing.
                 return Collections.EMPTY_LIST;
             }
             return selectedDocs;
         }
 
-        final Cursor cursor = mModel.getItem(position);
+        final Cursor cursor = mModel.getItem(modelId);
         checkNotNull(cursor, "Cursor cannot be null.");
         final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
 
@@ -1657,303 +1674,9 @@ public class DirectoryFragment extends Fragment {
         return mSelectionManager.getSelection().contains(position);
     }
 
-    /**
-     * The data model for the current loaded directory.
-     */
-    @VisibleForTesting
-    public static final class Model implements DocumentContext {
-        private RecyclerView.Adapter<?> mViewAdapter;
-        private Context mContext;
-        private int mCursorCount;
-        private boolean mIsLoading;
-        @GuardedBy("mPendingDelete")
-        private Boolean mPendingDelete = false;
-        @GuardedBy("mPendingDelete")
-        private SparseBooleanArray mMarkedForDeletion = new SparseBooleanArray();
-        private UpdateListener mUpdateListener;
-        @Nullable private Cursor mCursor;
-        @Nullable private String info;
-        @Nullable private String error;
-
-        Model(Context context, RecyclerView.Adapter<?> viewAdapter) {
-            mContext = context;
-            mViewAdapter = viewAdapter;
-        }
-
-        void update(DirectoryResult result) {
-            if (DEBUG) Log.i(TAG, "Updating model with new result set.");
-
-            if (result == null) {
-                mCursor = null;
-                mCursorCount = 0;
-                info = null;
-                error = null;
-                mIsLoading = false;
-                mUpdateListener.onModelUpdate(this);
-                return;
-            }
-
-            if (result.exception != null) {
-                Log.e(TAG, "Error while loading directory contents", result.exception);
-                mUpdateListener.onModelUpdateFailed(result.exception);
-                return;
-            }
-
-            mCursor = result.cursor;
-            mCursorCount = mCursor.getCount();
-
-            final Bundle extras = mCursor.getExtras();
-            if (extras != null) {
-                info = extras.getString(DocumentsContract.EXTRA_INFO);
-                error = extras.getString(DocumentsContract.EXTRA_ERROR);
-                mIsLoading = extras.getBoolean(DocumentsContract.EXTRA_LOADING, false);
-            }
-
-            mUpdateListener.onModelUpdate(this);
-        }
-
-        int getItemCount() {
-            synchronized(mPendingDelete) {
-                return mCursorCount - mMarkedForDeletion.size();
-            }
-        }
-
-        Cursor getItem(int position) {
-            synchronized(mPendingDelete) {
-                // Items marked for deletion are masked out of the UI.  To do this, for every marked
-                // item whose position is less than the requested item position, advance the requested
-                // position by 1.
-                final int originalPos = position;
-                final int size = mMarkedForDeletion.size();
-                for (int i = 0; i < size; ++i) {
-                    // It'd be more concise, but less efficient, to iterate over positions while calling
-                    // mMarkedForDeletion.get.  Instead, iterate over deleted entries.
-                    if (mMarkedForDeletion.keyAt(i) <= position && mMarkedForDeletion.valueAt(i)) {
-                        ++position;
-                    }
-                }
-
-                if (DEBUG && position != originalPos) {
-                    Log.d(TAG, "Item position adjusted for deletion.  Original: " + originalPos
-                            + "  Adjusted: " + position);
-                }
-
-                if (position >= mCursorCount) {
-                    throw new IndexOutOfBoundsException("Attempt to retrieve " + position + " of " +
-                            mCursorCount + " items");
-                }
-
-                mCursor.moveToPosition(position);
-                return mCursor;
-            }
-        }
-
-        private boolean isEmpty() {
-            return mCursorCount == 0;
-        }
-
-        private boolean isLoading() {
-            return mIsLoading;
-        }
-
-        List<DocumentInfo> getDocuments(Selection items) {
-            final int size = (items != null) ? items.size() : 0;
-
-            final List<DocumentInfo> docs =  new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                final Cursor cursor = getItem(items.get(i));
-                checkNotNull(cursor, "Cursor cannot be null.");
-                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-                docs.add(doc);
-            }
-            return docs;
-        }
-
-        @Override
-        public Cursor getCursor() {
-            if (Looper.myLooper() != Looper.getMainLooper()) {
-                throw new IllegalStateException("Can't call getCursor from non-main thread.");
-            }
-            return mCursor;
-        }
-
-        List<DocumentInfo> getDocumentsMarkedForDeletion() {
-            synchronized (mPendingDelete) {
-                final int size = mMarkedForDeletion.size();
-                List<DocumentInfo> docs =  new ArrayList<>(size);
-
-                for (int i = 0; i < size; ++i) {
-                    final int position = mMarkedForDeletion.keyAt(i);
-                    checkState(position < mCursorCount);
-                    mCursor.moveToPosition(position);
-                    final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(mCursor);
-                    docs.add(doc);
-                }
-                return docs;
-            }
-        }
-
-        /**
-         * Marks the given files for deletion. This will remove them from the UI. Clients must then
-         * call either {@link #undoDeletion()} or {@link #finalizeDeletion()} to cancel or confirm
-         * the deletion, respectively. Only one deletion operation is allowed at a time.
-         *
-         * @param selected A selection representing the files to delete.
-         */
-        void markForDeletion(Selection selected) {
-            synchronized (mPendingDelete) {
-                mPendingDelete = true;
-                // Only one deletion operation at a time.
-                checkState(mMarkedForDeletion.size() == 0);
-                // There should never be more to delete than what exists.
-                checkState(mCursorCount >= selected.size());
-
-                int[] positions = selected.getAll();
-                Arrays.sort(positions);
-
-                // Walk backwards through the set, since we're removing positions.
-                // Otherwise, positions would change after the first modification.
-                for (int p = positions.length - 1; p >= 0; p--) {
-                    mMarkedForDeletion.append(positions[p], true);
-                    mViewAdapter.notifyItemRemoved(positions[p]);
-                    if (DEBUG) Log.d(TAG, "Scheduled " + positions[p] + " for delete.");
-                }
-            }
-        }
-
-        /**
-         * Cancels an ongoing deletion operation. All files currently marked for deletion will be
-         * unmarked, and restored in the UI.  See {@link #markForDeletion(Selection)}.
-         */
-        void undoDeletion() {
-            synchronized (mPendingDelete) {
-                // Iterate over deleted items, temporarily marking them false in the deletion list, and
-                // re-adding them to the UI.
-                final int size = mMarkedForDeletion.size();
-                for (int i = 0; i < size; ++i) {
-                    final int position = mMarkedForDeletion.keyAt(i);
-                    mMarkedForDeletion.put(position, false);
-                    mViewAdapter.notifyItemInserted(position);
-                }
-                resetDeleteData();
-            }
-        }
-
-        private void resetDeleteData() {
-            synchronized (mPendingDelete) {
-                mPendingDelete = false;
-                mMarkedForDeletion.clear();
-            }
-        }
-
-        /**
-         * Finalizes an ongoing deletion operation. All files currently marked for deletion will be
-         * deleted.  See {@link #markForDeletion(Selection)}.
-         *
-         * @param view The view which will be used to interact with the user (e.g. surfacing
-         * snackbars) for errors, info, etc.
-         */
-        void finalizeDeletion(DeletionListener listener) {
-            synchronized (mPendingDelete) {
-                if (mPendingDelete) {
-                    // Necessary to avoid b/25072545. Even when that's resolved, this
-                    // is a nice safe thing to day.
-                    mPendingDelete = false;
-                    final ContentResolver resolver = mContext.getContentResolver();
-                    DeleteFilesTask task = new DeleteFilesTask(resolver, listener);
-                    task.execute();
-                }
-            }
-        }
-
-        /**
-         * A Task which collects the DocumentInfo for documents that have been marked for deletion,
-         * and actually deletes them.
-         */
-        private class DeleteFilesTask extends AsyncTask<Void, Void, List<DocumentInfo>> {
-            private ContentResolver mResolver;
-            private DeletionListener mListener;
-
-            /**
-             * @param resolver A ContentResolver for performing the actual file deletions.
-             * @param errorCallback A Runnable that is executed in the event that one or more errors
-             *     occured while copying files.  Execution will occur on the UI thread.
-             */
-            public DeleteFilesTask(ContentResolver resolver, DeletionListener listener) {
-                mResolver = resolver;
-                mListener = listener;
-            }
-
-            @Override
-            protected List<DocumentInfo> doInBackground(Void... params) {
-                return getDocumentsMarkedForDeletion();
-            }
-
-            @Override
-            protected void onPostExecute(List<DocumentInfo> docs) {
-                boolean hadTrouble = false;
-                for (DocumentInfo doc : docs) {
-                    if (!doc.isDeleteSupported()) {
-                        Log.w(TAG, doc + " could not be deleted.  Skipping...");
-                        hadTrouble = true;
-                        continue;
-                    }
-
-                    ContentProviderClient client = null;
-                    try {
-                        if (DEBUG) Log.d(TAG, "Deleting: " + doc.displayName);
-                        client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                            mResolver, doc.derivedUri.getAuthority());
-                        DocumentsContract.deleteDocument(client, doc.derivedUri);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Failed to delete " + doc);
-                        hadTrouble = true;
-                    } finally {
-                        ContentProviderClient.releaseQuietly(client);
-                    }
-                }
-
-                if (hadTrouble) {
-                    // TODO show which files failed? b/23720103
-                    mListener.onError();
-                    if (DEBUG) Log.d(TAG, "Deletion task completed.  Some deletions failed.");
-                } else {
-                    if (DEBUG) Log.d(TAG, "Deletion task completed successfully.");
-                }
-                resetDeleteData();
-
-                mListener.onCompletion();
-            }
-        }
-
-        static class DeletionListener {
-            /**
-             * Called when deletion has completed (regardless of whether an error occurred).
-             */
-            void onCompletion() {}
-
-            /**
-             * Called at the end of a deletion operation that produced one or more errors.
-             */
-            void onError() {}
-        }
-
-        void addUpdateListener(UpdateListener listener) {
-            checkState(mUpdateListener == null);
-            mUpdateListener = listener;
-        }
-
-        static class UpdateListener {
-            /**
-             * Called when a successful update has occurred.
-             */
-            void onModelUpdate(Model model) {}
-
-            /**
-             * Called when an update has been attempted but failed.
-             */
-            void onModelUpdateFailed(Exception e) {}
-        }
+    boolean isSelected(String modelId) {
+        // TODO(stable-id): implement this
+        return false;
     }
 
     private class ItemClickListener implements ClickListener {
@@ -1963,7 +1686,7 @@ public class DirectoryFragment extends Fragment {
             if (mSelectionManager.hasSelection()) {
                 mSelectionManager.toggleSelection(position);
             } else {
-                handleViewItem(position);
+                handleViewItem(doc.modelId);
             }
         }
     }
