@@ -45,10 +45,20 @@ public class MtpManagerTest extends InstrumentationTestCase {
     @Override
     public void setUp() throws Exception {
         mUsbManager = getContext().getSystemService(UsbManager.class);
-        mUsbDevice = findDevice();
-        mManager = new MtpManager(getContext());
-        mManager.openDevice(mUsbDevice.getDeviceId());
-        waitForStorages(mManager, mUsbDevice.getDeviceId());
+        for (int i = 0; i < 2; i++) {
+            mUsbDevice = findDevice();
+            mManager = new MtpManager(getContext());
+            mManager.openDevice(mUsbDevice.getDeviceId());
+            try {
+                waitForStorages(mManager, mUsbDevice.getDeviceId());
+                return;
+            } catch (IOException exp) {
+                // When the MTP device is Android, and it changes the USB device type from
+                // "Charging" to "MTP", the device ID will be updated. We need to find a device
+                // again.
+                continue;
+            }
+        }
     }
 
     @Override
