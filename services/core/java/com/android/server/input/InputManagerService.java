@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import android.annotation.Nullable;
 import android.view.Display;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.R;
@@ -83,6 +84,9 @@ import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
+import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
 import java.io.File;
@@ -116,6 +120,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 4;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 5;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 6;
+    private static final int MSG_INPUT_METHOD_SUBTYPE_CHANGED = 7;
 
     // Pointer to native input manager service object.
     private final long mPtr;
@@ -1206,6 +1211,15 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
+    // Must be called on handler.
+    private void handleSwitchInputMethodSubtype(int userId,
+            @Nullable InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype subtype) {
+        if (DEBUG) {
+            Slog.i(TAG, "InputMethodSubtype changed: userId=" + userId
+                    + " ime=" + inputMethodInfo + " subtype=" + subtype);
+        }
+    }
+
     public void switchKeyboardLayout(int deviceId, int direction) {
         mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, deviceId, direction).sendToTarget();
     }
@@ -1757,12 +1771,22 @@ public class InputManagerService extends IInputManager.Stub
                 case MSG_RELOAD_DEVICE_ALIASES:
                     reloadDeviceAliases();
                     break;
-                case MSG_DELIVER_TABLET_MODE_CHANGED:
+                case MSG_DELIVER_TABLET_MODE_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     long whenNanos = (args.argi1 & 0xFFFFFFFFl) | ((long) args.argi2 << 32);
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
+                }
+                case MSG_INPUT_METHOD_SUBTYPE_CHANGED: {
+                    final int userId = msg.arg1;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final InputMethodInfo inputMethodInfo = (InputMethodInfo) args.arg1;
+                    final InputMethodSubtype subtype = (InputMethodSubtype) args.arg2;
+                    args.recycle();
+                    handleSwitchInputMethodSubtype(userId, inputMethodInfo, subtype);
+                    break;
+                }
             }
         }
     }
@@ -1919,6 +1943,16 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setInteractive(boolean interactive) {
             nativeSetInteractive(mPtr, interactive);
+        }
+
+        @Override
+        public void onInputMethodSubtypeChanged(int userId,
+                @Nullable InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype subtype) {
+            final SomeArgs someArgs = SomeArgs.obtain();
+            someArgs.arg1 = inputMethodInfo;
+            someArgs.arg2 = subtype;
+            mHandler.obtainMessage(MSG_INPUT_METHOD_SUBTYPE_CHANGED, userId, 0, someArgs)
+                    .sendToTarget();
         }
     }
 }
