@@ -147,6 +147,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public SharedPreferences getSharedPreferences(File file, int mode) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public FileInputStream openFileInput(String name) throws FileNotFoundException {
         throw new UnsupportedOperationException();
     }

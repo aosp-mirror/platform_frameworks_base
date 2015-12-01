@@ -129,7 +129,7 @@ class ContextImpl extends Context {
     /**
      * Map from package name, to preference name, to cached preferences.
      */
-    private static ArrayMap<String, ArrayMap<String, SharedPreferencesImpl>> sSharedPrefs;
+    private static ArrayMap<String, ArrayMap<File, SharedPreferencesImpl>> sSharedPrefs;
 
     final ActivityThread mMainThread;
     final LoadedApk mPackageInfo;
@@ -327,34 +327,39 @@ class ContextImpl extends Context {
 
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
+        // At least one application in the world actually passes in a null
+        // name.  This happened to work because when we generated the file name
+        // we would stringify it to "null.xml".  Nice.
+        if (mPackageInfo.getApplicationInfo().targetSdkVersion <
+                Build.VERSION_CODES.KITKAT) {
+            if (name == null) {
+                name = "null";
+            }
+        }
+
+        final File file = getSharedPrefsFile(name);
+        return getSharedPreferences(file, mode);
+    }
+
+    @Override
+    public SharedPreferences getSharedPreferences(File file, int mode) {
         SharedPreferencesImpl sp;
         synchronized (ContextImpl.class) {
             if (sSharedPrefs == null) {
-                sSharedPrefs = new ArrayMap<String, ArrayMap<String, SharedPreferencesImpl>>();
+                sSharedPrefs = new ArrayMap<String, ArrayMap<File, SharedPreferencesImpl>>();
             }
 
             final String packageName = getPackageName();
-            ArrayMap<String, SharedPreferencesImpl> packagePrefs = sSharedPrefs.get(packageName);
+            ArrayMap<File, SharedPreferencesImpl> packagePrefs = sSharedPrefs.get(packageName);
             if (packagePrefs == null) {
-                packagePrefs = new ArrayMap<String, SharedPreferencesImpl>();
+                packagePrefs = new ArrayMap<File, SharedPreferencesImpl>();
                 sSharedPrefs.put(packageName, packagePrefs);
             }
 
-            // At least one application in the world actually passes in a null
-            // name.  This happened to work because when we generated the file name
-            // we would stringify it to "null.xml".  Nice.
-            if (mPackageInfo.getApplicationInfo().targetSdkVersion <
-                    Build.VERSION_CODES.KITKAT) {
-                if (name == null) {
-                    name = "null";
-                }
-            }
-
-            sp = packagePrefs.get(name);
+            sp = packagePrefs.get(file);
             if (sp == null) {
-                File prefsFile = getSharedPrefsFile(name);
-                sp = new SharedPreferencesImpl(prefsFile, mode);
-                packagePrefs.put(name, sp);
+                sp = new SharedPreferencesImpl(file, mode);
+                packagePrefs.put(file, sp);
                 return sp;
             }
         }
