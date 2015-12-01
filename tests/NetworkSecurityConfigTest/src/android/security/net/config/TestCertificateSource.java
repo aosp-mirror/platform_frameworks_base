@@ -19,15 +19,29 @@ package android.security.net.config;
 import java.util.Set;
 import java.security.cert.X509Certificate;
 
+import com.android.org.conscrypt.TrustedCertificateIndex;
+
 /** @hide */
 public class TestCertificateSource implements CertificateSource {
 
     private final Set<X509Certificate> mCertificates;
+    private final TrustedCertificateIndex mIndex = new TrustedCertificateIndex();
     public TestCertificateSource(Set<X509Certificate> certificates) {
         mCertificates = certificates;
+        for (X509Certificate cert : certificates) {
+            mIndex.index(cert);
+        }
     }
 
     public Set<X509Certificate> getCertificates() {
             return mCertificates;
+    }
+
+    public X509Certificate findBySubjectAndPublicKey(X509Certificate cert) {
+        java.security.cert.TrustAnchor anchor = mIndex.findBySubjectAndPublicKey(cert);
+        if (anchor == null) {
+            return null;
+        }
+        return anchor.getTrustedCert();
     }
 }
