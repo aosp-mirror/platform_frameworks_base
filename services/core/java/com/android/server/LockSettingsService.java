@@ -679,7 +679,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockKeystore(credential, userId);
             unlockUser(userId, null);
             UserInfo info = UserManager.get(mContext).getUserInfo(userId);
-            if (StorageManager.isFileBasedEncryptionEnabled() && info.isManagedProfile()) {
+            if (LockPatternUtils.isSeparateWorkChallengeEnabled() && info.isManagedProfile()) {
                 TrustManager trustManager =
                         (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
                 trustManager.setDeviceLockedForUser(userId, false);

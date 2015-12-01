@@ -32,7 +32,6 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -743,7 +742,7 @@ public class KeyguardViewMediator extends SystemUI {
         long timeout;
 
         UserInfo user = UserManager.get(mContext).getUserInfo(userId);
-        if ((!user.isManagedProfile() && StorageManager.isFileBasedEncryptionEnabled())
+        if ((!user.isManagedProfile() && LockPatternUtils.isSeparateWorkChallengeEnabled())
                 || policyTimeout <= 0) {
             timeout = lockAfterTimeout;
         } else {
@@ -779,11 +778,11 @@ public class KeyguardViewMediator extends SystemUI {
                          + mDelayedShowingSequence);
         doKeyguardLaterLockedForChildProfiles();
     }
-    
+
     private void doKeyguardLaterLockedForChildProfiles() {
         UserManager um = UserManager.get(mContext);
         List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
-        if (StorageManager.isFileBasedEncryptionEnabled() && profiles.size() > 1) {
+        if (LockPatternUtils.isSeparateWorkChallengeEnabled() && profiles.size() > 1) {
             for (UserInfo info : profiles) {
                 if (info.id != UserHandle.myUserId() && info.isManagedProfile()) {
                     long userTimeout = getLockTimeout(info.id);

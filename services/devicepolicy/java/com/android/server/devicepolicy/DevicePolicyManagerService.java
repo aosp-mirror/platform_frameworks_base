@@ -3872,7 +3872,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceCrossUserPermission(userHandle);
         // Managed Profile password can only be changed when per user encryption is present.
-        if (!StorageManager.isFileBasedEncryptionEnabled()) {
+        if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
             enforceNotManagedProfile(userHandle, "set the active password");
         }
 
@@ -4483,7 +4483,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 UserInfo user = mUserManager.getUserInfo(userHandle);
                 final List<UserInfo> profiles;
-                if (user.isManagedProfile() || StorageManager.isFileBasedEncryptionEnabled()) {
+                if (user.isManagedProfile() || LockPatternUtils.isSeparateWorkChallengeEnabled()) {
                     // If we are being asked about a managed profile or the main user profile has a
                     // separate lock from the work profile, just return keyguard features disabled
                     // by admins in the profile.

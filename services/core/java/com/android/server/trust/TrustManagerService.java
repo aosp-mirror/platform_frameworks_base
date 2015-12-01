@@ -291,7 +291,7 @@ public class TrustManagerService extends SystemService {
     }
 
     public void setDeviceLockedForUser(int userId, boolean locked) {
-        if (StorageManager.isFileBasedEncryptionEnabled()) {
+        if (LockPatternUtils.isSeparateWorkChallengeEnabled()) {
             UserInfo info = mUserManager.getUserInfo(userId);
             if (info.isManagedProfile()) {
                 synchronized (mDeviceLockedForUser) {
@@ -670,7 +670,7 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceLocked(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
-            if (!StorageManager.isFileBasedEncryptionEnabled()) {
+            if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
                 userId = resolveProfileParent(userId);
             }
 

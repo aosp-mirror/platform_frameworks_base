@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockPatternUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -25,9 +26,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
-import android.os.SystemProperties;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -389,7 +388,7 @@ class LockSettingsStorage {
 
     private int getUserParentOrSelfId(int userId) {
         // Device supports per user encryption, so lock is applied to the given user.
-        if (StorageManager.isFileBasedEncryptionEnabled()) {
+        if (LockPatternUtils.isSeparateWorkChallengeEnabled()) {
             return userId;
         }
         // Device uses Block Based Encryption, and the parent user's lock is used for the whole

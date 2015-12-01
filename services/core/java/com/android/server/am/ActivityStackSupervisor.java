@@ -67,7 +67,6 @@ import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
 import android.app.admin.IDevicePolicyManager;
-import android.app.trust.ITrustManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentSender;
@@ -1673,7 +1672,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         KeyguardManager km = (KeyguardManager) mService.mContext
                 .getSystemService(Context.KEYGUARD_SERVICE);
         if (user.isManagedProfile()
-                && StorageManager.isFileBasedEncryptionEnabled()
+                && LockPatternUtils.isSeparateWorkChallengeEnabled()
                 && km.isDeviceLocked(userId)) {
             IIntentSender target = mService.getIntentSenderLocked(
                     ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,

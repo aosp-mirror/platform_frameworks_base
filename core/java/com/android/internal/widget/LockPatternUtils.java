@@ -1270,6 +1270,10 @@ public class LockPatternUtils {
         }
     }
 
+    public static boolean isSeparateWorkChallengeEnabled() {
+        return StorageManager.isFileBasedEncryptionEnabled();
+    }
+
     public void registerStrongAuthTracker(final StrongAuthTracker strongAuthTracker) {
         try {
             getLockSettings().registerStrongAuthTracker(strongAuthTracker.mStub);

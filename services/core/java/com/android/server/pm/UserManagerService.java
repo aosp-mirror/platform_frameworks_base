@@ -70,6 +70,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -411,7 +412,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getCredentialOwnerProfile(int userHandle) {
         checkManageUsersPermission("get the credential owner");
-        if (!StorageManager.isFileBasedEncryptionEnabled()) {
+        if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
             synchronized (mUsersLock) {
                 UserInfo profileParent = getProfileParentLU(userHandle);
                 if (profileParent != null) {
