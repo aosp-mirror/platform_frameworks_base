@@ -3356,10 +3356,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         try {
             try {
-                if (AppGlobals.getPackageManager().isPackageFrozen(app.info.packageName)) {
-                    // This is caught below as if we had failed to fork zygote
-                    throw new RuntimeException("Package " + app.info.packageName + " is frozen!");
-                }
+                final int userId = UserHandle.getUserId(app.uid);
+                AppGlobals.getPackageManager().checkPackageStartable(app.info.packageName, userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }

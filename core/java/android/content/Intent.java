@@ -2877,6 +2877,14 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_SWITCHED";
 
     /**
+     * Broadcast Action: Sent when the credential-encrypted private storage has
+     * become unlocked for the target user. This is only sent to registered
+     * receivers, not manifest receivers.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USER_UNLOCKED = "android.intent.action.USER_UNLOCKED";
+
+    /**
      * Broadcast sent to the system when a user's information changes. Carries an extra
      * {@link #EXTRA_USER_HANDLE} to indicate which user's information changed.
      * This is only sent to registered receivers, not manifest receivers. It is sent to all users.
