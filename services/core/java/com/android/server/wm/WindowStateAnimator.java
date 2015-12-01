@@ -1474,6 +1474,11 @@ class WindowStateAnimator {
                 }
                 mWin.mAppToken.updateReportedVisibilityLocked();
             }
+
+            final Task task = mWin.getTask();
+            if (task != null) {
+                task.scheduleShowNonResizeableDockToastIfNeeded();
+            }
             return true;
         }
         return false;

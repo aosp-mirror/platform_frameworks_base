@@ -658,10 +658,11 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     /**
-     * For docked workspace provides information which side of the screen was the dock anchored.
+     * For docked workspace (or workspace that's side-by-side to the docked), provides
+     * information which side of the screen was the dock anchored.
      */
     int getDockSide() {
-        if (mStackId != DOCKED_STACK_ID) {
+        if (mStackId != DOCKED_STACK_ID && !StackId.isResizeableByDockedStack(mStackId)) {
             return DOCKED_INVALID;
         }
         if (mDisplayContent == null) {

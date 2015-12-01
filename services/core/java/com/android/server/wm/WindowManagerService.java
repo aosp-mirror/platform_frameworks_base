@@ -150,8 +150,10 @@ import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
+import android.widget.Toast;
 
 import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.R;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -4787,6 +4789,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void scheduleShowNonResizeableDockToast(int taskId) {
+        synchronized (mWindowMap) {
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                if (DEBUG_STACK) Slog.i(TAG, "scheduleShowToast: could not find taskId=" + taskId);
+                return;
+            }
+            task.setShowNonResizeableDockToast();
+        }
+    }
+
     public void getStackBounds(int stackId, Rect bounds) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
@@ -7452,6 +7465,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RESIZE_TASK = 44;
 
         public static final int TWO_FINGER_SCROLL_START = 45;
+        public static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = 46;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -8022,6 +8036,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     } catch (RemoteException e) {
                         // This will not happen since we are in the same process.
                     }
+                }
+                break;
+                case SHOW_NON_RESIZEABLE_DOCK_TOAST: {
+                    final Toast toast = Toast.makeText(mContext,
+                            mContext.getString(R.string.dock_non_resizeble_text),
+                            Toast.LENGTH_LONG);
+                    final int gravity = toast.getGravity();
+                    final int xOffset = toast.getXOffset() + msg.arg1;
+                    final int yOffset = toast.getYOffset() + msg.arg2;
+                    toast.setGravity(gravity, xOffset, yOffset);
+                    toast.show();
                 }
                 break;
             }

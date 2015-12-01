@@ -26,6 +26,11 @@ import static com.android.server.wm.WindowManagerService.TAG;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
+import static com.android.server.wm.WindowManagerService.H.SHOW_NON_RESIZEABLE_DOCK_TOAST;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
 
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
@@ -76,6 +81,11 @@ class Task implements DimLayer.DimLayerUser {
     // Whether the task is resizeable
     private boolean mResizeable;
 
+    // Whether we need to show toast about the app being non-resizeable when it becomes visible.
+    // This flag is set when a non-resizeable task is docked (or side-by-side). It's cleared
+    // after we show the toast.
+    private boolean mShowNonResizeableDockToast;
+
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
 
@@ -90,6 +100,41 @@ class Task implements DimLayer.DimLayerUser {
 
     DisplayContent getDisplayContent() {
         return mStack.getDisplayContent();
+    }
+
+    void setShowNonResizeableDockToast() {
+        mShowNonResizeableDockToast = true;
+    }
+
+    void scheduleShowNonResizeableDockToastIfNeeded() {
+        if (!mShowNonResizeableDockToast) {
+            return;
+        }
+        final DisplayContent displayContent = mStack.getDisplayContent();
+        // If docked stack is not yet visible, we don't want to show the toast yet,
+        // since we need the visible rect of the docked task to position the toast.
+        if (displayContent == null || displayContent.getDockedStackLocked() == null) {
+            return;
+        }
+
+        mShowNonResizeableDockToast = false;
+
+        final int dockSide = mStack.getDockSide();
+        int xOffset = 0;
+        int yOffset = 0;
+        if (dockSide != DOCKED_INVALID) {
+            mStack.getBounds(mTmpRect);
+            displayContent.getLogicalDisplayRect(mTmpRect2);
+
+            if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
+                xOffset = mTmpRect.centerX() - mTmpRect2.centerX();
+            } else if (dockSide == DOCKED_TOP) {
+                // We don't adjust for DOCKED_BOTTOM case since it's already at the bottom.
+                yOffset = mTmpRect2.bottom - mTmpRect.bottom;
+            }
+            mService.mH.obtainMessage(
+                    SHOW_NON_RESIZEABLE_DOCK_TOAST, xOffset, yOffset).sendToTarget();
+        }
     }
 
     void addAppToken(int addPos, AppWindowToken wtoken) {
