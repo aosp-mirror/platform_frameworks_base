@@ -3644,21 +3644,47 @@ final class Settings {
         }
     }
 
-    void createNewUserLILPw(PackageManagerService service, Installer installer, int userHandle) {
-        for (PackageSetting ps : mPackages.values()) {
-            if (ps.pkg == null || ps.pkg.applicationInfo == null) {
+    void createNewUserLI(@NonNull PackageManagerService service, @NonNull Installer installer,
+            int userHandle) {
+        String[] volumeUuids;
+        String[] names;
+        int[] uids;
+        String[] seinfos;
+        int packagesCount;
+        synchronized (mPackages) {
+            Collection<PackageSetting> packages = mPackages.values();
+            packagesCount = packages.size();
+            volumeUuids = new String[packagesCount];
+            names = new String[packagesCount];
+            uids = new int[packagesCount];
+            seinfos = new String[packagesCount];
+            Iterator<PackageSetting> packagesIterator = packages.iterator();
+            for (int i = 0; i < packagesCount; i++) {
+                PackageSetting ps = packagesIterator.next();
+                if (ps.pkg == null || ps.pkg.applicationInfo == null) {
+                    continue;
+                }
+                // Only system apps are initially installed.
+                ps.setInstalled(ps.isSystem(), userHandle);
+                // Need to create a data directory for all apps under this user. Accumulate all
+                // required args and call the installer after mPackages lock has been released
+                volumeUuids[i] = ps.volumeUuid;
+                names[i] = ps.name;
+                uids[i] = UserHandle.getUid(userHandle, ps.appId);
+                seinfos[i] = ps.pkg.applicationInfo.seinfo;
+            }
+        }
+        for (int i = 0; i < packagesCount; i++) {
+            if (names[i] == null) {
                 continue;
             }
-            // Only system apps are initially installed.
-            ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
-            // Need to create a data directory for all apps under this user.
-            installer.createUserData(ps.volumeUuid, ps.name,
-                    UserHandle.getUid(userHandle, ps.appId), userHandle,
-                    ps.pkg.applicationInfo.seinfo);
+            installer.createUserData(volumeUuids[i], names[i], uids[i], userHandle, seinfos[i]);
         }
-        applyDefaultPreferredAppsLPw(service, userHandle);
-        writePackageRestrictionsLPr(userHandle);
-        writePackageListLPr(userHandle);
+        synchronized (mPackages) {
+            applyDefaultPreferredAppsLPw(service, userHandle);
+            writePackageRestrictionsLPr(userHandle);
+            writePackageListLPr(userHandle);
+        }
     }
 
     void removeUserLPw(int userId) {
