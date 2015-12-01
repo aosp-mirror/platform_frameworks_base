@@ -16,7 +16,9 @@
 
 package android.print;
 
+import android.graphics.drawable.Icon;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
 import java.util.List;
 
 /**
@@ -32,4 +34,27 @@ oneway interface IPrintSpoolerCallbacks {
     void onSetPrintJobStateResult(boolean success, int sequence);
     void onSetPrintJobTagResult(boolean success, int sequence);
     void onGetPrintJobInfoResult(in PrintJobInfo printJob, int sequence);
+
+    /**
+     * Deliver the result of a request of a custom printer icon.
+     *
+     * @param icon the icon that was retrieved, or null if no icon could be
+     *             found
+     * @param sequence the sequence number of the call to get the icon
+     */
+    void onGetCustomPrinterIconResult(in Icon icon, int sequence);
+
+    /**
+     * Declare that the print spooler cached a custom printer icon.
+     *
+     * @param sequence the sequence number of the call to cache the icon
+     */
+    void onCustomPrinterIconCached(int sequence);
+
+    /**
+     * Declare that the custom printer icon cache was cleared.
+     *
+     * @param sequence the sequence number of the call to clear the cache
+     */
+    void customPrinterIconCacheCleared(int sequence);
 }

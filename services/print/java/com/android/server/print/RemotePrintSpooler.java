@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -35,6 +36,7 @@ import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
@@ -71,6 +73,15 @@ final class RemotePrintSpooler {
     private final SetPrintJobStateCaller mSetPrintJobStatusCaller = new SetPrintJobStateCaller();
 
     private final SetPrintJobTagCaller mSetPrintJobTagCaller = new SetPrintJobTagCaller();
+
+    private final OnCustomPrinterIconLoadedCaller mCustomPrinterIconLoadedCaller =
+            new OnCustomPrinterIconLoadedCaller();
+
+    private final ClearCustomPrinterIconCacheCaller mClearCustomPrinterIconCache =
+            new ClearCustomPrinterIconCacheCaller();
+
+    private final GetCustomPrinterIconCaller mGetCustomPrinterIconCaller =
+            new GetCustomPrinterIconCaller();
 
     private final ServiceConnection mServiceConnection = new MyServiceConnection();
 
@@ -279,6 +290,96 @@ final class RemotePrintSpooler {
         } finally {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setStatus()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Handle that a custom icon for a printer was loaded.
+     *
+     * @param printerId the id of the printer the icon belongs to
+     * @param icon the icon that was loaded
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public final void onCustomPrinterIconLoaded(@NonNull PrinterId printerId,
+            @Nullable Icon icon) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            mCustomPrinterIconLoadedCaller.onCustomPrinterIconLoaded(getRemoteInstanceLazy(),
+                    printerId, icon);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error loading new custom printer icon.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "[user: " + mUserHandle.getIdentifier() + "] onCustomPrinterIconLoaded()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public final @Nullable Icon getCustomPrinterIcon(@NonNull PrinterId printerId) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            return mGetCustomPrinterIconCaller.getCustomPrinterIcon(getRemoteInstanceLazy(),
+                    printerId);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error getting custom printer icon.", re);
+            return null;
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "[user: " + mUserHandle.getIdentifier() + "] getCustomPrinterIcon()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Clear the custom printer icon cache
+     */
+    public void clearCustomPrinterIconCache() {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            mClearCustomPrinterIconCache.clearCustomPrinterIconCache(getRemoteInstanceLazy());
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error clearing custom printer icon cache.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "[user: " + mUserHandle.getIdentifier()
+                                + "] clearCustomPrinterIconCache()");
             }
             synchronized (mLock) {
                 mCanUnbind = true;
@@ -632,6 +733,69 @@ final class RemotePrintSpooler {
         }
     }
 
+    private static final class OnCustomPrinterIconLoadedCaller extends TimedRemoteCaller<Void> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public OnCustomPrinterIconLoadedCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void onCustomPrinterIconCached(int sequence) {
+                    onRemoteMethodResult(null, sequence);
+                }
+            };
+        }
+
+        public Void onCustomPrinterIconLoaded(IPrintSpooler target, PrinterId printerId,
+                Icon icon) throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.onCustomPrinterIconLoaded(printerId, icon, mCallback, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
+    private static final class ClearCustomPrinterIconCacheCaller extends TimedRemoteCaller<Void> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public ClearCustomPrinterIconCacheCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void customPrinterIconCacheCleared(int sequence) {
+                    onRemoteMethodResult(null, sequence);
+                }
+            };
+        }
+
+        public Void clearCustomPrinterIconCache(IPrintSpooler target)
+                throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.clearCustomPrinterIconCache(mCallback, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
+    private static final class GetCustomPrinterIconCaller extends TimedRemoteCaller<Icon> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public GetCustomPrinterIconCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void onGetCustomPrinterIconResult(Icon icon, int sequence) {
+                    onRemoteMethodResult(icon, sequence);
+                }
+            };
+        }
+
+        public Icon getCustomPrinterIcon(IPrintSpooler target, PrinterId printerId)
+                throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.getCustomPrinterIcon(printerId, mCallback, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
     private static abstract class BasePrintSpoolerServiceCallbacks
             extends IPrintSpoolerCallbacks.Stub {
         @Override
@@ -656,6 +820,21 @@ final class RemotePrintSpooler {
 
         @Override
         public void onSetPrintJobTagResult(boolean success, int sequence) {
+            /* do nothing */
+        }
+
+        @Override
+        public void onCustomPrinterIconCached(int sequence) {
+            /* do nothing */
+        }
+
+        @Override
+        public void onGetCustomPrinterIconResult(@Nullable Icon icon, int sequence) {
+            /* do nothing */
+        }
+
+        @Override
+        public void customPrinterIconCacheCleared(int sequence) {
             /* do nothing */
         }
     }

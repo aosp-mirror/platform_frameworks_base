@@ -38,6 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_weight="1"
         android:duplicateParentState="true">
 
         <TextView
@@ -62,10 +63,20 @@
             android:ellipsize="end"
             android:textIsSelectable="false"
             android:visibility="gone"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?android:attr/textColorSecondary"
             android:duplicateParentState="true">
         </TextView>
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/more_info"
+        android:layout_width="24dip"
+        android:layout_height="24dip"
+        android:layout_gravity="center_vertical"
+        android:contentDescription="@string/printer_info_desc"
+        android:src="@drawable/ic_info"
+        android:visibility="gone">
+    </ImageView>
 
 </LinearLayout>

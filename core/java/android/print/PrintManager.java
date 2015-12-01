@@ -21,6 +21,7 @@ import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -306,6 +307,29 @@ public final class PrintManager {
             }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error getting print job", re);
+        }
+        return null;
+    }
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @hide
+     */
+    public Icon getCustomPrinterIcon(PrinterId printerId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
+        try {
+            return mService.getCustomPrinterIcon(printerId, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting custom printer icon", re);
         }
         return null;
     }

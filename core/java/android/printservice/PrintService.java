@@ -391,6 +391,12 @@ public abstract class PrintService extends Service {
             }
 
             @Override
+            public void requestCustomPrinterIcon(PrinterId printerId) {
+                mHandler.obtainMessage(ServiceHandler.MSG_REQUEST_CUSTOM_PRINTER_ICON,
+                        printerId).sendToTarget();
+            }
+
+            @Override
             public void stopPrinterStateTracking(PrinterId printerId) {
                 mHandler.obtainMessage(ServiceHandler.MSG_STOP_PRINTER_STATE_TRACKING,
                         printerId).sendToTarget();
@@ -423,10 +429,11 @@ public abstract class PrintService extends Service {
         public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
         public static final int MSG_VALIDATE_PRINTERS = 5;
         public static final int MSG_START_PRINTER_STATE_TRACKING = 6;
-        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 7;
-        public static final int MSG_ON_PRINTJOB_QUEUED = 8;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 9;
-        public static final int MSG_SET_CLIENT = 10;
+        public static final int MSG_REQUEST_CUSTOM_PRINTER_ICON = 7;
+        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 8;
+        public static final int MSG_ON_PRINTJOB_QUEUED = 9;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 10;
+        public static final int MSG_SET_CLIENT = 11;
 
         public ServiceHandler(Looper looper) {
             super(looper, null, true);
@@ -505,6 +512,17 @@ public abstract class PrintService extends Service {
                     if (mDiscoverySession != null) {
                         PrinterId printerId = (PrinterId) message.obj;
                         mDiscoverySession.startPrinterStateTracking(printerId);
+                    }
+                } break;
+
+                case MSG_REQUEST_CUSTOM_PRINTER_ICON: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_REQUEST_CUSTOM_PRINTER_ICON "
+                                + getPackageName());
+                    }
+                    if (mDiscoverySession != null) {
+                        PrinterId printerId = (PrinterId) message.obj;
+                        mDiscoverySession.requestCustomPrinterIcon(printerId);
                     }
                 } break;
 

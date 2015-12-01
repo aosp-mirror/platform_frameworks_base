@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -271,6 +272,28 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         return printJob;
     }
 
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public Icon getCustomPrinterIcon(PrinterId printerId) {
+        Icon icon = mSpooler.getCustomPrinterIcon(printerId);
+
+        if (icon == null) {
+            RemotePrintService service = mActiveServices.get(printerId.getServiceName());
+            if (service != null) {
+                service.requestCustomPrinterIcon(printerId);
+            }
+        }
+
+        return icon;
+    }
+
     public void cancelPrintJob(PrintJobId printJobId, int appId) {
         PrintJobInfo printJobInfo = mSpooler.getPrintJobInfo(printJobId, appId);
         if (printJobInfo == null) {
@@ -345,6 +368,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             throwIfDestroyedLocked();
 
             if (mPrinterDiscoverySession == null) {
+                mSpooler.clearCustomPrinterIconCache();
+
                 // If we do not have a session, tell all service to create one.
                 mPrinterDiscoverySession = new PrinterDiscoverySessionMediator(mContext) {
                     @Override
@@ -529,6 +554,20 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 return;
             }
             mPrinterDiscoverySession.onPrintersRemovedLocked(printerIds);
+        }
+    }
+
+    @Override
+    public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+
+            // No session - nothing to do.
+            if (mPrinterDiscoverySession == null) {
+                return;
+            }
+            mSpooler.onCustomPrinterIconLoaded(printerId, icon);
+            mPrinterDiscoverySession.onCustomPrinterIconLoadedLocked(printerId);
         }
     }
 
@@ -1248,6 +1287,37 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             ComponentName serviceName = service.getComponentName();
             removePrintersForServiceLocked(serviceName);
             service.destroy();
+        }
+
+        /**
+         * Handle that a custom icon for a printer was loaded.
+         *
+         * This increments the icon generation and adds the printer again which triggers an update
+         * in all users of the currently known printers.
+         *
+         * @param printerId the id of the printer the icon belongs to
+         * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+         */
+        public void onCustomPrinterIconLoadedLocked(PrinterId printerId) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "onCustomPrinterIconLoadedLocked()");
+            }
+            if (mIsDestroyed) {
+                Log.w(LOG_TAG, "Not updating printer - session destroyed");
+                return;
+            }
+
+            PrinterInfo printer = mPrinters.get(printerId);
+            if (printer != null) {
+                PrinterInfo newPrinter = (new PrinterInfo.Builder(printer))
+                        .incCustomPrinterIconGen().build();
+                mPrinters.put(printerId, newPrinter);
+
+                ArrayList<PrinterInfo> addedPrinters = new ArrayList<>(1);
+                addedPrinters.add(newPrinter);
+                mHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
+                        addedPrinters).sendToTarget();
+            }
         }
 
         public void onServiceDiedLocked(RemotePrintService service) {

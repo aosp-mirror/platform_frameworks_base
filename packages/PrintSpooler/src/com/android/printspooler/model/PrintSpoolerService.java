@@ -23,6 +23,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -109,6 +110,9 @@ public final class PrintSpoolerService extends Service {
 
     private NotificationController mNotificationController;
 
+    /** Cache for custom printer icons loaded from the print service */
+    private CustomPrinterIconCache mCustomIconCache;
+
     public static PrintSpoolerService peekInstance() {
         synchronized (sLock) {
             return sInstance;
@@ -123,6 +127,7 @@ public final class PrintSpoolerService extends Service {
 
         mPersistanceManager = new PersistenceManager();
         mNotificationController = new NotificationController(PrintSpoolerService.this);
+        mCustomIconCache = new CustomPrinterIconCache(getCacheDir());
 
         synchronized (mLock) {
             mPersistanceManager.readStateLocked();
@@ -132,6 +137,11 @@ public final class PrintSpoolerService extends Service {
         synchronized (sLock) {
             sInstance = this;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -701,6 +711,37 @@ public final class PrintSpoolerService extends Service {
                 return null;
             }
         }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+    }
+
+    /**
+     * Handle that a custom icon for a printer was loaded.
+     *
+     * @param printerId the id of the printer the icon belongs to
+     * @param icon the icon that was loaded
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon) {
+        mCustomIconCache.onCustomPrinterIconLoaded(printerId, icon);
+    }
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public Icon getCustomPrinterIcon(PrinterId printerId) {
+        return mCustomIconCache.getIcon(printerId);
+    }
+
+    /**
+     * Clear the custom printer icon cache.
+     */
+    public void clearCustomPrinterIconCache() {
+        mCustomIconCache.clear();
     }
 
     private final class PersistenceManager {
@@ -1395,5 +1436,38 @@ public final class PrintSpoolerService extends Service {
         public PrintSpoolerService getService() {
             return PrintSpoolerService.this;
         }
+
+        @Override
+        public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon,
+                IPrintSpoolerCallbacks callbacks, int sequence)
+                throws RemoteException {
+            try {
+                PrintSpoolerService.this.onCustomPrinterIconLoaded(printerId, icon);
+            } finally {
+                callbacks.onCustomPrinterIconCached(sequence);
+            }
+        }
+
+        @Override
+        public void getCustomPrinterIcon(PrinterId printerId, IPrintSpoolerCallbacks callbacks,
+                int sequence) throws RemoteException {
+            Icon icon = null;
+            try {
+                icon = PrintSpoolerService.this.getCustomPrinterIcon(printerId);
+            } finally {
+                callbacks.onGetCustomPrinterIconResult(icon, sequence);
+            }
+        }
+
+        @Override
+        public void clearCustomPrinterIconCache(IPrintSpoolerCallbacks callbacks,
+                int sequence) throws RemoteException {
+            try {
+                PrintSpoolerService.this.clearCustomPrinterIconCache();
+            } finally {
+                callbacks.customPrinterIconCacheCleared(sequence);
+            }
+        }
+
     }
 }
