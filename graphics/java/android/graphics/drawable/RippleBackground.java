@@ -139,6 +139,7 @@ class RippleBackground extends RippleComponent {
         exit.setInterpolator(LINEAR_INTERPOLATOR);
         exit.setDuration(OPACITY_EXIT_DURATION);
         exit.setStartDelay(fastEnterDuration);
+        exit.setStartValue(targetAlpha);
         set.add(exit);
 
         // Linear "fast" enter based on current opacity.
