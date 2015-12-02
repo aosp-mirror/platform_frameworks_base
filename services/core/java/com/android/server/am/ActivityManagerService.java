@@ -7238,6 +7238,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public void getProcessStatesAndOomScoresForPIDs(
             /*in*/ int[] pids, /*out*/ int[] states, /*out*/ int[] scores) {
+        if (scores != null) {
+            enforceCallingPermission(android.Manifest.permission.GET_PROCESS_STATE_AND_OOM_SCORE,
+                    "getProcessStatesAndOomScoresForPIDs()");
+        }
+
         if (pids == null) {
             throw new NullPointerException("pids");
         } else if (states == null) {
