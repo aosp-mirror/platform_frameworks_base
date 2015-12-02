@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
@@ -869,13 +868,19 @@ public class AlarmManager {
      * {@link Intent#filterEquals}), will be canceled.
      *
      * @param operation IntentSender which matches a previously added
-     * IntentSender.
+     * IntentSender. This parameter must not be {@code null}.
      *
      * @see #set
      */
     public void cancel(PendingIntent operation) {
         if (operation == null) {
-            throw new NullPointerException("operation");
+            final String msg = "cancel() called with a null PendingIntent";
+            if (mTargetSdkVersion >= Build.VERSION_CODES.N) {
+                throw new NullPointerException(msg);
+            } else {
+                Log.e(TAG, msg);
+                return;
+            }
         }
 
         try {
@@ -891,7 +896,7 @@ public class AlarmManager {
      */
     public void cancel(OnAlarmListener listener) {
         if (listener == null) {
-            throw new NullPointerException("listener");
+            throw new NullPointerException("cancel() called with a null OnAlarmListener");
         }
 
         ListenerWrapper wrapper = null;
