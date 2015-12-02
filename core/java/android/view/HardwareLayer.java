@@ -33,10 +33,10 @@ import com.android.internal.util.VirtualRefBasePtr;
  * @hide
  */
 final class HardwareLayer {
-    private HardwareRenderer mRenderer;
+    private ThreadedRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
 
-    private HardwareLayer(HardwareRenderer renderer, long deferredUpdater) {
+    private HardwareLayer(ThreadedRenderer renderer, long deferredUpdater) {
         if (renderer == null || deferredUpdater == 0) {
             throw new IllegalArgumentException("Either hardware renderer: " + renderer
                     + " or deferredUpdater: " + deferredUpdater + " is invalid");
@@ -140,7 +140,7 @@ final class HardwareLayer {
         mRenderer.pushLayerUpdate(this);
     }
 
-    static HardwareLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
+    static HardwareLayer adoptTextureLayer(ThreadedRenderer renderer, long layer) {
         return new HardwareLayer(renderer, layer);
     }
 

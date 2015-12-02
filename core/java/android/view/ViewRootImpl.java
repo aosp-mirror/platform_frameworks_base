@@ -102,7 +102,7 @@ import java.util.List;
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl implements ViewParent,
-        View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
+        View.AttachInfo.Callbacks, ThreadedRenderer.HardwareDrawCallbacks {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -761,7 +761,7 @@ public final class ViewRootImpl implements ViewParent,
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
 
         if (hardwareAccelerated) {
-            if (!HardwareRenderer.isAvailable()) {
+            if (!ThreadedRenderer.isAvailable()) {
                 return;
             }
 
@@ -784,8 +784,8 @@ public final class ViewRootImpl implements ViewParent,
                 // shows for launching applications, so they will look more like
                 // the app being launched.
                 mAttachInfo.mHardwareAccelerationRequested = true;
-            } else if (!HardwareRenderer.sRendererDisabled
-                    || (HardwareRenderer.sSystemRendererDisabled && forceHwAccelerated)) {
+            } else if (!ThreadedRenderer.sRendererDisabled
+                    || (ThreadedRenderer.sSystemRendererDisabled && forceHwAccelerated)) {
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.destroy();
                 }
@@ -794,7 +794,7 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean hasSurfaceInsets = insets.left != 0 || insets.right != 0
                         || insets.top != 0 || insets.bottom != 0;
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
-                mAttachInfo.mHardwareRenderer = HardwareRenderer.create(mContext, translucent);
+                mAttachInfo.mHardwareRenderer = ThreadedRenderer.create(mContext, translucent);
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.setName(attrs.getTitle().toString());
                     mAttachInfo.mHardwareAccelerated =
@@ -1865,7 +1865,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            final HardwareRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
+            final ThreadedRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
             if (hardwareRenderer != null && hardwareRenderer.isEnabled()) {
                 if (hwInitialized
                         || mWidth != hardwareRenderer.getWidth()
@@ -5733,7 +5733,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void destroyHardwareRenderer() {
-        HardwareRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
+        ThreadedRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
 
         if (hardwareRenderer != null) {
             if (mView != null) {

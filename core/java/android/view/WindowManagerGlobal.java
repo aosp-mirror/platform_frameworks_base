@@ -425,7 +425,7 @@ public final class WindowManagerGlobal {
                 mDyingViews.remove(view);
             }
         }
-        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+        if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
             doTrimForeground();
         }
     }
@@ -452,7 +452,7 @@ public final class WindowManagerGlobal {
     }
 
     public void trimMemory(int level) {
-        if (HardwareRenderer.isAvailable()) {
+        if (ThreadedRenderer.isAvailable()) {
             if (shouldDestroyEglContext(level)) {
                 // Destroy all hardware surfaces and resources associated to
                 // known windows
@@ -465,16 +465,16 @@ public final class WindowManagerGlobal {
                 level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             }
 
-            HardwareRenderer.trimMemory(level);
+            ThreadedRenderer.trimMemory(level);
 
-            if (HardwareRenderer.sTrimForeground) {
+            if (ThreadedRenderer.sTrimForeground) {
                 doTrimForeground();
             }
         }
     }
 
     public static void trimForeground() {
-        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+        if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
             WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
             wm.doTrimForeground();
         }
@@ -494,7 +494,7 @@ public final class WindowManagerGlobal {
             }
         }
         if (!hasVisibleWindows) {
-            HardwareRenderer.trimMemory(
+            ThreadedRenderer.trimMemory(
                     ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         }
     }
@@ -513,7 +513,7 @@ public final class WindowManagerGlobal {
                     String name = getWindowName(root);
                     pw.printf("\n\t%s (visibility=%d)", name, root.getHostVisibility());
 
-                    HardwareRenderer renderer =
+                    ThreadedRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
                     if (renderer != null) {
                         renderer.dumpGfxInfo(pw, fd, args);

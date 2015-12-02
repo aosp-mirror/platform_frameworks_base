@@ -13270,7 +13270,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    public HardwareRenderer getHardwareRenderer() {
+    public ThreadedRenderer getHardwareRenderer() {
         return mAttachInfo != null ? mAttachInfo.mHardwareRenderer : null;
     }
 
@@ -17436,7 +17436,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_WINDOW_FOCUSED;
         if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= StateSet.VIEW_STATE_ACTIVATED;
         if (mAttachInfo != null && mAttachInfo.mHardwareAccelerationRequested &&
-                HardwareRenderer.isAvailable()) {
+                ThreadedRenderer.isAvailable()) {
             // This is set if HW acceleration is requested, even if the current
             // process doesn't allow it.  This is just to allow app preview
             // windows to better match their app.
@@ -22054,7 +22054,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         boolean mHardwareAccelerated;
         boolean mHardwareAccelerationRequested;
-        HardwareRenderer mHardwareRenderer;
+        ThreadedRenderer mHardwareRenderer;
         List<RenderNode> mPendingAnimatingRenderNodes;
 
         /**
