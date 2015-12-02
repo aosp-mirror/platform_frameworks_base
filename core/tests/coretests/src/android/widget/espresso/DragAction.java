@@ -91,6 +91,72 @@ public final class DragAction implements ViewAction {
         },
 
         /**
+         * Starts a drag with a mouse double click.
+         */
+        MOUSE_DOUBLE_CLICK {
+            private DownMotionPerformer downMotion = new DownMotionPerformer() {
+                @Override
+                @Nullable
+                public MotionEvent perform(
+                        UiController uiController,  float[] coordinates, float[] precision) {
+                    return performDoubleTap(uiController, coordinates, precision);
+                }
+            };
+
+            @Override
+            public Status sendSwipe(
+                    UiController uiController,
+                    float[] startCoordinates, float[] endCoordinates, float[] precision) {
+                return sendLinearDrag(
+                        uiController, downMotion, startCoordinates, endCoordinates, precision);
+            }
+
+            @Override
+            public String toString() {
+                return "mouse double click and drag to select";
+            }
+
+            @Override
+            public UiController wrapUiController(UiController uiController) {
+                return new MouseUiController(uiController);
+            }
+        },
+
+        /**
+         * Starts a drag with a mouse long click.
+         */
+        MOUSE_LONG_CLICK {
+            private DownMotionPerformer downMotion = new DownMotionPerformer() {
+                @Override
+                public MotionEvent perform(
+                        UiController uiController, float[] coordinates, float[] precision) {
+                    MotionEvent downEvent = MotionEvents.sendDown(
+                            uiController, coordinates, precision)
+                            .down;
+                    return performLongPress(uiController, coordinates, precision);
+                }
+            };
+
+            @Override
+            public Status sendSwipe(
+                    UiController uiController,
+                    float[] startCoordinates, float[] endCoordinates, float[] precision) {
+                return sendLinearDrag(
+                        uiController, downMotion, startCoordinates, endCoordinates, precision);
+            }
+
+            @Override
+            public String toString() {
+                return "mouse long click and drag to select";
+            }
+
+            @Override
+            public UiController wrapUiController(UiController uiController) {
+                return new MouseUiController(uiController);
+            }
+        },
+
+        /**
          * Starts a drag with a tap.
          */
         TAP {
@@ -127,15 +193,7 @@ public final class DragAction implements ViewAction {
                 @Override
                 public MotionEvent perform(
                         UiController uiController, float[] coordinates, float[] precision) {
-                    MotionEvent downEvent = MotionEvents.sendDown(
-                            uiController, coordinates, precision)
-                            .down;
-                    // Duration before a press turns into a long press.
-                    // Factor 1.5 is needed, otherwise a long press is not safely detected.
-                    // See android.test.TouchUtils longClickView
-                    long longPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f);
-                    uiController.loopMainThreadForAtLeast(longPressTimeout);
-                    return downEvent;
+                    return performLongPress(uiController, coordinates, precision);
                 }
             };
 
@@ -162,25 +220,7 @@ public final class DragAction implements ViewAction {
                 @Nullable
                 public MotionEvent perform(
                         UiController uiController,  float[] coordinates, float[] precision) {
-                    MotionEvent downEvent = MotionEvents.sendDown(
-                            uiController, coordinates, precision)
-                            .down;
-                    try {
-                        if (!MotionEvents.sendUp(uiController, downEvent)) {
-                            String logMessage = "Injection of up event as part of the double tap " +
-                                    "failed. Sending cancel event.";
-                            Log.d(TAG, logMessage);
-                            MotionEvents.sendCancel(uiController, downEvent);
-                            return null;
-                        }
-
-                        long doubleTapMinimumTimeout = ViewConfiguration.getDoubleTapMinTime();
-                        uiController.loopMainThreadForAtLeast(doubleTapMinimumTimeout);
-
-                        return MotionEvents.sendDown(uiController, coordinates, precision).down;
-                    } finally {
-                        downEvent.recycle();
-                    }
+                    return performDoubleTap(uiController, coordinates, precision);
                 }
             };
 
@@ -265,6 +305,43 @@ public final class DragAction implements ViewAction {
             }
 
             return res;
+        }
+
+        private static MotionEvent performLongPress(
+                UiController uiController, float[] coordinates, float[] precision) {
+            MotionEvent downEvent = MotionEvents.sendDown(
+                    uiController, coordinates, precision)
+                    .down;
+            // Duration before a press turns into a long press.
+            // Factor 1.5 is needed, otherwise a long press is not safely detected.
+            // See android.test.TouchUtils longClickView
+            long longPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f);
+            uiController.loopMainThreadForAtLeast(longPressTimeout);
+            return downEvent;
+        }
+
+        @Nullable
+        private static MotionEvent performDoubleTap(
+                UiController uiController,  float[] coordinates, float[] precision) {
+            MotionEvent downEvent = MotionEvents.sendDown(
+                    uiController, coordinates, precision)
+                    .down;
+            try {
+                if (!MotionEvents.sendUp(uiController, downEvent)) {
+                    String logMessage = "Injection of up event as part of the double tap " +
+                            "failed. Sending cancel event.";
+                    Log.d(TAG, logMessage);
+                    MotionEvents.sendCancel(uiController, downEvent);
+                    return null;
+                }
+
+                long doubleTapMinimumTimeout = ViewConfiguration.getDoubleTapMinTime();
+                uiController.loopMainThreadForAtLeast(doubleTapMinimumTimeout);
+
+                return MotionEvents.sendDown(uiController, coordinates, precision).down;
+            } finally {
+                downEvent.recycle();
+            }
         }
 
         @Override

@@ -16,7 +16,11 @@
 
 package android.widget;
 
+import static android.widget.espresso.TextViewActions.mouseDoubleClickOnTextAtIndex;
+import static android.widget.espresso.TextViewActions.mouseLongClickOnTextAtIndex;
+import static android.widget.espresso.TextViewActions.mouseDoubleClickAndDragOnText;
 import static android.widget.espresso.TextViewActions.mouseDragOnText;
+import static android.widget.espresso.TextViewActions.mouseLongClickAndDragOnText;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -61,5 +65,105 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
                 mouseDragOnText( helloWorld.indexOf("ld!"), helloWorld.indexOf("llo")));
 
         onView(withId(R.id.textview)).check(hasSelection("llo wor"));
+    }
+
+    @SmallTest
+    public void testSelectTextByLongClick() throws Exception {
+        getActivity();
+
+        final String helloWorld = "Hello world!";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+
+        onView(withId(R.id.textview)).perform(mouseLongClickOnTextAtIndex(0));
+        onView(withId(R.id.textview)).check(hasSelection("Hello"));
+
+        onView(withId(R.id.textview)).perform(mouseLongClickOnTextAtIndex(
+                helloWorld.indexOf("world")));
+        onView(withId(R.id.textview)).check(hasSelection("world"));
+
+        onView(withId(R.id.textview)).perform(mouseLongClickOnTextAtIndex(
+                helloWorld.indexOf("llo")));
+        onView(withId(R.id.textview)).check(hasSelection("Hello"));
+
+        onView(withId(R.id.textview)).perform(mouseLongClickOnTextAtIndex(
+                helloWorld.indexOf("rld")));
+        onView(withId(R.id.textview)).check(hasSelection("world"));
+    }
+
+    @SmallTest
+    public void testSelectTextByDoubleClick() throws Exception {
+        getActivity();
+
+        final String helloWorld = "Hello world!";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+
+        onView(withId(R.id.textview)).perform(mouseDoubleClickOnTextAtIndex(0));
+        onView(withId(R.id.textview)).check(hasSelection("Hello"));
+
+        onView(withId(R.id.textview)).perform(mouseDoubleClickOnTextAtIndex(
+                helloWorld.indexOf("world")));
+        onView(withId(R.id.textview)).check(hasSelection("world"));
+
+        onView(withId(R.id.textview)).perform(mouseDoubleClickOnTextAtIndex(
+                helloWorld.indexOf("llo")));
+        onView(withId(R.id.textview)).check(hasSelection("Hello"));
+
+        onView(withId(R.id.textview)).perform(mouseDoubleClickOnTextAtIndex(
+                helloWorld.indexOf("rld")));
+        onView(withId(R.id.textview)).check(hasSelection("world"));
+    }
+
+    @SmallTest
+    public void testSelectTextByDoubleClickAndDrag() throws Exception {
+        getActivity();
+
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseDoubleClickAndDragOnText(text.indexOf("f"), text.indexOf("j")));
+        onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
+    }
+
+    @SmallTest
+    public void testSelectTextByDoubleClickAndDrag_reverse() throws Exception {
+        getActivity();
+
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseDoubleClickAndDragOnText(text.indexOf("j"), text.indexOf("f")));
+        onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
+    }
+
+    @SmallTest
+    public void testSelectTextByLongPressAndDrag() throws Exception {
+        getActivity();
+
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseLongClickAndDragOnText(text.indexOf("f"), text.indexOf("j")));
+        onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
+    }
+
+    @SmallTest
+    public void testSelectTextByLongPressAndDrag_reverse() throws Exception {
+        getActivity();
+
+        final String text = "abcd efg hijk lmn";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseLongClickAndDragOnText(text.indexOf("j"), text.indexOf("f")));
+        onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
     }
 }
