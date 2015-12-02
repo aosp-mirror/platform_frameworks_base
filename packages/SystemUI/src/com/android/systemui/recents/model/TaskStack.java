@@ -199,8 +199,11 @@ public class TaskStack {
     /** Task stack callbacks */
     public interface TaskStackCallbacks {
         /* Notifies when a task has been removed from the stack */
-        void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-                                       Task newFrontMostTask);
+        void onStackTaskRemoved(TaskStack stack, Task removedTask, int removedTaskIndex,
+                boolean wasFrontMostTask, Task newFrontMostTask);
+
+        /* Notifies when a task has been removed from the history */
+        void onHistoryTaskRemoved(TaskStack stack, Task removedTask);
     }
 
     /**
@@ -382,6 +385,7 @@ public class TaskStack {
     public void removeTask(Task t) {
         if (mStackTaskList.contains(t)) {
             boolean wasFrontMostTask = (getStackFrontMostTask() == t);
+            int removedTaskIndex = indexOfStackTask(t);
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask();
             if (newFrontMostTask != null && newFrontMostTask.lockToTaskEnabled) {
@@ -389,13 +393,14 @@ public class TaskStack {
             }
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask);
+                mCb.onStackTaskRemoved(this, t, removedTaskIndex, wasFrontMostTask,
+                        newFrontMostTask);
             }
         } else if (mHistoryTaskList.contains(t)) {
             removeTaskImpl(mHistoryTaskList, t);
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, false, null);
+                mCb.onHistoryTaskRemoved(this, t);
             }
         }
     }

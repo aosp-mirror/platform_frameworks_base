@@ -284,6 +284,20 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     /**
+     * Dismisses recents back to the launch target task.
+     */
+    boolean dismissRecentsToLaunchTargetTaskOrHome() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
+            // If we have a focused Task, launch that Task now
+            if (mRecentsView.launchPreviousTask()) return true;
+            // If none of the other cases apply, then just go Home
+            dismissRecentsToHome(true);
+        }
+        return false;
+    }
+
+    /**
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
     boolean dismissRecentsToFocusedTaskOrHome() {
@@ -566,9 +580,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     @Override
     public void onBackPressed() {
-        if (!dismissHistory()) {
-            dismissRecentsToFocusedTaskOrHome();
-        }
+        // Back behaves like the recents button so just trigger a toggle event
+        EventBus.getDefault().send(new ToggleRecentsEvent());
     }
 
     /**** RecentsResizeTaskDialog ****/
@@ -584,7 +597,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(ToggleRecentsEvent event) {
         if (!dismissHistory()) {
-            dismissRecentsToFocusedTaskOrHome();
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            if (launchState.launchedFromHome) {
+                dismissRecentsToHome(true);
+            } else {
+                dismissRecentsToLaunchTargetTaskOrHome();
+            }
         }
     }
 

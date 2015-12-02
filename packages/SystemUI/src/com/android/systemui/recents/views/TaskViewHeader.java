@@ -55,6 +55,8 @@ import com.android.systemui.recents.model.Task;
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
+    private static final float FOCUS_TRANSLATION_Z = 4f;
+
     Task mTask;
 
     // Header views
@@ -367,13 +369,14 @@ public class TaskViewHeader extends FrameLayout
         Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
 
         if (focused) {
-            // If we are not animating the visible state, just return
-            if (!animateFocusedState) return;
-
-            // Bump up the translation
-            mFocusAnimator = ObjectAnimator.ofFloat(this, "translationZ", 8f);
-            mFocusAnimator.setDuration(200);
-            mFocusAnimator.start();
+            if (animateFocusedState) {
+                // Bump up the translation
+                mFocusAnimator = ObjectAnimator.ofFloat(this, "translationZ", FOCUS_TRANSLATION_Z);
+                mFocusAnimator.setDuration(200);
+                mFocusAnimator.start();
+            } else {
+                setTranslationZ(FOCUS_TRANSLATION_Z);
+            }
         } else {
             if (isRunning) {
                 // Restore the translation

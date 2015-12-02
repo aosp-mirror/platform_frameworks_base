@@ -78,8 +78,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     Task mTask;
     boolean mTaskDataLoaded;
-    boolean mIsFocused;
-    boolean mIsFocusAnimated;
     boolean mClipViewInStack;
     AnimateableViewBounds mViewBounds;
     private AnimatorSet mClipAnimation;
@@ -640,14 +638,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     public void setFocusedState(boolean isFocused, boolean animated, boolean requestViewFocus) {
         if (DEBUG) {
             Log.d(TAG, "setFocusedState: " + mTask.activityLabel + " focused: " + isFocused +
-                    " mIsFocused: " + mIsFocused + " animated: " + animated +
-                    " requestViewFocus: " + requestViewFocus + " isFocused(): " + isFocused() +
+                    " animated: " + animated + " requestViewFocus: " + requestViewFocus +
+                    " isFocused(): " + isFocused() +
                     " isAccessibilityFocused(): " + isAccessibilityFocused());
         }
 
         SystemServicesProxy ssp = Recents.getSystemServices();
-        mIsFocused = isFocused;
-        mIsFocusAnimated = animated;
         mHeaderView.onTaskViewFocusChanged(isFocused, animated);
         if (isFocused) {
             if (requestViewFocus && !isFocused()) {
@@ -661,20 +657,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 clearAccessibilityFocus();
             }
         }
-    }
-
-    /**
-     * Returns whether we have explicitly been focused.
-     */
-    public boolean isFocusedTask() {
-        return mIsFocused;
-    }
-
-    /**
-     * Returns whether this focused task is animated.
-     */
-    public boolean isFocusAnimated() {
-        return mIsFocusAnimated;
     }
 
     public void disableLayersForOneFrame() {
