@@ -22,11 +22,14 @@ import com.android.internal.util.Preconditions;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -84,7 +87,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SAFE_BOOT,
             UserManager.ALLOW_PARENT_PROFILE_APP_LINKING,
             UserManager.DISALLOW_RECORD_AUDIO,
-            UserManager.DISALLOW_CAMERA
+            UserManager.DISALLOW_CAMERA,
+            UserManager.DISALLOW_RUN_IN_BACKGROUND
     );
 
     /**
@@ -126,6 +130,7 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_ADJUST_VOLUME,
+            UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE
     );
 
@@ -263,34 +268,28 @@ public class UserRestrictionsUtils {
      * Takes a new use restriction set and the previous set, and apply the restrictions that have
      * changed.
      *
-     * <p>Note this method is called by {@link UserManagerService} while holding
-     * {@code mRestrictionLock}. Be aware when calling into other services, which could cause
-     * a deadlock.
+     * <p>Note this method is called by {@link UserManagerService} without holding any locks.
      */
-    public static void applyUserRestrictionsLR(Context context, int userId,
+    public static void applyUserRestrictions(Context context, int userId,
             Bundle newRestrictions, Bundle prevRestrictions) {
         for (String key : USER_RESTRICTIONS) {
             final boolean newValue = newRestrictions.getBoolean(key);
             final boolean prevValue = prevRestrictions.getBoolean(key);
 
             if (newValue != prevValue) {
-                applyUserRestrictionLR(context, userId, key, newValue);
+                applyUserRestriction(context, userId, key, newValue);
             }
         }
     }
-    
+
     /**
      * Apply each user restriction.
-     *
-     * <p>Note this method is called by {@link UserManagerService} while holding
-     * {@code mRestrictionLock}. Be aware when calling into other services, which could cause
-     * a deadlock.
      *
      * <p>See also {@link
      * com.android.providers.settings.SettingsProvider#isGlobalOrSecureSettingRestrictedForUser},
      * which should be in sync with this method.
      */
-    private static void applyUserRestrictionLR(Context context, int userId, String key,
+    private static void applyUserRestriction(Context context, int userId, String key,
             boolean newValue) {
         if (UserManagerService.DBG) {
             Log.d(TAG, "Applying user restriction: userId=" + userId
@@ -365,6 +364,17 @@ public class UserRestrictionsUtils {
                                 userId);
                     }
                     break;
+                case UserManager.DISALLOW_RUN_IN_BACKGROUND:
+                    if (newValue) {
+                        int currentUser = ActivityManager.getCurrentUser();
+                        if (currentUser != userId && userId != UserHandle.USER_SYSTEM) {
+                            try {
+                                ActivityManagerNative.getDefault().stopUser(userId, false, null);
+                            } catch (RemoteException e) {
+                                throw e.rethrowAsRuntimeException();
+                            }
+                        }
+                    }
             }
         } finally {
             Binder.restoreCallingIdentity(id);

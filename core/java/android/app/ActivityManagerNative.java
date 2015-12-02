@@ -1981,9 +1981,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case STOP_USER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int userid = data.readInt();
+            boolean force = data.readInt() != 0;
             IStopUserCallback callback = IStopUserCallback.Stub.asInterface(
                     data.readStrongBinder());
-            int result = stopUser(userid, callback);
+            int result = stopUser(userid, force, callback);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -5287,11 +5288,13 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
-    public int stopUser(int userid, IStopUserCallback callback) throws RemoteException {
+    public int stopUser(int userid, boolean force, IStopUserCallback callback)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(userid);
+        data.writeInt(force ? 1 : 0);
         data.writeStrongInterface(callback);
         mRemote.transact(STOP_USER_TRANSACTION, data, reply, 0);
         reply.readException();

@@ -154,7 +154,7 @@ public class Am extends BaseCommand {
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
                 "       am unlock-user <USER_ID> [TOKEN_HEX]\n" +
-                "       am stop-user [-w] <USER_ID>\n" +
+                "       am stop-user [-w] [-f] <USER_ID>\n" +
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
@@ -290,6 +290,7 @@ public class Am extends BaseCommand {
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit start or switch to it.\n" +
                 "  -w: wait for stop-user to complete.\n" +
+                "  -f: force stop even if there are related users that cannot be stopped.\n" +
                 "\n" +
                 "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
@@ -1131,10 +1132,13 @@ public class Am extends BaseCommand {
 
     private void runStopUser() throws Exception {
         boolean wait = false;
-        String opt = null;
+        boolean force = false;
+        String opt;
         while ((opt = nextOption()) != null) {
             if ("-w".equals(opt)) {
                 wait = true;
+            } else if ("-f".equals(opt)) {
+                force = true;
             } else {
                 System.err.println("Error: unknown option: " + opt);
                 return;
@@ -1143,7 +1147,7 @@ public class Am extends BaseCommand {
         int user = Integer.parseInt(nextArgRequired());
         StopUserCallback callback = wait ? new StopUserCallback() : null;
 
-        int res = mAm.stopUser(user, callback);
+        int res = mAm.stopUser(user, force, callback);
         if (res != ActivityManager.USER_OP_SUCCESS) {
             String txt = "";
             switch (res) {
@@ -1152,6 +1156,13 @@ public class Am extends BaseCommand {
                     break;
                 case ActivityManager.USER_OP_UNKNOWN_USER:
                     txt = " (Unknown user " + user + ")";
+                    break;
+                case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
+                    txt = " (System user cannot be stopped)";
+                    break;
+                case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
+                    txt = " (Can't stop user " + user
+                            + " - one of its related users can't be stopped)";
                     break;
             }
             System.err.println("Switch failed: " + res + txt);

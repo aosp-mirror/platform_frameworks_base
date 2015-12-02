@@ -20424,8 +20424,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int stopUser(final int userId, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, callback);
+    public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
+        return mUserController.stopUser(userId, force, callback);
     }
 
     void onUserRemovedLocked(int userId) {

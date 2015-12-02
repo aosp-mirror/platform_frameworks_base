@@ -31,7 +31,8 @@ import java.util.List;
 
 /** Test {@link UserManager} functionality. */
 public class UserManagerTest extends AndroidTestCase {
-
+    private static final int REMOVE_CHECK_INTERVAL = 500;
+    private static final int REMOVE_TIMEOUT = 60 * 1000;
     private UserManager mUserManager = null;
     private final Object mUserLock = new Object();
     private List<Integer> usersToRemove;
@@ -227,10 +228,16 @@ public class UserManagerTest extends AndroidTestCase {
     private void removeUser(int userId) {
         synchronized (mUserLock) {
             mUserManager.removeUser(userId);
+            long time = System.currentTimeMillis();
             while (mUserManager.getUserInfo(userId) != null) {
                 try {
-                    mUserLock.wait(500);
+                    mUserLock.wait(REMOVE_CHECK_INTERVAL);
                 } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT) {
+                    fail("Timeout waiting for removeUser. userId = " + userId);
                 }
             }
         }

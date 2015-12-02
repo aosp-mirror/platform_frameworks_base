@@ -487,6 +487,19 @@ public class UserManager {
     public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
 
     /**
+     * Specifies if a user is not allowed to run in the background and should be stopped during
+     * user switch. The default value is <code>false</code>.
+     *
+     * <p>This restriction can be set by device owners and profile owners.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
+
+    /**
      * Specifies if a user is not allowed to use the camera.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)

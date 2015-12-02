@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
+import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.os.Process.SYSTEM_UID;
@@ -34,6 +36,7 @@ import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_M
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.Dialog;
@@ -56,11 +59,11 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -77,6 +80,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import libcore.util.EmptyArray;
 
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
@@ -152,39 +157,44 @@ final class UserController {
             finishUserBoot(uss);
 
             startProfilesLocked();
+            stopRunningUsersLocked(MAX_RUNNING_USERS);
+        }
+    }
 
-            int num = mUserLru.size();
-            int i = 0;
-            while (num > MAX_RUNNING_USERS && i < mUserLru.size()) {
-                Integer oldUserId = mUserLru.get(i);
-                UserState oldUss = mStartedUsers.get(oldUserId);
-                if (oldUss == null) {
-                    // Shouldn't happen, but be sane if it does.
-                    mUserLru.remove(i);
-                    num--;
-                    continue;
-                }
-                if (oldUss.mState == UserState.STATE_STOPPING
-                        || oldUss.mState == UserState.STATE_SHUTDOWN) {
-                    // This user is already stopping, doesn't count.
-                    num--;
-                    i++;
-                    continue;
-                }
-                if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId) {
-                    // Owner/System user and current user can't be stopped. We count it as running
-                    // when it is not a pure system user.
-                    if (UserInfo.isSystemOnly(oldUserId)) {
-                        num--;
-                    }
-                    i++;
-                    continue;
-                }
-                // This is a user to be stopped.
-                stopUserLocked(oldUserId, null);
+    void stopRunningUsersLocked(int maxRunningUsers) {
+        int num = mUserLru.size();
+        int i = 0;
+        while (num > maxRunningUsers && i < mUserLru.size()) {
+            Integer oldUserId = mUserLru.get(i);
+            UserState oldUss = mStartedUsers.get(oldUserId);
+            if (oldUss == null) {
+                // Shouldn't happen, but be sane if it does.
+                mUserLru.remove(i);
+                num--;
+                continue;
+            }
+            if (oldUss.mState == UserState.STATE_STOPPING
+                    || oldUss.mState == UserState.STATE_SHUTDOWN) {
+                // This user is already stopping, doesn't count.
                 num--;
                 i++;
+                continue;
             }
+            if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId) {
+                // Owner/System user and current user can't be stopped. We count it as running
+                // when it is not a pure system user.
+                if (UserInfo.isSystemOnly(oldUserId)) {
+                    num--;
+                }
+                i++;
+                continue;
+            }
+            // This is a user to be stopped.
+            if (stopUsersLocked(oldUserId, false, null) != USER_OP_SUCCESS) {
+                num--;
+            }
+            num--;
+            i++;
         }
     }
 
@@ -205,7 +215,7 @@ final class UserController {
         }
     }
 
-    int stopUser(final int userId, final IStopUserCallback callback) {
+    int stopUser(final int userId, final boolean force, final IStopUserCallback callback) {
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
@@ -221,16 +231,44 @@ final class UserController {
         mService.enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES,
                 userId);
         synchronized (mService) {
-            return stopUserLocked(userId, callback);
+            return stopUsersLocked(userId, force, callback);
         }
     }
 
-    private int stopUserLocked(final int userId, final IStopUserCallback callback) {
-        if (DEBUG_MU) Slog.i(TAG, "stopUserLocked userId=" + userId);
-        if (mCurrentUserId == userId && mTargetUserId == UserHandle.USER_NULL) {
+    /**
+     * Stops the user along with its related users. The method calls
+     * {@link #getUsersToStopLocked(int)} to determine the list of users that should be stopped.
+     */
+    private int stopUsersLocked(final int userId, boolean force, final IStopUserCallback callback) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            return USER_OP_ERROR_IS_SYSTEM;
+        }
+        if (isCurrentUserLocked(userId)) {
             return USER_OP_IS_CURRENT;
         }
+        int[] usersToStop = getUsersToStopLocked(userId);
+        // If one of related users is system or current, no related users should be stopped
+        for (int i = 0; i < usersToStop.length; i++) {
+            int relatedUserId = usersToStop[i];
+            if ((UserHandle.USER_SYSTEM == relatedUserId) || isCurrentUserLocked(relatedUserId)) {
+                if (DEBUG_MU) Slog.i(TAG, "stopUsersLocked cannot stop related user "
+                        + relatedUserId);
+                // We still need to stop the requested user if it's a force stop.
+                if (force) {
+                    stopSingleUserLocked(userId, callback);
+                }
+                return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
+            }
+        }
+        if (DEBUG_MU) Slog.i(TAG, "stopUsersLocked usersToStop=" + Arrays.toString(usersToStop));
+        for (int userIdToStop : usersToStop) {
+            stopSingleUserLocked(userIdToStop, userIdToStop == userId ? callback : null);
+        }
+        return USER_OP_SUCCESS;
+    }
 
+    private void stopSingleUserLocked(final int userId, final IStopUserCallback callback) {
+        if (DEBUG_MU) Slog.i(TAG, "stopSingleUserLocked userId=" + userId);
         final UserState uss = mStartedUsers.get(userId);
         if (uss == null) {
             // User is not started, nothing to do...  but we do need to
@@ -246,7 +284,7 @@ final class UserController {
                     }
                 });
             }
-            return USER_OP_SUCCESS;
+            return;
         }
 
         if (callback != null) {
@@ -307,8 +345,6 @@ final class UserController {
                 Binder.restoreCallingIdentity(ident);
             }
         }
-
-        return USER_OP_SUCCESS;
     }
 
     void finishUserStop(UserState uss) {
@@ -350,6 +386,36 @@ final class UserController {
         }
     }
 
+    /**
+     * Determines the list of users that should be stopped together with the specified
+     * {@code userId}. The returned list includes {@code userId}.
+     */
+    private @NonNull int[] getUsersToStopLocked(int userId) {
+        int startedUsersSize = mStartedUsers.size();
+        IntArray userIds = new IntArray();
+        userIds.add(userId);
+        synchronized (mUserProfileGroupIdsSelfLocked) {
+            int userGroupId = mUserProfileGroupIdsSelfLocked.get(userId,
+                    UserInfo.NO_PROFILE_GROUP_ID);
+            for (int i = 0; i < startedUsersSize; i++) {
+                UserState uss = mStartedUsers.valueAt(i);
+                int startedUserId = uss.mHandle.getIdentifier();
+                // Skip unrelated users (profileGroupId mismatch)
+                int startedUserGroupId = mUserProfileGroupIdsSelfLocked.get(startedUserId,
+                        UserInfo.NO_PROFILE_GROUP_ID);
+                boolean sameGroup = (userGroupId != UserInfo.NO_PROFILE_GROUP_ID)
+                        && (userGroupId == startedUserGroupId);
+                // userId has already been added
+                boolean sameUserId = startedUserId == userId;
+                if (!sameGroup || sameUserId) {
+                    continue;
+                }
+                userIds.add(startedUserId);
+            }
+        }
+        return userIds.toArray();
+    }
+
     private void forceStopUserLocked(int userId, String reason) {
         mService.forceStopPackageLocked(null, -1, false, false, true, false, false,
                 userId, reason);
@@ -361,7 +427,6 @@ final class UserController {
                 null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                 null, false, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
     }
-
 
     /**
      * Stops the guest user if it has gone to the background.
@@ -380,7 +445,7 @@ final class UserController {
                 UserInfo userInfo = getUserInfo(oldUserId);
                 if (userInfo.isGuest()) {
                     // This is a user to be stopped.
-                    stopUserLocked(oldUserId, null);
+                    stopUsersLocked(oldUserId, true, null);
                     break;
                 }
             }
@@ -476,7 +541,7 @@ final class UserController {
                 // If the user we are switching to is not currently started, then
                 // we need to start it now.
                 if (mStartedUsers.get(userId) == null) {
-                    mStartedUsers.put(userId, new UserState(new UserHandle(userId)));
+                    mStartedUsers.put(userId, new UserState(UserHandle.of(userId)));
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }
@@ -695,6 +760,24 @@ final class UserController {
         mUserSwitchObservers.finishBroadcast();
     }
 
+    private void stopBackgroundUsersIfEnforced(int oldUserId) {
+        // Never stop system user
+        if (oldUserId == UserHandle.USER_SYSTEM) {
+            return;
+        }
+        // For now, only check for user restriction. Additional checks can be added here
+        boolean disallowRunInBg = hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND,
+                oldUserId);
+        if (!disallowRunInBg) {
+            return;
+        }
+        synchronized (mService) {
+            if (DEBUG_MU) Slog.i(TAG, "stopBackgroundUsersIfEnforced stopping " + oldUserId
+                    + " and related users");
+            stopUsersLocked(oldUserId, false, null);
+        }
+    }
+
     void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
         synchronized (mService) {
             Slog.wtf(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
@@ -747,7 +830,7 @@ final class UserController {
     }
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
-        completeSwitchAndInitialize(uss, newUserId, false, true);
+        completeSwitchAndInitialize(uss, oldUserId, newUserId, false, true);
     }
 
     void onUserInitialized(UserState uss, boolean foreground, int oldUserId, int newUserId) {
@@ -756,10 +839,10 @@ final class UserController {
                 moveUserToForegroundLocked(uss, oldUserId, newUserId);
             }
         }
-        completeSwitchAndInitialize(uss, newUserId, true, false);
+        completeSwitchAndInitialize(uss, oldUserId, newUserId, true, false);
     }
 
-    void completeSwitchAndInitialize(UserState uss, int newUserId,
+    void completeSwitchAndInitialize(UserState uss, int oldUserId, int newUserId,
             boolean clearInitializing, boolean clearSwitching) {
         boolean unfrozen = false;
         synchronized (mService) {
@@ -781,6 +864,7 @@ final class UserController {
                     newUserId, 0));
         }
         stopGuestUserIfBackground();
+        stopBackgroundUsersIfEnforced(oldUserId);
     }
 
     void moveUserToForegroundLocked(UserState uss, int oldUserId, int newUserId) {
@@ -1072,6 +1156,10 @@ final class UserController {
 
     int getCurrentUserIdLocked() {
         return mCurrentUserId;
+    }
+
+    private boolean isCurrentUserLocked(int userId) {
+        return mCurrentUserId == userId || mTargetUserId == userId;
     }
 
     int setTargetUserIdLocked(int targetUserId) {

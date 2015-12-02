@@ -265,6 +265,12 @@ public class ActivityManager {
     /** @hide User operation call: given user id is the current user, can't be stopped. */
     public static final int USER_OP_IS_CURRENT = -2;
 
+    /** @hide User operation call: system user can't be stopped. */
+    public static final int USER_OP_ERROR_IS_SYSTEM = -3;
+
+    /** @hide User operation call: one of related users cannot be stopped. */
+    public static final int USER_OP_ERROR_RELATED_USERS_CANNOT_STOP = -4;
+
     /** @hide Process does not exist. */
     public static final int PROCESS_STATE_NONEXISTENT = -1;
 
