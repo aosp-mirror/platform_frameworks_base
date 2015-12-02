@@ -223,6 +223,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помоћ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Закључај одмах"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
+    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Безбедни режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android систем"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Лично"</string>
