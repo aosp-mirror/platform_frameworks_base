@@ -6072,6 +6072,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         "No more processes in " + old.uidRecord);
                 enqueueUidChangeLocked(old.uidRecord, -1, UidRecord.CHANGE_GONE);
                 mActiveUids.remove(uid);
+                mBatteryStatsService.noteUidProcessState(uid,
+                        ActivityManager.PROCESS_STATE_NONEXISTENT);
             }
             old.uidRecord = null;
         }
@@ -6096,6 +6098,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
             mActiveUids.put(proc.uid, uidRec);
+            mBatteryStatsService.noteUidProcessState(uidRec.uid, uidRec.curProcState);
             enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
         }
         proc.uidRecord = uidRec;
@@ -19497,10 +19500,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (proc.baseProcessTracker != null) {
                 proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
             }
-            if (proc.repProcState >= 0) {
-                mBatteryStatsService.noteProcessState(proc.processName, proc.info.uid,
-                        proc.repProcState);
-            }
         }
     }
 
@@ -20000,6 +19999,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 uidRec.setProcState = uidRec.curProcState;
                 enqueueUidChangeLocked(uidRec, -1, uidChange);
+                mBatteryStatsService.noteUidProcessState(uidRec.uid, uidRec.curProcState);
             }
         }
 

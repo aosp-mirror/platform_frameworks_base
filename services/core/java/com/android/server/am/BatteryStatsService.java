@@ -272,15 +272,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    void noteProcessState(String name, int uid, int state) {
-        synchronized (mStats) {
-            mStats.noteProcessStateLocked(name, uid, state);
-        }
-    }
-
     void noteProcessFinish(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessFinishLocked(name, uid);
+        }
+    }
+
+    void noteUidProcessState(int uid, int state) {
+        synchronized (mStats) {
+            mStats.noteUidProcessStateLocked(uid, state);
         }
     }
 

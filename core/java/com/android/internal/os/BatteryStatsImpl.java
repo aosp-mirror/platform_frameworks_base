@@ -105,7 +105,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 136 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 138 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2621,10 +2621,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteProcessStateLocked(String name, int uid, int state) {
+    public void noteUidProcessStateLocked(int uid, int state) {
         uid = mapUid(uid);
-        final long elapsedRealtime = SystemClock.elapsedRealtime();
-        getUidStatsLocked(uid).updateProcessStateLocked(name, state, elapsedRealtime);
+        getUidStatsLocked(uid).updateUidProcessStateLocked(state);
     }
 
     public void noteProcessFinishLocked(String name, int uid) {
@@ -2632,13 +2631,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (!mActiveEvents.updateState(HistoryItem.EVENT_PROC_FINISH, name, uid, 0)) {
             return;
         }
-        final long elapsedRealtime = SystemClock.elapsedRealtime();
-        final long uptime = SystemClock.uptimeMillis();
-        getUidStatsLocked(uid).updateProcessStateLocked(name, Uid.PROCESS_STATE_NONE,
-                elapsedRealtime);
         if (!mRecordAllHistory) {
             return;
         }
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PROC_FINISH, name, uid);
     }
 
@@ -4446,8 +4443,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         StopwatchTimer mForegroundActivityTimer;
 
-        static final int PROCESS_STATE_NONE = NUM_PROCESS_STATE;
-        int mProcessState = PROCESS_STATE_NONE;
+        int mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         StopwatchTimer[] mProcessStateTimer;
 
         BatchTimer mVibratorOnTimer;
@@ -4812,21 +4808,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void updateUidProcessStateLocked(int state, long elapsedRealtimeMs) {
-            if (mProcessState == state) return;
-
-            if (mProcessState != PROCESS_STATE_NONE) {
-                mProcessStateTimer[mProcessState].stopRunningLocked(elapsedRealtimeMs);
-            }
-            mProcessState = state;
-            if (state != PROCESS_STATE_NONE) {
-                if (mProcessStateTimer[state] == null) {
-                    makeProcessState(state, null);
-                }
-                mProcessStateTimer[state].startRunningLocked(elapsedRealtimeMs);
-            }
-        }
-
         public BatchTimer createVibratorOnTimerLocked() {
             if (mVibratorOnTimer == null) {
                 mVibratorOnTimer = new BatchTimer(Uid.this, VIBRATOR_ON, mOnBatteryTimeBase);
@@ -5167,7 +5148,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                         active |= !mProcessStateTimer[i].reset(false);
                     }
                 }
-                active |= (mProcessState != PROCESS_STATE_NONE);
+                active |= (mProcessState != ActivityManager.PROCESS_STATE_NONEXISTENT);
             }
             if (mVibratorOnTimer != null) {
                 if (mVibratorOnTimer.reset(false)) {
@@ -5261,14 +5242,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             for (int ip=mProcessStats.size()-1; ip>=0; ip--) {
                 Proc proc = mProcessStats.valueAt(ip);
-                if (proc.mProcessState == PROCESS_STATE_NONE) {
-                    proc.detach();
-                    mProcessStats.removeAt(ip);
-                } else {
-                    proc.reset();
-                    active = true;
-                }
+                proc.detach();
             }
+            mProcessStats.clear();
             if (mPids.size() > 0) {
                 for (int i=mPids.size()-1; i>=0; i--) {
                     Pid pid = mPids.valueAt(i);
@@ -5697,7 +5673,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 mForegroundActivityTimer = null;
             }
-            mProcessState = PROCESS_STATE_NONE;
+            mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             for (int i = 0; i < NUM_PROCESS_STATE; i++) {
                 if (in.readInt() != 0) {
                     makeProcessState(i, in);
@@ -6080,11 +6056,6 @@ public final class BatteryStatsImpl extends BatteryStats {
              */
             int mUnpluggedNumAnrs;
 
-            /**
-             * Current process state.
-             */
-            int mProcessState = PROCESS_STATE_NONE;
-
             ArrayList<ExcessivePower> mExcessivePower;
 
             Proc(String name) {
@@ -6102,16 +6073,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
-            }
-
-            void reset() {
-                mUserTime = mSystemTime = mForegroundTime = 0;
-                mStarts = mNumCrashes = mNumAnrs = 0;
-                mLoadedUserTime = mLoadedSystemTime = mLoadedForegroundTime = 0;
-                mLoadedStarts = mLoadedNumCrashes = mLoadedNumAnrs = 0;
-                mUnpluggedUserTime = mUnpluggedSystemTime = mUnpluggedForegroundTime = 0;
-                mUnpluggedStarts = mUnpluggedNumCrashes = mUnpluggedNumAnrs = 0;
-                mExcessivePower = null;
             }
 
             void detach() {
@@ -6668,46 +6629,39 @@ public final class BatteryStatsImpl extends BatteryStats {
             return ps;
         }
 
-        public void updateProcessStateLocked(String procName, int state, long elapsedRealtimeMs) {
-            int procState;
-            if (state <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                procState = PROCESS_STATE_FOREGROUND;
-            } else if (state <= ActivityManager.PROCESS_STATE_RECEIVER) {
-                procState = PROCESS_STATE_ACTIVE;
+        public void updateUidProcessStateLocked(int procState) {
+            int uidRunningState;
+            if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                uidRunningState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+            } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                uidRunningState = PROCESS_STATE_TOP;
+            } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                // Persistent and other foreground states go here.
+                uidRunningState = PROCESS_STATE_FOREGROUND_SERVICE;
+            } else if (procState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+                uidRunningState = PROCESS_STATE_TOP_SLEEPING;
+            } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                // Persistent and other foreground states go here.
+                uidRunningState = PROCESS_STATE_FOREGROUND;
+            } else if (procState <= ActivityManager.PROCESS_STATE_RECEIVER) {
+                uidRunningState = PROCESS_STATE_BACKGROUND;
             } else {
-                procState = PROCESS_STATE_RUNNING;
+                uidRunningState = PROCESS_STATE_CACHED;
             }
-            updateRealProcessStateLocked(procName, procState, elapsedRealtimeMs);
-        }
 
-        public void updateRealProcessStateLocked(String procName, int procState,
-                long elapsedRealtimeMs) {
-            Proc proc = getProcessStatsLocked(procName);
-            if (proc.mProcessState != procState) {
-                boolean changed;
-                if (procState < proc.mProcessState) {
-                    // Has this process become more important?  If so,
-                    // we may need to change the uid if the currrent uid proc state
-                    // is not as important as what we are now setting.
-                    changed = mProcessState > procState;
-                } else {
-                    // Has this process become less important?  If so,
-                    // we may need to change the uid if the current uid proc state
-                    // is the same importance as the old setting.
-                    changed = mProcessState == proc.mProcessState;
+            if (mProcessState == uidRunningState) return;
+
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+
+            if (mProcessState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                mProcessStateTimer[mProcessState].stopRunningLocked(elapsedRealtime);
+            }
+            mProcessState = uidRunningState;
+            if (uidRunningState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                if (mProcessStateTimer[uidRunningState] == null) {
+                    makeProcessState(uidRunningState, null);
                 }
-                proc.mProcessState = procState;
-                if (changed) {
-                    // uid's state may have changed; compute what the new state should be.
-                    int uidProcState = PROCESS_STATE_NONE;
-                    for (int ip=mProcessStats.size()-1; ip>=0; ip--) {
-                        proc = mProcessStats.valueAt(ip);
-                        if (proc.mProcessState < uidProcState) {
-                            uidProcState = proc.mProcessState;
-                        }
-                    }
-                    updateUidProcessStateLocked(uidProcState, elapsedRealtimeMs);
-                }
+                mProcessStateTimer[uidRunningState].startRunningLocked(elapsedRealtime);
             }
         }
 
@@ -9423,7 +9377,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (in.readInt() != 0) {
                 u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
             }
-            u.mProcessState = Uid.PROCESS_STATE_NONE;
+            u.mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             for (int i = 0; i < Uid.NUM_PROCESS_STATE; i++) {
                 if (in.readInt() != 0) {
                     u.makeProcessState(i, null);
