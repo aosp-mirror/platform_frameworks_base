@@ -3465,42 +3465,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceCrossUserPermission(userHandle);
         enforceNotManagedProfile(userHandle, "set the active password");
-
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        DevicePolicyData p = getUserData(userHandle);
-
         validateQualityConstant(quality);
 
-        synchronized (this) {
-            if (p.mActivePasswordQuality != quality || p.mActivePasswordLength != length
-                    || p.mFailedPasswordAttempts != 0 || p.mActivePasswordLetters != letters
-                    || p.mActivePasswordUpperCase != uppercase
-                    || p.mActivePasswordLowerCase != lowercase
-                    || p.mActivePasswordNumeric != numbers
-                    || p.mActivePasswordSymbols != symbols
-                    || p.mActivePasswordNonLetter != nonletter) {
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    p.mActivePasswordQuality = quality;
-                    p.mActivePasswordLength = length;
-                    p.mActivePasswordLetters = letters;
-                    p.mActivePasswordLowerCase = lowercase;
-                    p.mActivePasswordUpperCase = uppercase;
-                    p.mActivePasswordNumeric = numbers;
-                    p.mActivePasswordSymbols = symbols;
-                    p.mActivePasswordNonLetter = nonletter;
-                    p.mFailedPasswordAttempts = 0;
-                    saveSettingsLocked(userHandle);
-                    updatePasswordExpirationsLocked(userHandle);
-                    setExpirationAlarmCheckLocked(mContext, p);
-                    sendAdminCommandToSelfAndProfilesLocked(
-                            DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
-                            DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+        DevicePolicyData policy = getUserData(userHandle);
+
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                policy.mActivePasswordQuality = quality;
+                policy.mActivePasswordLength = length;
+                policy.mActivePasswordLetters = letters;
+                policy.mActivePasswordLowerCase = lowercase;
+                policy.mActivePasswordUpperCase = uppercase;
+                policy.mActivePasswordNumeric = numbers;
+                policy.mActivePasswordSymbols = symbols;
+                policy.mActivePasswordNonLetter = nonletter;
+                policy.mFailedPasswordAttempts = 0;
+                saveSettingsLocked(userHandle);
+                updatePasswordExpirationsLocked(userHandle);
+                setExpirationAlarmCheckLocked(mContext, policy);
+                sendAdminCommandToSelfAndProfilesLocked(
+                        DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
+                        DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
             }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
