@@ -82,6 +82,10 @@ public class PathParser {
             }
         }
 
+        public long getNativePtr() {
+            return mNativePathData;
+        }
+
         /**
          * Update the path data to match the source.
          * Before calling this, make sure canMorph(target, source) is true.
