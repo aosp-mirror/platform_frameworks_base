@@ -589,6 +589,9 @@ class ContextImpl extends Context {
         if ((mode & MODE_ENABLE_WRITE_AHEAD_LOGGING) != 0) {
             flags |= SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
         }
+        if ((mode & MODE_NO_LOCALIZED_COLLATORS) != 0) {
+            flags |= SQLiteDatabase.NO_LOCALIZED_COLLATORS;
+        }
         SQLiteDatabase db = SQLiteDatabase.openDatabase(f.getPath(), factory, flags, errorHandler);
         setFilePermissionsFromMode(f.getPath(), mode, 0);
         return db;
