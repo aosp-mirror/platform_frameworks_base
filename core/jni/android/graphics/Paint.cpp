@@ -71,13 +71,6 @@ static void defaultSettingsForAndroid(Paint* paint) {
     paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
 }
 
-struct LocalesCacheEntry {
-    std::string javaLocales;
-    std::string languageTags;
-};
-
-static thread_local LocalesCacheEntry sSingleEntryLocalesCache;
-
 namespace PaintGlue {
     enum MoveOpt {
         AFTER, AT_OR_AFTER, BEFORE, AT_OR_BEFORE, AT
@@ -402,15 +395,20 @@ namespace PaintGlue {
         }
     }
 
-    static void setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
+    static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         ScopedUtfChars localesChars(env, locales);
-        if (sSingleEntryLocalesCache.javaLocales != localesChars.c_str()) {
-            sSingleEntryLocalesCache.javaLocales = localesChars.c_str();
-            toLanguageTags(&sSingleEntryLocalesCache.languageTags, localesChars.c_str());
-        }
+        std::string buf;
+        toLanguageTags(&buf, localesChars.c_str());
+        jint minikinLangListId = FontStyle::registerLanguageList(buf);
+        obj->setMinikinLangListId(minikinLangListId);
+        return minikinLangListId;
+    }
 
-        obj->setTextLocales(sSingleEntryLocalesCache.languageTags);
+    static void setTextLocalesByMinikinLangListId(JNIEnv* env, jobject clazz, jlong objHandle,
+            jint minikinLangListId) {
+        Paint* obj = reinterpret_cast<Paint*>(objHandle);
+        obj->setMinikinLangListId(minikinLangListId);
     }
 
     static jboolean isElegantTextHeight(JNIEnv* env, jobject, jlong paintHandle) {
@@ -991,7 +989,9 @@ static const JNINativeMethod methods[] = {
     {"nSetRasterizer","!(JJ)J", (void*) PaintGlue::setRasterizer},
     {"nGetTextAlign","!(J)I", (void*) PaintGlue::getTextAlign},
     {"nSetTextAlign","!(JI)V", (void*) PaintGlue::setTextAlign},
-    {"nSetTextLocales","!(JLjava/lang/String;)V", (void*) PaintGlue::setTextLocales},
+    {"nSetTextLocales","!(JLjava/lang/String;)I", (void*) PaintGlue::setTextLocales},
+    {"nSetTextLocalesByMinikinLangListId","!(JI)V",
+            (void*) PaintGlue::setTextLocalesByMinikinLangListId},
     {"nIsElegantTextHeight","!(J)Z", (void*) PaintGlue::isElegantTextHeight},
     {"nSetElegantTextHeight","!(JZ)V", (void*) PaintGlue::setElegantTextHeight},
     {"nGetTextSize","!(J)F", (void*) PaintGlue::getTextSize},

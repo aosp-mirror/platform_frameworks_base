@@ -53,12 +53,12 @@ public:
         return mFontFeatureSettings;
     }
 
-    void setTextLocales(const std::string &textLocales) {
-        mTextLocales = textLocales;
+    void setMinikinLangListId(uint32_t minikinLangListId) {
+        mMinikinLangListId = minikinLangListId;
     }
 
-    const std::string& getTextLocales() const {
-        return mTextLocales;
+    uint32_t getMinikinLangListId() const {
+        return mMinikinLangListId;
     }
 
     void setFontVariant(FontVariant variant) {
@@ -80,7 +80,7 @@ public:
 private:
     float mLetterSpacing = 0;
     std::string mFontFeatureSettings;
-    std::string mTextLocales;
+    uint32_t mMinikinLangListId;
     FontVariant mFontVariant;
     uint32_t mHyphenEdit = 0;
 };

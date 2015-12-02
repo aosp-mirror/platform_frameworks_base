@@ -25,6 +25,9 @@ import android.text.SpannedString;
 import android.text.TextUtils;
 import android.util.LocaleList;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.HashMap;
 import java.util.Locale;
 
 /**
@@ -55,6 +58,16 @@ public class Paint {
 
     private LocaleList  mLocales;
     private String      mFontFeatureSettings;
+
+    private static final Object sCacheLock = new Object();
+
+    /**
+     * Cache for the Minikin language list ID.
+     *
+     * A map from a string representation of the LocaleList to Minikin's language list ID.
+     */
+    @GuardedBy("sCacheLock")
+    private static final HashMap<String, Integer> sMinikinLangListIdCache = new HashMap<>();
 
     /**
      * @hide
@@ -1335,7 +1348,7 @@ public class Paint {
             return;
         }
         mLocales = new LocaleList(locale);
-        nSetTextLocales(mNativePaint, locale.toString());
+        syncTextLocalesWithMinikin();
     }
 
     /**
@@ -1372,7 +1385,21 @@ public class Paint {
         }
         if (locales.equals(mLocales)) return;
         mLocales = locales;
-        nSetTextLocales(mNativePaint, locales.toLanguageTags());
+        syncTextLocalesWithMinikin();
+    }
+
+    private void syncTextLocalesWithMinikin() {
+        final String languageTags = mLocales.toLanguageTags();
+        final Integer minikinLangListId;
+        synchronized (sCacheLock) {
+            minikinLangListId = sMinikinLangListIdCache.get(languageTags);
+            if (minikinLangListId == null) {
+                final int newID = nSetTextLocales(mNativePaint, languageTags);
+                sMinikinLangListIdCache.put(languageTags, newID);
+                return;
+            }
+        }
+        nSetTextLocalesByMinikinLangListId(mNativePaint, minikinLangListId.intValue());
     }
 
     /**
@@ -2714,8 +2741,9 @@ public class Paint {
     private static native void nSetTextAlign(long paintPtr,
                                                    int align);
 
-    private static native void nSetTextLocales(long paintPtr,
-                                                    String locales);
+    private static native int nSetTextLocales(long paintPtr, String locales);
+    private static native void nSetTextLocalesByMinikinLangListId(long paintPtr,
+            int mMinikinLangListId);
 
     private static native float nGetTextAdvances(long paintPtr, long typefacePtr,
             char[] text, int index, int count, int contextIndex, int contextCount,
