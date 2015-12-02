@@ -1860,7 +1860,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             mNeedsAnimation = true;
         }
-        if (isHeadsUp(child)) {
+        if (isHeadsUp(child) && !mChangePositionInProgress) {
             mAddedHeadsUpChildren.add(child);
             mChildrenToAddAnimated.remove(child);
         }
