@@ -315,9 +315,25 @@ public final class TextViewActions {
                     (new TextCoordinates(mIndex)).calculateCoordinates(mTextView);
             final Rect bounds = new Rect();
             view.getBoundsOnScreen(bounds);
-            final float diffX = bounds.centerX() - currentCoordinates[0];
+            final Rect visibleDisplayBounds = new Rect();
+            mTextView.getWindowVisibleDisplayFrame(visibleDisplayBounds);
+            visibleDisplayBounds.right -= 1;
+            visibleDisplayBounds.bottom -= 1;
+            if (!visibleDisplayBounds.intersect(bounds)) {
+                throw new PerformException.Builder()
+                        .withActionDescription(mActionDescription
+                                + " The handle is entirely out of the visible display frame of"
+                                + "the TextView's window.")
+                        .withViewDescription(HumanReadables.describe(view))
+                        .build();
+            }
+            final float dragPointX = Math.max(Math.min(bounds.centerX(),
+                    visibleDisplayBounds.right), visibleDisplayBounds.left);
+            final float diffX = dragPointX - currentCoordinates[0];
             final float verticalOffset = bounds.height() * 0.7f;
-            float diffY = bounds.top + verticalOffset - currentCoordinates[1];
+            final float dragPointY = Math.max(Math.min(bounds.top + verticalOffset,
+                    visibleDisplayBounds.bottom), visibleDisplayBounds.top);
+            float diffY = dragPointY - currentCoordinates[1];
             if (currentLine > targetLine) {
                 diffY -= mTextView.getLineHeight() * LINE_SLOP_MULTIPLIER;
             } else if (currentLine < targetLine) {
