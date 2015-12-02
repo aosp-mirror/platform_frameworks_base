@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"Đang tiến hành báo cáo lỗi"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Báo cáo lỗi đã được chụp"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Vuốt sang trái để chia sẻ báo cáo lỗi của bạn"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Chạm để chia sẻ báo cáo lỗi của bạn"</string>

@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"شیل"</string>
+    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"بگ رپورٹ پر پیشرفت جاری ہے"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"بَگ رپورٹ کیپچر کر لی گئی"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"اپنی بگ رپورٹ کا اشتراک کرنے کیلئے بائیں سوائپ کریں"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"اپنی بَگ رپورٹ کا اشتراک کرنے کیلئے ٹچ کریں"</string>

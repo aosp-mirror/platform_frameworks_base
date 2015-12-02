@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"សែល"</string>
+    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"កំពុងដំណើរការរបាយការណ៍កំហុស"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"បាន​ចាប់​យក​របាយការណ៍​កំហុស"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"អូស​ទៅ​ឆ្វេង​​ ដើម្បី​ចែក​រំលែក​របាយការណ៍​កំហុស​របស់​អ្នក"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ប៉ះ​ ដើម្បី​ចែក​រំលែក​របាយការណ៍​កំហុស​របស់​អ្នក"</string>

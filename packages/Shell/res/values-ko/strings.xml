@@ -17,6 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"셸"</string>
+    <!-- no translation found for bugreport_in_progress_title (6125357428413919520) -->
+    <skip />
     <string name="bugreport_finished_title" msgid="2293711546892863898">"버그 신고서 캡처됨"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"왼쪽으로 스와이프하여 버그 신고서를 공유하세요."</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"버그 신고서를 공유하려면 터치하세요."</string>

@@ -17,6 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ഷെൽ"</string>
+    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"ബഗ് റിപ്പോർട്ട് പുരോഗതിയിലാണ്"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"ബഗ് റിപ്പോർട്ട് ക്യാപ്‌ചർ ചെയ്‌തു"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടുന്നതിന് ഇടത്തേയ്‌ക്ക് സ്വൈപ്പുചെയ്യുക"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"നിങ്ങളുടെ ബഗ് റിപ്പോർട്ട് പങ്കിടാൻ സ്‌പർശിക്കുക"</string>
