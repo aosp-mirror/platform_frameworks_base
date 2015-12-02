@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
@@ -132,7 +133,9 @@ public class CustomTile extends QSTile<QSTile.State> {
     @Override
     protected void handleUpdateState(State state, Object arg) {
         state.visible = true;
-        state.icon = new DrawableIcon(mTile.getIcon().loadDrawable(mContext));
+        Drawable drawable = mTile.getIcon().loadDrawable(mContext);
+        drawable.setTint(mContext.getColor(android.R.color.white));
+        state.icon = new DrawableIcon(drawable);
         state.label = mTile.getLabel();
         if (mTile.getContentDescription() != null) {
             state.contentDescription = mTile.getContentDescription();

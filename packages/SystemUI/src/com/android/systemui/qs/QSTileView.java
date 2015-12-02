@@ -222,7 +222,6 @@ public class QSTileView extends QSTileBaseView {
         final ImageView icon = new ImageView(mContext);
         icon.setId(android.R.id.icon);
         icon.setScaleType(ScaleType.CENTER_INSIDE);
-        icon.setImageTintList(ColorStateList.valueOf(getContext().getColor(android.R.color.white)));
         return icon;
     }
 
