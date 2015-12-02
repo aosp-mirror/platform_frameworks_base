@@ -16,6 +16,9 @@
 
 package com.android.printspooler.model;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -497,7 +500,7 @@ public final class PrintSpoolerService extends Service {
                 success = true;
 
                 printJob.setState(state);
-                printJob.setStateReason(error);
+                printJob.setStatus(error);
                 printJob.setCancelling(false);
 
                 if (DEBUG_PRINT_JOB_LIFECYCLE) {
@@ -546,6 +549,35 @@ public final class PrintSpoolerService extends Service {
 
         return success;
     }
+
+    /**
+     * Set the progress for a print job.
+     *
+     * @param printJobId ID of the print job to update
+     * @param progress the new progress
+     */
+    public void setProgress(@NonNull PrintJobId printJobId,
+            @FloatRange(from=0.0, to=1.0) float progress) {
+        synchronized (mLock) {
+            getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setProgress(progress);
+
+            mNotificationController.onUpdateNotifications(mPrintJobs);
+        }
+    }
+
+   /**
+    * Set the status for a print job.
+    *
+    * @param printJobId ID of the print job to update
+    * @param status the new status
+    */
+   public void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
+       synchronized (mLock) {
+           getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setStatus(status);
+
+           mNotificationController.onUpdateNotifications(mPrintJobs);
+       }
+   }
 
     public boolean hasActivePrintJobsLocked() {
         final int printJobCount = mPrintJobs.size();
@@ -693,6 +725,8 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_COPIES = "copies";
         private static final String ATTR_PRINTER_NAME = "printerName";
         private static final String ATTR_STATE_REASON = "stateReason";
+        private static final String ATTR_STATUS = "status";
+        private static final String ATTR_PROGRESS = "progress";
         private static final String ATTR_CANCELLING = "cancelling";
 
         private static final String TAG_ADVANCED_OPTIONS = "advancedOptions";
@@ -801,12 +835,18 @@ public final class PrintSpoolerService extends Service {
                     if (!TextUtils.isEmpty(printerName)) {
                         serializer.attribute(null, ATTR_PRINTER_NAME, printerName);
                     }
-                    String stateReason = printJob.getStateReason();
-                    if (!TextUtils.isEmpty(stateReason)) {
-                        serializer.attribute(null, ATTR_STATE_REASON, stateReason);
-                    }
                     serializer.attribute(null, ATTR_CANCELLING, String.valueOf(
                             printJob.isCancelling()));
+
+                    float progress = printJob.getProgress();
+                    if (progress != Float.NaN) {
+                        serializer.attribute(null, ATTR_PROGRESS, String.valueOf(progress));
+                    }
+
+                    CharSequence status = printJob.getStatus();
+                    if (!TextUtils.isEmpty(status)) {
+                        serializer.attribute(null, ATTR_STATUS, status.toString());
+                    }
 
                     PrinterId printerId = printJob.getPrinterId();
                     if (printerId != null) {
@@ -1025,8 +1065,25 @@ public final class PrintSpoolerService extends Service {
             printJob.setCopies(Integer.parseInt(copies));
             String printerName = parser.getAttributeValue(null, ATTR_PRINTER_NAME);
             printJob.setPrinterName(printerName);
+
+            String progressString = parser.getAttributeValue(null, ATTR_PROGRESS);
+            if (progressString != null) {
+                float progress = Float.parseFloat(progressString);
+
+                if (progress != Float.NaN) {
+                    printJob.setProgress(progress);
+                }
+            }
+
+            CharSequence status = parser.getAttributeValue(null, ATTR_STATUS);
+            printJob.setStatus(status);
+
+            // stateReason is deprecated, but might be used by old print jobs
             String stateReason = parser.getAttributeValue(null, ATTR_STATE_REASON);
-            printJob.setStateReason(stateReason);
+            if (stateReason != null) {
+                printJob.setStatus(stateReason);
+            }
+
             String cancelling = parser.getAttributeValue(null, ATTR_CANCELLING);
             printJob.setCancelling(!TextUtils.isEmpty(cancelling)
                     ? Boolean.parseBoolean(cancelling) : false);
@@ -1321,6 +1378,18 @@ public final class PrintSpoolerService extends Service {
         public void removeApprovedPrintService(ComponentName serviceToRemove) {
             (new ApprovedPrintServices(PrintSpoolerService.this))
                     .removeApprovedService(serviceToRemove);
+        }
+
+        @Override
+        public void setProgress(@NonNull PrintJobId printJobId,
+                @FloatRange(from=0.0, to=1.0) float progress) throws RemoteException {
+            PrintSpoolerService.this.setProgress(printJobId, progress);
+        }
+
+        @Override
+        public void setStatus(@NonNull PrintJobId printJobId,
+                @Nullable CharSequence status) throws RemoteException {
+            PrintSpoolerService.this.setStatus(printJobId, status);
         }
 
         public PrintSpoolerService getService() {

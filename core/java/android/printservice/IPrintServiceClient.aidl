@@ -35,6 +35,22 @@ interface IPrintServiceClient {
     boolean setPrintJobTag(in PrintJobId printJobId, String tag);
     oneway void writePrintJobData(in ParcelFileDescriptor fd, in PrintJobId printJobId);
 
+    /**
+     * Set the progress of this print job
+     *
+     * @param printJobId The print job to update
+     * @param progress The new progress
+     */
+    void setProgress(in PrintJobId printJobId, in float progress);
+
+    /**
+     * Set the status of this print job
+     *
+     * @param printJobId The print job to update
+     * @param status The new status, can be null
+     */
+    void setStatus(in PrintJobId printJobId, in CharSequence status);
+
     void onPrintersAdded(in ParceledListSlice printers);
     void onPrintersRemoved(in ParceledListSlice printerIds);
 }

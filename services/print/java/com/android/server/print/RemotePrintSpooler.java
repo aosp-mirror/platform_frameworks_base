@@ -16,6 +16,9 @@
 
 package com.android.server.print;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -227,6 +230,61 @@ final class RemotePrintSpooler {
             }
         }
         return false;
+    }
+
+    /**
+     * Set progress of a print job.
+     *
+     * @param printJobId The print job to update
+     * @param progress The new progress
+     */
+    public final void setProgress(@NonNull PrintJobId printJobId,
+            @FloatRange(from=0.0, to=1.0) float progress) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setProgress(printJobId, progress);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error setting progress.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setProgress()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Set status of a print job.
+     *
+     * @param printJobId The print job to update
+     * @param status The new status
+     */
+    public final void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setStatus(printJobId, status);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error setting status.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setStatus()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
     }
 
     public final boolean setPrintJobTag(PrintJobId printJobId, String tag) {
