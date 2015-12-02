@@ -387,8 +387,11 @@ public class MediaFocusControl {
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int) */
     protected int requestAudioFocus(AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags) {
-        Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId + " req=" + focusChangeHint +
-                "flags=0x" + Integer.toHexString(flags));
+        Log.i(TAG, " AudioFocus  requestAudioFocus() from uid/pid " + Binder.getCallingUid()
+                + "/" + Binder.getCallingPid()
+                + " clientId=" + clientId
+                + " req=" + focusChangeHint
+                + " flags=0x" + Integer.toHexString(flags));
         // we need a valid binder callback for clients
         if (!cb.pingBinder()) {
             Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
@@ -481,7 +484,9 @@ public class MediaFocusControl {
      * */
     protected int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId, AudioAttributes aa) {
         // AudioAttributes are currently ignored, to be used for zones
-        Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
+        Log.i(TAG, " AudioFocus  abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
+                + "/" + Binder.getCallingPid()
+                + " clientId=" + clientId);
         try {
             // this will take care of notifying the new focus owner if needed
             synchronized(mAudioFocusLock) {
