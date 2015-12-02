@@ -56,6 +56,7 @@ import android.view.WindowManagerPolicy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import static android.app.ActivityManager.StackId;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
@@ -1564,13 +1565,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    /**
-     * @return true if this window desires key events.
-     */
-    public final boolean canReceiveKeys() {
+    /** @return true if this window desires key events. */
+    boolean canReceiveKeys() {
         return isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE)
-                && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0);
+                && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
+                && stackCanReceiveKeys();
+    }
+
+    boolean stackCanReceiveKeys() {
+        final TaskStack stack = getStack();
+        return stack != null && StackId.canReceiveKeys(stack.mStackId);
     }
 
     @Override

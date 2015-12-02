@@ -54,7 +54,6 @@ import android.app.IActivityController;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -73,7 +72,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
@@ -2827,41 +2825,43 @@ final class ActivityStack {
     }
 
     private void adjustFocusedActivityLocked(ActivityRecord r, String reason) {
-        if (mStackSupervisor.isFocusedStack(this) && mService.mFocusedActivity == r) {
-            ActivityRecord next = topRunningActivityLocked();
-            final String myReason = reason + " adjustFocus";
-            if (next != r) {
-                if (next != null && StackId.keepFocusInStackIfPossible(mStackId)) {
-                    // For freeform, docked, and pinned stacks we always keep the focus within the
-                    // stack as long as there is a running activity in the stack that we can adjust
-                    // focus to.
-                    mService.setFocusedActivityLocked(next, myReason);
-                    return;
-                } else {
-                    final TaskRecord task = r.task;
-                    if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
-                        // For non-fullscreen stack, we want to move the focus to the next visible
-                        // stack to prevent the home screen from moving to the top and obscuring
-                        // other visible stacks.
-                        if (!mFullscreen
-                                && adjustFocusToNextVisibleStackLocked(null, myReason)) {
-                            return;
-                        }
-                        // Move the home stack to the top if this stack is fullscreen or there is no
-                        // other visible stack.
-                        if (mStackSupervisor.moveHomeStackTaskToTop(
-                                task.getTaskToReturnTo(), myReason)) {
-                            // Activity focus was already adjusted. Nothing else to do...
-                            return;
-                        }
+        if (!mStackSupervisor.isFocusedStack(this) || mService.mFocusedActivity != r) {
+            return;
+        }
+
+        final ActivityRecord next = topRunningActivityLocked();
+        final String myReason = reason + " adjustFocus";
+        if (next != r) {
+            if (next != null && StackId.keepFocusInStackIfPossible(mStackId)) {
+                // For freeform, docked, and pinned stacks we always keep the focus within the
+                // stack as long as there is a running activity in the stack that we can adjust
+                // focus to.
+                mService.setFocusedActivityLocked(next, myReason);
+                return;
+            } else {
+                final TaskRecord task = r.task;
+                if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
+                    // For non-fullscreen stack, we want to move the focus to the next visible
+                    // stack to prevent the home screen from moving to the top and obscuring
+                    // other visible stacks.
+                    if (!mFullscreen
+                            && adjustFocusToNextVisibleStackLocked(null, myReason)) {
+                        return;
+                    }
+                    // Move the home stack to the top if this stack is fullscreen or there is no
+                    // other visible stack.
+                    if (mStackSupervisor.moveHomeStackTaskToTop(
+                            task.getTaskToReturnTo(), myReason)) {
+                        // Activity focus was already adjusted. Nothing else to do...
+                        return;
                     }
                 }
             }
+        }
 
-            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
-            if (top != null) {
-                mService.setFocusedActivityLocked(top, myReason);
-            }
+        final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
+        if (top != null) {
+            mService.setFocusedActivityLocked(top, myReason);
         }
     }
 

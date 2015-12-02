@@ -9129,8 +9129,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (wtoken == token) {
                             break;
                         }
-                        if (mFocusedApp == token) {
-                            // Whoops, we are below the focused app...  no focus for you!
+                        if (mFocusedApp == token && token.stackCanReceiveKeys()) {
+                            // Whoops, we are below the focused app whose stack can receive keys...
+                            // No focus for you!!!
                             if (localLOGV || DEBUG_FOCUS_LIGHT) Slog.v(TAG,
                                     "findFocusedWindow: Reached focused app=" + mFocusedApp);
                             return null;

@@ -543,6 +543,11 @@ public class ActivityManager {
             return stackId == FREEFORM_WORKSPACE_STACK_ID
                     || stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
         }
+
+        /** Returns true if the windows in the stack can receive input keys. */
+        public static boolean canReceiveKeys(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
     }
 
     /**
