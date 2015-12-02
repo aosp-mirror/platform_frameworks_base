@@ -16,12 +16,17 @@
 
 package android.app.usage;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.Nullable;
 import android.app.usage.NetworkStats.Bucket;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.DataUsageRequest;
 import android.net.NetworkIdentity;
 import android.net.NetworkTemplate;
 import android.os.Build;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -286,6 +291,62 @@ public class NetworkStatsManager {
         result = new NetworkStats(mContext, template, startTime, endTime);
         result.startUserUidEnumeration();
         return result;
+    }
+
+    /**
+     * Registers to receive notifications about data usage on specified networks and uids.
+     * The callbacks will continue to be called as long as the process is live or
+     * {@link #unregisterDataUsageCallback} is called.
+     *
+     * @param policy {@link DataUsagePolicy} describing this request.
+     * @param callback The {@link DataUsageCallback} that the system will call when data usage
+     *            has exceeded the specified threshold.
+     */
+    public void registerDataUsageCallback(DataUsagePolicy policy, DataUsageCallback callback) {
+        registerDataUsageCallback(policy, callback, null /* handler */);
+    }
+
+    /**
+     * Registers to receive notifications about data usage on specified networks and uids.
+     * The callbacks will continue to be called as long as the process is live or
+     * {@link #unregisterDataUsageCallback} is called.
+     *
+     * @param policy {@link DataUsagePolicy} describing this request.
+     * @param callback The {@link DataUsageCallback} that the system will call when data usage
+     *            has exceeded the specified threshold.
+     * @param handler to dispatch callback events through, otherwise if {@code null} it uses
+     *            the calling thread.
+     */
+    public void registerDataUsageCallback(DataUsagePolicy policy, DataUsageCallback callback,
+                @Nullable Handler handler) {
+        checkNotNull(policy, "DataUsagePolicy cannot be null");
+        checkNotNull(callback, "DataUsageCallback cannot be null");
+
+        // TODO: Implement stub.
+    }
+
+    /**
+     * Unregisters callbacks on data usage.
+     *
+     * @param callback The {@link DataUsageCallback} used when registering.
+     */
+    public void unregisterDataUsageCallback(DataUsageCallback callback) {
+        checkNotNull(callback, "DataUsageCallback cannot be null");
+
+        // TODO: Implement stub.
+    }
+
+    /**
+     * Base class for data usage callbacks. Should be extended by applications wanting
+     * notifications.
+     */
+    public static class DataUsageCallback {
+        /**
+         * Called when data usage has reached the given policy threshold.
+         */
+        public void onLimitReached() {}
+
+        private DataUsageRequest request;
     }
 
     private static NetworkTemplate createTemplate(int networkType, String subscriberId) {
