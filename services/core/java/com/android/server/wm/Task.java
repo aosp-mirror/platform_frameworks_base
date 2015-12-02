@@ -562,8 +562,10 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     public void printTo(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("taskId="); pw.print(mTaskId);
-                pw.print(prefix); pw.print("appTokens="); pw.print(mAppTokens);
-                pw.print(prefix); pw.print("mdr="); pw.println(mDeferRemoval);
+        pw.print(prefix); pw.print("taskId="); pw.println(mTaskId);
+            pw.print(prefix + prefix); pw.print("mFullscreen="); pw.println(mFullscreen);
+            pw.print(prefix + prefix); pw.print("mBounds="); pw.println(mBounds.toShortString());
+            pw.print(prefix + prefix); pw.print("mdr="); pw.println(mDeferRemoval);
+            pw.print(prefix + prefix); pw.print("appTokens="); pw.println(mAppTokens);
     }
 }

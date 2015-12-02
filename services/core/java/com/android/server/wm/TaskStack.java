@@ -602,6 +602,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mStackId="); pw.println(mStackId);
         pw.print(prefix); pw.print("mDeferDetach="); pw.println(mDeferDetach);
+        pw.print(prefix); pw.print("mFullscreen="); pw.println(mFullscreen);
+        pw.print(prefix); pw.print("mBounds="); pw.println(mBounds.toShortString());
         for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
             pw.print(prefix);
             mTasks.get(taskNdx).printTo(prefix + " ", pw);
