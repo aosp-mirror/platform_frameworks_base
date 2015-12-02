@@ -226,6 +226,12 @@ public class StubProvider extends DocumentsProvider {
     }
 
     @Override
+    public Cursor queryChildDocumentsForManage(String parentDocumentId, String[] projection,
+            String sortOrder) throws FileNotFoundException {
+        return queryChildDocuments(parentDocumentId, projection, sortOrder);
+    }
+
+    @Override
     public Cursor queryChildDocuments(String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
         final StubDocument parentDocument = mStorage.get(parentDocumentId);

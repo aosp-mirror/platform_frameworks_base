@@ -23,8 +23,10 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.text.TextUtils;
 
@@ -195,6 +197,10 @@ public class RootInfo implements Durable, Parcelable {
         }
     }
 
+    public Uri getUri() {
+        return DocumentsContract.buildRootUri(authority, rootId);
+    }
+
     public boolean isRecents() {
         return authority == null && rootId == null;
     }
@@ -238,11 +244,6 @@ public class RootInfo implements Durable, Parcelable {
                 || derivedType == TYPE_RECENTS || derivedType == TYPE_DOWNLOADS;
     }
 
-    @Override
-    public String toString() {
-        return "Root{authority=" + authority + ", rootId=" + rootId + ", title=" + title + "}";
-    }
-
     public Drawable loadIcon(Context context) {
         if (derivedIcon != 0) {
             return context.getDrawable(derivedIcon);
@@ -281,6 +282,11 @@ public class RootInfo implements Durable, Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(authority, rootId);
+    }
+
+    @Override
+    public String toString() {
+        return "Root{authority=" + authority + ", rootId=" + rootId + ", title=" + title + "}";
     }
 
     public String getDirectoryString() {

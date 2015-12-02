@@ -260,8 +260,7 @@ public abstract class BaseActivity extends Activity {
         } else if (id == R.id.menu_settings) {
             final RootInfo root = getCurrentRoot();
             final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
-            intent.setDataAndType(DocumentsContract.buildRootUri(root.authority, root.rootId),
-                    DocumentsContract.Root.MIME_TYPE_ITEM);
+            intent.setDataAndType(root.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
             startActivity(intent);
             return true;
         }
