@@ -19,31 +19,133 @@ package android.widget.espresso;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withTagValue;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
-import android.app.Activity;
+import org.hamcrest.Matcher;
+
+import android.support.test.espresso.NoMatchingRootException;
+import android.support.test.espresso.NoMatchingViewException;
+import android.support.test.espresso.UiController;
+import android.support.test.espresso.ViewAction;
+import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.action.ViewActions;
+import android.support.test.espresso.matcher.ViewMatchers;
+import android.view.View;
+
 import com.android.internal.widget.FloatingToolbar;
 
 /**
  * Espresso utility methods for the floating toolbar.
  */
 public class FloatingToolbarEspressoUtils {
-
+    private final static Object TAG = FloatingToolbar.FLOATING_TOOLBAR_TAG;
 
     private FloatingToolbarEspressoUtils() {}
+
+    private static ViewInteraction onFloatingToolBar() {
+        return onView(withTagValue(is(TAG)))
+                .inRoot(withDecorView(hasDescendant(withTagValue(is(TAG)))));
+    }
 
     /**
      * Asserts that the floating toolbar is displayed on screen.
      *
      * @throws AssertionError if the assertion fails
      */
-    public static void assertFloatingToolbarIsDisplayed(Activity activity) {
-        onView(withTagValue(is((Object) FloatingToolbar.FLOATING_TOOLBAR_TAG)))
-                .inRoot(withDecorView(not(is(activity.getWindow().getDecorView()))))
-                .check(matches(isDisplayed()));
+    public static void assertFloatingToolbarIsDisplayed() {
+        onFloatingToolBar().check(matches(isDisplayed()));
     }
 
+    /**
+     * Asserts that the floating toolbar is not displayed on screen.
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertFloatingToolbarIsNotDisplayed() {
+        try {
+            onFloatingToolBar().check(matches(isDisplayed()));
+        } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e) {
+            return;
+        }
+        throw new AssertionError("Floating toolbar is displayed");
+    }
+
+    private static void toggleOverflow() {
+        final int id = com.android.internal.R.id.overflow;
+        onView(allOf(withId(id), isDisplayed()))
+                .inRoot(withDecorView(hasDescendant(withId(id))))
+                .perform(ViewActions.click());
+        onView(isRoot()).perform(SLEEP);
+    }
+
+    public static void sleepForFloatingToolbarPopup() {
+        onView(isRoot()).perform(SLEEP);
+    }
+
+    /**
+     * Asserts that the floating toolbar contains the specified item.
+     *
+     * @param itemLabel label of the item.
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertFloatingToolbarContainsItem(String itemLabel) {
+        try{
+            onFloatingToolBar().check(matches(hasDescendant(ViewMatchers.withText(itemLabel))));
+        } catch (AssertionError e) {
+            try{
+                toggleOverflow();
+            } catch (NoMatchingViewException | NoMatchingRootException e2) {
+                // No overflow items.
+                throw e;
+            }
+            try{
+                onFloatingToolBar().check(matches(hasDescendant(ViewMatchers.withText(itemLabel))));
+            } finally {
+                toggleOverflow();
+            }
+        }
+    }
+
+    /**
+     * Asserts that the floating toolbar doesn't contain the specified item.
+     *
+     * @param itemLabel label of the item.
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertFloatingToolbarDoesNotContainItem(String itemLabel) {
+        try{
+            assertFloatingToolbarContainsItem(itemLabel);
+        } catch (AssertionError e) {
+            return;
+        }
+        throw new AssertionError("Floating toolbar contains " + itemLabel);
+    }
+
+    /**
+     * ViewAction to sleep to wait floating toolbar's animation.
+     */
+    private static final ViewAction SLEEP = new ViewAction() {
+        private static final long SLEEP_DURATION = 400;
+
+        @Override
+        public Matcher<View> getConstraints() {
+            return isDisplayed();
+        }
+
+        @Override
+        public String getDescription() {
+            return "Sleep " + SLEEP_DURATION + " ms.";
+        }
+
+        @Override
+        public void perform(UiController uiController, View view) {
+            uiController.loopMainThreadForAtLeast(SLEEP_DURATION);
+        }
+    };
 }
