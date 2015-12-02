@@ -41,6 +41,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
@@ -274,7 +275,7 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
         }
         final String ruleId = automaticZenRule.getId();
-        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        ZenModeConfig.ZenRule rule;
         if (ruleId == null) {
             throw new IllegalArgumentException("Rule doesn't exist");
         } else {
@@ -307,13 +308,32 @@ public class ZenModeHelper {
         return setConfig(newConfig, reason, true);
     }
 
+    public boolean removeAutomaticZenRules(String packageName, String reason) {
+        ZenModeConfig newConfig;
+        synchronized (mConfig) {
+            if (mConfig == null) return false;
+            newConfig = mConfig.copy();
+        }
+        for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
+            ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
+            if (rule.component.getPackageName().equals(packageName)
+                    && canManageAutomaticZenRule(rule)) {
+                newConfig.automaticRules.removeAt(i);
+            }
+        }
+        return setConfig(newConfig, reason, true);
+    }
+
     public boolean canManageAutomaticZenRule(ZenRule rule) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.MANAGE_NOTIFICATIONS)
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == 0 || callingUid == Process.SYSTEM_UID) {
+            return true;
+        } else if (mContext.checkCallingPermission(android.Manifest.permission.MANAGE_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
         } else {
-            String[] packages = mContext.getPackageManager().getPackagesForUid(
-                    Binder.getCallingUid());
+            String[] packages =
+                    mContext.getPackageManager().getPackagesForUid(Binder.getCallingUid());
             if (packages != null) {
                 final int packageCount = packages.length;
                 for (int i = 0; i < packageCount; i++) {
