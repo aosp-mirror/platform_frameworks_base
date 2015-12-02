@@ -1299,6 +1299,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             // Since the number of notifications is determined based on the height of the view, we
             // need to update them.
             updateRowStates();
+            mStackScroller.onHeightChanged(null, false);
         }
     }
 
