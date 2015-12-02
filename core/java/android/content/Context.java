@@ -159,6 +159,16 @@ public abstract class Context {
      */
     public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 0x0008;
 
+    /**
+     * Database open flag: when set, the database is opened without support for
+     * localized collators.
+     *
+     * @see #openOrCreateDatabase(String, int, CursorFactory)
+     * @see #openOrCreateDatabase(String, int, CursorFactory, DatabaseErrorHandler)
+     * @see SQLiteDatabase#NO_LOCALIZED_COLLATORS
+     */
+    public static final int MODE_NO_LOCALIZED_COLLATORS = 0x0010;
+
     /** @hide */
     @IntDef(flag = true,
             value = {
@@ -1271,6 +1281,7 @@ public abstract class Context {
      *     default operation, {@link #MODE_WORLD_READABLE}
      *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
      *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
+     *     Use {@link #MODE_NO_LOCALIZED_COLLATORS} to disable localized collators.
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
      *
@@ -1281,6 +1292,7 @@ public abstract class Context {
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
      * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
+     * @see #MODE_NO_LOCALIZED_COLLATORS
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
@@ -1298,6 +1310,7 @@ public abstract class Context {
      *     default operation, {@link #MODE_WORLD_READABLE}
      *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
      *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
+     *     Use {@link #MODE_NO_LOCALIZED_COLLATORS} to disable localized collators.
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
@@ -1309,6 +1322,7 @@ public abstract class Context {
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
      * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
+     * @see #MODE_NO_LOCALIZED_COLLATORS
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
