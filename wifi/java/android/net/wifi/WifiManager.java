@@ -665,7 +665,7 @@ public class WifiManager {
      * </ul>
      * @return a list of network configurations in the form of a list
      * of {@link WifiConfiguration} objects. Upon failure to fetch or
-     * when when Wi-Fi is turned off, it can be null.
+     * when Wi-Fi is turned off, it can be null.
      */
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {

@@ -257,7 +257,7 @@ class AppWindowToken extends WindowToken {
             if (win.mAttrs.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
                     || win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
                 // In cases where there are multiple windows, we prefer the non-exiting window. This
-                // happens for example when when replacing windows during an activity relaunch. When
+                // happens for example when replacing windows during an activity relaunch. When
                 // constructing the animation, we want the new window, not the exiting one.
                 if (win.mExiting) {
                     candidate = win;
