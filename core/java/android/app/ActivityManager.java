@@ -2113,7 +2113,9 @@ public class ActivityManager {
         public int[] taskIds;
         public String[] taskNames;
         public Rect[] taskBounds;
+        public int[] taskUserIds;
         public int displayId;
+        public int userId;
 
         @Override
         public int describeContents() {
@@ -2137,7 +2139,9 @@ public class ActivityManager {
                 dest.writeInt(taskBounds[i].right);
                 dest.writeInt(taskBounds[i].bottom);
             }
+            dest.writeIntArray(taskUserIds);
             dest.writeInt(displayId);
+            dest.writeInt(userId);
         }
 
         public void readFromParcel(Parcel source) {
@@ -2157,7 +2161,9 @@ public class ActivityManager {
             } else {
                 taskBounds = null;
             }
+            taskUserIds = source.createIntArray();
             displayId = source.readInt();
+            userId = source.readInt();
         }
 
         public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
@@ -2183,6 +2189,7 @@ public class ActivityManager {
             sb.append(prefix); sb.append("Stack id="); sb.append(stackId);
                     sb.append(" bounds="); sb.append(bounds.toShortString());
                     sb.append(" displayId="); sb.append(displayId);
+                    sb.append(" userId="); sb.append(userId);
                     sb.append("\n");
             prefix = prefix + "  ";
             for (int i = 0; i < taskIds.length; ++i) {
@@ -2191,6 +2198,7 @@ public class ActivityManager {
                         if (taskBounds != null) {
                             sb.append(" bounds="); sb.append(taskBounds[i].toShortString());
                         }
+                        sb.append(" userId=").append(taskUserIds[i]);
                         sb.append("\n");
             }
             return sb.toString();

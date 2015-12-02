@@ -1424,16 +1424,15 @@ final class ActivityStack {
     final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
         ActivityRecord top = topRunningActivityLocked();
-        if (top == null) {
-            return;
-        }
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
-        checkTranslucentActivityWaiting(top);
+        if (top != null) {
+            checkTranslucentActivityWaiting(top);
+        }
 
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
-        boolean aboveTop = true;
+        boolean aboveTop = top != null;
         final boolean stackInvisible = !isStackVisibleLocked();
         boolean behindFullscreenActivity = stackInvisible;
         boolean noStackActivityResumed = (isInStackLocked(starting) == null);
@@ -1447,13 +1446,15 @@ final class ActivityStack {
                 if (r.finishing) {
                     continue;
                 }
-                if (aboveTop && r != top) {
+                final boolean isTop = r == top;
+                if (aboveTop && !isTop) {
                     continue;
                 }
                 aboveTop = false;
                 // mLaunchingBehind: Activities launching behind are at the back of the task stack
                 // but must be drawn initially for the animation as though they were visible.
-                if (!behindFullscreenActivity || r.mLaunchTaskBehind) {
+                if ((!behindFullscreenActivity || r.mLaunchTaskBehind)
+                        && okToShowLocked(r)) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                             "Make visible? " + r + " finishing=" + r.finishing
                             + " state=" + r.state);
@@ -1464,7 +1465,7 @@ final class ActivityStack {
                     }
 
                     if (r.app == null || r.app.thread == null) {
-                        if (makeVisibleAndRestartIfNeeded(starting, configChanges, top,
+                        if (makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
                                 noStackActivityResumed, r)) {
                             if (activityNdx >= activities.size()) {
                                 // Record may be removed if its process needs to restart.
@@ -1474,18 +1475,19 @@ final class ActivityStack {
                             }
                         }
                     } else if (r.visible) {
-                        if (alreadyVisible(r)) {
+                        // If this activity is already visible, then there is nothing to do here.
+                        if (handleAlreadyVisible(r)) {
                             noStackActivityResumed = false;
                         }
                     } else {
-                        becomeVisible(starting, r);
+                        makeVisible(starting, r);
                     }
                     // Aggregate current change flags.
                     configChanges |= r.configChangeFlags;
                     behindFullscreenActivity = updateBehindFullscreen(stackInvisible,
                             behindFullscreenActivity, task, r);
                 } else {
-                    becomeInvisible(stackInvisible, behindFullscreenActivity, r);
+                    makeInvisible(stackInvisible, behindFullscreenActivity, r);
                 }
             }
             if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -1516,12 +1518,12 @@ final class ActivityStack {
     }
 
     private boolean makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
-            ActivityRecord top, boolean noStackActivityResumed, ActivityRecord r) {
+            boolean isTop, boolean noStackActivityResumed, ActivityRecord r) {
         // We need to make sure the app is running if it's the top, or it is just made visible from
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (r == top || !r.visible) {
+        if (isTop || !r.visible) {
             // This activity needs to be visible, but isn't even running...
             // get it started and resume if no other stack in this stack is resumed.
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
@@ -1540,7 +1542,7 @@ final class ActivityStack {
         return false;
     }
 
-    private void becomeInvisible(boolean stackInvisible, boolean behindFullscreenActivity,
+    private void makeInvisible(boolean stackInvisible, boolean behindFullscreenActivity,
             ActivityRecord r) {
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r + " finishing="
                 + r.finishing + " state=" + r.state + " stackInvisible=" + stackInvisible
@@ -1606,7 +1608,7 @@ final class ActivityStack {
         return behindFullscreenActivity;
     }
 
-    private void becomeVisible(ActivityRecord starting, ActivityRecord r) {
+    private void makeVisible(ActivityRecord starting, ActivityRecord r) {
         // This activity is not currently visible, but is running. Tell it to become visible.
         r.visible = true;
         if (r.state != ActivityState.RESUMED && r != starting) {
@@ -1631,8 +1633,7 @@ final class ActivityStack {
         }
     }
 
-    private boolean alreadyVisible(ActivityRecord r) {
-        // If this activity is already visible, then there is nothing else to do here.
+    private boolean handleAlreadyVisible(ActivityRecord r) {
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Skipping: already visible at " + r);
         r.stopFreezingScreenLocked(false);
         try {

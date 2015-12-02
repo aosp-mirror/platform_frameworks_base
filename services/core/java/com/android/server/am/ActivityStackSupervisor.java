@@ -2702,7 +2702,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Configuration config) {
         if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + token);
 
-        ArrayList<ActivityRecord> stops = null;
         ArrayList<ActivityRecord> finishes = null;
         ArrayList<UserState> startingUsers = null;
         int NS = 0;
@@ -2756,7 +2755,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         // Atomically retrieve all of the other things to do.
-        stops = processStoppingActivitiesLocked(true);
+        final ArrayList<ActivityRecord> stops = processStoppingActivitiesLocked(true);
         NS = stops != null ? stops.size() : 0;
         if ((NF = mFinishingActivities.size()) > 0) {
             finishes = new ArrayList<>(mFinishingActivities);
@@ -4304,12 +4303,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mWindowManager.getStackBounds(stack.mStackId, info.bounds);
         info.displayId = Display.DEFAULT_DISPLAY;
         info.stackId = stack.mStackId;
+        info.userId = stack.mCurrentUser;
 
         ArrayList<TaskRecord> tasks = stack.getAllTasks();
         final int numTasks = tasks.size();
         int[] taskIds = new int[numTasks];
         String[] taskNames = new String[numTasks];
         Rect[] taskBounds = new Rect[numTasks];
+        int[] taskUserIds = new int[numTasks];
         for (int i = 0; i < numTasks; ++i) {
             final TaskRecord task = tasks.get(i);
             taskIds[i] = task.taskId;
@@ -4319,10 +4320,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     : "unknown";
             taskBounds[i] = new Rect();
             mWindowManager.getTaskBounds(task.taskId, taskBounds[i]);
+            taskUserIds[i] = task.userId;
         }
         info.taskIds = taskIds;
         info.taskNames = taskNames;
         info.taskBounds = taskBounds;
+        info.taskUserIds = taskUserIds;
         return info;
     }
 
