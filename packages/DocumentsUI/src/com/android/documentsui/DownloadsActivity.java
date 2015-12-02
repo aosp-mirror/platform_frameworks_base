@@ -50,8 +50,11 @@ import com.android.internal.util.Preconditions;
 import java.util.Arrays;
 import java.util.List;
 
-public class ManageRootActivity extends BaseActivity {
-    private static final String TAG = "ManageRootsActivity";
+// Let's face it. MANAGE_ROOT is used almost exclusively
+// for downloads, and is specialized for this purpose.
+// So it is now thusly christened.
+public class DownloadsActivity extends BaseActivity {
+    private static final String TAG = "DownloadsActivity";
 
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
@@ -59,7 +62,7 @@ public class ManageRootActivity extends BaseActivity {
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
 
-    public ManageRootActivity() {
+    public DownloadsActivity() {
         super(R.layout.manage_roots_activity, TAG);
     }
 
@@ -250,7 +253,7 @@ public class ManageRootActivity extends BaseActivity {
         finish();
     }
 
-    public static ManageRootActivity get(Fragment fragment) {
-        return (ManageRootActivity) fragment.getActivity();
+    public static DownloadsActivity get(Fragment fragment) {
+        return (DownloadsActivity) fragment.getActivity();
     }
 }

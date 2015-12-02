@@ -176,7 +176,6 @@ public abstract class FragmentTuner {
             final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
 
             open.setVisible(false);
-            share.setVisible(false);
             delete.setVisible(canDelete);
             copyTo.setVisible(true);
             copyTo.setEnabled(true);
