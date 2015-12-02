@@ -29,6 +29,12 @@ import java.lang.annotation.Target;
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RemotableViewMethod {
+    /**
+     * @return Method name which can be called on a background thread. It should have the
+     * same arguments as the original method and should return a {@link Runnable} (or null)
+     * which will be called on the UI thread.
+     */
+    String asyncImpl() default "";
 }
 
 

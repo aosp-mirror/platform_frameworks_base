@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -38,6 +39,7 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -47,6 +49,8 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViews.OnClickHandler;
 import android.widget.RemoteViewsAdapter.RemoteAdapterConnectionCallback;
 import android.widget.TextView;
+
+import java.util.concurrent.Executor;
 
 /**
  * Provides the glue to show AppWidget views. This class offers automatic animation
@@ -85,6 +89,9 @@ public class AppWidgetHostView extends FrameLayout {
     Bitmap mOld;
     Paint mOldPaint = new Paint();
     private OnClickHandler mOnClickHandler;
+
+    private Executor mAsyncExecutor;
+    private CancellationSignal mLastExecutionSignal;
 
     /**
      * Create a host view.  Uses default fade animations.
@@ -320,6 +327,22 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
+     * Sets an executor which can be used for asynchronously inflating and applying the remoteviews.
+     * @see {@link RemoteViews#applyAsync(Context, ViewGroup, RemoteViews.OnViewAppliedListener, Executor)}
+     *
+     * @param executor the executor to use or null.
+     * @hide
+     */
+    public void setAsyncExecutor(Executor executor) {
+        if (mLastExecutionSignal != null) {
+            mLastExecutionSignal.cancel();
+            mLastExecutionSignal = null;
+        }
+
+        mAsyncExecutor = executor;
+    }
+
+    /**
      * Update the AppWidgetProviderInfo for this view, and reset it to the
      * initial layout.
      */
@@ -360,6 +383,11 @@ public class AppWidgetHostView extends FrameLayout {
             }
         }
 
+        if (mLastExecutionSignal != null) {
+            mLastExecutionSignal.cancel();
+            mLastExecutionSignal = null;
+        }
+
         if (remoteViews == null) {
             if (mViewMode == VIEW_MODE_DEFAULT) {
                 // We've already done this -- nothing to do.
@@ -369,6 +397,10 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
+            if (mAsyncExecutor != null) {
+                inflateAsync(remoteViews);
+                return;
+            }
             // Prepare a local reference to the remote Context so we're ready to
             // inflate any requested LayoutParams.
             mRemoteContext = getRemoteContext();
@@ -401,6 +433,10 @@ public class AppWidgetHostView extends FrameLayout {
             mViewMode = VIEW_MODE_CONTENT;
         }
 
+        applyContent(content, recycled, exception);
+    }
+
+    private void applyContent(View content, boolean recycled, Exception exception) {
         if (content == null) {
             if (mViewMode == VIEW_MODE_ERROR) {
                 // We've already done this -- nothing to do.
@@ -428,6 +464,68 @@ public class AppWidgetHostView extends FrameLayout {
                 // and that looks okay.
                 mFadeStartTime = SystemClock.uptimeMillis();
                 invalidate();
+            }
+        }
+    }
+
+    private void inflateAsync(RemoteViews remoteViews) {
+        // Prepare a local reference to the remote Context so we're ready to
+        // inflate any requested LayoutParams.
+        mRemoteContext = getRemoteContext();
+        int layoutId = remoteViews.getLayoutId();
+
+        // If our stale view has been prepared to match active, and the new
+        // layout matches, try recycling it
+        if (layoutId == mLayoutId && mView != null) {
+            try {
+                mLastExecutionSignal = remoteViews.reapplyAsync(mContext,
+                        mView,
+                        mAsyncExecutor,
+                        new ViewApplyListener(remoteViews, layoutId, true),
+                        mOnClickHandler);
+            } catch (Exception e) {
+                // Reapply failed. Try apply
+            }
+        }
+        if (mLastExecutionSignal == null) {
+            mLastExecutionSignal = remoteViews.applyAsync(mContext,
+                    this,
+                    mAsyncExecutor,
+                    new ViewApplyListener(remoteViews, layoutId, false),
+                    mOnClickHandler);
+        }
+    }
+
+    private class ViewApplyListener implements RemoteViews.OnViewAppliedListener {
+        private final RemoteViews mViews;
+        private final boolean mIsReapply;
+        private final int mLayoutId;
+
+        public ViewApplyListener(RemoteViews views, int layoutId, boolean isReapply) {
+            mViews = views;
+            mLayoutId = layoutId;
+            mIsReapply = isReapply;
+        }
+
+        @Override
+        public void onViewApplied(View v) {
+            AppWidgetHostView.this.mLayoutId = mLayoutId;
+            mViewMode = VIEW_MODE_CONTENT;
+
+            applyContent(v, mIsReapply, null);
+        }
+
+        @Override
+        public void onError(Exception e) {
+            if (mIsReapply) {
+                // Try a fresh replay
+                mLastExecutionSignal = mViews.applyAsync(mContext,
+                        AppWidgetHostView.this,
+                        mAsyncExecutor,
+                        new ViewApplyListener(mViews, mLayoutId, false),
+                        mOnClickHandler);
+            } else {
+                applyContent(null, false, e);
             }
         }
     }
