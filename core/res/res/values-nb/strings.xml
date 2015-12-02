@@ -222,6 +222,8 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Talehjelp"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nå"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
+    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Personlig"</string>
@@ -235,7 +237,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, media og filer på enheten din"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medier og filer på enheten din"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spill inn lyd"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
