@@ -251,6 +251,10 @@ public class MediaRecorder
          */
         public static final int REMOTE_SUBMIX = 8;
 
+        /** Microphone audio source tuned for unprocessed (raw) sound if available, behaves like
+         *  {@link #DEFAULT} otherwise. */
+        public static final int UNPROCESSED = 9;
+
         /**
          * Audio source for capturing broadcast radio tuner output.
          * @hide
@@ -405,7 +409,7 @@ public class MediaRecorder
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.REMOTE_SUBMIX;
+        return AudioSource.UNPROCESSED;
     }
 
     /**

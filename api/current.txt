@@ -19300,6 +19300,7 @@ package android.media {
     field public static final deprecated int NUM_STREAMS = 5; // 0x5
     field public static final java.lang.String PROPERTY_OUTPUT_FRAMES_PER_BUFFER = "android.media.property.OUTPUT_FRAMES_PER_BUFFER";
     field public static final java.lang.String PROPERTY_OUTPUT_SAMPLE_RATE = "android.media.property.OUTPUT_SAMPLE_RATE";
+    field public static final java.lang.String PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED = "android.media.property.SUPPORT_AUDIO_SOURCE_UNPROCESSED";
     field public static final java.lang.String PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND = "android.media.property.SUPPORT_MIC_NEAR_ULTRASOUND";
     field public static final java.lang.String PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND = "android.media.property.SUPPORT_SPEAKER_NEAR_ULTRASOUND";
     field public static final java.lang.String RINGER_MODE_CHANGED_ACTION = "android.media.RINGER_MODE_CHANGED";
@@ -20647,6 +20648,7 @@ package android.media {
     field public static final int DEFAULT = 0; // 0x0
     field public static final int MIC = 1; // 0x1
     field public static final int REMOTE_SUBMIX = 8; // 0x8
+    field public static final int UNPROCESSED = 9; // 0x9
     field public static final int VOICE_CALL = 4; // 0x4
     field public static final int VOICE_COMMUNICATION = 7; // 0x7
     field public static final int VOICE_DOWNLINK = 3; // 0x3
