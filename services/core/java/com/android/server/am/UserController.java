@@ -1033,12 +1033,11 @@ final class UserController {
         if ((flags & ActivityManager.FLAG_OR_STOPPED) != 0) {
             return true;
         }
-        if ((flags & ActivityManager.FLAG_AND_LOCKED) != 0) {
-            // If user is currently locked, we fall through to default "running"
-            // behavior below
-            if (state.unlocked) {
-                return false;
-            }
+        if ((flags & ActivityManager.FLAG_AND_LOCKED) != 0 && state.unlocked) {
+            return false;
+        }
+        if ((flags & ActivityManager.FLAG_AND_UNLOCKED) != 0 && !state.unlocked) {
+            return false;
         }
         return state.mState != UserState.STATE_STOPPING
                 && state.mState != UserState.STATE_SHUTDOWN;
