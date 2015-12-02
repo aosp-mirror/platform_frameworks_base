@@ -2268,6 +2268,7 @@
   <java-symbol type="layout" name="floating_popup_menu_image_button" />
   <java-symbol type="layout" name="floating_popup_overflow_list_item" />
   <java-symbol type="layout" name="floating_popup_overflow_image_list_item" />
+  <java-symbol type="layout" name="floating_popup_overflow_button" />
   <java-symbol type="dimen" name="floating_toolbar_height" />
   <java-symbol type="dimen" name="floating_toolbar_menu_button_side_padding" />
   <java-symbol type="dimen" name="floating_toolbar_overflow_side_padding" />
@@ -2279,6 +2280,10 @@
   <java-symbol type="dimen" name="floating_toolbar_horizontal_margin" />
   <java-symbol type="dimen" name="floating_toolbar_vertical_margin" />
   <java-symbol type="dimen" name="content_rect_bottom_clip_allowance" />
+  <java-symbol type="drawable" name="ft_avd_tooverflow" />
+  <java-symbol type="drawable" name="ft_avd_toarrow" />
+  <java-symbol type="drawable" name="ft_avd_toarrow_animation" />
+  <java-symbol type="drawable" name="ft_avd_tooverflow_animation" />
 
   <java-symbol type="string" name="date_picker_prev_month_button" />
   <java-symbol type="string" name="date_picker_next_month_button" />
