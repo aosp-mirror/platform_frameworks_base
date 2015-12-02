@@ -3096,6 +3096,8 @@ public class ActivityManager {
     public static final int FLAG_OR_STOPPED = 1 << 0;
     /** {@hide} */
     public static final int FLAG_AND_LOCKED = 1 << 1;
+    /** {@hide} */
+    public static final int FLAG_AND_UNLOCKED = 1 << 2;
 
     /**
      * Return whether the given user is actively running.  This means that

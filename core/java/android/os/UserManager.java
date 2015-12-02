@@ -755,6 +755,23 @@ public class UserManager {
     }
 
     /**
+     * Return whether the given user is running in an "unlocked" state. A user
+     * is unlocked only after they've entered their credentials (such as a lock
+     * pattern or PIN), and credential-encrypted private app data storage is
+     * available.
+     *
+     * @param user to retrieve the unlocked state for.
+     */
+    public boolean isUserRunningUnlocked(UserHandle user) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(
+                    user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Returns the UserInfo object describing a specific user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle the user handle of the user whose information is being requested.
