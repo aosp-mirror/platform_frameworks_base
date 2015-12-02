@@ -94,8 +94,9 @@ class DisplayContent {
     Region mNonResizeableRegion = new Region();
 
     /** Save allocating when calculating rects */
-    private Rect mTmpRect = new Rect();
-    private Rect mTmpRect2 = new Rect();
+    private final Rect mTmpRect = new Rect();
+    private final Rect mTmpRect2 = new Rect();
+    private final Region mTmpRegion = new Region();
 
     /** For gathering Task objects in order. */
     final ArrayList<Task> mTmpTaskHistory = new ArrayList<Task>();
@@ -402,6 +403,14 @@ class DisplayContent {
         // any touch inside the focused task itself.
         if (addBackFocusedTask) {
             mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
+        }
+        final WindowState inputMethod = mService.mInputMethodWindow;
+        if (inputMethod != null && inputMethod.isVisibleLw()) {
+            // If the input method is visible and the user is typing, we don't want these touch
+            // events to be intercepted and used to change focus. This would likely cause a
+            // disappearance of the input method.
+            inputMethod.getTouchableRegion(mTmpRegion);
+            mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
         if (mTapDetector != null) {
             mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion, mNonResizeableRegion);
