@@ -3822,11 +3822,4 @@ org.xml.sax.helpers.DefaultHandler
 org.xmlpull.v1.XmlPullParser
 org.xmlpull.v1.XmlPullParserException
 org.xmlpull.v1.XmlSerializer
-<<<<<<< HEAD
 sun.misc.Unsafe
-=======
-<<<<<<< HEAD
-=======
-sun.misc.Unsafe
->>>>>>> 631d21f... Move StrictJarFile from libcore to framework
->>>>>>> 43ea2cc... DO NOT MERGE Move StrictJarFile from libcore to framework
