@@ -2713,57 +2713,60 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void setFocusedActivityLocked(ActivityRecord r, String reason) {
-        if (r != null && mFocusedActivity != r) {
-            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
-            ActivityRecord last = mFocusedActivity;
-            mFocusedActivity = r;
-            if (r.task.taskType != ActivityRecord.HOME_ACTIVITY_TYPE
-                    && r.task.taskType != ActivityRecord.RECENTS_ACTIVITY_TYPE) {
-                if (mCurAppTimeTracker != r.appTimeTracker) {
-                    // We are switching app tracking.  Complete the current one.
-                    if (mCurAppTimeTracker != null) {
-                        mCurAppTimeTracker.stop();
-                        mHandler.obtainMessage(REPORT_TIME_TRACKER_MSG,
-                                mCurAppTimeTracker).sendToTarget();
-                        mStackSupervisor.clearOtherAppTimeTrackers(r.appTimeTracker);
-                        mCurAppTimeTracker = null;
-                    }
-                    if (r.appTimeTracker != null) {
-                        mCurAppTimeTracker = r.appTimeTracker;
-                        startTimeTrackingFocusedActivityLocked();
-                    }
-                } else {
+        if (r == null || mFocusedActivity == r) {
+            return;
+        }
+
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
+        final ActivityRecord last = mFocusedActivity;
+        mFocusedActivity = r;
+        if (r.task.isApplicationTask()) {
+            if (mCurAppTimeTracker != r.appTimeTracker) {
+                // We are switching app tracking.  Complete the current one.
+                if (mCurAppTimeTracker != null) {
+                    mCurAppTimeTracker.stop();
+                    mHandler.obtainMessage(
+                            REPORT_TIME_TRACKER_MSG, mCurAppTimeTracker).sendToTarget();
+                    mStackSupervisor.clearOtherAppTimeTrackers(r.appTimeTracker);
+                    mCurAppTimeTracker = null;
+                }
+                if (r.appTimeTracker != null) {
+                    mCurAppTimeTracker = r.appTimeTracker;
                     startTimeTrackingFocusedActivityLocked();
                 }
             } else {
-                r.appTimeTracker = null;
+                startTimeTrackingFocusedActivityLocked();
             }
-            if (r.task != null && r.task.voiceInteractor != null) {
-                startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
-            } else {
-                finishRunningVoiceLocked();
-                if (last != null && last.task.voiceSession != null) {
-                    // We had been in a voice interaction session, but now focused has
-                    // move to something different.  Just finish the session, we can't
-                    // return to it and retain the proper state and synchronization with
-                    // the voice interaction service.
-                    finishVoiceTask(last.task.voiceSession);
-                }
-            }
-            if (mStackSupervisor.setFocusedStack(r, reason + " setFocusedActivity")) {
-                mWindowManager.setFocusedApp(r.appToken, true);
-            }
-            applyUpdateLockStateLocked(r);
-            if (mFocusedActivity.userId != mLastFocusedUserId) {
-                mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
-                mHandler.sendMessage(mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG,
-                        mFocusedActivity.userId, 0));
-                mLastFocusedUserId = mFocusedActivity.userId;
+        } else {
+            r.appTimeTracker = null;
+        }
+        if (r.task.voiceInteractor != null) {
+            startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
+        } else {
+            finishRunningVoiceLocked();
+            if (last != null && last.task.voiceSession != null) {
+                // We had been in a voice interaction session, but now focused has
+                // move to something different.  Just finish the session, we can't
+                // return to it and retain the proper state and synchronization with
+                // the voice interaction service.
+                finishVoiceTask(last.task.voiceSession);
             }
         }
-        EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY,
+        if (mStackSupervisor.setFocusedStack(r, reason + " setFocusedActivity")) {
+            mWindowManager.setFocusedApp(r.appToken, true);
+        }
+        applyUpdateLockStateLocked(r);
+        if (mFocusedActivity.userId != mLastFocusedUserId) {
+            mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
+            mHandler.obtainMessage(
+                    FOREGROUND_PROFILE_CHANGED_MSG, mFocusedActivity.userId, 0).sendToTarget();
+            mLastFocusedUserId = mFocusedActivity.userId;
+        }
+
+        EventLogTags.writeAmFocusedActivity(
                 mFocusedActivity == null ? -1 : mFocusedActivity.userId,
-                mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName);
+                mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName,
+                reason);
     }
 
     final void clearFocusedActivity(ActivityRecord r) {
@@ -2779,7 +2782,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             mFocusedActivity = null;
-            EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY, -1, "NULL");
+            EventLogTags.writeAmFocusedActivity(-1, "NULL", "clearFocusedActivity");
         }
     }
 

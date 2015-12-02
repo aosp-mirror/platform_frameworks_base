@@ -699,26 +699,4 @@ public class TaskStack implements DimLayer.DimLayerUser {
         }
         return false;
     }
-
-    /**
-     * Returns true if this stack has a window that is fully visible, doesn't perform an entry
-     * animation and is just positioned where it's supposed to be.
-     */
-    boolean hasWindowWithFinalVisibility() {
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            Task task = mTasks.get(i);
-            for (int j = task.mAppTokens.size() - 1; j >= 0; j--) {
-                final AppWindowToken token = task.mAppTokens.get(j);
-                if (token.mAppAnimator.animating || token.mWillReplaceWindow) {
-                    continue;
-                }
-                WindowState win = token.findMainWindow();
-                if (win != null && !win.mWinAnimator.mEnterAnimationPending
-                        && !win.mWinAnimator.mEnteringAnimation) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

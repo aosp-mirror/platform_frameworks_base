@@ -269,6 +269,10 @@ class AppWindowToken extends WindowToken {
         return candidate;
     }
 
+    boolean stackCanReceiveKeys() {
+        return (windows.size() > 0) ? windows.get(windows.size() - 1).stackCanReceiveKeys() : false;
+    }
+
     boolean isVisible() {
         final int N = allAppWindows.size();
         for (int i=0; i<N; i++) {
