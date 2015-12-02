@@ -39,7 +39,7 @@
         </activity>
 
         <activity
-            android:name=".ManageRootActivity"
+            android:name=".DownloadsActivity"
             android:theme="@style/DocumentsFullScreenTheme"
             android:icon="@drawable/ic_doc_text">
             <intent-filter>
