@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.view.NotificationHeaderView;
 import android.view.View;
 
 /**
@@ -83,4 +84,11 @@ public abstract class NotificationViewWrapper {
      * @param onClickListener the listener to invoke when the expand affordance is clicked on
      */
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {}
+
+    /**
+     * @return the notification header if it exists
+     */
+    public NotificationHeaderView getNotificationHeader() {
+        return null;
+    }
 }

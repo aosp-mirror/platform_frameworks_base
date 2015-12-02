@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -34,6 +33,7 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends LinearLayout {
+    public static final int NO_COLOR = -1;
     private final int mHeaderMinWidth;
     private View mAppName;
     private View mSubTextView;
@@ -42,6 +42,8 @@ public class NotificationHeaderView extends LinearLayout {
     private View mExpandButton;
     private View mIcon;
     private TextView mChildCount;
+    private int mIconColor;
+    private int mOriginalNotificationColor;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -144,6 +146,24 @@ public class NotificationHeaderView extends LinearLayout {
         } else {
             mChildCount.setVisibility(GONE);
         }
+    }
+
+    @RemotableViewMethod
+    public void setOriginalIconColor(int color) {
+        mIconColor = color;
+    }
+
+    public int getOriginalIconColor() {
+        return mIconColor;
+    }
+
+    @RemotableViewMethod
+    public void setOriginalNotificationColor(int color) {
+        mOriginalNotificationColor = color;
+    }
+
+    public int getOriginalNotificationColor() {
+        return mOriginalNotificationColor;
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {

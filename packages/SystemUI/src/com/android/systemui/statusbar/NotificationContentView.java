@@ -509,18 +509,6 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    public void setSubTextVisible(boolean visible) {
-        if (mExpandedChild != null) {
-            mExpandedWrapper.setSubTextVisible(visible);
-        }
-        if (mContractedChild != null) {
-            mContractedWrapper.setSubTextVisible(visible);
-        }
-        if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.setSubTextVisible(visible);
-        }
-    }
-
     public void setGroupManager(NotificationGroupManager groupManager) {
         mGroupManager = groupManager;
     }
@@ -539,5 +527,19 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.updateExpandability(expandable,  mExpandClickListener);
         }
+    }
+
+    public NotificationHeaderView getNotificationHeader() {
+        NotificationHeaderView header = null;
+        if (mContractedChild != null) {
+            header = mContractedWrapper.getNotificationHeader();
+        }
+        if (header == null && mExpandedChild != null) {
+            header = mExpandedWrapper.getNotificationHeader();
+        }
+        if (header == null && mHeadsUpChild != null) {
+            header = mHeadsUpWrapper.getNotificationHeader();
+        }
+        return header;
     }
 }

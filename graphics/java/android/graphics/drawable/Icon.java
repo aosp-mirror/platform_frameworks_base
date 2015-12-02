@@ -44,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * An umbrella container for several serializable graphics representations, including Bitmaps,
@@ -456,6 +457,37 @@ public final class Icon implements Parcelable {
             }
         }
         return null;
+    }
+
+    /**
+     * Compares if this icon is constructed from the same resources as another icon.
+     * Note that this is an inexpensive operation and doesn't do deep Bitmap equality comparisons.
+     *
+     * @param otherIcon the other icon
+     * @return whether this icon is the same as the another one
+     * @hide
+     */
+    public boolean sameAs(Icon otherIcon) {
+        if (otherIcon == this) {
+            return true;
+        }
+        if (mType != otherIcon.getType()) {
+            return false;
+        }
+        switch (mType) {
+            case TYPE_BITMAP:
+                return getBitmap() == otherIcon.getBitmap();
+            case TYPE_DATA:
+                return getDataLength() == otherIcon.getDataLength()
+                        && getDataOffset() == otherIcon.getDataOffset()
+                        && getDataBytes() == otherIcon.getDataBytes();
+            case TYPE_RESOURCE:
+                return getResId() == otherIcon.getResId()
+                        && Objects.equals(getResPackage(), otherIcon.getResPackage());
+            case TYPE_URI:
+                return Objects.equals(getUriString(), otherIcon.getUriString());
+        }
+        return false;
     }
 
     /**
