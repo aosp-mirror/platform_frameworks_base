@@ -4397,8 +4397,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r == null) {
                 return;
             }
-            if (r.task != null && r.task.mResizeable) {
-                // Fixed screen orientation isn't supported with resizeable activities.
+            TaskRecord task = r.task;
+            if (task != null && (!task.mFullscreen || !task.stack.mFullscreen)) {
+                // Fixed screen orientation isn't supported when activities aren't in full screen
+                // mode.
                 return;
             }
             final long origId = Binder.clearCallingIdentity();
@@ -17759,7 +17761,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param userId is only used when persistent parameter is set to true to persist configuration
      *               for that particular user
      */
-    boolean updateConfigurationLocked(Configuration values,
+    private boolean updateConfigurationLocked(Configuration values,
             ActivityRecord starting, boolean initLocale, boolean persistent, int userId) {
         int changes = 0;
 
