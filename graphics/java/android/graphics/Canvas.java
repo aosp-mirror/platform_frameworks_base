@@ -484,7 +484,7 @@ public class Canvas {
      *
      * @param bounds    The maximum size the offscreen bitmap needs to be
      *                  (in local coordinates)
-     * @param alpha     The alpha to apply to the offscreen when when it is
+     * @param alpha     The alpha to apply to the offscreen when it is
                         drawn during restore()
      * @param saveFlags see _SAVE_FLAG constants, generally {@link #ALL_SAVE_FLAG} is recommended
      *                  for performance reasons.

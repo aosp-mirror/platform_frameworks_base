@@ -240,7 +240,7 @@ public final class MediaBrowser {
     /**
      * Gets the root id.
      * <p>
-     * Note that the root id may become invalid or change when when the
+     * Note that the root id may become invalid or change when the
      * browser is disconnected.
      * </p>
      *
@@ -270,7 +270,7 @@ public final class MediaBrowser {
     /**
      * Gets the media session token associated with the media browser.
      * <p>
-     * Note that the session token may become invalid or change when when the
+     * Note that the session token may become invalid or change when the
      * browser is disconnected.
      * </p>
      *
