@@ -36,13 +36,6 @@ bool NinePatchPeeker::readChunk(const char tag[], const void* data, size_t lengt
         free(mPatch);
         mPatch = patchNew;
         mPatchSize = patchSize;
-
-        // now update our host to force index or 32bit config
-        // 'cause we don't want 565 predithered, since as a 9patch, we know
-        // we will be stretched, and therefore we want to dither afterwards.
-        if (mHost) {
-            mHost->setPreserveSrcDepth(true);
-        }
     } else if (!strcmp("npLb", tag) && length == sizeof(int32_t) * 4) {
         mHasInsets = true;
         memcpy(&mOpticalInsets, data, sizeof(int32_t) * 4);

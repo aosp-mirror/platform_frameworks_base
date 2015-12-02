@@ -25,13 +25,9 @@ class SkImageDecoder;
 using namespace android;
 
 class NinePatchPeeker : public SkPngChunkReader {
-private:
-    // the host lives longer than we do, so a raw ptr is safe
-    SkImageDecoder* mHost;
 public:
-    NinePatchPeeker(SkImageDecoder* host)
-            : mHost(host)
-            , mPatch(NULL)
+    NinePatchPeeker()
+            : mPatch(NULL)
             , mPatchSize(0)
             , mHasInsets(false)
             , mOutlineRadius(0)
