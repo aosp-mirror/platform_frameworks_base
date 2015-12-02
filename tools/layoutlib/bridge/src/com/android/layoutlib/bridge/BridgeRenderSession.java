@@ -23,6 +23,7 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
+import com.android.tools.layoutlib.java.System_Delegate;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -188,6 +189,21 @@ public class BridgeRenderSession extends RenderSession {
         }
 
         return mLastResult;
+    }
+
+    @Override
+    public void setSystemTimeNanos(long nanos) {
+        System_Delegate.setNanosTime(nanos);
+    }
+
+    @Override
+    public void setSystemBootTimeNanos(long nanos) {
+        System_Delegate.setBootTimeNanos(nanos);
+    }
+
+    @Override
+    public void setElapsedFrameTimeNanos(long nanos) {
+        mSession.setElapsedFrameTimeNanos(nanos);
     }
 
     @Override

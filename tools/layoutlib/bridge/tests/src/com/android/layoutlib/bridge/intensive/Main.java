@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
 
@@ -348,15 +350,45 @@ public class Main {
         renderAndVerify(params, "expand_horz_layout.png");
     }
 
+    /** Test expand_layout.xml */
+    @Test
+    public void testVectorAnimation() throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "indeterminate_progressbar.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "animated_vector.png", TimeUnit.SECONDS.toNanos(2));
+
+        parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "indeterminate_progressbar.xml");
+        params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+        renderAndVerify(params, "animated_vector_1.png", TimeUnit.SECONDS.toNanos(3));
+    }
+
     /**
      * Create a new rendering session and test that rendering given layout on nexus 5
      * doesn't throw any exceptions and matches the provided image.
+     * <p/>If frameTimeNanos is >= 0 a frame will be executed during the rendering. The time
+     * indicates how far in the future is.
      */
-    private void renderAndVerify(SessionParams params, String goldenFileName)
+    private void renderAndVerify(SessionParams params, String goldenFileName, long frameTimeNanos)
             throws ClassNotFoundException {
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
         RenderSession session = sBridge.createSession(params);
+
+        if (frameTimeNanos != -1) {
+            session.setElapsedFrameTimeNanos(frameTimeNanos);
+        }
 
         if (!session.getResult().isSuccess()) {
             getLogger().error(session.getResult().getException(),
@@ -374,6 +406,15 @@ public class Main {
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
         }
+    }
+
+    /**
+     * Create a new rendering session and test that rendering given layout on nexus 5
+     * doesn't throw any exceptions and matches the provided image.
+     */
+    private void renderAndVerify(SessionParams params, String goldenFileName)
+            throws ClassNotFoundException {
+        renderAndVerify(params, goldenFileName, -1);
     }
 
     /**
