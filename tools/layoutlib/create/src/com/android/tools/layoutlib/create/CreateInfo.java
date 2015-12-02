@@ -120,6 +120,11 @@ public final class CreateInfo implements ICreateInfo {
     }
 
     @Override
+    public String[] getPromotedFields() {
+        return PROMOTED_FIELDS;
+    }
+
+    @Override
     public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
         return INJECTED_METHODS;
     }
@@ -291,9 +296,7 @@ public final class CreateInfo implements ICreateInfo {
         };
 
     private final static String[] PROMOTED_FIELDS = new String[] {
-        "android.widget.SimpleMonthView#mTitle",
-        "android.widget.SimpleMonthView#mCalendar",
-        "android.widget.SimpleMonthView#mDayOfWeekLabelCalendar"
+        "android.view.Choreographer#mLastFrameTimeNanos"
     };
 
     /**
