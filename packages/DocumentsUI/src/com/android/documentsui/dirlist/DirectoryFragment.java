@@ -741,45 +741,45 @@ public class DirectoryFragment extends Fragment {
 
             Selection selection = mSelectionManager.getSelection(new Selection());
 
-            final int id = item.getItemId();
-            if (id == R.id.menu_open) {
-                openDocuments(selection);
-                mode.finish();
-                return true;
+            switch (item.getItemId()) {
+                case R.id.menu_open:
+                    openDocuments(selection);
+                    mode.finish();
+                    return true;
 
-            } else if (id == R.id.menu_share) {
-                shareDocuments(selection);
-                mode.finish();
-                return true;
+                case R.id.menu_share:
+                    shareDocuments(selection);
+                    mode.finish();
+                    return true;
 
-            } else if (id == R.id.menu_delete) {
-                // Exit selection mode first, so we avoid deselecting deleted documents.
-                mode.finish();
-                deleteDocuments(selection);
-                return true;
+                case R.id.menu_delete:
+                    // Exit selection mode first, so we avoid deselecting deleted documents.
+                    mode.finish();
+                    deleteDocuments(selection);
+                    return true;
 
-            } else if (id == R.id.menu_copy_to) {
-                transferDocuments(selection, CopyService.TRANSFER_MODE_COPY);
-                mode.finish();
-                return true;
+                case R.id.menu_copy_to:
+                    transferDocuments(selection, CopyService.TRANSFER_MODE_COPY);
+                    mode.finish();
+                    return true;
 
-            } else if (id == R.id.menu_move_to) {
-                // Exit selection mode first, so we avoid deselecting deleted documents.
-                mode.finish();
-                transferDocuments(selection, CopyService.TRANSFER_MODE_MOVE);
-                return true;
+                case R.id.menu_move_to:
+                    // Exit selection mode first, so we avoid deselecting deleted documents.
+                    mode.finish();
+                    transferDocuments(selection, CopyService.TRANSFER_MODE_MOVE);
+                    return true;
 
-            } else if (id == R.id.menu_copy_to_clipboard) {
-                copySelectionToClipboard(selection);
-                mode.finish();
-                return true;
+                case R.id.menu_copy_to_clipboard:
+                    copySelectionToClipboard(selection);
+                    return true;
 
-            } else if (id == R.id.menu_select_all) {
-                selectAllFiles();
-                return true;
+                case R.id.menu_select_all:
+                    selectAllFiles();
+                    return true;
 
-            } else {
-                return false;
+                default:
+                    if (DEBUG) Log.d(TAG, "Unhandled menu item selected: " + item);
+                    return false;
             }
         }
     }
