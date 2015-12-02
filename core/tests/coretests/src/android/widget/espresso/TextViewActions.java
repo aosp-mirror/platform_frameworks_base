@@ -53,6 +53,21 @@ public final class TextViewActions {
     }
 
     /**
+     * Returns an action that clicks by mouse on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to click on.
+     */
+    public static ViewAction mouseClickOnTextAtIndex(int index) {
+        return actionWithAssertions(
+                new MouseClickAction(Tap.SINGLE, new TextCoordinates(index), Press.PINPOINT));
+    }
+
+    /**
      * Returns an action that double-clicks on text at an index on the TextView.<br>
      * <br>
      * View constraints:
@@ -68,6 +83,21 @@ public final class TextViewActions {
     }
 
     /**
+     * Returns an action that double-clicks by mouse on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to double-click on.
+     */
+    public static ViewAction mouseDoubleClickOnTextAtIndex(int index) {
+        return actionWithAssertions(
+                new MouseClickAction(Tap.DOUBLE, new TextCoordinates(index), Press.PINPOINT));
+    }
+
+    /**
      * Returns an action that long presses on text at an index on the TextView.<br>
      * <br>
      * View constraints:
@@ -80,6 +110,21 @@ public final class TextViewActions {
     public static ViewAction longPressOnTextAtIndex(int index) {
         return actionWithAssertions(
                 new GeneralClickAction(Tap.LONG, new TextCoordinates(index), Press.FINGER));
+    }
+
+    /**
+     * Returns an action that long click by mouse on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to long click on.
+     */
+    public static ViewAction mouseLongClickOnTextAtIndex(int index) {
+        return actionWithAssertions(
+                new MouseClickAction(Tap.LONG, new TextCoordinates(index), Press.PINPOINT));
     }
 
     /**
@@ -142,6 +187,50 @@ public final class TextViewActions {
         return actionWithAssertions(
                 new DragAction(
                         DragAction.Drag.MOUSE_DOWN,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.PINPOINT,
+                        TextView.class));
+    }
+
+    /**
+     * Returns an action that double click then drags by mouse on text from startIndex to endIndex
+     * on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction mouseDoubleClickAndDragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.MOUSE_DOUBLE_CLICK,
+                        new TextCoordinates(startIndex),
+                        new TextCoordinates(endIndex),
+                        Press.PINPOINT,
+                        TextView.class));
+    }
+
+    /**
+     * Returns an action that long click then drags by mouse on text from startIndex to endIndex
+     * on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param startIndex The index of the TextView's text to start a drag from
+     * @param endIndex The index of the TextView's text to end the drag at
+     */
+    public static ViewAction mouseLongClickAndDragOnText(int startIndex, int endIndex) {
+        return actionWithAssertions(
+                new DragAction(
+                        DragAction.Drag.MOUSE_LONG_CLICK,
                         new TextCoordinates(startIndex),
                         new TextCoordinates(endIndex),
                         Press.PINPOINT,
