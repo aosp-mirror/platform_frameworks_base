@@ -166,7 +166,7 @@ public class Hyphenator {
         sMap.put(null, null);
 
         // TODO: replace this with a discovery-based method that looks into /system/usr/hyphen-data
-        String[] availableLanguages = {"en-US", "eu", "hu", "hy", "nb", "nn", "und-Ethi"};
+        String[] availableLanguages = {"en-US", "es", "eu", "hu", "hy", "nb", "nn", "und-Ethi"};
         for (int i = 0; i < availableLanguages.length; i++) {
             String languageTag = availableLanguages[i];
             Hyphenator h = loadHyphenator(languageTag);
