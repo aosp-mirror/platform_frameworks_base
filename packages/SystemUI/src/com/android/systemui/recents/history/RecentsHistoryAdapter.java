@@ -18,7 +18,6 @@ package com.android.systemui.recents.history;
 
 import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -29,7 +28,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.Calendar;

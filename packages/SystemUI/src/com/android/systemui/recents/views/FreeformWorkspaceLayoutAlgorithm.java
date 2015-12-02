@@ -16,12 +16,13 @@
 
 package com.android.systemui.recents.views;
 
-import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,48 +34,91 @@ public class FreeformWorkspaceLayoutAlgorithm {
     private static final String TAG = "FreeformWorkspaceLayoutAlgorithm";
     private static final boolean DEBUG = false;
 
-    // The number of cells in the freeform workspace
-    private int mFreeformCellXCount;
-    private int mFreeformCellYCount;
-
-    // The width and height of the cells in the freeform workspace
-    private int mFreeformCellWidth;
-    private int mFreeformCellHeight;
-
-    // Optimization, allows for quick lookup of task -> index
-    private HashMap<Task.TaskKey, Integer> mTaskIndexMap = new HashMap<>();
+    // Optimization, allows for quick lookup of task -> rect
+    private HashMap<Task.TaskKey, RectF> mTaskRectMap = new HashMap<>();
 
     /**
      * Updates the layout for each of the freeform workspace tasks.  This is called after the stack
      * layout is updated.
      */
     public void update(List<Task> freeformTasks, TaskStackLayoutAlgorithm stackLayout) {
-        mTaskIndexMap.clear();
+        Collections.reverse(freeformTasks);
+        mTaskRectMap.clear();
 
         int numFreeformTasks = stackLayout.mNumFreeformTasks;
         if (!freeformTasks.isEmpty()) {
-            // Calculate the cell width/height depending on the number of freeform tasks
-            mFreeformCellXCount = Math.max(1, (int) Math.ceil(Math.sqrt(numFreeformTasks)));
-            mFreeformCellYCount = Math.max(1, (int) Math.ceil((float) numFreeformTasks /
-                    mFreeformCellXCount));
-            // For now, make the cells square
-            mFreeformCellWidth = Math.min(stackLayout.mFreeformRect.width() / mFreeformCellXCount,
-                    stackLayout.mFreeformRect.height() / mFreeformCellYCount);
-            mFreeformCellHeight = mFreeformCellWidth;
 
-            // Put each of the tasks in the progress map at a fixed index (does not need to actually
-            // map to a scroll position, just by index)
-            int taskCount = freeformTasks.size();
-            for (int i = taskCount - 1; i >= 0; i--) {
+            // Normalize the widths so that we can calculate the best layout below
+            int workspaceWidth = stackLayout.mFreeformRect.width();
+            int workspaceHeight = stackLayout.mFreeformRect.height();
+            float normalizedWorkspaceWidth = (float) workspaceWidth / workspaceHeight;
+            float normalizedWorkspaceHeight = 1f;
+            float[] normalizedTaskWidths = new float[numFreeformTasks];
+            for (int i = 0; i < numFreeformTasks; i++) {
                 Task task = freeformTasks.get(i);
-                mTaskIndexMap.put(task.key, taskCount - i - 1);
+                float rowTaskWidth;
+                if (task.bounds != null) {
+                    rowTaskWidth = (float) task.bounds.width() / task.bounds.height();
+                } else {
+                    // If this is a stack task that was dragged into the freeform workspace, then
+                    // the task will not yet have an associated bounds, so assume the full workspace
+                    // width for the time being
+                    rowTaskWidth = normalizedWorkspaceWidth;
+                }
+                // Bound the task width to the workspace width so that at the worst case, it will
+                // fit its own row
+                normalizedTaskWidths[i] = Math.min(rowTaskWidth,
+                        normalizedWorkspaceWidth);
             }
 
-            if (DEBUG) {
-                Log.d(TAG, "mFreeformCellXCount: " + mFreeformCellXCount);
-                Log.d(TAG, "mFreeformCellYCount: " + mFreeformCellYCount);
-                Log.d(TAG, "mFreeformCellWidth: " + mFreeformCellWidth);
-                Log.d(TAG, "mFreeformCellHeight: " + mFreeformCellHeight);
+            // Determine the scale to best fit each of the tasks in the workspace
+            float rowScale = 0.85f;
+            float rowWidth = 0f;
+            float maxRowWidth = 0f;
+            int rowCount = 1;
+            for (int i = 0; i < numFreeformTasks;) {
+                float width = normalizedTaskWidths[i] * rowScale;
+                if (rowWidth + width > normalizedWorkspaceWidth) {
+                    // That is too long for this row, create new row
+                    rowWidth = 0f;
+                    if ((rowCount + 1) * rowScale > normalizedWorkspaceHeight) {
+                        // The new row is too high, so we need to try fitting again.  Update the
+                        // scale to be the smaller of the scale needed to fit the task in the
+                        // previous row, or the scale needed to fit the new row
+                        rowScale = Math.min(normalizedWorkspaceWidth / (rowWidth + width),
+                                normalizedWorkspaceHeight / (rowCount + 1));
+                        rowCount = 1;
+                        i = 0;
+                    } else {
+                        // The new row fits, so continue
+                        rowCount++;
+                        i++;
+                    }
+                } else {
+                    // Task is OK in this row
+                    rowWidth += width;
+                    i++;
+                }
+                maxRowWidth = Math.max(rowWidth, maxRowWidth);
+            }
+
+            // Normalize each of the actual rects to that scale
+            int height = (int) (rowScale * workspaceHeight);
+            float rowTop = ((1f - (rowScale * rowCount)) * workspaceHeight) / 2f;
+            float defaultRowLeft = ((1f - (maxRowWidth / normalizedWorkspaceWidth)) *
+                    workspaceWidth) / 2f;
+            float rowLeft = defaultRowLeft;
+            for (int i = 0; i < numFreeformTasks; i++) {
+                Task task = freeformTasks.get(i);
+                int width = (int) (height * normalizedTaskWidths[i]);
+                if (rowLeft + width > workspaceWidth) {
+                    // This goes on the next line
+                    rowTop += height;
+                    rowLeft = defaultRowLeft;
+                }
+                RectF rect = new RectF(rowLeft, rowTop, rowLeft + width, rowTop + height);
+                rowLeft += width;
+                mTaskRectMap.put(task.key, rect);
             }
         }
     }
@@ -86,7 +130,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
         if (stackLayout.mNumFreeformTasks == 0 || task == null) {
             return false;
         }
-        return mTaskIndexMap.containsKey(task.key);
+        return mTaskRectMap.containsKey(task.key);
     }
 
     /**
@@ -95,34 +139,35 @@ public class FreeformWorkspaceLayoutAlgorithm {
      */
     public TaskViewTransform getTransform(Task task, TaskViewTransform transformOut,
             TaskStackLayoutAlgorithm stackLayout) {
-        if (mTaskIndexMap.containsKey(task.key)) {
+        if (mTaskRectMap.containsKey(task.key)) {
             Rect taskRect = stackLayout.mTaskRect;
-            int taskIndex = mTaskIndexMap.get(task.key);
+            RectF ffRect = mTaskRectMap.get(task.key);
+            float scale = Math.max(ffRect.width() / taskRect.width(),
+                    ffRect.height() / taskRect.height());
             int topOffset = (stackLayout.mFreeformRect.top - taskRect.top);
-            int x = taskIndex % mFreeformCellXCount;
-            int y = taskIndex / mFreeformCellXCount;
+            int scaleXOffset = (int) (((1f - scale) * taskRect.width()) / 2);
+            int scaleYOffset = (int) (((1f - scale) * taskRect.height()) / 2);
 
-            Bitmap thumbnail = task.thumbnail;
-            float thumbnailScale = 1f;
-            float thumbnailWidth = mFreeformCellWidth;
-            float thumbnailHeight = mFreeformCellHeight;
-            if (thumbnail != null) {
-                int bitmapWidth = task.thumbnail.getWidth();
-                int bitmapHeight = task.thumbnail.getHeight();
-                thumbnailScale = Math.min((float) mFreeformCellWidth / bitmapWidth,
-                        (float) mFreeformCellHeight / bitmapHeight);
-                thumbnailWidth = bitmapWidth * thumbnailScale;
-                thumbnailHeight = bitmapHeight * thumbnailScale;
-            }
-            int scaleXOffset = (int) (((1f - thumbnailScale) * thumbnailWidth) / 2);
-            int scaleYOffset = (int) (((1f - thumbnailScale) * thumbnailHeight) / 2);
-            transformOut.scale = thumbnailScale * 0.9f;
-            transformOut.translationX = x * mFreeformCellWidth - scaleXOffset;
-            transformOut.translationY = topOffset + y * mFreeformCellHeight - scaleYOffset;
+            transformOut.scale = scale * 0.95f;
+            transformOut.translationX = (int) (ffRect.left - scaleXOffset);
+            transformOut.translationY = (int) (topOffset + ffRect.top - scaleYOffset);
             transformOut.translationZ = stackLayout.mMaxTranslationZ;
-            transformOut.rect.set(stackLayout.mTaskRect);
+            transformOut.clipBottom = (int) (taskRect.height() - (ffRect.height() / scale));
+            transformOut.clipRight = (int) (taskRect.width() - (ffRect.width() / scale));
+            if (task.thumbnail != null) {
+                transformOut.thumbnailScale = Math.min(
+                        ((float) taskRect.width() - transformOut.clipRight) /
+                                task.thumbnail.getWidth(),
+                        ((float) taskRect.height() - transformOut.clipBottom) /
+                                task.thumbnail.getHeight());
+            } else {
+                transformOut.thumbnailScale = 1f;
+            }
+            transformOut.rect.set(taskRect);
             transformOut.rect.offset(transformOut.translationX, transformOut.translationY);
             Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
+            transformOut.rect.right -= transformOut.clipRight * scale;
+            transformOut.rect.bottom -= transformOut.clipBottom * scale;
             transformOut.visible = true;
             transformOut.p = 1f;
 

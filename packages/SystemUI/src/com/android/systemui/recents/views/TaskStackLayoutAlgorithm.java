@@ -334,7 +334,6 @@ public class TaskStackLayoutAlgorithm {
      * including the search bar.
      */
     public void initialize(Rect taskStackBounds, StackState state) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsConfiguration config = Recents.getConfiguration();
         int widthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
@@ -589,8 +588,15 @@ public class TaskStackLayoutAlgorithm {
                 transformOut.reset();
                 return transformOut;
             }
-            return getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
+            getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
                     frontTransform);
+            if (task.thumbnail != null) {
+                transformOut.thumbnailScale = (float) mTaskRect.width() / task.thumbnail.getWidth();
+            }
+            if (DEBUG) {
+                Log.d(TAG, "getTransform: " + task.key + ", " + transformOut);
+            }
+            return transformOut;
         }
     }
 
@@ -653,6 +659,9 @@ public class TaskStackLayoutAlgorithm {
         transformOut.rect.offset(transformOut.translationX, transformOut.translationY);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
         transformOut.visible = true;
+        transformOut.clipBottom = 0;
+        transformOut.clipRight = 0;
+        transformOut.thumbnailScale = 1f;
         transformOut.p = relP;
         return transformOut;
     }
