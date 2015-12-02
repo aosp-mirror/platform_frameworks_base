@@ -18,17 +18,51 @@ package com.android.tools.layoutlib.java;
 
 import com.android.tools.layoutlib.create.ReplaceMethodCallsAdapter;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * Provides dummy implementation of methods that don't exist on the host VM.
+ * This also providers a time control that allows to set a specific system time.
  *
  * @see ReplaceMethodCallsAdapter
  */
+@SuppressWarnings("unused")
 public class System_Delegate {
+    // Current system time
+    private static AtomicLong mNanosTime = new AtomicLong(System.nanoTime());
+    // Time that the system booted up in nanos
+    private static AtomicLong mBootNanosTime = new AtomicLong(System.nanoTime());
+
     public static void log(String message) {
         // ignore.
     }
 
     public static void log(String message, Throwable th) {
         // ignore.
+    }
+
+    public static void setNanosTime(long nanos) {
+        mNanosTime.set(nanos);
+    }
+
+    public static void setBootTimeNanos(long nanos) {
+        mBootNanosTime.set(nanos);
+    }
+
+    public static long nanoTime() {
+        return mNanosTime.get();
+    }
+
+    public static long currentTimeMillis() {
+        return TimeUnit.NANOSECONDS.toMillis(mNanosTime.get());
+    }
+
+    public static long bootTime() {
+        return mBootNanosTime.get();
+    }
+
+    public static long bootTimeMillis() {
+        return TimeUnit.NANOSECONDS.toMillis(mBootNanosTime.get());
     }
 }
