@@ -25,7 +25,6 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -3996,6 +3995,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanel.animateToFullShade(0 /* delay */);
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
+        }
+    }
+
+    @Override
+    public void onExpandClicked(View clickedView, boolean nowExpanded) {
+        if (mState == StatusBarState.KEYGUARD && nowExpanded) {
+            goToLockedShade(clickedView);
         }
     }
 

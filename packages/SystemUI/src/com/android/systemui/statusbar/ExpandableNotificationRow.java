@@ -104,14 +104,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIconAnimationRunning;
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
+    private OnExpandClickListener mOnExpandClickListener;
     private OnClickListener mExpandClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
             if (mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
                 mGroupManager.toggleGroupExpansion(mStatusBarNotification);
+                mOnExpandClickListener.onExpandClicked(ExpandableNotificationRow.this,
+                        mGroupManager.isGroupExpanded(mStatusBarNotification));
             } else {
-                setUserExpanded(!isExpanded());
+                boolean nowExpanded = !isExpanded();
+                setUserExpanded(nowExpanded);
                 notifyHeightChanged(true);
+                mOnExpandClickListener.onExpandClicked(ExpandableNotificationRow.this,
+                        nowExpanded);
             }
         }
     };
@@ -419,6 +425,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setContentSubTextVisible(boolean visible) {
         mPrivateLayout.setSubTextVisible(visible);
+    }
+
+    public void setOnExpandClickListener(OnExpandClickListener onExpandClickListener) {
+        mOnExpandClickListener = onExpandClickListener;
     }
 
     public interface ExpansionLogger {
@@ -985,5 +995,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (wasExpanded != nowExpanded && mLogger != null) {
             mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded) ;
         }
+    }
+
+    public interface OnExpandClickListener {
+        void onExpandClicked(View clickedView, boolean nowExpanded);
     }
 }

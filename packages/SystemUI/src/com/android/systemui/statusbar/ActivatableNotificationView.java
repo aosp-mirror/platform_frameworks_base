@@ -130,6 +130,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final int mLowPriorityColor;
     private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
+    private boolean mTrackTouch;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -175,12 +176,27 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     };
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mDimmed) {
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (mDimmed && !mActivated) {
             return handleTouchEventDimmed(event);
         } else {
-            return super.onTouchEvent(event);
+            return super.dispatchTouchEvent(event);
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean result;
+        if (mDimmed && mActivated) {
+            result = handleTouchEventDimmed(event);
+        } else {
+            result = super.onTouchEvent(event);
+        }
+        if (mActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
+            mFalsingManager.onNotificationDoubleTap();
+            removeCallbacks(mTapTimeoutRunnable);
+        }
+        return result;
     }
 
     @Override
@@ -206,14 +222,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             case MotionEvent.ACTION_DOWN:
                 mDownX = event.getX();
                 mDownY = event.getY();
+                mTrackTouch = true;
                 if (mDownY > getActualHeight()) {
-                    return false;
+                    mTrackTouch = false;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (!isWithinTouchSlop(event)) {
                     makeInactive(true /* animate */);
-                    return false;
+                    mTrackTouch = false;
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -222,23 +239,23 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                         makeActive();
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
                     } else {
-                        mFalsingManager.onNotificationDoubleTap();
-                        boolean performed = performClick();
-                        if (performed) {
-                            removeCallbacks(mTapTimeoutRunnable);
+                        if (!performClick()) {
+                            return false;
                         }
                     }
                 } else {
                     makeInactive(true /* animate */);
+                    mTrackTouch = false;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 makeInactive(true /* animate */);
+                mTrackTouch = false;
                 break;
             default:
                 break;
         }
-        return true;
+        return mTrackTouch;
     }
 
     private void makeActive() {

@@ -955,15 +955,7 @@ public class NotificationPanelView extends PanelView implements
                 mQsTracking = false;
                 mTrackingPointer = -1;
                 trackMovement(event);
-                float fraction = getQsExpansionFraction();
-                if ((fraction != 0f || y >= mInitialTouchY)
-                        && (fraction != 1f || y <= mInitialTouchY)) {
-                    flingQsWithCurrentVelocity(y,
-                            event.getActionMasked() == MotionEvent.ACTION_CANCEL);
-                } else {
-                    logQsSwipeDown(y);
-                    mScrollYOverride = -1;
-                }
+                flingQsWithCurrentVelocity(y, event.getActionMasked() == MotionEvent.ACTION_CANCEL);
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
