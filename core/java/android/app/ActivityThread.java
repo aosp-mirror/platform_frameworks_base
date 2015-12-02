@@ -92,7 +92,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
 import android.view.Display;
-import android.view.HardwareRenderer;
+import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
@@ -4612,7 +4612,7 @@ public final class ActivityThread {
             // If there are several packages in this application we won't
             // initialize the graphics disk caches
             if (packages != null && packages.length == 1) {
-                HardwareRenderer.setupDiskCache(cacheDir);
+                ThreadedRenderer.setupDiskCache(cacheDir);
                 RenderScriptCacheDir.setupDiskCache(cacheDir);
             }
         } catch (RemoteException e) {
@@ -4659,7 +4659,7 @@ public final class ActivityThread {
             // use hardware accelerated drawing, since this can add too much
             // overhead to the process.
             if (!ActivityManager.isHighEndGfx()) {
-                HardwareRenderer.disable(false);
+                ThreadedRenderer.disable(false);
             }
         }
 
@@ -5529,9 +5529,9 @@ public final class ActivityThread {
         // accelerated drawing, since this can add too much overhead to the
         // process.
         if (!ActivityManager.isHighEndGfx()) {
-            HardwareRenderer.disable(true);
+            ThreadedRenderer.disable(true);
         } else {
-            HardwareRenderer.enableForegroundTrimming();
+            ThreadedRenderer.enableForegroundTrimming();
         }
         ActivityThread thread = new ActivityThread();
         thread.attach(true);

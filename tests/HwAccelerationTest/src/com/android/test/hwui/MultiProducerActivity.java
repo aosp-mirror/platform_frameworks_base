@@ -25,7 +25,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.DisplayListCanvas;
-import android.view.HardwareRenderer;
+import android.view.ThreadedRenderer;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 import android.view.View;
@@ -120,7 +120,7 @@ public class MultiProducerActivity extends Activity implements OnClickListener {
             if (view == null) {
                 view.postDelayed(mSetup, 50);
             }
-            HardwareRenderer renderer = view.getHardwareRenderer();
+            ThreadedRenderer renderer = view.getHardwareRenderer();
             if (renderer == null || view.getWidth() == 0) {
                 view.postDelayed(mSetup, 50);
             }
