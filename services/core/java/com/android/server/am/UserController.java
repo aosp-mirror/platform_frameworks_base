@@ -34,6 +34,7 @@ import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_CO
 import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
+import static com.android.server.am.ActivityManagerService.SYSTEM_USER_UNLOCK_MSG;
 import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
 
 import android.annotation.NonNull;
@@ -147,7 +148,6 @@ final class UserController {
         // User 0 is the first and only user that runs at boot.
         final UserState uss = new UserState(UserHandle.SYSTEM);
         mStartedUsers.put(UserHandle.USER_SYSTEM, uss);
-        updateUserUnlockedState(uss);
         mUserLru.add(UserHandle.USER_SYSTEM);
         updateStartedUserArrayLocked();
     }
@@ -173,8 +173,8 @@ final class UserController {
                 num--;
                 continue;
             }
-            if (oldUss.mState == UserState.STATE_STOPPING
-                    || oldUss.mState == UserState.STATE_SHUTDOWN) {
+            if (oldUss.state == UserState.STATE_STOPPING
+                    || oldUss.state == UserState.STATE_SHUTDOWN) {
                 // This user is already stopping, doesn't count.
                 num--;
                 i++;
@@ -199,17 +199,65 @@ final class UserController {
     }
 
     void finishUserBoot(UserState uss) {
+        finishUserBoot(uss, null);
+    }
+
+    void finishUserBoot(UserState uss, IIntentReceiver resultTo) {
+        final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
-            if (uss.mState == UserState.STATE_BOOTING
-                    && mStartedUsers.get(uss.mHandle.getIdentifier()) == uss) {
-                uss.mState = UserState.STATE_RUNNING;
-                final int userId = uss.mHandle.getIdentifier();
-                Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
+            // Bail if we ended up with a stale user
+            if (mStartedUsers.get(userId) != uss) return;
+
+            // We always walk through all the user lifecycle states to send
+            // consistent developer events. We step into RUNNING_LOCKED here,
+            // but we might immediately step into RUNNING below if the user
+            // storage is already unlocked.
+            if (uss.state == UserState.STATE_BOOTING) {
+                uss.setState(UserState.STATE_RUNNING_LOCKED);
+
+                Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
-                mService.broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null,
-                        new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
+                mService.broadcastIntentLocked(null, null, intent, null, resultTo, 0, null, null,
+                        new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
+                        AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
+            }
+
+            maybeFinishUserUnlock(uss);
+        }
+    }
+
+    /**
+     * Consider stepping from {@link UserState#STATE_RUNNING_LOCKED} into
+     * {@link UserState#STATE_RUNNING}, which only occurs if the user storage is
+     * actually unlocked.
+     */
+    void maybeFinishUserUnlock(UserState uss) {
+        final int userId = uss.mHandle.getIdentifier();
+        synchronized (mService) {
+            // Bail if we ended up with a stale user
+            if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
+
+            // Only keep marching forward if user is actually unlocked
+            if (!isUserKeyUnlocked(userId)) return;
+
+            if (uss.state == UserState.STATE_RUNNING_LOCKED) {
+                uss.setState(UserState.STATE_RUNNING);
+
+                mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
+
+                final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
+                unlockedIntent.addFlags(
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+                mService.broadcastIntentLocked(null, null, unlockedIntent, null, null, 0, null,
+                        null, null, AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                        userId);
+
+                final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
+                bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
+                mService.broadcastIntentLocked(null, null, bootIntent, null, null, 0, null, null,
+                        new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
                         AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
             }
         }
@@ -291,9 +339,9 @@ final class UserController {
             uss.mStopCallbacks.add(callback);
         }
 
-        if (uss.mState != UserState.STATE_STOPPING
-                && uss.mState != UserState.STATE_SHUTDOWN) {
-            uss.mState = UserState.STATE_STOPPING;
+        if (uss.state != UserState.STATE_STOPPING
+                && uss.state != UserState.STATE_SHUTDOWN) {
+            uss.setState(UserState.STATE_STOPPING);
             updateStartedUserArrayLocked();
 
             long ident = Binder.clearCallingIdentity();
@@ -321,11 +369,11 @@ final class UserController {
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                         // On to the next.
                         synchronized (mService) {
-                            if (uss.mState != UserState.STATE_STOPPING) {
+                            if (uss.state != UserState.STATE_STOPPING) {
                                 // Whoops, we are being started back up.  Abort, abort!
                                 return;
                             }
-                            uss.mState = UserState.STATE_SHUTDOWN;
+                            uss.setState(UserState.STATE_SHUTDOWN);
                         }
                         mService.mBatteryStatsService.noteEvent(
                                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
@@ -355,7 +403,7 @@ final class UserController {
             callbacks = new ArrayList<>(uss.mStopCallbacks);
             if (mStartedUsers.get(userId) != uss) {
                 stopped = false;
-            } else if (uss.mState != UserState.STATE_SHUTDOWN) {
+            } else if (uss.state != UserState.STATE_SHUTDOWN) {
                 stopped = false;
             } else {
                 stopped = true;
@@ -438,8 +486,8 @@ final class UserController {
                 Integer oldUserId = mUserLru.get(i);
                 UserState oldUss = mStartedUsers.get(oldUserId);
                 if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId
-                        || oldUss.mState == UserState.STATE_STOPPING
-                        || oldUss.mState == UserState.STATE_SHUTDOWN) {
+                        || oldUss.state == UserState.STATE_STOPPING
+                        || oldUss.state == UserState.STATE_SHUTDOWN) {
                     continue;
                 }
                 UserInfo userInfo = getUserInfo(oldUserId);
@@ -482,18 +530,18 @@ final class UserController {
         return userManager;
     }
 
-    private void updateUserUnlockedState(UserState uss) {
+    private boolean isUserKeyUnlocked(int userId) {
         final IMountService mountService = IMountService.Stub
                 .asInterface(ServiceManager.getService("mount"));
         if (mountService != null) {
             try {
-                uss.unlocked = mountService.isUserKeyUnlocked(uss.mHandle.getIdentifier());
+                return mountService.isUserKeyUnlocked(userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
         } else {
-            // System isn't fully booted yet, so guess based on property
-            uss.unlocked = !StorageManager.isFileBasedEncryptionEnabled();
+            Slog.w(TAG, "Mount service not published; guessing locked state based on property");
+            return !StorageManager.isFileBasedEncryptionEnabled();
         }
     }
 
@@ -547,8 +595,6 @@ final class UserController {
                 }
 
                 final UserState uss = mStartedUsers.get(userId);
-                updateUserUnlockedState(uss);
-
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
@@ -572,22 +618,22 @@ final class UserController {
 
                 // Make sure user is in the started state.  If it is currently
                 // stopping, we need to knock that off.
-                if (uss.mState == UserState.STATE_STOPPING) {
+                if (uss.state == UserState.STATE_STOPPING) {
                     // If we are stopping, we haven't sent ACTION_SHUTDOWN,
                     // so we can just fairly silently bring the user back from
                     // the almost-dead.
-                    uss.mState = UserState.STATE_RUNNING;
+                    uss.setState(uss.lastState);
                     updateStartedUserArrayLocked();
                     needStart = true;
-                } else if (uss.mState == UserState.STATE_SHUTDOWN) {
+                } else if (uss.state == UserState.STATE_SHUTDOWN) {
                     // This means ACTION_SHUTDOWN has been sent, so we will
                     // need to treat this as a new boot of the user.
-                    uss.mState = UserState.STATE_BOOTING;
+                    uss.setState(UserState.STATE_BOOTING);
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }
 
-                if (uss.mState == UserState.STATE_BOOTING) {
+                if (uss.state == UserState.STATE_BOOTING) {
                     // Let user manager propagate user restrictions to other services.
                     getUserManager().onBeforeStartUser(userId);
 
@@ -699,11 +745,9 @@ final class UserController {
 
     boolean unlockUserCleared(final int userId, byte[] token) {
         synchronized (mService) {
+            // Bail if already running unlocked
             final UserState uss = mStartedUsers.get(userId);
-            if (uss.unlocked) {
-                // Bail early when already unlocked
-                return true;
-            }
+            if (uss.state == UserState.STATE_RUNNING) return true;
         }
 
         final UserInfo userInfo = getUserInfo(userId);
@@ -718,13 +762,8 @@ final class UserController {
 
         synchronized (mService) {
             final UserState uss = mStartedUsers.get(userId);
-            updateUserUnlockedState(uss);
+            maybeFinishUserUnlock(uss);
         }
-
-        final Intent intent = new Intent(Intent.ACTION_USER_UNLOCKED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mService.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID, userId);
 
         return true;
     }
@@ -1045,8 +1084,8 @@ final class UserController {
         for (int i = 0; i < mStartedUsers.size(); i++) {
             UserState uss = mStartedUsers.valueAt(i);
             // This list does not include stopping users.
-            if (uss.mState != UserState.STATE_STOPPING
-                    && uss.mState != UserState.STATE_SHUTDOWN) {
+            if (uss.state != UserState.STATE_STOPPING
+                    && uss.state != UserState.STATE_SHUTDOWN) {
                 num++;
             }
         }
@@ -1054,8 +1093,8 @@ final class UserController {
         num = 0;
         for (int i = 0; i < mStartedUsers.size(); i++) {
             UserState uss = mStartedUsers.valueAt(i);
-            if (uss.mState != UserState.STATE_STOPPING
-                    && uss.mState != UserState.STATE_SHUTDOWN) {
+            if (uss.state != UserState.STATE_STOPPING
+                    && uss.state != UserState.STATE_SHUTDOWN) {
                 mStartedUserArray[num] = mStartedUsers.keyAt(i);
                 num++;
             }
@@ -1065,17 +1104,7 @@ final class UserController {
     void sendBootCompletedLocked(IIntentReceiver resultTo) {
         for (int i = 0; i < mStartedUsers.size(); i++) {
             UserState uss = mStartedUsers.valueAt(i);
-            if (uss.mState == UserState.STATE_BOOTING) {
-                uss.mState = UserState.STATE_RUNNING;
-                final int userId = mStartedUsers.keyAt(i);
-                Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
-                mService.broadcastIntentLocked(null, null, intent, null,
-                        resultTo, 0, null, null,
-                        new String[] {android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                        AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
-            }
+            finishUserBoot(uss, resultTo);
         }
     }
 
@@ -1117,14 +1146,33 @@ final class UserController {
         if ((flags & ActivityManager.FLAG_OR_STOPPED) != 0) {
             return true;
         }
-        if ((flags & ActivityManager.FLAG_AND_LOCKED) != 0 && state.unlocked) {
-            return false;
+
+        final boolean unlocked;
+        switch (state.state) {
+            case UserState.STATE_STOPPING:
+            case UserState.STATE_SHUTDOWN:
+            default:
+                return false;
+
+            case UserState.STATE_BOOTING:
+            case UserState.STATE_RUNNING_LOCKED:
+                unlocked = false;
+                break;
+
+            case UserState.STATE_RUNNING:
+                unlocked = true;
+                break;
         }
-        if ((flags & ActivityManager.FLAG_AND_UNLOCKED) != 0 && !state.unlocked) {
-            return false;
+
+        if ((flags & ActivityManager.FLAG_AND_LOCKED) != 0) {
+            return !unlocked;
         }
-        return state.mState != UserState.STATE_STOPPING
-                && state.mState != UserState.STATE_SHUTDOWN;
+        if ((flags & ActivityManager.FLAG_AND_UNLOCKED) != 0) {
+            return unlocked;
+        }
+
+        // One way or another, we're running!
+        return true;
     }
 
     UserInfo getCurrentUser() {

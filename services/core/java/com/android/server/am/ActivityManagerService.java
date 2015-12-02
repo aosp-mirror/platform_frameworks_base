@@ -1487,6 +1487,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int APP_BOOST_DEACTIVATE_MSG = 58;
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 59;
     static final int IDLE_UIDS_MSG = 60;
+    static final int SYSTEM_USER_UNLOCK_MSG = 61;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1987,6 +1988,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                         Integer.toString(msg.arg1), msg.arg1);
                 mSystemServiceManager.startUser(msg.arg1);
+                break;
+            }
+            case SYSTEM_USER_UNLOCK_MSG: {
+                mSystemServiceManager.unlockUser(msg.arg1);
                 break;
             }
             case SYSTEM_USER_CURRENT_MSG: {
