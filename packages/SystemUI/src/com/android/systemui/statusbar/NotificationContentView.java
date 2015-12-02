@@ -431,6 +431,11 @@ public class NotificationContentView extends FrameLayout {
      */
     private int calculateVisibleType() {
         boolean noExpandedChild = mExpandedChild == null;
+
+        if (!noExpandedChild && mContentHeight == mExpandedChild.getHeight()) {
+            return VISIBLE_TYPE_EXPANDED;
+        }
+
         if (mIsHeadsUp && mHeadsUpChild != null) {
             if (mContentHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
                 return VISIBLE_TYPE_HEADSUP;

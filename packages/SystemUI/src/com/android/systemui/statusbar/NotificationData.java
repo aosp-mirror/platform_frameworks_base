@@ -59,6 +59,7 @@ public class NotificationData {
         public RemoteViews cachedBigContentView;
         public RemoteViews cachedHeadsUpContentView;
         public RemoteViews cachedPublicContentView;
+        public CharSequence remoteInputText;
 
         public Entry(StatusBarNotification n, StatusBarIconView ic) {
             this.key = n.getKey();

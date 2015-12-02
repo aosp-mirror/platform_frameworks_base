@@ -148,6 +148,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public void onDefocus() {
         mController.removeRemoteInput(mEntry);
+        mEntry.remoteInputText = mEditText.getText();
         setVisibility(INVISIBLE);
     }
 
@@ -171,6 +172,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setInnerFocusable(true);
         mController.addRemoteInput(mEntry);
         mEditText.mShowImeOnInputConnection = true;
+        mEditText.setText(mEntry.remoteInputText);
+        mEditText.setSelection(mEditText.getText().length());
         mEditText.requestFocus();
     }
 
@@ -216,8 +219,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
                 defocusIfNeeded();
+                final InputMethodManager imm = InputMethodManager.getInstance();
+                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                return true;
             }
             return super.onKeyPreIme(keyCode, event);
         }
