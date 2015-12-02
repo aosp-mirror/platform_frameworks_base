@@ -44,7 +44,7 @@ public final class PathMeasure_Delegate {
 
     // ---- delegate data ----
     // This governs how accurate the approximation of the Path is.
-    private static final float PRECISION = 0.0002f;
+    private static final float PRECISION = 0.002f;
 
     /**
      * Array containing the path points components. There are three components for each point:

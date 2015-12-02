@@ -14,21 +14,39 @@
  * limitations under the License.
  */
 
-package com.android.tools.layoutlib.java;
-
-import com.android.tools.layoutlib.create.ReplaceMethodCallsAdapter;
+package android.animation;
 
 /**
- * Provides dummy implementation of methods that don't exist on the host VM.
- *
- * @see ReplaceMethodCallsAdapter
+ * A fake implementation of Animator which doesn't do anything.
  */
-public class System_Delegate {
-    public static void log(String message) {
-        // ignore.
+public class FakeAnimator extends Animator {
+    @Override
+    public long getStartDelay() {
+        return 0;
     }
 
-    public static void log(String message, Throwable th) {
-        // ignore.
+    @Override
+    public void setStartDelay(long startDelay) {
+
+    }
+
+    @Override
+    public Animator setDuration(long duration) {
+        return this;
+    }
+
+    @Override
+    public long getDuration() {
+        return 0;
+    }
+
+    @Override
+    public void setInterpolator(TimeInterpolator value) {
+
+    }
+
+    @Override
+    public boolean isRunning() {
+        return false;
     }
 }

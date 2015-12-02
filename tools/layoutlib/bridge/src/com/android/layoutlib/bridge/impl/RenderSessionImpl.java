@@ -46,7 +46,6 @@ import com.android.layoutlib.bridge.android.support.DesignLibUtil;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.ResourceType;
-import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.util.Pair;
 
 import android.animation.AnimationThread;
@@ -63,7 +62,6 @@ import android.graphics.Canvas;
 import android.preference.Preference_Delegate;
 import android.view.AttachInfo_Accessor;
 import android.view.BridgeInflater;
-import android.view.Choreographer_Delegate;
 import android.view.IWindowManager;
 import android.view.IWindowManagerImpl;
 import android.view.Surface;
@@ -122,10 +120,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private int mMeasuredScreenWidth = -1;
     private int mMeasuredScreenHeight = -1;
     private boolean mIsAlphaChannelImage;
-    /** If >= 0, a frame will be executed */
-    private long mElapsedFrameTimeNanos = -1;
-    /** True if one frame has been already executed to start the animations */
-    private boolean mFirstFrameExecuted = false;
 
     // information being returned through the API
     private BufferedImage mImage;
@@ -255,14 +249,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             return ERROR_INFLATION.createResult(t.getMessage(), t);
         }
-    }
-
-    /**
-     * Sets the time for which the next frame will be selected. The time is the elapsed time from
-     * the current system nanos time. You
-     */
-    public void setElapsedFrameTimeNanos(long nanos) {
-        mElapsedFrameTimeNanos = nanos;
     }
 
     /**
@@ -442,16 +428,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     gc.dispose();
                 }
 
-                if (mElapsedFrameTimeNanos >= 0) {
-                    long initialTime = System_Delegate.nanoTime();
-                    if (!mFirstFrameExecuted) {
-                        // The first frame will initialize the animations
-                        Choreographer_Delegate.doFrame(initialTime);
-                        mFirstFrameExecuted = true;
-                    }
-                    // Second frame will move the animations
-                    Choreographer_Delegate.doFrame(initialTime + mElapsedFrameTimeNanos);
-                }
                 mViewRoot.draw(mCanvas);
             }
 

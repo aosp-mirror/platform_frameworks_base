@@ -134,33 +134,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             }
         });
 
-        // Case 5: java.lang.System time calls
-        METHOD_REPLACERS.add(new MethodReplacer() {
-            @Override
-            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
-                return JAVA_LANG_SYSTEM.equals(owner) && name.equals("nanoTime");
-            }
-
-            @Override
-            public void replace(MethodInformation mi) {
-                mi.name = "nanoTime";
-                mi.owner = Type.getInternalName(System_Delegate.class);
-            }
-        });
-        METHOD_REPLACERS.add(new MethodReplacer() {
-            @Override
-            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
-                return JAVA_LANG_SYSTEM.equals(owner) && name.equals("currentTimeMillis");
-            }
-
-            @Override
-            public void replace(MethodInformation mi) {
-                mi.name = "currentTimeMillis";
-                mi.owner = Type.getInternalName(System_Delegate.class);
-            }
-        });
-
-        // Case 6: java.util.LinkedHashMap.eldest()
+        // Case 5: java.util.LinkedHashMap.eldest()
         METHOD_REPLACERS.add(new MethodReplacer() {
 
             private final String VOID_TO_MAP_ENTRY =
@@ -183,7 +157,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             }
         });
 
-        // Case 7: android.content.Context.getClassLoader() in LayoutInflater
+        // Case 6: android.content.Context.getClassLoader() in LayoutInflater
         METHOD_REPLACERS.add(new MethodReplacer() {
             // When LayoutInflater asks for a class loader, we must return the class loader that
             // cannot return app's custom views/classes. This is so that in case of any failure
