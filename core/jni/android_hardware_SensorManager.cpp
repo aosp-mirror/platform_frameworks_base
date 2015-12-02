@@ -185,6 +185,18 @@ static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong s
     return mgr->isDataInjectionEnabled();
 }
 
+static jboolean nativeSetPhysicalData(JNIEnv *env, jclass clazz,jlong sensorManager, jstring javaString)
+{
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    const char *nativeString = env->GetStringUTFChars(javaString, JNI_FALSE);
+    bool return_value;
+
+    //ALOGD("android_hardware_SensorManager, call JNI function nativeSetPhysicalData(%s)",nativeString);
+    return_value = mgr->SetPhysicalData(nativeString);
+
+    env->ReleaseStringUTFChars(javaString, nativeString);
+    return return_value;
+}
 //----------------------------------------------------------------------------
 
 class Receiver : public LooperCallback {
@@ -358,6 +370,9 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeIsDataInjectionEnabled",
             "(J)Z",
             (void*)nativeIsDataInjectionEnabled},
+    {"nativeSetPhysicalData",
+            "(JLjava/lang/String;)Z",
+            (void*)nativeSetPhysicalData },
 };
 
 static JNINativeMethod gBaseEventQueueMethods[] = {

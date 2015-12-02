@@ -45,6 +45,7 @@ public class SystemSensorManager extends SensorManager {
     private static native boolean nativeGetSensorAtIndex(long nativeInstance,
             Sensor sensor, int index);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
+    private static native boolean nativeSetPhysicalData(long nativeInstance, String data);
 
     private static boolean sSensorModuleInitialized = false;
     private static InjectEventQueue mInjectEventQueue = null;
@@ -272,6 +273,13 @@ public class SystemSensorManager extends SensorManager {
             }
             return ret == 0;
         }
+    }
+
+    @Override
+    protected boolean SetPhysicalDataImpl(String data)
+    {
+        //Log.d(TAG, "SystemSensorManager.SetPhysicalDataImpl(" + data + ")");
+        return nativeSetPhysicalData(mNativeInstance,data);
     }
 
     /*
