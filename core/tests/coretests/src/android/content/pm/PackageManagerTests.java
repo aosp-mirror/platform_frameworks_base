@@ -3278,7 +3278,6 @@ public class PackageManagerTests extends AndroidTestCase {
      * testGetKeySetByAlias - same as getSigningKeySet, but for keysets defined
      * by this package.
      */
-    @Suppress
     public void testGetKeySetByAlias() throws Exception {
         PackageManager pm = getPm();
         String mPkgName = mContext.getPackageName();
@@ -3309,17 +3308,20 @@ public class PackageManagerTests extends AndroidTestCase {
             assertTrue(false); // should have thrown
         } catch(IllegalArgumentException e) {
         }
+
+        // make sure we can get a KeySet from our pkg
+        ks = pm.getKeySetByAlias(mPkgName, "A");
+        assertNotNull(ks);
+
+        // and another
         final InstallParams ip = installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
         try {
             ks = pm.getKeySetByAlias(otherPkgName, "A");
-            assertTrue(false); // should have thrown
-        } catch (SecurityException e) {
+            assertNotNull(ks);
         } finally {
             cleanUpInstall(ip);
         }
-        ks = pm.getKeySetByAlias(mPkgName, "A");
-        assertNotNull(ks);
     }
 
     public void testIsSignedBy() throws Exception {
