@@ -22,8 +22,8 @@
 #else
 #include "DisplayListCanvas.h"
 #endif
-#include "microbench/MicroBench.h"
-#include "utils/TestUtils.h"
+#include "tests/common/TestUtils.h"
+#include "tests/microbench/MicroBench.h"
 
 using namespace android;
 using namespace android::uirenderer;

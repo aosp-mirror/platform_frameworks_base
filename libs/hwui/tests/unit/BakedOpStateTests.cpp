@@ -18,7 +18,7 @@
 
 #include <BakedOpState.h>
 #include <RecordedOp.h>
-#include <utils/TestUtils.h>
+#include <tests/common/TestUtils.h>
 
 namespace android {
 namespace uirenderer {

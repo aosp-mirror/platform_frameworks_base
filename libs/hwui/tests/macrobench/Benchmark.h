@@ -16,7 +16,7 @@
 #ifndef TESTS_BENCHMARK_H
 #define TESTS_BENCHMARK_H
 
-#include "TestScene.h"
+#include "tests/common/TestScene.h"
 
 #include <string>
 #include <vector>
