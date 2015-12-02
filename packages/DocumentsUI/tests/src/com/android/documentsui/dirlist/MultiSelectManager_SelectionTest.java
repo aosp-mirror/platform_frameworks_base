@@ -26,27 +26,33 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     private Selection selection;
 
+    private String[] ids = new String[]{
+            "foo",
+            "43",
+            "auth|id=@53di*/f3#d"
+    };
+
     @Override
     public void setUp() throws Exception {
         selection = new Selection();
-        selection.add(3);
-        selection.add(5);
-        selection.add(9);
+        selection.add(ids[0]);
+        selection.add(ids[1]);
+        selection.add(ids[2]);
     }
 
     public void testAdd() {
         // We added in setUp.
         assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(5);
-        assertContains(9);
+        assertContains(ids[0]);
+        assertContains(ids[1]);
+        assertContains(ids[2]);
     }
 
     public void testRemove() {
-        selection.remove(3);
-        selection.remove(5);
+        selection.remove(ids[0]);
+        selection.remove(ids[2]);
         assertEquals(1, selection.size());
-        assertContains(9);
+        assertContains(ids[1]);
     }
 
     public void testClear() {
@@ -60,10 +66,10 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
         assertTrue(selection.isEmpty());
     }
 
-    public void testSizeAndGet() {
+    public void testSize() {
         Selection other = new Selection();
         for (int i = 0; i < selection.size(); i++) {
-            other.add(selection.get(i));
+            other.add(ids[i]);
         }
         assertEquals(selection.size(), other.size());
     }
@@ -74,9 +80,9 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     public void testEqualsOther() {
         Selection other = new Selection();
-        other.add(3);
-        other.add(5);
-        other.add(9);
+        other.add(ids[0]);
+        other.add(ids[1]);
+        other.add(ids[2]);
         assertEquals(selection, other);
         assertEquals(selection.hashCode(), other.hashCode());
     }
@@ -90,65 +96,12 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     public void testNotEquals() {
         Selection other = new Selection();
-        other.add(789);
+        other.add("foobar");
         assertFalse(selection.equals(other));
     }
 
-    public void testExpandBefore() {
-        selection.expand(2, 10);
-        assertEquals(3, selection.size());
-        assertContains(13);
-        assertContains(15);
-        assertContains(19);
-    }
-
-    public void testExpandAfter() {
-        selection.expand(10, 10);
-        assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(5);
-        assertContains(9);
-    }
-
-    public void testExpandSplit() {
-        selection.expand(5, 10);
-        assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(15);
-        assertContains(19);
-    }
-
-    public void testExpandEncompased() {
-        selection.expand(2, 10);
-        assertEquals(3, selection.size());
-        assertContains(13);
-        assertContains(15);
-        assertContains(19);
-    }
-
-    public void testCollapseBefore() {
-        selection.collapse(0, 2);
-        assertEquals(3, selection.size());
-        assertContains(1);
-        assertContains(3);
-        assertContains(7);
-    }
-
-    public void testCollapseAfter() {
-        selection.collapse(10, 10);
-        assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(5);
-        assertContains(9);
-    }
-
-    public void testCollapseAcross() {
-        selection.collapse(0, 10);
-        assertEquals(0, selection.size());
-    }
-
-    private void assertContains(int i) {
-        String err = String.format("Selection %s does not contain %d", selection, i);
-        assertTrue(err, selection.contains(i));
+    private void assertContains(String id) {
+        String err = String.format("Selection %s does not contain %s", selection, id);
+        assertTrue(err, selection.contains(id));
     }
 }

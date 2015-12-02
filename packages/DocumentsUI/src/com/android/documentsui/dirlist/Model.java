@@ -34,7 +34,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.SparseBooleanArray;
+import android.util.SparseArray;
 
 import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.DirectoryResult;
@@ -45,9 +45,10 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The data model for the current loaded directory.
@@ -62,8 +63,8 @@ public class Model implements DocumentContext {
     @GuardedBy("mPendingDelete")
     private Boolean mPendingDelete = false;
     @GuardedBy("mPendingDelete")
-    private SparseBooleanArray mMarkedForDeletion = new SparseBooleanArray();
-    private Model.UpdateListener mUpdateListener;
+    private Set<String> mMarkedForDeletion = new HashSet<>();
+    private List<UpdateListener> mUpdateListeners = new ArrayList<>();
     @Nullable private Cursor mCursor;
     @Nullable String info;
     @Nullable String error;
@@ -72,6 +73,37 @@ public class Model implements DocumentContext {
     Model(Context context, RecyclerView.Adapter<?> viewAdapter) {
         mContext = context;
         mViewAdapter = viewAdapter;
+    }
+
+    /**
+     * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a
+     * unique string that can be used to identify the document referred to by the cursor.
+     *
+     * @param c A cursor that refers to a document.
+     */
+    public static String createId(Cursor c) {
+        return getCursorString(c, RootCursorWrapper.COLUMN_AUTHORITY) +
+                "|" + getCursorString(c, Document.COLUMN_DOCUMENT_ID);
+    }
+
+    /**
+     * @return Model IDs for all known items in the model. Note that this will include items
+     *         pending deletion.
+     */
+    public Set<String> getIds() {
+        return mPositions.keySet();
+    }
+
+    private void notifyUpdateListeners() {
+        for (UpdateListener listener: mUpdateListeners) {
+            listener.onModelUpdate(this);
+        }
+    }
+
+    private void notifyUpdateListeners(Exception e) {
+        for (UpdateListener listener: mUpdateListeners) {
+            listener.onModelUpdateFailed(e);
+        }
     }
 
     void update(DirectoryResult result) {
@@ -83,13 +115,13 @@ public class Model implements DocumentContext {
             info = null;
             error = null;
             mIsLoading = false;
-            mUpdateListener.onModelUpdate(this);
+            notifyUpdateListeners();
             return;
         }
 
         if (result.exception != null) {
             Log.e(TAG, "Error while loading directory contents", result.exception);
-            mUpdateListener.onModelUpdateFailed(result.exception);
+            notifyUpdateListeners(result.exception);
             return;
         }
 
@@ -105,9 +137,10 @@ public class Model implements DocumentContext {
             mIsLoading = extras.getBoolean(DocumentsContract.EXTRA_LOADING, false);
         }
 
-        mUpdateListener.onModelUpdate(this);
+        notifyUpdateListeners();
     }
 
+    @VisibleForTesting
     int getItemCount() {
         synchronized(mPendingDelete) {
             return mCursorCount - mMarkedForDeletion.size();
@@ -122,10 +155,7 @@ public class Model implements DocumentContext {
         mCursor.moveToPosition(-1);
         for (int pos = 0; pos < mCursorCount; ++pos) {
             mCursor.moveToNext();
-            // TODO(stable-id): factor the model ID construction code.
-            String modelId = getCursorString(mCursor, RootCursorWrapper.COLUMN_AUTHORITY) +
-                    "|" + getCursorString(mCursor, Document.COLUMN_DOCUMENT_ID);
-            mPositions.put(modelId, pos);
+            mPositions.put(Model.createId(mCursor), pos);
         }
     }
 
@@ -136,36 +166,6 @@ public class Model implements DocumentContext {
             return mCursor;
         }
         return null;
-    }
-
-    Cursor getItem(int position) {
-        synchronized(mPendingDelete) {
-            // Items marked for deletion are masked out of the UI.  To do this, for every marked
-            // item whose position is less than the requested item position, advance the requested
-            // position by 1.
-            final int originalPos = position;
-            final int size = mMarkedForDeletion.size();
-            for (int i = 0; i < size; ++i) {
-                // It'd be more concise, but less efficient, to iterate over positions while calling
-                // mMarkedForDeletion.get.  Instead, iterate over deleted entries.
-                if (mMarkedForDeletion.keyAt(i) <= position && mMarkedForDeletion.valueAt(i)) {
-                    ++position;
-                }
-            }
-
-            if (DEBUG && position != originalPos) {
-                Log.d(TAG, "Item position adjusted for deletion.  Original: " + originalPos
-                        + "  Adjusted: " + position);
-            }
-
-            if (position >= mCursorCount) {
-                throw new IndexOutOfBoundsException("Attempt to retrieve " + position + " of " +
-                        mCursorCount + " items");
-            }
-
-            mCursor.moveToPosition(position);
-            return mCursor;
-        }
     }
 
     boolean isEmpty() {
@@ -180,8 +180,8 @@ public class Model implements DocumentContext {
         final int size = (items != null) ? items.size() : 0;
 
         final List<DocumentInfo> docs =  new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            final Cursor cursor = getItem(items.get(i));
+        for (String modelId: items.getAll()) {
+            final Cursor cursor = getItem(modelId);
             checkNotNull(cursor, "Cursor cannot be null.");
             final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
             docs.add(doc);
@@ -198,13 +198,14 @@ public class Model implements DocumentContext {
     }
 
     List<DocumentInfo> getDocumentsMarkedForDeletion() {
+        // TODO(stable-id): This could be just a plain old selection now.
         synchronized (mPendingDelete) {
             final int size = mMarkedForDeletion.size();
             List<DocumentInfo> docs =  new ArrayList<>(size);
 
-            for (int i = 0; i < size; ++i) {
-                final int position = mMarkedForDeletion.keyAt(i);
-                checkState(position < mCursorCount);
+            for (String id: mMarkedForDeletion) {
+                Integer position = mPositions.get(id);
+                checkState(position != null);
                 mCursor.moveToPosition(position);
                 final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(mCursor);
                 docs.add(doc);
@@ -228,15 +229,14 @@ public class Model implements DocumentContext {
             // There should never be more to delete than what exists.
             checkState(mCursorCount >= selected.size());
 
-            int[] positions = selected.getAll();
-            Arrays.sort(positions);
-
-            // Walk backwards through the set, since we're removing positions.
-            // Otherwise, positions would change after the first modification.
-            for (int p = positions.length - 1; p >= 0; p--) {
-                mMarkedForDeletion.append(positions[p], true);
-                mViewAdapter.notifyItemRemoved(positions[p]);
-                if (DEBUG) Log.d(TAG, "Scheduled " + positions[p] + " for delete.");
+            // Adapter notifications must be sent in reverse order of adapter position.  This is
+            // because each removal causes subsequent item adapter positions to change.
+            SparseArray<String> ids = new SparseArray<>();
+            for (int i = ids.size() - 1; i >= 0; i--) {
+                int pos = ids.keyAt(i);
+                mMarkedForDeletion.add(ids.get(pos));
+                mViewAdapter.notifyItemRemoved(pos);
+                if (DEBUG) Log.d(TAG, "Scheduled " + pos + " for delete.");
             }
         }
     }
@@ -249,11 +249,11 @@ public class Model implements DocumentContext {
         synchronized (mPendingDelete) {
             // Iterate over deleted items, temporarily marking them false in the deletion list, and
             // re-adding them to the UI.
-            final int size = mMarkedForDeletion.size();
-            for (int i = 0; i < size; ++i) {
-                final int position = mMarkedForDeletion.keyAt(i);
-                mMarkedForDeletion.put(position, false);
-                mViewAdapter.notifyItemInserted(position);
+            for (String id: mMarkedForDeletion) {
+                Integer pos= mPositions.get(id);
+                checkNotNull(pos);
+                mMarkedForDeletion.remove(id);
+                mViewAdapter.notifyItemInserted(pos);
             }
             resetDeleteData();
         }
@@ -359,19 +359,18 @@ public class Model implements DocumentContext {
     }
 
     void addUpdateListener(UpdateListener listener) {
-        checkState(mUpdateListener == null);
-        mUpdateListener = listener;
+        mUpdateListeners.add(listener);
     }
 
-    static class UpdateListener {
+    static interface UpdateListener {
         /**
          * Called when a successful update has occurred.
          */
-        void onModelUpdate(Model model) {}
+        void onModelUpdate(Model model);
 
         /**
          * Called when an update has been attempted but failed.
          */
-        void onModelUpdateFailed(Exception e) {}
+        void onModelUpdateFailed(Exception e);
     }
 }

@@ -355,6 +355,7 @@ public class DirectoryFragment extends Fragment {
         mSelectionManager.addCallback(new SelectionModeListener());
 
         mModel = new Model(context, mAdapter);
+        mModel.addUpdateListener(mAdapter);
         mModel.addUpdateListener(mModelUpdateListener);
 
         mType = getArguments().getInt(EXTRA_TYPE);
@@ -638,9 +639,9 @@ public class DirectoryFragment extends Fragment {
         private Menu mMenu;
 
         @Override
-        public boolean onBeforeItemStateChange(int position, boolean selected) {
+        public boolean onBeforeItemStateChange(String modelId, boolean selected) {
             if (selected) {
-                final Cursor cursor = mModel.getItem(position);
+                final Cursor cursor = mModel.getItem(modelId);
                 checkNotNull(cursor, "Cursor cannot be null.");
                 final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
@@ -650,8 +651,8 @@ public class DirectoryFragment extends Fragment {
         }
 
         @Override
-        public void onItemStateChanged(int position, boolean selected) {
-            final Cursor cursor = mModel.getItem(position);
+        public void onItemStateChanged(String modelId, boolean selected) {
+            final Cursor cursor = mModel.getItem(modelId);
             checkNotNull(cursor, "Cursor cannot be null.");
 
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
@@ -913,7 +914,7 @@ public class DirectoryFragment extends Fragment {
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    private final class DocumentHolder
+    final class DocumentHolder
             extends RecyclerView.ViewHolder
             implements View.OnKeyListener
     {
@@ -986,14 +987,23 @@ public class DirectoryFragment extends Fragment {
         mRecView.setVisibility(View.VISIBLE);
     }
 
-    private final class DocumentsAdapter extends RecyclerView.Adapter<DocumentHolder> {
+    final class DocumentsAdapter
+        extends RecyclerView.Adapter<DocumentHolder>
+        implements Model.UpdateListener {
 
+        static private final String TAG = "DocumentsAdapter";
         private final Context mContext;
-        private final LayoutInflater mInflater;
+        /**
+         * Map of model IDs to adapter positions. This is the data structure that determines what
+         * shows up in the UI, and where. Note that item positions can change if items are
+         * removed/added, so this list should only be used in onBindViewHolder. See
+         * {@link RecyclerView.Adapter.onCreateViewHolder} for details.
+         */
+        // TODO(stable-id): need to keep this up-to-date when items are added/removed
+        private List<String> mModelIds = new ArrayList<>();
 
         public DocumentsAdapter(Context context) {
             mContext = context;
-            mInflater = LayoutInflater.from(context);
         }
 
         @Override
@@ -1029,7 +1039,7 @@ public class DirectoryFragment extends Fragment {
             final View itemView = holder.itemView;
 
             if (payload.contains(MultiSelectManager.SELECTION_CHANGED_MARKER)) {
-                final boolean selected = isSelected(position);
+                final boolean selected = isSelected(mModelIds.get(position));
                 itemView.setActivated(selected);
                 return;
             } else {
@@ -1046,7 +1056,8 @@ public class DirectoryFragment extends Fragment {
             final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                     context, mThumbSize);
 
-            final Cursor cursor = mModel.getItem(position);
+            final String modelId = mModelIds.get(position);
+            final Cursor cursor = mModel.getItem(modelId);
             checkNotNull(cursor, "Cursor cannot be null.");
 
             final String docAuthority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
@@ -1060,11 +1071,10 @@ public class DirectoryFragment extends Fragment {
             final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
             final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-            // TODO(stable-id): factor the model ID construction code.
-            holder.modelId = docAuthority + "|" + docId;
+            holder.modelId = Model.createId(cursor);
             final View itemView = holder.itemView;
 
-            holder.setSelected(isSelected(position));
+            holder.setSelected(isSelected(modelId));
 
             final ImageView iconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
             final ImageView iconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
@@ -1205,7 +1215,28 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return mModel.getItemCount();
+            if (DEBUG) Log.d(TAG, "getItemCount called: " + mModelIds.size());
+            return mModelIds.size();
+        }
+
+        @Override
+        public void onModelUpdate(Model model) {
+            // TODO(stable-id): Sort model IDs, categorize by dir/file, etc
+            if (DEBUG) Log.d(TAG, "onModelUpdate called");
+            mModelIds = Lists.newArrayList(model.getIds());
+        }
+
+        @Override
+        public void onModelUpdateFailed(Exception e) {
+            if (DEBUG) Log.d(TAG, "onModelUpdateFailed called ");
+            mModelIds.clear();
+        }
+
+        /**
+         * @return The model ID of the item at the given adapter position.
+         */
+        public String getModelId(int adapterPosition) {
+            return mModelIds.get(adapterPosition);
         }
 
     }
@@ -1399,7 +1430,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     public void selectAllFiles() {
-        boolean changed = mSelectionManager.setItemsSelected(0, mModel.getItemCount(), true);
+        boolean changed = mSelectionManager.setItemsSelected(mModel.getIds(), true);
         if (changed) {
             updateDisplayState();
         }
@@ -1670,28 +1701,23 @@ public class DirectoryFragment extends Fragment {
         abstract void onDocumentsReady(List<DocumentInfo> docs);
     }
 
-    boolean isSelected(int position) {
-        return mSelectionManager.getSelection().contains(position);
-    }
-
     boolean isSelected(String modelId) {
-        // TODO(stable-id): implement this
-        return false;
+        return mSelectionManager.getSelection().contains(modelId);
     }
 
     private class ItemClickListener implements ClickListener {
         @Override
         public void onClick(DocumentHolder doc) {
-            final int position = doc.getAdapterPosition();
             if (mSelectionManager.hasSelection()) {
-                mSelectionManager.toggleSelection(position);
+                mSelectionManager.toggleSelection(doc.modelId);
+                mSelectionManager.setSelectionRangeBegin(doc.getAdapterPosition());
             } else {
                 handleViewItem(doc.modelId);
             }
         }
     }
 
-    private class ModelUpdateListener extends Model.UpdateListener {
+    private class ModelUpdateListener implements Model.UpdateListener {
         @Override
         public void onModelUpdate(Model model) {
             if (model.info != null || model.error != null) {

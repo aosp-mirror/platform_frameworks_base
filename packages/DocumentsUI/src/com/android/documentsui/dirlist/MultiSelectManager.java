@@ -28,14 +28,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.AdapterDataObserver;
-import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -47,7 +41,12 @@ import com.android.documentsui.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * MultiSelectManager provides support traditional multi-item selection support to RecyclerView.
@@ -66,15 +65,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
     private final Selection mSelection = new Selection();
 
-    // Only created when selection is cleared.
-    private Selection mIntermediateSelection;
-
     private Range mRanger;
     private SelectionEnvironment mEnvironment;
 
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
-    private Adapter<?> mAdapter;
     private boolean mSingleSelect;
 
     // Payloads for notifyItemChange to distinguish between selection and other events.
@@ -87,7 +82,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @param mode Selection mode
      */
     public MultiSelectManager(final RecyclerView recyclerView, int mode) {
-        this(recyclerView.getAdapter(), new RuntimeSelectionEnvironment(recyclerView), mode);
+        this(new RuntimeSelectionEnvironment(recyclerView), mode);
 
         if (mode == MODE_MULTIPLE) {
             mBandManager = new BandController();
@@ -138,33 +133,41 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(Adapter<?> adapter, SelectionEnvironment environment, int mode) {
-        mAdapter = checkNotNull(adapter, "'adapter' cannot be null.");
+    MultiSelectManager(SelectionEnvironment environment, int mode) {
         mEnvironment = checkNotNull(environment, "'environment' cannot be null.");
         mSingleSelect = mode == MODE_SINGLE;
 
-        mAdapter.registerAdapterDataObserver(
-                new AdapterDataObserver() {
+        mEnvironment.registerDataObserver(
+                new RecyclerView.AdapterDataObserver() {
 
                     @Override
                     public void onChanged() {
+                        // TODO(stable-id): This is causing b/22765812
                         mSelection.clear();
                     }
 
                     @Override
                     public void onItemRangeChanged(
-                            int positionStart, int itemCount, Object payload) {
+                            int startPosition, int itemCount, Object payload) {
                         // No change in position. Ignoring.
                     }
 
                     @Override
-                    public void onItemRangeInserted(int positionStart, int itemCount) {
-                        mSelection.expand(positionStart, itemCount);
+                    public void onItemRangeInserted(int startPosition, int itemCount) {
+                        mSelection.cancelProvisionalSelection();
                     }
 
                     @Override
-                    public void onItemRangeRemoved(int positionStart, int itemCount) {
-                        mSelection.collapse(positionStart, itemCount);
+                    public void onItemRangeRemoved(int startPosition, int itemCount) {
+                        checkState(startPosition >= 0);
+                        checkState(itemCount > 0);
+                        mSelection.cancelProvisionalSelection();
+                        int endPosition = startPosition + itemCount;
+                        // Remove any disappeared IDs from the selection.
+                        for (int i = startPosition; i < endPosition; i++) {
+                            String id = mEnvironment.getModelIdFromAdapterPosition(i);
+                            mSelection.remove(id);
+                        }
                     }
 
                     @Override
@@ -214,36 +217,22 @@ public final class MultiSelectManager implements View.OnKeyListener {
     }
 
     /**
-     * Causes item at {@code position} in adapter to be selected.
-     *
-     * @param position Adapter position
-     * @param selected
-     * @return True if the selection state of the item changed.
-     */
-    @VisibleForTesting
-    public boolean setItemSelected(int position, boolean selected) {
-        if (mSingleSelect && hasSelection()) {
-            clearSelectionQuietly();
-        }
-        return setItemsSelected(position, 1, selected);
-    }
-
-    /**
      * Sets the selected state of the specified items. Note that the callback will NOT
      * be consulted to see if an item can be selected.
      *
-     * @return True if the selection state of any of the items changed.
+     * @param ids
+     * @param selected
+     * @return
      */
-    public boolean setItemsSelected(int position, int length, boolean selected) {
+    public boolean setItemsSelected(Iterable<String> ids, boolean selected) {
         boolean changed = false;
-        for (int i = position; i < position + length; i++) {
-            boolean itemChanged = selected ? mSelection.add(i) : mSelection.remove(i);
+        for (String id: ids) {
+            boolean itemChanged = selected ? mSelection.add(id) : mSelection.remove(id);
             if (itemChanged) {
-                notifyItemStateChanged(i, selected);
+                notifyItemStateChanged(id, selected);
             }
             changed |= itemChanged;
         }
-
         notifySelectionChanged();
         return changed;
     }
@@ -271,15 +260,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
         if (!hasSelection()) {
             return;
         }
-        if (mIntermediateSelection == null) {
-            mIntermediateSelection = new Selection();
-        }
-        getSelection(mIntermediateSelection);
+
+        Selection intermediateSelection = getSelection(new Selection());
         mSelection.clear();
 
-        for (int i = 0; i < mIntermediateSelection.size(); i++) {
-            int position = mIntermediateSelection.get(i);
-            notifyItemStateChanged(position, false);
+        for (String id: intermediateSelection.getAll()) {
+            notifyItemStateChanged(id, false);
         }
     }
 
@@ -301,7 +287,9 @@ public final class MultiSelectManager implements View.OnKeyListener {
             // if this is a mouse click on an item, start selection mode.
             // TODO:  && input.isPrimaryButtonPressed(), but it is returning false.
             if (input.isOverItem() && input.isMouseEvent()) {
-                toggleSelection(input.getItemPosition());
+                int position = input.getItemPosition();
+                toggleSelection(position);
+                setSelectionRangeBegin(position);
             }
             return false;
         }
@@ -330,29 +318,38 @@ public final class MultiSelectManager implements View.OnKeyListener {
             // information about what has changed.
             notifySelectionChanged();
         } else {
-            toggleSelection(input.getItemPosition());
+            int position = input.getItemPosition();
+            toggleSelection(position);
+            setSelectionRangeBegin(position);
         }
     }
 
     /**
-     * Toggles the selection state at position. If an item does end up selected
-     * a new Ranger (range selection manager) at that point is created.
+     * A convenience method for toggling selection by adapter position.
      *
-     * @param position
+     * @param position Adapter position to toggle.
      */
-    public void toggleSelection(int position) {
+    private void toggleSelection(int position) {
         // Position may be special "no position" during certain
         // transitional phases. If so, skip handling of the event.
         if (position == RecyclerView.NO_POSITION) {
             if (DEBUG) Log.d(TAG, "Ignoring toggle for element with no position.");
             return;
         }
+        toggleSelection(mEnvironment.getModelIdFromAdapterPosition(position));
+    }
 
+    /**
+     * Toggles selection on the item with the given model ID.
+     *
+     * @param modelId
+     */
+    public void toggleSelection(String modelId) {
         boolean changed = false;
-        if (mSelection.contains(position)) {
-            changed = attemptDeselect(position);
+        if (mSelection.contains(modelId)) {
+            changed = attemptDeselect(modelId);
         } else {
-            boolean canSelect = notifyBeforeItemStateChange(position, true);
+            boolean canSelect = notifyBeforeItemStateChange(modelId, true);
             if (!canSelect) {
                 return;
             }
@@ -365,8 +362,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             // an item to be selected.
             // By recreating Ranger at this point, we allow the user to create
             // multiple separate contiguous ranges with SHIFT+Click & Click.
-            selectAndNotify(position);
-            setSelectionFocusBegin(position);
+            selectAndNotify(modelId);
             changed = true;
         }
 
@@ -383,57 +379,59 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @throws IllegalStateException if {@code position} is not already be selected
      * @param position
      */
-    void setSelectionFocusBegin(int position) {
-        checkState(mSelection.contains(position));
-        mRanger = new Range(position);
+    void setSelectionRangeBegin(int position) {
+        if (mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(position))) {
+            mRanger = new Range(position);
+        }
     }
 
     /**
-     * Try to select all elements in range. Not that callbacks can cancel selection
-     * of specific items, so some or even all items may not reflect the desired
-     * state after the update is complete.
+     * Try to set selection state for all elements in range. Not that callbacks can cancel selection
+     * of specific items, so some or even all items may not reflect the desired state after the
+     * update is complete.
      *
-     * @param begin inclusive
-     * @param end inclusive
-     * @param selected
+     * @param begin Adapter position for range start (inclusive).
+     * @param end Adapter position for range end (inclusive).
+     * @param selected New selection state.
      */
     private void updateRange(int begin, int end, boolean selected) {
         checkState(end >= begin);
         for (int i = begin; i <= end; i++) {
+            String id = mEnvironment.getModelIdFromAdapterPosition(i);
             if (selected) {
-                boolean canSelect = notifyBeforeItemStateChange(i, true);
+                boolean canSelect = notifyBeforeItemStateChange(id, true);
                 if (canSelect) {
                     if (mSingleSelect && hasSelection()) {
                         clearSelectionQuietly();
                     }
-                    selectAndNotify(i);
+                    selectAndNotify(id);
                 }
             } else {
-                attemptDeselect(i);
+                attemptDeselect(id);
             }
         }
     }
 
     /**
-     * @param position
+     * @param modelId
      * @return True if the update was applied.
      */
-    private boolean selectAndNotify(int position) {
-        boolean changed = mSelection.add(position);
+    private boolean selectAndNotify(String modelId) {
+        boolean changed = mSelection.add(modelId);
         if (changed) {
-            notifyItemStateChanged(position, true);
+            notifyItemStateChanged(modelId, true);
         }
         return changed;
     }
 
     /**
-     * @param position
+     * @param id
      * @return True if the update was applied.
      */
-    private boolean attemptDeselect(int position) {
-        if (notifyBeforeItemStateChange(position, false)) {
-            mSelection.remove(position);
-            notifyItemStateChanged(position, false);
+    private boolean attemptDeselect(String id) {
+        if (notifyBeforeItemStateChange(id, false)) {
+            mSelection.remove(id);
+            notifyItemStateChanged(id, false);
             if (DEBUG) Log.d(TAG, "Selection after deselect: " + mSelection);
             return true;
         } else {
@@ -442,10 +440,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
     }
 
-    private boolean notifyBeforeItemStateChange(int position, boolean nextState) {
+    private boolean notifyBeforeItemStateChange(String id, boolean nextState) {
         int lastListener = mCallbacks.size() - 1;
         for (int i = lastListener; i > -1; i--) {
-            if (!mCallbacks.get(i).onBeforeItemStateChange(position, nextState)) {
+            if (!mCallbacks.get(i).onBeforeItemStateChange(id, nextState)) {
                 return false;
             }
         }
@@ -456,12 +454,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * Notifies registered listeners when the selection status of a single item
      * (identified by {@code position}) changes.
      */
-    private void notifyItemStateChanged(int position, boolean selected) {
+    private void notifyItemStateChanged(String id, boolean selected) {
         int lastListener = mCallbacks.size() - 1;
         for (int i = lastListener; i > -1; i--) {
-            mCallbacks.get(i).onItemStateChanged(position, selected);
+            mCallbacks.get(i).onItemStateChanged(id, selected);
         }
-        mAdapter.notifyItemChanged(position, SELECTION_CHANGED_MARKER);
+        mEnvironment.notifyItemChanged(id, SELECTION_CHANGED_MARKER);
     }
 
     /**
@@ -583,65 +581,40 @@ public final class MultiSelectManager implements View.OnKeyListener {
      */
     public static final class Selection {
 
-        // This class tracks selected positions by managing two arrays: the saved selection, and
-        // the total selection. Saved selections are those which have been completed by tapping an
-        // item or by completing a band select operation. Provisional selections are selections
-        // which have been temporarily created by an in-progress band select operation (once the
-        // user releases the mouse button during a band select operation, the selected items
-        // become saved). The total selection is the combination of both the saved selection and
-        // the provisional selection. Tracking both separately is necessary to ensure that saved
-        // selections do not become deselected when they are removed from the provisional selection;
-        // for example, if item A is tapped (and selected), then an in-progress band select covers A
-        // then uncovers A, A should still be selected as it has been saved. To ensure this
-        // behavior, the saved selection must be tracked separately.
-        private SparseBooleanArray mSavedSelection;
-        private SparseBooleanArray mTotalSelection;
-
-        public Selection() {
-            mSavedSelection = new SparseBooleanArray();
-            mTotalSelection = new SparseBooleanArray();
-        }
+        // This class tracks selected items by managing two sets: the saved selection, and the total
+        // selection. Saved selections are those which have been completed by tapping an item or by
+        // completing a band select operation. Provisional selections are selections which have been
+        // temporarily created by an in-progress band select operation (once the user releases the
+        // mouse button during a band select operation, the selected items become saved). The total
+        // selection is the combination of both the saved selection and the provisional
+        // selection. Tracking both separately is necessary to ensure that saved selections do not
+        // become deselected when they are removed from the provisional selection; for example, if
+        // item A is tapped (and selected), then an in-progress band select covers A then uncovers
+        // A, A should still be selected as it has been saved. To ensure this behavior, the saved
+        // selection must be tracked separately.
+        private Set<String> mSavedSelection = new HashSet<>();
+        private Set<String> mTotalSelection = new HashSet<>();
 
         @VisibleForTesting
-        public Selection(int... positions) {
-            this();
-            for (int i = 0; i < positions.length; i++) {
-                add(positions[i]);
+        public Selection(String... ids) {
+            for (int i = 0; i < ids.length; i++) {
+                add(ids[i]);
             }
         }
 
         /**
-         * @param position
+         * @param id
          * @return true if the position is currently selected.
          */
-        public boolean contains(int position) {
-            return mTotalSelection.get(position);
-        }
-
-        /**
-         * Useful for iterating over selection. Please note that
-         * iteration should be done over a copy of the selection,
-         * not the live selection.
-         *
-         * @see #copyTo(MultiSelectManager.Selection)
-         *
-         * @param index
-         * @return the position value stored at specified index.
-         */
-        public int get(int index) {
-            return mTotalSelection.keyAt(index);
+        public boolean contains(String id) {
+            return mTotalSelection.contains(id);
         }
 
         /**
          * Returns an unordered array of selected positions.
          */
-        public int[] getAll() {
-            final int size = size();
-            int[] positions = new int[size];
-            for (int i = 0; i < size; i++) {
-                positions[i] = get(i);
-            }
-            return positions;
+        public String[] getAll() {
+            return mTotalSelection.toArray(new String[0]);
         }
 
         /**
@@ -655,7 +628,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @return true if the selection is empty.
          */
         public boolean isEmpty() {
-            return mTotalSelection.size() == 0;
+            return mTotalSelection.isEmpty();
         }
 
         /**
@@ -666,37 +639,34 @@ public final class MultiSelectManager implements View.OnKeyListener {
          *     contain a value of true, and entries which were removed contain a value of false.
          */
         @VisibleForTesting
-        protected SparseBooleanArray setProvisionalSelection(
-                SparseBooleanArray provisionalSelection) {
-            SparseBooleanArray delta = new SparseBooleanArray();
+        protected Map<String, Boolean> setProvisionalSelection(Set<String> provisionalSelection) {
+            Map<String, Boolean> delta = new HashMap<>();
 
-            for (int i = 0; i < mTotalSelection.size(); i++) {
-                int position = mTotalSelection.keyAt(i);
-                if (!provisionalSelection.get(position) && !mSavedSelection.get(position)) {
-                    // Remove each item that used to be in the selection but is unsaved and not in
-                    // the new provisional selection.
-                    delta.put(position, false);
+            for (String id: mTotalSelection) {
+                // Mark each item that used to be in the selection but is unsaved and not in the new
+                // provisional selection.
+                if (!provisionalSelection.contains(id) && !mSavedSelection.contains(id)) {
+                    delta.put(id, false);
                 }
             }
 
-            for (int i = 0; i < provisionalSelection.size(); i++) {
-                int position = provisionalSelection.keyAt(i);
-                if (!mTotalSelection.get(position)) {
-                    // Add each item that was not previously in the selection but is in the
-                    // new provisional selection.
-                    delta.put(position, true);
+            for (String id: provisionalSelection) {
+                // Mark each item that was not previously in the selection but is in the new
+                // provisional selection.
+                if (!mTotalSelection.contains(id)) {
+                    delta.put(id, true);
                 }
             }
 
-            // Now, iterate through the changes and actually add/remove them to/from
-            // mCurrentSelection. This could not be done in the previous loops because changing the
-            // size of the selection mid-iteration changes iteration order erroneously.
-            for (int i = 0; i < delta.size(); i++) {
-                int position = delta.keyAt(i);
-                if (delta.get(position)) {
-                    mTotalSelection.put(position, true);
+            // Now, iterate through the changes and actually add/remove them to/from the current
+            // selection. This could not be done in the previous loops because changing the size of
+            // the selection mid-iteration changes iteration order erroneously.
+            for (Map.Entry<String, Boolean> entry: delta.entrySet()) {
+                String id = entry.getKey();
+                if (entry.getValue()) {
+                    mTotalSelection.add(id);
                 } else {
-                    mTotalSelection.delete(position);
+                    mTotalSelection.remove(id);
                 }
             }
 
@@ -710,7 +680,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          */
         @VisibleForTesting
         protected void applyProvisionalSelection() {
-            mSavedSelection = mTotalSelection.clone();
+            mSavedSelection = new HashSet<>(mTotalSelection);
         }
 
         /**
@@ -718,16 +688,16 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * now deselected.
          */
         @VisibleForTesting
-        protected void cancelProvisionalSelection() {
-            mTotalSelection = mSavedSelection.clone();
+        void cancelProvisionalSelection() {
+            mTotalSelection = new HashSet<>(mSavedSelection);
         }
 
         /** @hide */
         @VisibleForTesting
-        boolean add(int position) {
-            if (!mTotalSelection.get(position)) {
-                mTotalSelection.put(position, true);
-                mSavedSelection.put(position, true);
+        boolean add(String id) {
+            if (!mTotalSelection.contains(id)) {
+                mTotalSelection.add(id);
+                mSavedSelection.add(id);
                 return true;
             }
             return false;
@@ -735,68 +705,13 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         /** @hide */
         @VisibleForTesting
-        boolean remove(int position) {
-            if (mTotalSelection.get(position)) {
-                mTotalSelection.delete(position);
-                mSavedSelection.delete(position);
+        boolean remove(String id) {
+            if (mTotalSelection.contains(id)) {
+                mTotalSelection.remove(id);
+                mSavedSelection.remove(id);
                 return true;
             }
             return false;
-        }
-
-        /**
-         * Adjusts the selection range to reflect the existence of newly inserted values at
-         * the specified positions. This has the effect of adjusting all existing selected
-         * positions within the specified range accordingly. Note that this function discards any
-         * provisional selections which may have been applied.
-         *
-         * @param startPosition
-         * @param count
-         * @hide
-         */
-        @VisibleForTesting
-        void expand(int startPosition, int count) {
-            checkState(startPosition >= 0);
-            checkState(count > 0);
-            cancelProvisionalSelection();
-
-            for (int i = 0; i < mTotalSelection.size(); i++) {
-                int itemPosition = mTotalSelection.keyAt(i);
-                if (itemPosition >= startPosition) {
-                    mTotalSelection.setKeyAt(i, itemPosition + count);
-                    mSavedSelection.setKeyAt(i, itemPosition + count);
-                }
-            }
-        }
-
-        /**
-         * Adjusts the selection range to reflect the removal specified positions. This has
-         * the effect of adjusting all existing selected positions within the specified range
-         * accordingly. Note that this function discards any provisional selections which may have
-         * been applied.
-         *
-         * @param startPosition
-         * @param count The length of the range to collapse. Must be greater than 0.
-         * @hide
-         */
-        @VisibleForTesting
-        void collapse(int startPosition, int count) {
-            checkState(startPosition >= 0);
-            checkState(count > 0);
-
-            int endPosition = startPosition + count - 1;
-
-            SparseBooleanArray newSelection = new SparseBooleanArray();
-            for (int i = 0; i < mSavedSelection.size(); i++) {
-                int itemPosition = mSavedSelection.keyAt(i);
-                if (itemPosition < startPosition) {
-                    newSelection.append(itemPosition, true);
-                } else if (itemPosition > endPosition) {
-                    newSelection.append(itemPosition - count, true);
-                }
-            }
-            mSavedSelection = newSelection;
-            cancelProvisionalSelection();
         }
 
         public void clear() {
@@ -806,8 +721,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         @VisibleForTesting
         void copyFrom(Selection source) {
-            mSavedSelection = source.mSavedSelection.clone();
-            mTotalSelection = source.mTotalSelection.clone();
+            mSavedSelection = new HashSet<>(source.mSavedSelection);
+            mTotalSelection = new HashSet<>(source.mTotalSelection);
         }
 
         @Override
@@ -821,11 +736,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     .append(mTotalSelection.size())
                     .append(", ")
                     .append("items=[");
-            for (int i=0; i < mTotalSelection.size(); i++) {
-                if (i > 0) {
+            for (Iterator<String> i = mTotalSelection.iterator(); i.hasNext(); ) {
+                buffer.append(i.next());
+                if (i.hasNext()) {
                     buffer.append(", ");
                 }
-                buffer.append(mTotalSelection.keyAt(i));
             }
             buffer.append("]}");
             return buffer.toString();
@@ -867,13 +782,18 @@ public final class MultiSelectManager implements View.OnKeyListener {
         void removeCallback(Runnable r);
         Point createAbsolutePoint(Point relativePoint);
         Rect getAbsoluteRectForChildViewAt(int index);
-        int getAdapterPositionAt(int index);
         int getAdapterPositionForChildView(View view);
         int getColumnCount();
         int getRowCount();
         int getChildCount();
         int getVisibleChildCount();
         void focusItem(int position);
+        String getModelIdFromAdapterPosition(int position);
+        String getModelIdAt(int index);
+        String getModelIdForChildView(View view);
+        int getItemCount();
+        void notifyItemChanged(String id, String selectionChangedMarker);
+        void registerDataObserver(RecyclerView.AdapterDataObserver observer);
     }
 
     /** Recycler view facade implementation backed by good ol' RecyclerView. */
@@ -883,9 +803,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private final Drawable mBand;
 
         private boolean mIsOverlayShown = false;
+        private DirectoryFragment.DocumentsAdapter mAdapter;
 
         RuntimeSelectionEnvironment(RecyclerView rv) {
             mView = rv;
+            mAdapter = (DirectoryFragment.DocumentsAdapter) rv.getAdapter();
             mBand = mView.getContext().getTheme().getDrawable(R.drawable.band_select_overlay);
         }
 
@@ -899,17 +821,33 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
 
         @Override
-        public int getAdapterPositionAt(int index) {
-            return getAdapterPositionForChildView(mView.getChildAt(index));
+        public String getModelIdForChildView(View view) {
+            if (view.getParent() == mView) {
+                RecyclerView.ViewHolder vh = mView.getChildViewHolder(view);
+                if (vh instanceof DirectoryFragment.DocumentHolder) {
+                    return ((DirectoryFragment.DocumentHolder) vh).modelId;
+                }
+            }
+            return null;
         }
 
         @Override
-        public void addOnScrollListener(OnScrollListener listener) {
+        public String getModelIdFromAdapterPosition(int position) {
+            return mAdapter.getModelId(position);
+        }
+
+        @Override
+        public String getModelIdAt(int index) {
+            return getModelIdForChildView(mView.getChildAt(index));
+        }
+
+        @Override
+        public void addOnScrollListener(RecyclerView.OnScrollListener listener) {
             mView.addOnScrollListener(listener);
         }
 
         @Override
-        public void removeOnScrollListener(OnScrollListener listener) {
+        public void removeOnScrollListener(RecyclerView.OnScrollListener listener) {
             mView.removeOnScrollListener(listener);
         }
 
@@ -943,7 +881,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         @Override
         public int getColumnCount() {
-            LayoutManager layoutManager = mView.getLayoutManager();
+            RecyclerView.LayoutManager layoutManager = mView.getLayoutManager();
             if (layoutManager instanceof GridLayoutManager) {
                 return ((GridLayoutManager) layoutManager).getSpanCount();
             }
@@ -1019,6 +957,34 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     });
             }
         }
+
+        @Override
+        public void notifyItemChanged(String id, String selectionChangedMarker) {
+            // TODO: This could be optimized if we turned on RecyclerView stable IDs.
+            int count = mAdapter.getItemCount();
+            for (int i = 0; i < count; ++i) {
+                RecyclerView.ViewHolder vh = mView.findViewHolderForAdapterPosition(i);
+                // If the view isn't bound, this code never runs because the viewholder won't be
+                // found. That's fine, though, because the only time a view needs to be updated is
+                // when it's bound.
+                if (vh instanceof DirectoryFragment.DocumentHolder) {
+                    if (((DirectoryFragment.DocumentHolder) vh).modelId.equals(id)) {
+                        mAdapter.notifyItemChanged(i, SELECTION_CHANGED_MARKER);
+                    }
+                }
+            }
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return mAdapter.getItemCount();
+        }
+
+        @Override
+        public void registerDataObserver(RecyclerView.AdapterDataObserver observer) {
+            mAdapter.registerAdapterDataObserver(observer);
+        }
     }
 
     public interface Callback {
@@ -1029,17 +995,17 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @param selected <code>true</code> if the item is now selected, <code>false</code>
          *                if the item is now unselected.
          */
-        public void onItemStateChanged(int position, boolean selected);
+        public void onItemStateChanged(String id, boolean selected);
 
         /**
          * Called prior to an item changing state. Callbacks can cancel
          * the change at {@code position} by returning {@code false}.
          *
-         * @param position Adapter position of the item that was checked or unchecked
+         * @param id Adapter position of the item that was checked or unchecked
          * @param selected <code>true</code> if the item is to be selected, <code>false</code>
          *                if the item is to be unselected.
          */
-        public boolean onBeforeItemStateChange(int position, boolean selected);
+        public boolean onBeforeItemStateChange(String id, boolean selected);
 
         /**
          * Called immediately after completion of any set of changes.
@@ -1126,7 +1092,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             return !isActive()
                     && e.isMouseEvent()  // a mouse
                     && e.isActionDown()  // the initial button press
-                    && mAdapter.getItemCount() > 0
+                    && mEnvironment.getItemCount() > 0
                     && e.getItemPosition() == RecyclerView.NO_ID;  // in empty space
         }
 
@@ -1201,12 +1167,15 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mEnvironment.hideBand();
             mSelection.applyProvisionalSelection();
             mModel.endSelection();
-            int firstSelected = mModel.getPositionNearestOrigin();
+            String firstSelected = mModel.getItemNearestOrigin();
             if (!mSelection.contains(firstSelected)) {
                 Log.w(TAG, "First selected by band is NOT in selection!");
                 // Sadly this is really happening. Need to figure out what's going on.
-            } else if (firstSelected != GridModel.NOT_SET) {
-                setSelectionFocusBegin(firstSelected);
+            } else if (firstSelected != null) {
+                // TODO(stable-id): firstSelected should really be lastSelected, we want to anchor the
+                // range where the mouse-up occurred. Also figure out how to translate the model ID
+                // into a position.
+                // setSelectionRangeBegin(firstSelected);
             }
 
             mModel = null;
@@ -1214,11 +1183,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
 
         @Override
-        public void onSelectionChanged(SparseBooleanArray updatedSelection) {
-            SparseBooleanArray delta = mSelection.setProvisionalSelection(updatedSelection);
-            for (int i = 0; i < delta.size(); i++) {
-                int position = delta.keyAt(i);
-                notifyItemStateChanged(position, delta.get(position));
+        public void onSelectionChanged(Set<String> updatedSelection) {
+            Map<String, Boolean> delta = mSelection.setProvisionalSelection(updatedSelection);
+            for (Map.Entry<String, Boolean> entry: delta.entrySet()) {
+                notifyItemStateChanged(entry.getKey(), entry.getValue());
             }
             notifySelectionChanged();
         }
@@ -1369,7 +1337,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         // by their y-offset. For example, if the first column of the view starts at an x-value of 5,
         // mColumns.get(5) would return an array of positions in that column. Within that array, the
         // value for key y is the adapter position for the item whose y-offset is y.
-        private final SparseArray<SparseIntArray> mColumns = new SparseArray<>();
+        private final SparseArray<SparseArray<String>> mColumns = new SparseArray<>();
 
         // List of limits along the x-axis (columns).
         // This list is sorted from furthest left to furthest right.
@@ -1380,11 +1348,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private final List<Limits> mRowBounds = new ArrayList<>();
 
         // The adapter positions which have been recorded so far.
-        private final SparseBooleanArray mKnownPositions = new SparseBooleanArray();
+        private final Set<String> mKnownIds = new HashSet<>();
 
         // Array passed to registered OnSelectionChangedListeners. One array is created and reused
         // throughout the lifetime of the object.
-        private final SparseBooleanArray mSelection = new SparseBooleanArray();
+        private final Set<String> mSelection = new HashSet<>();
 
         // The current pointer (in absolute positioning from the top of the view).
         private Point mPointer = null;
@@ -1397,7 +1365,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         // Tracks where the band select originated from. This is used to determine where selections
         // should expand from when Shift+click is used.
-        private int mPositionNearestOrigin = NOT_SET;
+        private String mItemNearestOrigin = null;
 
         GridModel(SelectionEnvironment helper) {
             mHelper = helper;
@@ -1454,8 +1422,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @return The adapter position for the item nearest the origin corresponding to the latest
          *         band select operation, or NOT_SET if the selection did not cover any items.
          */
-        int getPositionNearestOrigin() {
-            return mPositionNearestOrigin;
+        String getItemNearestOrigin() {
+            return mItemNearestOrigin;
         }
 
         @Override
@@ -1475,11 +1443,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
          */
         private void recordVisibleChildren() {
             for (int i = 0; i < mHelper.getVisibleChildCount(); i++) {
-                int adapterPosition = mHelper.getAdapterPositionAt(i);
-                if (!mKnownPositions.get(adapterPosition)) {
-                    mKnownPositions.put(adapterPosition, true);
-                    recordItemData(
-                            mHelper.getAbsoluteRectForChildViewAt(i), adapterPosition);
+                String modelId = mHelper.getModelIdAt(i);
+                if (!mKnownIds.contains(modelId)) {
+                    mKnownIds.add(modelId);
+                    recordItemData(mHelper.getAbsoluteRectForChildViewAt(i), modelId);
                 }
             }
         }
@@ -1489,7 +1456,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @param absoluteChildRect The absolute rectangle for the child view being processed.
          * @param adapterPosition The position of the child view being processed.
          */
-        private void recordItemData(Rect absoluteChildRect, int adapterPosition) {
+        private void recordItemData(Rect absoluteChildRect, String modelId) {
             if (mColumnBounds.size() != mHelper.getColumnCount()) {
                 // If not all x-limits have been recorded, record this one.
                 recordLimits(
@@ -1502,12 +1469,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
                         mRowBounds, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
             }
 
-            SparseIntArray columnList = mColumns.get(absoluteChildRect.left);
+            SparseArray<String> columnList = mColumns.get(absoluteChildRect.left);
             if (columnList == null) {
-                columnList = new SparseIntArray();
+                columnList = new SparseArray<>();
                 mColumns.put(absoluteChildRect.left, columnList);
             }
-            columnList.put(absoluteChildRect.top, adapterPosition);
+            columnList.put(absoluteChildRect.top, modelId);
         }
 
         /**
@@ -1544,7 +1511,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 updateSelection(computeBounds());
             } else {
                 mSelection.clear();
-                mPositionNearestOrigin = NOT_SET;
+                mItemNearestOrigin = null;
             }
         }
 
@@ -1573,11 +1540,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 columnEndIndex = i;
             }
 
-            SparseIntArray firstColumn =
+            SparseArray<String> firstColumn =
                     mColumns.get(mColumnBounds.get(columnStartIndex).lowerLimit);
             int rowStartIndex = firstColumn.indexOfKey(rect.top);
             if (rowStartIndex < 0) {
-                mPositionNearestOrigin = NOT_SET;
+                mItemNearestOrigin = null;
                 return;
             }
 
@@ -1598,15 +1565,15 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 int columnStartIndex, int columnEndIndex, int rowStartIndex, int rowEndIndex) {
             mSelection.clear();
             for (int column = columnStartIndex; column <= columnEndIndex; column++) {
-                SparseIntArray items = mColumns.get(mColumnBounds.get(column).lowerLimit);
+                SparseArray<String> items = mColumns.get(mColumnBounds.get(column).lowerLimit);
                 for (int row = rowStartIndex; row <= rowEndIndex; row++) {
-                    int position = items.get(items.keyAt(row));
-                    mSelection.append(position, true);
+                    String id = items.get(items.keyAt(row));
+                    mSelection.add(id);
                     if (isPossiblePositionNearestOrigin(column, columnStartIndex, columnEndIndex,
                             row, rowStartIndex, rowEndIndex)) {
                         // If this is the position nearest the origin, record it now so that it
                         // can be returned by endSelection() later.
-                        mPositionNearestOrigin = position;
+                        mItemNearestOrigin = id;
                     }
                 }
             }
@@ -1643,7 +1610,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * Listener for changes in which items have been band selected.
          */
         static interface OnSelectionChangedListener {
-            public void onSelectionChanged(SparseBooleanArray updatedSelection);
+            public void onSelectionChanged(Set<String> updatedSelection);
         }
 
         void addOnSelectionChangedListener(OnSelectionChangedListener listener) {
@@ -1965,18 +1932,23 @@ public final class MultiSelectManager implements View.OnKeyListener {
             return false;
         }
 
-        return attemptChangePosition(position, event.isShiftPressed());
+        return attemptChangeFocus(position, event.isShiftPressed());
     }
 
+    /**
+     * @param targetPosition The adapter position to focus.
+     * @param extendSelection
+     */
     @VisibleForTesting
-    boolean attemptChangePosition(int targetPosition, boolean isShiftPressed) {
+    boolean attemptChangeFocus(int targetPosition, boolean extendSelection) {
         // Focus the new file.
         mEnvironment.focusItem(targetPosition);
 
-        if (isShiftPressed) {
+        if (extendSelection) {
             if (!hasSelection()) {
                 // If there is no selection, start a selection when the user presses shift-arrow.
                 toggleSelection(targetPosition);
+                setSelectionRangeBegin(targetPosition);
             } else if (!mSingleSelect) {
                 mRanger.snapSelection(targetPosition);
                 notifySelectionChanged();
@@ -1999,7 +1971,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
             position = 0;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
-            position = mAdapter.getItemCount() - 1;
+            position = mEnvironment.getItemCount() - 1;
         } else {
             // Find a navigation target based on the arrow key that the user pressed.  Ignore
             // navigation targets that aren't items in the recycler view.
