@@ -1207,7 +1207,7 @@
       </a>
       </li>
       <li><a href="<?cs var:toroot ?>training/enterprise/work-policy-ctrl.html">
-        Building a Work Policy Controller
+        Building a Device Policy Controller
       </a>
       </li>
     </ul>
