@@ -80,7 +80,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals("displayName", "Device Storage", cursor.getString(5));
             assertTrue("summary", cursor.isNull(6));
             assertTrue("lastModified", cursor.isNull(7));
-            assertTrue("icon", cursor.isNull(8));
+            assertEquals("icon", R.drawable.ic_root_mtp, cursor.getInt(8));
             assertEquals("flag", 0, cursor.getInt(9));
             assertEquals("size", 1000, cursor.getInt(10));
 
@@ -111,7 +111,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             cursor.moveToNext();
             assertEquals(1, cursor.getInt(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
-            assertTrue(cursor.isNull(2));
+            assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device Storage", cursor.getString(3));
             assertTrue(cursor.isNull(4));
             assertEquals(1, cursor.getInt(5));
@@ -121,7 +121,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             cursor.moveToNext();
             assertEquals(2, cursor.getInt(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
-            assertTrue(cursor.isNull(2));
+            assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device Storage", cursor.getString(3));
             assertTrue(cursor.isNull(4));
             assertEquals(2, cursor.getInt(5));
@@ -131,7 +131,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             cursor.moveToNext();
             assertEquals(3, cursor.getInt(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
-            assertTrue(cursor.isNull(2));
+            assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device /@#%&<>Storage", cursor.getString(3));
             assertTrue(cursor.isNull(4));
             assertEquals(3, cursor.getInt(5));
