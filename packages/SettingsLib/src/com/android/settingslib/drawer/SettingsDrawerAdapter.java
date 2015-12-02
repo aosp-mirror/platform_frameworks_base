@@ -38,7 +38,7 @@ public class SettingsDrawerAdapter extends BaseAdapter {
     }
 
     void updateCategories() {
-        List<DashboardCategory> categories = mActivity.getDashboardCategories(true);
+        List<DashboardCategory> categories = mActivity.getDashboardCategories();
         mItems.clear();
         for (int i = 0; i < categories.size(); i++) {
             Item category = new Item();

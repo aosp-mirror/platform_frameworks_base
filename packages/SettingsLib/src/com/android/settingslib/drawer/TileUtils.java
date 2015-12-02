@@ -14,6 +14,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -35,6 +36,7 @@ import java.util.Map;
 public class TileUtils {
 
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_TIMING = true;
 
     private static final String LOG_TAG = "TileUtils";
 
@@ -105,12 +107,9 @@ public class TileUtils {
 
     private static final String SETTING_PKG = "com.android.settings";
 
-    public static List<DashboardCategory> getCategories(Context context) {
-        return getCategories(context, new HashMap<Pair<String, String>, DashboardTile>());
-    }
-
     public static List<DashboardCategory> getCategories(Context context,
             HashMap<Pair<String, String>, DashboardTile> cache) {
+        final long startTime = System.currentTimeMillis();
         ArrayList<DashboardTile> tiles = new ArrayList<>();
         UserManager userManager = UserManager.get(context);
         for (UserHandle user : userManager.getUserProfiles()) {
@@ -143,6 +142,8 @@ public class TileUtils {
             Collections.sort(category.tiles, TILE_COMPARATOR);
         }
         Collections.sort(categories, CATEGORY_COMPARATOR);
+        if (DEBUG_TIMING) Log.d(LOG_TAG, "getCategories took "
+                + (System.currentTimeMillis() - startTime) + " ms");
         return categories;
     }
 
@@ -207,7 +208,9 @@ public class TileUtils {
                         activityInfo.packageName, activityInfo.name);
                 tile.category = categoryKey;
                 tile.priority = requireSettings ? resolved.priority : 0;
-                updateTileData(context, tile);
+                tile.metaData = activityInfo.metaData;
+                updateTileData(context, tile, activityInfo, activityInfo.applicationInfo,
+                        pm);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
 
                 addedCache.put(key, tile);
@@ -231,64 +234,52 @@ public class TileUtils {
         return null;
     }
 
-    private static boolean updateTileData(Context context, DashboardTile tile) {
-        Intent intent = tile.intent;
-        if (intent != null) {
-            // Find the activity that is in the system image
-            PackageManager pm = context.getPackageManager();
-            List<ResolveInfo> list = tile.userHandle.size() != 0
-                    ? pm.queryIntentActivitiesAsUser(intent, PackageManager.GET_META_DATA,
-                            tile.userHandle.get(0).getIdentifier())
-                    : pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
-            int listSize = list.size();
-            for (int i = 0; i < listSize; i++) {
-                ResolveInfo resolveInfo = list.get(i);
-                if (resolveInfo.activityInfo.applicationInfo.isSystemApp()) {
-                    int icon = 0;
-                    CharSequence title = null;
-                    String summary = null;
+    private static boolean updateTileData(Context context, DashboardTile tile,
+            ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
+        if (applicationInfo.isSystemApp()) {
+            int icon = 0;
+            CharSequence title = null;
+            String summary = null;
 
-                    // Get the activity's meta-data
-                    try {
-                        Resources res = pm.getResourcesForApplication(
-                                resolveInfo.activityInfo.packageName);
-                        Bundle metaData = resolveInfo.activityInfo.metaData;
+            // Get the activity's meta-data
+            try {
+                Resources res = pm.getResourcesForApplication(
+                        applicationInfo.packageName);
+                Bundle metaData = activityInfo.metaData;
 
-                        if (res != null && metaData != null) {
-                            if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
-                                icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
-                            }
-                            if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
-                                title = metaData.getString(META_DATA_PREFERENCE_TITLE);
-                            }
-                            if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
-                                summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
-                            }
-                        }
-                    } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
-                        if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
+                if (res != null && metaData != null) {
+                    if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
+                        icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
                     }
-
-                    // Set the preference title to the activity's label if no
-                    // meta-data is found
-                    if (TextUtils.isEmpty(title)) {
-                        title = resolveInfo.loadLabel(pm).toString();
+                    if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+                        title = metaData.getString(META_DATA_PREFERENCE_TITLE);
                     }
-                    if (icon == 0) {
-                        icon = resolveInfo.activityInfo.icon;
+                    if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
+                        summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
                     }
-
-                    // Set icon, title and summary for the preference
-                    tile.icon = Icon.createWithResource(resolveInfo.activityInfo.packageName, icon);
-                    tile.title = title;
-                    tile.summary = summary;
-                    // Replace the intent with this specific activity
-                    tile.intent = new Intent().setClassName(resolveInfo.activityInfo.packageName,
-                            resolveInfo.activityInfo.name);
-
-                    return true;
                 }
+            } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
+                if (DEBUG) Log.d(LOG_TAG, "Couldn't find info", e);
             }
+
+            // Set the preference title to the activity's label if no
+            // meta-data is found
+            if (TextUtils.isEmpty(title)) {
+                title = activityInfo.loadLabel(pm).toString();
+            }
+            if (icon == 0) {
+                icon = activityInfo.icon;
+            }
+
+            // Set icon, title and summary for the preference
+            tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
+            tile.title = title;
+            tile.summary = summary;
+            // Replace the intent with this specific activity
+            tile.intent = new Intent().setClassName(activityInfo.packageName,
+                    activityInfo.name);
+
+            return true;
         }
 
         return false;

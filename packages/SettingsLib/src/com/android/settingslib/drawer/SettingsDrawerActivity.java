@@ -18,9 +18,15 @@ package com.android.settingslib.drawer;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.TypedArray;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -33,20 +39,29 @@ import android.widget.ListView;
 import android.widget.Toolbar;
 import com.android.settingslib.R;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class SettingsDrawerActivity extends Activity {
 
+    protected static final boolean DEBUG_TIMING = false;
+    private static final String TAG = "SettingsDrawerActivity";
+
+    private static List<DashboardCategory> sDashboardCategories;
+    private static HashMap<Pair<String, String>, DashboardTile> sTileCache;
+
+    private final PackageReceiver mPackageReceiver = new PackageReceiver();
+    private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
+
     private SettingsDrawerAdapter mDrawerAdapter;
-    // Hold on to a cache of tiles to avoid loading the info multiple times.
-    private final HashMap<Pair<String, String>, DashboardTile> mTileCache = new HashMap<>();
-    private List<DashboardCategory> mDashboardCategories;
     private DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        long startTime = System.currentTimeMillis();
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.setContentView(R.layout.settings_with_drawer);
@@ -62,6 +77,10 @@ public class SettingsDrawerActivity extends Activity {
             mDrawerLayout = null;
             return;
         }
+        if (sDashboardCategories == null) {
+            sTileCache = new HashMap<>();
+            sDashboardCategories = TileUtils.getCategories(this, sTileCache);
+        }
         setActionBar(toolbar);
         mDrawerAdapter = new SettingsDrawerAdapter(this);
         ListView listView = (ListView) findViewById(R.id.left_drawer);
@@ -72,6 +91,8 @@ public class SettingsDrawerActivity extends Activity {
                 onTileClicked(mDrawerAdapter.getTile(position));
             };
         });
+        if (DEBUG_TIMING) Log.d(TAG, "onCreate took " + (System.currentTimeMillis() - startTime)
+                + " ms");
     }
 
     @Override
@@ -88,7 +109,29 @@ public class SettingsDrawerActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        updateDrawer();
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addDataScheme("package");
+        registerReceiver(mPackageReceiver, filter);
+
+        new CategoriesUpdater().execute();
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(mPackageReceiver);
+
+        super.onPause();
+    }
+
+    public void addCategoryListener(CategoryListener listener) {
+        mCategoryListeners.add(listener);
+    }
+
+    public void remCategoryListener(CategoryListener listener) {
+        mCategoryListeners.remove(listener);
     }
 
     public void openDrawer() {
@@ -134,11 +177,16 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
-    public List<DashboardCategory> getDashboardCategories(boolean force) {
-        if (force) {
-            mDashboardCategories = TileUtils.getCategories(this, mTileCache);
+    public List<DashboardCategory> getDashboardCategories() {
+        return sDashboardCategories;
+    }
+
+    protected void onCategoriesChanged() {
+        updateDrawer();
+        final int N = mCategoryListeners.size();
+        for (int i = 0; i < N; i++) {
+            mCategoryListeners.get(i).onCategoriesChanged();
         }
-        return mDashboardCategories;
     }
 
     public boolean openTile(DashboardTile tile) {
@@ -166,5 +214,29 @@ public class SettingsDrawerActivity extends Activity {
 
     public void onProfileTileOpen() {
         finish();
+    }
+
+    public interface CategoryListener {
+        void onCategoriesChanged();
+    }
+
+    private class CategoriesUpdater extends AsyncTask<Void, Void, List<DashboardCategory>> {
+        @Override
+        protected List<DashboardCategory> doInBackground(Void... params) {
+            return TileUtils.getCategories(SettingsDrawerActivity.this, sTileCache);
+        }
+
+        @Override
+        protected void onPostExecute(List<DashboardCategory> dashboardCategories) {
+            sDashboardCategories = dashboardCategories;
+            onCategoriesChanged();
+        }
+    }
+
+    private class PackageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            new CategoriesUpdater().execute();
+        }
     }
 }

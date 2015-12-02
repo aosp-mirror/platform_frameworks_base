@@ -74,6 +74,11 @@ public class DashboardTile implements Parcelable {
      */
     public int priority;
 
+    /**
+     * The metaData from the activity that defines this tile.
+     */
+    public Bundle metaData;
+
     public DashboardTile() {
         // Empty
     }
@@ -107,6 +112,7 @@ public class DashboardTile implements Parcelable {
         dest.writeBundle(extras);
         dest.writeString(category);
         dest.writeInt(priority);
+        dest.writeBundle(metaData);
     }
 
     public void readFromParcel(Parcel in) {
@@ -125,6 +131,7 @@ public class DashboardTile implements Parcelable {
         extras = in.readBundle();
         category = in.readString();
         priority = in.readInt();
+        metaData = in.readBundle();
     }
 
     DashboardTile(Parcel in) {
