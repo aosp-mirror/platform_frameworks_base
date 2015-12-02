@@ -551,7 +551,7 @@ final class TaskRecord {
                     mLastThumbnailFile.delete();
                 }
             } else {
-                mService.mTaskPersister.saveImage(thumbnail, mLastThumbnailFile.getAbsolutePath());
+                mService.mRecentTasks.saveImage(thumbnail, mLastThumbnailFile.getAbsolutePath());
             }
             return true;
         }
@@ -563,7 +563,7 @@ final class TaskRecord {
         thumbs.thumbnailInfo = mLastThumbnailInfo;
         thumbs.thumbnailFileDescriptor = null;
         if (mLastThumbnail == null) {
-            thumbs.mainThumbnail = mService.mTaskPersister.getImageFromWriteQueue(
+            thumbs.mainThumbnail = mService.mRecentTasks.getImageFromWriteQueue(
                     mLastThumbnailFile.getAbsolutePath());
         }
         // Only load the thumbnail file if we don't have a thumbnail

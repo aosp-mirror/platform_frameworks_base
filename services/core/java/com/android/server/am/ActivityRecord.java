@@ -1268,7 +1268,7 @@ final class ActivityRecord {
             final String iconFilename = createImageFilename(createTime, task.taskId);
             final File iconFile = new File(TaskPersister.getUserImagesDir(userId), iconFilename);
             final String iconFilePath = iconFile.getAbsolutePath();
-            mStackSupervisor.mService.mTaskPersister.saveImage(icon, iconFilePath);
+            service.mRecentTasks.saveImage(icon, iconFilePath);
             _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;

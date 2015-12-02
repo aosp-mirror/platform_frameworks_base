@@ -262,10 +262,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // For debugging to make sure the caller when acquiring/releasing our
     // wake lock is the system process.
     static final boolean VALIDATE_WAKE_LOCK_CALLER = false;
+    /** The number of distinct task ids that can be assigned to the tasks of a single user */
+    private static final int MAX_TASK_IDS_PER_USER = UserHandle.PER_USER_RANGE;
 
     final ActivityManagerService mService;
 
-    private final RecentTasks mRecentTasks;
+    private RecentTasks mRecentTasks;
 
     final ActivityStackSupervisorHandler mHandler;
 
@@ -276,9 +278,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** Counter for next free stack ID to use for dynamic activity stacks. */
     private int mNextFreeStackId = FIRST_DYNAMIC_STACK_ID;
 
-    /** Task identifier that activities are currently being started in.  Incremented each time a
-     * new task is created. */
-    private int mCurTaskId = 0;
+    /**
+     * Maps the task identifier that activities are currently being started in to the userId of the
+     * task. Each time a new task is created, the entry for the userId of the task is incremented
+     */
+    private final SparseIntArray mCurTaskIdForUser = new SparseIntArray(20);
 
     /** The current user */
     int mCurrentUser;
@@ -430,12 +434,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    public ActivityStackSupervisor(ActivityManagerService service, RecentTasks recentTasks) {
+    public ActivityStackSupervisor(ActivityManagerService service) {
         mService = service;
-        mRecentTasks = recentTasks;
         mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
         mResizeDockedStackTimeout = new ResizeDockedStackTimeout(service, this, mHandler);
+    }
+
+    void setRecentTasks(RecentTasks recentTasks) {
+        mRecentTasks = recentTasks;
     }
 
     /**
@@ -679,20 +686,37 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
-    void setNextTaskId(int taskId) {
-        if (taskId > mCurTaskId) {
-            mCurTaskId = taskId;
+    void setNextTaskIdForUserLocked(int taskId, int userId) {
+        final int currentTaskId = mCurTaskIdForUser.get(userId, -1);
+        if (taskId > currentTaskId) {
+            mCurTaskIdForUser.put(userId, taskId);
         }
     }
 
-    int getNextTaskId() {
-        do {
-            mCurTaskId++;
-            if (mCurTaskId <= 0) {
-                mCurTaskId = 1;
+    int getNextTaskIdForUserLocked(int userId) {
+        mRecentTasks.loadUserRecentsLocked(userId);
+        final int currentTaskId = mCurTaskIdForUser.get(userId, userId * MAX_TASK_IDS_PER_USER);
+        // for a userId u, a taskId can only be in the range
+        // [u*MAX_TASK_IDS_PER_USER, (u+1)*MAX_TASK_IDS_PER_USER-1], so if MAX_TASK_IDS_PER_USER
+        // was 10, user 0 could only have taskIds 0 to 9, user 1: 10 to 19, user 2: 20 to 29, so on.
+        int candidateTaskId = currentTaskId;
+        while (anyTaskForIdLocked(candidateTaskId, !RESTORE_FROM_RECENTS,
+                INVALID_STACK_ID) != null) {
+            candidateTaskId++;
+            if (candidateTaskId == (userId + 1) * MAX_TASK_IDS_PER_USER) {
+                // Wrap around as there will be smaller task ids that are available now.
+                candidateTaskId -= MAX_TASK_IDS_PER_USER;
             }
-        } while (anyTaskForIdLocked(mCurTaskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID) != null);
-        return mCurTaskId;
+            if (candidateTaskId == currentTaskId) {
+                // Something wrong!
+                // All MAX_TASK_IDS_PER_USER task ids are taken up by running tasks for this user
+                throw new IllegalStateException("Cannot get an available task id."
+                        + " Reached limit of " + MAX_TASK_IDS_PER_USER
+                        + " running tasks per user.");
+            }
+        }
+        mCurTaskIdForUser.put(userId, candidateTaskId);
+        return candidateTaskId;
     }
 
     ActivityRecord resumedAppLocked() {
@@ -2796,7 +2820,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         pw.print(prefix); pw.print("mFocusedStack=" + mFocusedStack);
                 pw.print(" mLastFocusedStack="); pw.println(mLastFocusedStack);
         pw.print(prefix); pw.println("mSleepTimeout=" + mSleepTimeout);
-        pw.print(prefix); pw.println("mCurTaskId=" + mCurTaskId);
+        pw.print(prefix);
+        pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
         pw.print(prefix); pw.println("mActivityContainers=" + mActivityContainers);
         pw.print(prefix); pw.print("mLockTaskModeState=" + lockTaskModeToString());

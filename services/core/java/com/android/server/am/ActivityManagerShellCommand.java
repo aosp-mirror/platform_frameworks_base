@@ -21,6 +21,8 @@ import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.PrintWriter;
 
 class ActivityManagerShellCommand extends ShellCommand {
@@ -58,6 +60,8 @@ class ActivityManagerShellCommand extends ShellCommand {
                     return runTrackAssociations(pw);
                 case "untrack-associations":
                     return runUntrackAssociations(pw);
+                case "is-user-stopped":
+                    return runIsUserStopped(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -65,6 +69,13 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    int runIsUserStopped(PrintWriter pw) {
+        int userId = UserHandle.parseUserArg(getNextArgRequired());
+        boolean stopped = mInternal.isUserStopped(userId);
+        pw.println(stopped);
+        return 0;
     }
 
     int runForceStop(PrintWriter pw) throws RemoteException {
@@ -107,7 +118,7 @@ class ActivityManagerShellCommand extends ShellCommand {
     int runWrite(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerUidObserver()");
-        mInternal.mTaskPersister.flush();
+        mInternal.mRecentTasks.flush();
         pw.println("All tasks persisted.");
         return 0;
     }
@@ -190,6 +201,8 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    Enable association tracking.");
             pw.println("  untrack-associations");
             pw.println("    Disable and clear association tracking.");
+            pw.println("  is-user-stopped <USER_ID>");
+            pw.println("    returns whether <USER_ID> has been stopped or not");
         }
     }
 }

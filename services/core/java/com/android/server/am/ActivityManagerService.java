@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
-
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.AssistUtils;
@@ -202,6 +201,7 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
@@ -565,7 +565,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * List of intents that were used to start the most recent tasks.
      */
-    private final RecentTasks mRecentTasks;
+    final RecentTasks mRecentTasks;
 
     /**
      * For addAppTask: cached of the last activity component that was added.
@@ -1051,11 +1051,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
-
-    /**
-     * Save recent tasks information across reboots.
-     */
-    final TaskPersister mTaskPersister;
 
     /**
      * Current configuration information.  HistoryRecord objects are given
@@ -2509,10 +2504,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
-        mRecentTasks = new RecentTasks(this);
-        mStackSupervisor = new ActivityStackSupervisor(this, mRecentTasks);
+        mStackSupervisor = new ActivityStackSupervisor(this);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
-        mTaskPersister = new TaskPersister(systemDir, mStackSupervisor, mRecentTasks);
+        mRecentTasks = new RecentTasks(this, mStackSupervisor);
+
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -2564,6 +2559,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mAppOpsService.publish(mContext);
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
+    }
+
+    void onUserStoppedLocked(int userId) {
+        mRecentTasks.unloadUserRecentsLocked(userId);
     }
 
     public void initPowerManagement() {
@@ -8851,6 +8850,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     android.Manifest.permission.GET_DETAILED_TASKS)
                     == PackageManager.PERMISSION_GRANTED;
 
+            mRecentTasks.loadUserRecentsLocked(userId);
+
             final int recentsCount = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res =
                     new ArrayList<>(maxNum < recentsCount ? maxNum : recentsCount);
@@ -9013,8 +9014,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 thumbnailInfo.taskHeight = displaySize.y;
                 thumbnailInfo.screenOrientation = mConfiguration.orientation;
 
-                TaskRecord task = new TaskRecord(this, mStackSupervisor.getNextTaskId(), ainfo,
-                        intent, description, thumbnailInfo);
+                TaskRecord task = new TaskRecord(this,
+                        mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
+                        ainfo, intent, description, thumbnailInfo);
 
                 int trimIdx = mRecentTasks.trimForTaskLocked(task, false);
                 if (trimIdx >= 0) {
@@ -9173,9 +9175,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 passedIconFile.getName());
         if (!legitIconFile.getPath().equals(filePath)
                 || !filePath.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {
-            throw new IllegalArgumentException("Bad file path: " + filePath);
+            throw new IllegalArgumentException("Bad file path: " + filePath
+                    + " passed for userId " + userId);
         }
-        return mTaskPersister.getTaskDescriptionIcon(filePath);
+        return mRecentTasks.getTaskDescriptionIcon(filePath);
     }
 
     @Override
@@ -11145,11 +11148,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /** Pokes the task persister. */
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
-        if (task != null && task.stack != null && task.stack.isHomeStack()) {
-            // Never persist the home stack.
-            return;
-        }
-        mTaskPersister.wakeup(task, flush);
+        mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
     /** Notifies all listeners when the task stack has changed. */
@@ -12562,11 +12561,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // security checks.
             mUserController.updateCurrentProfileIdsLocked();
 
-            mRecentTasks.clear();
-            mRecentTasks.addAll(mTaskPersister.restoreTasksLocked(mUserController.getUserIds()));
-            mRecentTasks.cleanupLocked(UserHandle.USER_ALL);
-            mTaskPersister.startPersisting();
-
+            mRecentTasks.onSystemReady();
             // Check to see if there are any update receivers to run.
             if (!mDidUpdate) {
                 if (mWaitingUpdate) {
@@ -20818,10 +20813,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mUserController.stopUser(userId, force, callback);
     }
 
-    void onUserRemovedLocked(int userId) {
-        mRecentTasks.removeTasksForUserLocked(userId);
-    }
-
     @Override
     public UserInfo getCurrentUser() {
         return mUserController.getCurrentUser();
@@ -20874,6 +20865,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         ApplicationInfo newInfo = new ApplicationInfo(info);
         newInfo.initForUser(userId);
         return newInfo;
+    }
+
+    public boolean isUserStopped(int userId) {
+        return mUserController.getStartedUserStateLocked(userId) == null;
     }
 
     ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId) {
@@ -21028,7 +21023,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void onUserRemoved(int userId) {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.onUserRemovedLocked(userId);
+                ActivityManagerService.this.onUserStoppedLocked(userId);
             }
         }
     }

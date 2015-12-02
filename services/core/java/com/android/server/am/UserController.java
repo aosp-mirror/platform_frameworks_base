@@ -419,6 +419,7 @@ final class UserController {
                 mUserLru.remove(Integer.valueOf(userId));
                 updateStartedUserArrayLocked();
 
+                mService.onUserStoppedLocked(userId);
                 // Clean up all state and processes associated with the user.
                 // Kill all the processes for the user.
                 forceStopUserLocked(userId, "finish user");
@@ -1121,8 +1122,7 @@ final class UserController {
             UserState uss = mStartedUsers.valueAt(i);
             if (uss.state != UserState.STATE_STOPPING
                     && uss.state != UserState.STATE_SHUTDOWN) {
-                mStartedUserArray[num] = mStartedUsers.keyAt(i);
-                num++;
+                mStartedUserArray[num++] = mStartedUsers.keyAt(i);
             }
         }
     }
