@@ -179,6 +179,10 @@ class UiBot {
         return find(By.res("com.android.documentsui:id/menu_delete"));
     }
 
+    UiObject2 menuShare() {
+        return find(By.res("com.android.documentsui:id/menu_share"));
+    }
+
     private UiObject2 find(BySelector selector) {
         mDevice.wait(Until.findObject(selector), mTimeout);
         return mDevice.findObject(selector);
