@@ -1684,27 +1684,4 @@ public abstract class SensorManager {
         }
         return delay;
     }
-
-    /**
-     * Send configuration string to Sensor HAL.
-     *
-     * @param data String which includes sensor physical data.
-     *        Sensor HAL is taking care of parsing data from string and
-     *        setting values to Sensor HW.
-     *
-     * @return true if successfully send to HAL.
-     */
-     /**
-     * @hide
-     */
-    public boolean SetPhysicalData(String data)
-    {
-        //Log.d(TAG, "SensorManager.SetPhysicalData(" + data + ")");
-        return SetPhysicalDataImpl(data);
-    }
-
-     /**
-     * @hide
-     */
-     protected abstract boolean SetPhysicalDataImpl(String data);
 }
