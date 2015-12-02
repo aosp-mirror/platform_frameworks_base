@@ -15,6 +15,7 @@
  */
 
 #include "TestSceneBase.h"
+#include "utils/Color.h"
 
 class RecentsAnimation;
 
@@ -29,16 +30,16 @@ class RecentsAnimation : public TestScene {
 public:
     void createContent(int width, int height, TestCanvas& renderer) override {
         static SkColor COLORS[] = {
-                0xFFF44336,
-                0xFF9C27B0,
-                0xFF2196F3,
-                0xFF4CAF50,
+                Color::Red_500,
+                Color::Purple_500,
+                Color::Blue_500,
+                Color::Green_500,
         };
 
         thumbnailSize = std::min(std::min(width, height) / 2, 720);
         int cardsize = std::min(width, height) - dp(64);
 
-        renderer.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        renderer.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
         renderer.insertReorderBarrier(true);
 
         int x = dp(32);
@@ -63,7 +64,7 @@ public:
             mCards[ci]->setPropertyFieldsDirty(RenderNode::Y);
         }
         mThumbnail.eraseColor(TestUtils::interpolateColor(
-                curFrame / 150.0f, 0xFF4CAF50, 0xFFFF5722));
+                curFrame / 150.0f, Color::Green_500, Color::DeepOrange_500));
     }
 
 private:
@@ -75,7 +76,7 @@ private:
             props.mutableOutline().setRoundRect(0, 0, width, height, dp(10), 1);
             props.mutableOutline().setShouldClip(true);
 
-            canvas.drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
+            canvas.drawColor(Color::Grey_200, SkXfermode::kSrcOver_Mode);
             canvas.drawBitmap(thumb, 0, 0, thumb.width(), thumb.height(),
                     0, 0, width, height, nullptr);
         });

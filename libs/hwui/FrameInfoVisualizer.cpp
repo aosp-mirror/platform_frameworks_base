@@ -16,6 +16,7 @@
 #include "FrameInfoVisualizer.h"
 
 #include "OpenGLRenderer.h"
+#include "utils/Color.h"
 
 #include <cutils/compiler.h>
 #include <array>
@@ -27,18 +28,18 @@
 #define PROFILE_DRAW_THRESHOLD_STROKE_WIDTH 2
 #define PROFILE_DRAW_DP_PER_MS 7
 
+namespace android {
+namespace uirenderer {
+
 // Must be NUM_ELEMENTS in size
-static const SkColor THRESHOLD_COLOR = 0xff5faa4d;
-static const SkColor BAR_FAST_ALPHA = 0x8F000000;
-static const SkColor BAR_JANKY_ALPHA = 0xDF000000;
+static const SkColor THRESHOLD_COLOR = Color::Green_500;
+static const SkColor BAR_FAST_MASK = 0x8FFFFFFF;
+static const SkColor BAR_JANKY_MASK = 0xDFFFFFFF;
 
 // We could get this from TimeLord and use the actual frame interval, but
 // this is good enough
 #define FRAME_THRESHOLD 16
 #define FRAME_THRESHOLD_NS 16000000
-
-namespace android {
-namespace uirenderer {
 
 struct BarSegment {
     FrameInfoIndex start;
@@ -47,13 +48,13 @@ struct BarSegment {
 };
 
 static const std::array<BarSegment,7> Bar {{
-    { FrameInfoIndex::IntendedVsync, FrameInfoIndex::HandleInputStart, 0x00796B },
-    { FrameInfoIndex::HandleInputStart, FrameInfoIndex::PerformTraversalsStart, 0x388E3C },
-    { FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, 0x689F38},
-    { FrameInfoIndex::DrawStart, FrameInfoIndex::SyncStart, 0x2196F3},
-    { FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart, 0x4FC3F7},
-    { FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers, 0xF44336},
-    { FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted, 0xFF9800},
+    { FrameInfoIndex::IntendedVsync, FrameInfoIndex::HandleInputStart, Color::Teal_700 },
+    { FrameInfoIndex::HandleInputStart, FrameInfoIndex::PerformTraversalsStart, Color::Green_700 },
+    { FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, Color::LightGreen_700 },
+    { FrameInfoIndex::DrawStart, FrameInfoIndex::SyncStart, Color::Blue_500 },
+    { FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart, Color::LightBlue_300 },
+    { FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers, Color::Red_500},
+    { FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted, Color::Orange_500},
 }};
 
 static int dpToPx(int dp, float density) {
@@ -197,9 +198,9 @@ void FrameInfoVisualizer::drawGraph(OpenGLRenderer* canvas) {
     SkPaint paint;
     for (size_t i = 0; i < Bar.size(); i++) {
         nextBarSegment(Bar[i].start, Bar[i].end);
-        paint.setColor(Bar[i].color | BAR_FAST_ALPHA);
+        paint.setColor(Bar[i].color & BAR_FAST_MASK);
         canvas->drawRects(mFastRects.get(), mNumFastRects * 4, &paint);
-        paint.setColor(Bar[i].color | BAR_JANKY_ALPHA);
+        paint.setColor(Bar[i].color & BAR_JANKY_MASK);
         canvas->drawRects(mJankyRects.get(), mNumJankyRects * 4, &paint);
     }
 }
