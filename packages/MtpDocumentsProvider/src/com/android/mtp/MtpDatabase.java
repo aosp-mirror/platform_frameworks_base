@@ -368,7 +368,7 @@ class MtpDatabase {
         values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
         values.putNull(Document.COLUMN_SUMMARY);
         values.putNull(Document.COLUMN_LAST_MODIFIED);
-        values.putNull(Document.COLUMN_ICON);
+        values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
         values.put(Document.COLUMN_FLAGS, 0);
         values.put(Document.COLUMN_SIZE,
                 (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE));
