@@ -330,7 +330,8 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- Used for runtime permissions related to user's contacts and profile. -->
+    <!-- Used for runtime permissions related to contacts and profiles on this
+        device. -->
     <permission-group android:name="android.permission-group.CONTACTS"
         android:icon="@drawable/perm_group_contacts"
         android:label="@string/permgrouplab_contacts"
@@ -1037,7 +1038,15 @@
     <eat-comment />
 
     <!-- Allows access to the list of accounts in the Accounts Service.
-        <p>Protection level: dangerous
+
+    <p class="note"><strong>Note:</strong> Beginning with Android 6.0 (API level
+    23), if an app shares the signature of the authenticator that manages an
+    account, it does not need <code>"GET_ACCOUNTS"</code> permission to read
+    information about that account. On Android 5.1 and lower, all apps need
+    <code>"GET_ACCOUNTS"</code> permission to read information about any
+    account.</p>
+
+    <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.GET_ACCOUNTS"
         android:permissionGroup="android.permission-group.CONTACTS"
