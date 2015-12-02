@@ -16,8 +16,64 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.android.internal.util.XmlUtils.readBooleanAttribute;
+import static com.android.internal.util.XmlUtils.readIntAttribute;
+import static com.android.internal.util.XmlUtils.readLongAttribute;
+import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
+import static com.android.internal.util.XmlUtils.writeIntAttribute;
+import static com.android.internal.util.XmlUtils.writeLongAttribute;
+import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
+import android.Manifest;
+import android.app.AppOpsManager;
+import android.app.ApplicationThreadNative;
+import android.app.BroadcastOptions;
+import android.app.IActivityContainer;
+import android.app.IActivityContainerCallback;
+import android.app.IAppTask;
+import android.app.ITaskStackListener;
+import android.app.ProfilerInfo;
+import android.app.assist.AssistContent;
+import android.app.assist.AssistStructure;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
+import android.appwidget.AppWidgetManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.PermissionInfo;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.os.BatteryStats;
+import android.os.PersistableBundle;
+import android.os.PowerManager;
+import android.os.Trace;
+import android.os.TransactionTooLargeException;
+import android.os.WorkSource;
+import android.os.storage.IMountService;
+import android.os.storage.MountServiceInternal;
+import android.os.storage.StorageManager;
+import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionSession;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.DebugUtils;
+import android.util.SparseIntArray;
+import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -1456,6 +1512,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
     final UiHandler mUiHandler;
+
+    PackageManagerInternal mPackageManagerInt;
 
     final class UiHandler extends Handler {
         public UiHandler() {
@@ -9960,14 +10018,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if (cpr.proc != null) {
-                    if (false) {
-                        if (cpr.name.flattenToShortString().equals(
-                                "com.android.providers.calendar/.CalendarProvider2")) {
-                            Slog.v(TAG, "****************** KILLING "
-                                + cpr.name.flattenToShortString());
-                            Process.killProcess(cpr.proc.pid);
-                        }
-                    }
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     boolean success = updateOomAdjLocked(cpr.proc);
                     maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
@@ -10060,6 +10110,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
                     final long ident = Binder.clearCallingIdentity();
+
+                    // If permissions need a review before any of the app components can run,
+                    // we return no provider and launch a review activity if the calling app
+                    // is in the foreground.
+                    if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+                        if (!requestTargetProviderPermissionsReviewIfNeededLocked(cpi, r, userId)) {
+                            return null;
+                        }
+                    }
+
                     try {
                         checkTime(startTime, "getContentProviderImpl: before getApplicationInfo");
                         ApplicationInfo ai =
@@ -10210,6 +10270,52 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return cpr != null ? cpr.newHolder(conn) : null;
+    }
+
+    private boolean requestTargetProviderPermissionsReviewIfNeededLocked(ProviderInfo cpi,
+            ProcessRecord r, final int userId) {
+        if (getPackageManagerInternalLocked().isPermissionsReviewRequired(
+                cpi.packageName, r.userId)) {
+
+            final boolean callerForeground = r != null ? r.setSchedGroup
+                    != Process.THREAD_GROUP_BG_NONINTERACTIVE : true;
+
+            // Show a permission review UI only for starting from a foreground app
+            if (!callerForeground) {
+                Slog.w(TAG, "u" + r.userId + " Instantiating a provider in package"
+                        + cpi.packageName + " requires a permissions review");
+                return false;
+            }
+
+            final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, cpi.packageName);
+
+            if (DEBUG_PERMISSIONS_REVIEW) {
+                Slog.i(TAG, "u" + r.userId + " Launching permission review "
+                        + "for package " + cpi.packageName);
+            }
+
+            final UserHandle userHandle = new UserHandle(userId);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mContext.startActivityAsUser(intent, userHandle);
+                }
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    PackageManagerInternal getPackageManagerInternalLocked() {
+        if (mPackageManagerInt == null) {
+            mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
+        }
+        return mPackageManagerInt;
     }
 
     @Override
@@ -10915,7 +11021,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void stopAppSwitches() {
         if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
                 != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission "
+            throw new SecurityException("viewquires permission "
                     + android.Manifest.permission.STOP_APP_SWITCHES);
         }
 

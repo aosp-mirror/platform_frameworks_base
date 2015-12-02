@@ -26,6 +26,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
@@ -400,14 +401,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Permission grant: grant the permission as an install permission. */
     private static final int GRANT_INSTALL = 2;
 
-    /** Permission grant: grant the permission as an install permission for a legacy app. */
-    private static final int GRANT_INSTALL_LEGACY = 3;
-
     /** Permission grant: grant the permission as a runtime one. */
-    private static final int GRANT_RUNTIME = 4;
+    private static final int GRANT_RUNTIME = 3;
 
     /** Permission grant: grant as runtime a permission that was granted as an install time one. */
-    private static final int GRANT_UPGRADE = 5;
+    private static final int GRANT_UPGRADE = 4;
 
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
@@ -3688,6 +3686,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             enforceDeclaredAsUsedAndRuntimeOrDevelopmentPermission(pkg, bp);
 
+            // If a permission review is required for legacy apps we represent
+            // their permissions as always granted runtime ones since we need
+            // to keep the review required permission flag per user while an
+            // install permission's state is shared across all users.
+            if (Build.PERMISSIONS_REVIEW_REQUIRED
+                    && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
+                    && bp.isRuntime()) {
+                return;
+            }
+
             uid = UserHandle.getUid(userId, pkg.applicationInfo.uid);
             sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
@@ -3787,6 +3795,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             enforceDeclaredAsUsedAndRuntimeOrDevelopmentPermission(pkg, bp);
+
+            // If a permission review is required for legacy apps we represent
+            // their permissions as always granted runtime ones since we need
+            // to keep the review required permission flag per user while an
+            // install permission's state is shared across all users.
+            if (Build.PERMISSIONS_REVIEW_REQUIRED
+                    && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
+                    && bp.isRuntime()) {
+                return;
+            }
 
             SettingBase sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
@@ -3906,6 +3924,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
             flagMask &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
         }
 
         synchronized (mPackages) {
@@ -8641,6 +8660,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
+            final boolean appSupportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
+                    >= Build.VERSION_CODES.M;
             switch (level) {
                 case PermissionInfo.PROTECTION_NORMAL: {
                     // For all apps normal permissions are install time ones.
@@ -8648,9 +8669,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } break;
 
                 case PermissionInfo.PROTECTION_DANGEROUS: {
-                    if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    // If a permission review is required for legacy apps we represent
+                    // their permissions as always granted runtime ones since we need
+                    // to keep the review required permission flag per user while an
+                    // install permission's state is shared across all users.
+                    if (!appSupportsRuntimePermissions && !Build.PERMISSIONS_REVIEW_REQUIRED) {
                         // For legacy apps dangerous permissions are install time ones.
-                        grant = GRANT_INSTALL_LEGACY;
+                        grant = GRANT_INSTALL;
                     } else if (origPermissions.hasInstallPermission(bp.name)) {
                         // For legacy apps that became modern, install becomes runtime.
                         grant = GRANT_UPGRADE;
@@ -8697,7 +8722,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 switch (grant) {
                     case GRANT_INSTALL: {
                         // Revoke this as runtime permission to handle the case of
-                        // a runtime permission being downgraded to an install one.
+                        // a runtime permission being downgraded to an install one. Also in permission review mode we keep dangerous permissions for legacy apps
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             if (origPermissions.getRuntimePermissionState(
                                     bp.name, userId) != null) {
@@ -8717,25 +8742,38 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     } break;
 
-                    case GRANT_INSTALL_LEGACY: {
-                        // Grant an install permission.
-                        if (permissionsState.grantInstallPermission(bp) !=
-                                PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                            changedInstallPermission = true;
-                        }
-                    } break;
-
                     case GRANT_RUNTIME: {
                         // Grant previously granted runtime permissions.
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             PermissionState permissionState = origPermissions
                                     .getRuntimePermissionState(bp.name, userId);
-                            final int flags = permissionState != null
+                            int flags = permissionState != null
                                     ? permissionState.getFlags() : 0;
                             if (origPermissions.hasRuntimePermission(bp.name, userId)) {
                                 if (permissionsState.grantRuntimePermission(bp, userId) ==
                                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
                                     // If we cannot put the permission as it was, we have to write.
+                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                            changedRuntimePermissionUserIds, userId);
+                                }
+                                // If the app supports runtime permissions no need for a review.
+                                if (Build.PERMISSIONS_REVIEW_REQUIRED
+                                        && appSupportsRuntimePermissions
+                                        && (flags & PackageManager
+                                                .FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                                    flags &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+                                    // Since we changed the flags, we have to write.
+                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                            changedRuntimePermissionUserIds, userId);
+                                }
+                            } else if (Build.PERMISSIONS_REVIEW_REQUIRED
+                                    && !appSupportsRuntimePermissions) {
+                                // For legacy apps that need a permission review, every new
+                                // runtime permission is granted but it is pending a review.
+                                if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+                                    permissionsState.grantRuntimePermission(bp, userId);
+                                    flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                                    // We changed the permission and flags, hence have to write.
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
                                 }
@@ -13800,9 +13838,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        final int userSettableFlags = FLAG_PERMISSION_USER_SET
+        // These are flags that can change base on user actions.
+        final int userSettableMask = FLAG_PERMISSION_USER_SET
                 | FLAG_PERMISSION_USER_FIXED
-                | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                | FLAG_PERMISSION_REVOKE_ON_UPGRADE
+                | FLAG_PERMISSION_REVIEW_REQUIRED;
 
         final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
                 | FLAG_PERMISSION_POLICY_FIXED;
@@ -13843,7 +13883,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Always clear the user settable flags.
             final boolean hasInstallState = permissionsState.getInstallPermissionState(
                     bp.name) != null;
-            if (permissionsState.updatePermissionFlags(bp, userId, userSettableFlags, 0)) {
+            // If permission review is enabled and this is a legacy app, mark the
+            // permission as requiring a review as this is the initial state.
+            int flags = 0;
+            if (Build.PERMISSIONS_REVIEW_REQUIRED
+                    && ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+            }
+            if (permissionsState.updatePermissionFlags(bp, userId, userSettableMask, flags)) {
                 if (hasInstallState) {
                     writeInstallPermissions = true;
                 } else {
@@ -13867,7 +13914,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         != PERMISSION_OPERATION_FAILURE) {
                     writeRuntimePermissions = true;
                 }
-            } else {
+            // If permission review is enabled the permissions for a legacy apps
+            // are represented as constantly granted runtime ones, so don't revoke.
+            } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
                 // Otherwise, reset the permission.
                 final int revokeResult = permissionsState.revokeRuntimePermission(bp, userId);
                 switch (revokeResult) {
@@ -16760,6 +16809,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     void newUserCreated(final int userHandle) {
         mDefaultPermissionPolicy.grantDefaultPermissions(userHandle);
+        // If permission review for legacy apps is required, we represent
+        // dagerous permissions for such apps as always granted runtime
+        // permissions to keep per user flag state whether review is needed.
+        // Hence, if a new user is added we have to propagate dangerous
+        // permission grants for these legacy apps.
+        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
+                    | UPDATE_PERMISSIONS_REPLACE_ALL);
+        }
     }
 
     @Override
@@ -17175,6 +17233,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         packageName, userId);
             }
         }
+
         @Override
         public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
             synchronized (mPackages) {
@@ -17208,6 +17267,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                         deletePackageIfUnusedLPr(removedFromList.get(i));
                     }
                 }
+            }
+        }
+
+        @Override
+        public boolean isPermissionsReviewRequired(String packageName, int userId) {
+            synchronized (mPackages) {
+                // If we do not support permission review, done.
+                if (!Build.PERMISSIONS_REVIEW_REQUIRED) {
+                    return false;
+                }
+
+                PackageSetting packageSetting = mSettings.mPackages.get(packageName);
+                if (packageSetting == null) {
+                    return false;
+                }
+
+                // Permission review applies only to apps not supporting the new permission model.
+                if (packageSetting.pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M) {
+                    return false;
+                }
+
+                // Legacy apps have the permission and get user consent on launch.
+                PermissionsState permissionsState = packageSetting.getPermissionsState();
+                return permissionsState.isPermissionReviewRequired(userId);
             }
         }
     }

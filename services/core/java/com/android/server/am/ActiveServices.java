@@ -30,10 +30,14 @@ import java.util.Set;
 
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.content.IIntentSender;
+import android.content.IntentSender;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteCallback;
 import android.os.SystemProperties;
 import android.os.TransactionTooLargeException;
 import android.util.ArrayMap;
@@ -300,7 +304,7 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
-            int callingPid, int callingUid, String callingPackage, int userId)
+            int callingPid, int callingUid, String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
@@ -340,6 +344,18 @@ public final class ActiveServices {
 
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
                 callingUid, r.packageName, service, service.getFlags(), null, r.userId);
+
+        // If permissions need a review before any of the app components can run,
+        // we do not start the service and launch a review activity if the calling app
+        // is in the foreground passing it a pending intent to start the service when
+        // review is completed.
+        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+            if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage,
+                    callingUid, service, callerFg, userId)) {
+                return null;
+            }
+        }
+
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "START SERVICE WHILE RESTART PENDING: " + r);
         }
@@ -417,6 +433,50 @@ public final class ActiveServices {
         return startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
     }
 
+    private boolean requestStartTargetPermissionsReviewIfNeededLocked(ServiceRecord r,
+            String callingPackage, int callingUid, Intent service, boolean callerFg,
+            final int userId) {
+        if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+                r.packageName, r.userId)) {
+
+            // Show a permission review UI only for starting from a foreground app
+            if (!callerFg) {
+                Slog.w(TAG, "u" + r.userId + " Starting a service in package"
+                        + r.packageName + " requires a permissions review");
+                return false;
+            }
+
+            IIntentSender target = mAm.getIntentSenderLocked(
+                    ActivityManager.INTENT_SENDER_SERVICE, callingPackage,
+                    callingUid, userId, null, null, 0, new Intent[]{service},
+                    new String[]{service.resolveType(mAm.mContext.getContentResolver())},
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                            | PendingIntent.FLAG_IMMUTABLE, null);
+
+            final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, r.packageName);
+            intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
+
+            if (DEBUG_PERMISSIONS_REVIEW) {
+                Slog.i(TAG, "u" + r.userId + " Launching permission review for package "
+                        + r.packageName);
+            }
+
+            mAm.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAm.mContext.startActivityAsUser(intent, new UserHandle(userId));
+                }
+            });
+
+            return false;
+        }
+
+        return  true;
+    }
+
     ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
             boolean callerFg, boolean addToStarting) throws TransactionTooLargeException {
         ProcessStats.ServiceState stracker = r.getTracker();
@@ -427,7 +487,7 @@ public final class ActiveServices {
         synchronized (r.stats.getBatteryStats()) {
             r.stats.startRunningLocked();
         }
-        String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false);
+        String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false);
         if (error != null) {
             return new ComponentName("!!", error);
         }
@@ -721,8 +781,8 @@ public final class ActiveServices {
     }
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags,
-            String callingPackage, int userId) throws TransactionTooLargeException {
+            String resolvedType, final IServiceConnection connection, int flags,
+            String callingPackage, final int userId) throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
@@ -783,6 +843,83 @@ public final class ActiveServices {
         }
         ServiceRecord s = res.record;
 
+        boolean permissionsReviewRequired = false;
+
+        // If permissions need a review before any of the app components can run,
+        // we schedule binding to the service but do not start its process, then
+        // we launch a review activity to which is passed a callback to invoke
+        // when done to start the bound service's process to completing the binding.
+        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+            if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+                    s.packageName, s.userId)) {
+
+                permissionsReviewRequired = true;
+
+                // Show a permission review UI only for binding from a foreground app
+                if (!callerFg) {
+                    Slog.w(TAG, "u" + s.userId + " Binding to a service in package"
+                            + s.packageName + " requires a permissions review");
+                    return 0;
+                }
+
+                final ServiceRecord serviceRecord = s;
+                final Intent serviceIntent = service;
+
+                RemoteCallback callback = new RemoteCallback(
+                        new RemoteCallback.OnResultListener() {
+                    @Override
+                    public void onResult(Bundle result) {
+                        synchronized(mAm) {
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                if (!mPendingServices.contains(serviceRecord)) {
+                                    return;
+                                }
+                                // If there is still a pending record, then the service
+                                // binding request is still valid, so hook them up. We
+                                // proceed only if the caller cleared the review requirement
+                                // otherwise we unbind because the user didn't approve.
+                                if (!mAm.getPackageManagerInternalLocked()
+                                        .isPermissionsReviewRequired(
+                                                serviceRecord.packageName,
+                                                serviceRecord.userId)) {
+                                    try {
+                                        bringUpServiceLocked(serviceRecord,
+                                                serviceIntent.getFlags(),
+                                                callerFg, false, false);
+                                    } catch (RemoteException e) {
+                                        /* ignore - local call */
+                                    }
+                                } else {
+                                    unbindServiceLocked(connection);
+                                }
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
+                        }
+                    }
+                });
+
+                final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, s.packageName);
+                intent.putExtra(Intent.EXTRA_REMOTE_CALLBACK, callback);
+
+                if (DEBUG_PERMISSIONS_REVIEW) {
+                    Slog.i(TAG, "u" + s.userId + " Launching permission review for package "
+                            + s.packageName);
+                }
+
+                mAm.mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAm.mContext.startActivityAsUser(intent, new UserHandle(userId));
+                    }
+                });
+            }
+        }
+
         final long origId = Binder.clearCallingIdentity();
 
         try {
@@ -840,7 +977,8 @@ public final class ActiveServices {
 
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
-                if (bringUpServiceLocked(s, service.getFlags(), callerFg, false) != null) {
+                if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
+                        permissionsReviewRequired) != null) {
                     return 0;
                 }
             }
@@ -888,6 +1026,10 @@ public final class ActiveServices {
         }
 
         return 1;
+    }
+
+    private void foo() {
+
     }
 
     void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
@@ -1366,7 +1508,7 @@ public final class ActiveServices {
             return;
         }
         try {
-            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
+            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false);
         } catch (TransactionTooLargeException e) {
             // Ignore, it's been logged and nothing upstack cares.
         }
@@ -1410,8 +1552,9 @@ public final class ActiveServices {
         }
     }
 
-    private final String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
-            boolean whileRestarting) throws TransactionTooLargeException {
+    private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
+            boolean whileRestarting, boolean permissionsReviewRequired)
+            throws TransactionTooLargeException {
         //Slog.i(TAG, "Bring up service:");
         //r.dump("  ");
 
@@ -1497,7 +1640,7 @@ public final class ActiveServices {
 
         // Not running -- get it started, and enqueue this service record
         // to be executed when the app comes up.
-        if (app == null) {
+        if (app == null && !permissionsReviewRequired) {
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
                     "service", r.name, false, isolated, false)) == null) {
                 String msg = "Unable to launch app "
@@ -1919,6 +2062,9 @@ public final class ActiveServices {
                     serviceProcessGoneLocked(s);
                 }
             }
+
+            // If unbound while waiting to start, remove the pending service
+            mPendingServices.remove(s);
 
             if ((c.flags&Context.BIND_AUTO_CREATE) != 0) {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();
@@ -2962,5 +3108,4 @@ public final class ActiveServices {
             }
         }
     }
-
 }

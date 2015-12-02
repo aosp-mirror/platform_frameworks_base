@@ -3855,10 +3855,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(comp, userHandle);
             if (admin == null) {
-                try {
-                    result.sendResult(null);
-                } catch (RemoteException e) {
-                }
+                result.sendResult(null);
                 return;
             }
             Intent intent = new Intent(DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED);
@@ -3868,10 +3865,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     null, new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    try {
-                        result.sendResult(getResultExtras(false));
-                    } catch (RemoteException e) {
-                    }
+                    result.sendResult(getResultExtras(false));
                 }
             }, null, Activity.RESULT_OK, null, null);
         }

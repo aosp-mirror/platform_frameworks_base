@@ -1609,6 +1609,53 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGE_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to review permissions for an app.
+     * The system uses this intent if permission review for apps not
+     * supporting the new runtime permissions model is enabled. In
+     * this mode a permission review is required before any of the
+     * app components can run.
+     * <p>
+     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose
+     * permissions will be reviewed (mandatory).
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_INTENT} specifies a pending intent to
+     * be fired after the permission review (optional).
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_REMOTE_CALLBACK} specifies a callback to
+     * be invoked after the permission review (optional).
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_RESULT_NEEDED} specifies whether the intent
+     * passed via {@link #EXTRA_INTENT} needs a result (optional).
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @see #EXTRA_PACKAGE_NAME
+     * @see #EXTRA_INTENT
+     * @see #EXTRA_REMOTE_CALLBACK
+     * @see #EXTRA_RESULT_NEEDED
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REVIEW_PERMISSIONS =
+            "android.intent.action.REVIEW_PERMISSIONS";
+
+    /**
+     * Intent extra: A callback for reporting remote result as a bundle.
+     * <p>
+     * Type: IRemoteCallback
+     * </p>
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
+
+    /**
      * Intent extra: An app package name.
      * <p>
      * Type: String
@@ -1618,6 +1665,16 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SystemApi
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
+
+    /**
+     * Intent extra: An extra for specifying whether a result is needed.
+     * <p>
+     * Type: boolean
+     * </p>
+     *
+     * @hide
+     */
+    public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
 
     /**
      * Broadcast action that requests current permission granted information.  It will respond

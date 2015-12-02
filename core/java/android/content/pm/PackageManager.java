@@ -2018,7 +2018,6 @@ public abstract class PackageManager {
      */
     public static final int FLAG_PERMISSION_SYSTEM_FIXED =  1 << 4;
 
-
     /**
      * Permission flag: The permission is granted by default because it
      * enables app functionality that is expected to work out-of-the-box
@@ -2028,6 +2027,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
+
+    /**
+     * Permission flag: The permission has to be reviewed before any of
+     * the app components can run.
+     *
+     * @hide
+     */
+    public static final int FLAG_PERMISSION_REVIEW_REQUIRED =  1 << 6;
 
     /**
      * Mask for all permission flags.
@@ -4808,6 +4815,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_USER_SET: return "USER_SET";
             case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "REVOKE_ON_UPGRADE";
             case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
+            case FLAG_PERMISSION_REVIEW_REQUIRED: return "REVIEW_REQUIRED";
             default: return Integer.toString(flag);
         }
     }

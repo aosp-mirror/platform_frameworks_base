@@ -788,6 +788,18 @@ public class Build {
             SystemProperties.getInt("ro.debuggable", 0) == 1;
 
     /**
+     * Specifies whether the permissions needed by a legacy app should be
+     * reviewed before any of its components can run. A legacy app is one
+     * with targetSdkVersion < 23, i.e apps using the old permission model.
+     * If review is not required, permissions are reviewed before the app
+     * is installed.
+     *
+     * @hide
+     */
+    public static final boolean PERMISSIONS_REVIEW_REQUIRED =
+            SystemProperties.getInt("ro.permission_review_required", 0) == 1;
+
+    /**
      * Returns the version string for the radio firmware.  May return
      * null (if, for instance, the radio is not currently on).
      */

@@ -122,4 +122,13 @@ public abstract class PackageManagerInternal {
      * @param packageList List of package names to keep cached.
      */
     public abstract void setKeepUninstalledPackages(List<String> packageList);
+
+    /**
+     * Gets whether some of the permissions used by this package require a user
+     * review before any of the app components can run.
+     * @param packageName The package name for which to check.
+     * @param userId The user under which to check.
+     * @return True a permissions review is required.
+     */
+    public abstract boolean isPermissionsReviewRequired(String packageName, int userId);
 }

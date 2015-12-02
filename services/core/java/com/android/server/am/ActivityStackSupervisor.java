@@ -76,6 +76,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -88,6 +89,7 @@ import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -1705,6 +1707,46 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // they will just get a cancel result.
             ActivityOptions.abort(options);
             return ActivityManager.START_SUCCESS;
+        }
+
+        // If permissions need a review before any of the app components can run, we
+        // launch the review activity and pass a pending intent to start the activity
+        // we are to launching now after the review is completed.
+        if (Build.PERMISSIONS_REVIEW_REQUIRED && aInfo != null) {
+            if (mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+                    aInfo.packageName, userId)) {
+                IIntentSender target = mService.getIntentSenderLocked(
+                        ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                        callingUid, userId, null, null, 0, new Intent[]{intent},
+                        new String[]{resolvedType}, PendingIntent.FLAG_CANCEL_CURRENT
+                                | PendingIntent.FLAG_ONE_SHOT, null);
+
+                Intent newIntent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
+                newIntent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                newIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
+                newIntent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
+                if (resultRecord != null) {
+                    newIntent.putExtra(Intent.EXTRA_RESULT_NEEDED, true);
+                }
+                newIntent.setFlags(intent.getFlags());
+                intent = newIntent;
+
+                resolvedType = null;
+                callingUid = realCallingUid;
+                callingPid = realCallingPid;
+
+                aInfo = resolveActivity(intent, null, PackageManager.MATCH_DEFAULT_ONLY
+                        | ActivityManagerService.STOCK_PM_FLAGS, null, userId);
+
+                if (DEBUG_PERMISSIONS_REVIEW) {
+                    Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
+                            true, false) + "} from uid " + callingUid + " on display "
+                            + (container == null ? (mFocusedStack == null ?
+                            Display.DEFAULT_DISPLAY : mFocusedStack.mDisplayId) :
+                            (container.mActivityDisplay == null ? Display.DEFAULT_DISPLAY :
+                                    container.mActivityDisplay.mDisplayId)));
+                }
+            }
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,

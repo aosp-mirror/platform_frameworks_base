@@ -27,12 +27,16 @@ import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +50,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
 import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -181,7 +186,7 @@ public final class BroadcastQueue {
                 } break;
             }
         }
-    };
+    }
 
     private final class AppNotResponding implements Runnable {
         private final ProcessRecord mApp;
@@ -580,6 +585,17 @@ public final class BroadcastQueue {
         }
 
         if (!skip) {
+            // If permissions need a review before any of the app components can run, we drop
+            // the broadcast and if the calling app is in the foreground and the broadcast is
+            // explicit we launch the review UI passing it a pending intent to send the skipped
+            // broadcast.
+            if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+                if (!requestStartTargetPermissionsReviewIfNeededLocked(r, filter.packageName,
+                        filter.owningUserId)) {
+                    return;
+                }
+            }
+
             // If this is not being sent as an ordered broadcast, then we
             // don't want to touch the fields that keep track of the current
             // state of ordered broadcasts.
@@ -620,6 +636,54 @@ public final class BroadcastQueue {
                 }
             }
         }
+    }
+
+    private boolean requestStartTargetPermissionsReviewIfNeededLocked(
+            BroadcastRecord receiverRecord, String receivingPackageName,
+            final int receivingUserId) {
+        if (!mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+                receivingPackageName, receivingUserId)) {
+            return true;
+        }
+
+        final boolean callerForeground = receiverRecord.callerApp != null
+                ? receiverRecord.callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE
+                : true;
+
+        // Show a permission review UI only for explicit broadcast from a foreground app
+        if (callerForeground && receiverRecord.intent.getComponent() != null) {
+            IIntentSender target = mService.getIntentSenderLocked(
+                    ActivityManager.INTENT_SENDER_BROADCAST, receiverRecord.callerPackage,
+                    receiverRecord.callingUid, receiverRecord.userId, null, null, 0,
+                    new Intent[]{receiverRecord.intent},
+                    new String[]{receiverRecord.intent.resolveType(mService.mContext
+                            .getContentResolver())},
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                            | PendingIntent.FLAG_IMMUTABLE, null);
+
+            final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, receivingPackageName);
+            intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
+
+            if (DEBUG_PERMISSIONS_REVIEW) {
+                Slog.i(TAG, "u" + receivingUserId + " Launching permission review for package "
+                        + receivingPackageName);
+            }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mService.mContext.startActivityAsUser(intent, new UserHandle(receivingUserId));
+                }
+            });
+        } else {
+            Slog.w(TAG, "u" + receivingUserId + " Receiving a broadcast in package"
+                    + receivingPackageName + " requires a permissions review");
+        }
+
+        return false;
     }
 
     final void scheduleTempWhitelistLocked(int uid, long duration, BroadcastRecord r) {
@@ -1003,6 +1067,18 @@ public final class BroadcastQueue {
                             "Skipping delivery to " + info.activityInfo.packageName + " / "
                             + info.activityInfo.applicationInfo.uid
                             + " : package no longer available");
+                    skip = true;
+                }
+            }
+
+            // If permissions need a review before any of the app components can run, we drop
+            // the broadcast and if the calling app is in the foreground and the broadcast is
+            // explicit we launch the review UI passing it a pending intent to send the skipped
+            // broadcast.
+            if (Build.PERMISSIONS_REVIEW_REQUIRED && !skip) {
+                if (!requestStartTargetPermissionsReviewIfNeededLocked(r,
+                        info.activityInfo.packageName, UserHandle.getUserId(
+                                info.activityInfo.applicationInfo.uid))) {
                     skip = true;
                 }
             }
