@@ -1067,19 +1067,20 @@ public class PackageParser {
         pkg.mSignatures = null;
         pkg.mSigningKeys = null;
 
-        collectCertificates(pkg, new File(pkg.baseCodePath), parseFlags);
+        collectCertificates(pkg, new File(pkg.baseCodePath), pkg.applicationInfo.flags, parseFlags);
 
         if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
-            for (String splitCodePath : pkg.splitCodePaths) {
-                collectCertificates(pkg, new File(splitCodePath), parseFlags);
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                collectCertificates(pkg, new File(pkg.splitCodePaths[i]), pkg.splitFlags[i],
+                        parseFlags);
             }
         }
     }
 
-    private static void collectCertificates(Package pkg, File apkFile, int parseFlags)
+    private static void collectCertificates(Package pkg, File apkFile, int apkFlags, int parseFlags)
             throws PackageParserException {
-        final boolean requireCode = ((parseFlags & PARSE_ENFORCE_CODE) != 0)
-                && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0);
+        final boolean hasCode = (apkFlags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        final boolean requireCode = ((parseFlags & PARSE_ENFORCE_CODE) != 0) && hasCode;
         final String apkPath = apkFile.getAbsolutePath();
         final boolean skipVerification = Build.IS_DEBUGGABLE
                 && ((parseFlags & PARSE_SKIP_VERIFICATION) != 0);
@@ -1216,7 +1217,8 @@ public class PackageParser {
                 // TODO: factor signature related items out of Package object
                 final Package tempPkg = new Package(null);
                 // TODO: fix b/25118622; pass in '0' for parse flags
-                collectCertificates(tempPkg, apkFile, flags & PARSE_SKIP_VERIFICATION);
+                collectCertificates(tempPkg, apkFile, 0 /*apkFlags*/,
+                        flags & PARSE_SKIP_VERIFICATION);
                 signatures = tempPkg.mSignatures;
             } else {
                 signatures = null;
