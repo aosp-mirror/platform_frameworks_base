@@ -949,6 +949,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 : Color.BLACK;
     }
 
+    private int getCurrentColor(ColorViewState state) {
+        if (state.visible) {
+            return state.color;
+        } else {
+            return 0;
+        }
+    }
+
     /**
      * Update a color view
      *
@@ -970,6 +978,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean show = state.present
                 && (color & Color.BLACK) != 0
                 && ((mWindow.getAttributes().flags & state.translucentFlag) == 0  || force);
+        boolean showView = show && !isResizing();
 
         boolean visibilityChanged = false;
         View view = state.view;
@@ -979,7 +988,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         int resolvedGravity = verticalBar ? state.horizontalGravity : state.verticalGravity;
 
         if (view == null) {
-            if (show) {
+            if (showView) {
                 state.view = view = new View(mContext);
                 view.setBackgroundColor(color);
                 view.setTransitionName(state.transitionName);
@@ -995,7 +1004,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 updateColorViewTranslations();
             }
         } else {
-            int vis = show ? VISIBLE : INVISIBLE;
+            int vis = showView ? VISIBLE : INVISIBLE;
             visibilityChanged = state.targetVisibility != vis;
             state.targetVisibility = vis;
             LayoutParams lp = (LayoutParams) view.getLayoutParams();
@@ -1007,14 +1016,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 lp.rightMargin = rightMargin;
                 view.setLayoutParams(lp);
             }
-            if (show) {
+            if (showView) {
                 view.setBackgroundColor(color);
             }
         }
         if (visibilityChanged) {
             view.animate().cancel();
-            if (animate) {
-                if (show) {
+            if (animate && !isResizing()) {
+                if (showView) {
                     if (view.getVisibility() != VISIBLE) {
                         view.setVisibility(VISIBLE);
                         view.setAlpha(0.0f);
@@ -1034,9 +1043,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 }
             } else {
                 view.setAlpha(1.0f);
-                view.setVisibility(show ? VISIBLE : INVISIBLE);
+                view.setVisibility(showView ? VISIBLE : INVISIBLE);
             }
         }
+        state.visible = show;
+        state.color = color;
     }
 
     private void updateColorViewTranslations() {
@@ -1568,7 +1579,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         if (mBackdropFrameRenderer != null) {
             mBackdropFrameRenderer.onResourcesLoaded(
-                    this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable);
+                    this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
+                    getCurrentColor(mStatusColorViewState));
         }
 
         mDecorCaptionView = createDecorCaptionView(inflater);
@@ -1715,18 +1727,22 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final ThreadedRenderer renderer = (ThreadedRenderer) getHardwareRenderer();
         if (renderer != null) {
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
-                    initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable);
+                    initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
+                    getCurrentColor(mStatusColorViewState));
 
             // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
             // If we want to get the shadow shown while resizing, we would need to elevate a new
             // element which owns the caption and has the elevation.
             updateElevation();
+
+            updateColorViews(null /* insets */, false);
         }
     }
 
     @Override
     public void onWindowDragResizeEnd() {
         releaseThreadedRenderer();
+        updateColorViews(null /* insets */, false);
     }
 
     @Override
@@ -1759,6 +1775,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
+    private boolean isResizing() {
+        return mBackdropFrameRenderer != null;
+    }
+
     /**
      * The elevation gets set for the first time and the framework needs to be informed that
      * the surface layer gets created with the shadow size in mind.
@@ -1774,8 +1794,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean wasAdjustedForStack = mElevationAdjustedForStack;
         // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
         // since the shadow is bound to the content size and not the target size.
-        if (ActivityManager.StackId.hasWindowShadow(mStackId)
-                && mBackdropFrameRenderer == null) {
+        if (ActivityManager.StackId.hasWindowShadow(mStackId) && !isResizing()) {
             elevation = hasWindowFocus() ?
                     DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
             // TODO(skuhne): Remove this if clause once b/22668382 got fixed.
@@ -1805,6 +1824,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return isShowingCaption() ? mDecorCaptionView.getCaptionHeight() : 0;
     }
 
+    int getStatusBarHeight() {
+        return mStatusColorViewState.view != null ? mStatusColorViewState.view.getHeight() : 0;
+    }
+
     /**
      * Converts a DIP measure into physical pixels.
      * @param dip The dip value.
@@ -1819,6 +1842,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         View view = null;
         int targetVisibility = View.INVISIBLE;
         boolean present = false;
+        boolean visible;
+        int color;
 
         final int id;
         final int systemUiHideFlag;

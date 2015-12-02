@@ -17,6 +17,7 @@
 package com.android.internal.policy;
 
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.view.Choreographer;
@@ -44,6 +45,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     // The render nodes for the multi threaded renderer.
     private ThreadedRenderer mRenderer;
     private RenderNode mFrameAndBackdropNode;
+    private RenderNode mSystemBarBackgroundNode;
 
     private final Rect mOldTargetRect = new Rect();
     private final Rect mNewTargetRect = new Rect();
@@ -62,13 +64,16 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
 
     private Drawable mCaptionBackgroundDrawable;
     private Drawable mResizingBackgroundDrawable;
+    private ColorDrawable mStatusBarColor;
 
     public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
-            Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable) {
+            Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable,
+            int statusBarColor) {
         setName("ResizeFrame");
 
         mRenderer = renderer;
-        onResourcesLoaded(decorView, resizingBackgroundDrawable, captionBackgroundDrawable);
+        onResourcesLoaded(decorView, resizingBackgroundDrawable, captionBackgroundDrawable,
+                statusBarColor);
 
         // Create a render node for the content and frame backdrop
         // which can be resized independently from the content.
@@ -87,10 +92,24 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     }
 
     void onResourcesLoaded(DecorView decorView, Drawable resizingBackgroundDrawable,
-            Drawable captionBackgroundDrawableDrawable) {
+            Drawable captionBackgroundDrawableDrawable, int statusBarColor) {
         mDecorView = decorView;
         mResizingBackgroundDrawable = resizingBackgroundDrawable;
         mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
+        if (statusBarColor != 0) {
+            mStatusBarColor = new ColorDrawable(statusBarColor);
+            addSystemBarNodeIfNeeded();
+        } else {
+            mStatusBarColor = null;
+        }
+    }
+
+    private void addSystemBarNodeIfNeeded() {
+        if (mSystemBarBackgroundNode != null) {
+            return;
+        }
+        mSystemBarBackgroundNode = RenderNode.create("SystemBarBackgroundNode", null);
+        mRenderer.addRenderNode(mSystemBarBackgroundNode, false);
     }
 
     /**
@@ -132,6 +151,9 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                 // Remove the render node again
                 // (see comment above - better to do that only once).
                 mRenderer.removeRenderNode(mFrameAndBackdropNode);
+                if (mSystemBarBackgroundNode != null) {
+                    mRenderer.removeRenderNode(mSystemBarBackgroundNode);
+                }
 
                 mRenderer = null;
 
@@ -232,6 +254,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         // inaccessible. For that case we remember the previous metrics to avoid flashes.
         // Note that even when there is no visible caption, the caption child will exist.
         final int captionHeight = mDecorView.getCaptionHeight();
+        final int statusBarHeight = mDecorView.getStatusBarHeight();
+
         // The caption height will probably never dynamically change while we are resizing.
         // Once set to something other then 0 it should be kept that way.
         if (captionHeight != 0) {
@@ -256,7 +280,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mFrameAndBackdropNode.setLeftTopRightBottom(left, top, left + width, top + height);
 
         // Draw the caption and content backdrops in to our render node.
-        final DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
+        DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
         mCaptionBackgroundDrawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
         mCaptionBackgroundDrawable.draw(canvas);
 
@@ -264,6 +288,15 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
         mResizingBackgroundDrawable.draw(canvas);
         mFrameAndBackdropNode.end(canvas);
+
+        if (mSystemBarBackgroundNode != null && mStatusBarColor != null) {
+            canvas = mSystemBarBackgroundNode.start(width, height);
+            mSystemBarBackgroundNode.setLeftTopRightBottom(left, top, left + width, top + height);
+            mStatusBarColor.setBounds(0, 0, left + width, statusBarHeight);
+            mStatusBarColor.draw(canvas);
+            mSystemBarBackgroundNode.end(canvas);
+            mRenderer.drawRenderNode(mSystemBarBackgroundNode);
+        }
 
         // We need to render the node explicitly
         mRenderer.drawRenderNode(mFrameAndBackdropNode);
