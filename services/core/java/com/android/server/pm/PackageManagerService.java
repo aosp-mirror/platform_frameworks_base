@@ -11574,7 +11574,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
-            if (origin.staged) {
+            if (origin.staged && origin.cid != null) {
                 if (DEBUG_INSTALL) Slog.d(TAG, origin.cid + " already staged; skipping copy");
                 cid = origin.cid;
                 setMountPath(PackageHelper.getSdDir(cid));
