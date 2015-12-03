@@ -726,12 +726,13 @@ class WindowStateAnimator {
     void destroySurfaceLocked() {
         final AppWindowToken wtoken = mWin.mAppToken;
         if (wtoken != null) {
-            wtoken.mHasSavedSurface = false;
             wtoken.mAnimatingWithSavedSurface = false;
             if (mWin == wtoken.startingWindow) {
                 wtoken.startingDisplayed = false;
             }
         }
+
+        mWin.mSurfaceSaved = false;
 
         if (mSurfaceController != null) {
             int i = mWin.mChildWindows.size();

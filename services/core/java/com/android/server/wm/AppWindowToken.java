@@ -54,10 +54,6 @@ class AppWindowToken extends WindowToken {
 
     final boolean voiceInteraction;
 
-    // Whether the window has a saved surface from last pause, which can be
-    // used to start an entering animation earlier.
-    boolean mHasSavedSurface;
-
     // Whether we're performing an entering animation with a saved surface.
     boolean mAnimatingWithSavedSurface;
 
@@ -316,39 +312,38 @@ class AppWindowToken extends WindowToken {
         // currently animating with save surfaces. (If the app didn't even finish
         // drawing when the user exits, but we have a saved surface from last time,
         // we still want to keep that surface.)
-        mHasSavedSurface = allDrawn || mAnimatingWithSavedSurface;
-        if (mHasSavedSurface) {
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "Saving surface: " + this);
-            return true;
+        return allDrawn || mAnimatingWithSavedSurface;
+    }
+
+    boolean hasSavedSurface() {
+        for (int i = windows.size() -1; i >= 0; i--) {
+            final WindowState ws = windows.get(i);
+            if (ws.hasSavedSurface()) {
+                return true;
+            }
         }
         return false;
     }
 
     void restoreSavedSurfaces() {
-        if (!mHasSavedSurface) {
+        if (!hasSavedSurface()) {
             return;
         }
 
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                 "Restoring saved surfaces: " + this + ", allDrawn=" + allDrawn);
 
-        mHasSavedSurface = false;
         mAnimatingWithSavedSurface = true;
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState ws = windows.get(i);
-            ws.mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+            ws.restoreSavedSurface();
         }
     }
 
     void destroySavedSurfaces() {
-        if (mHasSavedSurface) {
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                    "Destroying saved surface: " + this);
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                final WindowState win = windows.get(i);
-                win.mWinAnimator.destroySurfaceLocked();
-            }
+        for (int i = windows.size() - 1; i >= 0; i--) {
+            WindowState win = windows.get(i);
+            win.destroySavedSurface();
         }
     }
 
