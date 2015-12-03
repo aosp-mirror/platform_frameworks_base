@@ -61,6 +61,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.providers.settings.SettingsState.Setting;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -71,8 +72,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import com.android.providers.settings.SettingsState.Setting;
 
 /**
  * <p>
@@ -1891,7 +1890,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 122;
+            private static final int SETTINGS_VERSION = 123;
 
             private final int mUserId;
 
@@ -2042,6 +2041,24 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 122;
+                }
+
+                if (currentVersion == 122) {
+                    // Version 123: Adding a default value for the ability to add a user from
+                    // the lock screen.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        Setting currentSetting = globalSettings.getSettingLocked(
+                                Settings.Global.ADD_USERS_WHEN_LOCKED);
+                        if (currentSetting == null) {
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.ADD_USERS_WHEN_LOCKED,
+                                    getContext().getResources().getBoolean(
+                                            R.bool.def_add_users_from_lockscreen) ? "1" : "0",
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 123;
                 }
                 // vXXX: Add new settings above this point.
 
