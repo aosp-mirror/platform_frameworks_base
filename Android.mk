@@ -677,12 +677,25 @@ dirs_to_check_apis := \
   $(fwbase_dirs_to_document) \
 	$(non_base_dirs)
 
+###########################################################
+## Return all directories that have a 'NO_DOCS' file in
+## them, appending a '%' to them to form a pattern to
+## filter out files under those directories.
+## $(1): A list of base directories to look at.
+###########################################################
+define find-no-docs-pattern
+$(addsuffix %, $(dir $(foreach dir, $(1), $(shell cd $(LOCAL_PATH); find $(dir) -name NO_DOCS))))
+endef
+
 # These are relative to frameworks/base
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 dirs_to_document := \
 	$(dirs_to_check_apis) \
   $(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)) \
   $(addprefix ../../, $(FRAMEWORKS_SUPPORT_JAVA_SRC_DIRS)) \
+
+patterns_to_not_document := \
+	$(call find-no-docs-pattern, $(dirs_to_document))
 
 # These are relative to frameworks/base
 html_dirs := \
@@ -697,8 +710,10 @@ common_src_files := \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_SRC_FILES := \
-	$(call find-other-java-files, $(dirs_to_document)) \
+	$(filter-out $(patterns_to_not_document), $(call find-other-java-files, $(dirs_to_document))) \
 	$(common_src_files)
+
+#	$(call find-other-java-files, $(dirs_to_document)) \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
