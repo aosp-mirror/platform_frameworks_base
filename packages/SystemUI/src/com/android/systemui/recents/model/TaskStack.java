@@ -206,15 +206,21 @@ public class TaskStack {
     /**
      * The various possible dock states when dragging and dropping a task.
      */
-    public enum DockState implements DropTarget {
-        NONE(-1, 96, null, null),
-        LEFT(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
-                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.25f, 1)),
-        TOP(DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, 192,
-                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.25f)),
-        RIGHT(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
-                new RectF(0.75f, 0, 1, 1), new RectF(0.75f, 0, 1, 1)),
-        BOTTOM(DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, 192,
+    public static class DockState implements DropTarget {
+
+        private static final int DOCK_AREA_ALPHA = 192;
+        public static final DockState NONE = new DockState(-1, 96, null, null);
+        public static final DockState LEFT = new DockState(
+                DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
+                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.25f, 1));
+        public static final DockState TOP = new DockState(
+                DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
+                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.25f));
+        public static final DockState RIGHT = new DockState(
+                DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
+                new RectF(0.75f, 0, 1, 1), new RectF(0.75f, 0, 1, 1));
+        public static final DockState BOTTOM = new DockState(
+                DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
                 new RectF(0, 0.75f, 1, 1), new RectF(0, 0.75f, 1, 1));
 
         @Override
@@ -460,6 +466,22 @@ public class TaskStack {
      */
     public int getStackTaskCount() {
         return mStackTaskList.size();
+    }
+
+    /**
+     * Returns the number of freeform tasks in the active stack.
+     */
+    public int getStackTaskFreeformCount() {
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        int freeformCount = 0;
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (task.isFreeformTask()) {
+                freeformCount++;
+            }
+        }
+        return freeformCount;
     }
 
     /**

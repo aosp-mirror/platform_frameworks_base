@@ -156,7 +156,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private DropTarget mStackDropTarget = new DropTarget() {
         @Override
         public boolean acceptsDrop(int x, int y, int width, int height) {
-            return mLayoutAlgorithm.mCurrentStackRect.contains(x, y);
+            return mLayoutAlgorithm.mStackRect.contains(x, y);
         }
     };
 
@@ -401,7 +401,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             if (boundTranslationsToRect) {
                 transform.translationY = Math.min(transform.translationY,
-                        mLayoutAlgorithm.mCurrentStackRect.bottom);
+                        mLayoutAlgorithm.mStackRect.bottom);
             }
             frontTransform = transform;
         }
@@ -880,7 +880,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Computes the stack and task rects */
     public void computeRects(Rect taskStackBounds) {
         // Compute the rects in the stack algorithm
-        mLayoutAlgorithm.initialize(taskStackBounds);
+        mLayoutAlgorithm.initialize(taskStackBounds,
+                TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
 
         // Update the scroll bounds
         updateLayout(false);
@@ -993,7 +994,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Handler for the first layout. */
     void onFirstLayout() {
-        int offscreenY = mLayoutAlgorithm.mCurrentStackRect.bottom;
+        int offscreenY = mLayoutAlgorithm.mStackRect.bottom;
 
         // Find the launch target task
         Task launchTargetTask = mStack.getLaunchTarget();
@@ -1102,7 +1103,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller.stopScroller();
         mStackScroller.stopBoundScrollAnimation();
         // Animate all the task views out of view
-        ctx.offscreenTranslationY = mLayoutAlgorithm.mCurrentStackRect.bottom;
+        ctx.offscreenTranslationY = mLayoutAlgorithm.mStackRect.bottom;
 
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();

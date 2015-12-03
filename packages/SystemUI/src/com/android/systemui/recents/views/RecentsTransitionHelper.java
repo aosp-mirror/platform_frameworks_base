@@ -257,7 +257,7 @@ public class RecentsTransitionHelper {
         TaskStackLayoutAlgorithm layoutAlgorithm = stackView.getStackAlgorithm();
         Rect offscreenTaskRect = new Rect(layoutAlgorithm.mTaskRect);
         offscreenTaskRect.offsetTo(offscreenTaskRect.left,
-                layoutAlgorithm.mCurrentStackRect.bottom);
+                layoutAlgorithm.mStackRect.bottom);
 
         // If this is a full screen stack, the transition will be towards the single, full screen
         // task. We only need the transition spec for this task.

@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 import com.android.systemui.recents.misc.Utilities;
@@ -101,12 +102,18 @@ public class FreeformWorkspaceLayoutAlgorithm {
             int x = taskIndex % mFreeformCellXCount;
             int y = taskIndex / mFreeformCellXCount;
 
-            int bitmapWidth = task.thumbnail.getWidth();
-            int bitmapHeight = task.thumbnail.getHeight();
-            float thumbnailScale = Math.min((float) mFreeformCellWidth / bitmapWidth,
-                    (float) mFreeformCellHeight / bitmapHeight);
-            float thumbnailWidth = bitmapWidth * thumbnailScale;
-            float thumbnailHeight = bitmapHeight * thumbnailScale;
+            Bitmap thumbnail = task.thumbnail;
+            float thumbnailScale = 1f;
+            float thumbnailWidth = mFreeformCellWidth;
+            float thumbnailHeight = mFreeformCellHeight;
+            if (thumbnail != null) {
+                int bitmapWidth = task.thumbnail.getWidth();
+                int bitmapHeight = task.thumbnail.getHeight();
+                thumbnailScale = Math.min((float) mFreeformCellWidth / bitmapWidth,
+                        (float) mFreeformCellHeight / bitmapHeight);
+                thumbnailWidth = bitmapWidth * thumbnailScale;
+                thumbnailHeight = bitmapHeight * thumbnailScale;
+            }
             int scaleXOffset = (int) (((1f - thumbnailScale) * thumbnailWidth) / 2);
             int scaleYOffset = (int) (((1f - thumbnailScale) * thumbnailHeight) / 2);
             transformOut.scale = thumbnailScale * 0.9f;

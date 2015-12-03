@@ -200,7 +200,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         mDummyStackView = new TaskStackView(mContext, new TaskStack());
         mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
                 null, false);
-        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */);
+        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
@@ -216,7 +216,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
     public void onBootCompleted() {
         mBootCompleted = true;
-        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */);
+        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
     }
 
     @Override
@@ -566,8 +566,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
      *
      * @param tryAndBindSearchWidget if set, will attempt to fetch and bind the search widget if one
      *                               is not already bound (can be expensive)
+     * @param stack the stack to initialize the stack layout with
      */
-    private void reloadHeaderBarLayout(boolean tryAndBindSearchWidget) {
+    private void reloadHeaderBarLayout(boolean tryAndBindSearchWidget, TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect windowRect = ssp.getWindowRect();
@@ -593,7 +594,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         TaskStackLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         algo.setSystemInsets(systemInsets);
-        algo.initialize(taskStackBounds);
+        if (stack != null) {
+            algo.initialize(taskStackBounds,
+                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
+        }
         Rect taskViewBounds = algo.getUntransformedTaskViewBounds();
         if (!taskViewBounds.equals(mLastTaskViewBounds)) {
             mLastTaskViewBounds.set(taskViewBounds);
@@ -629,7 +633,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         preloadIcon(topTask);
 
         // Update the header bar if necessary
-        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
+        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
 
         // Update the destination rect
         mDummyStackView.updateLayoutForStack(stack);
@@ -800,9 +804,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             boolean isTopTaskHome, boolean animate) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
 
-        // Update the header bar if necessary
-        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */);
-
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
         // the stacks might have changed.
@@ -814,6 +815,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
+
+        // Update the header bar if necessary
+        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
 
         // Prepare the dummy stack for the transition
         mDummyStackView.updateLayoutForStack(stack);
