@@ -716,6 +716,13 @@
 
     <bool name="config_carDockEnablesAccelerometer">true</bool>
 
+    <!--  Control whether to launch Car dock home app when user presses home button or when
+          car dock intent is fired.
+          In mobile device, usually separate home app is expected in car mode, and this should be
+          enabled. But in environments like real car, default home app may be enough, and in that
+          case, this can be disabled (set to false). -->
+    <bool name="config_enableCarDockHomeLaunch">true</bool>
+
     <!-- HDMI behavior -->
 
     <!-- The number of degrees to rotate the display when the device has HDMI connected
@@ -732,6 +739,15 @@
              6  UI_MODE_TYPE_WATCH
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
+
+    <!--  Control whether to lock UI mode to what is selected from config_defaultUiModeType.
+          Once UI mode is locked, applications cannot change it anymore. -->
+    <bool name="config_lockUiMode">false</bool>
+
+    <!--  Control whether to lock day/night mode change from normal application. When it is
+          true, day / night mode change is only allowed to apps with MODIFY_DAY_NIGHT_MODE
+          permission. -->
+    <bool name="config_lockDayNightMode">false</bool>
 
     <!-- Control the default night mode to use when there is no other mode override set.
          One of the following values (see UiModeManager.java):
