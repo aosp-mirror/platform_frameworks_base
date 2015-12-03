@@ -23,6 +23,10 @@ import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestListener;
 
+/**
+ * Instrumentation that can show the test result in the TestResultActivity.
+ * It's useful when it runs testcases with a real USB device and could not use USB port for ADB.
+ */
 public class TestResultInstrumentation extends InstrumentationTestRunner implements TestListener {
     private boolean mHasError = false;
 

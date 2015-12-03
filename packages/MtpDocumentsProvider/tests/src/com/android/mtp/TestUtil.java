@@ -33,7 +33,7 @@ import junit.framework.Assert;
 /**
  * Static utility methods for testing.
  */
-class TestUtil {
+final class TestUtil {
     private static final String ACTION_USB_PERMISSION =
             "com.android.mtp.USB_PERMISSION";
 
@@ -42,12 +42,11 @@ class TestUtil {
     /**
      * Requests permission for a MTP device and returns the first MTP device that has at least one
      * storage.
-     * @throws Exception
      */
     static UsbDevice setupMtpDevice(
             TestResultInstrumentation instrumentation,
             UsbManager usbManager,
-            MtpManager manager) throws Exception {
+            MtpManager manager) throws InterruptedException, IOException {
         for (int i = 0; i < 2; i++) {
             final UsbDevice device = findMtpDevice(instrumentation, usbManager);
             manager.openDevice(device.getDeviceId());
@@ -121,7 +120,7 @@ class TestUtil {
     private static void waitForStorages(
             TestResultInstrumentation instrumentation,
             MtpManager manager,
-            int deviceId) throws Exception {
+            int deviceId) throws IOException, InterruptedException {
         while (true) {
             if (manager.getRoots(deviceId).length == 0) {
                 instrumentation.show("Wait for storages.");
