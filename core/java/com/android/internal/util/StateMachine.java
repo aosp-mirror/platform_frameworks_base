@@ -778,6 +778,7 @@ public class StateMachine {
          */
         @Override
         public final void handleMessage(Message msg) {
+            mSm.onPreHandleMessage(msg);
             if (!mHasQuit) {
                 if (mDbg) mSm.log("handleMessage: E msg.what=" + msg.what);
 
@@ -803,6 +804,7 @@ public class StateMachine {
                 // We need to check if mSm == null here as we could be quitting.
                 if (mDbg && mSm != null) mSm.log("handleMessage: X");
             }
+            mSm.onPostHandleMessage(msg);
         }
 
         /**
@@ -1271,6 +1273,21 @@ public class StateMachine {
      */
     protected StateMachine(String name, Handler handler) {
         initStateMachine(name, handler.getLooper());
+    }
+
+    /**
+     * Notifies subclass that the StateMachine handler is about to process the Message msg
+     * @param msg The message that is being handled
+     */
+    protected void onPreHandleMessage(Message msg) {
+    }
+
+    /**
+     * Notifies subclass that the StateMachine handler has finished processing the Message msg and
+     * has possibly transitioned to a new state.
+     * @param msg The message that is being handled
+     */
+    protected void onPostHandleMessage(Message msg) {
     }
 
     /**
