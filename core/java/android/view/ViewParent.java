@@ -26,11 +26,6 @@ import android.view.accessibility.AccessibilityEvent;
  * 
  */
 public interface ViewParent {
-    public static final int FLAG_LAYOUT_AXIS_HORIZONTAL = 1;
-    public static final int FLAG_LAYOUT_AXIS_VERTICAL = 2;
-    public static final int FLAG_LAYOUT_AXIS_ANY
-            = FLAG_LAYOUT_AXIS_HORIZONTAL | FLAG_LAYOUT_AXIS_VERTICAL;
-
     /**
      * Called when something has changed which has invalidated the layout of a
      * child of this view parent. This will schedule a layout pass of the view
@@ -618,48 +613,4 @@ public interface ViewParent {
      * @return true if the action was consumed by this ViewParent
      */
     public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle arguments);
-
-    /**
-     * Called when a child of this ViewParent requires a relayout before
-     * the next frame is drawn. A call to {@link View#requestLayout() child.requestLayout()}
-     * will implicitly result in a call to
-     * <code>child.getParent().requestLayoutForChild(child)</code>. App code should not call this
-     * method directly. Call <code>child.requestLayout()</code> instead.
-     *
-     * <p>On versions of Android from API 23 and older, a call to {@link View#requestLayout()}
-     * would cause a matching call to <code>requestLayout</code> on each parent view up to
-     * the root. With the addition of <code>requestLayoutForChild</code> a view's parent may
-     * explicitly decide how to handle a layout request. This allows for optimizations when
-     * a view parent knows that a layout-altering change in a child will not affect its own
-     * measurement.</p>
-     *
-     * @param child Child requesting a layout
-     */
-    public void requestLayoutForChild(View child);
-
-    /**
-     * Determine which axes of this ViewParent's layout are dependent on the given
-     * direct child view. The returned value is a flag set that may contain
-     * {@link #FLAG_LAYOUT_AXIS_HORIZONTAL} and/or {@link #FLAG_LAYOUT_AXIS_VERTICAL}.
-     * {@link #FLAG_LAYOUT_AXIS_ANY} is provided as a shortcut for
-     * <code>FLAG_LAYOUT_AXIS_HORIZONTAL | FLAG_LAYOUT_AXIS_VERTICAL</code>.
-     *
-     * <p>The given child must be a direct child view. Implementations should throw
-     * {@link IllegalArgumentException} otherwise.</p>
-     *
-     * <p>The caller may specify which axes it cares about. This should be treated as a filter.
-     * Implementations should never return a result that would be different from
-     * <code>result & axisFilter</code>.</p>
-     *
-     * @param child Direct child of this ViewParent to check
-     * @param axisFilter Which axes to check for dependencies. Can be
-     *                   {@link #FLAG_LAYOUT_AXIS_HORIZONTAL}, {@link #FLAG_LAYOUT_AXIS_VERTICAL}
-     *                   or {@link #FLAG_LAYOUT_AXIS_ANY}.
-     * @return Axes of this ViewParent that depend on the given child's layout changes
-     *
-     * @see #FLAG_LAYOUT_AXIS_HORIZONTAL
-     * @see #FLAG_LAYOUT_AXIS_VERTICAL
-     * @see #FLAG_LAYOUT_AXIS_ANY
-     */
-    public int findDependentLayoutAxes(View child, int axisFilter);
 }

@@ -1368,11 +1368,6 @@ public class Toolbar extends ViewGroup {
     }
 
     @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        return findDependentLayoutAxesHelper(child, axisFilter, LayoutParams.class);
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = 0;
         int height = 0;

@@ -2109,11 +2109,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        return findDependentLayoutAxesHelper(child, axisFilter, LayoutParams.class);
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mSelector == null) {
             useDefaultSelector();

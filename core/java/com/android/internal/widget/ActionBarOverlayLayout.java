@@ -360,11 +360,6 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
     }
 
     @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        return findDependentLayoutAxesHelper(child, axisFilter, LayoutParams.class);
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         pullChildren();
 
