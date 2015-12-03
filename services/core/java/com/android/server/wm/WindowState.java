@@ -72,6 +72,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -618,39 +619,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int pw = mContainingFrame.width();
         final int ph = mContainingFrame.height();
 
-        int w,h;
-        if ((mAttrs.flags & FLAG_SCALED) != 0) {
-            if (mAttrs.width < 0) {
-                w = pw;
-            } else if (mEnforceSizeCompat) {
-                w = (int)(mAttrs.width * mGlobalScale + .5f);
-            } else {
-                w = mAttrs.width;
-            }
-            if (mAttrs.height < 0) {
-                h = ph;
-            } else if (mEnforceSizeCompat) {
-                h = (int)(mAttrs.height * mGlobalScale + .5f);
-            } else {
-                h = mAttrs.height;
-            }
-        } else {
-            if (mAttrs.width == WindowManager.LayoutParams.MATCH_PARENT) {
-                w = pw;
-            } else if (mEnforceSizeCompat) {
-                w = (int)(mRequestedWidth * mGlobalScale + .5f);
-            } else {
-                w = mRequestedWidth;
-            }
-            if (mAttrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
-                h = ph;
-            } else if (mEnforceSizeCompat) {
-                h = (int)(mRequestedHeight * mGlobalScale + .5f);
-            } else {
-                h = mRequestedHeight;
-            }
-        }
-
         if (!mParentFrame.equals(pf)) {
             //Slog.i(TAG, "Window " + this + " content frame from " + mParentFrame
             //        + " to " + pf);
@@ -676,28 +644,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int fw = mFrame.width();
         final int fh = mFrame.height();
 
-        float x, y;
-        if (mEnforceSizeCompat) {
-            x = mAttrs.x * mGlobalScale;
-            y = mAttrs.y * mGlobalScale;
-        } else {
-            x = mAttrs.x;
-            y = mAttrs.y;
-        }
-
-        if (nonFullscreenTask) {
-            // Make sure window fits in containing frame since it is in a non-fullscreen stack as
-            // required by {@link Gravity#apply} call.
-            w = Math.min(w, pw);
-            h = Math.min(h, ph);
-        }
-
-        Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
-                (int) (x + mAttrs.horizontalMargin * pw),
-                (int) (y + mAttrs.verticalMargin * ph), mFrame);
-
-        // Now make sure the window fits in the overall display frame.
-        Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
+        applyGravityAndUpdateFrame();
 
         // Calculate the outsets before the content frame gets shrinked to the window frame.
         if (hasOutsets) {
@@ -2228,5 +2175,70 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mVScale >= 0) {
             rect.bottom = rect.top + (int)((rect.bottom - rect.top) / mVScale);
         }
+    }
+
+    void applyGravityAndUpdateFrame() {
+        final int pw = mContainingFrame.width();
+        final int ph = mContainingFrame.height();
+        final Task task = getTask();
+        final boolean nonFullscreenTask = task != null && !task.isFullscreen();
+
+        float x, y;
+        int w,h;
+
+        if ((mAttrs.flags & FLAG_SCALED) != 0) {
+            if (mAttrs.width < 0) {
+                w = pw;
+            } else if (mEnforceSizeCompat) {
+                w = (int)(mAttrs.width * mGlobalScale + .5f);
+            } else {
+                w = mAttrs.width;
+            }
+            if (mAttrs.height < 0) {
+                h = ph;
+            } else if (mEnforceSizeCompat) {
+                h = (int)(mAttrs.height * mGlobalScale + .5f);
+            } else {
+                h = mAttrs.height;
+            }
+        } else {
+            if (mAttrs.width == MATCH_PARENT) {
+                w = pw;
+            } else if (mEnforceSizeCompat) {
+                w = (int)(mRequestedWidth * mGlobalScale + .5f);
+            } else {
+                w = mRequestedWidth;
+            }
+            if (mAttrs.height == MATCH_PARENT) {
+                h = ph;
+            } else if (mEnforceSizeCompat) {
+                h = (int)(mRequestedHeight * mGlobalScale + .5f);
+            } else {
+                h = mRequestedHeight;
+            }
+        }
+
+        if (mEnforceSizeCompat) {
+            x = mAttrs.x * mGlobalScale;
+            y = mAttrs.y * mGlobalScale;
+        } else {
+            x = mAttrs.x;
+            y = mAttrs.y;
+        }
+
+        if (nonFullscreenTask) {
+            // Make sure window fits in containing frame since it is in a non-fullscreen stack as
+            // required by {@link Gravity#apply} call.
+            w = Math.min(w, pw);
+            h = Math.min(h, ph);
+        }
+
+        // Set mFrame
+        Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
+                (int) (x + mAttrs.horizontalMargin * pw),
+                (int) (y + mAttrs.verticalMargin * ph), mFrame);
+
+        // Now make sure the window fits in the overall display frame.
+        Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
     }
 }
