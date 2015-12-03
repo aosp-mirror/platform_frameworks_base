@@ -48,7 +48,8 @@ public class RecentsTaskLoadPlan {
     private static boolean DEBUG = false;
 
     private static int MIN_NUM_TASKS = 5;
-    private static int SESSION_BEGIN_TIME = 60 /* s/min */ * 60 /* min/hr */ * 6 /* hrs */;
+    private static int SESSION_BEGIN_TIME = 1000 /* ms/s */ * 60 /* s/min */ * 60 /* min/hr */ *
+            6 /* hrs */;
 
     /** The set of conditions to load tasks. */
     public static class Options {
