@@ -4493,8 +4493,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (user.isManagedProfile()) {
                     // If we are being asked about a managed profile just return
                     // keyguard features disabled by admins in the profile.
-                    profiles = new ArrayList<UserInfo>(1);
-                    profiles.add(user);
+                    profiles = Collections.singletonList(user);
                 } else {
                     // Otherwise return those set by admins in the user
                     // and its profiles.
