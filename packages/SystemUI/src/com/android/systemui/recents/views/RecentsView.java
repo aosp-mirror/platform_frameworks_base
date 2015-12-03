@@ -138,6 +138,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 // If onRecentsHidden is not triggered, we need to the stack view again here
                 mTaskStackView.reset();
                 mTaskStackView.setStack(stack);
+                removeView(mTaskStackView);
+                addView(mTaskStackView);
             } else {
                 mTaskStackView = new TaskStackView(getContext(), stack);
                 mTaskStackView.setCallbacks(this);
