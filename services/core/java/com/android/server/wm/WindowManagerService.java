@@ -7385,7 +7385,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent != null) {
                 mAnimator.addDisplayLocked(displayId);
                 displayContent.initializeDisplayBaseInfo();
-                displayContent.mTapDetector.init();
+                if (displayContent.mTapDetector != null) {
+                    displayContent.mTapDetector.init();
+                }
             }
         }
     }
