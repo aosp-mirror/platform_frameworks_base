@@ -51,14 +51,4 @@ interface IUiModeManager {
      * 2 for night, and 3 for automatic mode switching.
      */
     int getNightMode();
-
-    /**
-     * Tells if UI mode is locked or not.
-     */
-    boolean isUiModeLocked();
-
-    /**
-     * Tells if Night mode is locked or not.
-     */
-    boolean isNightModeLocked();
 }
