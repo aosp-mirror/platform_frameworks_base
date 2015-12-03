@@ -1070,7 +1070,7 @@ public final class PrintSpoolerService extends Service {
             if (progressString != null) {
                 float progress = Float.parseFloat(progressString);
 
-                if (progress != Float.NaN) {
+                if (progress != -1) {
                     printJob.setProgress(progress);
                 }
             }
