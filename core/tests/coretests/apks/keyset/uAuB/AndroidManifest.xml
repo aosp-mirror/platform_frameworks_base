@@ -20,11 +20,11 @@
     <key-sets>
         <key-set android:name="A" >
           <public-key android:name="keyA"
-                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJoN1Nsgqf0V4C/bbN8wo8O2X/S5D76+5Mb9mlIsHkUTUTbHCNk+LxHIUYLm89YbP9zImrV0bUHLUAZUyoMUCiMCAwEAAQ==" />
+                      android:value="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsMpNthdOxud7roPDZMMomOqXgJJdRfIWpkKEqmC61Mv+Nf6QY3TorEwJeghjSmqj7IbBKrtvfQq4E2XJO1HuspmQO4Ng2gvn+r+6EwNfKc9k55d6s+27SR867jKurBbHNtZMG+tjL1yH4r+tNzcuJCsgyAFqLmxFdcxEwzNvREyRpoYc5RDR0mmTwkMCUhJ6CId1EYEKiCEdNzxv+fWPEb21u+/MWpleGCILs8kglRVb2q/WOzAAvGr4FY5plfaE6N+lr7+UschQ+aMi1+uqewo2o0qPFVmZP5hnwj55K4UMzu/NhhDqQQsX4cSGES1KgHo5MTqRqZjN/I7emw5pFQIDAQAB" />
         </key-set>
         <key-set android:name="B" >
           <public-key android:name="keyB"
-                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMTfQsY8UuXiXmvw/y7Tpr7HoyfAC0nE/8Qdk3ZtEr9asa5qqP0F6xzCI1PGVFV+WLVRwm6FdB9StENL5EKyQFcCAwEAAQ==" />
+                      android:value="MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEtGr5cL2N7ztHiHmphB1/1eq+43lEAmP36iiEJAfX+cVReGSPFXqNnnM8Vptd2boAe332lrFw9rKPmbkZA+jOTA==" />
         </key-set>
         <upgrade-key-set android:name="A"/>
         <upgrade-key-set android:name="B"/>

@@ -20,7 +20,7 @@
     <key-sets>
         <key-set android:name="B" >
           <public-key android:name="keyB"
-                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMTfQsY8UuXiXmvw/y7Tpr7HoyfAC0nE/8Qdk3ZtEr9asa5qqP0F6xzCI1PGVFV+WLVRwm6FdB9StENL5EKyQFcCAwEAAQ==" />
+                      android:value="MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEtGr5cL2N7ztHiHmphB1/1eq+43lEAmP36iiEJAfX+cVReGSPFXqNnnM8Vptd2boAe332lrFw9rKPmbkZA+jOTA==" />
         </key-set>
         <upgrade-key-set android:name="B"/>
     </key-sets>
