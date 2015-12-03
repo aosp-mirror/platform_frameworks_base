@@ -100,6 +100,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.pm.PackageManagerService;
@@ -435,6 +436,7 @@ class MountService extends IMountService.Stub
     private PackageManagerService mPms;
 
     private final Callbacks mCallbacks;
+    private final LockPatternUtils mLockPatternUtils;
 
     // Two connectors - mConnector & mCryptConnector
     private final CountDownLatch mConnectedSignal = new CountDownLatch(2);
@@ -1429,6 +1431,7 @@ class MountService extends IMountService.Stub
 
         mContext = context;
         mCallbacks = new Callbacks(FgThread.get().getLooper());
+        mLockPatternUtils = new LockPatternUtils(mContext);
 
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
@@ -2720,6 +2723,12 @@ class MountService extends IMountService.Stub
     public void unlockUserKey(int userId, int serialNumber, byte[] token) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
+
+        // When a user has secure lock screen, require a challenge token to
+        // actually unlock. This check is mostly in place for emulation mode.
+        if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(token)) {
+            throw new IllegalStateException("Token required to unlock secure user " + userId);
+        }
 
         final String encodedToken;
         if (ArrayUtils.isEmpty(token)) {
