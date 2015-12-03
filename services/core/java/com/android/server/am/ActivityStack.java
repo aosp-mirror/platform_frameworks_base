@@ -4751,7 +4751,7 @@ final class ActivityStack {
         final Rect bounds = task.getLaunchBounds();
         task.updateOverrideConfiguration(bounds);
         mWindowManager.setAppTask(
-                r.appToken, task.taskId, task.getLaunchBounds(), task.mOverrideConfig);
+                r.appToken, task.taskId, mStackId, task.getLaunchBounds(), task.mOverrideConfig);
         mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
         r.taskConfigOverride = task.mOverrideConfig;
     }

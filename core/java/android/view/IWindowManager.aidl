@@ -110,11 +110,14 @@ interface IWindowManager
      *
      * @param token The token we are adding to the input task Id.
      * @param taskId The Id of the task we are adding the token to.
+     * @param stackId Stack Id to create a new Task with the input task Id on
+     *                if the task doesn't exist yet.
      * @param taskBounds Bounds to use when creating a new Task with the input task Id if
      *                   the task doesn't exist yet.
      * @param config Configuration that is being used with this task.
      */
-    void setAppTask(IBinder token, int taskId, in Rect taskBounds, in Configuration config);
+    void setAppTask(
+            IBinder token, int taskId, int stackId, in Rect taskBounds, in Configuration config);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
