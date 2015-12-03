@@ -705,8 +705,6 @@ framework_docs_LOCAL_SRC_FILES := \
 	$(filter-out $(patterns_to_not_document), $(call find-other-java-files, $(dirs_to_document))) \
 	$(common_src_files)
 
-#	$(call find-other-java-files, $(dirs_to_document)) \
-
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
 	$(call find-other-java-files, $(dirs_to_check_apis)) \
