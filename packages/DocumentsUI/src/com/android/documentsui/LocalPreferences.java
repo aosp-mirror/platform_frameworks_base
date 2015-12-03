@@ -24,8 +24,10 @@ public class LocalPreferences {
     private static final String KEY_FILE_SIZE = "fileSize";
 
     public static boolean getDisplayAdvancedDevices(Context context) {
+        boolean defaultAdvanced = context.getResources()
+                .getBoolean(R.bool.config_defaultAdvancedDevices);
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(KEY_ADVANCED_DEVICES, false);
+                .getBoolean(KEY_ADVANCED_DEVICES, defaultAdvanced);
     }
 
     public static boolean getDisplayFileSize(Context context) {
