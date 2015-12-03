@@ -3273,7 +3273,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setAppTask(IBinder token, int taskId, Rect taskBounds, Configuration config) {
+    public void setAppTask(
+            IBinder token, int taskId, int stackId, Rect taskBounds, Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3291,8 +3292,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Task newTask = mTaskIdToTask.get(taskId);
             if (newTask == null) {
                 newTask = createTaskLocked(
-                        taskId, oldTask.mStack.mStackId, oldTask.mUserId, atoken, taskBounds,
-                        config);
+                        taskId, stackId, oldTask.mUserId, atoken, taskBounds, config);
             }
             newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken);
         }

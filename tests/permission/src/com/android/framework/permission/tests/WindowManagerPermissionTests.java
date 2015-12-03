@@ -22,10 +22,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-
 import junit.framework.TestCase;
+
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /**
  * TODO: Remove this. This is only a placeholder, need to implement this.
@@ -104,7 +103,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.setAppTask(null, 0, null, null);
+            mWm.setAppTask(null, 0, INVALID_STACK_ID, null, null);
             fail("IWindowManager.setAppGroupId did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
