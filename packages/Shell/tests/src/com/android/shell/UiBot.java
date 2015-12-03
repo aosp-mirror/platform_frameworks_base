@@ -20,6 +20,7 @@ import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
+import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
@@ -116,21 +117,27 @@ final class UiBot {
      */
     // TODO: UI Automator should provide such logic.
     public void chooseActivity(String name) {
-        // First select activity if it's not the default option.
-        boolean gotIt = mDevice.wait(Until.hasObject(By.text(name)), mTimeout);
-        // TODO: if the activity is indeed the default option, call above will timeout, which will
-        // make the tests run slower. It might be better to change the logic to assume the default
-        // first.
+        // First check if the activity is the default option.
+        String shareText = String.format("Share with %s", name);
+        boolean gotIt = mDevice.wait(Until.hasObject(By.text(shareText)), mTimeout);
+
         if (gotIt) {
-            Log.v(TAG, "Found activity " + name + ", it's not default action");
-            UiObject activityChooser = getVisibleObject(name);
-            click(activityChooser, "activity chooser");
+            Log.v(TAG, "Found activity " + name + ", it's the default action");
         } else {
-            String text = String.format("Share with %s", name);
-            Log.v(TAG, "Didn't find activity " + name
-                    + ", assuming it's the default action and search for '" + text + "'");
-            gotIt = mDevice.wait(Until.hasObject(By.text(text)), mTimeout);
-            assertTrue("did not find text '" + text + "'", gotIt);
+            // Since it's not, need to find it in the scrollable list...
+            Log.v(TAG, "Activity " + name + " is not default action");
+            UiScrollable activitiesList = new UiScrollable(new UiSelector().scrollable(true));
+
+            UiObject activity;
+            try {
+                activitiesList.scrollForward();
+                activity = getVisibleObject(name);
+            } catch (UiObjectNotFoundException e) {
+                throw new IllegalStateException("didn't find activity '" + name
+                        + "' on activities chooser", e);
+            }
+            // ... then select it.
+            click(activity, name);
         }
 
         // Then clicks the "Just Once" button.
