@@ -131,7 +131,6 @@ package android {
     field public static final java.lang.String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
     field public static final java.lang.String MODIFY_AUDIO_SETTINGS = "android.permission.MODIFY_AUDIO_SETTINGS";
     field public static final java.lang.String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
-    field public static final java.lang.String MODIFY_DAY_NIGHT_MODE = "android.permission.MODIFY_DAY_NIGHT_MODE";
     field public static final java.lang.String MODIFY_NETWORK_ACCOUNTING = "android.permission.MODIFY_NETWORK_ACCOUNTING";
     field public static final java.lang.String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
@@ -5610,8 +5609,6 @@ package android.app {
     method public void enableCarMode(int);
     method public int getCurrentModeType();
     method public int getNightMode();
-    method public boolean isNightModeLocked();
-    method public boolean isUiModeLocked();
     method public void setNightMode(int);
     field public static java.lang.String ACTION_ENTER_CAR_MODE;
     field public static java.lang.String ACTION_ENTER_DESK_MODE;

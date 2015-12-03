@@ -233,35 +233,4 @@ public class UiModeManager {
         }
         return -1;
     }
-
-    /**
-     * @return If UI mode is locked or not. When UI mode is locked, calls to change UI mode
-     *         like {@link #enableCarMode(int)} will silently fail.
-     */
-    public boolean isUiModeLocked() {
-        if (mService != null) {
-            try {
-                return mService.isUiModeLocked();
-            } catch (RemoteException e) {
-                Log.e(TAG, "isUiModeLocked: RemoteException", e);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @return If Night mode is locked or not. When Night mode is locked, changing Night mode
-     *         is only allowed to privileged system components and normal application's call
-     *         to change Night mode using {@link #setNightMode(int)} will silently fail.
-     */
-    public boolean isNightModeLocked() {
-        if (mService != null) {
-            try {
-                return mService.isNightModeLocked();
-            } catch (RemoteException e) {
-                Log.e(TAG, "isNightModeLocked: RemoteException", e);
-            }
-        }
-        return true;
-    }
 }
