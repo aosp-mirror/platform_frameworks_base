@@ -133,6 +133,15 @@ public abstract class SystemService {
     public void onStartUser(int userHandle) {}
 
     /**
+     * Called when an existing user is unlocked. This means the
+     * credential-encrypted storage for that user is now available, and
+     * encryption-aware component filtering is no longer in effect.
+     *
+     * @param userHandle The identifier of the user.
+     */
+    public void onUnlockUser(int userHandle) {}
+
+    /**
      * Called when switching to a different foreground user, for system services that have
      * special behavior for whichever user is currently in the foreground.  This is called
      * before any application processes are aware of the new user.

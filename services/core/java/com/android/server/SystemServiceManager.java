@@ -165,6 +165,19 @@ public class SystemServiceManager {
         }
     }
 
+    public void unlockUser(final int userHandle) {
+        final int serviceLen = mServices.size();
+        for (int i = 0; i < serviceLen; i++) {
+            final SystemService service = mServices.get(i);
+            try {
+                service.onUnlockUser(userHandle);
+            } catch (Exception ex) {
+                Slog.wtf(TAG, "Failure reporting unlock of user " + userHandle
+                        + " to service " + service.getClass().getName(), ex);
+            }
+        }
+    }
+
     public void switchUser(final int userHandle) {
         final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {

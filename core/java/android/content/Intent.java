@@ -1926,6 +1926,24 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ALARM_CHANGED = "android.intent.action.ALARM_CHANGED";
+
+    /**
+     * Broadcast Action: This is broadcast once, after the system has finished
+     * booting and the user is in a "locked" state. A user is locked when their
+     * credential-encrypted private app data storage is unavailable. Once the
+     * user has entered their credentials (such as a lock pattern or PIN) for
+     * the first time, the {@link #ACTION_BOOT_COMPLETED} broadcast will be
+     * sent.
+     * <p>
+     * You must hold the
+     * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission in
+     * order to receive this broadcast.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOCKED_BOOT_COMPLETED = "android.intent.action.LOCKED_BOOT_COMPLETED";
+
     /**
      * Broadcast Action: This is broadcast once, after the system has finished
      * booting.  It can be used to perform application-specific initialization,
@@ -1938,6 +1956,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
+
     /**
      * Broadcast Action: This is broadcast when a user action should request a
      * temporary system dialog to dismiss.  Some examples of temporary system
