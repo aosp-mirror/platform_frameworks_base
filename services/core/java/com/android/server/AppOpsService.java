@@ -512,33 +512,35 @@ public class AppOpsService extends IAppOpsService.Stub {
         String[] uidPackageNames = getPackagesForUid(uid);
         ArrayMap<Callback, ArraySet<String>> callbackSpecs = null;
 
-        ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
-        if (callbacks != null) {
-            final int callbackCount = callbacks.size();
-            for (int i = 0; i < callbackCount; i++) {
-                Callback callback = callbacks.get(i);
-                ArraySet<String> changedPackages = new ArraySet<>();
-                Collections.addAll(changedPackages, uidPackageNames);
-                callbackSpecs = new ArrayMap<>();
-                callbackSpecs.put(callback, changedPackages);
-            }
-        }
-
-        for (String uidPackageName : uidPackageNames) {
-            callbacks = mPackageModeWatchers.get(uidPackageName);
+        synchronized (this) {
+            ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
             if (callbacks != null) {
-                if (callbackSpecs == null) {
-                    callbackSpecs = new ArrayMap<>();
-                }
                 final int callbackCount = callbacks.size();
                 for (int i = 0; i < callbackCount; i++) {
                     Callback callback = callbacks.get(i);
-                    ArraySet<String> changedPackages = callbackSpecs.get(callback);
-                    if (changedPackages == null) {
-                        changedPackages = new ArraySet<>();
-                        callbackSpecs.put(callback, changedPackages);
+                    ArraySet<String> changedPackages = new ArraySet<>();
+                    Collections.addAll(changedPackages, uidPackageNames);
+                    callbackSpecs = new ArrayMap<>();
+                    callbackSpecs.put(callback, changedPackages);
+                }
+            }
+
+            for (String uidPackageName : uidPackageNames) {
+                callbacks = mPackageModeWatchers.get(uidPackageName);
+                if (callbacks != null) {
+                    if (callbackSpecs == null) {
+                        callbackSpecs = new ArrayMap<>();
                     }
-                    changedPackages.add(uidPackageName);
+                    final int callbackCount = callbacks.size();
+                    for (int i = 0; i < callbackCount; i++) {
+                        Callback callback = callbacks.get(i);
+                        ArraySet<String> changedPackages = callbackSpecs.get(callback);
+                        if (changedPackages == null) {
+                            changedPackages = new ArraySet<>();
+                            callbackSpecs.put(callback, changedPackages);
+                        }
+                        changedPackages.add(uidPackageName);
+                    }
                 }
             }
         }
@@ -1772,7 +1774,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private static String[] getPackagesForUid(int uid) {
         String[] packageNames = null;
         try {
-            packageNames= AppGlobals.getPackageManager().getPackagesForUid(uid);
+            packageNames = AppGlobals.getPackageManager().getPackagesForUid(uid);
         } catch (RemoteException e) {
             /* ignore - local call */
         }
