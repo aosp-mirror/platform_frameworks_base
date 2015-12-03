@@ -8135,9 +8135,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if ((p.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
-                ArraySet<String> appOpPerms = mAppOpPermissionPackages.get(p.info.name);
-                if (appOpPerms != null) {
-                    appOpPerms.remove(pkg.packageName);
+                ArraySet<String> appOpPkgs = mAppOpPermissionPackages.get(p.info.name);
+                if (appOpPkgs != null) {
+                    appOpPkgs.remove(pkg.packageName);
                 }
             }
         }
@@ -8151,10 +8151,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             String perm = pkg.requestedPermissions.get(i);
             BasePermission bp = mSettings.mPermissions.get(perm);
             if (bp != null && (bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
-                ArraySet<String> appOpPerms = mAppOpPermissionPackages.get(perm);
-                if (appOpPerms != null) {
-                    appOpPerms.remove(pkg.packageName);
-                    if (appOpPerms.isEmpty()) {
+                ArraySet<String> appOpPkgs = mAppOpPermissionPackages.get(perm);
+                if (appOpPkgs != null) {
+                    appOpPkgs.remove(pkg.packageName);
+                    if (appOpPkgs.isEmpty()) {
                         mAppOpPermissionPackages.remove(perm);
                     }
                 }
