@@ -101,6 +101,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runList();
                 case "uninstall":
                     return runUninstall();
+                case "resolve-activity":
+                    return runResolveActivity();
                 case "query-intent-activities":
                     return runQueryIntentActivities();
                 case "query-intent-services":
@@ -565,6 +567,28 @@ class PackageManagerShellCommand extends ShellCommand {
         return intent;
     }
 
+    private int runResolveActivity() {
+        Intent intent;
+        try {
+            intent = parseIntentAndUser();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        try {
+            ResolveInfo ri = mInterface.resolveIntent(intent, null, 0, mTargetUser);
+            PrintWriter pw = getOutPrintWriter();
+            if (ri == null) {
+                pw.println("No activity found");
+            } else {
+                PrintWriterPrinter pr = new PrintWriterPrinter(pw);
+                ri.dump(pr, "");
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed calling service", e);
+        }
+        return 0;
+    }
+
     private int runQueryIntentActivities() {
         Intent intent;
         try {
@@ -1016,6 +1040,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -s: short summary");
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
+        pw.println("  resolve-intent [--user USER_ID] INTENT");
+        pw.println("    Prints the activity that resolves to the given Intent.");
         pw.println("  query-intent-activities [--user USER_ID] INTENT");
         pw.println("    Prints all activities that can handle the given Intent.");
         pw.println("  query-intent-services [--user USER_ID] INTENT");
