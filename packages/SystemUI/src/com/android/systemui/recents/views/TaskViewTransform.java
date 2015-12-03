@@ -18,19 +18,28 @@ package com.android.systemui.recents.views;
 
 import android.animation.ValueAnimator;
 import android.graphics.RectF;
-import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 
 
 /* The transform state for a task view */
 public class TaskViewTransform {
+
+    // TODO: Move this out of the transform
     public int startDelay = 0;
+
     public int translationX = 0;
     public int translationY = 0;
     public float translationZ = 0;
     public float scale = 1f;
     public float alpha = 1f;
+
+    // Clip and thumbnail scale are untransformed layout-space properties
+    // The bottom clip is only used for freeform workspace tasks
+    public int clipBottom = 0;
+    public int clipRight = 0;
+    public float thumbnailScale = 1f;
+
     public boolean visible = false;
     float p = 0f;
 
@@ -40,18 +49,6 @@ public class TaskViewTransform {
 
     public TaskViewTransform() {
         // Do nothing
-    }
-
-    public TaskViewTransform(TaskViewTransform o) {
-        startDelay = o.startDelay;
-        translationX = o.translationX;
-        translationY = o.translationY;
-        translationZ = o.translationZ;
-        scale = o.scale;
-        alpha = o.alpha;
-        visible = o.visible;
-        rect.set(o.rect);
-        p = o.p;
     }
 
     /**
@@ -64,6 +61,9 @@ public class TaskViewTransform {
         translationZ = 0;
         scale = 1f;
         alpha = 1f;
+        clipBottom = 0;
+        clipRight = 0;
+        thumbnailScale = 1f;
         visible = false;
         rect.setEmpty();
         p = 0f;
@@ -87,7 +87,7 @@ public class TaskViewTransform {
     }
 
     /** Applies this transform to a view. */
-    public void applyToTaskView(View v, int duration, Interpolator interp, boolean allowLayers,
+    public void applyToTaskView(TaskView v, int duration, Interpolator interp, boolean allowLayers,
             boolean allowShadows, ValueAnimator.AnimatorUpdateListener updateCallback) {
         // Check to see if any properties have changed, and update the task view
         if (duration > 0) {
@@ -149,7 +149,7 @@ public class TaskViewTransform {
     }
 
     /** Reset the transform on a view. */
-    public static void reset(View v) {
+    public static void reset(TaskView v) {
         // Cancel any running animations
         v.animate().cancel();
         v.setTranslationX(0f);
@@ -158,6 +158,9 @@ public class TaskViewTransform {
         v.setScaleX(1f);
         v.setScaleY(1f);
         v.setAlpha(1f);
+        v.getViewBounds().setClipRight(0, false /* forceUpdate */);
+        v.getViewBounds().setClipBottom(0, false /* forceUpdate */);
+        v.mThumbnailView.setBitmapScale(1f);
     }
 
     @Override

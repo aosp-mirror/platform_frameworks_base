@@ -18,6 +18,7 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -80,6 +82,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     boolean mIsFocusAnimated;
     boolean mClipViewInStack;
     AnimateableViewBounds mViewBounds;
+    private AnimatorSet mClipAnimation;
 
     View mContent;
     TaskViewThumbnail mThumbnailView;
@@ -209,22 +212,44 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
         mThumbnailView.updateClipToTaskBar(mHeaderView);
+
         setMeasuredDimension(width, height);
         invalidateOutline();
     }
 
     /** Synchronizes this view's properties with the task's transform */
-    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
-        updateViewPropertiesToTaskTransform(toTransform, duration, null);
-    }
-
-    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration,
-                                             ValueAnimator.AnimatorUpdateListener updateCallback) {
+    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int clipBottom,
+            int duration, Interpolator interpolator,
+            ValueAnimator.AnimatorUpdateListener updateCallback) {
         RecentsConfiguration config = Recents.getConfiguration();
+        Utilities.cancelAnimationWithoutCallbacks(mClipAnimation);
 
         // Apply the transform
-        toTransform.applyToTaskView(this, duration, mFastOutSlowInInterpolator, false,
+        toTransform.applyToTaskView(this, duration, interpolator, false,
                 !config.fakeShadows, updateCallback);
+
+        // Update the clipping
+        if (duration > 0) {
+            mClipAnimation = new AnimatorSet();
+            mClipAnimation.playTogether(
+                    ObjectAnimator.ofInt(mViewBounds, AnimateableViewBounds.CLIP_BOTTOM,
+                            mViewBounds.getClipBottom(), clipBottom),
+                    ObjectAnimator.ofInt(mViewBounds, AnimateableViewBounds.CLIP_RIGHT,
+                            mViewBounds.getClipRight(), toTransform.clipRight),
+                    ObjectAnimator.ofFloat(mThumbnailView, TaskViewThumbnail.BITMAP_SCALE,
+                            mThumbnailView.getBitmapScale(), toTransform.thumbnailScale));
+            mClipAnimation.setStartDelay(toTransform.startDelay);
+            mClipAnimation.setDuration(duration);
+            mClipAnimation.setInterpolator(interpolator);
+            mClipAnimation.start();
+        } else {
+            mViewBounds.setClipBottom(clipBottom, false /* forceUpdate */);
+            mViewBounds.setClipRight(toTransform.clipRight, false /* forceUpdate */);
+            mThumbnailView.setBitmapScale(toTransform.thumbnailScale);
+        }
+        if (!config.useHardwareLayers) {
+            mThumbnailView.updateThumbnailVisibility(clipBottom - getPaddingBottom());
+        }
 
         // Update the task progress
         Utilities.cancelAnimationWithoutCallbacks(mTaskProgressAnimator);
@@ -673,11 +698,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
     public void onTaskDataLoaded() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         if (mThumbnailView != null && mHeaderView != null) {
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask);
             mHeaderView.rebindToTask(mTask);
+
             // Rebind any listeners
             mActionButtonView.setOnClickListener(this);
             setOnLongClickListener(this);
@@ -721,7 +746,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     public boolean onLongClick(View v) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (v == this && !ssp.hasDockedTask()) {
+        // Since we are clipping the view to the bounds, manually do the hit test
+        Rect clipBounds = new Rect(mViewBounds.mClipBounds);
+        clipBounds.scale(getScaleX());
+        boolean inBounds = clipBounds.contains(mDownTouchPos.x, mDownTouchPos.y);
+        if (v == this && inBounds && !ssp.hasDockedTask()) {
             // Start listening for drag events
             setClipViewInStack(false);
 

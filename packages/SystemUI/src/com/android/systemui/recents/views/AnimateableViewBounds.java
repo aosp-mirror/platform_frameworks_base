@@ -69,7 +69,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
      */
     public void reset() {
         mClipRect.setEmpty();
-        mSourceView.invalidateOutline();
         updateClipBounds();
     }
 
@@ -94,7 +93,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     public void setClipBottom(int bottom, boolean force) {
         if (bottom != mClipRect.bottom || force) {
             mClipRect.bottom = bottom;
-            mSourceView.invalidateOutline();
             updateClipBounds();
         }
     }
@@ -108,7 +106,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     public void setClipRight(int right, boolean force) {
         if (right != mClipRect.right || force) {
             mClipRect.right = right;
-            mSourceView.invalidateOutline();
             updateClipBounds();
         }
     }
@@ -123,5 +120,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
                 mSourceView.getWidth() - mClipRect.right,
                 mSourceView.getHeight() - mClipRect.bottom);
         mSourceView.setClipBounds(mClipBounds);
+        mSourceView.invalidateOutline();
     }
 }

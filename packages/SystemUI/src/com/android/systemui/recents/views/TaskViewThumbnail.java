@@ -25,7 +25,6 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -56,15 +55,11 @@ public class TaskViewThumbnail extends View {
                 }
             };
 
-    private Task mTask;
-
     // Drawing
     int mCornerRadius;
     float mDimAlpha;
     Matrix mScaleMatrix = new Matrix();
     Paint mDrawPaint = new Paint();
-    RectF mBitmapRect = new RectF();
-    RectF mLayoutRect = new RectF();
     float mBitmapScale = 1f;
     BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
@@ -104,15 +99,6 @@ public class TaskViewThumbnail extends View {
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (changed) {
-            mLayoutRect.set(0, 0, getWidth(), getHeight());
-            setBitmapScale(computeThumbnailScale(mTask != null ? mTask.isFreeformTask() : false));
-        }
-    }
-
-    @Override
     protected void onDraw(Canvas canvas) {
         if (mInvisible) {
             return;
@@ -129,15 +115,9 @@ public class TaskViewThumbnail extends View {
             mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP,
                     Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
-            mBitmapRect.set(0, 0, bm.getWidth(), bm.getHeight());
         } else {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
-        }
-        if (mTask != null) {
-            setBitmapScale(computeThumbnailScale(mTask != null ? mTask.isFreeformTask() : false));
-        } else {
-            setBitmapScale(1f);
         }
     }
 
@@ -157,32 +137,6 @@ public class TaskViewThumbnail extends View {
             mDrawPaint.setColor(Color.argb(255, grey, grey, grey));
         }
         invalidate();
-    }
-
-    /**
-     * Returns the scale to apply to a thumbnail bitmap relative to this view rect.
-     */
-    public float computeThumbnailScale(boolean isFreeformTask) {
-        if (isFreeformTask) {
-            // For freeform tasks, we scale the bitmap rect to fit in the layout rect
-            return Math.min(mLayoutRect.width() / mBitmapRect.width(),
-                    mLayoutRect.height() / mBitmapRect.height());
-        } else {
-            // For stack tasks, we scale the bitmap to fit the width
-            return Math.max(1f, mLayoutRect.width() / mBitmapRect.width());
-        }
-    }
-
-    /**
-     * Returns the scaled bitmap rect.
-     */
-    public RectF getScaledBitmapRect(float scale) {
-        RectF scaledBitmapRect = new RectF(mBitmapRect);
-        scaledBitmapRect.left *= scale;
-        scaledBitmapRect.top *= scale;
-        scaledBitmapRect.right *= scale;
-        scaledBitmapRect.bottom *= scale;
-        return scaledBitmapRect;
     }
 
     /**
@@ -235,7 +189,6 @@ public class TaskViewThumbnail extends View {
 
     /** Binds the thumbnail view to the task */
     void rebindToTask(Task t) {
-        mTask = t;
         if (t.thumbnail != null) {
             setThumbnail(t.thumbnail);
         } else {
@@ -245,7 +198,6 @@ public class TaskViewThumbnail extends View {
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
-        mTask = null;
         setThumbnail(null);
     }
 }

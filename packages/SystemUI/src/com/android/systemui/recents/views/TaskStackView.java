@@ -16,10 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
@@ -139,11 +135,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // A convenience update listener to request updating clipping of tasks
     private ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
             new ValueAnimator.AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            requestUpdateStackViewsClip();
-        }
-    };
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    requestUpdateStackViewsClip();
+                }
+            };
 
     // The drop targets for a task drag
     private DropTarget mFreeformWorkspaceDropTarget = new DropTarget() {
@@ -474,8 +470,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
 
                 // Animate the task into place
-                tv.updateViewPropertiesToTaskTransform(transform,
-                        mStackViewsAnimationDuration, mRequestUpdateClippingListener);
+                tv.updateViewPropertiesToTaskTransform(transform, transform.clipBottom,
+                        mStackViewsAnimationDuration, mFastOutSlowInInterpolator,
+                        mRequestUpdateClippingListener);
 
                 // Reattach it in the right z order
                 detachViewFromParent(tv);
@@ -497,7 +494,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
 
             // Pick up all the newly visible children and update all the existing children
-            for (int i = visibleStackRange[0]; isValidVisibleStackRange && i >= visibleStackRange[1]; i--) {
+            for (int i = visibleStackRange[0];
+                    isValidVisibleStackRange && i >= visibleStackRange[1]; i--) {
                 Task task = tasks.get(i);
                 TaskViewTransform transform = mCurrentTaskTransforms.get(i);
                 TaskView tv = mTmpTaskViewMap.get(task);
@@ -516,21 +514,25 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                 mLayoutAlgorithm.getStackTransform(0f, 0f, mTmpStackBackTransform,
                                         null);
                             }
-                            tv.updateViewPropertiesToTaskTransform(mTmpStackBackTransform, 0);
+                            tv.updateViewPropertiesToTaskTransform(mTmpStackBackTransform, 0, 0,
+                                    mFastOutSlowInInterpolator, mRequestUpdateClippingListener);
                         } else {
                             if (!hasStackFrontTransform) {
                                 hasStackFrontTransform = true;
                                 mLayoutAlgorithm.getStackTransform(1f, 0f, mTmpStackFrontTransform,
                                         null);
                             }
-                            tv.updateViewPropertiesToTaskTransform(mTmpStackFrontTransform, 0);
+                            tv.updateViewPropertiesToTaskTransform(mTmpStackFrontTransform, 0, 0,
+                                    mFastOutSlowInInterpolator, mRequestUpdateClippingListener);
                         }
                     }
                 }
 
-                // Animate the task into place
+                // Animate the task into place, the clip for stack tasks will be calculated in
+                // clipTaskViews()
                 tv.updateViewPropertiesToTaskTransform(transform,
-                        mStackViewsAnimationDuration, mRequestUpdateClippingListener);
+                        tv.getViewBounds().getClipBottom(), mStackViewsAnimationDuration,
+                        mFastOutSlowInInterpolator, mRequestUpdateClippingListener);
             }
 
             // Update the focus if the previous focused task was returned to the view pool
@@ -988,6 +990,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
             requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
+            requestUpdateStackViewsClip();
             clipTaskViews(true /* forceUpdate */);
         }
     }
@@ -1131,8 +1134,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    public boolean isTransformedTouchPointInView(float x, float y, View child) {
-        return isTransformedTouchPointInView(x, y, child, null);
+    public boolean isTransformedTouchPointInView(float x, float y, TaskView tv) {
+        final float[] point = new float[2];
+        point[0] = x;
+        point[1] = y;
+        transformPointToViewLocal(point, tv);
+        x = point[0];
+        y = point[1];
+        return (0 <= x) && (x < (tv.getMeasuredWidth() - tv.getViewBounds().getClipRight())) &&
+                (0 <= y) && (y < (tv.getMeasuredHeight() - tv.getViewBounds().getClipBottom()));
     }
 
     @Override
@@ -1343,9 +1353,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onTaskViewClipStateChanged(TaskView tv) {
-        if (!mStackViewsDirty) {
-            invalidate();
-        }
+        requestUpdateStackViewsClip();
     }
 
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/
@@ -1425,12 +1433,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    private AnimatorSet mDropAnimation;
-
     public final void onBusEvent(DragStartEvent event) {
-        // Cancel the existing drop animation
-        Utilities.cancelAnimationWithoutCallbacks(mDropAnimation);
-
         if (event.task.isFreeformTask()) {
             // Animate to the front of the stack
             mStackScroller.animateScroll(mStackScroller.getStackScroll(),
@@ -1460,47 +1463,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         boolean hasChangedStacks =
                 (!isFreeformTask && event.dropTarget == mFreeformWorkspaceDropTarget) ||
                         (isFreeformTask && event.dropTarget == mStackDropTarget);
-        if (hasChangedStacks) {
-            ArrayList<Animator> animations = new ArrayList<>();
 
+        event.postAnimationTrigger.increment();
+        if (hasChangedStacks) {
             // Move the task to the right position in the stack (ie. the front of the stack if
             // freeform or the front of the stack if fullscreen).  Note, we MUST move the tasks
             // before we update their stack ids, otherwise, the keys will have changed.
             if (event.dropTarget == mFreeformWorkspaceDropTarget) {
                 mStack.moveTaskToStack(event.task, FREEFORM_WORKSPACE_STACK_ID);
-                updateLayout(true);
-
-                // Update the clipping to match the scaled bitmap rect
-                TaskViewThumbnail thumbnailView = event.taskView.mThumbnailView;
-                float thumbnailScale = thumbnailView.computeThumbnailScale(true);
-                RectF bitmapRect = thumbnailView.getScaledBitmapRect(thumbnailScale);
-                AnimateableViewBounds viewBounds = event.taskView.getViewBounds();
-                int clipRight = (int) (thumbnailView.getMeasuredWidth() - bitmapRect.width());
-                int clipBottom = (int) (thumbnailView.getMeasuredHeight() - bitmapRect.height());
-                animations.add(ObjectAnimator.ofFloat(thumbnailView, TaskViewThumbnail.BITMAP_SCALE,
-                        thumbnailView.getBitmapScale(), thumbnailScale));
-                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_BOTTOM,
-                        viewBounds.getClipBottom(), clipBottom));
-                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_RIGHT,
-                        viewBounds.getClipRight(), clipRight));
             } else if (event.dropTarget == mStackDropTarget) {
                 mStack.moveTaskToStack(event.task, FULLSCREEN_WORKSPACE_STACK_ID);
-                updateLayout(true);
-
-                // Reset the clipping when animating to the stack
-                TaskViewThumbnail thumbnailView = event.taskView.mThumbnailView;
-                float thumbnailScale = thumbnailView.computeThumbnailScale(false);
-                AnimateableViewBounds viewBounds = event.taskView.getViewBounds();
-                animations.add(ObjectAnimator.ofFloat(thumbnailView, TaskViewThumbnail.BITMAP_SCALE,
-                        thumbnailView.getBitmapScale(), thumbnailScale));
-                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_BOTTOM,
-                        viewBounds.getClipBottom(), 0));
-                animations.add(ObjectAnimator.ofInt(viewBounds, AnimateableViewBounds.CLIP_RIGHT,
-                        viewBounds.getClipRight(), 0));
             }
+            updateLayout(true);
 
             // Move the task to the new stack in the system after the animation completes
-            event.postAnimationTrigger.increment();
             event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
                 public void run() {
@@ -1508,22 +1484,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     ssp.moveTaskToStack(event.task.key.id, event.task.key.stackId);
                 }
             });
-
-            // Animate the normal properties of the view
-            mDropAnimation = new AnimatorSet();
-            mDropAnimation.playTogether(animations);
-            mDropAnimation.setDuration(250);
-            mDropAnimation.setInterpolator(mFastOutSlowInInterpolator);
-            mDropAnimation.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    event.postAnimationTrigger.decrement();
-                }
-            });
-            mDropAnimation.start();
         }
-
-        event.postAnimationTrigger.increment();
         event.taskView.animate()
                 .withEndAction(event.postAnimationTrigger.decrementAsRunnable());
 
