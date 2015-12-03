@@ -278,6 +278,11 @@ public class JobStore {
                 // Copy over the jobs so we can release the lock before writing.
                 for (int i=0; i<mJobSet.size(); i++) {
                     JobStatus jobStatus = mJobSet.valueAt(i);
+
+                    if (!jobStatus.isPersisted()){
+                        continue;
+                    }
+
                     JobStatus copy = new JobStatus(jobStatus.getJob(), jobStatus.getUid(),
                             jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed());
                     mStoreCopy.add(copy);
