@@ -38612,10 +38612,11 @@ package android.util {
     field public static final int RTL = 1; // 0x1
   }
 
-  public final class LocaleList {
+  public final class LocaleList implements android.os.Parcelable {
     ctor public LocaleList();
     ctor public LocaleList(java.util.Locale);
     ctor public LocaleList(java.util.Locale[]);
+    method public int describeContents();
     method public static android.util.LocaleList forLanguageTags(java.lang.String);
     method public java.util.Locale get(int);
     method public java.util.Locale getBestMatch(java.lang.String[]);
@@ -38625,6 +38626,8 @@ package android.util {
     method public boolean isEmpty();
     method public int size();
     method public java.lang.String toLanguageTags();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.util.LocaleList> CREATOR;
   }
 
   public final class Log {

@@ -19,6 +19,8 @@ package android.util;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -35,11 +37,12 @@ import java.util.Locale;
  * LocaleList is an immutable list of Locales, typically used to keep an
  * ordered user preferences for locales.
  */
-public final class LocaleList {
+public final class LocaleList implements Parcelable {
     private final Locale[] mList;
     // This is a comma-separated list of the locales in the LocaleList created at construction time,
     // basically the result of running each locale's toLanguageTag() method and concatenating them
     // with commas in between.
+    @NonNull
     private final String mStringRepresentation;
 
     private static final Locale[] sEmptyList = new Locale[0];
@@ -99,6 +102,16 @@ public final class LocaleList {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int parcelableFlags) {
+        dest.writeString(mStringRepresentation);
     }
 
     @NonNull
@@ -163,10 +176,25 @@ public final class LocaleList {
         }
     }
 
+    public static final Parcelable.Creator<LocaleList> CREATOR
+            = new Parcelable.Creator<LocaleList>() {
+        @Override
+        public LocaleList createFromParcel(Parcel source) {
+            return LocaleList.forLanguageTags(source.readString());
+        }
+
+        @Override
+        public LocaleList[] newArray(int size) {
+            return new LocaleList[size];
+        }
+    };
+
+    @NonNull
     public static LocaleList getEmptyLocaleList() {
         return sEmptyLocaleList;
     }
 
+    @NonNull
     public static LocaleList forLanguageTags(@Nullable String list) {
         if (list == null || list.equals("")) {
             return getEmptyLocaleList();
