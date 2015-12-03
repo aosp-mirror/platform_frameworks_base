@@ -118,18 +118,21 @@ public class TaskStackLayoutAlgorithm {
      */
     public static class StackState {
 
-        public static final StackState FREEFORM_ONLY = new StackState(1f);
-        public static final StackState STACK_ONLY = new StackState(0f);
-        public static final StackState SPLIT = new StackState(0.5f);
+        public static final StackState FREEFORM_ONLY = new StackState(1f, 0);
+        public static final StackState STACK_ONLY = new StackState(0f, 0);
+        public static final StackState SPLIT = new StackState(0.5f, 255);
 
         public final float freeformHeightPct;
+        public final int freeformBackgroundAlpha;
 
         /**
          * @param freeformHeightPct the percentage of the stack height (not including paddings) to
          *                          allocate to the freeform workspace
+         * @param freeformBackgroundAlpha the background alpha for the freeform workspace
          */
-        StackState(float freeformHeightPct) {
+        StackState(float freeformHeightPct, int freeformBackgroundAlpha) {
             this.freeformHeightPct = freeformHeightPct;
+            this.freeformBackgroundAlpha = freeformBackgroundAlpha;
         }
 
         /**
@@ -278,7 +281,6 @@ public class TaskStackLayoutAlgorithm {
     FreeformWorkspaceLayoutAlgorithm mFreeformLayoutAlgorithm;
 
     public TaskStackLayoutAlgorithm(Context context, TaskStackView stackView) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = context.getResources();
         mStackView = stackView;
 
@@ -309,9 +311,6 @@ public class TaskStackLayoutAlgorithm {
      */
     public void setSystemInsets(Rect systemInsets) {
         mSystemInsets.set(systemInsets);
-        if (DEBUG) {
-            Log.d(TAG, "setSystemInsets: " + systemInsets);
-        }
     }
 
     /**
@@ -343,6 +342,7 @@ public class TaskStackLayoutAlgorithm {
 
         // The freeform height is the visible height (not including system insets) - padding above
         // freeform and below stack - gap between the freeform and stack
+        mState = state;
         mStackTopOffset = mFocusedPeekHeight + heightPadding;
         mStackBottomOffset = mSystemInsets.bottom + heightPadding;
         state.computeRects(mFreeformRect, mStackRect, taskStackBounds, widthPadding, heightPadding,
@@ -511,6 +511,14 @@ public class TaskStackLayoutAlgorithm {
         float max = mUnfocusedRange.relativeMax +
                 mFocusState * (mFocusedRange.relativeMax - mUnfocusedRange.relativeMax);
         return stackScroll + max;
+    }
+
+    /**
+     *
+     * Returns the current stack state.
+     */
+    public StackState getStackState() {
+        return mState;
     }
 
     /**

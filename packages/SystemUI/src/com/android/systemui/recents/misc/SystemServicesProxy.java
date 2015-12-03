@@ -115,7 +115,6 @@ public class SystemServicesProxy {
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
-        RecentsDebugFlags flags = Recents.getDebugFlags();
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManagerNative.getDefault();
