@@ -73,19 +73,31 @@ public interface Parcelable {
      */
     public static final int PARCELABLE_ELIDE_DUPLICATES = 0x0002;
 
-    /**
+    /*
      * Bit masks for use with {@link #describeContents}: each bit represents a
      * kind of object considered to have potential special significance when
      * marshalled.
      */
+
+    /**
+     * Descriptor bit used with {@link #describeContents()}: indicates that
+     * the Parcelable object's flattened representation includes a file descriptor.
+     *
+     * @see #describeContents()
+     */
     public static final int CONTENTS_FILE_DESCRIPTOR = 0x0001;
     
     /**
-     * Describe the kinds of special objects contained in this Parcelable's
-     * marshalled representation.
+     * Describe the kinds of special objects contained in this Parcelable
+     * instance's marshaled representation. For example, if the object will
+     * include a file descriptor in the output of {@link #writeToParcel(Parcel, int)},
+     * the return value of this method must include the
+     * {@link #CONTENTS_FILE_DESCRIPTOR} bit.
      *  
-     * @return a bitmask indicating the set of special object types marshalled
-     * by the Parcelable.
+     * @return a bitmask indicating the set of special object types marshaled
+     * by this Parcelable object instance.
+     *
+     * @see #CONTENTS_FILE_DESCRIPTOR
      */
     public int describeContents();
     
