@@ -37,7 +37,7 @@
          Or string format of ApnSettingV3.
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string-array translatable="false" name="config_tether_apndata">
-        <item>[ApnSettingV3]TELUS ISP,isp.telus.com,,,,,,,,,302,220,,DUN,,,true,0,,,,,,,gid,54</item>
+        <item>[ApnSettingV3]TELUS ISP,isp.telus.com,,,,,,,,,302,220,,DUN,IP,IP,true,0,,,,,,,gid,54</item>
         <item>[ApnSettingV3]Tethered Mobile Internet,isp.mb.com,,,,,,,,,302,220,,DUN,,,true,0,,,,,,,gid,50</item>
         <item>[ApnSettingV3]Tethered Public Mobile,isp.mb.com,,,,,,,,,302,220,,DUN,,,true,0,,,,,,,gid,4D4F</item>
     </string-array>
