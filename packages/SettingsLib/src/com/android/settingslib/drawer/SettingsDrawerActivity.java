@@ -77,10 +77,7 @@ public class SettingsDrawerActivity extends Activity {
             mDrawerLayout = null;
             return;
         }
-        if (sDashboardCategories == null) {
-            sTileCache = new HashMap<>();
-            sDashboardCategories = TileUtils.getCategories(this, sTileCache);
-        }
+        getDashboardCategories();
         setActionBar(toolbar);
         mDrawerAdapter = new SettingsDrawerAdapter(this);
         ListView listView = (ListView) findViewById(R.id.left_drawer);
@@ -109,19 +106,23 @@ public class SettingsDrawerActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-        filter.addDataScheme("package");
-        registerReceiver(mPackageReceiver, filter);
+        if (mDrawerLayout != null) {
+            final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            filter.addDataScheme("package");
+            registerReceiver(mPackageReceiver, filter);
 
-        new CategoriesUpdater().execute();
+            new CategoriesUpdater().execute();
+        }
     }
 
     @Override
     protected void onPause() {
-        unregisterReceiver(mPackageReceiver);
+        if (mDrawerLayout != null) {
+            unregisterReceiver(mPackageReceiver);
+        }
 
         super.onPause();
     }
@@ -178,6 +179,10 @@ public class SettingsDrawerActivity extends Activity {
     }
 
     public List<DashboardCategory> getDashboardCategories() {
+        if (sDashboardCategories == null) {
+            sTileCache = new HashMap<>();
+            sDashboardCategories = TileUtils.getCategories(this, sTileCache);
+        }
         return sDashboardCategories;
     }
 

@@ -116,7 +116,7 @@ public class ApplicationsState {
 
     final HandlerThread mThread;
     final BackgroundHandler mBackgroundHandler;
-    final MainHandler mMainHandler = new MainHandler();
+    final MainHandler mMainHandler = new MainHandler(Looper.getMainLooper());
 
     private ApplicationsState(Application app) {
         mContext = app;
@@ -686,6 +686,10 @@ public class ApplicationsState {
         static final int MSG_RUNNING_STATE_CHANGED = 6;
         static final int MSG_LAUNCHER_INFO_CHANGED = 7;
         static final int MSG_LOAD_ENTRIES_COMPLETE = 8;
+
+        public MainHandler(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void handleMessage(Message msg) {
