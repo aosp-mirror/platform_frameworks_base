@@ -439,7 +439,7 @@ int GraphicsJNI::getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
     return env->CallIntMethod(javaBitmap, gBitmap_getAllocationByteCountMethodID);
 }
 
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, BitmapRegionDecoder* bitmap)
+jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
 {
     SkASSERT(bitmap != NULL);
 
@@ -673,6 +673,91 @@ bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
 
     mStorage = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
     return mStorage != nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(
+        android::Bitmap* recycledBitmap, size_t recycledBytes)
+    : mRecycledBitmap(recycledBitmap)
+    , mRecycledBytes(recycledBytes)
+    , mSkiaBitmap(nullptr)
+    , mNeedsCopy(false)
+{}
+
+RecyclingClippingPixelAllocator::~RecyclingClippingPixelAllocator() {}
+
+bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    // Ensure that the caller did not pass in a NULL bitmap to the constructor or this
+    // function.
+    LOG_ALWAYS_FATAL_IF(!mRecycledBitmap);
+    LOG_ALWAYS_FATAL_IF(!bitmap);
+    mSkiaBitmap = bitmap;
+
+    // This behaves differently than the RecyclingPixelAllocator.  For backwards
+    // compatibility, the original color type of the recycled bitmap must be maintained.
+    if (mRecycledBitmap->info().colorType() != bitmap->colorType()) {
+        return false;
+    }
+
+    // The Skia bitmap specifies the width and height needed by the decoder.
+    // mRecycledBitmap specifies the width and height of the bitmap that we
+    // want to reuse.  Neither can be changed.  We will try to find a way
+    // to reuse the memory.
+    const int maxWidth = SkTMax(bitmap->width(), mRecycledBitmap->info().width());
+    const int maxHeight = SkTMax(bitmap->height(), mRecycledBitmap->info().height());
+    const SkImageInfo maxInfo = bitmap->info().makeWH(maxWidth, maxHeight);
+    const size_t rowBytes = maxInfo.minRowBytes();
+    const size_t bytesNeeded = maxInfo.getSafeSize(rowBytes);
+    if (bytesNeeded <= mRecycledBytes) {
+        // Here we take advantage of reconfigure() to reset the rowBytes and ctable
+        // of mRecycledBitmap.  It is very important that we pass in
+        // mRecycledBitmap->info() for the SkImageInfo.  According to the
+        // specification for BitmapRegionDecoder, we are not allowed to change
+        // the SkImageInfo.
+        mRecycledBitmap->reconfigure(mRecycledBitmap->info(), rowBytes, ctable);
+
+        // This call will give the bitmap the same pixelRef as mRecycledBitmap.
+        bitmap->setPixelRef(mRecycledBitmap->refPixelRef())->unref();
+
+        // Make sure that the recycled bitmap has the correct alpha type.
+        mRecycledBitmap->setAlphaType(bitmap->alphaType());
+
+        bitmap->lockPixels();
+        mNeedsCopy = false;
+
+        // TODO: If the dimensions of the SkBitmap are smaller than those of
+        // mRecycledBitmap, should we zero the memory in mRecycledBitmap?
+        return true;
+    }
+
+    // In the event that mRecycledBitmap is not large enough, allocate new memory
+    // on the heap.
+    SkBitmap::HeapAllocator heapAllocator;
+
+    // We will need to copy from heap memory to mRecycledBitmap's memory after the
+    // decode is complete.
+    mNeedsCopy = true;
+
+    return heapAllocator.allocPixelRef(bitmap, ctable);
+}
+
+void RecyclingClippingPixelAllocator::copyIfNecessary() {
+    if (mNeedsCopy) {
+        SkPixelRef* recycledPixels = mRecycledBitmap->refPixelRef();
+        void* dst = recycledPixels->pixels();
+        size_t dstRowBytes = mRecycledBitmap->rowBytes();
+        size_t bytesToCopy = SkTMin(mRecycledBitmap->info().minRowBytes(),
+                mSkiaBitmap->info().minRowBytes());
+        for (int y = 0; y < mRecycledBitmap->info().height(); y++) {
+            memcpy(dst, mSkiaBitmap->getAddr(0, y), bytesToCopy);
+            dst = SkTAddOffset<void>(dst, dstRowBytes);
+        }
+        recycledPixels->notifyPixelsChanged();
+        recycledPixels->unref();
+    }
+    mRecycledBitmap = nullptr;
+    mSkiaBitmap = nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

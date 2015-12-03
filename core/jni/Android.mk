@@ -199,7 +199,6 @@ LOCAL_C_INCLUDES += \
     external/sqlite/android \
     external/expat/lib \
     external/tremor/Tremor \
-    external/jpeg \
     external/harfbuzz_ng/src \
     libcore/include \
     $(call include-path-for, audio-utils) \
@@ -238,7 +237,7 @@ LOCAL_SHARED_LIBRARIES := \
     libicuuc \
     libicui18n \
     libmedia \
-    libjpeg \
+    libjpeg-turbo \
     libusbhost \
     libharfbuzz_ng \
     libz \
