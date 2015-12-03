@@ -624,7 +624,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             byte[] hash = credentialUtil.toHash(credential, userId);
             if (Arrays.equals(hash, storedHash.hash)) {
                 unlockKeystore(credentialUtil.adjustForKeystore(credential), userId);
-                unlockUser(userId, null);
+
+                // TODO: pass through a meaningful token from gatekeeper to
+                // unlock credential keys; for now pass through a stub value to
+                // indicate that we came from a user challenge.
+                final byte[] token = String.valueOf(userId).getBytes();
+                unlockUser(userId, token);
+
                 // migrate credential to GateKeeper
                 credentialUtil.setCredential(credential, null, userId);
                 if (!hasChallenge) {
@@ -677,7 +683,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
             // credential has matched
             unlockKeystore(credential, userId);
-            unlockUser(userId, null);
+
+            // TODO: pass through a meaningful token from gatekeeper to
+            // unlock credential keys; for now pass through a stub value to
+            // indicate that we came from a user challenge.
+            final byte[] token = String.valueOf(userId).getBytes();
+            unlockUser(userId, token);
+
             UserInfo info = UserManager.get(mContext).getUserInfo(userId);
             if (LockPatternUtils.isSeparateWorkChallengeEnabled() && info.isManagedProfile()) {
                 TrustManager trustManager =

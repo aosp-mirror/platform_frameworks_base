@@ -82,8 +82,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import libcore.util.EmptyArray;
-
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
  */
@@ -223,7 +221,7 @@ final class UserController {
                         AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
             }
 
-            maybeFinishUserUnlock(uss);
+            maybeUnlockUser(userId);
         }
     }
 
@@ -232,7 +230,7 @@ final class UserController {
      * {@link UserState#STATE_RUNNING}, which only occurs if the user storage is
      * actually unlocked.
      */
-    void maybeFinishUserUnlock(UserState uss) {
+    void finishUserUnlock(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -530,9 +528,12 @@ final class UserController {
         return userManager;
     }
 
+    private IMountService getMountService() {
+        return IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+    }
+
     private boolean isUserKeyUnlocked(int userId) {
-        final IMountService mountService = IMountService.Stub
-                .asInterface(ServiceManager.getService("mount"));
+        final IMountService mountService = getMountService();
         if (mountService != null) {
             try {
                 return mountService.isUserKeyUnlocked(userId);
@@ -743,6 +744,17 @@ final class UserController {
         }
     }
 
+    /**
+     * Attempt to unlock user without a credential token. This typically
+     * succeeds when the device doesn't have credential-encrypted storage, or
+     * when the the credential-encrypted storage isn't tied to a user-provided
+     * PIN or pattern.
+     */
+    boolean maybeUnlockUser(final int userId) {
+        // Try unlocking storage using empty token
+        return unlockUserCleared(userId, null);
+    }
+
     boolean unlockUserCleared(final int userId, byte[] token) {
         synchronized (mService) {
             // Bail if already running unlocked
@@ -750,19 +762,20 @@ final class UserController {
             if (uss.state == UserState.STATE_RUNNING) return true;
         }
 
-        final UserInfo userInfo = getUserInfo(userId);
-        final IMountService mountService = IMountService.Stub
-                .asInterface(ServiceManager.getService("mount"));
-        try {
-            mountService.unlockUserKey(userId, userInfo.serialNumber, token);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to unlock: " + e.getMessage());
-            return false;
+        if (!isUserKeyUnlocked(userId)) {
+            final UserInfo userInfo = getUserInfo(userId);
+            final IMountService mountService = getMountService();
+            try {
+                mountService.unlockUserKey(userId, userInfo.serialNumber, token);
+            } catch (RemoteException | RuntimeException e) {
+                Slog.w(TAG, "Failed to unlock: " + e.getMessage());
+                return false;
+            }
         }
 
         synchronized (mService) {
             final UserState uss = mStartedUsers.get(userId);
-            maybeFinishUserUnlock(uss);
+            finishUserUnlock(uss);
         }
 
         return true;
