@@ -2354,7 +2354,7 @@ public class PhoneNumberUtils
                         tempDialStr = postDialStr.substring(dialableIndex);
                     } else {
                         // Non-dialable character such as P/W should not be at the end of
-                        // the dial string after P/W processing in CdmaConnection.java
+                        // the dial string after P/W processing in GsmCdmaConnection.java
                         // Set the postDialStr to "" to break out of the loop
                         if (dialableIndex < 0) {
                             postDialStr = "";
