@@ -111,6 +111,10 @@ public:
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void reloadPointerResources();
 
+    /* Detach or attach the pointer icon status. When detached, the pointer icon disappears
+     * and the icon location does not change at all. */
+    void detachPointerIcon(bool detached);
+
 private:
     static const size_t MAX_RECYCLED_SPRITES = 12;
     static const size_t MAX_SPOTS = 12;
@@ -179,6 +183,8 @@ private:
         int32_t requestedPointerShape;
 
         int32_t buttonState;
+
+        bool iconDetached;
 
         Vector<Spot*> spots;
         Vector<sp<Sprite> > recycledSprites;

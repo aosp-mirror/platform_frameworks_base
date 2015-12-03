@@ -214,6 +214,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetPointerIconShape(long ptr, int iconId);
     private static native void nativeReloadPointerIcons(long ptr);
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
+    private static native void nativeSetPointerIconDetached(long ptr, boolean detached);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -1272,6 +1273,11 @@ public class InputManagerService extends IInputManager.Stub
 
     public void setFocusedApplication(InputApplicationHandle application) {
         nativeSetFocusedApplication(mPtr, application);
+    }
+
+    @Override
+    public void setPointerIconDetached(boolean detached) {
+        nativeSetPointerIconDetached(mPtr, detached);
     }
 
     public void setInputDispatchMode(boolean enabled, boolean frozen) {

@@ -40246,6 +40246,8 @@ package android.view {
     field public static final int AXIS_LTRIGGER = 17; // 0x11
     field public static final int AXIS_ORIENTATION = 8; // 0x8
     field public static final int AXIS_PRESSURE = 2; // 0x2
+    field public static final int AXIS_RELATIVE_X = 27; // 0x1b
+    field public static final int AXIS_RELATIVE_Y = 28; // 0x1c
     field public static final int AXIS_RTRIGGER = 18; // 0x12
     field public static final int AXIS_RUDDER = 20; // 0x14
     field public static final int AXIS_RX = 12; // 0xc
@@ -40781,6 +40783,7 @@ package android.view {
     method public boolean hasNestedScrollingParent();
     method public boolean hasOnClickListeners();
     method public boolean hasOverlappingRendering();
+    method public boolean hasPointerCapture();
     method public boolean hasTransientState();
     method public boolean hasWindowFocus();
     method public static android.view.View inflate(android.content.Context, int, android.view.ViewGroup);
@@ -40907,6 +40910,7 @@ package android.view {
     method public void postOnAnimation(java.lang.Runnable);
     method public void postOnAnimationDelayed(java.lang.Runnable, long);
     method public void refreshDrawableState();
+    method public void releasePointerCapture();
     method public boolean removeCallbacks(java.lang.Runnable);
     method public void removeOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener);
     method public void removeOnLayoutChangeListener(android.view.View.OnLayoutChangeListener);
@@ -41007,6 +41011,7 @@ package android.view {
     method public void setPaddingRelative(int, int, int, int);
     method public void setPivotX(float);
     method public void setPivotY(float);
+    method public void setPointerCapture();
     method public void setPointerIcon(android.view.PointerIcon);
     method public void setPressed(boolean);
     method public final void setRight(int);
