@@ -933,7 +933,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             super(context, menu, anchorView, overflowOnly,
                     com.android.internal.R.attr.actionOverflowMenuStyle);
             setGravity(Gravity.END);
-            setCallback(mPopupPresenterCallback);
+            setPresenterCallback(mPopupPresenterCallback);
         }
 
         @Override
@@ -956,7 +956,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                 setAnchorView(mOverflowButton == null ? (View) mMenuView : mOverflowButton);
             }
 
-            setCallback(mPopupPresenterCallback);
+            setPresenterCallback(mPopupPresenterCallback);
         }
 
         @Override

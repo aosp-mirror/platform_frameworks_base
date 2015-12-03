@@ -245,7 +245,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
             MenuPopupHelper subPopup = new MenuPopupHelper(
                     mContext, subMenu, mShownAnchorView, mOverflowOnly, mPopupStyleAttr,
                     mPopupStyleRes);
-            subPopup.setCallback(mPresenterCallback);
+            subPopup.setPresenterCallback(mPresenterCallback);
             subPopup.setForceShowIcon(mAdapter.getForceShowIcon());
 
             if (subPopup.tryShow()) {

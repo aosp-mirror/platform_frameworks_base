@@ -53,7 +53,7 @@ import com.android.internal.view.menu.IconMenuPresenter;
 import com.android.internal.view.menu.ListMenuPresenter;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
-import com.android.internal.view.menu.MenuPopupHelper;
+import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.DecorContentParent;
@@ -232,8 +232,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mAlwaysReadCloseOnTouchAttr = false;
 
     ContextMenuBuilder mContextMenu;
-    MenuDialogHelper mContextMenuHelper;
-    MenuPopupHelper mContextMenuPopupHelper;
+    MenuHelper mContextMenuHelper;
     private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
@@ -1102,10 +1101,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mContextMenuHelper != null) {
             mContextMenuHelper.dismiss();
             mContextMenuHelper = null;
-        }
-        if (mContextMenuPopupHelper != null) {
-            mContextMenuPopupHelper.dismiss();
-            mContextMenuPopupHelper = null;
         }
     }
 

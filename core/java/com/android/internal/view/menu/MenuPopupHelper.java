@@ -30,7 +30,7 @@ import android.widget.PopupWindow.OnDismissListener;
 /**
  * Presents a menu as a small, simple popup anchored to another view.
  */
-public class MenuPopupHelper {
+public class MenuPopupHelper implements MenuHelper {
     private final Context mContext;
 
     // Immutable cached popup menu properties.
@@ -244,6 +244,7 @@ public class MenuPopupHelper {
     /**
      * Dismisses the popup, if showing.
      */
+    @Override
     public void dismiss() {
         if (isShowing()) {
             mPopup.dismiss();
@@ -270,7 +271,8 @@ public class MenuPopupHelper {
         return mPopup != null && mPopup.isShowing();
     }
 
-    public void setCallback(@Nullable MenuPresenter.Callback cb) {
+    @Override
+    public void setPresenterCallback(@Nullable MenuPresenter.Callback cb) {
         mPresenterCallback = cb;
         if (mPopup != null) {
             mPopup.setCallback(cb);
