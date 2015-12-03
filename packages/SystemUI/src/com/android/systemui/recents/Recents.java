@@ -365,8 +365,8 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public void dockTopTask(boolean draggingInRecents, Rect initialBounds) {
-        mImpl.dockTopTask(draggingInRecents, initialBounds);
+    public void dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
+        mImpl.dockTopTask(draggingInRecents, stackCreateMode,initialBounds);
         if (draggingInRecents) {
             mDraggingInRecentsCurrentUser = sSystemServicesProxy.getCurrentUser();
         }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -53,6 +54,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
 
     private RecentsComponent mRecentsComponent;
     private Divider mDivider;
+    private Context mContext;
     private boolean mIsVertical;
     private boolean mIsRTL;
 
@@ -69,6 +71,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private int mDragMode;
 
     public NavigationBarGestureHelper(Context context) {
+        mContext = context;
         ViewConfiguration configuration = ViewConfiguration.get(context);
         Resources r = context.getResources();
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
@@ -172,6 +175,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                     == DOCKED_INVALID) {
                 mDragMode = calculateDragMode();
                 Rect initialBounds = null;
+                int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
                 if (mDragMode == DRAG_MODE_DIVIDER) {
                     initialBounds = new Rect();
                     mDivider.getView().calculateBoundsForPosition(mIsVertical
@@ -181,8 +185,12 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                                     ? DOCKED_TOP
                                     : DOCKED_LEFT,
                             initialBounds);
+                } else if (mDragMode == DRAG_MODE_RECENTS && mTouchDownX
+                        < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
+                    createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
-                mRecentsComponent.dockTopTask(mDragMode == DRAG_MODE_RECENTS, initialBounds);
+                mRecentsComponent.dockTopTask(mDragMode == DRAG_MODE_RECENTS, createMode,
+                        initialBounds);
                 if (mDragMode == DRAG_MODE_DIVIDER) {
                     mDivider.getView().startDragging();
                 }
