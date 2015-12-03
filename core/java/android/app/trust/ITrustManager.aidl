@@ -29,6 +29,7 @@ interface ITrustManager {
     void registerTrustListener(in ITrustListener trustListener);
     void unregisterTrustListener(in ITrustListener trustListener);
     void reportKeyguardShowingChanged();
+    void setDeviceLockedForUser(int userId, boolean locked);
     boolean isDeviceLocked(int userId);
     boolean isDeviceSecure(int userId);
 }
