@@ -445,12 +445,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return super.verifyDrawable(who);
     }
 
-    public void disableLayersForOneFrame() {
-        if (mTaskStackView != null) {
-            mTaskStackView.disableLayersForOneFrame();
-        }
-    }
-
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override

@@ -425,10 +425,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
         }
 
-        if (!launchState.launchedHasConfigurationChanged) {
-            mRecentsView.disableLayersForOneFrame();
-        }
-
         // Notify that recents is now visible
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));

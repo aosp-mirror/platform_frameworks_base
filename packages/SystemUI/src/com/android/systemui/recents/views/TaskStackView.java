@@ -127,7 +127,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     List<TaskView> mImmutableTaskViews = new ArrayList<>();
     List<TaskView> mTmpTaskViews = new ArrayList<>();
     LayoutInflater mInflater;
-    boolean mLayersDisabled;
     boolean mTouchExplorationEnabled;
 
     Interpolator mFastOutSlowInInterpolator;
@@ -462,9 +461,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         Log.d(TAG, "picking up from pool: " + task.key);
                     }
                     tv = mViewPool.pickUpViewFromPool(task, task);
-                    if (mLayersDisabled) {
-                        tv.disableLayersForOneFrame();
-                    }
                 } else {
                     // Reattach it in the right z order
                     detachViewFromParent(tv);
@@ -500,9 +496,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
                 if (tv == null) {
                     tv = mViewPool.pickUpViewFromPool(task, task);
-                    if (mLayersDisabled) {
-                        tv.disableLayersForOneFrame();
-                    }
                     if (mStackViewsAnimationDuration > 0) {
                         // For items in the list, put them in start animating them from the
                         // approriate ends of the list where they are expected to appear
@@ -1147,8 +1140,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        mLayersDisabled = false;
-
         // Draw the freeform workspace background
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.hasFreeformWorkspaceSupport()) {
@@ -1158,14 +1149,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         super.dispatchDraw(canvas);
-    }
-
-    public void disableLayersForOneFrame() {
-        mLayersDisabled = true;
-        List<TaskView> taskViews = getTaskViews();
-        for (int i = 0; i < taskViews.size(); i++) {
-            taskViews.get(i).disableLayersForOneFrame();
-        }
     }
 
     /**
