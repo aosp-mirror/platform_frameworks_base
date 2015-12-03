@@ -57,6 +57,7 @@ public:
 #if HWUI_NEW_OPS
             BakedOpRenderer* renderer,
             const BakedOpState* bakedState,
+            const Rect* clip,
 #else
             OpenGLRenderer* renderer,
 #endif
@@ -65,6 +66,7 @@ public:
         : renderer(renderer)
 #if HWUI_NEW_OPS
         , bakedState(bakedState)
+        , clip(clip)
 #endif
         , x(x)
         , y(y)
@@ -79,6 +81,7 @@ public:
 #if HWUI_NEW_OPS
     BakedOpRenderer* renderer;
     const BakedOpState* bakedState;
+    const Rect* clip;
 #else
     OpenGLRenderer* renderer;
 #endif

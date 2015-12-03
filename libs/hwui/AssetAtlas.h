@@ -148,15 +148,15 @@ public:
 
     /**
      * Returns the entry in the atlas associated with the specified
-     * bitmap. If the bitmap is not in the atlas, return NULL.
+     * pixelRef. If the pixelRef is not in the atlas, return NULL.
      */
-    Entry* getEntry(const SkBitmap* bitmap) const;
+    Entry* getEntry(const SkPixelRef* pixelRef) const;
 
     /**
      * Returns the texture for the atlas entry associated with the
-     * specified bitmap. If the bitmap is not in the atlas, return NULL.
+     * specified pixelRef. If the pixelRef is not in the atlas, return NULL.
      */
-    Texture* getEntryTexture(const SkBitmap* bitmap) const;
+    Texture* getEntryTexture(const SkPixelRef* pixelRef) const;
 
 private:
     void createEntries(Caches& caches, int64_t* map, int count);

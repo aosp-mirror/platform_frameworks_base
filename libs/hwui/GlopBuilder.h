@@ -53,7 +53,7 @@ public:
     GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
     GlopBuilder& setMeshIndexedQuads(Vertex* vertexData, int quadCount);
-    GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: use indexed quads
+    GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: delete
     GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
     GlopBuilder& setMeshPatchQuads(const Patch& patch);

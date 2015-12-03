@@ -118,7 +118,7 @@ public:
         TYPE* end = current + vertexCount;
         mBounds.set(current->x, current->y, current->x, current->y);
         for (; current < end; current++) {
-            mBounds.expandToCoverVertex(current->x, current->y);
+            mBounds.expandToCover(current->x, current->y);
         }
     }
 

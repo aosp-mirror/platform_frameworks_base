@@ -37,21 +37,34 @@ class RenderNode;
 struct Vertex;
 
 /**
- * The provided macro is executed for each op type in order, with the results separated by commas.
+ * On of the provided macros is executed for each op type in order. The first will be used for ops
+ * that cannot merge, and the second for those that can.
  *
  * This serves as the authoritative list of ops, used for generating ID enum, and ID based LUTs.
  */
+#define MAP_OPS_BASED_ON_MERGEABILITY(U_OP_FN, M_OP_FN) \
+        M_OP_FN(BitmapOp) \
+        U_OP_FN(LinesOp) \
+        U_OP_FN(RectOp) \
+        U_OP_FN(RenderNodeOp) \
+        U_OP_FN(ShadowOp) \
+        U_OP_FN(SimpleRectsOp) \
+        M_OP_FN(TextOp) \
+        U_OP_FN(BeginLayerOp) \
+        U_OP_FN(EndLayerOp) \
+        U_OP_FN(LayerOp)
+
+/**
+ * The provided macro is executed for each op type in order. This is used in cases where
+ * merge-ability of ops doesn't matter.
+ */
 #define MAP_OPS(OP_FN) \
-        OP_FN(BitmapOp) \
-        OP_FN(LinesOp) \
-        OP_FN(RectOp) \
-        OP_FN(RenderNodeOp) \
-        OP_FN(ShadowOp) \
-        OP_FN(SimpleRectsOp) \
-        OP_FN(TextOp) \
-        OP_FN(BeginLayerOp) \
-        OP_FN(EndLayerOp) \
-        OP_FN(LayerOp)
+        MAP_OPS_BASED_ON_MERGEABILITY(OP_FN, OP_FN)
+
+#define NULL_OP_FN(Type)
+
+#define MAP_MERGED_OPS(OP_FN) \
+        MAP_OPS_BASED_ON_MERGEABILITY(NULL_OP_FN, OP_FN)
 
 // Generate OpId enum
 #define IDENTITY_FN(Type) Type,

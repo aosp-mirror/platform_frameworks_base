@@ -62,7 +62,9 @@ public:
         int cardIndexOffset = scrollPx / (cardSpacing + cardHeight);
         int pxOffset = -(scrollPx % (cardSpacing + cardHeight));
 
-        TestCanvas canvas(cardWidth, cardHeight);
+        TestCanvas canvas(
+                listView->stagingProperties().getWidth(),
+                listView->stagingProperties().getHeight());
         for (size_t ci = 0; ci < cards.size(); ci++) {
             // update card position
             auto card = cards[(ci + cardIndexOffset) % cards.size()];
@@ -121,9 +123,11 @@ private:
             static SkBitmap filledBox = createBoxBitmap(true);
             static SkBitmap strokedBox = createBoxBitmap(false);
 
-            props.mutableOutline().setRoundRect(0, 0, cardWidth, cardHeight, dp(6), 1);
-            props.mutableOutline().setShouldClip(true);
-            canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
+            // TODO: switch to using round rect clipping, once merging correctly handles that
+            SkPaint roundRectPaint;
+            roundRectPaint.setAntiAlias(true);
+            roundRectPaint.setColor(Color::White);
+            canvas.drawRoundRect(0, 0, cardWidth, cardHeight, dp(6), dp(6), roundRectPaint);
 
             SkPaint textPaint;
             textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);

@@ -75,7 +75,8 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
             .setTransform(bakedState->computedState.transform, transformFlags)
             .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
             .build();
-    renderer->renderGlop(*bakedState, glop);
+    // Note: don't pass dirty bounds here, so user must manage passing dirty bounds to renderer
+    renderer->renderGlop(nullptr, clip, glop);
 #else
     GlopBuilder(renderer->mRenderState, renderer->mCaches, &glop)
             .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)

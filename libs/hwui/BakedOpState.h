@@ -38,6 +38,16 @@ namespace OpClipSideFlags {
 }
 
 /**
+ * Holds a list of BakedOpStates of ops that can be drawn together
+ */
+struct MergedBakedOpList {
+    const BakedOpState*const* states;
+    size_t count;
+    int clipSideFlags;
+    Rect clip;
+};
+
+/**
  * Holds the resolved clip, transform, and bounds of a recordedOp, when replayed with a snapshot
  */
 class ResolvedRenderState {

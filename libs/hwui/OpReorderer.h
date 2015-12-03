@@ -58,7 +58,8 @@ namespace OpBatchType {
 }
 
 class OpReorderer : public CanvasStateClient {
-    typedef std::function<void(void*, const RecordedOp&, const BakedOpState&)> BakedOpDispatcher;
+    typedef void (*BakedOpReceiver)(void*, const BakedOpState&);
+    typedef void (*MergedOpReceiver)(void*, const MergedBakedOpList& opList);
 
     /**
      * Stores the deferred render operations and state used to compute ordering
@@ -87,7 +88,7 @@ class OpReorderer : public CanvasStateClient {
         void deferMergeableOp(LinearAllocator& allocator,
                 BakedOpState* op, batchid_t batchId, mergeid_t mergeId);
 
-        void replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers) const;
+        void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers, MergedOpReceiver*) const;
 
         bool empty() const {
             return mBatches.empty();
@@ -132,19 +133,44 @@ public:
      * It constructs a lookup array of lambdas, which allows a recorded BakeOpState to use
      * state->op->opId to lookup a receiver that will be called when the op is replayed.
      *
-     * For example a BitmapOp would resolve, via the lambda lookup, to calling:
-     *
-     * StaticDispatcher::onBitmapOp(Renderer& renderer, const BitmapOp& op, const BakedOpState& state);
      */
-#define BAKED_OP_RECEIVER(Type) \
-    [](void* internalRenderer, const RecordedOp& op, const BakedOpState& state) { \
-        StaticDispatcher::on##Type(*(static_cast<Renderer*>(internalRenderer)), static_cast<const Type&>(op), state); \
-    },
     template <typename StaticDispatcher, typename Renderer>
     void replayBakedOps(Renderer& renderer) {
-        static BakedOpDispatcher receivers[] = {
-            MAP_OPS(BAKED_OP_RECEIVER)
+        /**
+         * defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
+         * dispatch the op via a method on a static dispatcher when the op is replayed.
+         *
+         * For example a BitmapOp would resolve, via the lambda lookup, to calling:
+         *
+         * StaticDispatcher::onBitmapOp(Renderer& renderer, const BitmapOp& op, const BakedOpState& state);
+         */
+        #define X(Type) \
+                [](void* renderer, const BakedOpState& state) { \
+                    StaticDispatcher::on##Type(*(static_cast<Renderer*>(renderer)), static_cast<const Type&>(*(state.op)), state); \
+                },
+        static BakedOpReceiver unmergedReceivers[] = {
+            MAP_OPS(X)
         };
+        #undef X
+
+        /**
+         * defines a LUT of lambdas which allow merged arrays of BakedOpState* to be passed to a
+         * static dispatcher when the group of merged ops is replayed. Unmergeable ops trigger
+         * a LOG_ALWAYS_FATAL().
+         */
+        #define X(Type) \
+                [](void* renderer, const MergedBakedOpList& opList) { \
+                    LOG_ALWAYS_FATAL("op type %d does not support merging", opList.states[0]->op->opId); \
+                },
+        #define Y(Type) \
+                [](void* renderer, const MergedBakedOpList& opList) { \
+                    StaticDispatcher::onMerged##Type##s(*(static_cast<Renderer*>(renderer)), opList); \
+                },
+        static MergedOpReceiver mergedReceivers[] = {
+            MAP_OPS_BASED_ON_MERGEABILITY(X, Y)
+        };
+        #undef X
+        #undef Y
 
         // Relay through layers in reverse order, since layers
         // later in the list will be drawn by earlier ones
@@ -153,18 +179,18 @@ public:
             if (layer.renderNode) {
                 // cached HW layer - can't skip layer if empty
                 renderer.startRepaintLayer(layer.offscreenBuffer, layer.repaintRect);
-                layer.replayBakedOpsImpl((void*)&renderer, receivers);
+                layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
                 renderer.endLayer();
             } else if (!layer.empty()) { // save layer - skip entire layer if empty
                 layer.offscreenBuffer = renderer.startTemporaryLayer(layer.width, layer.height);
-                layer.replayBakedOpsImpl((void*)&renderer, receivers);
+                layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
                 renderer.endLayer();
             }
         }
 
         const LayerReorderer& fbo0 = mLayerReorderers[0];
         renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
-        fbo0.replayBakedOpsImpl((void*)&renderer, receivers);
+        fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
         renderer.endFrame();
     }
 
@@ -213,7 +239,7 @@ private:
 
     void deferRenderNodeOp(const RenderNodeOp& op);
 
-    void replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers);
+    void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers);
 
     SkPath* createFrameAllocatedPath() {
         mFrameAllocatedPaths.emplace_back(new SkPath);

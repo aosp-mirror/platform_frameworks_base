@@ -65,12 +65,22 @@ public:
     virtual void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) {}
     virtual void endFrame() {}
 
-    // define virtual defaults for direct
-#define BASE_OP_METHOD(Type) \
+    // define virtual defaults for single draw methods
+#define X(Type) \
     virtual void on##Type(const Type&, const BakedOpState&) { \
         ADD_FAILURE() << #Type " not expected in this test"; \
     }
-    MAP_OPS(BASE_OP_METHOD)
+    MAP_OPS(X)
+#undef X
+
+    // define virtual defaults for merged draw methods
+#define X(Type) \
+    virtual void onMerged##Type##s(const MergedBakedOpList& opList) { \
+        ADD_FAILURE() << "Merged " #Type "s not expected in this test"; \
+    }
+    MAP_MERGED_OPS(X)
+#undef X
+
     int getIndex() { return mIndex; }
 
 protected:
@@ -83,11 +93,21 @@ protected:
  */
 class TestDispatcher {
 public:
-#define DISPATCHER_METHOD(Type) \
+    // define single op methods, which redirect to TestRendererBase
+#define X(Type) \
     static void on##Type(TestRendererBase& renderer, const Type& op, const BakedOpState& state) { \
         renderer.on##Type(op, state); \
     }
-    MAP_OPS(DISPATCHER_METHOD);
+    MAP_OPS(X);
+#undef X
+
+    // define merged op methods, which redirect to TestRendererBase
+#define X(Type) \
+    static void onMerged##Type##s(TestRendererBase& renderer, const MergedBakedOpList& opList) { \
+        renderer.onMerged##Type##s(opList); \
+    }
+    MAP_MERGED_OPS(X);
+#undef X
 };
 
 class FailRenderer : public TestRendererBase {};
@@ -153,7 +173,8 @@ TEST(OpReorderer, simpleBatching) {
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
+        SkBitmap bitmap = TestUtils::createSkBitmap(10, 10,
+                kAlpha_8_SkColorType); // Disable merging by using alpha 8 bitmap
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
         // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
@@ -171,7 +192,7 @@ TEST(OpReorderer, simpleBatching) {
     SimpleBatchingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
-            << "Expect number of ops = 2 * loop count"; // TODO: force no merging
+            << "Expect number of ops = 2 * loop count";
 }
 
 TEST(OpReorderer, textStrikethroughBatching) {
@@ -181,8 +202,10 @@ TEST(OpReorderer, textStrikethroughBatching) {
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             EXPECT_TRUE(mIndex++ >= LOOPS) << "Strikethrough rects should be above all text";
         }
-        void onTextOp(const TextOp& op, const BakedOpState& state) override {
-            EXPECT_TRUE(mIndex++ < LOOPS) << "Text should be beneath all strikethrough rects";
+        void onMergedTextOps(const MergedBakedOpList& opList) override {
+            EXPECT_EQ(0, mIndex);
+            mIndex += opList.count;
+            EXPECT_EQ(5u, opList.count);
         }
     };
     auto node = TestUtils::createNode(0, 0, 200, 2000,

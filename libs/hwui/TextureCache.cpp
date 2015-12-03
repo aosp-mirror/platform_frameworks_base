@@ -138,7 +138,7 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 // in the cache (and is thus added to the cache)
 Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
     if (CC_LIKELY(mAssetAtlas != nullptr) && atlasUsageType == AtlasUsageType::Use) {
-        AssetAtlas::Entry* entry = mAssetAtlas->getEntry(bitmap);
+        AssetAtlas::Entry* entry = mAssetAtlas->getEntry(bitmap->pixelRef());
         if (CC_UNLIKELY(entry)) {
             return entry->texture;
         }
