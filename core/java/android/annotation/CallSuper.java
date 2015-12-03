@@ -25,10 +25,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Denotes that any overriding methods should invoke this method as well.
  * <p>
  * Example:
- * <pre>{@code
+ * <pre><code>
  *  &#64;CallSuper
  *  public abstract void onFocusLost();
- * }</pre>
+ * </code></pre>
  *
  * @hide
  */

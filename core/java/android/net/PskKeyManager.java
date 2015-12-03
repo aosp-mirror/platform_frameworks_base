@@ -97,7 +97,7 @@ import javax.net.ssl.SSLEngine;
  *
  * SSLContext sslContext = SSLContext.getInstance("TLS");
  * sslContext.init(
- *         new KeyManager[] &#123;pskKeyManager&#125;,
+ *         new KeyManager[] { pskKeyManager },
  *         new TrustManager[0], // No TrustManagers needed for TLS-PSK
  *         null // Use the default source of entropy
  *         );

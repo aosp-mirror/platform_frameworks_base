@@ -388,8 +388,8 @@ To declare a widget as resizeable horizontally and vertically, supply the value
     android:previewImage="@drawable/preview"
     android:initialLayout="@layout/example_appwidget"
     android:configure="com.example.android.ExampleAppWidgetConfigure"
-    android:resizeMode="horizontal|vertical" >
-&lt;/appwidget-provider></pre>
+    android:resizeMode="horizontal|vertical" &gt;
+&lt;/appwidget-provider&gt;</pre>
 
 <p>For more information about Home screen widgets, see the <a
 href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>
@@ -809,7 +809,7 @@ Play of the application's requirement for new hardware capabilities supported
 in this version of the platform. Developers declare these and other feature
 constants in <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> manifest elements.
+<uses-feature>}</a> manifest elements.
 
 <ul>
   <li>{@link android.content.pm.PackageManager#FEATURE_USB_ACCESSORY
@@ -824,7 +824,7 @@ devices.</li>
 
 <p>Google Play filters applications based on features declared in <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> manifest elements. For more information about
+<uses-feature>}</a> manifest elements. For more information about
 declaring features in an application manifest, read <a
 href="{@docRoot}google/play/filters.html">Google Play
 Filters</a>.</p>

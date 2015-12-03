@@ -29,12 +29,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Denotes that the annotated element should be an int or long in the given range
  * <p>
  * Example:
- * <pre>{@code
+ * <pre><code>
  *  &#64;IntRange(from=0,to=255)
  *  public int getAlpha() {
  *      ...
  *  }
- * }</pre>
+ * </code></pre>
  *
  * @hide
  */

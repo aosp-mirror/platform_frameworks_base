@@ -351,7 +351,7 @@ ES 3.1. Key new functionality provided in OpenGL ES 3.1 includes:</p>
 <p>The Java interface for OpenGL ES 3.1 on Android is provided with
   {@link android.opengl.GLES31}. When using OpenGL ES 3.1, be sure that you
   declare it in your manifest file with the
-  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> tag and the {@code android:glEsVersion} attribute. For example:</p>
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> tag and the {@code android:glEsVersion} attribute. For example:</p>
 
 <pre>
 &lt;manifest&gt;
@@ -942,7 +942,7 @@ how to implement switching between IMEs, see
 
 <h3 id="ManifestFeatures">Declarable required features</h3>
 <p>The following values are now supported in the
-<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element, so you can ensure that your app is installed only on devices that
 provide the features your app needs.</p>
 
@@ -968,7 +968,7 @@ provide the features your app needs.</p>
 <h3 id="Permissions">User permissions</h3>
 
 <p>The following permission is now supported in the
-<a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code &lt;uses-permission&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code <uses-permission>}</a>
 element to declare the permissions your app requires to access certain APIs.</p>
 
 <ul>

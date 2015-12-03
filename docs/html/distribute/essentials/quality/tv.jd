@@ -321,7 +321,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
     <p style="margin-bottom:.5em;">
       If the app uses a game controller as it's primary input method, it declares the appropriate
       requirement with the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"
-      >{@code &lt;uses-feature>}</a> manifest tag.
+      >{@code <uses-feature>}</a> manifest tag.
       (<a href="{@docRoot}training/tv/games/index.html#gamepad">Learn how</a>)
     </p>
   </td>

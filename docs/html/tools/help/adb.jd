@@ -36,7 +36,7 @@ manages communication between the client and the adb daemon running on an emulat
   <li>A daemon, which runs as a background process on each emulator or device instance. </li>
 </ul>
 
-<p>You can find the {@code adb} tool in {@code &lt;sdk&gt;/platform-tools/}.</p>
+<p>You can find the {@code adb} tool in {@code <sdk>/platform-tools/}.</p>
 
 <p>When you start an adb client, the client first checks whether there is an adb server
 process already running. If there isn't, it starts the server process. When the server starts,

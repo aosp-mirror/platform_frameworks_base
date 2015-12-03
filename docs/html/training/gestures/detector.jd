@@ -186,7 +186,7 @@ and pass along all observed events to the detector instance.</p>
 
 
 <p>In the following snippet, a return value of {@code true} from the individual 
-{@code on<em>&lt;TouchEvent&gt;</em>} methods indicates that you
+<code>on<em>&lt;TouchEvent&gt;</em></code> methods indicates that you
 have handled the touch event. A return value of {@code false} passes events down
 through the view stack until the touch has been successfully handled.</p>
 
@@ -286,7 +286,7 @@ the {@link android.view.GestureDetector.OnGestureListener} interface. </p>
 <p>
 {@link
 android.view.GestureDetector.SimpleOnGestureListener} provides an implementation
-for all of the {@code on<em>&lt;TouchEvent&gt;</em>} methods by returning {@code false}
+for all of the <code>on<em>&lt;TouchEvent&gt;</em></code> methods by returning {@code false}
 for all of them. Thus you can override only the methods you care about.
 For
 example, the snippet below creates a class that extends {@link

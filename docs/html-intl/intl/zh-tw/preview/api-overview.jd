@@ -133,8 +133,8 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>在 Windows 上，您可能必須執行 {@code telnet 127.0.0.1 &lt;emulator-id&gt;}，後面接著
-{@code finger touch &lt;finger_id&gt;}。
+<p>在 Windows 上，您可能必須執行 {@code telnet 127.0.0.1 <emulator-id>}，後面接著
+{@code finger touch <finger_id>}。
 </p>
 </li>
 </ol>
@@ -193,7 +193,7 @@ adb -e emu finger touch &lt;finger_id&gt;
 
 <p>針對您要向 {@code ChooserTargetService} 公開的每個活動，在您的應用程式宣示說明中，新增名稱為
 {@code "android.service.chooser.chooser_target_service"} 的
-{@code &lt;meta-data&gt;} 元素。
+{@code <meta-data>} 元素。
 </p>
 
 <pre>

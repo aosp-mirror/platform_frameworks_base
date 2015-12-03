@@ -303,7 +303,7 @@ the ADK 2012 library.</p>
   <li>Start the ADK 2012 IDE and choose <strong>File > Preferences</strong>.</li>
   <li>In the <strong>Preferences</strong> dialog, make a note of the <strong>Sketchbook
 location</strong> directory.</li>
-  <li>Copy the {@code &lt;adk-source-download&gt;/adk2012/board/library/ADK2} directory and its
+  <li>Copy the {@code <adk-source-download>/adk2012/board/library/ADK2} directory and its
 contents into your {@code sketchbook/libraries/} directory, so that you create a {@code
 sketchbook/libraries/ADK2} directory.</li>
   <li>Stop and restart the <strong>ADK 2012 IDE</strong>.</li>
@@ -339,7 +339,7 @@ to load software onto accessory hardware may be inconvenient or undesirable.</p>
 <ol>
   <li><a href="#src-download">Download</a> the ADK 2012 source code files.</li>
   <li>In a terminal window, navigate to {@code
-&lt;adk-source-download&gt;/adk2012/board/MakefileBasedBuild}.</li>
+<adk-source-download>/adk2012/board/MakefileBasedBuild}.</li>
   <li>Execute the following command and follow the instructions:
     <pre>$> ./setup</pre>
   </li>

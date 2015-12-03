@@ -580,7 +580,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * Tags may be specified with character sequence values in layout XML as either
  * a single tag using the {@link android.R.styleable#View_tag android:tag}
- * attribute or multiple tags using the {@code &lt;tag&gt;} child element:
+ * attribute or multiple tags using the {@code <tag>} child element:
  * <pre>
  *     &ltView ...
  *           android:tag="@string/mytag_value" /&gt;

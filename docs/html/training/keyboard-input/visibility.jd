@@ -8,7 +8,11 @@ trainingnavtop=true
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
-<ol>  <li><a href="#ShowOnStart">Show the Input Method When the Activity Starts</a></li>  <li><a href="#ShowOnDemand">Show the Input Method On Demand</a></li>  <li><a href="#Respond">Specify How Your UI Should Respond</a></li></ol>
+<ol>
+  <li><a href="#ShowOnStart">Show the Input Method When the Activity Starts</a></li>
+  <li><a href="#ShowOnDemand">Show the Input Method On Demand</a></li>
+  <li><a href="#Respond">Specify How Your UI Should Respond</a></li>
+</ol>
 
 </div>
 </div>
@@ -37,7 +41,7 @@ the input method to appear by default.</p>
 
 <p>To show the input method when your activity starts, add the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#wsoft">{@code
-android:windowSoftInputMode}</a> attribute to the {@code &lt;activity>} element with the
+android:windowSoftInputMode}</a> attribute to the {@code <activity>} element with the
 {@code "stateVisible"} value. For example:</p>
 
 <pre>
@@ -92,7 +96,7 @@ you should specify how you'd like the system to display your UI in the remaining
 
 <p>To declare your preferred treatment in an activity, use the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#wsoft">{@code
-android:windowSoftInputMode}</a> attribute in your manifest's {@code &lt;activity>} element
+android:windowSoftInputMode}</a> attribute in your manifest's {@code <activity>} element
 with one of the "adjust" values.</p>
 
 <p>For example, to ensure that the system resizes your layout to the available space&mdash;which

@@ -40,7 +40,7 @@ parent.link=manifest-intro.html
     Declares a content provider component. A content provider is a subclass of 
     {@link android.content.ContentProvider} that supplies structured access to data managed by the 
     application.  All content providers in your application must be defined in a 
-    {@code &lt;provider&gt;} element in the manifest file; otherwise, the system is unaware of them 
+    {@code <provider>} element in the manifest file; otherwise, the system is unaware of them
     and doesn't run them.
     <p>
         You only declare content providers that are part of your application. Content providers in
@@ -100,7 +100,7 @@ content://com.example.project.healthcareprovider/nurses/rn
 The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
 application components, including content providers.  The 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;provider&gt;} 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code <provider>}
 attributes must both be "{@code true}" (as they both
 are by default) for the content provider to be enabled.  If either is 
 "{@code false}", the provider is disabled; it cannot be instantiated.

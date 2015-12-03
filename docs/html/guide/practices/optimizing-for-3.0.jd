@@ -188,7 +188,7 @@ larger screens.</p>
   <li><b>Apply the new "holographic" theme to your application</b>
     <ol>
       <li>Open your manifest file and update the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element to
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> element to
 set <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to {@code "11"}. For example:
@@ -383,9 +383,9 @@ href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a
 <p>Android 3.0 adds a hardware-accelerated OpenGL renderer that gives a performance boost to most 2D
 graphics operations. You can enable hardware-accelerated rendering in your application by setting
 {@code android:hardwareAccelerated="true"} in your manifest's <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element or for individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> elements. Hardware acceleration results in smoother animations, smoother
+<activity>}</a> elements. Hardware acceleration results in smoother animations, smoother
 scrolling, and overall better performance and response to user interaction. When enabled, be sure
 that you thoroughly test your application on a device that supports hardware acceleration.</p>
 
@@ -500,7 +500,7 @@ layouts</a> for smaller screens to adjust your layout. However, sometimes your l
 not fit a smaller screen or you've explicitly designed your application only for tablets and other
 large devices. In this case, you can manage the availability of your application to smaller screens
 by using the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> manifest element.</p>
+<supports-screens>}</a> manifest element.</p>
 
 <p>For example, if you want your application to be available only to extra large
 screens, you can declare the element in your manifest like this:</p>
@@ -523,7 +523,7 @@ your application is available only to devices with an extra large screen.</p>
 
 <p class="note"><strong>Note:</strong> If you use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> element for the reverse scenario (when your application is not compatible
+<supports-screens>}</a> element for the reverse scenario (when your application is not compatible
 with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
 external services such as Google Play <strong>do not</strong> apply filtering. Your application
 will still be available to larger screens, but when it runs, it will not fill the screen&mdash;the
@@ -540,22 +540,22 @@ application can't scale up or perhaps you've decided to publish two versions of 
 that each deliver different features for different screen configurations, so you don't want
 larger devices to download the version designed for smaller screens. In such a case, you can
 use the <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element to manage the distribution of your application based on the
+<compatible-screens>}</a> element to manage the distribution of your application based on the
 combination of screen size and density. External services such as
 Google Play uses this information to apply filtering to your application, so that only devices
 that have a screen configuration with which you declare compatibility can download your
 application.</p>
 
 <p>The <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element must contain one or more {@code &lt;screen&gt;} elements,
+<compatible-screens>}</a> element must contain one or more {@code <screen>} elements,
 which each specify a screen configuration with which your application is compatible, using both
 the {@code android:screenSize} and {@code android:screenDensity} attributes. Each {@code
-&lt;screen&gt;} element <strong>must include both attributes</strong> to specify an individual
+<screen>} element <strong>must include both attributes</strong> to specify an individual
 screen configuration&mdash;if either attribute is missing, then the element is invalid
 (external services such as Google Play will ignore it).</p>
 
 <p>For example, if your application is compatible with only small and normal screens, regardless
-of screen density, then you must specify eight different {@code &lt;screen&gt;} elements,
+of screen density, then you must specify eight different {@code <screen>} elements,
 because each screen size has four density configurations. You must declare each one of
 these; any combination of size and density that you do <em>not</em> specify is considered a screen
 configuration with which your application is <em>not</em> compatible. Here's what the manifest
@@ -584,17 +584,17 @@ entry looks like if your application is compatible with only small and normal sc
 
 <p class="note"><strong>Note:</strong> Although you can also use the <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element for the reverse scenario (when your application is not
+<compatible-screens>}</a> element for the reverse scenario (when your application is not
 compatible with smaller screens), it's easier if you instead use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> as discussed in the previous section, because it doesn't require you
+<supports-screens>}</a> as discussed in the previous section, because it doesn't require you
 to specify each screen density your application supports.</p>
 
 <p>Remember, you should strive to make your application available to as many devices as possible by
 applying all necessary techniques for <a
 href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a>. You should
 then use the <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element to filter your application from certain devices only when you
+<compatible-screens>}</a> element to filter your application from certain devices only when you
 cannot offer compatibility on all screen configurations or you have decided to provide
 multiple versions of your application, each for a different set of screen configurations.</p>
 
@@ -650,7 +650,7 @@ href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Ch
 <p>In the worst-case scenario, however, you can avoid orientation changes by using the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
 android:screenOrientation}</a> attribute in the <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element. Instead of locking the orientation in landscape or portrait, however, you should
 specify a value of {@code "nosensor"}. This way, your activity uses whatever orientation the
 device specifies as its natural orientation and the screen will not rotate. You should still
@@ -676,7 +676,7 @@ Screen Turn Deserves Another</a>.</p>
 traditional phone calls or handle SMS. Some devices might also omit
 other hardware features, such as Bluetooth. If your application uses these features, then your
 manifest file probably already includes (or should include) a declaration of the feature with the <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element. Doing so prevents devices that do not declare support for the feature from downloading
 your applications. For example:</p>
 

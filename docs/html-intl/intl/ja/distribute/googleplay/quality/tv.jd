@@ -286,7 +286,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      アプリがその主要な入力方式としてゲーム コントローラを使用する場合、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> マニフェスト タグで適切な要件を宣言しています。（<a href="{@docRoot}training/tv/games/index.html#gamepad">こちらを参照してください</a>）
+      アプリがその主要な入力方式としてゲーム コントローラを使用する場合、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> マニフェスト タグで適切な要件を宣言しています。（<a href="{@docRoot}training/tv/games/index.html#gamepad">こちらを参照してください</a>）
     </p>
   </td>
 </tr>

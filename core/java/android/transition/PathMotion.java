@@ -31,9 +31,9 @@ import android.util.AttributeSet;
  * <p>This may be used in XML as an element inside a transition.</p>
  * <pre>
  * {@code
- * &lt;changeBounds>
- *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
- * &lt;/changeBounds>
+ * <changeBounds>
+ *     <pathMotion class="my.app.transition.MyPathMotion"/>
+ * </changeBounds>
  * }
  * </pre>
  */

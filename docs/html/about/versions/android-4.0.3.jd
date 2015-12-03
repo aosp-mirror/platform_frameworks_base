@@ -297,7 +297,7 @@ application is compatible with the system, prior to installing the application. 
 application against an Android platform that supports API level {@sdkPlatformApiLevel} or
 higher. Depending on your needs, you might also need to add an
 <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code> attribute to the
-<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>
 element.</p>
 
 <p>For more information, see the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a>

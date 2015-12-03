@@ -109,7 +109,7 @@ There is no default.  The name must be specified.
 <dt><a name="banner"></a>{@code android:banner}</dt>
 <dd>A <a href="{@docRoot}guide/topics/resources/drawable-resource.html">drawable resource</a>
 providing an extended graphical banner for its associated item. Use with the
-{@code &lt;application&gt;} tag to supply a default banner for all application activities, or with the
+{@code <application>} tag to supply a default banner for all application activities, or with the
 <a href="{@docRoot}guide/topics/manifest/activity-element.html"><code>&lt;activity&gt;</code></a>
 tag to supply a banner for a specific activity.
 
@@ -119,7 +119,7 @@ should only be specified by applications with an activity that handles the
 {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} intent.</p>
 
 <p>This attribute must be set as a reference to a drawable resource containing
-the image (for example {@code "&#64;drawable/banner"}). There is no default banner.
+the image (for example <code>"@drawable/banner"</code>). There is no default banner.
 </p>
 
 <p>
@@ -197,7 +197,7 @@ each of the application's components.  See the individual
 
 <p>
 This attribute must be set as a reference to a drawable resource containing
-the image (for example {@code "&#64;drawable/icon"}). There is no default icon.
+the image (for example <code>"@drawable/icon"</code>). There is no default icon.
 </p></dd>
 
 <dt><a name="isGame"></a>{@code android:isGame}</dt>
@@ -252,7 +252,7 @@ it can also be set as a raw string.
 <dt><a name="logo"></a>{@code android:logo}</dt>
 <dd>A logo for the application as whole, and the default logo for activities.
 <p>This attribute must be set as a reference to a drawable resource containing
-the image (for example {@code "&#64;drawable/logo"}).  There is no default logo.</p></dd>
+the image (for example <code>"@drawable/logo"</code>).  There is no default logo.</p></dd>
 
 <dt><a name="space"></a>{@code android:manageSpaceActivity}</dt>
 <dd>The fully qualified name of an Activity subclass that the system

@@ -98,8 +98,8 @@ following metadata:</p>
    &lt;uses name="media" /&gt;
 &lt;/automotiveApp&gt;
 </pre>
-<p>The {@code &lt;uses&gt;} element declares the Auto capability your app
-intends to use. Multiple {@code &lt;uses&gt;} tags can be added if your
+<p>The {@code <uses>} element declares the Auto capability your app
+intends to use. Multiple {@code <uses>} tags can be added if your
 application uses multiple car capabilities. The {@code name} attribute indicates
 the specific capability your app uses. The values supported are:</p>
 <ul>
@@ -115,7 +115,7 @@ app for Auto.
 <p>In your app’s manifest ({@code AndroidManifest.xml}), provide a reference to
 the Auto XML configuration file you created in the previous section. Add a
 {@code "com.google.android.gms.car.application"} metadata entry under the
-<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element that references your Auto XML configuration file. Omit the {@code .xml}
 file extension when specifying the configuration filename.</p>
 <p>The following code snippet shows how to include this reference in your

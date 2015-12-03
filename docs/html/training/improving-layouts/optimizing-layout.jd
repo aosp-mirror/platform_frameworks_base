@@ -71,7 +71,7 @@ benefits will be multiplied.</p>
 <p class="img-caption"><strong>Figure 1.</strong> Conceptual layout for an item in a {@link
 android.widget.ListView}.</p>
 
-<p>The {@code hierarchyviewer} tool is available in  {@code &lt;sdk&gt;/tools/}. When opened,
+<p>The {@code hierarchyviewer} tool is available in  {@code <sdk>/tools/}. When opened,
 the Hierarchy Viewer shows a list of available devices and its running components. Click
 <strong>Load View Hierarchy</strong> to view the layout hierarchy of the selected component. For
 example, figure 2 shows the layout for the list item illustrated by figure 1.</p>

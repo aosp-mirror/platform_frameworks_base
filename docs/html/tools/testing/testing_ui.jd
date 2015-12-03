@@ -96,7 +96,7 @@ Functional or black-box UI testing does not require testers to know the internal
 <p>To analyze the UI components of the application that you want to test:</p>
 <ol>
 <li>Connect your Android device to your development machine.</li>
-<li>Open a terminal window and navigate to {@code &lt;android-sdk&gt;/tools/}.</li>
+<li>Open a terminal window and navigate to {@code <android-sdk>/tools/}.</li>
 <LI>Run the tool with this command:<pre>$ uiautomatorviewer</pre></LI>
 <li><p>To capture a screen for analysis, click the <strong>Device Screenshot</strong> button in the GUI of the {@code uiautomatorviewer} tool.</p>
 <p class="note"><strong>Note: </strong>If you have more than one device connected, specify the device for screen capture by setting the {@code ANDROID_SERIAL} environment variable:  
@@ -158,7 +158,7 @@ If you are connected to only a single device, you do not need to set the ANDROID
   </ol>
 </li>
 </ol>
-<p>If you did not configure Eclipse as your development environment, make sure that the {@code uiautomator.jar} and {@code android.jar} files from the {@code &lt;android-sdk&gt;/platforms/&lt;sdk&gt;} directory are in your Java class path.</p>
+<p>If you did not configure Eclipse as your development environment, make sure that the {@code uiautomator.jar} and {@code android.jar} files from the {@code <android-sdk>/platforms/<sdk>} directory are in your Java class path.</p>
 <p>Once you have completed these prerequisite tasks, you're almost ready to start creating your {@code uiautomator} tests. </li>
 
 <h2 id="creating">Creating uiautomator Tests</h2>
@@ -169,7 +169,7 @@ If you are connected to only a single device, you do not need to set the ANDROID
 <p>The first thing your test case should do is access the device that contains the target app. It’s also good practice to start the test from the Home screen of the device. From the Home screen (or some other starting location you’ve chosen in the target app), you can use the classes provided by the {@code uiautomator} API to simulate user actions and to test specific UI components. For an example of how to put together a {@code uiautomator} test case, see the <a href="#sample">sample test case</a>.</p>
 
 <h3 id="classes">uiautomator API</h3>
-<p>The {@code uiautomator} API is bundled in the {@code uiautomator.jar} file under the {@code &lt;android-sdk&gt;/platforms/} directory.  The API includes these key classes that allow you to capture and manipulate UI components on the target app:</p>
+<p>The {@code uiautomator} API is bundled in the {@code uiautomator.jar} file under the {@code <android-sdk>/platforms/} directory.  The API includes these key classes that allow you to capture and manipulate UI components on the target app:</p>
 <dl>
 <DT><a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a></DT>
 <dd><p>Represents the device state.  In your tests, you can call methods on the <a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a> instance to check for the state of various properties, such as current orientation or display size. Your tests also can use the <a href="{@docRoot}tools/help/uiautomator/UiDevice.html">{@code UiDevice}</a> instance to perform device level actions, such as forcing the device into a specific rotation, pressing the d-pad hardware button, or pressing the Home and Menu buttons.</p>
@@ -323,7 +323,7 @@ public class LaunchSettings extends UiAutomatorTestCase {
 <ol>
 <li>Create the required build configuration files to build the output JAR. To generate the build configuration files, open a terminal and run the following command:
 <pre>&lt;android-sdk&gt;/tools/android create uitest-project -n &lt;name&gt; -t 1 -p &lt;path&gt;</pre>
-The {@code &lt;name&gt;} is the name of the project that contains your {@code uiautomator} test source files, and the {@code &lt;path&gt;} is the path to the corresponding project directory. 
+The {@code <name>} is the name of the project that contains your {@code uiautomator} test source files, and the {@code <path>} is the path to the corresponding project directory.
 </li>
 <LI>From the command line, set the {@code ANDROID_HOME} variable: 
 <ul>

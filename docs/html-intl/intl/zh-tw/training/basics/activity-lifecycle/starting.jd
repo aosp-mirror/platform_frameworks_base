@@ -149,7 +149,7 @@ android.app.Activity#onCreate onCreate()} 方法。
 </p>
 
 <p>必須在宣示說明中使用 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> (包括 {@link
+<intent-filter>}</a> (包括 {@link
 android.content.Intent#ACTION_MAIN MAIN} 行為與 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 類別) 宣告您應用程式的主要應用行為顯示。
 例如：</p> 
 

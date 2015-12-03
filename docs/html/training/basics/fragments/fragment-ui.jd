@@ -55,7 +55,7 @@ remove, and replace fragments to an activity at runtime in order to create a dyn
 <h2 id="AddAtRuntime">Add a Fragment to an Activity at Runtime</h2> 
 
 <p>Rather than defining the fragments for an activity in the layout file&mdash;as shown in the
-<a href="creating.html">previous lesson</a> with the {@code &lt;fragment>} element&mdash;you can add
+<a href="creating.html">previous lesson</a> with the {@code <fragment>} element&mdash;you can add
 a fragment to the activity during the activity runtime. This is necessary
 if you plan to change fragments during the life of the activity.</p>
 
@@ -140,7 +140,7 @@ public class MainActivity extends FragmentActivity {
 </pre>
 
 <p>Because the fragment has been added to the {@link android.widget.FrameLayout} container at
-runtime&mdash;instead of defining it in the activity's layout with a {@code &lt;fragment>}
+runtime&mdash;instead of defining it in the activity's layout with a {@code <fragment>}
 element&mdash;the activity can remove the fragment and replace it with a different one.</p>
 
 

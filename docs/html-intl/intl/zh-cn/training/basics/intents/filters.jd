@@ -31,8 +31,8 @@ trainingnavtop=true
 
 </p>
 
-<p>要允许其他应用开始您的Activity，您需要 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
-在相应元素的宣示说明文件中添加一个 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素。</p>
+<p>要允许其他应用开始您的Activity，您需要 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
+在相应元素的宣示说明文件中添加一个 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> 元素。</p>
 
 <p>当您的应用安装在设备上时，系统会识别您的意向过滤器并添加信息至所有已安装应用支持的意向内部目录。当应用通过隐含意向调用 {@link android.app.Activity#startActivity
 startActivity()} 或 {@link android.app.Activity#startActivityForResult startActivityForResult()} 时，系统会找到可以响应该意向的Activity。
@@ -56,13 +56,13 @@ startActivity()} 或 {@link android.app.Activity#startActivityForResult startAct
   <dt>操作</dt>
     <dd>对要执行的操作命名的字符串。通常是平台定义的值之一，比如
  {@link android.content.Intent#ACTION_SEND} 或 {@link android.content.Intent#ACTION_VIEW}。
-    <p>使用 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 元素在您的意向过滤器中指定此值。您在此元素中指定的值必须是操作的完整字符串名称，而不是 API 常数（请参阅以下示例）。
+    <p>使用 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a> 元素在您的意向过滤器中指定此值。您在此元素中指定的值必须是操作的完整字符串名称，而不是 API 常数（请参阅以下示例）。
 
 </p></dd>
 
   <dt>数据</dt>
     <dd>与意向关联的数据描述。
-    <p>用 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 元素在您的意向过滤器中指定此内容。使用此元素中的一个或多个属性，您可以只指定 MIME 类型、URI 前缀、URI 架构或这些的组合以及其他指示所接受数据类型的项。
+    <p>用 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> 元素在您的意向过滤器中指定此内容。使用此元素中的一个或多个属性，您可以只指定 MIME 类型、URI 前缀、URI 架构或这些的组合以及其他指示所接受数据类型的项。
 
 
 </p>
@@ -76,11 +76,11 @@ startActivity()} 或 {@link android.app.Activity#startActivityForResult startAct
 系统支持多种不同的类别，但大多数都很少使用。
 ﻿但是，所有隐含意向默认使用
 {@link android.content.Intent#CATEGORY_DEFAULT} 进行定义。
-    <p>用 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+    <p>用 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a>
  元素在您的意向过滤器中指定此内容。</p></dd>
 </dl>
 
-<p>在您的意向过滤器中，您可以通过声明嵌套在 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+<p>在您的意向过滤器中，您可以通过声明嵌套在 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
 元素中的具有相应 XML 元素的各项，来声明您的Activity接受的条件。
 </p>
 
@@ -100,11 +100,11 @@ android.content.Intent#ACTION_SEND} 意向的意向过滤器：</p>
 
 <p>每个入站意向仅指定一项操作和一个数据类型，但可以在每个
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html"> {@code
-&lt;intent-filter&gt;}</a> 中声明
+<intent-filter>}</a> 中声明
  <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> 和 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a> 元素的多个实例。</p>
+<action>}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+<category>}</a> 和 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+<data>}</a> 元素的多个实例。</p>
 
 <p>如果任何两对操作和数据的行为相斥，您应创建单独的意向过滤器指定与哪种数据类型配对时哪些操作可接受。
 

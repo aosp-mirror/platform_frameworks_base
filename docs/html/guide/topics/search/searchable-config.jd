@@ -72,9 +72,9 @@ Android uses the filename as the resource ID.</dd>
       <dt><a name="label"></a><code>android:label</code></dt>
       <dd><em>String resource</em>. (Required.) The name of your application.
 It should be the same as the name applied to the {@code android:label} attribute of your <a
-href="{@docRoot}guide/topics/manifest/activity-element.html#label">{@code &lt;activity&gt;}</a> or
+href="{@docRoot}guide/topics/manifest/activity-element.html#label">{@code <activity>}</a> or
 <a href="{@docRoot}guide/topics/manifest/application-element.html#label">{@code
-&lt;application&gt;}</a> manifest element. This label is only visible to the user when you set
+<application>}</a> manifest element. This label is only visible to the user when you set
 <code>android:includeInGlobalSearch</code> to "true", in which case, this label is used to identify
 your application as a searchable item in the system's search settings.</dd>
 
@@ -136,13 +136,13 @@ for this attribute.
     <p>If you have defined a content provider to generate search suggestions, you need to
     define additional attributes that configure communications with the content
     provider. When providing search suggestions, you need some of the following
-    {@code &lt;searchable>} attributes:</p><br/>
+    {@code <searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
       <dt><a name="searchSuggestAuthority"></a><code>android:searchSuggestAuthority</code></dt>
         <dd><em>String</em>. (Required to provide search suggestions.)
         This value must match the authority string provided in the {@code android:authorities}
-attribute of the Android manifest {@code &lt;provider>} element.</dd>
+attribute of the Android manifest {@code <provider>} element.</dd>
 
       <dt><a name="searchSuggestPath"></a><code>android:searchSuggestPath</code></dt>
         <dd><em>String</em>. This path is used as a portion of the suggestions
@@ -189,7 +189,7 @@ android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column), this value is
     <h4>Quick Search Box attributes</h4>
 
     <p>To make your custom search suggestions available to Quick Search Box, you need some of the
-    following {@code &lt;searchable>} attributes:</p><br/>
+    following {@code <searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
       <dt><a name="includeInGlobalSearch"></a><code>android:includeInGlobalSearch</code></dt>
@@ -219,7 +219,7 @@ content provider again). The default value is false.</dd>
     <h4>Voice search attributes</h4>
 
     <p>To enable voice search, you'll need some of the
-    following {@code &lt;searchable>} attributes:</p><br/>
+    following {@code <searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
         <dt><a name="voiceSearchMode"></a><code>android:voiceSearchMode</code></dt>

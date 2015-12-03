@@ -31,7 +31,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <p>
  * Example:
  * <pre>{@code
- *  public abstract void setTextColor(&#64;ColorInt int color);
+ *  public abstract void setTextColor(@ColorInt int color);
  * }</pre>
  *
  * @hide

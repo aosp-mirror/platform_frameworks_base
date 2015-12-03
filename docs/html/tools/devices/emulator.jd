@@ -393,7 +393,7 @@ Virtualization Technology (VT) support and one of the following operating system
   <li>Start the Android SDK Manager, select <strong>Extras</strong> and then select <strong>Intel
 Hardware Accelerated Execution Manager</strong>.</li>
   <li>After the download completes, execute {@code
-&lt;sdk&gt;/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM.exe}.</li>
+<sdk>/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM.exe}.</li>
   <li>Follow the on-screen instructions to complete installation.</li>
   <li>After installation completes, confirm that the virtualization driver is operating correctly by
 opening a command prompt window and running the following command:
@@ -449,7 +449,7 @@ virtualization extensions. The kernel extension is compatible with Mac OS X Snow
   <li>Start the Android SDK Manager, select <strong>Extras</strong> and then select <strong>Intel
 Hardware Accelerated Execution Manager</strong>.
   <li>After the download completes, execute
-    {@code &lt;sdk&gt;/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM.dmg}.</li>
+    {@code <sdk>/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM.dmg}.</li>
   <li>Double click the <strong>IntelHAXM.mpkg</strong> icon to begin installation.</li>
   <li>Follow the on-screen instructions to complete installation.</li>
   <li>After installation completes, confirm that the new kernel extension is operating correctly by

@@ -338,24 +338,24 @@ Google Play filtering.</p>
   <tr><th>Manifest Element</th><th>Summary</th></tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a></nobr></td>
+<compatible-screens>}</a></nobr></td>
     <td>
       <p>Google Play filters the application if the device screen size and density does not match
-any of the screen configurations (declared by a {@code &lt;screen&gt;} element) in the {@code
-&lt;compatible-screens&gt;} element.</p>
+any of the screen configurations (declared by a {@code <screen>} element) in the {@code
+<compatible-screens>} element.</p>
       <p class="caution"><strong>Caution:</strong> Normally, <strong>you should not use
 this manifest element</strong>. Using this element can dramatically
 reduce the potential user base for your application, by excluding all combinations of screen size
 and density that you have not listed. You should instead use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> manifest element (described above in <a href="#table1">table
+<supports-screens>}</a> manifest element (described above in <a href="#table1">table
 1</a>) to enable screen compatibility mode for screen configurations you have not accounted for
 with alternative resources.</p>
     </td>
   </tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a></nobr></td>
+<supports-gl-texture>}</a></nobr></td>
     <td>
       <p>Google Play filters the application unless one or more of the GL texture compression
 formats supported by the application are also supported by the device. </p>
@@ -419,17 +419,17 @@ when each APK provides different filters based on the following configurations:<
   <li>OpenGL texture compression formats
     <p>By using the <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a> element.</p>
+<supports-gl-texture>}</a> element.</p>
   </li>
   <li>Screen size (and, optionally, screen density)
     <p>By using the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> or <a
+<supports-screens>}</a> or <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a> element.</p>
+<compatible-screens>}</a> element.</p>
   </li>
   <li>API level
     <p>By using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk&gt;}</a> element.</p>
+<uses-sdk>}</a> element.</p>
   </li>
   <li>CPU Architecture (ABI)
     <p>By including native libraries built with the <a href="{@docRoot}tools/sdk/ndk/index.html">Android

@@ -42,7 +42,7 @@ filters on the target activity itself set these flags.
 </p>
 
 <p>
-With the exception of {@code targetActivity}, {@code &lt;activity-alias&gt;} 
+With the exception of {@code targetActivity}, {@code <activity-alias>}
 attributes are a subset of <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> attributes.  
 For attributes in the subset, none of the values set for the target carry over
 to the alias.  However, for attributes not in the subset, the values set for 
@@ -60,7 +60,7 @@ The default value is "{@code true}".
 The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
 application components, including activity aliases.  The 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;activity-alias&gt;} 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code <activity-alias>}
 attributes must both be "{@code true}" for the system to be able to instantiate 
 the target activity through the alias.  If either is "{@code false}", the alias 
 does not work.

@@ -73,8 +73,8 @@ on-screen object from point A to point B).</li>
 <li>History. You can find the size of a gesture's history by calling the {@link
 android.view.MotionEvent} method {@link android.view.MotionEvent#getHistorySize
 getHistorySize()}. You can then obtain the positions, sizes, time, and pressures
-of each of the historical events by using the motion event's {@code
-getHistorical<em>&lt;Value&gt;</em>} methods. History is useful when rendering a trail of the user's finger, 
+of each of the historical events by using the motion event's
+<code>getHistorical<em>&lt;Value&gt;</em></code> methods. History is useful when rendering a trail of the user's finger,
 such as for touch drawing. See the {@link android.view.MotionEvent} reference for
 details.</li>
 

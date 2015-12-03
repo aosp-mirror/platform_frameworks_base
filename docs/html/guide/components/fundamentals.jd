@@ -348,7 +348,7 @@ the device.</p>
 intent filters that declare the capabilities of the activity so it can respond to intents
 from other apps. You can declare an intent filter for your component by
 adding an <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> element as a child of the component's declaration element.</p>
+<intent-filter>}</a> element as a child of the component's declaration element.</p>
 
 <p>For example, if you've built an email app with an activity for composing a new email, you can
 declare an intent filter to respond to "send" intents (in order to send a new email) like this:</p>

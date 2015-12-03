@@ -348,7 +348,7 @@ the {@link android.content.Intent#ACTION_BOOT_COMPLETED} action:
 
 
 <p>Notice that in the manifest, the boot receiver is set to
-{@code android:enabled=&quot;false&quot;}. This means that the receiver will not be called
+<code>android:enabled=&quot;false&quot;</code>. This means that the receiver will not be called
 unless the application explicitly enables it. This prevents the boot receiver from being
 called unnecessarily. You can enable a receiver (for example, if the user sets an alarm)
 as follows:</p>

@@ -329,23 +329,23 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
   <tr><th>매니페스트 요소</th><th>요약</th></tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a></nobr></td>
+<compatible-screens>}</a></nobr></td>
     <td>
       <p>Google Play가 장치 화면
 크기와 밀도가 {@code
-&lt;compatible-screens&gt;} 요소에서 {@code &lt;screen&gt;} 요소가 선언한 화면 구성과 일치하지 않는 경우에 애플리케이션을 필터링합니다.</p>
+<compatible-screens>} 요소에서 {@code <screen>} 요소가 선언한 화면 구성과 일치하지 않는 경우에 애플리케이션을 필터링합니다.</p>
       <p class="caution"><strong>주의:</strong> 일반적으로 <strong>이 매니페스트 요소를 사용하면 안 됩니다</strong>.
  이 요소를 사용하면 목록에 없는 화면 크기와 밀도의 조합을 모두 제외시켜 애플리케이션의 잠재적 사용자 기반이 현저히 줄어들 수 있습니다.
 
  대신 위의 <a href="#table1">표 1</a>에 나오는 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> 매니페스트 요소를 사용하여 대체 리소스로 고려하지 않은 화면 구성에 대해 화면 호환성 모드를 활성화해야 합니다.
+<supports-screens>}</a> 매니페스트 요소를 사용하여 대체 리소스로 고려하지 않은 화면 구성에 대해 화면 호환성 모드를 활성화해야 합니다.
 
 </p>
     </td>
   </tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a></nobr></td>
+<supports-gl-texture>}</a></nobr></td>
     <td>
       <p>Google Play는 애플리케이션에서 지원되는 하나 이상의 GL 텍스처 압축 형식이 장치에서도 지원되는 경우를 제외하고 애플리케이션을 필터링합니다.
  </p>
@@ -408,16 +408,16 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 <ul>
   <li>OpenGL 텍스처 압축 형식
     <p><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a> 요소를 사용하여 필터링합니다.</p>
+<supports-gl-texture>}</a> 요소를 사용하여 필터링합니다.</p>
   </li>
   <li>화면 크기(및 선택적 화면 밀도)
     <p><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> 또는 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a> 요소를 사용하여 필터링합니다.</p>
+<supports-screens>}</a> 또는 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+<compatible-screens>}</a> 요소를 사용하여 필터링합니다.</p>
   </li>
   <li>API 레벨
     <p><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk&gt;}</a> 요소를 사용하여 필터링합니다.</p>
+<uses-sdk>}</a> 요소를 사용하여 필터링합니다.</p>
   </li>
   <li>CPU 아키텍처(ABI)
     <p>특정 CPU 아키텍처(예: ARM EABI v7 또는 x86)를 대상으로 하는 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>로 작성된 네이티브 라이브러리를 포함하여 필터링합니다.

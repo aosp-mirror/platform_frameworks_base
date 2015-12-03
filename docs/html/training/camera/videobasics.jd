@@ -52,7 +52,7 @@ records video. In this lesson, you make it do this for you.</p>
 <h2 id="TaskManifest">Request Camera Permission</h2>
 
 <p>To advertise that your application depends on having a camera, put a
-{@code &lt;uses-feature&gt;} tag in the manifest file:</p>
+{@code <uses-feature>} tag in the manifest file:</p>
 
 <pre style="clear:right">
 &lt;manifest ... >

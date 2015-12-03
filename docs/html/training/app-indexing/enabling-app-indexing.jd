@@ -28,7 +28,7 @@ for the Google search engine, can also index content in your Android app.
 By opting in, you can allow Googlebot to crawl the content in the APK
 through the Google Play Store to index the app content. To indicate which app
 content you’d like Google to index, simply add link elements either to
-your existing <a href="https://support.google.com/webmasters/answer/156184?hl=en" class="external-link" target="_blank">Sitemap</a> file or in the {@code &lt;head&gt;} element of each web
+your existing <a href="https://support.google.com/webmasters/answer/156184?hl=en" class="external-link" target="_blank">Sitemap</a> file or in the {@code <head>} element of each web
 page in your site, in the same way as you would for web pages.</p>
 
 <p>The deep links that you share with Google Search must take this URI
@@ -49,10 +49,10 @@ or web pages.</p>
 <h2 id="sitemap">Add Deep Links in Your Sitemap</h2>
 <p>To annotate the deep link for Google Search app indexing in your
 <a href="https://support.google.com/webmasters/answer/156184?hl=en" class="external-link" target="_blank">Sitemap</a>, use the
-{@code &lt;xhtml:link&gt;} tag and specify the deep link as an alternate URI.</p>
+{@code <xhtml:link>} tag and specify the deep link as an alternate URI.</p>
 <p>For example, the following XML snippet shows how you might specify a link to
-your web page by using the {@code &lt;loc&gt;} tag, and a corresponding deep
-link to your Android app by using the {@code &lt;xhtml:link&gt;} tag.</p>
+your web page by using the {@code <loc>} tag, and a corresponding deep
+link to your Android app by using the {@code <xhtml:link>} tag.</p>
 <pre>
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;urlset
@@ -70,8 +70,8 @@ link to your Android app by using the {@code &lt;xhtml:link&gt;} tag.</p>
 <h2 id="webpages">Add Deep Links in Your Web Pages</h2>
 <p>Instead of specifying the deep links for Google Search app indexing in your
 Sitemap file, you can annotate the deep links in the HTML markup of your web
-pages. You can do this in the {@code &lt;head&gt;} section for each web
-page by adding a {@code &lt;link&gt;} tag and specifying the deep link as an
+pages. You can do this in the {@code <head>} section for each web
+page by adding a {@code <link>} tag and specifying the deep link as an
 alternate URI.</p>
 <p>For example, the following HTML snippet shows how you might specify the
 corresponding deep link in a web page that has the URL

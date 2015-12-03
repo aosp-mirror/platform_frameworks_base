@@ -34,13 +34,13 @@ for an array of drawables).</dd>
 <p class="note"><strong>Note:</strong> A bool is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine bool resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;bool>} element's {@code name} will be used as the resource
+The filename is arbitrary. The {@code <bool>} element's {@code name} will be used as the resource
 ID.</dd>
 
 <dt>resource reference:</dt>
@@ -130,13 +130,13 @@ Alpha-Red-Green-Blue information in one of the following formats:</p>
 <p class="note"><strong>Note:</strong> A color is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine color resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/colors.xml</code><br/>
-The filename is arbitrary. The {@code &lt;color>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <color>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>resource reference:</dt>
@@ -244,13 +244,13 @@ devices.</dd>
 <p class="note"><strong>Note:</strong> A dimension is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine dimension resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;dimen>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <dimen>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>resource reference:</dt>
@@ -329,7 +329,7 @@ float fontSize = res.{@link android.content.res.Resources#getDimension(int) getD
 
 <h2 id="Id">ID</h2>
 
-<p>A unique resource ID defined in XML. Using the name you provide in the {@code &lt;item&gt;}
+<p>A unique resource ID defined in XML. Using the name you provide in the {@code <item>}
 element, the Android developer tools create a unique integer in your project's {@code
 R.java} class, which you can use as an
 identifier for an application resources (for example, a {@link android.view.View} in your UI layout)
@@ -339,7 +339,7 @@ result code).</p>
 <p class="note"><strong>Note:</strong> An ID is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine ID resources with other simple resources in the one XML file,
-under one {@code &lt;resources&gt;} element. Also, remember that an ID resources does not reference
+under one {@code <resources>} element. Also, remember that an ID resources does not reference
 an actual resource item; it is simply a unique ID that you can attach to other resources or use
 as a unique integer in your application.</p>
 
@@ -446,13 +446,13 @@ protected Dialog {@link android.app.Activity#onCreateDialog(int)}(int id) {
 <p class="note"><strong>Note:</strong> An integer is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine integer resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename.xml</em></code><br/>
-The filename is arbitrary. The {@code &lt;integer>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <integer>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>resource reference:</dt>
@@ -525,14 +525,14 @@ int maxSpeed = res.{@link android.content.res.Resources#getInteger(int) getInteg
 <p class="note"><strong>Note:</strong> An integer array is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine integer array resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;integer-array>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <integer-array>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
@@ -566,7 +566,7 @@ In XML: <code>@[<em>package</em>:]array.<em>integer_array_name</em></code>
       <p>No attributes.</p>
     </dd>
   <dt id="integer-array-element"><code>&lt;integer-array&gt;</code></dt>
-    <dd>Defines an array of integers. Contains one or more child {@code &lt;item>} elements.
+    <dd>Defines an array of integers. Contains one or more child {@code <item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:name</code></dt>
@@ -576,7 +576,7 @@ ID to reference the array.</dd>
     </dd>
   <dt id="integer-array-item-element"><code>&lt;item&gt;</code></dt>
     <dd>An integer. The value can be a reference to another
-integer resource. Must be a child of a {@code &lt;integer-array&gt;} element.
+integer resource. Must be a child of a {@code <integer-array>} element.
       <p>No attributes.</p>
     </dd>
 </dl>
@@ -620,14 +620,14 @@ each item with the {@link android.content.res.TypedArray}'s {@code get...()} met
 <p class="note"><strong>Note:</strong> A typed array is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine typed array resources with other simple resources in the one XML file,
-under one {@code &lt;resources&gt;} element.</p>
+under one {@code <resources>} element.</p>
 
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;array>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <array>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
@@ -660,7 +660,7 @@ In XML: <code>@[<em>package</em>:]array.<em>array_name</em></code>
       <p>No attributes.</p>
     </dd>
   <dt id="array-element"><code>&lt;array&gt;</code></dt>
-    <dd>Defines an array. Contains one or more child {@code &lt;item>} elements.
+    <dd>Defines an array. Contains one or more child {@code <item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>android:name</code></dt>
@@ -670,7 +670,7 @@ ID to reference the array.</dd>
     </dd>
   <dt id="array-item-element"><code>&lt;item&gt;</code></dt>
     <dd>A generic resource. The value can be a reference to a resource or a simple data type.
-Must be a child of an {@code &lt;array&gt;} element.
+Must be a child of an {@code <array>} element.
       <p>No attributes.</p>
     </dd>
 </dl>
