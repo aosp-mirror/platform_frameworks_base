@@ -37,6 +37,8 @@ public class WindowManagerProxy {
 
     private static final String TAG = "WindowManagerProxy";
 
+    private static final WindowManagerProxy sInstance = new WindowManagerProxy();
+
     @GuardedBy("mResizeRect")
     private final Rect mResizeRect = new Rect();
     private final Rect mTmpRect = new Rect();
@@ -77,6 +79,13 @@ public class WindowManagerProxy {
             }
         }
     };
+
+    private WindowManagerProxy() {
+    }
+
+    public static WindowManagerProxy getInstance() {
+        return sInstance;
+    }
 
     public void resizeDockedStack(Rect rect) {
         synchronized (mResizeRect) {

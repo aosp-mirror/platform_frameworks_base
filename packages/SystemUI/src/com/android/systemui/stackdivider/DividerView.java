@@ -74,7 +74,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private final Rect mTmpRect = new Rect();
     private final Rect mLastResizeRect = new Rect();
-    private final WindowManagerProxy mWindowManagerProxy = new WindowManagerProxy();
+    private final WindowManagerProxy mWindowManagerProxy = WindowManagerProxy.getInstance();
     private Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mTouchResponseInterpolator =
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
