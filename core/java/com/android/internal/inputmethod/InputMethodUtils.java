@@ -377,17 +377,17 @@ public class InputMethodUtils {
         }
         // TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(languageTag)}.
         String[] localeParams = localeStr.split("_", 3);
+        if (localeParams.length >= 1 && "tl".equals(localeParams[0])) {
+             // Convert a locale whose language is "tl" to one whose language is "fil".
+             // For example, "tl_PH" will get converted to "fil_PH".
+             // Versions of Android earlier than Lollipop did not support three letter language
+             // codes, and used "tl" (Tagalog) as the language string for "fil" (Filipino).
+             // On Lollipop and above, the current three letter version must be used.
+             localeParams[0] = "fil";
+        }
         // The length of localeStr is guaranteed to always return a 1 <= value <= 3
         // because localeStr is not empty.
         if (localeParams.length == 1) {
-            if (localeParams.length >= 1 && "tl".equals(localeParams[0])) {
-                // Convert a locale whose language is "tl" to one whose language is "fil".
-                // For example, "tl_PH" will get converted to "fil_PH".
-                // Versions of Android earlier than Lollipop did not support three letter language
-                // codes, and used "tl" (Tagalog) as the language string for "fil" (Filipino).
-                // On Lollipop and above, the current three letter version must be used.
-                localeParams[0] = "fil";
-            }
             return new Locale(localeParams[0]);
         } else if (localeParams.length == 2) {
             return new Locale(localeParams[0], localeParams[1]);
