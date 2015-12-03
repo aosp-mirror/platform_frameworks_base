@@ -30,7 +30,6 @@ hwui_src_files := \
     utils/StringUtils.cpp \
     utils/TestWindowContext.cpp \
     utils/VectorDrawableUtils.cpp \
-    utils/TestUtils.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
@@ -89,6 +88,9 @@ hwui_src_files := \
     TextureCache.cpp \
     VectorDrawablePath.cpp \
     protos/hwui.proto
+
+hwui_test_common_src_files := \
+    tests/common/TestUtils.cpp
 
 hwui_cflags := \
     -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES \
@@ -180,8 +182,8 @@ LOCAL_CFLAGS := \
         -DHWUI_NULL_GPU
 LOCAL_SRC_FILES := \
         $(hwui_src_files) \
-        tests/nullegl.cpp \
-        tests/nullgles.cpp
+        tests/common/nullegl.cpp \
+        tests/common/nullgles.cpp
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
 
@@ -215,28 +217,29 @@ LOCAL_CFLAGS := \
         -DHWUI_NULL_GPU
 
 LOCAL_SRC_FILES += \
-    unit_tests/CanvasStateTests.cpp \
-    unit_tests/ClipAreaTests.cpp \
-    unit_tests/DamageAccumulatorTests.cpp \
-    unit_tests/DeviceInfoTests.cpp \
-    unit_tests/FatVectorTests.cpp \
-    unit_tests/LayerUpdateQueueTests.cpp \
-    unit_tests/LinearAllocatorTests.cpp \
-    unit_tests/VectorDrawableTests.cpp \
-    unit_tests/OffscreenBufferPoolTests.cpp \
-    unit_tests/StringUtilsTests.cpp
+    $(hwui_test_common_src_files) \
+    tests/unit/CanvasStateTests.cpp \
+    tests/unit/ClipAreaTests.cpp \
+    tests/unit/DamageAccumulatorTests.cpp \
+    tests/unit/DeviceInfoTests.cpp \
+    tests/unit/FatVectorTests.cpp \
+    tests/unit/LayerUpdateQueueTests.cpp \
+    tests/unit/LinearAllocatorTests.cpp \
+    tests/unit/VectorDrawableTests.cpp \
+    tests/unit/OffscreenBufferPoolTests.cpp \
+    tests/unit/StringUtilsTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
-        unit_tests/BakedOpStateTests.cpp \
-        unit_tests/RecordingCanvasTests.cpp \
-        unit_tests/OpReordererTests.cpp
+        tests/unit/BakedOpStateTests.cpp \
+        tests/unit/RecordingCanvasTests.cpp \
+        tests/unit/OpReordererTests.cpp
 endif
 
 include $(BUILD_NATIVE_TEST)
 
 # ------------------------
-# test app
+# Macro-bench app
 # ------------------------
 
 include $(CLEAR_VARS)
@@ -255,11 +258,12 @@ LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 
 LOCAL_SRC_FILES += \
-    tests/TestContext.cpp \
-    tests/TestSceneRunner.cpp \
-    tests/main.cpp
+    $(hwui_test_common_src_files) \
+    tests/macrobench/TestContext.cpp \
+    tests/macrobench/TestSceneRunner.cpp \
+    tests/macrobench/main.cpp
 
-LOCAL_SRC_FILES += $(call all-cpp-files-under, tests/scenes)
+LOCAL_SRC_FILES += $(call all-cpp-files-under, tests/common/scenes)
 
 include $(BUILD_EXECUTABLE)
 
@@ -285,14 +289,15 @@ LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_null_gpu
 LOCAL_STATIC_LIBRARIES := libbenchmark libbase
 
 LOCAL_SRC_FILES += \
-    microbench/DisplayListCanvasBench.cpp \
-    microbench/LinearAllocatorBench.cpp \
-    microbench/PathParserBench.cpp \
-    microbench/ShadowBench.cpp
+    $(hwui_test_common_src_files) \
+    tests/microbench/DisplayListCanvasBench.cpp \
+    tests/microbench/LinearAllocatorBench.cpp \
+    tests/microbench/PathParserBench.cpp \
+    tests/microbench/ShadowBench.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
-        microbench/OpReordererBench.cpp
+        tests/microbench/OpReordererBench.cpp
 endif
 
 include $(BUILD_EXECUTABLE)

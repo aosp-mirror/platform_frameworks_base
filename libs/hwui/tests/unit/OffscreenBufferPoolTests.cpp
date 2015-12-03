@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <renderstate/OffscreenBufferPool.h>
 
-#include <utils/TestUtils.h>
+#include <tests/common/TestUtils.h>
 
 using namespace android;
 using namespace android::uirenderer;

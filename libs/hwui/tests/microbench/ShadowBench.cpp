@@ -21,7 +21,7 @@
 #include "Vector.h"
 #include "VertexBuffer.h"
 #include "TessellationCache.h"
-#include "microbench/MicroBench.h"
+#include "tests/microbench/MicroBench.h"
 
 #include <SkPath.h>
 

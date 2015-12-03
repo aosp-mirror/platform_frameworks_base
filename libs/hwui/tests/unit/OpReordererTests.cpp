@@ -21,7 +21,7 @@
 #include <OpReorderer.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
-#include <utils/TestUtils.h>
+#include <tests/common/TestUtils.h>
 
 #include <unordered_map>
 

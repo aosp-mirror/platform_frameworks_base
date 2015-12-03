@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <utils/FatVector.h>
 
-#include <utils/TestUtils.h>
+#include <tests/common/TestUtils.h>
 
 using namespace android;
 using namespace android::uirenderer;

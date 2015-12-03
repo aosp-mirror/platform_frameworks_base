@@ -18,7 +18,7 @@
 #include "Benchmark.h"
 #include "RenderNode.h"
 #include "TestContext.h"
-#include "scenes/TestSceneBase.h"
+#include "tests/common/scenes/TestSceneBase.h"
 #include "renderthread/RenderProxy.h"
 #include "renderthread/RenderTask.h"
 
