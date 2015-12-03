@@ -213,6 +213,21 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return false;
     }
 
+    /** Launches the task that recents was launched from if possible */
+    public boolean launchPreviousTask() {
+        if (mTaskStackView != null) {
+            TaskStack stack = mTaskStackView.getStack();
+            Task task = stack.getLaunchTarget();
+            if (task != null) {
+                TaskView taskView = mTaskStackView.getChildViewForTask(task);
+                onTaskViewClicked(mTaskStackView, taskView, stack, task, false, null,
+                        INVALID_STACK_ID);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Launches a given task. */
     public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
         if (mTaskStackView != null) {
@@ -471,9 +486,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
 
             // Remove the task after it is docked
-            if (event.taskView.isFocusedTask()) {
-                mTaskStackView.resetFocusedTask();
-            }
             event.taskView.animate()
                     .alpha(0f)
                     .setDuration(150)

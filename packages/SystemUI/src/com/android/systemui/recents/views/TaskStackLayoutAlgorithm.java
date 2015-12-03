@@ -658,7 +658,8 @@ public class TaskStackLayoutAlgorithm {
         transformOut.rect.set(mTaskRect);
         transformOut.rect.offset(transformOut.translationX, transformOut.translationY);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
-        transformOut.visible = true;
+        transformOut.visible = (transformOut.rect.top < mStackRect.bottom) &&
+                (frontTransform == null || transformOut.rect.top != frontTransform.rect.top);
         transformOut.clipBottom = 0;
         transformOut.clipRight = 0;
         transformOut.thumbnailScale = 1f;

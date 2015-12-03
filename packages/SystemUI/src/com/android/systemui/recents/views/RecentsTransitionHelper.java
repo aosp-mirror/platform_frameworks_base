@@ -308,12 +308,6 @@ public class RecentsTransitionHelper {
      */
     private static AppTransitionAnimationSpec composeAnimationSpec(TaskView taskView,
             TaskViewTransform transform, boolean addHeaderBitmap) {
-        // Disable any focused state before we draw the header
-        // Upfront the processing of the thumbnail
-        if (taskView.isFocusedTask()) {
-            taskView.setFocusedState(false, false /* animated */, false /* requestViewFocus */);
-        }
-
         Bitmap b = null;
         if (addHeaderBitmap) {
             float scale = transform.scale;
