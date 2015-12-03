@@ -58,6 +58,9 @@ class ImageUtils {
             case ImageFormat.Y16:
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW10:
+            case ImageFormat.RAW12:
+            case ImageFormat.DEPTH16:
+            case ImageFormat.DEPTH_POINT_CLOUD:
                 return 1;
             case ImageFormat.PRIVATE:
                 return 0;

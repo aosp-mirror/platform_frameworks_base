@@ -403,8 +403,7 @@ static void ImageWriter_cancelImage(JNIEnv* env, jobject thiz, jlong nativeCtx, 
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "ImageWriterContext is not initialized");
+        ALOGW("ImageWriter#close called before Image#close, consider calling Image#close first");
         return;
     }
 
@@ -414,8 +413,7 @@ static void ImageWriter_cancelImage(JNIEnv* env, jobject thiz, jlong nativeCtx, 
     int fenceFd = -1;
     Image_getNativeContext(env, image, &buffer, &fenceFd);
     if (buffer == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "Image is not initialized");
+        // Cancel an already cancelled image is harmless.
         return;
     }
 
