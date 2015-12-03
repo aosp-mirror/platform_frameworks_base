@@ -2517,7 +2517,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void repositionChild(Session session, IWindow client,
-            int top, int left, int right, int bottom,
+            int left, int top, int right, int bottom,
             long deferTransactionUntilFrame, Rect outFrame) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "repositionChild");
         long origId = Binder.clearCallingIdentity();
@@ -2538,10 +2538,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAttrs.y = top;
                 win.mAttrs.width = right - left;
                 win.mAttrs.height = bottom - top;
-
                 win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
-
-                win.mWinAnimator.computeShownFrameLocked();
 
                 if (SHOW_TRANSACTIONS) {
                     Slog.i(TAG, ">>> OPEN TRANSACTION repositionChild");
@@ -2549,12 +2546,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 SurfaceControl.openTransaction();
 
+                win.applyGravityAndUpdateFrame();
+                win.mWinAnimator.computeShownFrameLocked();
+
+                win.mWinAnimator.setSurfaceBoundariesLocked(false);
+
                 if (deferTransactionUntilFrame > 0) {
                     win.mWinAnimator.mSurfaceController.deferTransactionUntil(
                             win.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
                             deferTransactionUntilFrame);
                 }
-                win.mWinAnimator.setSurfaceBoundariesLocked(false);
 
                 SurfaceControl.closeTransaction();
                 if (SHOW_TRANSACTIONS) {
@@ -2588,6 +2589,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return 0;
             }
+
             WindowStateAnimator winAnimator = win.mWinAnimator;
             if (viewVisibility != View.GONE) {
                 win.setRequestedSize(requestedWidth, requestedHeight);
