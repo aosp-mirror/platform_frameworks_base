@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.LocaleList;
 import android.util.Printer;
 
 /**
@@ -340,6 +341,22 @@ public class EditorInfo implements InputType, Parcelable {
     public Bundle extras;
 
     /**
+     * Additional context information that tells what languages are expected by the user.
+     *
+     * <p><strong>IME authors:</strong> Possible use cases for IME developers would be:</p>
+     * <ul>
+     *     <li>Automatically switching keyboard layout.</li>
+     *     <li>Changing language model for better typing experience.</li>
+     * </ul>
+     *
+     * <p><strong>Editor authors:</strong> Providing this context information can help IMEs to
+     * improve text input experience.  For example, chat applications can remember what language is
+     * used in the last conversation for each chat session, and put the last used language at the
+     * top of {@link #locales}.</p>
+     */
+    public LocaleList locales = LocaleList.getEmptyLocaleList();
+
+    /**
      * Ensure that the data in this EditorInfo is compatible with an application
      * that was developed against the given target API version.  This can
      * impact the following input types:
@@ -393,6 +410,7 @@ public class EditorInfo implements InputType, Parcelable {
                 + " fieldId=" + fieldId
                 + " fieldName=" + fieldName);
         pw.println(prefix + "extras=" + extras);
+        pw.println(prefix + "locales=" + locales);
     }
 
     /**
@@ -416,6 +434,7 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeInt(fieldId);
         dest.writeString(fieldName);
         dest.writeBundle(extras);
+        locales.writeToParcel(dest, flags);
     }
 
     /**
@@ -439,6 +458,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();
+                    res.locales = LocaleList.CREATOR.createFromParcel(source);
                     return res;
                 }
 

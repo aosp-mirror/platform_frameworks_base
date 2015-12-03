@@ -6439,6 +6439,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 return ic;
             }
+            // LocaleList is designed to be immutable.  This is theoretically equivalent to copy
+            // the snapshot of the current text locales.
+            outAttrs.locales = getTextLocales();
         }
         return null;
     }
