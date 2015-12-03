@@ -47,9 +47,9 @@ endif
 include $(BUILD_PACKAGE)
 
 ifndef LOCAL_JACK_ENABLED
-$(mainDexList): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
+$(mainDexList): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
-	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
+	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList)
@@ -88,9 +88,9 @@ endif
 include $(BUILD_PACKAGE)
 
 ifndef LOCAL_JACK_ENABLED
-$(mainDexList2): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
+$(mainDexList2): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
-	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
+	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList2)
