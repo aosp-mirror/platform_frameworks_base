@@ -176,11 +176,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
-                mDownX = (int) ev.getX();
-                mDownY = (int) ev.getY();
+                mActivePointerId = ev.getPointerId(index);
+                mDownX = (int) ev.getX(index);
+                mDownY = (int) ev.getY(index);
                 mLastY = mDownY;
                 mDownScrollP = mScroller.getStackScroll();
-                mActivePointerId = ev.getPointerId(index);
                 mVelocityTracker.addMovement(ev);
                 break;
             }
@@ -221,6 +221,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // Select a new active pointer id and reset the motion state
                     final int newPointerIndex = (pointerIndex == 0) ? 1 : 0;
                     mActivePointerId = ev.getPointerId(newPointerIndex);
+                    mDownX = (int) ev.getX(pointerIndex);
+                    mDownY = (int) ev.getY(pointerIndex);
+                    mLastY = mDownY;
+                    mDownScrollP = mScroller.getStackScroll();
                 }
                 mVelocityTracker.addMovement(ev);
                 break;
