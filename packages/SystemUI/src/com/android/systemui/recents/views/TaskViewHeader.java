@@ -80,12 +80,9 @@ public class TaskViewHeader extends FrameLayout
 
     // Header dim, which is only used when task view hardware layers are not used
     Paint mDimLayerPaint = new Paint();
-    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
 
     Interpolator mFastOutSlowInInterpolator;
     Interpolator mFastOutLinearInInterpolator;
-
-    boolean mLayersDisabled;
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -111,6 +108,7 @@ public class TaskViewHeader extends FrameLayout
         });
 
         // Load the dismiss resources
+        mDimLayerPaint.setColor(Color.argb(0, 0, 0, 0));
         mLightDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_light);
         mDarkDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_dark);
         mDismissContentDescription =
@@ -173,21 +171,13 @@ public class TaskViewHeader extends FrameLayout
         canvas.restoreToCount(count);
     }
 
-    @Override
-    public boolean hasOverlappingRendering() {
-        return false;
-    }
-
     /**
      * Sets the dim alpha, only used when we are not using hardware layers.
      * (see RecentsConfiguration.useHardwareLayers)
      */
     void setDimAlpha(int alpha) {
-        mDimColorFilter.setColor(Color.argb(alpha, 0, 0, 0));
-        mDimLayerPaint.setColorFilter(mDimColorFilter);
-        if (!mLayersDisabled) {
-            setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
-        }
+        mDimLayerPaint.setColor(Color.argb(alpha, 0, 0, 0));
+        invalidate();
     }
 
     /** Returns the secondary color for a primary color. */
@@ -341,23 +331,11 @@ public class TaskViewHeader extends FrameLayout
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if (mLayersDisabled) {
-            mLayersDisabled = false;
-            postOnAnimation(new Runnable() {
-                @Override
-                public void run() {
-                    mLayersDisabled = false;
-                    setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
-                }
-            });
-        }
-    }
 
-    public void disableLayersForOneFrame() {
-        mLayersDisabled = true;
-
-        // Disable layer for a frame so we can draw our first frame faster.
-        setLayerType(LAYER_TYPE_NONE, null);
+        // Draw the thumbnail with the rounded corners
+        canvas.drawRoundRect(0, 0, getWidth(), getHeight(),
+                mCornerRadius,
+                mCornerRadius, mDimLayerPaint);
     }
 
     /** Notifies the associated TaskView has been focused. */
