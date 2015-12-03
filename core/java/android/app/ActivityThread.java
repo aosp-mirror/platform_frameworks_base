@@ -4841,7 +4841,7 @@ public final class ActivityThread {
         if (ii != null) {
             final ApplicationInfo instrApp = new ApplicationInfo();
             ii.copyTo(instrApp);
-
+            instrApp.initForUser(UserHandle.myUserId());
             final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
                     appContext.getClassLoader(), false, true, false);
             final ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
