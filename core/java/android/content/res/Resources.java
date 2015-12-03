@@ -1988,7 +1988,7 @@ public class Resources {
         }
         synchronized (sSync) {
             if (mPluralRule != null) {
-                mPluralRule = PluralRules.forLocale(config.getLocales().getPrimary());
+                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
             }
         }
     }
