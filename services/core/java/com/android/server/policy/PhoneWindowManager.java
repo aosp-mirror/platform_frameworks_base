@@ -159,8 +159,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
-    // No longer recommended for desk docks; still useful in car docks.
-    static final boolean ENABLE_CAR_DOCK_HOME_CAPTURE = true;
+    // No longer recommended for desk docks;
     static final boolean ENABLE_DESK_DOCK_HOME_CAPTURE = false;
 
     static final int SHORT_PRESS_POWER_NOTHING = 0;
@@ -316,6 +315,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
+
+    // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
+    // This is for car dock and this is updated from resource.
+    private boolean mEnableCarDockHomeCapture = true;
 
     boolean mBootMessageNeedsHiding;
     KeyguardServiceDelegate mKeyguardDelegate;
@@ -1399,6 +1402,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHomeIntent.addCategory(Intent.CATEGORY_HOME);
         mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mEnableCarDockHomeCapture = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableCarDockHomeLaunch);
         mCarDockIntent =  new Intent(Intent.ACTION_MAIN, null);
         mCarDockIntent.addCategory(Intent.CATEGORY_CAR_DOCK);
         mCarDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -6402,7 +6407,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * true:
      * <ul>
      *  <li>The device is not in either car mode or desk mode
-     *  <li>The device is in car mode but ENABLE_CAR_DOCK_HOME_CAPTURE is false
+     *  <li>The device is in car mode but mEnableCarDockHomeCapture is false
      *  <li>The device is in desk mode but ENABLE_DESK_DOCK_HOME_CAPTURE is false
      *  <li>The device is in car mode but there's no CAR_DOCK app with METADATA_DOCK_HOME
      *  <li>The device is in desk mode but there's no DESK_DOCK app with METADATA_DOCK_HOME
@@ -6416,7 +6421,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // is, when in car mode you should be taken to car home regardless
         // of whether we are actually in a car dock.
         if (mUiMode == Configuration.UI_MODE_TYPE_CAR) {
-            if (ENABLE_CAR_DOCK_HOME_CAPTURE) {
+            if (mEnableCarDockHomeCapture) {
                 intent = mCarDockIntent;
             }
         } else if (mUiMode == Configuration.UI_MODE_TYPE_DESK) {
@@ -6936,6 +6941,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mSupportAutoRotation="); pw.println(mSupportAutoRotation);
         pw.print(prefix); pw.print("mUiMode="); pw.print(mUiMode);
                 pw.print(" mDockMode="); pw.print(mDockMode);
+                pw.print(" mEnableCarDockHomeCapture="); pw.print(mEnableCarDockHomeCapture);
                 pw.print(" mCarDockRotation="); pw.print(mCarDockRotation);
                 pw.print(" mDeskDockRotation="); pw.println(mDeskDockRotation);
         pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
