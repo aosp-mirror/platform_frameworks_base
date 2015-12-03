@@ -505,6 +505,15 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Returns the task progress that would put the task just off the front of the stack.
+     */
+    public float getStackFrontTaskProgress(float stackScroll) {
+        float max = mUnfocusedRange.relativeMax +
+                mFocusState * (mFocusedRange.relativeMax - mUnfocusedRange.relativeMax);
+        return stackScroll + max;
+    }
+
+    /**
      * Computes the maximum number of visible tasks and thumbnails when the scroll is at the initial
      * stack scroll.  Requires that update() is called first.
      */

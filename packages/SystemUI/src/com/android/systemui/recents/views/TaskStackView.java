@@ -517,8 +517,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         } else {
                             if (!hasStackFrontTransform) {
                                 hasStackFrontTransform = true;
-                                mLayoutAlgorithm.getStackTransform(1f, 0f, mTmpStackFrontTransform,
-                                        null);
+                                mLayoutAlgorithm.getStackTransform(
+                                        mLayoutAlgorithm.getStackFrontTaskProgress(0f), 0f,
+                                        mTmpStackFrontTransform, null);
                             }
                             tv.updateViewPropertiesToTaskTransform(mTmpStackFrontTransform, 0, 0,
                                     mFastOutSlowInInterpolator, mRequestUpdateClippingListener);
