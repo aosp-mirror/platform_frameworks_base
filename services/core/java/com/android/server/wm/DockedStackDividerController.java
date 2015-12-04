@@ -20,8 +20,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.IDockDividerVisibilityListener;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -46,6 +44,7 @@ public class DockedStackDividerController {
     private final Rect mLastRect = new Rect();
     private IDockDividerVisibilityListener mListener;
     private boolean mLastVisibility = false;
+    private boolean mForceVisibilityReevaluation;
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -69,16 +68,16 @@ public class DockedStackDividerController {
 
     void setWindow(WindowState window) {
         mWindow = window;
-        reevaluateVisibility();
+        reevaluateVisibility(false);
     }
 
-    void reevaluateVisibility() {
+    void reevaluateVisibility(boolean force) {
         if (mWindow == null) {
             return;
         }
         TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID);
         final boolean visible = stack != null && stack.isVisibleLocked();
-        if (mLastVisibility == visible) {
+        if (mLastVisibility == visible && !force) {
             return;
         }
         mLastVisibility = visible;
@@ -131,5 +130,6 @@ public class DockedStackDividerController {
             throw new IllegalStateException("Dock divider visibility listener already set!");
         }
         mListener = listener;
+        reevaluateVisibility(true);
     }
 }
