@@ -42950,6 +42950,7 @@ package android.view.inputmethod {
     field public int initialSelStart;
     field public int inputType;
     field public java.lang.CharSequence label;
+    field public android.util.LocaleList locales;
     field public java.lang.String packageName;
     field public java.lang.String privateImeOptions;
   }
