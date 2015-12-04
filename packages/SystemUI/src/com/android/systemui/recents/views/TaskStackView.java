@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -126,6 +127,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     Task mFocusedTask;
     // Optimizations
     int mStackViewsAnimationDuration;
+    int mTaskCornerRadiusPx;
     boolean mStackViewsDirty = true;
     boolean mStackViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
@@ -174,6 +176,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
+        Resources res = context.getResources();
+
         // Set the stack first
         setStack(stack);
         mViewPool = new ViewPool<>(context, this);
@@ -184,6 +188,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
+        mTaskCornerRadiusPx = res.getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
 
         int taskBarDismissDozeDelaySeconds = getResources().getInteger(
                 R.integer.recents_task_bar_dismiss_delay_seconds);
@@ -364,8 +370,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private boolean updateStackTransforms(ArrayList<TaskViewTransform> taskTransforms,
                                        ArrayList<Task> tasks,
                                        float stackScroll,
-                                       int[] visibleRangeOut,
-                                       boolean boundTranslationsToRect) {
+                                       int[] visibleRangeOut) {
         int taskTransformCount = taskTransforms.size();
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
@@ -411,11 +416,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     break;
                 }
             }
-
-            if (boundTranslationsToRect) {
-                transform.translationY = Math.min(transform.translationY,
-                        mLayoutAlgorithm.mStackRect.bottom);
-            }
             frontTransform = transform;
         }
         if (visibleRangeOut != null) {
@@ -433,7 +433,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             float stackScroll = mStackScroller.getStackScroll();
             int[] visibleStackRange = mTmpVisibleRange;
             boolean isValidVisibleStackRange = updateStackTransforms(mCurrentTaskTransforms, tasks,
-                    stackScroll, visibleStackRange, false);
+                    stackScroll, visibleStackRange);
             boolean hasStackBackTransform = false;
             boolean hasStackFrontTransform = false;
             if (DEBUG) {
@@ -490,7 +490,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
 
                 // Animate the task into place
-                tv.updateViewPropertiesToTaskTransform(transform, transform.clipBottom,
+                tv.updateViewPropertiesToTaskTransform(transform, 0,
                         mStackViewsAnimationDuration, mFastOutSlowInInterpolator,
                         mRequestUpdateClippingListener);
 
@@ -513,8 +513,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         if (Float.compare(transform.p, 0f) <= 0) {
                             if (!hasStackBackTransform) {
                                 hasStackBackTransform = true;
-                                mLayoutAlgorithm.getStackTransform(0f, 0f, mTmpStackBackTransform,
-                                        null);
+                                mLayoutAlgorithm.getStackTransform(
+                                        mLayoutAlgorithm.getStackBackTaskProgress(0f), 0f,
+                                        mTmpStackBackTransform, null);
                             }
                             tv.updateViewPropertiesToTaskTransform(mTmpStackBackTransform, 0, 0,
                                     mFastOutSlowInInterpolator, mRequestUpdateClippingListener);
@@ -586,17 +587,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // stacked and we can make assumptions about the visibility of the this
                 // task relative to the ones in front of it.
                 if (frontTv != null) {
-                    mTmpTaskRect.set(mLayoutAlgorithm.mTaskRect);
-                    mTmpTaskRect.offset(0, tv.getTranslationY());
-                    Utilities.scaleRectAboutCenter(mTmpTaskRect, tv.getScaleX());
-                    float taskBottom = mTmpTaskRect.bottom;
-                    mTmpTaskRect.set(mLayoutAlgorithm.mTaskRect);
-                    mTmpTaskRect.offset(0, frontTv.getTranslationY());
-                    Utilities.scaleRectAboutCenter(mTmpTaskRect, frontTv.getScaleX());
-                    float frontTaskTop = mTmpTaskRect.top;
+                    float taskBottom = tv.getBottom();
+                    float frontTaskTop = frontTv.getTop();
                     if (frontTaskTop < taskBottom) {
                         // Map the stack view space coordinate (the rects) to view space
-                        clipBottom = (int) ((taskBottom - frontTaskTop) / tv.getScaleX()) - 1;
+                        clipBottom = (int) (taskBottom - frontTaskTop) - mTaskCornerRadiusPx;
                     }
                 }
             }
@@ -980,11 +975,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             onFirstLayout();
         }
 
+        requestSynchronizeStackViewsWithModel();
         if (changed) {
             if (mStackScroller.isScrollOutOfBounds()) {
                 mStackScroller.boundScroll();
             }
-            requestSynchronizeStackViewsWithModel();
             synchronizeStackViewsWithModel();
             requestUpdateStackViewsClip();
             clipTaskViews(true /* forceUpdate */);
@@ -1147,8 +1142,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         transformPointToViewLocal(point, tv);
         x = point[0];
         y = point[1];
-        return (0 <= x) && (x < (tv.getMeasuredWidth() - tv.getViewBounds().getClipRight())) &&
-                (0 <= y) && (y < (tv.getMeasuredHeight() - tv.getViewBounds().getClipBottom()));
+        return (0 <= x) && (x < tv.getWidth()) && (0 <= y) && (y < tv.getHeight());
     }
 
     @Override
@@ -1497,6 +1491,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         event.taskView.animate()
                 .withEndAction(event.postAnimationTrigger.decrementAsRunnable());
+
+        // We translated the view but we need to animate it back from the current layout-space rect
+        // to its final layout-space rect
+        int x = (int) event.taskView.getTranslationX();
+        int y = (int) event.taskView.getTranslationY();
+        Rect taskViewRect = new Rect(event.taskView.getLeft(), event.taskView.getTop(),
+                event.taskView.getRight(), event.taskView.getBottom());
+        taskViewRect.offset(x, y);
+        event.taskView.setTranslationX(0);
+        event.taskView.setTranslationY(0);
+        event.taskView.setLeftTopRightBottom(taskViewRect.left, taskViewRect.top,
+                taskViewRect.right, taskViewRect.bottom);
 
         // Animate the tack view back into position
         requestSynchronizeStackViewsWithModel(250);
