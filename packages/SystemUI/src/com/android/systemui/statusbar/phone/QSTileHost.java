@@ -45,12 +45,6 @@ import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
-import com.android.systemui.qs.tiles.QAirplaneTile;
-import com.android.systemui.qs.tiles.QBluetoothTile;
-import com.android.systemui.qs.tiles.QFlashlightTile;
-import com.android.systemui.qs.tiles.QLockTile;
-import com.android.systemui.qs.tiles.QRotationLockTile;
-import com.android.systemui.qs.tiles.QWifiTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
@@ -334,8 +328,8 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
     }
 
     public QSTile<?> createTile(String tileSpec) {
-        if (tileSpec.equals("wifi")) return new WifiTile(this, false);
-        else if (tileSpec.equals("bt")) return new BluetoothTile(this, false);
+        if (tileSpec.equals("wifi")) return new WifiTile(this);
+        else if (tileSpec.equals("bt")) return new BluetoothTile(this);
         else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
         else if (tileSpec.equals("cell")) return new CellularTile(this);
         else if (tileSpec.equals("airplane")) return new AirplaneModeTile(this);
@@ -348,16 +342,6 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
         else if (tileSpec.equals("hotspot")) return new HotspotTile(this);
         else if (tileSpec.equals("user")) return new UserTile(this);
         else if (tileSpec.equals("battery")) return new BatteryTile(this);
-        // Detail only versions of wifi and bluetooth.
-        else if (tileSpec.equals("dwifi")) return new WifiTile(this, true);
-        else if (tileSpec.equals("dbt")) return new BluetoothTile(this, true);
-        // Quick tiles, no text.
-        else if (tileSpec.equals("qwifi")) return new QWifiTile(this);
-        else if (tileSpec.equals("qbt")) return new QBluetoothTile(this);
-        else if (tileSpec.equals("qairplane")) return new QAirplaneTile(this);
-        else if (tileSpec.equals("qrotation")) return new QRotationLockTile(this);
-        else if (tileSpec.equals("qflashlight")) return new QFlashlightTile(this);
-        else if (tileSpec.equals("qlock")) return new QLockTile(this);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);

@@ -30,10 +30,10 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -63,7 +63,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private boolean mListening;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
-    private QSPanel mHeaderQsPanel;
+    private QuickQSPanel mHeaderQsPanel;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -75,7 +75,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         mExpandedGroup = (ViewGroup) findViewById(R.id.expanded_group);
 
-        mHeaderQsPanel = (QSPanel) findViewById(R.id.quick_qs_panel);
+        mHeaderQsPanel = (QuickQSPanel) findViewById(R.id.quick_qs_panel);
 
         mSettingsButton = (SettingsButton) findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
@@ -133,9 +133,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void setExpansion(float headerExpansionFraction) {
-        float offset = getHeight() * headerExpansionFraction;
-        mExpandedGroup.setTranslationY(offset - getHeight());
-        mHeaderQsPanel.setTranslationY(offset);
+        mExpandedGroup.setAlpha(headerExpansionFraction);
+        mExpandedGroup.setVisibility(headerExpansionFraction > 0 ? View.VISIBLE : View.INVISIBLE);
+        mHeaderQsPanel.setAlpha(1 - headerExpansionFraction);
+        mHeaderQsPanel.setVisibility(headerExpansionFraction < 1 ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void setListening(boolean listening) {
@@ -190,7 +191,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 host.getUserSwitcherController(), host.getUserInfoController(),
                 host.getKeyguardMonitor(), host.getSecurityController(),
                 host.getBatteryController());
+        mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(myHost);
+        mHeaderQsPanel.setMaxTiles(3);
         mHeaderQsPanel.setTiles(myHost.getTiles());
         myHost.addCallback(new QSTile.Host.Callback() {
             @Override

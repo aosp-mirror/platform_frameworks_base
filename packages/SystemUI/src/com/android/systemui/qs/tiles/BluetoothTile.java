@@ -24,18 +24,15 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTileView;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.util.Collection;
-import java.util.Set;
 
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
@@ -44,18 +41,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     private final BluetoothController mController;
     private final BluetoothDetailAdapter mDetailAdapter;
 
-    private final boolean mAlwaysDetail;
-
-    public BluetoothTile(Host host, boolean alwaysDetail) {
+    public BluetoothTile(Host host) {
         super(host);
-        mAlwaysDetail = alwaysDetail;
         mController = host.getBluetoothController();
         mDetailAdapter = new BluetoothDetailAdapter();
-    }
-
-    @Override
-    public int getTileType() {
-        return QSTileView.QS_TYPE_DUAL;
     }
 
     @Override
@@ -78,18 +67,15 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     }
 
     @Override
-    protected void handleClick() {
-        if (mAlwaysDetail) {
-            handleSecondaryClick();
-            return;
-        }
+    protected void handleSecondaryClick() {
+        // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = (Boolean)mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setBluetoothEnabled(!isEnabled);
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleClick() {
         if (!mState.value) {
             mState.value = true;
             mController.setBluetoothEnabled(true);

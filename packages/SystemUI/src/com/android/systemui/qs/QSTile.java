@@ -86,20 +86,12 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mTileSpec = tileSpec;
     }
 
-    public int getTileType() {
-        return QSTileView.QS_TYPE_NORMAL;
-    }
-
-    public final boolean supportsDualTargets() {
-        return getTileType() == QSTileView.QS_TYPE_DUAL;
-    }
-
     public Host getHost() {
         return mHost;
     }
 
-    public QSTileBaseView createTileView(Context context) {
-        return new QSTileView(context);
+    public QSIconView createTileView(Context context) {
+        return new QSIconView(context);
     }
 
     public DetailAdapter getDetailAdapter() {
@@ -181,7 +173,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected void handleSecondaryClick() {
-        // optional
+        // Default to normal click.
+        handleClick();
     }
 
     protected void handleLongClick() {

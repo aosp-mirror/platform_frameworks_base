@@ -101,10 +101,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         final int NT = mTiles.size();
         for (int i = 0; i < NT; i++) {
             TileRecord tile = mTiles.get(i);
-            if (tile.tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
-                // Don't show any quick tiles for now.
-                continue;
-            }
             if (mPages.get(index).isFull()) {
                 if (++index == mPages.size()) {
                     if (DEBUG) Log.d(TAG, "Adding page for " + tile.tile.getClass().getSimpleName());
@@ -178,7 +174,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         public TilePage(Context context, AttributeSet attrs) {
             super(context, attrs);
-            mAllowDual = false;
             updateResources();
         }
 

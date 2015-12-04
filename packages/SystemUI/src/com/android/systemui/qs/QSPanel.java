@@ -298,7 +298,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         showDetail(show, r);
     }
 
-    private void showDetail(boolean show, Record r) {
+    protected void showDetail(boolean show, Record r) {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
     }
 
@@ -330,10 +330,14 @@ public class QSPanel extends FrameLayout implements Tunable {
         r.tileView.onStateChanged(state);
     }
 
+    protected QSTileBaseView createTileView(QSTile<?> tile) {
+        return new QSTileView(mContext, tile.createTileView(mContext));
+    }
+
     protected void addTile(final QSTile<?> tile) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
-        r.tileView = tile.createTileView(mContext);
+        r.tileView = createTileView(tile);
         r.tileView.setVisibility(View.GONE);
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
@@ -369,13 +373,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                r.tile.click();
-            }
-        };
-        final View.OnClickListener clickSecondary = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                r.tile.secondaryClick();
+                onTileClick(r.tile);
             }
         };
         final View.OnLongClickListener longClick = new View.OnLongClickListener() {
@@ -396,7 +394,7 @@ public class QSPanel extends FrameLayout implements Tunable {
                 return true;
             }
         };
-        r.tileView.init(click, clickSecondary, longClick);
+        r.tileView.init(click, longClick);
         r.tile.setListening(mListening);
         callback.onStateChanged(r.tile.getState());
         r.tile.refreshState();
@@ -405,6 +403,10 @@ public class QSPanel extends FrameLayout implements Tunable {
         if (mTileLayout != null) {
             mTileLayout.addTile(r);
         }
+    }
+
+    protected void onTileClick(QSTile<?> tile) {
+        tile.click();
     }
 
     public boolean isShowingDetail() {
@@ -429,7 +431,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         return mQsContainer.getMeasuredHeight();
     }
 
-    private void handleShowDetail(Record r, boolean show) {
+    protected void handleShowDetail(Record r, boolean show) {
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);
         } else {
@@ -560,7 +562,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         }
     }
 
-    private static class Record {
+    protected static class Record {
         View detailView;
         DetailAdapter detailAdapter;
         int x;
