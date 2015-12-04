@@ -234,6 +234,7 @@ public final class DocumentsContract {
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
          * @see #FLAG_VIRTUAL_DOCUMENT
+         * @see #FLAG_ARCHIVE
          */
         public static final String COLUMN_FLAGS = "flags";
 
@@ -366,6 +367,18 @@ public final class DocumentsContract {
          *      android.os.CancellationSignal)
          */
         public static final int FLAG_VIRTUAL_DOCUMENT = 1 << 10;
+
+        /**
+         * Flag indicating that a document is an archive, and it's contents can be
+         * obtained via {@link DocumentsProvider#queryChildDocuments}.
+         * <p>
+         * The <em>provider</em> support library offers utility classes to add common
+         * archive support.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsProvider#queryChildDocuments(String, String[], String)
+         */
+        public static final int FLAG_ARCHIVE = 1 << 11;
 
         /**
          * Flag indicating that document titles should be hidden when viewing
