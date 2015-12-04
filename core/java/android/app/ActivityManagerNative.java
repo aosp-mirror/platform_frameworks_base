@@ -2733,6 +2733,22 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(res);
             return true;
         }
+        case IN_MULTI_WINDOW_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final IBinder token = data.readStrongBinder();
+            final boolean multiWindowMode = inMultiWindowMode(token);
+            reply.writeNoException();
+            reply.writeInt(multiWindowMode ? 1 : 0);
+            return true;
+        }
+        case IN_PICTURE_IN_PICTURE_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final IBinder token = data.readStrongBinder();
+            final boolean pipMode = inPictureInPictureMode(token);
+            reply.writeNoException();
+            reply.writeInt(pipMode ? 1 : 0);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6364,6 +6380,34 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
+    }
+
+    @Override
+    public boolean inMultiWindowMode(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(IN_MULTI_WINDOW_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        final boolean multiWindowMode = reply.readInt() == 1 ? true : false;
+        data.recycle();
+        reply.recycle();
+        return multiWindowMode;
+    }
+
+    @Override
+    public boolean inPictureInPictureMode(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(IN_PICTURE_IN_PICTURE_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        final boolean pipMode = reply.readInt() == 1 ? true : false;
+        data.recycle();
+        reply.recycle();
+        return pipMode;
     }
 
     private IBinder mRemote;

@@ -545,6 +545,10 @@ public interface IActivityManager extends IInterface {
 
     public int getAppStartMode(int uid, String packageName) throws RemoteException;
 
+    public boolean inMultiWindowMode(IBinder token) throws RemoteException;
+
+    public boolean inPictureInPictureMode(IBinder token) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -906,4 +910,6 @@ public interface IActivityManager extends IInterface {
     int MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 349;
     int GET_APP_START_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 350;
     int UNLOCK_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 351;
+    int IN_MULTI_WINDOW_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 352;
+    int IN_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 353;
 }

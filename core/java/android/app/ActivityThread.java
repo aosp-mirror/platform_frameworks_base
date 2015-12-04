@@ -1275,6 +1275,18 @@ public final class ActivityThread {
             } catch (IOException e) {
             }
         }
+
+        @Override
+        public void scheduleMultiWindowModeChanged(IBinder token, boolean multiWindowMode)
+                throws RemoteException {
+            sendMessage(H.MULTI_WINDOW_MODE_CHANGED, token, multiWindowMode ? 1 : 0);
+        }
+
+        @Override
+        public void schedulePictureInPictureModeChanged(IBinder token, boolean pipMode)
+                throws RemoteException {
+            sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, token, pipMode ? 1 : 0);
+        }
     }
 
     private int getLifecycleSeq() {
@@ -1336,6 +1348,8 @@ public final class ActivityThread {
         public static final int ENTER_ANIMATION_COMPLETE = 149;
         public static final int START_BINDER_TRACKING = 150;
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
+        public static final int MULTI_WINDOW_MODE_CHANGED = 152;
+        public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1389,6 +1403,8 @@ public final class ActivityThread {
                     case CANCEL_VISIBLE_BEHIND: return "CANCEL_VISIBLE_BEHIND";
                     case BACKGROUND_VISIBLE_BEHIND_CHANGED: return "BACKGROUND_VISIBLE_BEHIND_CHANGED";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
+                    case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
+                    case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
                 }
             }
             return Integer.toString(code);
@@ -1631,6 +1647,12 @@ public final class ActivityThread {
                     break;
                 case STOP_BINDER_TRACKING_AND_DUMP:
                     handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
+                    break;
+                case MULTI_WINDOW_MODE_CHANGED:
+                    handleMultiWindowModeChanged((IBinder) msg.obj, msg.arg1 == 1);
+                    break;
+                case PICTURE_IN_PICTURE_MODE_CHANGED:
+                    handlePictureInPictureModeChanged((IBinder) msg.obj, msg.arg1 == 1);
                     break;
             }
             Object obj = msg.obj;
@@ -2811,6 +2833,20 @@ public final class ActivityThread {
         } finally {
             IoUtils.closeQuietly(fd);
             Binder.getTransactionTracker().clearTraces();
+        }
+    }
+
+    private void handleMultiWindowModeChanged(IBinder token, boolean multiWindowMode) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.activity.onMultiWindowModeChanged(multiWindowMode);
+        }
+    }
+
+    private void handlePictureInPictureModeChanged(IBinder token, boolean pipMode) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.activity.onPictureInPictureModeChanged(pipMode);
         }
     }
 

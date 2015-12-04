@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
@@ -1262,7 +1263,8 @@ final class TaskRecord {
         if (Objects.equals(mBounds, bounds)) {
             return null;
         }
-        Configuration oldConfig = mOverrideConfig;
+        final Configuration oldConfig = mOverrideConfig;
+        final boolean oldFullscreen = mFullscreen;
 
         mFullscreen = bounds == null;
         if (mFullscreen) {
@@ -1296,7 +1298,41 @@ final class TaskRecord {
                             ? Configuration.ORIENTATION_PORTRAIT
                             : Configuration.ORIENTATION_LANDSCAPE;
         }
+
+        if (mFullscreen != oldFullscreen) {
+            reportMultiWindowModeChange();
+        }
+
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
+    }
+
+    private void reportMultiWindowModeChange() {
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.app != null && r.app.thread != null) {
+                try {
+                    // An activity is consider to be in multi-window mode if its task isn't
+                    // fullscreen.
+                    r.app.thread.scheduleMultiWindowModeChanged(r.appToken, !mFullscreen);
+                } catch (Exception e) {
+                    Slog.e(TAG, "TaskRecord.reportMultiWindowModeChange: ", e);
+                }
+            }
+        }
+    }
+
+    void reportPictureInPictureModeChange() {
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = mActivities.get(i);
+            if (r.app != null && r.app.thread != null) {
+                try {
+                    r.app.thread.schedulePictureInPictureModeChanged(
+                            r.appToken, stack.mStackId == PINNED_STACK_ID);
+                } catch (Exception e) {
+                    Slog.e(TAG, "TaskRecord.reportMultiWindowModeChange: ", e);
+                }
+            }
+        }
     }
 
     /** Updates the task's bounds and override configuration to match what is expected for the

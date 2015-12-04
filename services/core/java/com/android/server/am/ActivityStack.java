@@ -4652,7 +4652,7 @@ final class ActivityStack {
         TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
                 voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
-        addTask(task, toTop, false);
+        addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
         if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.mResizeable
                 && !isLockscreenShown) {
@@ -4673,7 +4673,9 @@ final class ActivityStack {
         return new ArrayList<>(mTaskHistory);
     }
 
-    void addTask(final TaskRecord task, final boolean toTop, boolean moving) {
+    void addTask(final TaskRecord task, final boolean toTop, String reason) {
+        final ActivityStack prevStack = preAddTask(task, reason);
+
         task.stack = this;
         if (toTop) {
             insertTaskAtTop(task, null);
@@ -4681,18 +4683,31 @@ final class ActivityStack {
             mTaskHistory.add(0, task);
             updateTaskMovement(task, false);
         }
-        if (!moving && task.voiceSession != null) {
-            try {
-                task.voiceSession.taskStarted(task.intent, task.taskId);
-            } catch (RemoteException e) {
-            }
-        }
+        postAddTask(task, prevStack);
     }
 
-    void positionTask(final TaskRecord task, int position, boolean moving) {
+    void positionTask(final TaskRecord task, int position) {
+        final ActivityStack prevStack = preAddTask(task, "positionTask");
         task.stack = this;
         insertTaskAtPosition(task, position);
-        if (!moving && task.voiceSession != null) {
+        postAddTask(task, prevStack);
+    }
+
+    private ActivityStack preAddTask(TaskRecord task, String reason) {
+        final ActivityStack prevStack = task.stack;
+        if (prevStack != null && prevStack != this) {
+            prevStack.removeTask(task, reason, MOVING);
+        }
+        return prevStack;
+    }
+
+    private void postAddTask(TaskRecord task, ActivityStack prevStack) {
+        if (prevStack != null) {
+            if (prevStack != this
+                    && (prevStack.mStackId == PINNED_STACK_ID || mStackId == PINNED_STACK_ID)) {
+                task.reportPictureInPictureModeChange();
+            }
+        } else if (task.voiceSession != null) {
             try {
                 task.voiceSession.taskStarted(task.intent, task.taskId);
             } catch (RemoteException e) {
@@ -4754,6 +4769,7 @@ final class ActivityStack {
         r.setTask(task, null);
         task.addActivityToTop(r);
         setAppTask(r, task);
+        task.reportPictureInPictureModeChange();
         setFocusAndResumeStateIfNeeded(r, wasFocused, wasResumed, "moveActivityToStack");
     }
 

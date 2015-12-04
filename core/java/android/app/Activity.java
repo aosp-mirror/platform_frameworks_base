@@ -1727,6 +1727,57 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Called by the system when the activity changes from fullscreen mode to multi-window mode and
+     * visa-versa.
+     * @see android.R.attr#resizeableActivity
+     *
+     * @param multiWindowMode True if the activity is in multi-window mode.
+     */
+    public void onMultiWindowModeChanged(boolean multiWindowMode) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG,
+                "onMultiWindowModeChanged " + this + ": " + multiWindowMode);
+    }
+
+    /**
+     * Returns true if the activity is currently in multi-window mode.
+     * @see android.R.attr#resizeableActivity
+     *
+     * @return True if the activity is in multi-window mode.
+     */
+    public boolean inMultiWindowMode() {
+        try {
+            return ActivityManagerNative.getDefault().inMultiWindowMode(mToken);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
+     * Called by the system when the activity changes to and from picture-in-picture mode.
+     * @see android.R.attr#supportsPictureInPicture
+     *
+     * @param pictureInPictureMode True if the activity is in picture-in-picture mode.
+     */
+    public void onPictureInPictureModeChanged(boolean pictureInPictureMode) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG,
+                "onPictureInPictureModeChanged " + this + ": " + pictureInPictureMode);
+    }
+
+    /**
+     * Returns true if the activity is currently in picture-in-picture mode.
+     * @see android.R.attr#supportsPictureInPicture
+     *
+     * @return True if the activity is in picture-in-picture mode.
+     */
+    public boolean inPictureInPictureMode() {
+        try {
+            return ActivityManagerNative.getDefault().inPictureInPictureMode(mToken);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
      * Called by the system when the device configuration changes while your
      * activity is running.  Note that this will <em>only</em> be called if
      * you have selected configurations you would like to handle with the

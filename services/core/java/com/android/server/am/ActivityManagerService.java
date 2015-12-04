@@ -16,64 +16,8 @@
 
 package com.android.server.am;
 
-import static android.Manifest.permission.INTERACT_ACROSS_USERS;
-import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
-import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
-import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
-import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
-import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
-import static org.xmlpull.v1.XmlPullParser.START_TAG;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
-
-import android.Manifest;
-import android.app.AppOpsManager;
-import android.app.ApplicationThreadNative;
-import android.app.BroadcastOptions;
-import android.app.IActivityContainer;
-import android.app.IActivityContainerCallback;
-import android.app.IAppTask;
-import android.app.ITaskStackListener;
-import android.app.ProfilerInfo;
-import android.app.assist.AssistContent;
-import android.app.assist.AssistStructure;
-import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManagerInternal;
-import android.appwidget.AppWidgetManager;
-import android.content.pm.PackageManagerInternal;
-import android.content.pm.PermissionInfo;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.os.BatteryStats;
-import android.os.PersistableBundle;
-import android.os.PowerManager;
-import android.os.Trace;
-import android.os.TransactionTooLargeException;
-import android.os.WorkSource;
-import android.os.storage.IMountService;
-import android.os.storage.MountServiceInternal;
-import android.os.storage.StorageManager;
-import android.service.voice.IVoiceInteractionSession;
-import android.service.voice.VoiceInteractionSession;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.DebugUtils;
-import android.util.SparseIntArray;
-import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -185,6 +129,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
@@ -305,6 +250,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
@@ -333,6 +279,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -498,9 +445,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Maximum amount of time we will allow to elapse before re-reporting usage stats
     // interaction with foreground processes.
     static final long USAGE_STATS_INTERACTION_INTERVAL = 24*60*60*1000L;
-
-    // Maximum number of users we allow to be running at a time.
-    static final int MAX_RUNNING_USERS = 3;
 
     // This is the amount of time we allow an app to settle after it goes into the background,
     // before we start restricting what it can do.
@@ -7210,6 +7154,29 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public boolean inMultiWindowMode(IBinder token) {
+        synchronized(this) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return false;
+            }
+            // An activity is consider to be in multi-window mode if its task isn't fullscreen.
+            return !r.task.mFullscreen;
+        }
+    }
+
+    @Override
+    public boolean inPictureInPictureMode(IBinder token) {
+        synchronized(this) {
+            final ActivityStack stack = ActivityRecord.getStackLocked(token);
+            if (stack == null) {
+                return false;
+            }
+            return stack.mStackId == PINNED_STACK_ID;
+        }
+    }
+
     // =========================================================
     // PROCESS INFO
     // =========================================================
@@ -8863,7 +8830,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 task.inRecents = true;
                 mRecentTasks.add(task);
-                r.task.stack.addTask(task, false, false);
+                r.task.stack.addTask(task, false, "addAppTask");
 
                 task.setLastThumbnailLocked(thumbnail);
                 task.freeLastThumbnail();

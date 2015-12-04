@@ -2337,8 +2337,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 // above. Go ahead and reset it.
                                 targetStack = computeStackFocus(
                                         sourceRecord, false /* newTask */, null /* bounds */);
-                                targetStack.addTask(
-                                        task, !launchTaskBehind /* toTop */, false /* moving */);
+                                targetStack.addTask(task,
+                                        !launchTaskBehind /* toTop */, "startActivityUnchecked");
                             }
 
                         }
@@ -3344,7 +3344,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        stack.addTask(task, false, false);
+        stack.addTask(task, false, "restoreRecentTask");
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
         final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -3381,10 +3381,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
         task.mResizeable = resizeable;
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
-        if (task.stack != null) {
-            task.stack.removeTask(task, reason, MOVING);
-        }
-        stack.addTask(task, toTop, MOVING);
+        stack.addTask(task, toTop, reason);
 
         // If the task had focus before (or we're requested to move focus),
         // move focus to the new stack.
@@ -3499,11 +3496,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         mWindowManager.positionTaskInStack(
                 taskId, stackId, position, task.mBounds, task.mOverrideConfig);
-        final boolean stackChanged = task.stack != null && task.stack != stack;
-        if (stackChanged) {
-            task.stack.removeTask(task, "moveTaskToStack", MOVING);
-        }
-        stack.positionTask(task, position, stackChanged);
+        stack.positionTask(task, position);
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
         stack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
