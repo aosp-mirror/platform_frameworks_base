@@ -49,7 +49,7 @@ public class TaskStackViewScroller {
     ObjectAnimator mScrollAnimator;
     float mFinalAnimatedScroll;
 
-    Interpolator mLinearOutSlowInInterpolator;
+    private Interpolator mLinearOutSlowInInterpolator;
 
     public TaskStackViewScroller(Context context, TaskStackLayoutAlgorithm layoutAlgorithm) {
         mContext = context;
