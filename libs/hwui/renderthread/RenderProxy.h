@@ -67,7 +67,7 @@ public:
     ANDROID_API bool loadSystemProperties();
     ANDROID_API void setName(const char* name);
 
-    ANDROID_API bool initialize(const sp<ANativeWindow>& window);
+    ANDROID_API void initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
     ANDROID_API bool pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height, float lightRadius,
