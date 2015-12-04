@@ -1,7 +1,7 @@
 #ifndef HOST_PSEUDOLOCALIZE_H
 #define HOST_PSEUDOLOCALIZE_H
 
-#include <base/macros.h>
+#include <android-base/macros.h>
 #include "StringPool.h"
 
 class PseudoMethodImpl {
