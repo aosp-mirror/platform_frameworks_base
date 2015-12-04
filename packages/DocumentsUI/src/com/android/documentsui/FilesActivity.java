@@ -369,9 +369,15 @@ public class FilesActivity extends BaseActivity {
                 // TODO: Should be statically bound using alphabeticShortcut. See b/21330356.
                 dir = DirectoryFragment.get(getFragmentManager());
                 dir.copySelectedToClipboard();
+                return true;
+            case KeyEvent.KEYCODE_V:
+                // TODO: Should be statically bound using alphabeticShortcut. See b/21330356.
+                dir = DirectoryFragment.get(getFragmentManager());
+                dir.pasteFromClipboard();
+                return true;
+            default:
+                return super.onKeyShortcut(keyCode, event);
         }
-
-        return super.onKeyShortcut(keyCode, event);
     }
 
     @Override
