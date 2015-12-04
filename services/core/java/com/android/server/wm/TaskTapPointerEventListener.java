@@ -109,6 +109,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 final int y = (int) motionEvent.getY();
                 final Task task = mDisplayContent.findTaskForControlPoint(x, y);
                 if (task == null) {
+                    mPointerIconShape = STYLE_NOT_SPECIFIED;
                     break;
                 }
                 task.getDimBounds(mTmpRect);
@@ -137,6 +138,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             } break;
 
             case MotionEvent.ACTION_HOVER_EXIT:
+                mPointerIconShape = STYLE_NOT_SPECIFIED;
                 motionEvent.getDevice().setPointerShape(STYLE_DEFAULT);
                 break;
 
