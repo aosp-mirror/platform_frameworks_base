@@ -428,9 +428,6 @@ please see themes_device_defaults.xml.
         <item name="fastScrollOverlayPosition">floating</item>
         <item name="fastScrollTextColor">@color/primary_text_dark</item>
 
-        <!-- Pointer style -->
-        <item name="pointerStyle">@style/Pointer</item>
-
         <!-- Accessibility focused drawable -->
         <item name="accessibilityFocusedDrawable">@drawable/view_accessibility_focused</item>
 

@@ -1026,9 +1026,6 @@ i
         <!-- ============== -->
         <eat-comment />
 
-        <!-- Reference to the Pointer style -->
-        <attr name="pointerStyle" format="reference" />
-
         <!-- The drawable for accessibility focused views. -->
         <attr name="accessibilityFocusedDrawable" format="reference" />
 
