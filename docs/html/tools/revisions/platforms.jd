@@ -26,7 +26,7 @@ for app development. If you want details about the features and APIs added in ea
 version, instead read the highlights in the <a href="{@docRoot}about/index.html">About</a>
 section.</p>
 
-<p>In order to compile your application against a particular version of Android, you must use the
+<p>To compile your application against a particular version of Android, you must use the
 <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> to download and install the SDK
 Platform for that release. If you want to test your application on an emulator, you must also
 download at least one System Image for that Android version.</p>
@@ -59,6 +59,24 @@ packages may not be available for download.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(November 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Fixed bugs in the layout rendering library used by Android Studio.</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r23 or higher is required.</li>
+      <li>Android SDK Tools 24.3.4 or higher is required.</li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(August 2015)</em>
   </p>
 
