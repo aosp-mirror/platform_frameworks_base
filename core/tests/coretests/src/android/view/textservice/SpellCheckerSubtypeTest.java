@@ -21,6 +21,7 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import static android.test.MoreAsserts.assertNotEqual;
 
@@ -77,6 +78,34 @@ public class SpellCheckerSubtypeTest extends InstrumentationTestCase {
         assertEquals(
                 defaultHashCodeAlgorithm(SUBTYPE_SUBTYPE_LOCALE_STRING_A, SUBTYPE_EXTRA_VALUE_A),
                 clonedSubtype.hashCode());
+    }
+
+    @SmallTest
+    public void testGetLocaleObject() throws Exception {
+        assertEquals(new Locale("en"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "en", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+        assertEquals(new Locale("en", "US"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "en_US", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+        assertEquals(new Locale("en", "US", "POSIX"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "en_US_POSIX", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+
+        // Special rewrite rule for "tl" for versions of Android earlier than Lollipop that did not
+        // support three letter language codes, and used "tl" (Tagalog) as the language string for
+        // "fil" (Filipino).
+        assertEquals(new Locale("fil"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "tl", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+        assertEquals(new Locale("fil", "PH"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "tl_PH", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+        assertEquals(new Locale("fil", "PH", "POSIX"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "tl_PH_POSIX", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+
+        // So far rejecting invalid/unexpected locale strings is out of the scope.
+        assertEquals(new Locale("a"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "a", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+        assertEquals(new Locale("a b c"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "a b c", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
+        assertEquals(new Locale("en-US"), new SpellCheckerSubtype(
+                SUBTYPE_NAME_RES_ID_A, "en-US", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
     }
 
     @SmallTest
