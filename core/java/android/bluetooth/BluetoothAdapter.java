@@ -74,6 +74,8 @@ import java.util.UUID;
  * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}; or start a scan for
  * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
  *
+ * <p>This class is thread safe.
+ *
  * <p class="note"><strong>Note:</strong>
  * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
  * permission and some also require the
@@ -82,7 +84,7 @@ import java.util.UUID;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using Bluetooth, read the
- * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.</p>
+ * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.
  * </div>
  *
  * {@see BluetoothDevice}
