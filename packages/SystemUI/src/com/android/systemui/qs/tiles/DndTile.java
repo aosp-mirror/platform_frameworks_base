@@ -142,7 +142,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on_priority);
                 state.label = mContext.getString(R.string.quick_settings_dnd_priority_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_priority_on);

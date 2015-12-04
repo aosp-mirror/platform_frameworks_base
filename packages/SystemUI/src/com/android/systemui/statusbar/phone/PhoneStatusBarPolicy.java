@@ -249,8 +249,17 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
         if (DndTile.isVisible(mContext) || DndTile.isCombinedIcon(mContext)) {
             zenVisible = mZen != Global.ZEN_MODE_OFF;
-            zenIconId = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS
-                    ? R.drawable.stat_sys_dnd_total_silence : R.drawable.stat_sys_dnd;
+            switch(mZen) {
+                case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                    zenIconId = R.drawable.stat_sys_dnd_priority;
+                    break;
+                case Global.ZEN_MODE_NO_INTERRUPTIONS:
+                    zenIconId = R.drawable.stat_sys_dnd_total_silence;
+                    break;
+                default:
+                    zenIconId = R.drawable.stat_sys_dnd;
+                    break;
+            }
             zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
         } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
