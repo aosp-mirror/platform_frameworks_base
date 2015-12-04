@@ -3484,6 +3484,14 @@ public class AccountManagerService
                 return false;
             }
 
+            final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+            if (am.isUserRunningAndLocked(mAccounts.userId)
+                    && !authenticatorInfo.componentInfo.encryptionAware) {
+                Slog.w(TAG, "Blocking binding to authenticator " + authenticatorInfo.componentName
+                        + " which isn't encryption aware");
+                return false;
+            }
+
             Intent intent = new Intent();
             intent.setAction(AccountManager.ACTION_AUTHENTICATOR_INTENT);
             intent.setComponent(authenticatorInfo.componentName);
@@ -3497,7 +3505,6 @@ public class AccountManagerService
                 }
                 return false;
             }
-
 
             return true;
         }

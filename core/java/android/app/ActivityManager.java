@@ -3108,9 +3108,29 @@ public class ActivityManager {
      * @param userid the user's id. Zero indicates the default user.
      * @hide
      */
-    public boolean isUserRunning(int userid) {
+    public boolean isUserRunning(int userId) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userid, 0);
+            return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /** {@hide} */
+    public boolean isUserRunningAndLocked(int userId) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(userId,
+                    ActivityManager.FLAG_AND_LOCKED);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /** {@hide} */
+    public boolean isUserRunningAndUnlocked(int userId) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(userId,
+                    ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException e) {
             return false;
         }

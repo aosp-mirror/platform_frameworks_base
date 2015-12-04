@@ -195,8 +195,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             mServices = new ArrayList<ServiceInfo<AuthenticatorDescription>>();
             AuthenticatorDescription d1 = new AuthenticatorDescription("type1", "p1", 0, 0, 0, 0);
             AuthenticatorDescription d2 = new AuthenticatorDescription("type2", "p2", 0, 0, 0, 0);
-            mServices.add(new ServiceInfo<AuthenticatorDescription>(d1, null, 0));
-            mServices.add(new ServiceInfo<AuthenticatorDescription>(d2, null, 0));
+            mServices.add(new ServiceInfo<AuthenticatorDescription>(d1, null, null));
+            mServices.add(new ServiceInfo<AuthenticatorDescription>(d2, null, null));
         }
 
         @Override

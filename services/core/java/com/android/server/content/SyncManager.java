@@ -422,8 +422,8 @@ public class SyncManager {
 
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 onUserRemoved(userId);
-            } else if (Intent.ACTION_USER_STARTING.equals(action)) {
-                onUserStarting(userId);
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                onUserUnlocked(userId);
             } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
                 onUserStopping(userId);
             }
@@ -517,7 +517,7 @@ public class SyncManager {
 
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-        intentFilter.addAction(Intent.ACTION_USER_STARTING);
+        intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         intentFilter.addAction(Intent.ACTION_USER_STOPPING);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
@@ -1292,7 +1292,7 @@ public class SyncManager {
         }
     }
 
-    private void onUserStarting(int userId) {
+    private void onUserUnlocked(int userId) {
         // Make sure that accounts we're about to use are valid
         AccountManagerService.getSingleton().validateAccounts(userId);
 
@@ -2673,21 +2673,20 @@ public class SyncManager {
                 final Iterator<SyncOperation> operationIterator =
                         mSyncQueue.getOperations().iterator();
 
-                final ActivityManager activityManager
-                        = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                final ActivityManager am = mContext.getSystemService(ActivityManager.class);
                 final Set<Integer> removedUsers = Sets.newHashSet();
                 while (operationIterator.hasNext()) {
                     final SyncOperation op = operationIterator.next();
 
-                    // If the user is not running, skip the request.
-                    if (!activityManager.isUserRunning(op.target.userId)) {
+                    // If the user is not running unlocked, skip the request.
+                    if (!am.isUserRunningAndUnlocked(op.target.userId)) {
                         final UserInfo userInfo = mUserManager.getUserInfo(op.target.userId);
                         if (userInfo == null) {
                             removedUsers.add(op.target.userId);
                         }
                         if (isLoggable) {
                             Log.v(TAG, "    Dropping all sync operations for + "
-                                    + op.target.userId + ": user not running.");
+                                    + op.target.userId + ": user not running unlocked.");
                         }
                         continue;
                     }

@@ -755,6 +755,23 @@ public class UserManager {
     }
 
     /**
+     * Return whether the given user is running in a "locked" state. A user
+     * is unlocked only after they've entered their credentials (such as a lock
+     * pattern or PIN), and credential-encrypted private app data storage is
+     * available.
+     *
+     * @param user to retrieve the unlocked state for.
+     */
+    public boolean isUserRunningAndLocked(UserHandle user) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(
+                    user.getIdentifier(), ActivityManager.FLAG_AND_LOCKED);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Return whether the given user is running in an "unlocked" state. A user
      * is unlocked only after they've entered their credentials (such as a lock
      * pattern or PIN), and credential-encrypted private app data storage is
@@ -762,7 +779,7 @@ public class UserManager {
      *
      * @param user to retrieve the unlocked state for.
      */
-    public boolean isUserRunningUnlocked(UserHandle user) {
+    public boolean isUserRunningAndUnlocked(UserHandle user) {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
