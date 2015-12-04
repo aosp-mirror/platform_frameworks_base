@@ -18574,13 +18574,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param location an array of two integers in which to hold the coordinates
      */
-    public void getLocationOnScreen(@Size(2) int[] location) {
-        getLocationInWindow(location);
+    public void getLocationOnScreen(@Size(2) int[] outLocation) {
+        getLocationInWindow(outLocation);
 
         final AttachInfo info = mAttachInfo;
         if (info != null) {
-            location[0] += info.mWindowLeft;
-            location[1] += info.mWindowTop;
+            outLocation[0] += info.mWindowLeft;
+            outLocation[1] += info.mWindowTop;
         }
     }
 
@@ -18591,11 +18591,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param outWindowSpace an array of two integers in which to hold the coordinates
      */
-    public void getLocationInWindow(@Size(2) int[] outWindowSpace) {
-        outWindowSpace[0] = 0;
-        outWindowSpace[1] = 0;
+    public void getLocationInWindow(@Size(2) int[] outLocation) {
+        if (outLocation == null || outLocation.length < 2) {
+            throw new IllegalArgumentException("outLocation must be an array of two integers");
+        }
 
-        transformFromViewToWindowSpace(outWindowSpace);
+        outLocation[0] = 0;
+        outLocation[1] = 0;
+
+        transformFromViewToWindowSpace(outLocation);
     }
 
     void transformFromViewToWindowSpace(@Size(2) int[] inOutLocation) {
