@@ -351,4 +351,369 @@
     <!-- Full package name of OEM preferred device feedback reporter. Leave this blank, overlaid in Settings/TvSettings [DO NOT TRANSLATE] -->
     <string name="oem_preferred_feedback_reporter" translatable="false" />
 
+    <!-- Development settings -->
+    <skip/>
+    <!-- Development Settings.  the title for the item to take the user to Development settings.  Development settings are settings meant for application developers.  -->
+    <string name="development_settings_title">Developer options</string>
+    <!-- Development settings enable title. -->
+    <string name="development_settings_enable">Enable developer options</string>
+    <!-- Development Settings summary.  The summary of the item to take the user to Development settings.  Development settings are settings meant for application developers. -->
+    <string name="development_settings_summary">Set options for app development</string>
+    <!-- Setting checkbox title for Whether to enable USB debugging support on the phone. -->
+    <!-- Error message for users that aren't allowed to modify developer options [CHAR LIMIT=none] -->
+    <string name="development_settings_not_available">Developer options are not available for this user</string>
+    <!-- Error message for users that aren't allowed to modify VPN settings [CHAR LIMIT=none] -->
+    <string name="vpn_settings_not_available">VPN settings are not available for this user</string>
+    <!-- Error message for users that aren't allowed to modify Tethering settings [CHAR LIMIT=none] -->
+    <string name="tethering_settings_not_available">Tethering settings are not available for this user</string>
+    <!-- Error message for users that aren't allowed to modify Access Point Names settings [CHAR LIMIT=none] -->
+    <string name="apn_settings_not_available">Access Point Name settings are not available for this user</string>
+    <string name="enable_adb">USB debugging</string>
+    <!-- Setting checkbox summary for Whether to enable USB debugging support on the phone -->
+    <string name="enable_adb_summary">Debug mode when USB is connected</string>
+    <!-- Setting title to revoke secure USB debugging authorizations -->
+    <string name="clear_adb_keys">Revoke USB debugging authorizations</string>
+    <!-- [CHAR LIMIT=NONE] Setting checkbox title for Whether to include bug report item in power menu. -->
+    <string name="bugreport_in_power">Bug report shortcut</string>
+    <!-- [CHAR LIMIT=NONE] Setting checkbox summary for Whether to include bug report item in power -->
+    <string name="bugreport_in_power_summary">Show a button in the power menu for taking a bug report</string>
+    <!-- Setting Checkbox title whether to keep the screen on when plugged in to a power source -->
+    <string name="keep_screen_on">Stay awake</string>
+    <!-- setting Checkbox summary whether to keep the screen on when plugged in  -->
+    <string name="keep_screen_on_summary">Screen will never sleep while charging</string>
+    <!-- Setting Checkbox title whether to enable bluetooth HCI snoop log -->
+    <string name="bt_hci_snoop_log">Enable Bluetooth HCI snoop log</string>
+    <!-- setting Checkbox summary whether to capture all bluetooth HCI packets in a file -->
+    <string name="bt_hci_snoop_log_summary">Capture all bluetooth HCI packets in a file</string>
+    <!-- setting Checkbox title whether to enable OEM unlock [CHAR_LIMIT=35] -->
+    <string name="oem_unlock_enable">OEM unlocking</string>
+    <!-- setting Checkbox summary whether to enable OEM unlock [CHAR_LIMIT=50] -->
+    <string name="oem_unlock_enable_summary">Allow the bootloader to be unlocked</string>
+    <!-- Confirmation dialog title to ensure user wishes to enable OEM unlock and disable theft protection features -->
+    <string name="confirm_enable_oem_unlock_title">Allow OEM unlocking?</string>
+    <!-- Warning dialog message to confirm user wishes to enable OEM unlock and disable theft protection features -->
+    <string name="confirm_enable_oem_unlock_text">WARNING: Device protection features will not work on this device while this setting is turned on.</string>
+
+    <!-- UI debug setting: select current app to mock location [CHAR LIMIT=50] -->
+    <string name="mock_location_app">Select mock location app</string>
+    <!-- UI debug setting: no mock location app has been set [CHAR LIMIT=50] -->
+    <string name="mock_location_app_not_set">No mock location app set</string>
+    <!-- UI debug setting: mock location app has been set [CHAR LIMIT=50] -->
+    <string name="mock_location_app_set">Mock location app: <xliff:g id="app_name">%1$s</xliff:g></string>
+
+    <!-- Preference category for networking debugging development settings. [CHAR LIMIT=50] -->
+    <string name="debug_networking_category">Networking</string>
+
+    <!-- Setting Checkbox title whether to show options for wireless display certification -->
+    <string name="wifi_display_certification">Wireless display certification</string>
+    <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
+    <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
+    <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover. [CHAR LIMIT=40] -->
+    <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to Cellular handover</string>
+    <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
+    <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
+    <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
+    <string name="legacy_dhcp_client">Use legacy DHCP client</string>
+    <!-- Setting Checkbox title whether to always keep cellular data active. [CHAR LIMIT=80] -->
+    <string name="mobile_data_always_on">Cellular data always active</string>
+
+    <!-- setting Checkbox summary whether to show options for wireless display certification  -->
+    <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
+    <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
+    <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
+    <!-- Setting Checkbox summary whether to enable Wifi aggressive handover [CHAR LIMIT=130] -->
+    <string name="wifi_aggressive_handover_summary">When enabled, Wi\u2011Fi will be more aggressive in handing over the data connection to Cellular, when Wi\u2011Fi signal is low</string>
+    <!-- Setting Checkbox summary whether to always allow WiFi Roam Scans [CHAR LIMIT=130] -->
+    <string name="wifi_allow_scan_with_traffic_summary">Allow/Disallow Wi\u2011Fi Roam Scans based on the amount of data traffic present at the interface</string>
+    <!-- UI debug setting: limit size of Android logger buffers -->
+    <string name="select_logd_size_title">Logger buffer sizes</string>
+    <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->
+    <string name="select_logd_size_dialog_title">Select Logger sizes per log buffer</string>
+    <!-- UI debug setting: select USB configuration -->
+    <string name="select_usb_configuration_title">Select USB Configuration</string>
+    <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->
+    <string name="select_usb_configuration_dialog_title">Select USB Configuration</string>
+    <!-- Setting Checkbox title whether to allow mock locations -->
+    <string name="allow_mock_location">Allow mock locations</string>
+    <!-- setting Checkbox summary whether to allow mock locations  -->
+    <string name="allow_mock_location_summary">Allow mock locations</string>
+    <!-- Setting Checkbox title whether to enable view attribute inspection -->
+    <string name="debug_view_attributes">Enable view attribute inspection</string>
+    <!-- Setting Checkbox summary whether to use DHCP client from Lollipop (Android 5.0) [CHAR LIMIT=130] -->
+    <string name="legacy_dhcp_client_summary">Use the DHCP client from Lollipop instead of the new Android DHCP client.</string>
+    <string name="mobile_data_always_on_summary">Always keep mobile data active, even when Wi\u2011Fi is active (for fast network switching).</string>
+    <!-- Title of warning dialog about the implications of enabling USB debugging -->
+    <string name="adb_warning_title">Allow USB debugging?</string>
+    <!-- Warning text to user about the implications of enabling USB debugging -->
+    <string name="adb_warning_message">USB debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification, and read log data.</string>
+    <!-- Message of dialog confirming that user wants to revoke access to adb from all computers they have authorized -->
+    <string name="adb_keys_warning_message">Revoke access to USB debugging from all computers you\u2019ve previously authorized?</string>
+    <!-- Title of warning dialog about the implications of enabling developer settings -->
+    <string name="dev_settings_warning_title">Allow development settings?</string>
+    <!-- Warning text to user about the implications of enabling USB debugging -->
+    <string name="dev_settings_warning_message">These settings are intended for development use only.  They can cause your device and the applications on it to break or misbehave.</string>
+    <!-- Title of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=32] -->
+    <string name="verify_apps_over_usb_title">Verify apps over USB</string>
+    <!-- Summary of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=NONE] -->
+    <string name="verify_apps_over_usb_summary">Check apps installed via ADB/ADT for harmful behavior.</string>
+
+    <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
+    <string name="enable_terminal_title">Local terminal</string>
+    <!-- Summary of checkbox setting that enables the terminal app. [CHAR LIMIT=64] -->
+    <string name="enable_terminal_summary">Enable terminal app that offers local shell access</string>
+
+    <!-- HDCP checking title, used for debug purposes only. [CHAR LIMIT=25] -->
+    <string name="hdcp_checking_title">HDCP checking</string>
+    <!-- HDCP checking dialog title, used for debug purposes only. [CHAR LIMIT=25] -->
+    <string name="hdcp_checking_dialog_title">Set HDCP checking behavior</string>
+
+    <!-- Preference category for app debugging development settings. [CHAR LIMIT=50] -->
+    <string name="debug_debugging_category">Debugging</string>
+
+    <!-- UI debug setting: select current app to debug [CHAR LIMIT=50] -->
+    <string name="debug_app">Select debug app</string>
+    <!-- UI debug setting: no debug app has been set [CHAR LIMIT=50] -->
+    <string name="debug_app_not_set">No debug application set</string>
+    <!-- UI debug setting: debug app has been set [CHAR LIMIT=50] -->
+    <string name="debug_app_set">Debugging application: <xliff:g id="app_name">%1$s</xliff:g></string>
+
+    <!-- UI debug setting: title for app picker dialog [CHAR LIMIT=50] -->
+    <string name="select_application">Select application</string>
+    <!-- UI debug setting: label for app picker to select no applicatiojn [CHAR LIMIT=50] -->
+    <string name="no_application">Nothing</string>
+
+    <!-- UI debug setting: wait for debugger to attach to debugging process? [CHAR LIMIT=50] -->
+    <string name="wait_for_debugger">Wait for debugger</string>
+    <!-- UI debug setting: wait for debugger to attach to debugging process summary [CHAR LIMIT=500] -->
+    <string name="wait_for_debugger_summary">Debugged application waits for debugger to
+        attach before executing</string>
+
+    <!-- Preference category for input debugging development settings. [CHAR LIMIT=25] -->
+    <string name="debug_input_category">Input</string>
+
+    <!-- Preference category for drawing debugging development settings. [CHAR LIMIT=25] -->
+    <string name="debug_drawing_category">Drawing</string>
+
+    <!-- Preference category for hardware accelerated drawing debugging development settings. [CHAR LIMIT=50] -->
+    <string name="debug_hw_drawing_category">Hardware accelerated rendering</string>
+
+    <!-- Preference category for media development settings. [CHAR LIMIT=50] -->
+    <string name="media_category">Media</string>
+
+    <!-- Preference category for monitoring debugging development settings. [CHAR LIMIT=25] -->
+    <string name="debug_monitoring_category">Monitoring</string>
+
+    <!-- UI debug setting: always enable strict mode? [CHAR LIMIT=25] -->
+    <string name="strict_mode">Strict mode enabled</string>
+    <!-- UI debug setting: show strict mode summary [CHAR LIMIT=50] -->
+    <string name="strict_mode_summary">Flash screen when apps do long operations
+        on main thread</string>
+
+    <!-- UI debug setting: show pointer location? [CHAR LIMIT=25] -->
+    <string name="pointer_location">Pointer location</string>
+    <!-- UI debug setting: show pointer location summary [CHAR LIMIT=50] -->
+    <string name="pointer_location_summary">Screen overlay showing current touch data</string>
+
+    <!-- UI debug setting: show touches? [CHAR LIMIT=25] -->
+    <string name="show_touches">Show touches</string>
+    <!-- UI debug setting: show touches location summary [CHAR LIMIT=50] -->
+    <string name="show_touches_summary">Show visual feedback for touches</string>
+
+    <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
+    <string name="show_screen_updates">Show surface updates</string>
+    <!-- UI debug setting: show surface updates summary [CHAR LIMIT=50] -->
+    <string name="show_screen_updates_summary">Flash entire window surfaces when they update</string>
+
+    <!-- UI debug setting: show where window updates happen with GPU rendering? [CHAR LIMIT=25] -->
+    <string name="show_hw_screen_updates">Show GPU view updates</string>
+    <!-- UI debug setting: show GPU rendering screen updates summary [CHAR LIMIT=50] -->
+    <string name="show_hw_screen_updates_summary">Flash views inside windows when drawn with the GPU</string>
+
+    <!-- UI debug setting: show when hardware layers get updated [CHAR LIMIT=25] -->
+    <string name="show_hw_layers_updates">Show hardware layers updates</string>
+    <!-- UI debug setting: show hardware layers updates summary [CHAR LIMIT=50] -->
+    <string name="show_hw_layers_updates_summary">Flash hardware layers green when they update</string>
+
+    <!-- UI debug setting: show the amount of overdraw in apps using the GPU [CHAR LIMIT=25] -->
+    <string name="debug_hw_overdraw">Debug GPU overdraw</string>
+
+    <!-- UI debug setting: disable use of overlays? [CHAR LIMIT=25] -->
+    <string name="disable_overlays">Disable HW overlays</string>
+    <!-- UI debug setting: disable use of overlays summary [CHAR LIMIT=50] -->
+    <string name="disable_overlays_summary">Always use GPU for screen compositing</string>
+
+    <!-- UI debug setting: simulate color space anomalies. [CHAR LIMIT=25] -->
+    <string name="simulate_color_space">Simulate color space</string>
+
+    <!-- UI debug setting: enable various types of OpenGL traces [CHAR LIMIT=25] -->
+    <string name="enable_opengl_traces_title">Enable OpenGL traces</string>
+
+    <!-- UI debug setting: disable USB audio routing title [CHAR LIMIT=32] -->
+    <string name="usb_audio_disable_routing">Disable USB audio routing</string>
+    <!-- UI debug setting: disable USB audio routing summary [CHAR LIMIT=50] -->
+    <string name="usb_audio_disable_routing_summary">Disable automatic routing to USB audio peripherals</string>
+
+    <!-- UI debug setting: show layout bounds information [CHAR LIMIT=25] -->
+    <string name="debug_layout">Show layout bounds</string>
+    <!-- UI debug setting: show layout bounds information summary [CHAR LIMIT=50] -->
+    <string name="debug_layout_summary">Show clip bounds, margins, etc.</string>
+
+    <!-- UI debug setting: force right to left layout [CHAR LIMIT=37] -->
+    <string name="force_rtl_layout_all_locales">Force RTL layout direction</string>
+    <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
+    <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
+
+    <!-- UI debug setting: show how CPU is being used? [CHAR LIMIT=25] -->
+    <string name="show_cpu_usage">Show CPU usage</string>
+    <!-- UI debug setting: show cpu usage summary [CHAR LIMIT=50] -->
+    <string name="show_cpu_usage_summary">Screen overlay showing current CPU usage</string>
+
+    <!-- UI debug setting: force hardware acceleration to render apps [CHAR LIMIT=25] -->
+    <string name="force_hw_ui">Force GPU rendering</string>
+    <!-- UI debug setting: force hardware acceleration summary [CHAR LIMIT=50] -->
+    <string name="force_hw_ui_summary">Force use of GPU for 2d drawing</string>
+
+    <!-- UI debug setting: force anti-aliasing to render apps [CHAR LIMIT=25] -->
+    <string name="force_msaa">Force 4x MSAA</string>
+    <!-- UI debug setting: force anti-aliasing summary [CHAR LIMIT=50] -->
+    <string name="force_msaa_summary">Enable 4x MSAA in OpenGL ES 2.0 apps</string>
+
+    <!-- UI debug setting: show when non-rectangular clip operations are used [CHAR LIMIT=100] -->
+    <string name="show_non_rect_clip">Debug non-rectangular clip operations</string>
+
+    <!-- UI debug setting: profile time taken by hardware acceleration to render apps [CHAR LIMIT=25] -->
+    <string name="track_frame_time">Profile GPU rendering</string>
+
+    <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
+    <string name="window_animation_scale_title">Window animation scale</string>
+
+    <!-- UI debug setting: scaling factor for transition animations [CHAR LIMIT=25] -->
+    <string name="transition_animation_scale_title">Transition animation scale</string>
+
+    <!-- UI debug setting: scaling factor for all Animator-based animations [CHAR LIMIT=25] -->
+    <string name="animator_duration_scale_title">Animator duration scale</string>
+
+    <!-- UI debug setting: simulate secondary display devices using overlays [CHAR LIMIT=25] -->
+    <string name="overlay_display_devices_title">Simulate secondary displays</string>
+
+    <!-- Preference category for application debugging development settings. [CHAR LIMIT=25] -->
+    <string name="debug_applications_category">Apps</string>
+
+    <!-- UI debug setting: immediately destroy activities? [CHAR LIMIT=25] -->
+    <string name="immediately_destroy_activities">Don\u2019t keep activities</string>
+    <!-- UI debug setting: immediately destroy activities summary [CHAR LIMIT=50] -->
+    <string name="immediately_destroy_activities_summary">Destroy every activity as soon as
+        the user leaves it</string>
+
+    <!-- UI debug setting: limit number of running background processes [CHAR LIMIT=25] -->
+    <string name="app_process_limit_title">Background process limit</string>
+
+    <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
+    <string name="show_all_anrs">Show all ANRs</string>
+    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
+    <string name="show_all_anrs_summary">Show App Not Responding dialog
+        for background apps</string>
+
+    <!-- UI debug setting: force allow apps on external storage [CHAR LIMIT=50] -->
+    <string name="force_allow_on_external">Force allow apps on external</string>
+    <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
+    <string name="force_allow_on_external_summary">Makes any app elligible to be written to external storage, regardless of manifest values</string>
+
+    <!-- UI debug setting: force all activites to be resizable for multiwindow [CHAR LIMIT=50] -->
+    <string name="force_resizable_activities">Force activities to be resizable</string>
+    <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
+    <string name="force_resizable_activities_summary">Makes all activities resizable for multi-window, regardless of manifest values.</string>
+
+    <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
+    <string name="local_backup_password_title">Desktop backup password</string>
+    <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
+    <string name="local_backup_password_summary_none">Desktop full backups aren\u2019t currently protected</string>
+    <!-- Summary text of the "local backup password" setting when the user has already supplied a password -->
+    <string name="local_backup_password_summary_change">Touch to change or remove the password for desktop full backups</string>
+
+    <!-- Toast message shown when the user successfully sets a new local backup password [CHAR LIMIT=80] -->
+    <string name="local_backup_password_toast_success">New backup password set</string>
+    <!-- Toast message shown when setting a new local backup password fails due to the user not correctly typing the password again for confirmation [CHAR LIMIT=80] -->
+    <string name="local_backup_password_toast_confirmation_mismatch">New password and confirmation don\u2019t match</string>
+    <!-- Toast message shown when setting a new local backup password fails due to the user not supplying the correct existing password. The phrasing here is deliberately quite general. [CHAR LIMIT=80] -->
+    <string name="local_backup_password_toast_validation_failure">Failure setting backup password</string>
+
+    <!-- Name of each color mode for the display. [CHAR LIMIT=40] -->
+    <string-array name="color_mode_names">
+        <item>Vibrant (default)</item>
+        <item>Natural</item>
+        <item>Standard</item>
+    </string-array>
+
+    <!-- Description of each color mode for the display. [CHAR LIMIT=NONE] -->
+    <string-array name="color_mode_descriptions">
+        <item>Enhanced colors</item>
+        <item>Natural colors as seen by the eye</item>
+        <item>Colors optimized for digital content</item>
+    </string-array>
+
+    <!-- Settings item title for inactive apps [CHAR LIMIT=35] -->
+    <string name="inactive_apps_title">Inactive apps</string>
+    <!-- Settings item summary for inactive app [CHAR LIMIT=100] -->
+    <string name="inactive_app_inactive_summary">Inactive. Touch to toggle.</string>
+    <!-- Settings item summary for active app [CHAR LIMIT=100] -->
+    <string name="inactive_app_active_summary">Active. Touch to toggle.</string>
+
+    <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
+    <string name="runningservices_settings_title">Running services</string>
+    <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
+    <string name="runningservices_settings_summary">View and control currently running services</string>
+
+    <!-- Sound & display settings screen, setting option name to change the user interface theme [CHAR LIMIT=30] -->
+    <string name="night_mode_title">Night mode</string>
+    <!-- Sound & display settings screen, setting option summary to change the user interface theme [CHAR LIMIT=100] -->
+    <string name="night_mode_summary">%s</string>
+    <!-- Sound & display settings screen, theme setting value to prefer a light-colored user interface [CHAR LIMIT=30] -->
+    <string name="night_mode_no">Disabled</string>
+    <!-- Sound & display settings screen, theme setting value to prefer a dark-colored user interface [CHAR LIMIT=30] -->
+    <string name="night_mode_yes">Always on</string>
+    <!-- Sound & display settings screen, theme setting value to automatically switch between a light- or dark-colored user interface [CHAR LIMIT=30] -->
+    <string name="night_mode_auto">Automatic</string>
+
+    <!-- Developer settings screen, convert userdata to file encryption option name -->
+    <string name="convert_to_file_encryption">Convert to file encryption</string>
+    <!-- Developer settings screen, convert userdata to file encryption summary when option is available -->
+    <string name="convert_to_file_encryption_enabled">Convert\u2026</string>
+    <!-- Developer settings screen, convert userdata to file encryption summary when option is already done -->
+    <string name="convert_to_file_encryption_done">Already file encrypted</string>
+    <!-- Title used on dialog with final prompt for converting to file encryption -->
+    <string name="title_convert_fbe">Converting to file based encryption</string>
+    <!-- Warning displayed on dialog with final prompt for converting to file encryption -->
+    <string name="convert_to_fbe_warning">
+        Convert data partition to file based encryption.\n
+        !!Warning!! This will erase all your data.\n
+        This feature is alpha, and may not work correctly.\n
+        Press \'Wipe and convert\u2026\' to continue.</string>
+    <!-- Button on dialog that triggers convertion to file encryption -->
+    <string name="button_convert_fbe">Wipe and convert\u2026</string>
+
+    <!-- Name of feature to change color setting for the display [CHAR LIMIT=60] -->
+    <string name="picture_color_mode">Picture color mode</string>
+
+    <!-- Description of feature to change color setting for the display [CHAR LIMIT=NONE] -->
+    <string name="picture_color_mode_desc">Use sRGB</string>
+
+    <!-- Label for disabling color space adjustment [CHAR LIMIT=45] -->
+    <string name="daltonizer_mode_disabled">Disabled</string>
+    <!-- Label for converting display colors to grayscale, which simulates monochromacy (complete color blindness). [CHAR LIMIT=45] -->
+    <string name="daltonizer_mode_monochromacy">Monochromacy</string>
+    <!-- Label for deuteranomaly (red-green color blindness) [CHAR LIMIT=45] -->
+    <string name="daltonizer_mode_deuteranomaly">Deuteranomaly (red-green)</string>
+    <!-- Label for protanomaly (red-green color blindness) [CHAR LIMIT=45] -->
+    <string name="daltonizer_mode_protanomaly">Protanomaly (red-green)</string>
+    <!-- Label for tritanomaly (blue-yellow color blindness) [CHAR LIMIT=45] -->
+    <string name="daltonizer_mode_tritanomaly">Tritanomaly (blue-yellow)</string>
+
+    <!-- Title for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_display_daltonizer_preference_title">Color correction</string>
+    <!-- Subtitle for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_display_daltonizer_preference_subtitle">This feature is experimental and may affect performance.</string>
+    <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
+    <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
+
 </resources>
