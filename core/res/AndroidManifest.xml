@@ -325,6 +325,49 @@
 
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.AVAILABILITY_CHANGED" />
+
+    <!-- Added in N -->
+    <protected-broadcast android:name="android.intent.action.ANR" />
+    <protected-broadcast android:name="android.intent.action.CALL" />
+    <protected-broadcast android:name="android.intent.action.DROPBOX_ENTRY_ADDED" />
+    <protected-broadcast android:name="android.intent.action.INPUT_METHOD_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.internal_sim_state_changed" />
+    <protected-broadcast android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+    <protected-broadcast android:name="android.intent.action.PRECISE_CALL_STATE" />
+    <protected-broadcast android:name="android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.SUBSCRIPTION_PHONE_STATE" />
+    <protected-broadcast android:name="android.intent.action.USER_INFO_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.USER_UNLOCKED" />
+    <protected-broadcast android:name="android.intent.action.WALLPAPER_CHANGED" />
+
+    <protected-broadcast android:name="android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_STATE_CHANGED" />
+    <protected-broadcast android:name="android.content.jobscheduler.JOB_DELAY_EXPIRED" />
+    <protected-broadcast android:name="android.content.syncmanager.SYNC_ALARM" />
+    <protected-broadcast android:name="android.media.INTERNAL_RINGER_MODE_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.STREAM_DEVICES_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.STREAM_MUTE_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.net.sip.SIP_SERVICE_UP" />
+    <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.os.action.CHARGING" />
+    <protected-broadcast android:name="android.os.action.DISCHARGING" />
+    <protected-broadcast android:name="android.search.action.SEARCHABLES_CHANGED" />
+    <protected-broadcast android:name="android.security.STORAGE_CHANGED" />
+    <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_REGISTERED" />
+    <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_UNREGISTERED" />
+    <protected-broadcast android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+
+    <protected-broadcast android:name="com.android.bluetooth.btservice.action.ALARM_WAKEUP" />
+    <protected-broadcast android:name="com.android.ims.IMS_SERVICE_UP" />
+    <protected-broadcast android:name="com.android.server.action.NETWORK_STATS_POLL" />
+    <protected-broadcast android:name="com.android.server.action.NETWORK_STATS_UPDATED" />
+    <protected-broadcast android:name="com.android.server.NetworkTimeUpdateService.action.POLL" />
+    <protected-broadcast android:name="com.android.server.telecom.intent.action.CALLS_ADD_ENTRY" />
+    <protected-broadcast android:name="com.android.settings.location.MODE_CHANGING" />
+
+    <protected-broadcast android:name="ScheduleConditionProvider.EVALUATE" />
+    <protected-broadcast android:name="wifi_scan_available" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->

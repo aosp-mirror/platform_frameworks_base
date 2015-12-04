@@ -4093,8 +4093,15 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean isProtectedBroadcast(String actionName) {
         synchronized (mPackages) {
-            return mProtectedBroadcasts.contains(actionName);
+            if (mProtectedBroadcasts.contains(actionName)) {
+                return true;
+            } else if (actionName != null
+                    && actionName.startsWith("android.net.netmon.lingerExpired")) {
+                // TODO: remove this terrible hack
+                return true;
+            }
         }
+        return false;
     }
 
     @Override
