@@ -984,7 +984,14 @@ class UsbSettingsManager {
     public boolean hasPermission(UsbDevice device) {
         synchronized (mLock) {
             int uid = Binder.getCallingUid();
-            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
+            int androidMediaUid;
+            try {
+                androidMediaUid = mPackageManager.getApplicationInfo("com.android.mtp", 0).uid;
+            } catch (NameNotFoundException e) {
+                androidMediaUid = -1;
+            }
+            if (uid == Process.SYSTEM_UID || UserHandle.getAppId(uid) == androidMediaUid ||
+                    mDisablePermissionDialogs) {
                 return true;
             }
             SparseBooleanArray uidList = mDevicePermissionMap.get(device.getDeviceName());
