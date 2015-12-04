@@ -29962,7 +29962,7 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String CONTENT_VCARD_TYPE = "text/x-vcard";
     field public static final android.net.Uri CONTENT_VCARD_URI;
-    field public static final android.net.Uri CORP_CONTENT_FILTER_URI;
+    field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
     field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
     field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
     field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
@@ -30095,6 +30095,8 @@ package android.provider {
     field public static final java.lang.String DIRECTORY_AUTHORITY = "authority";
     field public static final java.lang.String DISPLAY_NAME = "displayName";
     field public static final android.net.Uri ENTERPRISE_CONTENT_URI;
+    field public static final long ENTERPRISE_DEFAULT = 1000000000L; // 0x3b9aca00L
+    field public static final long ENTERPRISE_LOCAL_INVISIBLE = 1000000001L; // 0x3b9aca01L
     field public static final java.lang.String EXPORT_SUPPORT = "exportSupport";
     field public static final int EXPORT_SUPPORT_ANY_ACCOUNT = 2; // 0x2
     field public static final int EXPORT_SUPPORT_NONE = 0; // 0x0

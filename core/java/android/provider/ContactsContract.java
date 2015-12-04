@@ -433,16 +433,12 @@ public final class ContactsContract {
 
         /**
          * _ID of the work profile default directory, which represents locally stored contacts.
-         *
-         * @hide
          */
         public static final long ENTERPRISE_DEFAULT = Directory.ENTERPRISE_DIRECTORY_ID_BASE
                 + DEFAULT;
 
         /**
          * _ID of the work profile directory that represents locally stored invisible contacts.
-         *
-         * @hide
          */
         public static final long ENTERPRISE_LOCAL_INVISIBLE = Directory.ENTERPRISE_DIRECTORY_ID_BASE
                 + LOCAL_INVISIBLE;
@@ -1647,12 +1643,12 @@ public final class ContactsContract {
                 CONTENT_URI, "filter");
 
         /**
-         * It supports the same semantics as {@link #CONTENT_FILTER_URI} and returns the same
-         * columns. If there is a corp profile linked to the current profile, it will query corp
-         * profile, otherwise it will return null.
+         * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
+         * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in parameters,
+         * otherwise it will throw UnsupportedOperationException.
          */
-        public static final Uri CORP_CONTENT_FILTER_URI = Uri.withAppendedPath(
-                CORP_CONTENT_URI, "filter");
+        public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                CONTENT_URI, "filter_enterprise");
 
         /**
          * The content:// style URI for this table joined with useful data from
