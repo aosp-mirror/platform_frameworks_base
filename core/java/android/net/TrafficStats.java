@@ -28,6 +28,7 @@ import com.android.server.NetworkManagementSocketTagger;
 
 import dalvik.system.SocketTagger;
 
+import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -222,6 +223,27 @@ public class TrafficStats {
      * Remove any statistics parameters from the given {@link Socket}.
      */
     public static void untagSocket(Socket socket) throws SocketException {
+        SocketTagger.get().untag(socket);
+    }
+
+    /**
+     * Tag the given {@link DatagramSocket} with any statistics parameters
+     * active for the current thread. Subsequent calls always replace any
+     * existing parameters. When finished, call
+     * {@link #untagDatagramSocket(DatagramSocket)} to remove statistics
+     * parameters.
+     *
+     * @see #setThreadStatsTag(int)
+     * @see #setThreadStatsUid(int)
+     */
+    public static void tagDatagramSocket(DatagramSocket socket) throws SocketException {
+        SocketTagger.get().tag(socket);
+    }
+
+    /**
+     * Remove any statistics parameters from the given {@link DatagramSocket}.
+     */
+    public static void untagDatagramSocket(DatagramSocket socket) throws SocketException {
         SocketTagger.get().untag(socket);
     }
 
