@@ -16,10 +16,12 @@
 
 package android.accessibilityservice;
 
-import android.os.Bundle;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
+import android.os.Bundle;
 import android.view.MagnificationSpec;
+import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.AccessibilityWindowInfo;
@@ -79,4 +81,6 @@ interface IAccessibilityServiceConnection {
         boolean animate);
 
     void setMagnificationCallbackEnabled(boolean enabled);
+
+    void sendMotionEvents(int sequence, in ParceledListSlice events);
 }

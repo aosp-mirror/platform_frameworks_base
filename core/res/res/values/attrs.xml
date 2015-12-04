@@ -3316,7 +3316,14 @@ i
              </p>
          -->
         <attr name="canControlMagnification" format="boolean" />
-        <!-- Short description of the accessibility serivce purpose or behavior.-->
+        <!-- Attribute whether the accessibility service wants to be able to perform gestures.
+             <p>
+             Required to allow setting the {@link android.accessibilityservice
+             #AccessibilityServiceInfo#FLAG_CAN_PERFORM_GESTURES} flag.
+             </p>
+         -->
+        <attr name="canPerformGestures" format="boolean" />
+        <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
     </declare-styleable>
 

@@ -42,4 +42,6 @@ import android.view.KeyEvent;
     void onKeyEvent(in KeyEvent event, int sequence);
 
     void onMagnificationChanged(in Region region, float scale, float centerX, float centerY);
+
+    void onPerformGestureResult(int sequence, boolean completedSuccessfully);
 }
