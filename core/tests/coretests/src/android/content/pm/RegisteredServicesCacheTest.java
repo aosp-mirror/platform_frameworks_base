@@ -188,7 +188,10 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
 
     private static RegisteredServicesCache.ServiceInfo<TestServiceType> newServiceInfo(
             TestServiceType type, int uid) {
-        return new RegisteredServicesCache.ServiceInfo<>(type, null, uid);
+        final ComponentInfo info = new ComponentInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.applicationInfo.uid = uid;
+        return new RegisteredServicesCache.ServiceInfo<>(type, info, null);
     }
 
     private void assertNotEmptyFileCreated(TestServicesCache cache, int userId) {
