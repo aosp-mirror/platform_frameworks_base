@@ -137,7 +137,7 @@ class FilteredTaskList {
 
     /** Returns the index of this task in the list of filtered tasks */
     int indexOf(Task t) {
-        if (mTaskIndices.containsKey(t.key)) {
+        if (t != null && mTaskIndices.containsKey(t.key)) {
             return mTaskIndices.get(t.key);
         }
         return -1;
