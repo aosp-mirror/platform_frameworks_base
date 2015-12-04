@@ -798,21 +798,33 @@ final class BackStackRecord extends FragmentTransaction implements
         }
     }
 
-    private static void setFirstOut(SparseArray<Fragment> fragments, Fragment fragment) {
+    private static void setFirstOut(SparseArray<Fragment> firstOutFragments,
+                            SparseArray<Fragment> lastInFragments, Fragment fragment) {
         if (fragment != null) {
             int containerId = fragment.mContainerId;
-            if (containerId != 0 && !fragment.isHidden() && fragment.isAdded() &&
-                    fragment.getView() != null && fragments.get(containerId) == null) {
-                fragments.put(containerId, fragment);
+            if (containerId != 0 && !fragment.isHidden()) {
+                if (fragment.isAdded() && fragment.getView() != null
+                        && firstOutFragments.get(containerId) == null) {
+                    firstOutFragments.put(containerId, fragment);
+                }
+                if (lastInFragments.get(containerId) == fragment) {
+                    lastInFragments.remove(containerId);
+                }
             }
         }
     }
 
-    private void setLastIn(SparseArray<Fragment> fragments, Fragment fragment) {
+    private void setLastIn(SparseArray<Fragment> firstOutFragments,
+            SparseArray<Fragment> lastInFragments, Fragment fragment) {
         if (fragment != null) {
             int containerId = fragment.mContainerId;
             if (containerId != 0) {
-                fragments.put(containerId, fragment);
+                if (!fragment.isAdded()) {
+                    lastInFragments.put(containerId, fragment);
+                }
+                if (firstOutFragments.get(containerId) == fragment) {
+                    firstOutFragments.remove(containerId);
+                }
             }
         }
     }
@@ -835,7 +847,7 @@ final class BackStackRecord extends FragmentTransaction implements
         while (op != null) {
             switch (op.cmd) {
                 case OP_ADD:
-                    setLastIn(lastInFragments, op.fragment);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_REPLACE: {
                     Fragment f = op.fragment;
@@ -845,29 +857,30 @@ final class BackStackRecord extends FragmentTransaction implements
                             if (f == null || old.mContainerId == f.mContainerId) {
                                 if (old == f) {
                                     f = null;
+                                    lastInFragments.remove(old.mContainerId);
                                 } else {
-                                    setFirstOut(firstOutFragments, old);
+                                    setFirstOut(firstOutFragments, lastInFragments, old);
                                 }
                             }
                         }
                     }
-                    setLastIn(lastInFragments, f);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 }
                 case OP_REMOVE:
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_HIDE:
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_SHOW:
-                    setLastIn(lastInFragments, op.fragment);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_DETACH:
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_ATTACH:
-                    setLastIn(lastInFragments, op.fragment);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
             }
 
@@ -889,38 +902,38 @@ final class BackStackRecord extends FragmentTransaction implements
         if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
         }
-        Op op = mHead;
+        Op op = mTail;
         while (op != null) {
             switch (op.cmd) {
                 case OP_ADD:
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_REPLACE:
                     if (op.removed != null) {
                         for (int i = op.removed.size() - 1; i >= 0; i--) {
-                            setLastIn(lastInFragments, op.removed.get(i));
+                            setLastIn(firstOutFragments, lastInFragments, op.removed.get(i));
                         }
                     }
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_REMOVE:
-                    setLastIn(lastInFragments, op.fragment);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_HIDE:
-                    setLastIn(lastInFragments, op.fragment);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_SHOW:
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_DETACH:
-                    setLastIn(lastInFragments, op.fragment);
+                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
                     break;
                 case OP_ATTACH:
-                    setFirstOut(firstOutFragments, op.fragment);
+                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
                     break;
             }
 
-            op = op.next;
+            op = op.prev;
         }
     }
 
