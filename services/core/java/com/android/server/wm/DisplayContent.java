@@ -237,8 +237,8 @@ class DisplayContent {
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
-        if (stack.mStackId == PINNED_STACK_ID && !toTop) {
-            // Pinned stack is always-on-top silly...
+        if (StackId.isAlwaysOnTop(stack.mStackId) && !toTop) {
+            // This stack is always-on-top silly...
             Slog.w(TAG, "Ignoring move of always-on-top stack=" + stack + " to bottom");
             return;
         }

@@ -548,6 +548,10 @@ public class ActivityManager {
         public static boolean canReceiveKeys(int stackId) {
             return stackId != PINNED_STACK_ID;
         }
+
+        public static boolean isAlwaysOnTop(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
     }
 
     /**

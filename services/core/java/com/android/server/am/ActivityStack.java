@@ -538,9 +538,8 @@ final class ActivityStack {
 
         if (addIndex > 0) {
             final ActivityStack topStack = mStacks.get(addIndex - 1);
-            if (topStack.mStackId == PINNED_STACK_ID && topStack != this) {
-                // The pinned stack is always the top most stack (always-on-top).
-                // So, stack is moved just below the pinned stack.
+            if (StackId.isAlwaysOnTop(topStack.mStackId) && topStack != this) {
+                // If the top stack is always on top, we move this stack just below it.
                 addIndex--;
             }
         }
