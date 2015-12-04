@@ -83,7 +83,6 @@ import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
@@ -183,6 +182,9 @@ public final class ActivityThread {
     // Details for pausing activity.
     private static final int USER_LEAVING = 1;
     private static final int DONT_REPORT = 2;
+
+    // Whether to invoke an activity callback after delivering new configuration.
+    private static final boolean REPORT_TO_ACTIVITY = true;
 
     private ContextImpl mSystemContext;
 
@@ -943,9 +945,9 @@ public final class ActivityThread {
 
         @Override
         public void scheduleActivityConfigurationChanged(
-                IBinder token, Configuration overrideConfig) {
+                IBinder token, Configuration overrideConfig, boolean reportToActivity) {
             sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED,
-                    new ActivityConfigChangeData(token, overrideConfig));
+                    new ActivityConfigChangeData(token, overrideConfig), reportToActivity ? 1 : 0);
         }
 
         @Override
@@ -1537,7 +1539,8 @@ public final class ActivityThread {
                     break;
                 case ACTIVITY_CONFIGURATION_CHANGED:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
-                    handleActivityConfigurationChanged((ActivityConfigChangeData)msg.obj);
+                    handleActivityConfigurationChanged((ActivityConfigChangeData) msg.obj,
+                            msg.arg1 == 1 ? REPORT_TO_ACTIVITY : !REPORT_TO_ACTIVITY);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case PROFILER_CONTROL:
@@ -3347,7 +3350,7 @@ public final class ActivityThread {
                     }
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Resuming activity "
                             + r.activityInfo.name + " with newConfig " + r.tmpConfig);
-                    performConfigurationChanged(r.activity, r.tmpConfig);
+                    performConfigurationChanged(r.activity, r.tmpConfig, REPORT_TO_ACTIVITY);
                     freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
                     r.newConfig = null;
                 }
@@ -3687,7 +3690,7 @@ public final class ActivityThread {
                     }
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
                             + r.activityInfo.name + " with new config " + r.tmpConfig);
-                    performConfigurationChanged(r.activity, r.tmpConfig);
+                    performConfigurationChanged(r.activity, r.tmpConfig, REPORT_TO_ACTIVITY);
                     freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
                     r.newConfig = null;
                 }
@@ -4340,7 +4343,8 @@ public final class ActivityThread {
         return callbacks;
     }
 
-    private static void performConfigurationChanged(ComponentCallbacks2 cb, Configuration config) {
+    private static void performConfigurationChanged(ComponentCallbacks2 cb, Configuration config,
+            boolean reportToActivity) {
         // Only for Activity objects, check that they actually call up to their
         // superclass implementation.  ComponentCallbacks2 is an interface, so
         // we check the runtime type and act accordingly.
@@ -4371,10 +4375,12 @@ public final class ActivityThread {
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Config callback " + cb
                 + ": shouldChangeConfig=" + shouldChangeConfig);
         if (shouldChangeConfig) {
-            cb.onConfigurationChanged(config);
+            if (reportToActivity) {
+                cb.onConfigurationChanged(config);
+            }
 
             if (activity != null) {
-                if (!activity.mCalled) {
+                if (reportToActivity && !activity.mCalled) {
                     throw new SuperNotCalledException(
                             "Activity " + activity.getLocalClassName() +
                         " did not call through to super.onConfigurationChanged()");
@@ -4449,7 +4455,7 @@ public final class ActivityThread {
         if (callbacks != null) {
             final int N = callbacks.size();
             for (int i=0; i<N; i++) {
-                performConfigurationChanged(callbacks.get(i), config);
+                performConfigurationChanged(callbacks.get(i), config, REPORT_TO_ACTIVITY);
             }
         }
     }
@@ -4465,21 +4471,22 @@ public final class ActivityThread {
         }
     }
 
-    final void handleActivityConfigurationChanged(ActivityConfigChangeData data) {
+    final void handleActivityConfigurationChanged(ActivityConfigChangeData data,
+            boolean reportToActivity) {
         ActivityClientRecord r = mActivities.get(data.activityToken);
         if (r == null || r.activity == null) {
             return;
         }
 
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
-                + r.activityInfo.name);
+                + r.activityInfo.name + ", with callback=" + reportToActivity);
 
         r.tmpConfig.setTo(mCompatConfiguration);
         if (data.overrideConfig != null) {
             r.overrideConfig = data.overrideConfig;
             r.tmpConfig.updateFrom(data.overrideConfig);
         }
-        performConfigurationChanged(r.activity, r.tmpConfig);
+        performConfigurationChanged(r.activity, r.tmpConfig, reportToActivity);
 
         freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(mCompatConfiguration));
 
