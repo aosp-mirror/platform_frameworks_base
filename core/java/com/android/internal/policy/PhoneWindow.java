@@ -2406,6 +2406,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setNeedsMenuKey(WindowManager.LayoutParams.NEEDS_MENU_SET_FALSE);
         }
 
+        if (!mForcedStatusBarColor) {
+            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
+        }
+        if (!mForcedNavigationBarColor) {
+            mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
+        }
+
         // Non-floating windows on high end devices must put up decor beneath the system bars and
         // therefore must know about visibility changes of those.
         if (!mIsFloating && ActivityManager.isHighEndGfx()) {
@@ -2415,12 +2422,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 setFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS & ~getForcedWindowFlags());
             }
-        }
-        if (!mForcedStatusBarColor) {
-            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, 0xFF000000);
-        }
-        if (!mForcedNavigationBarColor) {
-            mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
         }
         if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
             decor.setSystemUiVisibility(

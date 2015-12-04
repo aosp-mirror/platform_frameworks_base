@@ -47,6 +47,7 @@ public class BarController {
     private final int mTransientFlag;
     private final int mUnhideFlag;
     private final int mTranslucentFlag;
+    private final int mTransparentFlag;
     private final int mStatusBarManagerId;
     private final int mTranslucentWmFlag;
     protected final Handler mHandler;
@@ -63,13 +64,14 @@ public class BarController {
     private boolean mNoAnimationOnNextShow;
 
     public BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
-            int statusBarManagerId, int translucentWmFlag) {
+            int statusBarManagerId, int translucentWmFlag, int transparentFlag) {
         mTag = "BarController." + tag;
         mTransientFlag = transientFlag;
         mUnhideFlag = unhideFlag;
         mTranslucentFlag = translucentFlag;
         mStatusBarManagerId = statusBarManagerId;
         mTranslucentWmFlag = translucentWmFlag;
+        mTransparentFlag = transparentFlag;
         mHandler = new Handler();
     }
 
@@ -126,13 +128,13 @@ public class BarController {
                     vis &= ~mTranslucentFlag;
                 }
                 if ((fl & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-                    vis |= View.SYSTEM_UI_TRANSPARENT;
+                    vis |= mTransparentFlag;
                 } else {
-                    vis &= ~View.SYSTEM_UI_TRANSPARENT;
+                    vis &= ~mTransparentFlag;
                 }
             } else {
                 vis = (vis & ~mTranslucentFlag) | (oldVis & mTranslucentFlag);
-                vis = (vis & ~View.SYSTEM_UI_TRANSPARENT) | (oldVis & View.SYSTEM_UI_TRANSPARENT);
+                vis = (vis & ~mTransparentFlag) | (oldVis & mTransparentFlag);
             }
         }
         return vis;
@@ -247,7 +249,7 @@ public class BarController {
             }
         }
         if (mShowTransparent) {
-            vis |= View.SYSTEM_UI_TRANSPARENT;
+            vis |= mTransparentFlag;
             if (mSetUnHideFlagWhenNextTransparent) {
                 vis |= mUnhideFlag;
                 mSetUnHideFlagWhenNextTransparent = false;
@@ -258,7 +260,7 @@ public class BarController {
             vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;  // never show transient bars in low profile
         }
         if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0 ||
-                ((vis | oldVis) & View.SYSTEM_UI_TRANSPARENT) != 0) {
+                ((vis | oldVis) & mTransparentFlag) != 0) {
             mLastTranslucent = SystemClock.uptimeMillis();
         }
         return vis;

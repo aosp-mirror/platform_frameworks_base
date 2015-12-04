@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -27,6 +29,8 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -55,6 +59,8 @@ import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.stackdivider.WindowManagerProxy;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,8 +100,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     Rect mSystemInsets = new Rect();
 
+    final FlingAnimationUtils mFlingAnimationUtils;
+
     public RecentsView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public RecentsView(Context context, AttributeSet attrs) {
@@ -118,6 +126,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 com.android.internal.R.interpolator.fast_out_linear_in);
         mHistoryTransitionDuration = res.getInteger(R.integer.recents_history_transition_duration);
         mTouchHandler = new RecentsViewTouchHandler(this);
+        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         mHistoryButton = inflater.inflate(R.layout.recents_history_button, this, false);
@@ -511,7 +520,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     public final void onBusEvent(DraggingInRecentsEndedEvent event) {
-        animate().translationY(0f);
+        ViewPropertyAnimator animator = animate();
+        if (event.velocity > ViewConfiguration.get(getContext()).getScaledMinimumFlingVelocity()) {
+            animator.translationY(getHeight());
+            animator.withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    WindowManagerProxy.getInstance().maximizeDockedStack();
+                }
+            });
+            mFlingAnimationUtils.apply(animator, getTranslationY(), getHeight(), event.velocity);
+        } else {
+            animator.translationY(0f);
+            animator.setListener(null);
+            mFlingAnimationUtils.apply(animator, getTranslationY(), 0, event.velocity);
+        }
+        animator.start();
     }
 
     public final void onBusEvent(ShowHistoryEvent event) {

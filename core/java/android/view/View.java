@@ -3057,14 +3057,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      *
-     * Makes system ui transparent.
+     * Makes navigation bar transparent (but not the status bar).
      */
-    public static final int SYSTEM_UI_TRANSPARENT = 0x00008000;
+    public static final int NAVIGATION_BAR_TRANSPARENT = 0x00008000;
+
+    /**
+     * @hide
+     *
+     * Makes status bar transparent (but not the navigation bar).
+     */
+    public static final int STATUS_BAR_TRANSPARENT = 0x0000008;
+
+    /**
+     * @hide
+     *
+     * Makes both status bar and navigation bar transparent.
+     */
+    public static final int SYSTEM_UI_TRANSPARENT = NAVIGATION_BAR_TRANSPARENT
+            | STATUS_BAR_TRANSPARENT;
 
     /**
      * @hide
      */
-    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00003FFF;
+    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x00003FF7;
 
     /**
      * These are the system UI flags that can be cleared by events outside
