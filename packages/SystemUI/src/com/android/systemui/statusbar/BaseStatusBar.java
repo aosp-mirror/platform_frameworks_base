@@ -1544,7 +1544,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         entry.row = row;
-        updateNotificationHeightRange(entry);
         entry.row.setOnActivatedListener(this);
         entry.row.setExpandable(bigContentViewLocal != null);
 
@@ -1557,17 +1556,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setUserExpanded(userExpanded);
         }
         row.setUserLocked(userLocked);
-        row.updateStatusBarNotification(entry.notification);
+        row.onNotificationUpdated(entry);
         applyRemoteInput(entry);
         return true;
-    }
-
-    private void updateNotificationHeightRange(Entry entry) {
-        boolean customView = entry.getContentView().getId()
-                != com.android.internal.R.id.status_bar_latest_event_content;
-        boolean beforeN = entry.targetSdk < Build.VERSION_CODES.N;
-        int minHeight = customView && beforeN ? mRowMinHeightLegacy : mRowMinHeight;
-        entry.row.setHeightRange(minHeight, mRowMaxHeight);
     }
 
     /**
@@ -2191,7 +2182,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         mNotificationClicker.register(entry.row, sbn);
 
-        entry.row.updateStatusBarNotification(entry.notification);
+        entry.row.onNotificationUpdated(entry);
         entry.row.resetHeight();
 
         applyRemoteInput(entry);
