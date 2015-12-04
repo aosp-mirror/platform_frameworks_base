@@ -17,8 +17,8 @@
 <resources>
     <string name="app_label">Shell</string>
 
-    <!-- Title of notification indicating a bugreport process is in progress. [CHAR LIMIT=50] -->
-    <string name="bugreport_in_progress_title">Bug report in progress</string>
+    <!-- Title of notification indicating a bugreport is being generated. [CHAR LIMIT=50] -->
+    <string name="bugreport_in_progress_title">Bug report is being generated</string>
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
     <string name="bugreport_finished_title">Bug report captured</string>
 
