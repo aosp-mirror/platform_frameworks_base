@@ -906,7 +906,7 @@ public class ServiceState implements Parcelable {
 
     /**
      * In CDMA, mOperatorAlphaLong can be set from the ERI text.
-     * This is done from the CDMAPhone and not from the CdmaServiceStateTracker.
+     * This is done from the GsmCdmaPhone and not from the ServiceStateTracker.
      *
      * @hide
      */
