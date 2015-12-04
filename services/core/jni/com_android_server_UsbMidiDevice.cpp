@@ -43,12 +43,26 @@ android_server_UsbMidiDevice_get_subdevice_count(JNIEnv *env, jobject /* thiz */
         jint card, jint device)
 {
     char    path[100];
+    int     fd;
+    const   int kMaxRetries = 10;
+    const   int kSleepMicroseconds = 2000;
 
     snprintf(path, sizeof(path), "/dev/snd/controlC%d", card);
-    int fd = open(path, O_RDWR);
-    if (fd < 0) {
-        ALOGE("could not open %s", path);
-        return 0;
+    // This control device may not have been created yet. So we should
+    // try to open it several times to prevent intermittent failure
+    // from a race condition.
+    int retryCounter = 0;
+    while ((fd = open(path, O_RDWR)) < 0) {
+        if (++retryCounter > kMaxRetries) {
+            ALOGE("timed out after %d tries, could not open %s", retryCounter, path);
+            return 0;
+        } else {
+            ALOGW("attempt #%d, could not open %s", retryCounter, path);
+            // Increase the sleep interval each time.
+            // 10 retries will total 2 * sum(1..10) = 110 milliseconds.
+            // Typically the device should be ready in 5-10 milliseconds.
+            usleep(kSleepMicroseconds * retryCounter);
+        }
     }
 
     struct snd_rawmidi_info info;
