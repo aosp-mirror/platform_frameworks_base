@@ -183,6 +183,28 @@ public class JobStoreTest extends AndroidTestCase {
     }
 
     /**
+     * Test that non persisted job is not written to disk.
+     */
+    public void testNonPersistedTaskIsNotPersisted() throws Exception {
+        JobInfo.Builder b = new Builder(42, mComponent)
+                .setOverrideDeadline(10000)
+                .setPersisted(false);
+        JobStatus jsNonPersisted = new JobStatus(b.build(), SOME_UID);
+        mTaskStoreUnderTest.add(jsNonPersisted);
+        b = new Builder(43, mComponent)
+                .setOverrideDeadline(10000)
+                .setPersisted(true);
+        JobStatus jsPersisted = new JobStatus(b.build(), SOME_UID);
+        mTaskStoreUnderTest.add(jsPersisted);
+        Thread.sleep(IO_WAIT);
+        final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        assertEquals("Job count is incorrect.", 1, jobStatusSet.size());
+        JobStatus jobStatus = jobStatusSet.iterator().next();
+        assertEquals("Wrong job persisted.", 43, jobStatus.getJobId());
+    }
+
+    /**
      * Helper function to throw an error if the provided task and TaskStatus objects are not equal.
      */
     private void assertTasksEqual(JobInfo first, JobInfo second) {
