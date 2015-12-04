@@ -100,7 +100,7 @@ public class NotificationHeaderView extends LinearLayout {
             int overFlow = totalWidth - givenWidth;
             // We are overflowing, lets shrink
             final int appWidth = mAppName.getMeasuredWidth();
-            if (appWidth > mHeaderMinWidth) {
+            if (mAppName.getVisibility() != GONE && appWidth > mHeaderMinWidth) {
                 int newSize = appWidth - Math.min(appWidth - mHeaderMinWidth, overFlow);
                 int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
                 mAppName.measure(childWidthSpec, wrapContentHeightSpec);
