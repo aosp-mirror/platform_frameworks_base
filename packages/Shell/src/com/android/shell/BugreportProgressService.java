@@ -180,13 +180,13 @@ public class BugreportProgressService extends Service {
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
             super(looper);
-            pollProgress();
+            poll();
         }
 
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_POLL) {
-                pollProgress();
+                poll();
                 return;
             }
 
@@ -243,180 +243,190 @@ public class BugreportProgressService extends Service {
 
         }
 
-        /**
-         * Creates the {@link BugreportInfo} for a process and issue a system notification to
-         * indicate its progress.
-         *
-         * @return whether it succeeded or not.
-         */
-        private boolean startProgress(String name, int pid, int max) {
-            if (name == null) {
-                Log.w(TAG, "Missing " + EXTRA_NAME + " on start intent");
-                name = "N/A";
-            }
-            if (pid == -1) {
-                Log.e(TAG, "Missing " + EXTRA_PID + " on start intent");
-                return false;
-            }
-            if (max <= 0) {
-                Log.e(TAG, "Invalid value for extra " + EXTRA_MAX + ": " + max);
-                return false;
-            }
-
-            final BugreportInfo info = new BugreportInfo(getApplicationContext(), pid, name, max);
-            synchronized (mProcesses) {
-                if (mProcesses.indexOfKey(pid) >= 0) {
-                    Log.w(TAG, "PID " + pid + " already watched");
-                } else {
-                    mProcesses.put(info.pid, info);
-                }
-            }
-            updateProgress(info);
-            return true;
-        }
-
-        /**
-         * Updates the system notification for a given bug report.
-         */
-        private void updateProgress(BugreportInfo info) {
-            if (info.max <= 0 || info.progress < 0 || info.name == null) {
-                Log.e(TAG, "Invalid progress values for " + info);
-                return;
-            }
-
-            final Context context = getApplicationContext();
-            final NumberFormat nf = NumberFormat.getPercentInstance();
-            nf.setMinimumFractionDigits(2);
-            nf.setMaximumFractionDigits(2);
-            final String percentText = nf.format((double) info.progress / info.max);
-
-            final Intent cancelIntent = new Intent(context, BugreportReceiver.class);
-            cancelIntent.setAction(INTENT_BUGREPORT_CANCEL);
-            cancelIntent.putExtra(EXTRA_PID, info.pid);
-            final Action cancelAction = new Action.Builder(null,
-                    context.getString(com.android.internal.R.string.cancel),
-                    PendingIntent.getBroadcast(context, info.pid, cancelIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT)).build();
-
-            final String title = context.getString(R.string.bugreport_in_progress_title);
-            final Notification notification = new Notification.Builder(context)
-                    .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                    .setContentTitle(title)
-                    .setTicker(title)
-                    .setContentText(info.name)
-                    .setContentInfo(percentText)
-                    .setProgress(info.max, info.progress, false)
-                    .setOngoing(true)
-                    .setLocalOnly(true)
-                    .setColor(context.getColor(
-                            com.android.internal.R.color.system_notification_accent_color))
-                    .addAction(cancelAction)
-                    .build();
-
-            NotificationManager.from(context).notify(TAG, info.pid, notification);
-        }
-
-        /**
-         * Finalizes the progress on a given process and sends the finished intent.
-         */
-        private void stopProgress(int pid, Intent intent) {
-            synchronized (mProcesses) {
-                if (mProcesses.indexOfKey(pid) < 0) {
-                    Log.w(TAG, "PID not watched: " + pid);
-                } else {
-                    mProcesses.remove(pid);
-                }
-                stopSelfWhenDone();
-            }
-            if (DEBUG) Log.v(TAG, "stopProgress(" + pid + "): cancel notification");
-            NotificationManager.from(getApplicationContext()).cancel(TAG, pid);
-            if (intent != null) {
-                // Bug report finished fine: send a new, different notification.
-                if (DEBUG) Log.v(TAG, "stopProgress(" + pid + "): finish bug report");
-                onBugreportFinished(pid, intent);
-            }
-        }
-
-        /**
-         * Cancels a bugreport upon user's request.
-         */
-        private void cancel(int pid) {
-            Log.i(TAG, "Cancelling PID " + pid + " on user's request");
-            SystemProperties.set(CTL_STOP, BUGREPORT_SERVICE);
-            stopProgress(pid, null);
-        }
-
-        /**
-         * Poll {@link SystemProperties} to get the progress on each monitored process.
-         */
-        private void pollProgress() {
-            synchronized (mProcesses) {
-                if (mProcesses.size() == 0) {
-                    Log.d(TAG, "No process to poll progress.");
-                }
-                for (int i = 0; i < mProcesses.size(); i++) {
-                    final int pid = mProcesses.keyAt(i);
-                    final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
-                    final int progress = SystemProperties.getInt(progressKey, 0);
-                    if (progress == 0) {
-                        Log.v(TAG, "System property " + progressKey + " is not set yet");
-                        continue;
-                    }
-                    final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
-                    final BugreportInfo info = mProcesses.valueAt(i);
-                    final boolean maxChanged = max > 0 && max != info.max;
-                    final boolean progressChanged = progress > 0 && progress != info.progress;
-
-                    if (progressChanged || maxChanged) {
-                        if (progressChanged) {
-                            if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
-                                    + info.progress + " to " + progress);
-                            info.progress = progress;
-                        }
-                        if (maxChanged) {
-                            Log.i(TAG, "Updating max progress for PID " + pid + " from " + info.max
-                                    + " to " + max);
-                            info.max = max;
-                        }
-                        info.lastUpdate = System.currentTimeMillis();
-                        updateProgress(info);
-                    } else {
-                        long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
-                        if (inactiveTime >= INACTIVITY_TIMEOUT) {
-                            Log.w(TAG, "No progress update for process " + pid + " since "
-                                    + info.getFormattedLastUpdate());
-                            stopProgress(info.pid, null);
-                        }
-                    }
-                }
+        private void poll() {
+            if (pollProgress()) {
                 // Keep polling...
                 sendEmptyMessageDelayed(MSG_POLL, POLLING_FREQUENCY);
             }
         }
+    }
 
-        /**
-         * Finishes the service when it's not monitoring any more processes.
-         */
-        private void stopSelfWhenDone() {
-            synchronized (mProcesses) {
-                if (mProcesses.size() > 0) {
-                    if (DEBUG) Log.v(TAG, "Staying alive, waiting for pids " + mProcesses);
-                    return;
-                }
-                Log.v(TAG, "No more pids to handle, shutting down");
-                stopSelf();
-            }
+    /**
+     * Creates the {@link BugreportInfo} for a process and issue a system notification to
+     * indicate its progress.
+     *
+     * @return whether it succeeded or not.
+     */
+    private boolean startProgress(String name, int pid, int max) {
+        if (name == null) {
+            Log.w(TAG, "Missing " + EXTRA_NAME + " on start intent");
+        }
+        if (pid == -1) {
+            Log.e(TAG, "Missing " + EXTRA_PID + " on start intent");
+            return false;
+        }
+        if (max <= 0) {
+            Log.e(TAG, "Invalid value for extra " + EXTRA_MAX + ": " + max);
+            return false;
         }
 
-        private void onBugreportFinished(int pid, Intent intent) {
-            final Context context = getApplicationContext();
-            final Configuration conf = context.getResources().getConfiguration();
-            final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
-            final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
-
-            if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
-                triggerLocalNotification(context, pid, bugreportFile, screenshotFile);
+        final BugreportInfo info = new BugreportInfo(getApplicationContext(), pid, name, max);
+        synchronized (mProcesses) {
+            if (mProcesses.indexOfKey(pid) >= 0) {
+                Log.w(TAG, "PID " + pid + " already watched");
+            } else {
+                mProcesses.put(info.pid, info);
             }
+        }
+        updateProgress(info);
+        return true;
+    }
+
+    /**
+     * Updates the system notification for a given bug report.
+     */
+    private void updateProgress(BugreportInfo info) {
+        if (info.max <= 0 || info.progress < 0) {
+            Log.e(TAG, "Invalid progress values for " + info);
+            return;
+        }
+
+        final Context context = getApplicationContext();
+        final NumberFormat nf = NumberFormat.getPercentInstance();
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+        final String percentText = nf.format((double) info.progress / info.max);
+
+        final Intent cancelIntent = new Intent(context, BugreportReceiver.class);
+        cancelIntent.setAction(INTENT_BUGREPORT_CANCEL);
+        cancelIntent.putExtra(EXTRA_PID, info.pid);
+        final Action cancelAction = new Action.Builder(null,
+                context.getString(com.android.internal.R.string.cancel),
+                PendingIntent.getBroadcast(context, info.pid, cancelIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT)).build();
+
+        final String title = context.getString(R.string.bugreport_in_progress_title);
+        final String name =
+                info.name != null ? info.name : context.getString(R.string.bugreport_unnamed);
+
+        final Notification notification = new Notification.Builder(context)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setContentTitle(title)
+                .setTicker(title)
+                .setContentText(name)
+                .setContentInfo(percentText)
+                .setProgress(info.max, info.progress, false)
+                .setOngoing(true)
+                .setLocalOnly(true)
+                .setColor(context.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .addAction(cancelAction)
+                .build();
+
+        NotificationManager.from(context).notify(TAG, info.pid, notification);
+    }
+
+    /**
+     * Finalizes the progress on a given process and sends the finished intent.
+     */
+    private void stopProgress(int pid, Intent intent) {
+        synchronized (mProcesses) {
+            if (mProcesses.indexOfKey(pid) < 0) {
+                Log.w(TAG, "PID not watched: " + pid);
+            } else {
+                mProcesses.remove(pid);
+            }
+            stopSelfWhenDone();
+        }
+        if (DEBUG) Log.v(TAG, "stopProgress(" + pid + "): cancel notification");
+        NotificationManager.from(getApplicationContext()).cancel(TAG, pid);
+        if (intent != null) {
+            // Bug report finished fine: send a new, different notification.
+            if (DEBUG) Log.v(TAG, "stopProgress(" + pid + "): finish bug report");
+            onBugreportFinished(pid, intent);
+        }
+    }
+
+    /**
+     * Cancels a bugreport upon user's request.
+     */
+    private void cancel(int pid) {
+        Log.i(TAG, "Cancelling PID " + pid + " on user's request");
+        SystemProperties.set(CTL_STOP, BUGREPORT_SERVICE);
+        stopProgress(pid, null);
+    }
+
+    /**
+     * Poll {@link SystemProperties} to get the progress on each monitored process.
+     *
+     * @return whether it should keep polling.
+     */
+    private boolean pollProgress() {
+        synchronized (mProcesses) {
+            if (mProcesses.size() == 0) {
+                Log.d(TAG, "No process to poll progress.");
+            }
+            for (int i = 0; i < mProcesses.size(); i++) {
+                final int pid = mProcesses.keyAt(i);
+                final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
+                final int progress = SystemProperties.getInt(progressKey, 0);
+                if (progress == 0) {
+                    Log.v(TAG, "System property " + progressKey + " is not set yet");
+                    continue;
+                }
+                final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
+                final BugreportInfo info = mProcesses.valueAt(i);
+                final boolean maxChanged = max > 0 && max != info.max;
+                final boolean progressChanged = progress > 0 && progress != info.progress;
+
+                if (progressChanged || maxChanged) {
+                    if (progressChanged) {
+                        if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
+                                + info.progress + " to " + progress);
+                        info.progress = progress;
+                    }
+                    if (maxChanged) {
+                        Log.i(TAG, "Updating max progress for PID " + pid + " from " + info.max
+                                + " to " + max);
+                        info.max = max;
+                    }
+                    info.lastUpdate = System.currentTimeMillis();
+                    updateProgress(info);
+                } else {
+                    long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
+                    if (inactiveTime >= INACTIVITY_TIMEOUT) {
+                        Log.w(TAG, "No progress update for process " + pid + " since "
+                                + info.getFormattedLastUpdate());
+                        stopProgress(info.pid, null);
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Finishes the service when it's not monitoring any more processes.
+     */
+    private void stopSelfWhenDone() {
+        synchronized (mProcesses) {
+            if (mProcesses.size() > 0) {
+                if (DEBUG) Log.v(TAG, "Staying alive, waiting for pids " + mProcesses);
+                return;
+            }
+            Log.v(TAG, "No more pids to handle, shutting down");
+            stopSelf();
+        }
+    }
+
+    private void onBugreportFinished(int pid, Intent intent) {
+        final Context context = getApplicationContext();
+        final Configuration conf = context.getResources().getConfiguration();
+        final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
+        final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
+
+        if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
+            triggerLocalNotification(context, pid, bugreportFile, screenshotFile);
         }
     }
 
