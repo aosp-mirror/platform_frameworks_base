@@ -162,9 +162,6 @@
     <!-- The minimum height of the content if there is a picture present with big picture -->
     <dimen name="notification_big_picture_content_min_height_with_picture">41dp</dimen>
 
-    <!-- Minimum width of the search view text entry area. -->
-    <dimen name="search_view_text_min_width">160dip</dimen>
-
     <!-- Preferred width of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
 

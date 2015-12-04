@@ -78,7 +78,11 @@ public class ActionBarPolicy {
 
         // The embedded tabs policy changed in Jellybean; give older apps the old policy
         // so they get what they expect.
-        return mContext.getResources().getBoolean(R.bool.action_bar_embed_tabs_pre_jb);
+        final Configuration configuration = mContext.getResources().getConfiguration();
+        final int width = configuration.screenWidthDp;
+        final int height = configuration.screenHeightDp;
+        return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE ||
+                width >= 480 || (width >= 640 && height >= 480);
     }
 
     public int getTabContainerHeight() {

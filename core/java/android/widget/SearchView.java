@@ -45,7 +45,9 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.CollapsibleActionView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -1722,6 +1724,14 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             mThreshold = getThreshold();
         }
 
+        @Override
+        protected void onFinishInflate() {
+            super.onFinishInflate();
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            setMinWidth((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    getSearchViewTextMinWidthDp(), metrics));
+        }
+
         void setSearchView(SearchView searchView) {
             mSearchView = searchView;
         }
@@ -1818,5 +1828,21 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             return super.onKeyPreIme(keyCode, event);
         }
 
+        /**
+         * Get minimum width of the search view text entry area.
+         */
+        private int getSearchViewTextMinWidthDp() {
+            final Configuration configuration = getResources().getConfiguration();
+            final int width = configuration.screenWidthDp;
+            final int height = configuration.screenHeightDp;
+            final int orientation = configuration.orientation;
+            if (width >= 960 && height >= 720
+                    && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                return 256;
+            } else if (width >= 600 || (width >= 640 && height >= 480)) {
+                return 192;
+            };
+            return 160;
+        }
     }
 }

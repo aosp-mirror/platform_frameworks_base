@@ -72,8 +72,7 @@ public class ActionMenuItemView extends TextView
     public ActionMenuItemView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         final Resources res = context.getResources();
-        mAllowTextWithIcon = res.getBoolean(
-                com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
+        mAllowTextWithIcon = shouldAllowTextWithIcon();
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ActionMenuItemView, defStyleAttr, defStyleRes);
         mMinWidth = a.getDimensionPixelSize(
@@ -93,9 +92,20 @@ public class ActionMenuItemView extends TextView
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        mAllowTextWithIcon = getContext().getResources().getBoolean(
-                com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
+        mAllowTextWithIcon = shouldAllowTextWithIcon();
         updateTextButtonVisibility();
+    }
+
+    /**
+     * Whether action menu items should obey the "withText" showAsAction flag. This may be set to
+     * false for situations where space is extremely limited. -->
+     */
+    private boolean shouldAllowTextWithIcon() {
+        final Configuration configuration = getContext().getResources().getConfiguration();
+        final int width = configuration.screenWidthDp;
+        final int height = configuration.screenHeightDp;
+        return  width >= 480 || (width >= 640 && height >= 480)
+                || configuration.orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     @Override
