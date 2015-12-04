@@ -30091,10 +30091,10 @@ package android.provider {
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_directory";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/contact_directories";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final android.net.Uri CORP_CONTENT_URI;
     field public static final long DEFAULT = 0L; // 0x0L
     field public static final java.lang.String DIRECTORY_AUTHORITY = "authority";
     field public static final java.lang.String DISPLAY_NAME = "displayName";
+    field public static final android.net.Uri ENTERPRISE_CONTENT_URI;
     field public static final java.lang.String EXPORT_SUPPORT = "exportSupport";
     field public static final int EXPORT_SUPPORT_ANY_ACCOUNT = 2; // 0x2
     field public static final int EXPORT_SUPPORT_NONE = 0; // 0x0
