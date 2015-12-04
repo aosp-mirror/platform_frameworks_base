@@ -52,6 +52,8 @@ interface INotificationManager
     int getTopicVisibilityOverride(String pkg, int uid, in Notification.Topic topic);
     void setTopicPriority(String pkg, int uid, in Notification.Topic topic, int priority);
     int getTopicPriority(String pkg, int uid, in Notification.Topic topic);
+    void setTopicImportance(String pkg, int uid, in Notification.Topic topic, int importance);
+    int getTopicImportance(String pkg, int uid, in Notification.Topic topic);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.

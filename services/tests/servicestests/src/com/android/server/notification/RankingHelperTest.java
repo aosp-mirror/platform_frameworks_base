@@ -15,10 +15,17 @@
  */
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_LOW;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import android.app.Notification;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.AndroidTestCase;
@@ -28,6 +35,7 @@ import java.util.ArrayList;
 
 public class RankingHelperTest extends AndroidTestCase {
     @Mock NotificationUsageStats mUsageStats;
+    @Mock Handler handler;
 
     private Notification mNotiGroupGSortA;
     private Notification mNotiGroupGSortB;
@@ -46,13 +54,15 @@ public class RankingHelperTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
         UserHandle user = UserHandle.ALL;
 
-        mHelper = new RankingHelper(getContext(), null, mUsageStats, new String[0]);
+        mHelper = new RankingHelper(getContext(), handler, mUsageStats,
+                new String[] {TopicImportanceExtractor.class.getName()});
 
         mNotiGroupGSortA = new Notification.Builder(getContext())
                 .setContentTitle("A")
                 .setGroup("G")
                 .setSortKey("A")
                 .setWhen(1205)
+                .setTopic(new Notification.Topic("A", "a"))
                 .build();
         mRecordGroupGSortA = new NotificationRecord(new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortA, user), 0);
@@ -62,6 +72,7 @@ public class RankingHelperTest extends AndroidTestCase {
                 .setGroup("G")
                 .setSortKey("B")
                 .setWhen(1200)
+                .setTopic(new Notification.Topic("A", "a"))
                 .build();
         mRecordGroupGSortB = new NotificationRecord(new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortB, user), 0);
@@ -69,6 +80,7 @@ public class RankingHelperTest extends AndroidTestCase {
         mNotiNoGroup = new Notification.Builder(getContext())
                 .setContentTitle("C")
                 .setWhen(1201)
+                .setTopic(new Notification.Topic("C", "c"))
                 .build();
         mRecordNoGroup = new NotificationRecord(new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, 0, mNotiNoGroup, user), 0);
@@ -76,6 +88,7 @@ public class RankingHelperTest extends AndroidTestCase {
         mNotiNoGroup2 = new Notification.Builder(getContext())
                 .setContentTitle("D")
                 .setWhen(1202)
+                .setTopic(new Notification.Topic("D", "d"))
                 .build();
         mRecordNoGroup2 = new NotificationRecord(new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, 0, mNotiNoGroup2, user), 0);
@@ -84,6 +97,7 @@ public class RankingHelperTest extends AndroidTestCase {
                 .setContentTitle("E")
                 .setWhen(1201)
                 .setSortKey("A")
+                .setTopic(new Notification.Topic("E", "e"))
                 .build();
         mRecordNoGroupSortA = new NotificationRecord(new StatusBarNotification(
                 "package", "package", 1, null, 0, 0, 0, mNotiNoGroupSortA, user), 0);
@@ -137,5 +151,31 @@ public class RankingHelperTest extends AndroidTestCase {
     public void testSortShouldNotThrowOnEmptyList() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>();
         mHelper.sort(notificationList);
+    }
+
+    @SmallTest
+    public void testTopicImportanceExtractor() throws Exception {
+        mHelper.setTopicImportance("package", 0, new Notification.Topic("A", "a"),
+                IMPORTANCE_MAX);
+        // There is no B. There never was a b. Moving on...
+        mHelper.setTopicImportance("package", 0, new Notification.Topic("C", "c"),
+                IMPORTANCE_HIGH);
+        mHelper.setTopicImportance("package", 0, new Notification.Topic("D", "d"),
+                IMPORTANCE_LOW);
+        // watch out: different package.
+        mHelper.setTopicImportance("package2", 0, new Notification.Topic("E", "e"),
+                IMPORTANCE_NONE);
+
+        TopicImportanceExtractor validator = mHelper.findExtractor(TopicImportanceExtractor.class);
+        validator.process(mRecordGroupGSortA);
+        validator.process(mRecordGroupGSortB);
+        validator.process(mRecordNoGroup);
+        validator.process(mRecordNoGroup2);
+        validator.process(mRecordNoGroupSortA);
+        assertTrue(mRecordGroupGSortA.getTopicImportance() == IMPORTANCE_MAX);
+        assertTrue(mRecordGroupGSortB.getTopicImportance() == IMPORTANCE_MAX);
+        assertTrue(mRecordNoGroup.getTopicImportance() == IMPORTANCE_HIGH);
+        assertTrue(mRecordNoGroup2.getTopicImportance() == IMPORTANCE_LOW);
+        assertTrue(mRecordNoGroupSortA.getTopicImportance() == IMPORTANCE_UNSPECIFIED);
     }
 }

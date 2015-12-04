@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -55,12 +56,13 @@ public class RankingHelper implements RankingConfig {
     private static final String ATT_UID = "uid";
     private static final String ATT_PRIORITY = "priority";
     private static final String ATT_VISIBILITY = "visibility";
+    private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_TOPIC_ID = "id";
     private static final String ATT_TOPIC_LABEL = "label";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
-    private static final int DEFAULT_VISIBILITY =
-            NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
+    private static final int DEFAULT_VISIBILITY = Ranking.VISIBILITY_NO_OVERRIDE;
+    private static final int DEFAULT_IMPORTANCE = Ranking.IMPORTANCE_UNSPECIFIED;
 
     private final NotificationSignalExtractor[] mSignalExtractors;
     private final NotificationComparator mPreliminaryComparator = new NotificationComparator();
@@ -197,6 +199,7 @@ public class RankingHelper implements RankingConfig {
             if (TAG_TOPIC.equals(tagName)) {
                 int priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
                 int vis = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+                int importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                 String id = parser.getAttributeValue(null, ATT_TOPIC_ID);
                 CharSequence label = parser.getAttributeValue(null, ATT_TOPIC_LABEL);
 
@@ -208,6 +211,9 @@ public class RankingHelper implements RankingConfig {
                     }
                     if (vis != DEFAULT_VISIBILITY) {
                         topic.visibility = vis;
+                    }
+                    if (importance != DEFAULT_IMPORTANCE) {
+                        topic.importance = importance;
                     }
                     r.topics.put(id, topic);
                 }
@@ -266,6 +272,9 @@ public class RankingHelper implements RankingConfig {
             }
             if (t.visibility != DEFAULT_VISIBILITY) {
                 out.attribute(null, ATT_VISIBILITY, Integer.toString(t.visibility));
+            }
+            if (t.importance != DEFAULT_IMPORTANCE) {
+                out.attribute(null, ATT_IMPORTANCE, Integer.toString(t.importance));
             }
             out.endTag(null, TAG_TOPIC);
         }
@@ -403,6 +412,20 @@ public class RankingHelper implements RankingConfig {
         updateConfig();
     }
 
+    @Override
+    public int getTopicImportance(String packageName, int uid, Notification.Topic topic) {
+        final Record r = getOrCreateRecord(packageName, uid);
+        return getOrCreateTopic(r, topic).importance;
+    }
+
+    @Override
+    public void setTopicImportance(String pkgName, int uid, Notification.Topic topic,
+            int importance) {
+        final Record r = getOrCreateRecord(pkgName, uid);
+        getOrCreateTopic(r, topic).importance = importance;
+        updateConfig();
+    }
+
     private Topic getOrCreateTopic(Record r, Notification.Topic topic) {
         if (topic == null) {
             topic = createDefaultTopic();
@@ -468,6 +491,10 @@ public class RankingHelper implements RankingConfig {
                         pw.print(" visibility=");
                         pw.print(Notification.visibilityToString(t.visibility));
                     }
+                    if (t.importance != DEFAULT_IMPORTANCE) {
+                        pw.print(" importance=");
+                        pw.print(Ranking.importanceToString(t.importance));
+                    }
                     pw.println();
                 }
             }
@@ -512,6 +539,7 @@ public class RankingHelper implements RankingConfig {
         Notification.Topic topic;
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
+        int importance = DEFAULT_IMPORTANCE;
 
         public Topic(Notification.Topic topic) {
             this.topic = topic;

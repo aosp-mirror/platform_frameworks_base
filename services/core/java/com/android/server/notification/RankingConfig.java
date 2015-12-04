@@ -31,4 +31,8 @@ public interface RankingConfig {
 
     void setTopicVisibilityOverride(String packageName, int uid, Notification.Topic topic,
             int visibility);
+
+    void setTopicImportance(String packageName, int uid, Notification.Topic topic, int importance);
+
+    int getTopicImportance(String packageName, int uid, Notification.Topic topic);
 }

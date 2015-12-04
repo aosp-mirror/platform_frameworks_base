@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -82,6 +83,7 @@ public final class NotificationRecord {
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
     private int mPackageVisibility;
+    private int mTopicImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
 
     private int mSuppressedVisualEffects = 0;
 
@@ -106,6 +108,7 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
+        mTopicImportance = previous.mTopicImportance;
         // Don't copy mGlobalSortKey, recompute it.
     }
 
@@ -195,6 +198,8 @@ public final class NotificationRecord {
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "  mPackageVisibility=" + mPackageVisibility);
+        pw.println(prefix + "  mTopicImportance="
+                + NotificationListenerService.Ranking.importanceToString(mTopicImportance));
         pw.println(prefix + "  mIntercept=" + mIntercept);
         pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
@@ -266,6 +271,16 @@ public final class NotificationRecord {
 
     public int getPackageVisibilityOverride() {
         return mPackageVisibility;
+    }
+
+    public void setTopicImportance(int importance) {
+        if (importance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+            mTopicImportance = importance;
+        }
+    }
+
+    public int getTopicImportance() {
+        return mTopicImportance;
     }
 
     public boolean setIntercepted(boolean intercept) {

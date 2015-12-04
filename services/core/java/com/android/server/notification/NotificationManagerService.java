@@ -1243,6 +1243,20 @@ public class NotificationManagerService extends SystemService {
             return mRankingHelper.getTopicVisibilityOverride(pkg, uid, topic);
         }
 
+        @Override
+        public void setTopicImportance(String pkg, int uid, Notification.Topic topic,
+                int importance) {
+            checkCallerIsSystem();
+            mRankingHelper.setTopicImportance(pkg, uid, topic, importance);
+            savePolicyFile();
+        }
+
+        @Override
+        public int getTopicImportance(String pkg, int uid, Notification.Topic topic) {
+            checkCallerIsSystem();
+            return mRankingHelper.getTopicImportance(pkg, uid, topic);
+        }
+
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
@@ -2201,6 +2215,7 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     mRankingHelper.extractSignals(r);
+                    savePolicyFile();
 
                     // 3. Apply local rules
 

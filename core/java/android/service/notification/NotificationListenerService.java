@@ -823,9 +823,9 @@ public abstract class NotificationListenerService extends Service {
         public static final int VISIBILITY_NO_OVERRIDE = -1000;
 
         /**
-         * Value signifying thatn the has not expressed an importance.
+         * Value signifying that the user has not expressed an importance.
          *
-         * This value is for persisting preferences, and should never ve associated with
+         * This value is for persisting preferences, and should never be associated with
          * an actual notification.
          */
         public static final int IMPORTANCE_UNSPECIFIED = -1000;
@@ -951,6 +951,28 @@ public abstract class NotificationListenerService extends Service {
             mMatchesInterruptionFilter = matchesInterruptionFilter;
             mVisibilityOverride = visibilityOverride;
             mSuppressedVisualEffects = suppressedVisualEffects;
+        }
+
+        /**
+         * {@hide}
+         */
+        public static String importanceToString(int importance) {
+            switch (importance) {
+                case IMPORTANCE_UNSPECIFIED:
+                    return "UNSPECIFIED";
+                case IMPORTANCE_NONE:
+                    return "NONE";
+                case IMPORTANCE_LOW:
+                    return "LOW";
+                case IMPORTANCE_DEFAULT:
+                    return "DEFAULT";
+                case IMPORTANCE_HIGH:
+                    return "HIGH";
+                case IMPORTANCE_MAX:
+                    return "MAX";
+                default:
+                    return "UNKNOWN(" + String.valueOf(importance) + ")";
+            }
         }
     }
 
