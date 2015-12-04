@@ -16,6 +16,7 @@
 
 package android.view.textservice;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
@@ -147,9 +148,19 @@ public final class SpellCheckerSubtype implements Parcelable {
     }
 
     /**
+     * @return The normalized {@link Locale} object of the subtype. The returned locale may or may
+     * not equal to "locale" string parameter passed to the constructor.
+     *
+     * <p>TODO: Consider to make this a public API.</p>
      * @hide
      */
-    public static Locale constructLocaleFromString(String localeStr) {
+    @Nullable
+    public Locale getLocaleObject() {
+        // TODO: Use InputMethodUtils.constructLocaleFromString() instead.
+        return constructLocaleFromString(mSubtypeLocale);
+    }
+
+    private static Locale constructLocaleFromString(String localeStr) {
         if (TextUtils.isEmpty(localeStr))
             return null;
         String[] localeParams = localeStr.split("_", 3);
