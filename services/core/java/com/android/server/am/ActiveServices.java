@@ -1240,8 +1240,9 @@ public final class ActiveServices {
                     try {
                         // Before going further -- if this app is not allowed to run in the
                         // background, then at this point we aren't going to let it period.
-                        if (!mAm.checkAllowBackgroundLocked(sInfo.applicationInfo.uid,
-                                sInfo.packageName, callingPid)) {
+                        final int allowed = mAm.checkAllowBackgroundLocked(
+                                sInfo.applicationInfo.uid, sInfo.packageName, callingPid);
+                        if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                             Slog.w(TAG, "Background execution not allowed: service "
                                     + r.intent + " to " + name.flattenToShortString()
                                     + " from pid=" + callingPid + " uid=" + callingUid

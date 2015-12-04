@@ -562,8 +562,9 @@ public final class BroadcastQueue {
             skip = true;
         }
         if (!skip) {
-            if (!mService.checkAllowBackgroundLocked(filter.receiverList.uid, filter.packageName,
-                    -1)) {
+            final int allowed = mService.checkAllowBackgroundLocked(filter.receiverList.uid,
+                    filter.packageName, -1);
+            if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
                 Slog.w(TAG, "Background execution not allowed: receiving "
                         + r.intent
                         + " to " + filter.receiverList.app
@@ -1013,15 +1014,6 @@ public final class BroadcastQueue {
                 skip = true;
             }
             if (!skip) {
-                if (!mService.checkAllowBackgroundLocked(info.activityInfo.applicationInfo.uid,
-                        info.activityInfo.packageName, -1)) {
-                    Slog.w(TAG, "Background execution not allowed: receiving "
-                            + r.intent + " to "
-                            + component.flattenToShortString());
-                    skip = true;
-                }
-            }
-            if (!skip) {
                 skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
                         r.callingPid, r.resolvedType, info.activityInfo.applicationInfo.uid);
             }
@@ -1083,6 +1075,28 @@ public final class BroadcastQueue {
                 }
             }
 
+            String targetProcess = info.activityInfo.processName;
+            ProcessRecord app = mService.getProcessRecordLocked(targetProcess,
+                    info.activityInfo.applicationInfo.uid, false);
+            if (!skip) {
+                final int allowed = mService.checkAllowBackgroundLocked(
+                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, -1);
+                if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
+                    // We won't allow this receiver to be launched if the app has been
+                    // completely disabled from launches, or it is delayed and the broadcast
+                    // was not explicitly sent to it and this would result in a new process
+                    // for it being created.
+                    if (allowed == ActivityManager.APP_START_MODE_DISABLED
+                            || (r.intent.getComponent() == null
+                            && r.intent.getPackage() == null && app == null)) {
+                        Slog.w(TAG, "Background execution not allowed: receiving "
+                                + r.intent + " to "
+                                + component.flattenToShortString());
+                        skip = true;
+                    }
+                }
+            }
+
             if (skip) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Skipping delivery of ordered [" + mQueueName + "] "
@@ -1095,7 +1109,6 @@ public final class BroadcastQueue {
             }
 
             r.state = BroadcastRecord.APP_RECEIVE;
-            String targetProcess = info.activityInfo.processName;
             r.curComponent = component;
             final int receiverUid = info.activityInfo.applicationInfo.uid;
             // If it's a singleton, it needs to be the same app or a special app
@@ -1126,8 +1139,6 @@ public final class BroadcastQueue {
             }
 
             // Is this receiver's application already running?
-            ProcessRecord app = mService.getProcessRecordLocked(targetProcess,
-                    info.activityInfo.applicationInfo.uid, false);
             if (app != null && app.thread != null) {
                 try {
                     app.addPackage(info.activityInfo.packageName,

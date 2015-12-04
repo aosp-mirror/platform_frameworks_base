@@ -281,6 +281,7 @@ public interface MetricsConstants {
     public static final int ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE = 255;
     public static final int ACTION_WIGGLE_CAMERA_GESTURE = 256;
     public static final int QS_WORKMODE = 257;
+    public static final int BACKGROUND_CHECK_SUMMARY = 258;
 
     // These constants must match those in the analytic pipeline, do not edit.
     // Add temporary values to the top of MetricsLogger instead.
