@@ -83,7 +83,7 @@ int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
         if (!lhs.positions) return -1;
         if (!rhs.positions) return +1;
 
-        return memcmp(lhs.positions, rhs.positions, lhs.glyphCount << 1);
+        return memcmp(lhs.positions, rhs.positions, lhs.glyphCount * sizeof(float) * 2);
     }
 
     return 0;
@@ -169,7 +169,7 @@ void TextDropShadowCache::clear() {
 
 ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs, int numGlyphs,
         float radius, const float* positions) {
-    ShadowText entry(paint, radius, numGlyphs * 2, glyphs, positions);
+    ShadowText entry(paint, radius, numGlyphs, glyphs, positions);
     ShadowTexture* texture = mCache.get(entry);
 
     if (!texture) {
