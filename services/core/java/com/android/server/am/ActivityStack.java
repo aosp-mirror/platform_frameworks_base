@@ -145,6 +145,9 @@ final class ActivityStack {
     // convertToTranslucent().
     static final long TRANSLUCENT_CONVERSION_TIMEOUT = 2000;
 
+    // How many activities have to be scheduled to stop to force a stop pass.
+    private static final int MAX_STOPPING_TO_FORCE = 3;
+
     enum ActivityState {
         INITIALIZING,
         RESUMED,
@@ -1097,19 +1100,7 @@ final class ActivityStack {
                 } else if (!hasVisibleBehindActivity() || mService.isSleepingOrShuttingDown()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
-
-                    mStackSupervisor.mStoppingActivities.add(prev);
-                    if (mStackSupervisor.mStoppingActivities.size() > 3 ||
-                            prev.frontOfTask && mTaskHistory.size() <= 1) {
-                        // If we already have a few activities waiting to stop,
-                        // then give up on things going idle and start clearing
-                        // them out. Or if r is the last of activity of the last task the stack
-                        // will be empty and must be cleared immediately.
-                        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "To many pending stops, forcing idle");
-                        mStackSupervisor.scheduleIdleLocked();
-                    } else {
-                        mStackSupervisor.checkReadyForSleepLocked();
-                    }
+                    addToStopping(prev);
                 }
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "App died during pause, not stopping: " + prev);
@@ -1164,6 +1155,21 @@ final class ActivityStack {
 
         // Notfiy when the task stack has changed
         mService.notifyTaskStackChangedLocked();
+    }
+
+    private void addToStopping(ActivityRecord r) {
+        mStackSupervisor.mStoppingActivities.add(r);
+        if (mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE ||
+                r.frontOfTask && mTaskHistory.size() <= 1) {
+            // If we already have a few activities waiting to stop,
+            // then give up on things going idle and start clearing
+            // them out. Or if r is the last of activity of the last task the stack
+            // will be empty and must be cleared immediately.
+            if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "To many pending stops, forcing idle");
+            mStackSupervisor.scheduleIdleLocked();
+        } else {
+            mStackSupervisor.checkReadyForSleepLocked();
+        }
     }
 
     /**
@@ -3167,17 +3173,7 @@ final class ActivityStack {
         // finishing until the resumed one becomes visible.
         if (mode == FINISH_AFTER_VISIBLE && r.nowVisible) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                mStackSupervisor.mStoppingActivities.add(r);
-                if (mStackSupervisor.mStoppingActivities.size() > 3
-                        || r.frontOfTask && mTaskHistory.size() <= 1) {
-                    // If we already have a few activities waiting to stop,
-                    // then give up on things going idle and start clearing
-                    // them out. Or if r is the last of activity of the last task the stack
-                    // will be empty and must be cleared immediately.
-                    mStackSupervisor.scheduleIdleLocked();
-                } else {
-                    mStackSupervisor.checkReadyForSleepLocked();
-                }
+                addToStopping(r);
             }
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to STOPPING: "+ r + " (finish requested)");
