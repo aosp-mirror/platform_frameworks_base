@@ -1537,11 +1537,6 @@
          it should be disabled in that locale's resources. -->
     <bool name="config_actionMenuItemAllCaps">true</bool>
 
-    <!-- Whether action menu items should obey the "withText" showAsAction
-         flag. This may be set to false for situations where space is
-         extremely limited. -->
-    <bool name="config_allowActionMenuItemTextWithIcon">false</bool>
-
     <!-- Remote server that can provide NTP responses. -->
     <string translatable="false" name="config_ntpServer">2.android.pool.ntp.org</string>
     <!-- Normal polling frequency in milliseconds -->
