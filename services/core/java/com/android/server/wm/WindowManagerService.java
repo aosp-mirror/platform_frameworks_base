@@ -58,6 +58,8 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -8652,14 +8654,7 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (wtoken != null) {
                 winAnimator.mAnimLayer =
                         w.mLayer + wtoken.mAppAnimator.animLayerAdjustment;
-                if (wtoken.mWillReplaceWindow && wtoken.mReplacingWindow != w
-                        && wtoken.mAnimateReplacingWindow) {
-                    // We know that we will be animating a relaunching window in the near future,
-                    // which will receive a z-order increase. We want the replaced window to
-                    // immediately receive the same treatment, e.g. to be above the dock divider.
-                    w.mLayer += TYPE_LAYER_OFFSET;
-                    winAnimator.mAnimLayer += TYPE_LAYER_OFFSET;
-                }
+                forceHigherLayerIfNeeded(w, winAnimator, wtoken);
             } else {
                 winAnimator.mAnimLayer = w.mLayer;
             }
@@ -8693,6 +8688,30 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mAccessibilityController != null && anyLayerChanged
                 && windows.get(windows.size() - 1).getDisplayId() == Display.DEFAULT_DISPLAY) {
             mAccessibilityController.onWindowLayersChangedLocked();
+        }
+    }
+
+    private void forceHigherLayerIfNeeded(WindowState w, WindowStateAnimator winAnimator,
+            AppWindowToken wtoken) {
+        boolean force = false;
+        if (wtoken.mWillReplaceWindow && wtoken.mReplacingWindow != w
+                && wtoken.mAnimateReplacingWindow) {
+            // We know that we will be animating a relaunching window in the near future,
+            // which will receive a z-order increase. We want the replaced window to
+            // immediately receive the same treatment, e.g. to be above the dock divider.
+            force = true;
+        }
+        if (!force) {
+            final TaskStack stack = w.getStack();
+            if (stack != null && StackId.isAlwaysOnTop(stack.mStackId)) {
+                // If the window's stack is always on top, we want to make it above other windows
+                // also when these windows are animating.
+                force = true;
+            }
+        }
+        if (force) {
+            w.mLayer += TYPE_LAYER_OFFSET;
+            winAnimator.mAnimLayer += TYPE_LAYER_OFFSET;
         }
     }
 
