@@ -42,6 +42,36 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.5.1</a> <em>(December 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+    <li>Fixed a rendering failure issue in the Layout Editor.
+      <a href="http://b.android.com/194612">Issue: 194612</a> </li>
+    <li>Added the ability to vary <code>description</code> manifest attributes by configuration.
+      <a href="http://b.android.com/194705">Issue: 194705</a>
+    </li>
+     <li>Improved the contrast of the Android Studio Darcula appearance theme in Vector Asset Studio.
+      <a href="http://b.android.com/191819">Issue: 191819</a>
+    </li>
+    <li>Added <em>Help</em> button support to Vector Asset Studio.
+    </li>
+    <li>Added support for the <code>%</code> operator for data binding. <a href="http://b.android.com/194045">Issue: 194045</a>
+      </li>
+    <li>Fixed a case where launching an app for debugging resulted in the debugger connecting to the
+      wrong device. <a href="http://b.android.com/195167">Issue: 195167</a>
+    </li>
+    <li>Fixed a null pointer exception that could occur when attempting to run an app in
+      certain scenarios.
+    </li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.5.0</a> <em>(November 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -52,7 +82,8 @@ Android Studio, as denoted by revision number. </p>
       problems, such as memory leaks. To use this monitor, click <strong>Android Monitor</strong> at
       the bottom of the main window. In Android Monitor, click the <strong>Memory</strong> tab. While
       the monitor is running, click the <strong>Dump Java Heap</strong> icon, and then click
-      <strong>Captures</strong> in the main window and double-click the file to view it. (The
+      <strong>Captures</strong> in the main window and double-click the file to view it. Click
+      <em>Capture Analysis</em> on the right. (The
       Android Device Monitor can't be running at the same time as Android Monitor.)</li>
     <li>Added new deep link and app link support. The Code Editor can automatically create an
       intent filter for deep linking in the <code>AndroidManifest.xml</code> file. It can also

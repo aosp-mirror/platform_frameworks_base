@@ -42,7 +42,7 @@ install</a> instructions.</p>
 JDK 6 or higher (the JRE alone is not sufficient)&mdash;JDK 7 is required when
 developing for Android 5.0 and higher. To check if you
 have JDK installed (and which version), open a terminal and type <code>javac -version</code>.
-If the JDK is not available or the version is lower than version 6, download the 
+If the JDK is not available or the version is lower than version 6, download the
 <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" class="external-link"
 >Java SE Development Kit 7</a>.</p>
 
@@ -90,12 +90,6 @@ where they are installed. For example:</p>
     <li>Launch the {@code .dmg} file you just downloaded.</li>
     <li>Drag and drop Android Studio into the Applications folder.
     <li>Open Android Studio and follow the setup wizard to install any necessary SDK tools.
-      <p>
-      Depending on your security settings, when you attempt to open Android Studio, you might
-      see a warning that says the package is damaged and should be moved to the trash. If this
-      happens, go to <strong>System Preferences > Security &amp; Privacy</strong> and under
-      <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
-      Then open Android Studio again.</p>
     </li>
   </ol>
 
