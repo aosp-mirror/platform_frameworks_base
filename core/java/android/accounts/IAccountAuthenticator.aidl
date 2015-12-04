@@ -96,4 +96,12 @@ oneway interface IAccountAuthenticator {
      */
     void startUpdateCredentialsSession(in IAccountAuthenticatorResponse response, in Account account,
         String authTokenType, in Bundle options);
+
+    /**
+     * Finishes the session started by startAddAccountSession(...) or
+     * startUpdateCredentialsSession(...) by adding account to or updating local credentials
+     * in the IAccountManager.
+     */
+    void finishSession(in IAccountAuthenticatorResponse response, String accountType,
+        in Bundle sessionBundle);
 }
