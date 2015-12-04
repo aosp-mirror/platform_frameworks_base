@@ -7,6 +7,7 @@ include $(CLEAR_VARS)
 #
 LOCAL_SRC_FILES:= \
     asset_manager.cpp \
+    choreographer.cpp \
     configuration.cpp \
     input.cpp \
     looper.cpp \
@@ -42,5 +43,8 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE := libandroid
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+
+# Required because of b/25642296
+LOCAL_CLANG_arm64 := false
 
 include $(BUILD_SHARED_LIBRARY)
