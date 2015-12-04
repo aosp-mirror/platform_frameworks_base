@@ -1,6 +1,7 @@
 package com.android.server.am;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_FLAG_ONLY_IF_NEEDED;
@@ -15,8 +16,16 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_ONE_SHOT;
+import static android.content.Context.KEYGUARD_SERVICE;
+import static android.content.Intent.EXTRA_INTENT;
+import static android.content.Intent.EXTRA_PACKAGE_NAME;
+import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -66,7 +75,6 @@ import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -91,7 +99,6 @@ import android.view.Display;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.WindowManagerService;
 
@@ -358,37 +365,25 @@ class ActivityStarter {
             }
         }
 
-        UserInfo user = mSupervisor.getUserInfo(userId);
-        KeyguardManager km = (KeyguardManager) mService.mContext
-                .getSystemService(Context.KEYGUARD_SERVICE);
-        if (user.isManagedProfile()
-                && LockPatternUtils.isSeparateWorkChallengeEnabled()
-                && km.isDeviceLocked(userId)) {
-            IIntentSender target = mService.getIntentSenderLocked(
-                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                    Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
-                    new String[]{ resolvedType },
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                            | PendingIntent.FLAG_IMMUTABLE, null);
-            final int flags = intent.getFlags();
-            final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, user.id);
-            if (newIntent != null) {
-                intent = newIntent;
-                intent.setFlags(flags
-                        | Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
-                intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
-
-                resolvedType = null;
-                callingUid = realCallingUid;
-                callingPid = realCallingPid;
-
-                UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
-                rInfo = mSupervisor.resolveIntent(intent, resolvedType, parent.id);
-                aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
-                        null /*profilerInfo*/);
+        final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(intent,
+                resolvedType, aInfo, callingPackage, userId);
+        if (interceptingIntent != null) {
+            intent = interceptingIntent;
+            callingPid = realCallingPid;
+            callingUid = realCallingUid;
+            resolvedType = null;
+            // If we are intercepting and there was a task, convert it into an extra for the
+            // ConfirmCredentials intent and unassign it, as otherwise the task will move to
+            // front even if ConfirmCredentials is cancelled.
+            if (inTask != null) {
+                intent.putExtra(EXTRA_TASK_ID, inTask.taskId);
+                inTask = null;
             }
+
+            final UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
+            rInfo = mSupervisor.resolveIntent(intent, resolvedType, parent.id);
+            aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
+                    null /*profilerInfo*/);
         }
 
         if (abort) {
@@ -536,6 +531,34 @@ class ActivityStarter {
             mSupervisor.notifyActivityDrawnForKeyguard();
         }
         return err;
+    }
+
+    /**
+     * Creates an intent to intercept the current activity start with Confirm Credentials if needed.
+     *
+     * @return The intercepting intent if needed.
+     */
+    private Intent interceptWithConfirmCredentialsIfNeeded(Intent intent, String resolvedType,
+            ActivityInfo aInfo, String callingPackage, int userId) {
+        if (!mService.mUserController.shouldConfirmCredentials(userId)) {
+            return null;
+        }
+        final IIntentSender target = mService.getIntentSenderLocked(
+                INTENT_SENDER_ACTIVITY, callingPackage,
+                Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
+                new String[]{ resolvedType },
+                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE, null);
+        final int flags = intent.getFlags();
+        final KeyguardManager km = (KeyguardManager) mService.mContext
+                .getSystemService(KEYGUARD_SERVICE);
+        final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
+        if (newIntent == null) {
+            return null;
+        }
+        newIntent.setFlags(flags | FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        newIntent.putExtra(EXTRA_PACKAGE_NAME, aInfo.packageName);
+        newIntent.putExtra(EXTRA_INTENT, new IntentSender(target));
+        return newIntent;
     }
 
     void startHomeActivityLocked(Intent intent, ActivityInfo aInfo, String reason) {

@@ -4407,7 +4407,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
                         + taskId + " can't be launch in the home stack.");
             }
-
             task = mStackSupervisor.anyTaskForIdLocked(taskId, RESTORE_FROM_RECENTS, launchStackId);
             if (task == null) {
                 throw new IllegalArgumentException(
@@ -4426,7 +4425,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            if (task.getRootActivity() != null) {
+            // If the user must confirm credentials (e.g. when first launching a work app and the
+            // Work Challenge is present) let startActivityInPackage handle the intercepting.
+            if (!mUserController.shouldConfirmCredentials(task.userId)
+                    && task.getRootActivity() != null) {
                 moveTaskToFrontLocked(task.taskId, 0, bOptions);
                 return ActivityManager.START_TASK_TO_FRONT;
             }
