@@ -104,7 +104,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     public void testFullWorkflow() throws Exception {
         final String name = "BUG, Y U NO REPORT?";
         // TODO: call method to remove property instead
-        SystemProperties.set("dumpstate.42.progress", "-1");
+        SystemProperties.set("dumpstate.42.progress", "0");
+        SystemProperties.set("dumpstate.42.max", "0");
 
         Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
         intent.putExtra(EXTRA_PID, 42);
@@ -119,6 +120,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         SystemProperties.set("dumpstate.42.progress", "500");
         assertProgressNotification(name, "50.00%");
+
+        SystemProperties.set("dumpstate.42.max", "2000");
+        assertProgressNotification(name, "25.00%");
 
         createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
         createTextFile(SCREENSHOT_PATH, SCREENSHOT_CONTENT);

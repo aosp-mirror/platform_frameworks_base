@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -117,11 +116,13 @@ public class BugreportProgressService extends Service {
     /** How long (in ms) a dumpstate process will be monitored if it didn't show progress. */
     private static final long INACTIVITY_TIMEOUT = 3 * DateUtils.MINUTE_IN_MILLIS;
 
-    /** System property used for monitoring progress. */
-    private static final String PROPERTY_TEMPLATE_PROGRESS = "dumpstate.%d.progress";
+    /** System properties used for monitoring progress. */
+    private static final String DUMPSTATE_PREFIX = "dumpstate.";
+    private static final String PROGRESS_SUFFIX = ".progress";
+    private static final String MAX_SUFFIX = ".max";
 
     /** System property (and value) used for stop dumpstate. */
-    private static final String PROPERTY_CTL_STOP = "ctl.stop";
+    private static final String CTL_STOP = "ctl.stop";
     private static final String BUGREPORT_SERVICE = "bugreport";
 
     /** Managed dumpstate processes (keyed by pid) */
@@ -262,7 +263,7 @@ public class BugreportProgressService extends Service {
                 return false;
             }
 
-            final BugreportInfo info = new BugreportInfo(pid, name, max);
+            final BugreportInfo info = new BugreportInfo(getApplicationContext(), pid, name, max);
             synchronized (mProcesses) {
                 if (mProcesses.indexOfKey(pid) >= 0) {
                     Log.w(TAG, "PID " + pid + " already watched");
@@ -341,7 +342,7 @@ public class BugreportProgressService extends Service {
          */
         private void cancel(int pid) {
             Log.i(TAG, "Cancelling PID " + pid + " on user's request");
-            SystemProperties.set(PROPERTY_CTL_STOP, BUGREPORT_SERVICE);
+            SystemProperties.set(CTL_STOP, BUGREPORT_SERVICE);
             stopProgress(pid, null);
         }
 
@@ -354,20 +355,29 @@ public class BugreportProgressService extends Service {
                     Log.d(TAG, "No process to poll progress.");
                 }
                 for (int i = 0; i < mProcesses.size(); i++) {
-                    int pid = mProcesses.keyAt(i);
-                    String property = String.format(PROPERTY_TEMPLATE_PROGRESS, pid);
-                    int progress = SystemProperties.getInt(property, 0);
+                    final int pid = mProcesses.keyAt(i);
+                    final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
+                    final int progress = SystemProperties.getInt(progressKey, 0);
                     if (progress == 0) {
-                        Log.v(TAG, "System property " + property + " is not set yet");
+                        Log.v(TAG, "System property " + progressKey + " is not set yet");
                         continue;
                     }
+                    final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
+                    final BugreportInfo info = mProcesses.valueAt(i);
+                    final boolean maxChanged = max > 0 && max != info.max;
+                    final boolean progressChanged = progress > 0 && progress != info.progress;
 
-                    BugreportInfo info = mProcesses.valueAt(i);
-
-                    if (progress != info.progress) {
-                        if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
-                                + info.progress + " to " + progress);
-                        info.progress = progress;
+                    if (progressChanged || maxChanged) {
+                        if (progressChanged) {
+                            if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
+                                    + info.progress + " to " + progress);
+                            info.progress = progress;
+                        }
+                        if (maxChanged) {
+                            Log.i(TAG, "Updating max progress for PID " + pid + " from " + info.max
+                                    + " to " + max);
+                            info.max = max;
+                        }
                         info.lastUpdate = System.currentTimeMillis();
                         updateProgress(info);
                     } else {
@@ -612,6 +622,8 @@ public class BugreportProgressService extends Service {
      * Information about a bug report process while its in progress.
      */
     private static final class BugreportInfo {
+        private final Context context;
+
         /**
          * {@code pid} of the {@code dumpstate} process generating the bug report.
          */
@@ -623,12 +635,12 @@ public class BugreportProgressService extends Service {
          * Initial value is the bug report filename reported by {@code dumpstate}, but user can
          * change it later to a more meaningful name.
          */
-        final String name;
+        String name;
 
         /**
          * Maximum progress of the bug report generation.
          */
-        final int max;
+        int max;
 
         /**
          * Current progress of the bug report generation.
@@ -640,22 +652,23 @@ public class BugreportProgressService extends Service {
          */
         long lastUpdate = System.currentTimeMillis();
 
-        BugreportInfo(int pid, String name, int max) {
+        BugreportInfo(Context context, int pid, String name, int max) {
+            this.context = context;
             this.pid = pid;
             this.name = name;
             this.max = max;
         }
 
         String getFormattedLastUpdate() {
-            return SimpleDateFormat.getDateTimeInstance().format(new Date(lastUpdate));
+            return DateUtils.formatDateTime(context, lastUpdate,
+                    DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
         }
 
         @Override
         public String toString() {
             final float percent = ((float) progress * 100 / max);
-            return String.format("Progress for %s (pid=%d): %d/%d (%2.2f%%) Last update: %s", name,
-                    pid, progress, max, percent,
-                    getFormattedLastUpdate());
+            return "Progress for " + name + " (pid=" + pid + "): " + progress + "/" + max
+                    + " (" + percent + "%) Last update: " + getFormattedLastUpdate();
         }
     }
 }
