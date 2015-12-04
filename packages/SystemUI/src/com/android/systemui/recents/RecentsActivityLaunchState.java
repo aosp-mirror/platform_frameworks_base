@@ -82,7 +82,7 @@ public class RecentsActivityLaunchState {
             if (launchedFromHome) {
                 return numTasks - 1;
             } else {
-                if (flags.isFastToggleRecentsEnabled()) {
+                if (flags.isFastToggleRecentsEnabled() || !flags.isInitialStatePaging()) {
                     return numTasks - 1;
                 } else {
                     return numTasks - 2;

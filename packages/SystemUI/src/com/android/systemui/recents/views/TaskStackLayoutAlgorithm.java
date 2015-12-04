@@ -213,7 +213,7 @@ public class TaskStackLayoutAlgorithm {
 
     Context mContext;
     private TaskStackView mStackView;
-    private Interpolator mFastOutSlowInInterpolator;
+    private Interpolator mLinearOutSlowInInterpolator;
     private StackState mState = StackState.SPLIT;
 
     // The task bounds (untransformed) for layout.  This rect is anchored at mTaskRoot.
@@ -295,8 +295,8 @@ public class TaskStackLayoutAlgorithm {
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         mContext = context;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm();
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
     }
 
     /**
@@ -486,8 +486,9 @@ public class TaskStackLayoutAlgorithm {
         if (Float.compare(newState, getFocusState()) != 0) {
             mFocusStateAnimator = ObjectAnimator.ofFloat(this, FOCUS_STATE, getFocusState(),
                     newState);
-            mFocusStateAnimator.setDuration(200);
-            mFocusStateAnimator.setInterpolator(mFastOutSlowInInterpolator);
+            mFocusStateAnimator.setDuration(mContext.getResources().getInteger(
+                    R.integer.recents_animate_task_stack_scroll_duration));
+            mFocusStateAnimator.setInterpolator(mLinearOutSlowInInterpolator);
             mFocusStateAnimator.start();
         }
     }
