@@ -147,7 +147,7 @@ public class DirectoryFragment extends Fragment {
     public static final int REQUEST_COPY_DESTINATION = 1;
 
     private static final int LOADER_ID = 42;
-    private static final boolean DEBUG_ENABLE_DND = false;
+    private static final boolean DEBUG_ENABLE_DND = true;
 
     private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_ROOT = "root";

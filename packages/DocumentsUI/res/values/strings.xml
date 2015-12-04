@@ -21,6 +21,9 @@
     <!-- Title of the standalone files activity. [CHAR LIMIT=32] -->
     <string name="files_label">Files</string>
 
+    <!-- Title of the standalone downloads activity. [CHAR LIMIT=32] -->
+    <string name="downloads_label">Downloads</string>
+
     <!-- Action bar title prompting user to choose a location to open a document from [CHAR LIMIT=32] -->
     <string name="title_open">Open from</string>
     <!-- Action bar title prompting user to choose a location to save a document to [CHAR LIMIT=32] -->

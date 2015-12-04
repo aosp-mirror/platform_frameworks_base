@@ -41,6 +41,7 @@
         <activity
             android:name=".DownloadsActivity"
             android:theme="@style/DocumentsFullScreenTheme"
+            android:label="@string/downloads_label"
             android:icon="@drawable/ic_doc_text">
             <intent-filter>
                 <action android:name="android.provider.action.MANAGE_ROOT" />

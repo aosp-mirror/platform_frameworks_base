@@ -223,49 +223,61 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        final int id = item.getItemId();
-        if (id == android.R.id.home) {
-            onBackPressed();
-            return true;
-        } else if (id == R.id.menu_create_dir) {
-            showCreateDirectoryDialog();
-            return true;
-        } else if (id == R.id.menu_search) {
-            return false;
-        } else if (id == R.id.menu_sort_name) {
-            setUserSortOrder(State.SORT_ORDER_DISPLAY_NAME);
-            return true;
-        } else if (id == R.id.menu_sort_date) {
-            setUserSortOrder(State.SORT_ORDER_LAST_MODIFIED);
-            return true;
-        } else if (id == R.id.menu_sort_size) {
-            setUserSortOrder(State.SORT_ORDER_SIZE);
-            return true;
-        } else if (id == R.id.menu_grid) {
-            setUserMode(State.MODE_GRID);
-            return true;
-        } else if (id == R.id.menu_list) {
-            setUserMode(State.MODE_LIST);
-            return true;
-        } else if (id == R.id.menu_paste_from_clipboard) {
-            DirectoryFragment.get(getFragmentManager())
-                .pasteFromClipboard();
-          return true;
-        } else if (id == R.id.menu_advanced) {
-            setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
-            return true;
-        } else if (id == R.id.menu_file_size) {
-            setDisplayFileSize(!LocalPreferences.getDisplayFileSize(this));
-            return true;
-        } else if (id == R.id.menu_settings) {
-            final RootInfo root = getCurrentRoot();
-            final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
-            intent.setDataAndType(root.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
-            startActivity(intent);
-            return true;
-        }
 
-        return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
+            case R.id.menu_create_dir:
+                showCreateDirectoryDialog();
+                return true;
+
+            case R.id.menu_search:
+                return false;
+
+            case R.id.menu_sort_name:
+                setUserSortOrder(State.SORT_ORDER_DISPLAY_NAME);
+                return true;
+
+            case R.id.menu_sort_date:
+                setUserSortOrder(State.SORT_ORDER_LAST_MODIFIED);
+                return true;
+            case R.id.menu_sort_size:
+                setUserSortOrder(State.SORT_ORDER_SIZE);
+                return true;
+
+            case R.id.menu_grid:
+                setUserMode(State.MODE_GRID);
+                return true;
+
+            case R.id.menu_list:
+                setUserMode(State.MODE_LIST);
+                return true;
+
+            case R.id.menu_paste_from_clipboard:
+                DirectoryFragment.get(getFragmentManager())
+                    .pasteFromClipboard();
+              return true;
+
+            case R.id.menu_advanced:
+                setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
+                return true;
+
+            case R.id.menu_file_size:
+                setDisplayFileSize(!LocalPreferences.getDisplayFileSize(this));
+                return true;
+
+            case R.id.menu_settings:
+                final RootInfo root = getCurrentRoot();
+                final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
+                intent.setDataAndType(root.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     void showCreateDirectoryDialog() {
