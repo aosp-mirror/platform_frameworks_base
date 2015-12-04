@@ -521,7 +521,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public final void onBusEvent(DraggingInRecentsEndedEvent event) {
         ViewPropertyAnimator animator = animate();
-        if (event.velocity > ViewConfiguration.get(getContext()).getScaledMinimumFlingVelocity()) {
+        if (event.velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             animator.translationY(getHeight());
             animator.withEndAction(new Runnable() {
                 @Override
