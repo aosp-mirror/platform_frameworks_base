@@ -135,12 +135,22 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             }
         }
         if (mIcon != null) {
+            boolean hadColorFilter = mNotificationHeader.getOriginalIconColor()
+                    != NotificationHeaderView.NO_COLOR;
             if (fade) {
-                fadeIconColorFilter(mIcon, dark, delay);
-                fadeIconAlpha(mIcon, dark, delay);
+                if (hadColorFilter) {
+                    fadeIconColorFilter(mIcon, dark, delay);
+                    fadeIconAlpha(mIcon, dark, delay);
+                } else {
+                    fadeGrayscale(mIcon, dark, delay);
+                }
             } else {
-                updateIconColorFilter(mIcon, dark);
-                updateIconAlpha(mIcon, dark);
+                if (hadColorFilter) {
+                    updateIconColorFilter(mIcon, dark);
+                    updateIconAlpha(mIcon, dark);
+                } else {
+                    updateGrayscale(mIcon, dark);
+                }
             }
         }
         setPictureGrayscale(dark, fade, delay);
