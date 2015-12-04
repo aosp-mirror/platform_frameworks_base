@@ -30,6 +30,7 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     private static final String KEY_PAGE_ON_TOGGLE = "overview_page_on_toggle";
     private static final String KEY_FULLSCREEN_THUMBNAILS = "overview_fullscreen_thumbnails";
     private static final String KEY_SHOW_HISTORY = "overview_show_history";
+    private static final String KEY_INITIAL_STATE_PAGING = "overview_initial_state_paging";
 
     public static class Static {
         // Enables debug drawing for the transition thumbnail
@@ -54,6 +55,7 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     private boolean mPageOnToggle;
     private boolean mUseFullscreenThumbnails;
     private boolean mShowHistory;
+    private boolean mInitialStatePaging;
 
     /**
      * We read the prefs once when we start the activity, then update them as the tuner changes
@@ -63,7 +65,7 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
         TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_PAGE_ON_TOGGLE,
-                KEY_FULLSCREEN_THUMBNAILS, KEY_SHOW_HISTORY);
+                KEY_FULLSCREEN_THUMBNAILS, KEY_SHOW_HISTORY, KEY_INITIAL_STATE_PAGING);
     }
 
     /**
@@ -94,6 +96,13 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         return mShowHistory;
     }
 
+    /**
+     * @return whether the initial stack state is paging.
+     */
+    public boolean isInitialStatePaging() {
+        return mInitialStatePaging;
+    }
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         switch (key) {
@@ -111,6 +120,10 @@ public class RecentsDebugFlags implements TunerService.Tunable {
                 break;
             case KEY_SHOW_HISTORY:
                 mShowHistory = (newValue != null) &&
+                        (Integer.parseInt(newValue) != 0);
+                break;
+            case KEY_INITIAL_STATE_PAGING:
+                mInitialStatePaging = (newValue != null) &&
                         (Integer.parseInt(newValue) != 0);
                 break;
         }

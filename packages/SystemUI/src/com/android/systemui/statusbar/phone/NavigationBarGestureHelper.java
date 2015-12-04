@@ -18,29 +18,27 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
-import android.view.WindowManager;
 
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.tuner.TunerService;
 
 import static android.view.WindowManager.*;
 
 /**
  * Class to detect gestures on the navigation bar.
  */
-public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener {
+public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener
+        implements TunerService.Tunable {
 
-    private static final String DOCK_WINDOW_GESTURE_ENABLED_PROP = "persist.dock_gesture_enabled";
+    private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
 
     /**
      * When dragging from the navigation bar, we drag in recents.
@@ -78,7 +76,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mTaskSwitcherDetector = new GestureDetector(context, this);
-        mDockWindowEnabled = SystemProperties.getBoolean(DOCK_WINDOW_GESTURE_ENABLED_PROP, false);
+        TunerService.get(context).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
     }
 
     public void setComponents(RecentsComponent recentsComponent, Divider divider) {
@@ -266,5 +264,15 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             }
         }
         return true;
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        switch (key) {
+            case KEY_DOCK_WINDOW_GESTURE:
+                mDockWindowEnabled = (newValue != null) &&
+                        (Integer.parseInt(newValue) != 0);
+                break;
+        }
     }
 }
