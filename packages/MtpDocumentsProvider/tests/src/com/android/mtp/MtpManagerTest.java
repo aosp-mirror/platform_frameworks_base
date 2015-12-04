@@ -24,6 +24,9 @@ import android.os.OperationCanceledException;
 import android.test.InstrumentationTestCase;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 @RealDeviceTest
 public class MtpManagerTest extends InstrumentationTestCase {
@@ -53,20 +56,23 @@ public class MtpManagerTest extends InstrumentationTestCase {
 
     public void testCancelEvent() throws Exception {
         final CancellationSignal signal = new CancellationSignal();
-        final Thread thread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    mManager.readEvent(mUsbDevice.getDeviceId(), signal);
-                } catch (OperationCanceledException | IOException e) {
-                    getInstrumentation().show(e.getMessage());
-                }
-            }
-        };
+        final FutureTask<Boolean> future = new FutureTask<Boolean>(
+                new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws IOException {
+                        try {
+                            mManager.readEvent(mUsbDevice.getDeviceId(), signal);
+                            return false;
+                        } catch (OperationCanceledException exception) {
+                            return true;
+                        }
+                    }
+                });
+        final Thread thread = new Thread(future);
         thread.start();
         Thread.sleep(TIMEOUT_MS);
         signal.cancel();
-        thread.join(TIMEOUT_MS);
+        assertTrue(future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
     private Context getContext() {
