@@ -3464,9 +3464,28 @@ public class TelephonyManager {
      *
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return an IccOpenLogicalChannelResponse object.
+     * @deprecated Replaced by {@link #iccOpenLogicalChannel(String, int)}
      */
+    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID) {
-        return iccOpenLogicalChannel(getSubId(), AID);
+        return iccOpenLogicalChannel(getSubId(), AID, -1);
+    }
+
+    /**
+     * Opens a logical channel to the ICC card.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHO command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param AID Application id. See ETSI 102.221 and 101.220.
+     * @param p2 P2 parameter (described in ISO 7816-4).
+     * @return an IccOpenLogicalChannelResponse object.
+     */
+    public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID, int p2) {
+        return iccOpenLogicalChannel(getSubId(), AID, p2);
     }
 
     /**
@@ -3480,14 +3499,15 @@ public class TelephonyManager {
      *
      * @param subId The subscription to use.
      * @param AID Application id. See ETSI 102.221 and 101.220.
+     * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
      */
-    public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID) {
+    public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccOpenLogicalChannel(subId, AID);
+                return telephony.iccOpenLogicalChannel(subId, AID, p2);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
