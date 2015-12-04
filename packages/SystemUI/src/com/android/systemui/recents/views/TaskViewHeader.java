@@ -56,8 +56,6 @@ import com.android.systemui.recents.model.Task;
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
-    private static final float FOCUS_TRANSLATION_Z = 4f;
-
     Task mTask;
 
     // Header views
@@ -74,7 +72,6 @@ public class TaskViewHeader extends FrameLayout
     Drawable mDarkDismissDrawable;
     RippleDrawable mBackground;
     GradientDrawable mBackgroundColorDrawable;
-    ObjectAnimator mFocusAnimator;
     String mDismissContentDescription;
 
     // Static highlight that we draw at the top of each view
@@ -248,9 +245,6 @@ public class TaskViewHeader extends FrameLayout
         mApplicationIcon.setImageDrawable(null);
         mApplicationIcon.setOnClickListener(null);
         mMoveTaskButton.setOnClickListener(null);
-
-        // Stop any focus animations
-        Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
     }
 
     /** Updates the resize task bar button. */
@@ -347,35 +341,6 @@ public class TaskViewHeader extends FrameLayout
         // Draw the dim layer with the rounded corners
         canvas.drawRoundRect(0, 0, mTaskViewRect.width(), getHeight(),
                 mCornerRadius, mCornerRadius, mDimLayerPaint);
-    }
-
-    /** Notifies the associated TaskView has been focused. */
-    void onTaskViewFocusChanged(boolean focused, boolean animateFocusedState) {
-        boolean isRunning = false;
-        if (mFocusAnimator != null) {
-            isRunning = mFocusAnimator.isRunning();
-        }
-        Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
-
-        if (focused) {
-            if (animateFocusedState) {
-                // Bump up the translation
-                mFocusAnimator = ObjectAnimator.ofFloat(this, "translationZ", FOCUS_TRANSLATION_Z);
-                mFocusAnimator.setDuration(200);
-                mFocusAnimator.start();
-            } else {
-                setTranslationZ(FOCUS_TRANSLATION_Z);
-            }
-        } else {
-            if (isRunning) {
-                // Restore the translation
-                mFocusAnimator = ObjectAnimator.ofFloat(this, "translationZ", 0f);
-                mFocusAnimator.setDuration(150);
-                mFocusAnimator.start();
-            } else {
-                setTranslationZ(0f);
-            }
-        }
     }
 
     @Override

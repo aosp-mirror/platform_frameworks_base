@@ -658,7 +658,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
 
         SystemServicesProxy ssp = Recents.getSystemServices();
-        mHeaderView.onTaskViewFocusChanged(isFocused, animated);
         if (isFocused) {
             if (requestViewFocus && !isFocused()) {
                 requestFocus();
