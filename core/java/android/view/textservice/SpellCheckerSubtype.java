@@ -16,6 +16,8 @@
 
 package android.view.textservice;
 
+import com.android.internal.inputmethod.InputMethodUtils;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -156,24 +158,7 @@ public final class SpellCheckerSubtype implements Parcelable {
      */
     @Nullable
     public Locale getLocaleObject() {
-        // TODO: Use InputMethodUtils.constructLocaleFromString() instead.
-        return constructLocaleFromString(mSubtypeLocale);
-    }
-
-    private static Locale constructLocaleFromString(String localeStr) {
-        if (TextUtils.isEmpty(localeStr))
-            return null;
-        String[] localeParams = localeStr.split("_", 3);
-        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
-        // because localeStr is not empty.
-        if (localeParams.length == 1) {
-            return new Locale(localeParams[0]);
-        } else if (localeParams.length == 2) {
-            return new Locale(localeParams[0], localeParams[1]);
-        } else if (localeParams.length == 3) {
-            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
-        }
-        return null;
+        return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
     }
 
     /**
@@ -188,7 +173,7 @@ public final class SpellCheckerSubtype implements Parcelable {
      */
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
-        final Locale locale = constructLocaleFromString(mSubtypeLocale);
+        final Locale locale = getLocaleObject();
         final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
         if (mSubtypeNameResId == 0) {
             return localeStr;

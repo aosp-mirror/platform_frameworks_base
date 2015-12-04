@@ -89,13 +89,14 @@ public class SpellCheckerSubtypeTest extends InstrumentationTestCase {
         assertEquals(new Locale("en", "US", "POSIX"), new SpellCheckerSubtype(
                 SUBTYPE_NAME_RES_ID_A, "en_US_POSIX", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
 
-        // Special rewrite rule for "tl" was not yet supported in spell checker.
-        // TODO: Match the behavior to InputMethodSubtype.
-        assertEquals(new Locale("tl"), new SpellCheckerSubtype(
+        // Special rewrite rule for "tl" for versions of Android earlier than Lollipop that did not
+        // support three letter language codes, and used "tl" (Tagalog) as the language string for
+        // "fil" (Filipino).
+        assertEquals(new Locale("fil"), new SpellCheckerSubtype(
                 SUBTYPE_NAME_RES_ID_A, "tl", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
-        assertEquals(new Locale("tl", "PH"), new SpellCheckerSubtype(
+        assertEquals(new Locale("fil", "PH"), new SpellCheckerSubtype(
                 SUBTYPE_NAME_RES_ID_A, "tl_PH", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
-        assertEquals(new Locale("tl", "PH", "POSIX"), new SpellCheckerSubtype(
+        assertEquals(new Locale("fil", "PH", "POSIX"), new SpellCheckerSubtype(
                 SUBTYPE_NAME_RES_ID_A, "tl_PH_POSIX", SUBTYPE_EXTRA_VALUE_A).getLocaleObject());
 
         // So far rejecting invalid/unexpected locale strings is out of the scope.
