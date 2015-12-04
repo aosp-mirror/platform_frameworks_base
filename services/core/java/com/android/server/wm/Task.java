@@ -252,7 +252,7 @@ class Task implements DimLayer.DimLayerUser {
         }
 
         int boundsChange = BOUNDS_CHANGE_NONE;
-        if (mBounds.left != bounds.left || mBounds.right != bounds.right) {
+        if (mBounds.left != bounds.left || mBounds.top != bounds.top) {
             boundsChange |= BOUNDS_CHANGE_POSITION;
         }
         if (mBounds.width() != bounds.width() || mBounds.height() != bounds.height()) {
