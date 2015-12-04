@@ -22,7 +22,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
 @SmallTest
-public class MultiSelectManager_SelectionTest extends AndroidTestCase{
+public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     private Selection selection;
 
