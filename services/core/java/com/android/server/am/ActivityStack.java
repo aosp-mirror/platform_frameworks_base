@@ -24,7 +24,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
-
+import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
@@ -1330,6 +1330,11 @@ final class ActivityStack {
         if (stackIndex == mStacks.size() - 1) {
             Slog.wtf(TAG,
                     "Stack=" + this + " isn't front stack but is at the top of the stack list");
+            return false;
+        }
+
+        final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
+        if (isLockscreenShown && !StackId.isAllowedOverLockscreen(mStackId)) {
             return false;
         }
 
@@ -4645,7 +4650,9 @@ final class ActivityStack {
                 voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, false);
-        if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.mResizeable) {
+        final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
+        if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.mResizeable
+                && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
         }
         return task;

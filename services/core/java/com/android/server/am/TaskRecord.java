@@ -37,6 +37,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
@@ -1341,6 +1342,12 @@ final class TaskRecord {
     /** Returns the bounds that should be used to launch this task. */
     Rect getLaunchBounds() {
         final int stackId = stack.mStackId;
+
+        // If we're over lockscreen, forget about stack bounds and use fullscreen.
+        if (mService.mLockScreenShown == LOCK_SCREEN_SHOWN) {
+            return null;
+        }
+
         if (stack == null
                 || stackId == HOME_STACK_ID
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {

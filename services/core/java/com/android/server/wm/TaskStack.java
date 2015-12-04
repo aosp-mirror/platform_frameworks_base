@@ -692,6 +692,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     boolean isVisibleLocked() {
+        final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded();
+        if (keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
+            return false;
+        }
         for (int i = mTasks.size() - 1; i >= 0; i--) {
             Task task = mTasks.get(i);
             for (int j = task.mAppTokens.size() - 1; j >= 0; j--) {

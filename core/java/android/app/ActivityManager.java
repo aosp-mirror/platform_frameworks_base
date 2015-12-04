@@ -549,6 +549,13 @@ public class ActivityManager {
             return stackId != PINNED_STACK_ID;
         }
 
+        /**
+         * Returns true if the stack can be visible above lockscreen.
+         */
+        public static boolean isAllowedOverLockscreen(int stackId) {
+            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+        }
+
         public static boolean isAlwaysOnTop(int stackId) {
             return stackId == PINNED_STACK_ID;
         }
