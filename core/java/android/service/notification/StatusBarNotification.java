@@ -42,7 +42,6 @@ public class StatusBarNotification implements Parcelable {
     private final UserHandle user;
     private final long postTime;
 
-    private final int score;
     private Context mContext; // used for inflation & icon expansion
 
     /** @hide */
@@ -64,7 +63,6 @@ public class StatusBarNotification implements Parcelable {
         this.tag = tag;
         this.uid = uid;
         this.initialPid = initialPid;
-        this.score = score;
         this.notification = notification;
         this.user = user;
         this.postTime = postTime;
@@ -83,7 +81,6 @@ public class StatusBarNotification implements Parcelable {
         }
         this.uid = in.readInt();
         this.initialPid = in.readInt();
-        this.score = in.readInt();
         this.notification = new Notification(in);
         this.user = UserHandle.readFromParcel(in);
         this.postTime = in.readLong();
@@ -120,7 +117,6 @@ public class StatusBarNotification implements Parcelable {
         }
         out.writeInt(this.uid);
         out.writeInt(this.initialPid);
-        out.writeInt(this.score);
         this.notification.writeToParcel(out, flags);
         user.writeToParcel(out, flags);
 
@@ -153,14 +149,14 @@ public class StatusBarNotification implements Parcelable {
         this.notification.cloneInto(no, false); // light copy
         return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
-                this.score, no, this.user, this.postTime);
+                0, no, this.user, this.postTime);
     }
 
     @Override
     public StatusBarNotification clone() {
         return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
-                this.score, this.notification.clone(), this.user, this.postTime);
+                0, this.notification.clone(), this.user, this.postTime);
     }
 
     @Override
@@ -168,7 +164,7 @@ public class StatusBarNotification implements Parcelable {
         return String.format(
                 "StatusBarNotification(pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
                 this.pkg, this.user, this.id, this.tag,
-                this.score, this.key, this.notification);
+                0, this.key, this.notification);
     }
 
     /** Convenience method to check the notification's flags for
@@ -245,11 +241,6 @@ public class StatusBarNotification implements Parcelable {
      */
     public long getPostTime() {
         return postTime;
-    }
-
-    /** @hide */
-    public int getScore() {
-        return score;
     }
 
     /**

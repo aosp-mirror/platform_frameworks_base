@@ -64,8 +64,8 @@ public class RankingHelperTest extends AndroidTestCase {
                 .setWhen(1205)
                 .setTopic(new Notification.Topic("A", "a"))
                 .build();
-        mRecordGroupGSortA = new NotificationRecord(new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortA, user), 0);
+        mRecordGroupGSortA = new NotificationRecord(getContext(), new StatusBarNotification(
+                "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortA, user));
 
         mNotiGroupGSortB = new Notification.Builder(getContext())
                 .setContentTitle("B")
@@ -74,24 +74,24 @@ public class RankingHelperTest extends AndroidTestCase {
                 .setWhen(1200)
                 .setTopic(new Notification.Topic("A", "a"))
                 .build();
-        mRecordGroupGSortB = new NotificationRecord(new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortB, user), 0);
+        mRecordGroupGSortB = new NotificationRecord(getContext(), new StatusBarNotification(
+                "package", "package", 1, null, 0, 0, 0, mNotiGroupGSortB, user));
 
         mNotiNoGroup = new Notification.Builder(getContext())
                 .setContentTitle("C")
                 .setWhen(1201)
                 .setTopic(new Notification.Topic("C", "c"))
                 .build();
-        mRecordNoGroup = new NotificationRecord(new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiNoGroup, user), 0);
+        mRecordNoGroup = new NotificationRecord(getContext(), new StatusBarNotification(
+                "package", "package", 1, null, 0, 0, 0, mNotiNoGroup, user));
 
         mNotiNoGroup2 = new Notification.Builder(getContext())
                 .setContentTitle("D")
                 .setWhen(1202)
                 .setTopic(new Notification.Topic("D", "d"))
                 .build();
-        mRecordNoGroup2 = new NotificationRecord(new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiNoGroup2, user), 0);
+        mRecordNoGroup2 = new NotificationRecord(getContext(), new StatusBarNotification(
+                "package", "package", 1, null, 0, 0, 0, mNotiNoGroup2, user));
 
         mNotiNoGroupSortA = new Notification.Builder(getContext())
                 .setContentTitle("E")
@@ -99,8 +99,8 @@ public class RankingHelperTest extends AndroidTestCase {
                 .setSortKey("A")
                 .setTopic(new Notification.Topic("E", "e"))
                 .build();
-        mRecordNoGroupSortA = new NotificationRecord(new StatusBarNotification(
-                "package", "package", 1, null, 0, 0, 0, mNotiNoGroupSortA, user), 0);
+        mRecordNoGroupSortA = new NotificationRecord(getContext(), new StatusBarNotification(
+                "package", "package", 1, null, 0, 0, 0, mNotiNoGroupSortA, user));
     }
 
     @SmallTest

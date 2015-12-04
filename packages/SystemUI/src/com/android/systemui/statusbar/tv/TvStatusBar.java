@@ -175,7 +175,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void updateHeadsUp(String key, NotificationData.Entry entry, boolean shouldInterrupt,
+    protected void updateHeadsUp(String key, NotificationData.Entry entry, boolean shouldPeek,
             boolean alertAgain) {
     }
 

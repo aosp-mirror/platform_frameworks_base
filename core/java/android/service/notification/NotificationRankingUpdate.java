@@ -29,14 +29,19 @@ public class NotificationRankingUpdate implements Parcelable {
     private final int mFirstAmbientIndex;
     private final Bundle mVisibilityOverrides;
     private final Bundle mSuppressedVisualEffects;
+    private final int[] mImportance;
+    private final Bundle mImportanceExplanation;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
-            Bundle visibilityOverrides, int firstAmbientIndex, Bundle suppressedVisualEffects) {
+            Bundle visibilityOverrides, int firstAmbientIndex, Bundle suppressedVisualEffects,
+            int[] importance, Bundle explanation) {
         mKeys = keys;
         mFirstAmbientIndex = firstAmbientIndex;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
         mSuppressedVisualEffects = suppressedVisualEffects;
+        mImportance = importance;
+        mImportanceExplanation = explanation;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -45,6 +50,9 @@ public class NotificationRankingUpdate implements Parcelable {
         mInterceptedKeys = in.readStringArray();
         mVisibilityOverrides = in.readBundle();
         mSuppressedVisualEffects = in.readBundle();
+        mImportance = new int[mKeys.length];
+        in.readIntArray(mImportance);
+        mImportanceExplanation = in.readBundle();
     }
 
     @Override
@@ -59,6 +67,8 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeStringArray(mInterceptedKeys);
         out.writeBundle(mVisibilityOverrides);
         out.writeBundle(mSuppressedVisualEffects);
+        out.writeIntArray(mImportance);
+        out.writeBundle(mImportanceExplanation);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -90,5 +100,13 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getSuppressedVisualEffects() {
         return mSuppressedVisualEffects;
+    }
+
+    public int[] getImportance() {
+        return mImportance;
+    }
+
+    public Bundle getImportanceExplanation() {
+        return mImportanceExplanation;
     }
 }

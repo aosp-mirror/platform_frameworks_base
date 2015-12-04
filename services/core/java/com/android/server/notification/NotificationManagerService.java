@@ -34,6 +34,7 @@ import static android.service.notification.NotificationListenerService.SUPPRESSE
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
+import static  android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -181,16 +182,6 @@ public class NotificationManagerService extends SystemService {
     static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
 
     static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
-    static final boolean SCORE_ONGOING_HIGHER = false;
-
-    static final int JUNK_SCORE = -1000;
-    static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10;
-    static final int SCORE_DISPLAY_THRESHOLD = Notification.PRIORITY_MIN * NOTIFICATION_PRIORITY_MULTIPLIER;
-
-    // Notifications with scores below this will not interrupt the user, either via LED or
-    // sound or vibration
-    static final int SCORE_INTERRUPTION_THRESHOLD =
-            Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
     static final boolean ENABLE_BLOCKED_NOTIFICATIONS = true;
     static final boolean ENABLE_BLOCKED_TOASTS = true;
@@ -2158,31 +2149,15 @@ public class NotificationManagerService extends SystemService {
 
                 synchronized (mNotificationList) {
 
-                    // === Scoring ===
-
-                    // 0. Sanitize inputs
+                    // Sanitize inputs
                     notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN,
                             Notification.PRIORITY_MAX);
-                    // Migrate notification flags to scores
-                    if (0 != (notification.flags & Notification.FLAG_HIGH_PRIORITY)) {
-                        if (notification.priority < Notification.PRIORITY_MAX) {
-                            notification.priority = Notification.PRIORITY_MAX;
-                        }
-                    } else if (SCORE_ONGOING_HIGHER &&
-                            0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
-                        if (notification.priority < Notification.PRIORITY_HIGH) {
-                            notification.priority = Notification.PRIORITY_HIGH;
-                        }
-                    }
 
-                    // 1. initial score: buckets of 10, around the app [-20..20]
-                    final int score = notification.priority * NOTIFICATION_PRIORITY_MULTIPLIER;
-
-                    // 2. extract ranking signals from the notification data
+                    // setup local book-keeping
                     final StatusBarNotification n = new StatusBarNotification(
-                            pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
+                            pkg, opPkg, id, tag, callingUid, callingPid, 0, notification,
                             user);
-                    NotificationRecord r = new NotificationRecord(n, score);
+                    NotificationRecord r = new NotificationRecord(getContext(), n);
                     NotificationRecord old = mNotificationsByKey.get(n.getKey());
                     if (old != null) {
                         // Retain ranking information from previous record
@@ -2217,21 +2192,14 @@ public class NotificationManagerService extends SystemService {
                     mRankingHelper.extractSignals(r);
                     savePolicyFile();
 
-                    // 3. Apply local rules
-
                     // blocked apps
                     if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {
                         if (!isSystemNotification) {
-                            r.score = JUNK_SCORE;
                             Slog.e(TAG, "Suppressing notification from package " + pkg
                                     + " by user request.");
                             mUsageStats.registerBlocked(r);
+                            return;
                         }
-                    }
-
-                    if (r.score < SCORE_DISPLAY_THRESHOLD) {
-                        // Notification will be blocked because the score is too low.
-                        return;
                     }
 
                     int index = indexOfNotificationLocked(n.getKey());
@@ -2385,7 +2353,7 @@ public class NotificationManagerService extends SystemService {
         final Notification notification = record.sbn.getNotification();
 
         // Should this notification make noise, vibe, or use the LED?
-        final boolean aboveThreshold = record.score >= SCORE_INTERRUPTION_THRESHOLD;
+        final boolean aboveThreshold = record.getImportance() >= IMPORTANCE_HIGH;
         final boolean canInterrupt = aboveThreshold && !record.isIntercepted();
         if (DBG || record.isIntercepted())
             Slog.v(TAG,
@@ -3251,24 +3219,29 @@ public class NotificationManagerService extends SystemService {
         final int N = mNotificationList.size();
         ArrayList<String> keys = new ArrayList<String>(N);
         ArrayList<String> interceptedKeys = new ArrayList<String>(N);
+        ArrayList<Integer> importance = new ArrayList<>(N);
         Bundle visibilityOverrides = new Bundle();
         Bundle suppressedVisualEffects = new Bundle();
+        Bundle explanation = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
                 continue;
             }
-            keys.add(record.sbn.getKey());
+            final String key = record.sbn.getKey();
+            keys.add(key);
+            importance.add(record.getImportance());
+            if (record.getImportanceExplanation() != null) {
+                explanation.putCharSequence(key, record.getImportanceExplanation());
+            }
             if (record.isIntercepted()) {
-                interceptedKeys.add(record.sbn.getKey());
+                interceptedKeys.add(key);
 
             }
-            suppressedVisualEffects.putInt(
-                    record.sbn.getKey(), record.getSuppressedVisualEffects());
+            suppressedVisualEffects.putInt(key, record.getSuppressedVisualEffects());
             if (record.getPackageVisibilityOverride()
                     != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE) {
-                visibilityOverrides.putInt(record.sbn.getKey(),
-                        record.getPackageVisibilityOverride());
+                visibilityOverrides.putInt(key, record.getPackageVisibilityOverride());
             }
             // Find first min-prio notification for speedbump placement.
             if (speedBumpIndex == -1 &&
@@ -3283,10 +3256,15 @@ public class NotificationManagerService extends SystemService {
                 speedBumpIndex = keys.size() - 1;
             }
         }
-        String[] keysAr = keys.toArray(new String[keys.size()]);
+        final int M = keys.size();
+        String[] keysAr = keys.toArray(new String[M]);
         String[] interceptedKeysAr = interceptedKeys.toArray(new String[interceptedKeys.size()]);
+        int[] importanceAr = new int[M];
+        for (int i = 0; i < M; i++) {
+            importanceAr[i] = importance.get(i);
+        }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
-                speedBumpIndex, suppressedVisualEffects);
+                speedBumpIndex, suppressedVisualEffects, importanceAr, explanation);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {

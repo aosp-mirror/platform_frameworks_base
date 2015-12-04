@@ -32,11 +32,11 @@ public class NotificationComparator
             return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
         }
 
-        final int leftScore = left.sbn.getScore();
-        final int rightScore = right.sbn.getScore();
-        if (leftScore != rightScore) {
+        final int leftImportance = left.getImportance();
+        final int rightImportance = right.getImportance();
+        if (leftImportance != rightImportance) {
             // by priority, high to low
-            return -1 * Integer.compare(leftScore, rightScore);
+            return -1 * Integer.compare(leftImportance, rightImportance);
         }
 
         final float leftPeople = left.getContactAffinity();

@@ -1266,7 +1266,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (shadeEntry == null) {
             return;
         }
-        boolean isHeadsUped = mUseHeadsUp && shouldInterrupt(shadeEntry);
+        boolean isHeadsUped = mUseHeadsUp && shouldPeek(shadeEntry);
         if (isHeadsUped) {
             mHeadsUpManager.showNotification(shadeEntry);
             // Mark as seen immediately
@@ -2111,17 +2111,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     }
 
-    protected void updateHeadsUp(String key, Entry entry, boolean shouldInterrupt,
+    protected void updateHeadsUp(String key, Entry entry, boolean shouldPeek,
             boolean alertAgain) {
         final boolean wasHeadsUp = isHeadsUp(key);
         if (wasHeadsUp) {
-            if (!shouldInterrupt) {
+            if (!shouldPeek) {
                 // We don't want this to be interrupting anymore, lets remove it
                 mHeadsUpManager.removeNotification(key);
             } else {
                 mHeadsUpManager.updateNotification(entry, alertAgain);
             }
-        } else if (shouldInterrupt && alertAgain) {
+        } else if (shouldPeek && alertAgain) {
             // This notification was updated to be a heads-up, show it!
             mHeadsUpManager.showNotification(entry);
         }

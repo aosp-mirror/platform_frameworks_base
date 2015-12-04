@@ -188,22 +188,33 @@ public class NotificationData {
         public int compare(Entry a, Entry b) {
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
-            final int aPriority = na.getNotification().priority;
-            final int bPriority = nb.getNotification().priority;
+            int aImportance = Ranking.IMPORTANCE_DEFAULT;
+            int bImportance = Ranking.IMPORTANCE_DEFAULT;
+            int aRank = 0;
+            int bRank = 0;
+
+            if (mRankingMap != null) {
+                // RankingMap as received from NoMan
+                mRankingMap.getRanking(a.key, mRankingA);
+                mRankingMap.getRanking(b.key, mRankingB);
+                aImportance = mRankingA.getImportance();
+                bImportance = mRankingB.getImportance();
+                aRank = mRankingA.getRank();
+                bRank = mRankingB.getRank();
+            }
 
             String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
 
             // PRIORITY_MIN media streams are allowed to drift to the bottom
             final boolean aMedia = a.key.equals(mediaNotification)
-                    && aPriority > Notification.PRIORITY_MIN;
+                    && aImportance > Ranking.IMPORTANCE_LOW;
             final boolean bMedia = b.key.equals(mediaNotification)
-                    && bPriority > Notification.PRIORITY_MIN;
+                    && bImportance > Ranking.IMPORTANCE_LOW;
 
-            boolean aSystemMax = aPriority >= Notification.PRIORITY_MAX &&
+            boolean aSystemMax = aImportance >= Ranking.IMPORTANCE_MAX &&
                     isSystemNotification(na);
-            boolean bSystemMax = bPriority >= Notification.PRIORITY_MAX &&
+            boolean bSystemMax = bImportance >= Ranking.IMPORTANCE_MAX &&
                     isSystemNotification(nb);
-            int d = nb.getScore() - na.getScore();
 
             boolean isHeadsUp = a.row.isHeadsUp();
             if (isHeadsUp != b.row.isHeadsUp()) {
@@ -217,13 +228,8 @@ public class NotificationData {
             } else if (aSystemMax != bSystemMax) {
                 // Upsort PRIORITY_MAX system notifications
                 return aSystemMax ? -1 : 1;
-            } else if (mRankingMap != null) {
-                // RankingMap as received from NoMan
-                mRankingMap.getRanking(a.key, mRankingA);
-                mRankingMap.getRanking(b.key, mRankingB);
-                return mRankingA.getRank() - mRankingB.getRank();
-            } if (d != 0) {
-                return d;
+            } else if (aRank != bRank) {
+                return aRank - bRank;
             } else {
                 return (int) (nb.getNotification().when - na.getNotification().when);
             }
@@ -293,6 +299,14 @@ public class NotificationData {
                     & NotificationListenerService.SUPPRESSED_EFFECT_PEEK) != 0;
         }
         return false;
+    }
+
+    public int getImportance(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getImportance();
+        }
+        return Ranking.IMPORTANCE_UNSPECIFIED;
     }
 
     private void updateRankingAndSort(RankingMap ranking) {
@@ -390,12 +404,13 @@ public class NotificationData {
     }
 
     private void dumpEntry(PrintWriter pw, String indent, int i, Entry e) {
+        mRankingMap.getRanking(e.key, mTmpRanking);
         pw.print(indent);
         pw.println("  [" + i + "] key=" + e.key + " icon=" + e.icon);
         StatusBarNotification n = e.notification;
         pw.print(indent);
-        pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" +
-                n.getScore());
+        pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " importance=" +
+                mTmpRanking.getImportance());
         pw.print(indent);
         pw.println("      notification=" + n.getNotification());
         pw.print(indent);

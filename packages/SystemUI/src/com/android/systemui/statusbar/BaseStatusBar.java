@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static  android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
@@ -2096,11 +2098,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         mNotificationData.updateRanking(ranking);
 
         boolean applyInPlace = entry.cacheContentViews(mContext, notification.getNotification());
-        boolean shouldInterrupt = shouldInterrupt(entry, notification);
+        boolean shouldPeek = shouldPeek(entry, notification);
         boolean alertAgain = alertAgain(entry, n);
         if (DEBUG) {
             Log.d(TAG, "applyInPlace=" + applyInPlace
-                    + " shouldInterrupt=" + shouldInterrupt
+                    + " shouldPeek=" + shouldPeek
                     + " alertAgain=" + alertAgain);
         }
 
@@ -2147,7 +2149,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             entry.icon.set(ic);
             inflateViews(entry, mStackScroller);
         }
-        updateHeadsUp(key, entry, shouldInterrupt, alertAgain);
+        updateHeadsUp(key, entry, shouldPeek, alertAgain);
         updateNotifications();
 
         // Update the veto button accordingly (and as a result, whether this row is
@@ -2163,7 +2165,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         setAreThereNotifications();
     }
 
-    protected abstract void updateHeadsUp(String key, Entry entry, boolean shouldInterrupt,
+    protected abstract void updateHeadsUp(String key, Entry entry, boolean shouldPeek,
             boolean alertAgain);
 
     private void updateNotificationViews(Entry entry, StatusBarNotification sbn) {
@@ -2206,49 +2208,54 @@ public abstract class BaseStatusBar extends SystemUI implements
                 || (newNotification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0;
     }
 
-    protected boolean shouldInterrupt(Entry entry) {
-        return shouldInterrupt(entry, entry.notification);
+    protected boolean shouldPeek(Entry entry) {
+        return shouldPeek(entry, entry.notification);
     }
 
-    protected boolean shouldInterrupt(Entry entry, StatusBarNotification sbn) {
+    protected boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
         if (mNotificationData.shouldFilterOut(sbn)) {
-            if (DEBUG) {
-                Log.d(TAG, "Skipping HUN check for " + sbn.getKey() + " since it's filtered out.");
-            }
+            if (DEBUG) Log.d(TAG, "No peeking: filtered notification: " + sbn.getKey());
             return false;
         }
 
         if (isSnoozedPackage(sbn)) {
+            if (DEBUG) Log.d(TAG, "No peeking: snoozed package: " + sbn.getKey());
             return false;
         }
 
-        Notification notification = sbn.getNotification();
-        // some predicates to make the boolean logic legible
-        boolean isNoisy = (notification.defaults & Notification.DEFAULT_SOUND) != 0
-                || (notification.defaults & Notification.DEFAULT_VIBRATE) != 0
-                || notification.sound != null
-                || notification.vibrate != null;
-        boolean isHighPriority = sbn.getScore() >= INTERRUPTION_THRESHOLD;
-        boolean isFullscreen = notification.fullScreenIntent != null;
-        boolean hasTicker = mHeadsUpTicker && !TextUtils.isEmpty(notification.tickerText);
-        boolean accessibilityForcesLaunch = isFullscreen
-                && mAccessibilityManager.isTouchExplorationEnabled();
-        boolean justLaunchedFullScreenIntent = entry.hasJustLaunchedFullScreenIntent();
-        boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
-                && !accessibilityForcesLaunch
-                && !justLaunchedFullScreenIntent
-                && mPowerManager.isScreenOn()
+        if (entry.hasJustLaunchedFullScreenIntent()) {
+            if (DEBUG) Log.d(TAG, "No peeking: recent fullscreen: " + sbn.getKey());
+            return false;
+        }
+
+        if (sbn.getNotification().fullScreenIntent != null
+                && mAccessibilityManager.isTouchExplorationEnabled()) {
+            if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
+            return false;
+        }
+
+
+        if (mNotificationData.shouldSuppressPeek(sbn.getKey())) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed by manager: " + sbn.getKey());
+            return false;
+        }
+
+        if (mNotificationData.getImportance(sbn.getKey()) < IMPORTANCE_MAX) {
+            if (DEBUG) Log.d(TAG, "No peeking: unimportant notification: " + sbn.getKey());
+            return false;
+        }
+
+        boolean inUse = mPowerManager.isScreenOn()
                 && (!mStatusBarKeyguardViewManager.isShowing()
                         || mStatusBarKeyguardViewManager.isOccluded())
-                && !mStatusBarKeyguardViewManager.isInputRestricted()
-                && !mNotificationData.shouldSuppressPeek(sbn.getKey());
+                && !mStatusBarKeyguardViewManager.isInputRestricted();
         try {
-            interrupt = interrupt && !mDreamManager.isDreaming();
+            inUse = inUse && !mDreamManager.isDreaming();
         } catch (RemoteException e) {
             Log.d(TAG, "failed to query dream manager", e);
         }
-        if (DEBUG) Log.d(TAG, "interrupt: " + interrupt);
-        return interrupt;
+        if (DEBUG) Log.d(TAG, "peek if device in use: " + inUse);
+        return inUse;
     }
 
     protected abstract boolean isSnoozedPackage(StatusBarNotification sbn);
