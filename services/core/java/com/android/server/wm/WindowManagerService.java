@@ -8030,7 +8030,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mWindowMap) {
                         getDefaultDisplayContentLocked().getDockedDividerController()
-                                .reevaluateVisibility();
+                                .reevaluateVisibility(false);
                     }
                 }
                 break;
