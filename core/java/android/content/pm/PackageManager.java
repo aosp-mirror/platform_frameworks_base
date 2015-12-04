@@ -259,6 +259,14 @@ public abstract class PackageManager {
      */
     public static final int SKIP_CURRENT_PROFILE = 0x00000002;
 
+    /**
+     * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
+     * activities in the other profiles can respond to the intent only if no activity with
+     * non-negative priority in current profile can respond to the intent.
+     * @hide
+     */
+    public static final int ONLY_IF_NO_MATCH_FOUND = 0x00000004;
+
     /** @hide */
     @IntDef({PERMISSION_GRANTED, PERMISSION_DENIED})
     @Retention(RetentionPolicy.SOURCE)
@@ -4636,7 +4644,8 @@ public abstract class PackageManager {
      * @param filter The {@link IntentFilter} the intent has to match
      * @param sourceUserId The source user id.
      * @param targetUserId The target user id.
-     * @param flags The only possible value is {@link SKIP_CURRENT_PROFILE}
+     * @param flags The possible values are {@link SKIP_CURRENT_PROFILE} and
+     *        {@link ONLY_IF_NO_MATCH_FOUND}.
      * @hide
      */
     public abstract void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,

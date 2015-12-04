@@ -4868,15 +4868,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Check for results in the current profile.
                 List<ResolveInfo> result = mActivities.queryIntent(
                         intent, resolvedType, flags, userId);
+                result = filterIfNotSystemUser(result, userId);
 
                 // Check for cross profile results.
+                boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
                 xpResolveInfo = queryCrossProfileIntents(
-                        matchingFilters, intent, resolvedType, flags, userId);
+                        matchingFilters, intent, resolvedType, flags, userId,
+                        hasNonNegativePriorityResult);
                 if (xpResolveInfo != null && isUserEnabled(xpResolveInfo.targetUserId)) {
-                    result.add(xpResolveInfo);
-                    Collections.sort(result, mResolvePrioritySorter);
+                    boolean isVisibleToUser = filterIfNotSystemUser(
+                            Collections.singletonList(xpResolveInfo), userId).size() > 0;
+                    if (isVisibleToUser) {
+                        result.add(xpResolveInfo);
+                        Collections.sort(result, mResolvePrioritySorter);
+                    }
                 }
-                result = filterIfNotSystemUser(result, userId);
                 if (hasWebURI(intent)) {
                     CrossProfileDomainInfo xpDomainInfo = null;
                     final UserInfo parent = getProfileParent(userId);
@@ -5007,6 +5013,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return resolveInfos;
+    }
+
+    /**
+     * @param resolveInfos list of resolve infos in descending priority order
+     * @return if the list contains a resolve info with non-negative priority
+     */
+    private boolean hasNonNegativePriority(List<ResolveInfo> resolveInfos) {
+        return resolveInfos.size() > 0 && resolveInfos.get(0).priority >= 0;
     }
 
     private static boolean hasWebURI(Intent intent) {
@@ -5212,10 +5226,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    // Return matching ResolveInfo if any for skip current profile intent filters.
+    // Return matching ResolveInfo in target user if any.
     private ResolveInfo queryCrossProfileIntents(
             List<CrossProfileIntentFilter> matchingFilters, Intent intent, String resolvedType,
-            int flags, int sourceUserId) {
+            int flags, int sourceUserId, boolean matchInCurrentProfile) {
         if (matchingFilters != null) {
             // Two {@link CrossProfileIntentFilter}s can have the same targetUserId and
             // match the same intent. For performance reasons, it is better not to
@@ -5225,8 +5239,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i = 0; i < size; i++) {
                 CrossProfileIntentFilter filter = matchingFilters.get(i);
                 int targetUserId = filter.getTargetUserId();
-                if ((filter.getFlags() & PackageManager.SKIP_CURRENT_PROFILE) == 0
-                        && !alreadyTriedUserIds.get(targetUserId)) {
+                boolean skipCurrentProfile =
+                        (filter.getFlags() & PackageManager.SKIP_CURRENT_PROFILE) != 0;
+                boolean skipCurrentProfileIfNoMatchFound =
+                        (filter.getFlags() & PackageManager.ONLY_IF_NO_MATCH_FOUND) != 0;
+                if (!skipCurrentProfile && !alreadyTriedUserIds.get(targetUserId)
+                        && (!skipCurrentProfileIfNoMatchFound || !matchInCurrentProfile)) {
                     // Checking if there are activities in the target user that can handle the
                     // intent.
                     ResolveInfo resolveInfo = createForwardingResolveInfo(filter, intent,
