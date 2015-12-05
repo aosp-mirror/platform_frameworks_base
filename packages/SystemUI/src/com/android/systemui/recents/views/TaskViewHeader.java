@@ -31,6 +31,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -66,6 +67,7 @@ public class TaskViewHeader extends FrameLayout
     TextView mActivityDescription;
 
     // Header drawables
+    Rect mTaskViewRect = new Rect();
     int mCornerRadius;
     int mHighlightHeight;
     Drawable mLightDismissDrawable;
@@ -99,13 +101,6 @@ public class TaskViewHeader extends FrameLayout
     public TaskViewHeader(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setWillNotDraw(false);
-        setClipToOutline(true);
-        setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRect(0, 0, getWidth(), getHeight());
-            }
-        });
 
         // Load the dismiss resources
         mDimLayerPaint.setColor(Color.argb(0, 0, 0, 0));
@@ -148,8 +143,8 @@ public class TaskViewHeader extends FrameLayout
             mApplicationIcon.setBackground(null);
         }
 
-        mBackgroundColorDrawable = (GradientDrawable) getContext().getDrawable(R.drawable
-                .recents_task_view_header_bg_color);
+        mBackgroundColorDrawable = (GradientDrawable) getContext().getDrawable(
+                R.drawable.recents_task_view_header_bg_color);
         // Copy the ripple drawable since we are going to be manipulating it
         mBackground = (RippleDrawable)
                 getContext().getDrawable(R.drawable.recents_task_view_header_bg);
@@ -159,14 +154,37 @@ public class TaskViewHeader extends FrameLayout
         setBackground(mBackground);
     }
 
+    /**
+     * Called when the task view frame changes, allowing us to move the contents of the header
+     * to match the frame changes.
+     */
+    public void onTaskViewSizeChanged(int width, int height) {
+        mTaskViewRect.set(0, 0, width, height);
+        if (mDismissButton.getMeasuredWidth() > (width - mApplicationIcon.getMeasuredWidth())) {
+            mDismissButton.setAlpha(0f);
+        } else {
+            mDismissButton.setAlpha(1f);
+            if (mDismissButton != null) {
+                mDismissButton.setTranslationX(width - getMeasuredWidth());
+            }
+        }
+        if (mActivityDescription.getMeasuredWidth() > (width -
+                (mApplicationIcon.getMeasuredWidth() + mDismissButton.getMeasuredWidth()))) {
+            mActivityDescription.setAlpha(0f);
+        } else {
+            mActivityDescription.setAlpha(1f);
+        }
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         // Draw the highlight at the top edge (but put the bottom edge just out of view)
         float offset = (float) Math.ceil(mHighlightHeight / 2f);
         float radius = mCornerRadius;
         int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
-        canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-        canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
+        canvas.clipRect(0, 0, mTaskViewRect.width(), getMeasuredHeight());
+        canvas.drawRoundRect(-offset, 0f, (float) mTaskViewRect.width() + offset,
                 getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
         canvas.restoreToCount(count);
     }
@@ -178,12 +196,6 @@ public class TaskViewHeader extends FrameLayout
     void setDimAlpha(int alpha) {
         mDimLayerPaint.setColor(Color.argb(alpha, 0, 0, 0));
         invalidate();
-    }
-
-    /** Returns the secondary color for a primary color. */
-    int getSecondaryColor(int primaryColor, boolean useLightOverlayColor) {
-        int overlayColor = useLightOverlayColor ? Color.WHITE : Color.BLACK;
-        return Utilities.getColorWithOverlay(primaryColor, overlayColor, 0.8f);
     }
 
     /** Binds the bar view to the task */
@@ -332,10 +344,9 @@ public class TaskViewHeader extends FrameLayout
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
-        // Draw the thumbnail with the rounded corners
-        canvas.drawRoundRect(0, 0, getWidth(), getHeight(),
-                mCornerRadius,
-                mCornerRadius, mDimLayerPaint);
+        // Draw the dim layer with the rounded corners
+        canvas.drawRoundRect(0, 0, mTaskViewRect.width(), getHeight(),
+                mCornerRadius, mCornerRadius, mDimLayerPaint);
     }
 
     /** Notifies the associated TaskView has been focused. */

@@ -143,7 +143,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
             final Rect taskRect = stackLayout.mTaskRect;
             final RectF ffRect = mTaskRectMap.get(task.key);
 
-            transformOut.scale = 0.95f;
+            transformOut.scale = 1f;
             transformOut.alpha = 1f;
             transformOut.translationZ = stackLayout.mMaxTranslationZ;
             if (task.thumbnail != null) {
