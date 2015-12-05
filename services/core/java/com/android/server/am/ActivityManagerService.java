@@ -11224,9 +11224,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public void requestBugReport() {
+    public void requestBugReport(boolean progress) {
+        final String service = progress ? "bugreportplus" : "bugreport";
         enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
-        SystemProperties.set("ctl.start", "bugreport");
+        SystemProperties.set("ctl.start", service);
     }
 
     public static long getInputDispatchingTimeoutLocked(ActivityRecord r) {

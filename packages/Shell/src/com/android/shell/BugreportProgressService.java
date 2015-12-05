@@ -123,7 +123,7 @@ public class BugreportProgressService extends Service {
 
     /** System property (and value) used for stop dumpstate. */
     private static final String CTL_STOP = "ctl.stop";
-    private static final String BUGREPORT_SERVICE = "bugreport";
+    private static final String BUGREPORT_SERVICE = "bugreportplus";
 
     /** Managed dumpstate processes (keyed by pid) */
     private final SparseArray<BugreportInfo> mProcesses = new SparseArray<>();

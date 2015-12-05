@@ -142,6 +142,7 @@ public class Am extends BaseCommand {
                 "       am clear-debug-app\n" +
                 "       am set-watch-heap <PROCESS> <MEM-LIMIT>\n" +
                 "       am clear-watch-heap\n" +
+                "       am bug-report [--progress]\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
                 "       am restart\n" +
@@ -258,8 +259,9 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am clear-watch-heap: clear the previously set-watch-heap.\n" +
                 "\n" +
-                "am bug-report: request bug report generation; will launch UI\n" +
-                "    when done to select where it should be delivered.\n" +
+                "am bug-report: request bug report generation; will launch a notification\n" +
+                "    when done to select where it should be delivered. Options are: \n" +
+                "   --progress: will launch a notification right away to show its progress.\n" +
                 "\n" +
                 "am monitor: start monitoring for crashes or ANRs.\n" +
                 "    --gdb: start gdbserv on the given port at crash/ANR\n" +
@@ -1072,7 +1074,17 @@ public class Am extends BaseCommand {
     }
 
     private void runBugReport() throws Exception {
-        mAm.requestBugReport();
+        String opt;
+        boolean progress = false;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--progress")) {
+                progress = true;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        mAm.requestBugReport(progress);
         System.out.println("Your lovely bug report is being created; please be patient.");
     }
 

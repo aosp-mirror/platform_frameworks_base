@@ -437,7 +437,7 @@ public interface IActivityManager extends IInterface {
     public void registerUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
     public void unregisterUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
 
-    public void requestBugReport() throws RemoteException;
+    public void requestBugReport(boolean progress) throws RemoteException;
 
     public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason)
             throws RemoteException;
