@@ -1220,14 +1220,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             } else if (pullStackForward) {
                 // Otherwise, offset the scroll by the movement of the anchor task
                 float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
-                float newStackScroll = mStackScroller.getStackScroll() +
-                        (anchorTaskScroll - prevAnchorTaskScroll);
+                float stackScrollOffset = (anchorTaskScroll - prevAnchorTaskScroll);
                 if (mLayoutAlgorithm.getFocusState() != TaskStackLayoutAlgorithm.STATE_FOCUSED) {
                     // If we are focused, we don't want the front task to move, but otherwise, we
                     // allow the back task to move up, and the front task to move back
-                    newStackScroll /= 2;
+                    stackScrollOffset /= 2;
                 }
-                mStackScroller.setStackScroll(newStackScroll);
+                mStackScroller.setStackScroll(mStackScroller.getStackScroll() + stackScrollOffset);
                 mStackScroller.boundScroll();
             }
 
