@@ -3095,6 +3095,13 @@ i
         <!-- The extra value of the subtype. This string can be any string and will be passed to
              the SpellChecker.  -->
         <attr name="subtypeExtraValue" format="string" />
+        <!-- The unique id for the subtype. The text service (spell checker) framework keeps track
+             of enabled subtypes by ID. When the spell checker package gets upgraded, enabled IDs
+             will stay enabled even if other attributes are different. If the ID is unspecified or
+             or explicitly specified to 0 in XML resources,
+             {@code Arrays.hashCode(new Object[] {subtypeLocale, extraValue}) will be used instead.
+              -->
+        <attr name="subtypeId" />
     </declare-styleable>
 
     <!-- Use <code>accessibility-service</code> as the root tag of the XML resource that
