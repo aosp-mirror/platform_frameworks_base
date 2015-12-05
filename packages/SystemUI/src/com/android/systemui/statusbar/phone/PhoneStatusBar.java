@@ -3872,6 +3872,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             clearNotificationEffects();
         }
         mState = state;
+        mGroupManager.setStatusBarState(state);
         mFalsingManager.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
         updateDozing();

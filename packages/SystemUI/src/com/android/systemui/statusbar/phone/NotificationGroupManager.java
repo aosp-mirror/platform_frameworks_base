@@ -21,6 +21,7 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.StatusBarState;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -144,6 +145,20 @@ public class NotificationGroupManager {
             return false;
         }
         return !group.children.isEmpty();
+    }
+
+    public void setStatusBarState(int newState) {
+        if (mBarState == newState) {
+            return;
+        }
+        mBarState = newState;
+        if (mBarState == StatusBarState.KEYGUARD) {
+            for (NotificationGroup group : mGroupMap.values()) {
+                if (group.expanded) {
+                    setGroupExpanded(group, false);
+                }
+            }
+        }
     }
 
     /**
