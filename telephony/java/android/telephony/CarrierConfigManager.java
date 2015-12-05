@@ -524,6 +524,30 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL =
             "allow_non_emergency_calls_in_ecm_bool";
 
+    /**
+     * Flag indicating whether to allow carrier video calls to emergency numbers.
+     * When {@code true}, video calls to emergency numbers will be allowed.  When {@code false},
+     * video calls to emergency numbers will be initiated as audio-only calls instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS =
+            "bool_allow_emergency_video_calls";
+
+    /**
+     * Flag indicating whether the carrier supports video pause signaling.  When {@code true}, the
+     * carrier supports use of the {@link android.telecom.VideoProfile#STATE_PAUSED} video state
+     * to pause transmission of video when the In-Call app is sent to the background.
+     * When {@code false}, video pause signaling is not supported.  {@code True} by default unless
+     * a carrier configuration overrides the default.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String BOOL_ALLOW_VIDEO_PAUSE =
+            "bool_allow_video_pause";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -596,6 +620,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
+        sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_VIDEO_CALLS, false);
+        sDefaults.putBoolean(BOOL_ALLOW_VIDEO_PAUSE, true);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
