@@ -57,13 +57,20 @@ public class VideoCallImpl extends VideoCall {
     private final class VideoCallListenerBinder extends IVideoCallback.Stub {
         @Override
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_RECEIVE_SESSION_MODIFY_REQUEST,
                     videoProfile).sendToTarget();
+
         }
 
         @Override
         public void receiveSessionModifyResponse(int status, VideoProfile requestProfile,
                 VideoProfile responseProfile) {
+            if (mHandler == null) {
+                return;
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = status;
             args.arg2 = requestProfile;
@@ -74,12 +81,18 @@ public class VideoCallImpl extends VideoCall {
 
         @Override
         public void handleCallSessionEvent(int event) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_HANDLE_CALL_SESSION_EVENT, event)
                     .sendToTarget();
         }
 
         @Override
         public void changePeerDimensions(int width, int height) {
+            if (mHandler == null) {
+                return;
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = width;
             args.arg2 = height;
@@ -88,18 +101,27 @@ public class VideoCallImpl extends VideoCall {
 
         @Override
         public void changeVideoQuality(int videoQuality) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_VIDEO_QUALITY, videoQuality, 0)
                     .sendToTarget();
         }
 
         @Override
         public void changeCallDataUsage(long dataUsage) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CALL_DATA_USAGE, dataUsage)
                     .sendToTarget();
         }
 
         @Override
         public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CAMERA_CAPABILITIES,
                     cameraCapabilities).sendToTarget();
         }
