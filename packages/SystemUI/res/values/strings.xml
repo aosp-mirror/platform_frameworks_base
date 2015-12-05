@@ -1038,8 +1038,8 @@
     <!-- VolumeUI restoration notification: text -->
     <string name="volumeui_notification_text">Touch to restore the original.</string>
 
-    <!-- Describes the way 2 names are concatenated. An example would be ", " to produce "Peter Muller, Paul Curry". Please also include a space here if it's appropriate in the language and if it's a RTL language include it on the left. [CHAR LIMIT=3] -->
-    <string name="group_summary_concadenation">, </string>
+    <!-- Describes the way 2 names are concatenated. An example would be ", " to produce "Peter Muller, Paul Curry". Please also include a space here if it's appropriate in the language and if it's a RTL language include it on the left. The translation should start and end with " to keep the white space if desired [CHAR LIMIT=5] -->
+    <string name="group_summary_concadenation">", "</string>
 
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
     <string name="managed_profile_foreground_toast">You\'re using your work profile</string>

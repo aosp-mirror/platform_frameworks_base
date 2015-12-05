@@ -68,9 +68,9 @@ public class HybridNotificationViewManager {
     }
 
     private CharSequence resolveText(Notification notification) {
-        CharSequence contentText = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+        CharSequence contentText = notification.extras.getCharSequence(Notification.EXTRA_TEXT);
         if (contentText == null) {
-            contentText = notification.extras.getCharSequence(Notification.EXTRA_TEXT);
+            contentText = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
         }
         return contentText;
     }

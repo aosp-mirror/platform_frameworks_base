@@ -3001,6 +3001,7 @@ public class Notification implements Parcelable
          */
         private void resetNotificationHeader(RemoteViews contentView) {
             contentView.setImageViewResource(R.id.icon, 0);
+            contentView.setBoolean(R.id.notification_header, "setExpanded", false);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
@@ -3277,11 +3278,7 @@ public class Notification implements Parcelable
         }
 
         private void adaptNotificationHeaderForBigContentView(RemoteViews result) {
-            // We have to set the collapse button instead
-            result.setImageViewResource(R.id.expand_button, R.drawable.ic_arrow_up_14dp);
-            // Apply the color again
-            result.setDrawableParameters(R.id.expand_button, false, -1, resolveColor(),
-                    PorterDuff.Mode.SRC_ATOP, -1);
+            result.setBoolean(R.id.notification_header, "setExpanded", true);
         }
 
         /**

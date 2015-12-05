@@ -861,6 +861,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setChildrenExpanded(boolean expanded, boolean animate) {
         mChildrenExpanded = expanded;
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setExpanded(expanded);
+        }
         if (mChildrenContainer != null) {
             mChildrenContainer.setChildrenExpanded(expanded);
         }
@@ -968,8 +971,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         } else {
             header.reapply(getContext(), mNotificationHeader);
         }
+        updateHeaderExpandButton();
         updateChildrenHeaderAppearance();
         updateHeaderChildCount();
+    }
+
+    private void updateHeaderExpandButton() {
+        if (mIsSummaryWithChildren) {
+            mNotificationHeader.setIsGroupHeader(true /* isGroupHeader*/);
+        }
     }
 
     public void updateChildrenHeaderAppearance() {

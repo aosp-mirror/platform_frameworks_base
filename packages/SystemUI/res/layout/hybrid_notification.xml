@@ -18,21 +18,23 @@
 <com.android.systemui.statusbar.notification.HybridNotificationView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/notification_max_height">
+    android:layout_height="wrap_content"
+    android:paddingStart="@*android:dimen/notification_content_margin_start"
+    android:paddingEnd="12dp"
+    android:gravity="bottom">
     <TextView
         android:id="@+id/notification_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:paddingEnd="4dp"
         android:singleLine="true"
         android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
-        android:paddingEnd="4dp"
     />
     <TextView
         android:id="@+id/notification_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:paddingEnd="4dp"
         android:textAppearance="@*android:style/TextAppearance.Material.Notification"
         android:singleLine="true"
         />

@@ -18,21 +18,17 @@ package com.android.systemui.statusbar.notification;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 
 /**
  * A hybrid view which may contain information about one ore more notifications.
  */
-public class HybridNotificationView extends AlphaOptimizedFrameLayout {
+public class HybridNotificationView extends AlphaOptimizedLinearLayout {
 
-    protected final int mSingleLineHeight;
-    protected final int mStartMargin;
-    protected final int mEndMargin;
     protected TextView mTitleView;
     protected TextView mTextView;
 
@@ -51,62 +47,6 @@ public class HybridNotificationView extends AlphaOptimizedFrameLayout {
     public HybridNotificationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mSingleLineHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.notification_single_line_height);
-        mStartMargin = context.getResources().getDimensionPixelSize(
-                R.dimen.notification_content_margin_start);
-        mEndMargin = context.getResources().getDimensionPixelSize(
-                R.dimen.notification_content_margin_end);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int totalWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int remainingWidth = totalWidth - mStartMargin - mEndMargin;
-        int newHeightSpec = MeasureSpec.makeMeasureSpec(
-                MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.AT_MOST);
-        int newWidthSpec = MeasureSpec.makeMeasureSpec(remainingWidth, MeasureSpec.AT_MOST);
-        mTitleView.measure(newWidthSpec, newHeightSpec);
-        int maxTitleLength = getResources().getDimensionPixelSize(
-                R.dimen.notification_maximum_title_length);
-        int titleWidth = mTitleView.getMeasuredWidth();
-        int heightSpec = MeasureSpec.makeMeasureSpec(mSingleLineHeight, MeasureSpec.AT_MOST);
-        boolean hasText = !TextUtils.isEmpty(mTextView.getText());
-        if (titleWidth > maxTitleLength && hasText) {
-            titleWidth = maxTitleLength;
-            int widthSpec = MeasureSpec.makeMeasureSpec(titleWidth, MeasureSpec.EXACTLY);
-            mTitleView.measure(widthSpec, heightSpec);
-        }
-        if (hasText) {
-            remainingWidth -= titleWidth;
-            int widthSpec = MeasureSpec.makeMeasureSpec(remainingWidth, MeasureSpec.AT_MOST);
-            mTextView.measure(widthSpec, newHeightSpec);
-        }
-        setMeasuredDimension(totalWidth, mSingleLineHeight);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        int childLeft = mStartMargin;
-        int childRight = childLeft + mTitleView.getMeasuredWidth();
-        int childBottom = (mSingleLineHeight + mTitleView.getMeasuredHeight()) / 2;
-        int childTop = childBottom - mTitleView.getMeasuredHeight();
-        int rtlLeft = transformForRtl(childLeft);
-        int rtlRight = transformForRtl(childRight);
-        mTitleView.layout(Math.min(rtlLeft, rtlRight), childTop, Math.max(rtlLeft, rtlRight),
-                childBottom);
-        childLeft = childRight;
-        childRight = childLeft + mTextView.getMeasuredWidth();
-        childTop = mTitleView.getTop() + mTitleView.getBaseline() - mTextView.getBaseline();
-        childBottom = childTop + mTextView.getMeasuredHeight();
-        rtlLeft = transformForRtl(childLeft);
-        rtlRight = transformForRtl(childRight);
-        mTextView.layout(Math.min(rtlLeft, rtlRight), childTop, Math.max(rtlLeft, rtlRight),
-                childBottom);
-    }
-
-    private int transformForRtl(int left) {
-        return isLayoutRtl() ? getWidth() - left : left;
     }
 
     @Override

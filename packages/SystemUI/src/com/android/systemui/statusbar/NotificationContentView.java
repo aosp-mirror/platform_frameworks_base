@@ -52,7 +52,6 @@ public class NotificationContentView extends FrameLayout {
     private static final int VISIBLE_TYPE_SINGLELINE = 3;
 
     private final Rect mClipBounds = new Rect();
-    private final int mSingleLineHeight;
     private final int mHeadsUpHeight;
     private final int mRoundRectRadius;
     private final Interpolator mLinearInterpolator = new LinearInterpolator();
@@ -104,8 +103,6 @@ public class NotificationContentView extends FrameLayout {
         super(context, attrs);
         mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-        mSingleLineHeight = getResources().getDimensionPixelSize(
-                R.dimen.notification_single_line_height);
         mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
         mRoundRectRadius = getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
@@ -160,9 +157,8 @@ public class NotificationContentView extends FrameLayout {
             maxChildHeight = Math.max(maxChildHeight, mHeadsUpChild.getMeasuredHeight());
         }
         if (mSingleLineView != null) {
-            int size = Math.min(maxSize, mSingleLineHeight);
             mSingleLineView.measure(widthMeasureSpec,
-                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.AT_MOST));
             maxChildHeight = Math.max(maxChildHeight, mSingleLineView.getMeasuredHeight());
         }
         int ownHeight = Math.min(maxChildHeight, maxSize);
@@ -297,7 +293,7 @@ public class NotificationContentView extends FrameLayout {
 
     public int getMinHeight() {
         if (mIsChildInGroup && !isGroupExpanded()) {
-            return mSingleLineHeight;
+            return mSingleLineView.getHeight();
         } else {
             return mSmallHeight;
         }

@@ -2369,7 +2369,10 @@
   <java-symbol type="id" name="sub_text_divider" />
   <java-symbol type="id" name="content_info_divider" />
   <java-symbol type="id" name="text_line_1" />
-  <java-symbol type="drawable" name="ic_arrow_up_14dp" />
+  <java-symbol type="drawable" name="ic_expand_notification" />
+  <java-symbol type="drawable" name="ic_collapse_notification" />
+  <java-symbol type="drawable" name="ic_expand_bundle" />
+  <java-symbol type="drawable" name="ic_collapse_bundle" />
   <java-symbol type="dimen" name="notification_header_height" />
   <java-symbol type="dimen" name="notification_big_picture_content_min_height_with_picture" />
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
