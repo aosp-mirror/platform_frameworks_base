@@ -1838,6 +1838,16 @@ public abstract class PackageManager {
     public static final String FEATURE_MIDI = "android.software.midi";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device implements a an optimized mode for virtual reality (VR) applications that handles
+     * stereoscopic rendering of notifications, and may potentially also include optimizations to
+     * reduce latency in the graphics, display, and sensor stacks.  Presence of this feature
+     * also indicates that the VrCore library is included on this device.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VR_MODE = "android.software.vr.mode";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */

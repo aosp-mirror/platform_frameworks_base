@@ -53,6 +53,7 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.Installer;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
 
@@ -1440,6 +1441,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int IDLE_UIDS_MSG = 60;
     static final int SYSTEM_USER_UNLOCK_MSG = 61;
     static final int LOG_STACK_STATE = 62;
+    static final int VR_MODE_CHANGE_MSG = 63;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2154,6 +2156,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mStackSupervisor.logStackState();
                 }
             } break;
+            case VR_MODE_CHANGE_MSG: {
+                VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+                vrService.setVrMode(msg.arg1 != 0);
+            } break;
             }
         }
     };
@@ -2776,6 +2782,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mWindowManager.setFocusedApp(r.appToken, true);
         }
         applyUpdateLockStateLocked(r);
+        applyUpdateVrModeLocked(r);
         if (mFocusedActivity.userId != mLastFocusedUserId) {
             mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
             mHandler.obtainMessage(
@@ -2870,6 +2877,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean nextState = r != null && r.immersive;
         mHandler.sendMessage(
                 mHandler.obtainMessage(IMMERSIVE_MODE_LOCK_MSG, (nextState) ? 1 : 0, 0, r));
+    }
+
+    final void applyUpdateVrModeLocked(ActivityRecord r) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(VR_MODE_CHANGE_MSG, (r.isVrActivity) ? 1 : 0, 0));
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -11709,6 +11721,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException();
             }
             return r.immersive;
+        }
+    }
+
+    @Override
+    public void setVrMode(IBinder token, boolean enabled) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+            throw new UnsupportedOperationException("VR mode not supported on this device!");
+        }
+
+        synchronized(this) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                throw new IllegalArgumentException();
+            }
+            r.isVrActivity = enabled;
+
+            // Update associated state if this activity is currently focused
+            if (r == mFocusedActivity) {
+                applyUpdateVrModeLocked(r);
+            }
         }
     }
 

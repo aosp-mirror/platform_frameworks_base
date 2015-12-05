@@ -6022,6 +6022,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Enable or disable virtual reality (VR) mode.
+     *
+     * <p>VR mode is a hint to Android system services to switch to modes optimized for
+     * high-performance stereoscopic rendering.</p>
+     *
+     * @param enabled {@code true} to enable this mode.
+     */
+    public void setVrMode(boolean enabled) {
+        try {
+            ActivityManagerNative.getDefault().setVrMode(mToken, enabled);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /**
      * Start an action mode of the default type {@link ActionMode#TYPE_PRIMARY}.
      *
      * @param callback Callback that will manage lifecycle events for this action mode

@@ -89,14 +89,13 @@ import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.usage.UsageStatsService;
-import com.android.server.usb.UsbService;
+import com.android.server.vr.VrManagerService;
 import com.android.server.wallpaper.WallpaperManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import java.io.File;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -447,6 +446,7 @@ public final class SystemServer {
         ConsumerIrService consumerIr = null;
         MmsServiceBroker mmsService = null;
         EntropyMixer entropyMixer = null;
+        VrManagerService vrManagerService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
@@ -530,6 +530,10 @@ public final class SystemServer {
                     !mFirstBoot, mOnlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+
+            traceBeginAndSlog("StartVrManagerService");
+            mSystemServiceManager.startService(VrManagerService.class);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             mActivityManagerService.setWindowManager(wm);
