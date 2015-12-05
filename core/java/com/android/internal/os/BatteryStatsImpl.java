@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.bluetooth.UidTraffic;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -95,7 +96,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final String TAG = "BatteryStatsImpl";
     private static final boolean DEBUG = false;
     public static final boolean DEBUG_ENERGY = false;
-    private static final boolean DEBUG_ENERGY_CPU = DEBUG_ENERGY || false;
+    private static final boolean DEBUG_ENERGY_CPU = DEBUG_ENERGY;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
@@ -105,7 +106,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 138 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 139 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -196,8 +197,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     /**
      * The statistics we have collected organized by uids.
      */
-    final SparseArray<BatteryStatsImpl.Uid> mUidStats =
-        new SparseArray<BatteryStatsImpl.Uid>();
+    final SparseArray<BatteryStatsImpl.Uid> mUidStats = new SparseArray<>();
 
     // A set of pools of currently active timers.  When a timer is queried, we will divide the
     // elapsed time by the number of active timers to arrive at that timer's share of the time.
@@ -4691,6 +4691,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiControllerTime[type].addCountLocked(timeMs);
         }
 
+        public void noteBluetoothControllerActivityLocked(int type, long timeMs) {
+            if (mBluetoothControllerTime[type] == null) {
+                mBluetoothControllerTime[type] = new LongSamplingCounter(mOnBatteryTimeBase);
+            }
+            mBluetoothControllerTime[type].addCountLocked(timeMs);
+        }
+
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
             if (mAudioTurnedOnTimer == null) {
                 mAudioTurnedOnTimer = new StopwatchTimer(Uid.this, AUDIO_TURNED_ON,
@@ -5081,6 +5088,15 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (type >= 0 && type < NUM_CONTROLLER_ACTIVITY_TYPES &&
                     mWifiControllerTime[type] != null) {
                 return mWifiControllerTime[type].getCountLocked(which);
+            }
+            return 0;
+        }
+
+        @Override
+        public long getBluetoothControllerActivity(int type, int which) {
+            if (type >= 0 && type < NUM_CONTROLLER_ACTIVITY_TYPES &&
+                    mBluetoothControllerTime[type] != null) {
+                return mBluetoothControllerTime[type].getCountLocked(which);
             }
             return 0;
         }
@@ -7998,7 +8014,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
         if (DEBUG_ENERGY) {
-            Slog.d(TAG, "Updating bluetooth stats");
+            Slog.d(TAG, "Updating bluetooth stats: " + info);
         }
 
         if (info != null && mOnBatteryInternal) {
@@ -8017,6 +8033,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                 // We store the power drain as mAms.
                 mBluetoothActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
                         (long) (info.getControllerEnergyUsed() / opVolt));
+            }
+
+            final UidTraffic[] uidTraffic = info.getUidTraffic();
+            final int numUids = uidTraffic != null ? uidTraffic.length : 0;
+            for (int i = 0; i < numUids; i++) {
+                final UidTraffic traffic = uidTraffic[i];
+
+                // Add to the global counters.
+                mNetworkByteActivityCounters[NETWORK_BT_RX_DATA].addCountLocked(
+                        traffic.getRxBytes());
+                mNetworkByteActivityCounters[NETWORK_BT_TX_DATA].addCountLocked(
+                        traffic.getTxBytes());
+
+                // Add to the UID counters.
+                final Uid u = getUidStatsLocked(mapUid(traffic.getUid()));
+                u.noteNetworkActivityLocked(NETWORK_BT_RX_DATA, traffic.getRxBytes(), 0);
+                u.noteNetworkActivityLocked(NETWORK_BT_TX_DATA, traffic.getTxBytes(), 0);
             }
         }
     }
