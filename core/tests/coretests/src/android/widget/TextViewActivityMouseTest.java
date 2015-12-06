@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
+import static android.widget.espresso.DragHandleUtils.onHandleView;
+import static android.widget.espresso.TextViewActions.mouseClickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.mouseDoubleClickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.mouseLongClickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.mouseDoubleClickAndDragOnText;
@@ -25,6 +28,8 @@ import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 import com.android.frameworks.coretests.R;
@@ -48,10 +53,23 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+
+        assertNoSelectionHandles();
+
         onView(withId(R.id.textview)).perform(
                 mouseDragOnText(helloWorld.indexOf("llo"), helloWorld.indexOf("ld!")));
 
         onView(withId(R.id.textview)).check(hasSelection("llo wor"));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .check(matches(isDisplayed()));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .check(matches(isDisplayed()));
+
+        onView(withId(R.id.textview)).perform(mouseClickOnTextAtIndex(helloWorld.indexOf("w")));
+        onView(withId(R.id.textview)).check(hasSelection(""));
+
+        assertNoSelectionHandles();
     }
 
     @SmallTest
@@ -89,6 +107,9 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
         onView(withId(R.id.textview)).perform(mouseLongClickOnTextAtIndex(
                 helloWorld.indexOf("rld")));
         onView(withId(R.id.textview)).check(hasSelection("world"));
+
+        onView(withId(R.id.textview)).perform(mouseLongClickOnTextAtIndex(helloWorld.length()));
+        onView(withId(R.id.textview)).check(hasSelection("!"));
     }
 
     @SmallTest
@@ -113,6 +134,9 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
         onView(withId(R.id.textview)).perform(mouseDoubleClickOnTextAtIndex(
                 helloWorld.indexOf("rld")));
         onView(withId(R.id.textview)).check(hasSelection("world"));
+
+        onView(withId(R.id.textview)).perform(mouseDoubleClickOnTextAtIndex(helloWorld.length()));
+        onView(withId(R.id.textview)).check(hasSelection("!"));
     }
 
     @SmallTest
