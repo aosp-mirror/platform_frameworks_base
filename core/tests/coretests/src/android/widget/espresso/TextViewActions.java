@@ -64,7 +64,7 @@ public final class TextViewActions {
      */
     public static ViewAction mouseClickOnTextAtIndex(int index) {
         return actionWithAssertions(
-                new MouseClickAction(Tap.SINGLE, new TextCoordinates(index), Press.PINPOINT));
+                new MouseClickAction(Tap.SINGLE, new TextCoordinates(index)));
     }
 
     /**
@@ -94,7 +94,7 @@ public final class TextViewActions {
      */
     public static ViewAction mouseDoubleClickOnTextAtIndex(int index) {
         return actionWithAssertions(
-                new MouseClickAction(Tap.DOUBLE, new TextCoordinates(index), Press.PINPOINT));
+                new MouseClickAction(Tap.DOUBLE, new TextCoordinates(index)));
     }
 
     /**
@@ -124,7 +124,22 @@ public final class TextViewActions {
      */
     public static ViewAction mouseLongClickOnTextAtIndex(int index) {
         return actionWithAssertions(
-                new MouseClickAction(Tap.LONG, new TextCoordinates(index), Press.PINPOINT));
+                new MouseClickAction(Tap.LONG, new TextCoordinates(index)));
+    }
+
+    /**
+     * Returns an action that triple-clicks by mouse on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to triple-click on.
+     */
+    public static ViewAction mouseTripleClickOnTextAtIndex(int index) {
+        return actionWithAssertions(
+                new MouseClickAction(MouseClickAction.CLICK.TRIPLE, new TextCoordinates(index)));
     }
 
     /**
@@ -236,6 +251,28 @@ public final class TextViewActions {
                         Press.PINPOINT,
                         TextView.class));
     }
+
+    /**
+    * Returns an action that triple click then drags by mouse on text from startIndex to endIndex
+    * on the TextView.<br>
+    * <br>
+    * View constraints:
+    * <ul>
+    * <li>must be a TextView displayed on screen
+    * <ul>
+    *
+    * @param startIndex The index of the TextView's text to start a drag from
+    * @param endIndex The index of the TextView's text to end the drag at
+    */
+   public static ViewAction mouseTripleClickAndDragOnText(int startIndex, int endIndex) {
+       return actionWithAssertions(
+               new DragAction(
+                       DragAction.Drag.MOUSE_TRIPLE_CLICK,
+                       new TextCoordinates(startIndex),
+                       new TextCoordinates(endIndex),
+                       Press.PINPOINT,
+                       TextView.class));
+   }
 
     public enum Handle {
         SELECTION_START,

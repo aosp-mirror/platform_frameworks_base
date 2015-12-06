@@ -157,6 +157,59 @@ public final class DragAction implements ViewAction {
         },
 
         /**
+         * Starts a drag with a mouse triple click.
+         */
+        MOUSE_TRIPLE_CLICK {
+            private DownMotionPerformer downMotion = new DownMotionPerformer() {
+                @Override
+                @Nullable
+                public MotionEvent perform(
+                        UiController uiController, float[] coordinates, float[] precision) {
+                    MotionEvent downEvent = MotionEvents.sendDown(
+                            uiController, coordinates, precision)
+                            .down;
+                    for (int i = 0; i < 2; ++i) {
+                        try {
+                            if (!MotionEvents.sendUp(uiController, downEvent)) {
+                                String logMessage = "Injection of up event as part of the triple "
+                                        + "click failed. Sending cancel event.";
+                                Log.d(TAG, logMessage);
+                                MotionEvents.sendCancel(uiController, downEvent);
+                                return null;
+                            }
+
+                            long doubleTapMinimumTimeout = ViewConfiguration.getDoubleTapMinTime();
+                            uiController.loopMainThreadForAtLeast(doubleTapMinimumTimeout);
+                        } finally {
+                            downEvent.recycle();
+                        }
+                        downEvent = MotionEvents.sendDown(
+                                uiController, coordinates, precision).down;
+                    }
+                    return downEvent;
+                }
+            };
+
+            @Override
+            public Status sendSwipe(
+                    UiController uiController,
+                    float[] startCoordinates, float[] endCoordinates, float[] precision) {
+                return sendLinearDrag(
+                        uiController, downMotion, startCoordinates, endCoordinates, precision);
+            }
+
+            @Override
+            public String toString() {
+                return "mouse triple click and drag to select";
+            }
+
+            @Override
+            public UiController wrapUiController(UiController uiController) {
+                return new MouseUiController(uiController);
+            }
+        },
+
+        /**
          * Starts a drag with a tap.
          */
         TAP {
