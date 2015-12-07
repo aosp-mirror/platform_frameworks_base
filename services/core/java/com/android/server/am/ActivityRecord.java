@@ -384,6 +384,19 @@ final class ActivityRecord {
         mSmallestSizeConfigurations = smallestSizeConfigurations;
     }
 
+    void scheduleConfigurationChanged(Configuration config, boolean reportToActivity) {
+        if (app != null && app.thread != null) {
+            try {
+                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + " " +
+                        "reportToActivity=" + reportToActivity + " and config: " + config);
+                app.thread.scheduleActivityConfigurationChanged(
+                        appToken, new Configuration(config), reportToActivity);
+            } catch (RemoteException e) {
+                // If process died, whatever.
+            }
+        }
+    }
+
     static class Token extends IApplicationToken.Stub {
         private final WeakReference<ActivityRecord> weakActivity;
         private final ActivityManagerService mService;

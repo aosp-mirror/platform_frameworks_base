@@ -420,7 +420,8 @@ public abstract class ApplicationThreadNative extends Binder
             if (data.readInt() != 0) {
                 overrideConfig = Configuration.CREATOR.createFromParcel(data);
             }
-            scheduleActivityConfigurationChanged(b, overrideConfig);
+            final boolean reportToActivity = data.readInt() == 1;
+            scheduleActivityConfigurationChanged(b, overrideConfig, reportToActivity);
             return true;
         }
 
@@ -1169,8 +1170,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     @Override
-    public final void scheduleActivityConfigurationChanged(
-            IBinder token, Configuration overrideConfig) throws RemoteException {
+    public final void scheduleActivityConfigurationChanged(IBinder token,
+            Configuration overrideConfig, boolean reportToActivity) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
@@ -1180,6 +1181,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         } else {
             data.writeInt(0);
         }
+        data.writeInt(reportToActivity ? 1 : 0);
         mRemote.transact(SCHEDULE_ACTIVITY_CONFIGURATION_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

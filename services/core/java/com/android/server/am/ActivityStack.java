@@ -4105,6 +4105,9 @@ final class ActivityStack {
         if (changes == 0 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + r);
+            // There are no significant differences, so we won't relaunch but should still deliver
+            // the new configuration to the client process.
+            r.scheduleConfigurationChanged(taskConfig, false);
             return true;
         }
 
@@ -4127,7 +4130,8 @@ final class ActivityStack {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Checking to restart " + r.info.name + ": changed=0x"
                 + Integer.toHexString(changes) + ", handles=0x"
-                + Integer.toHexString(r.info.getRealConfigChanged()) + ", newConfig=" + newConfig);
+                + Integer.toHexString(r.info.getRealConfigChanged()) + ", newConfig=" + newConfig
+                + ", taskConfig=" + taskConfig);
 
         if ((changes&(~r.info.getRealConfigChanged())) != 0 || r.forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
@@ -4173,15 +4177,7 @@ final class ActivityStack {
         // NOTE: We only forward the task override configuration as the system level configuration
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
-        if (r.app != null && r.app.thread != null) {
-            try {
-                if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending new config to " + r);
-                r.app.thread.scheduleActivityConfigurationChanged(
-                        r.appToken, new Configuration(taskConfig));
-            } catch (RemoteException e) {
-                // If process died, whatever.
-            }
-        }
+        r.scheduleConfigurationChanged(taskConfig, true);
         r.stopFreezingScreenLocked(false);
 
         return true;
