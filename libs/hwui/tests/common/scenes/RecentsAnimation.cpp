@@ -19,11 +19,11 @@
 
 class RecentsAnimation;
 
-static Benchmark _Recents(BenchmarkInfo{
+static TestScene::Registrar _Recents(TestScene::Info{
     "recents",
     "A recents-like scrolling list of textures. "
     "Consists of updating a texture every frame",
-    simpleCreateScene<RecentsAnimation>
+    TestScene::simpleCreateScene<RecentsAnimation>
 });
 
 class RecentsAnimation : public TestScene {

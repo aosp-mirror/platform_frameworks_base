@@ -18,10 +18,10 @@
 
 class OvalAnimation;
 
-static Benchmark _Oval(BenchmarkInfo{
+static TestScene::Registrar _Oval(TestScene::Info{
     "oval",
     "Draws 1 oval.",
-    simpleCreateScene<OvalAnimation>
+    TestScene::simpleCreateScene<OvalAnimation>
 });
 
 class OvalAnimation : public TestScene {

@@ -19,11 +19,11 @@
 
 class RectGridAnimation;
 
-static Benchmark _RectGrid(BenchmarkInfo{
+static TestScene::Registrar _RectGrid(TestScene::Info{
     "rectgrid",
     "A dense grid of 1x1 rects that should visually look like a single rect. "
     "Low CPU/GPU load.",
-    simpleCreateScene<RectGridAnimation>
+    TestScene::simpleCreateScene<RectGridAnimation>
 });
 
 class RectGridAnimation : public TestScene {

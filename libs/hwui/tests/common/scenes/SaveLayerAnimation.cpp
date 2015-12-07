@@ -18,11 +18,11 @@
 
 class SaveLayerAnimation;
 
-static Benchmark _SaveLayer(BenchmarkInfo{
+static TestScene::Registrar _SaveLayer(TestScene::Info{
     "savelayer",
     "A nested pair of clipped saveLayer operations. "
     "Tests the clipped saveLayer codepath. Draws content into offscreen buffers and back again.",
-    simpleCreateScene<SaveLayerAnimation>
+    TestScene::simpleCreateScene<SaveLayerAnimation>
 });
 
 class SaveLayerAnimation : public TestScene {

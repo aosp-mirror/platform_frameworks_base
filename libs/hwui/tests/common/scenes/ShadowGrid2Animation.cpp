@@ -18,11 +18,11 @@
 
 class ShadowGrid2Animation;
 
-static Benchmark _ShadowGrid2(BenchmarkInfo{
+static TestScene::Registrar _ShadowGrid2(TestScene::Info{
     "shadowgrid2",
     "A dense grid of rounded rects that cast a shadow. This is a higher CPU load "
     "variant of shadowgrid. Very high CPU load, high GPU load.",
-    simpleCreateScene<ShadowGrid2Animation>
+    TestScene::simpleCreateScene<ShadowGrid2Animation>
 });
 
 class ShadowGrid2Animation : public TestScene {

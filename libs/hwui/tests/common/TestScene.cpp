@@ -13,49 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TESTS_BENCHMARK_H
-#define TESTS_BENCHMARK_H
 
 #include "tests/common/TestScene.h"
 
-#include <string>
-#include <vector>
-
 namespace android {
 namespace uirenderer {
+namespace test {
 
-struct BenchmarkOptions {
-    int count;
-};
-
-typedef test::TestScene* (*CreateScene)(const BenchmarkOptions&);
-
-template <class T>
-test::TestScene* simpleCreateScene(const BenchmarkOptions&) {
-    return new T();
+// Not a static global because we need to force the map to be constructed
+// before we try to add things to it.
+std::unordered_map<std::string, TestScene::Info>& TestScene::testMap() {
+    static std::unordered_map<std::string, TestScene::Info> testMap;
+    return testMap;
 }
 
-struct BenchmarkInfo {
-    std::string name;
-    std::string description;
-    CreateScene createScene;
-};
+void TestScene::registerScene(const TestScene::Info& info) {
+    testMap()[info.name] = info;
+}
 
-class Benchmark {
-public:
-    Benchmark(const BenchmarkInfo& info) {
-        registerBenchmark(info);
-    }
-
-private:
-    Benchmark() = delete;
-    Benchmark(const Benchmark&) = delete;
-    Benchmark& operator=(const Benchmark&) = delete;
-
-    static void registerBenchmark(const BenchmarkInfo& info);
-};
-
+} /* namespace test */
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* TESTS_BENCHMARK_H */

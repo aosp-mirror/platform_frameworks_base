@@ -18,12 +18,12 @@
 
 class PartialDamageAnimation;
 
-static Benchmark _PartialDamage(BenchmarkInfo{
+static TestScene::Registrar _PartialDamage(TestScene::Info{
     "partialdamage",
     "Tests the partial invalidation path. Draws a grid of rects and animates 1 "
     "of them, should be low CPU & GPU load if EGL_EXT_buffer_age or "
     "EGL_KHR_partial_update is supported by the device & are enabled in hwui.",
-    simpleCreateScene<PartialDamageAnimation>
+    TestScene::simpleCreateScene<PartialDamageAnimation>
 });
 
 class PartialDamageAnimation : public TestScene {

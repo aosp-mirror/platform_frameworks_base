@@ -19,8 +19,7 @@
 #include "DisplayListCanvas.h"
 #include "RecordingCanvas.h"
 #include "RenderNode.h"
-#include "tests/macrobench/Benchmark.h"
-#include "tests/macrobench/TestContext.h"
+#include "tests/common/TestContext.h"
 #include "tests/common/TestScene.h"
 #include "tests/common/TestUtils.h"
 
