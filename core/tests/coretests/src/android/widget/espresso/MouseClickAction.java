@@ -24,9 +24,9 @@ import android.support.test.espresso.action.CoordinatesProvider;
 import android.support.test.espresso.action.GeneralClickAction;
 import android.support.test.espresso.action.MotionEvents;
 import android.support.test.espresso.action.MotionEvents.DownResultHolder;
-import android.support.test.espresso.action.PrecisionDescriber;
 import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Tapper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
@@ -35,6 +35,8 @@ import android.view.ViewConfiguration;
  */
 public final class MouseClickAction implements ViewAction {
     private final GeneralClickAction mGeneralClickAction;
+    @MouseUiController.MouseButton
+    private final int mButton;
 
     public enum CLICK implements Tapper {
         TRIPLE {
@@ -86,8 +88,20 @@ public final class MouseClickAction implements ViewAction {
     };
 
     public MouseClickAction(Tapper tapper, CoordinatesProvider coordinatesProvider) {
-        mGeneralClickAction = new GeneralClickAction(tapper, coordinatesProvider,
-                Press.PINPOINT);
+        this(tapper, coordinatesProvider, MotionEvent.BUTTON_PRIMARY);
+    }
+
+    /**
+     * Constructs MouseClickAction
+     *
+     * @param tapper the tapper
+     * @param coordinatesProvider the provider of the event coordinates
+     * @param button the mouse button used to send motion events
+     */
+    public MouseClickAction(Tapper tapper, CoordinatesProvider coordinatesProvider,
+            @MouseUiController.MouseButton int button) {
+        mGeneralClickAction = new GeneralClickAction(tapper, coordinatesProvider, Press.PINPOINT);
+        mButton = button;
     }
 
     @Override
@@ -102,7 +116,7 @@ public final class MouseClickAction implements ViewAction {
 
     @Override
     public void perform(UiController uiController, View view) {
-        mGeneralClickAction.perform(new MouseUiController(uiController), view);
+        mGeneralClickAction.perform(new MouseUiController(uiController, mButton), view);
         long doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
         if (0 < doubleTapTimeout) {
             // Wait to avoid false gesture detection. Without this wait, consecutive clicks can be

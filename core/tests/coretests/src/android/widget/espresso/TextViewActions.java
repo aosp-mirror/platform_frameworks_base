@@ -26,6 +26,7 @@ import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Tap;
 import android.support.test.espresso.util.HumanReadables;
 import android.text.Layout;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Editor;
 import android.widget.TextView;
@@ -63,8 +64,24 @@ public final class TextViewActions {
      * @param index The index of the TextView's text to click on.
      */
     public static ViewAction mouseClickOnTextAtIndex(int index) {
+        return mouseClickOnTextAtIndex(index, MotionEvent.BUTTON_PRIMARY);
+    }
+
+    /**
+     * Returns an action that clicks by mouse on text at an index on the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView displayed on screen
+     * <ul>
+     *
+     * @param index The index of the TextView's text to click on.
+     * @param button the mouse button to use.
+     */
+    public static ViewAction mouseClickOnTextAtIndex(int index,
+            @MouseUiController.MouseButton int button) {
         return actionWithAssertions(
-                new MouseClickAction(Tap.SINGLE, new TextCoordinates(index)));
+                new MouseClickAction(Tap.SINGLE, new TextCoordinates(index), button));
     }
 
     /**
