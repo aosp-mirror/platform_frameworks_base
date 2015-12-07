@@ -135,4 +135,158 @@
     <string name="choose_profile" msgid="8229363046053568878">"Profil Seçin"</string>
     <string name="category_personal" msgid="1299663247844969448">"Şəxsi"</string>
     <string name="category_work" msgid="8699184680584175622">"İş"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Tərtibatçı seçimləri"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Tərtibatçı seçənəklərini aktiv edin"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"Tətbiq inkişafı seçimlərini təyin et"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Gəlişdirici seçimləri bu istifadəçi üçün əlçatımlı deyil"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN ayarları bu istifadəçi üçün əlçatmazdır"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Modem ayarları bu istifadəçi üçün əlçatmazdır"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Giriş Nöqtəsi Ad Ayarları bu istifadəçi üçün əlçatmazdır"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB debaq prosesi"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB qoşulu olan zaman debaq rejimi"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"USB debaq avtorizasiyasını ləğv edin"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Baq raportu qısa yolu"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Baq raportunu götürmək üçün qidalanma menyusunda düyməni göstərin"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Oyaq qal"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Enereji doldurularkən ekran heç vaxt yuxu rejimində olmur"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI izləmə jurnalını aktivləşdir"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Bütün bluetooth HCI paketlərini fayla atın"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM kilidinin açılması"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Əməliyyat sistemi yükləyicisinin kilidinin açılmasına icazə ver"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM kilidinin açılmasına icazə verilsin?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"XƏBƏRDARLIQ: Bu parametr yanılı olduqda cihazın qorunması xüsusiyyətləri işləməyəcək."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Saxta məkan tətbiqini seçin"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Ayarlanmış saxta məkan tətbiqi yoxdur"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Saxta məkan tətbiqi: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Şəbəkələşmə"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Simsiz displey sertifikatlaşması"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Aqressiv Wi‑Fi\'dan Şəbəkə ötürməsinə"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi axtarışlarına həmişə icazə verin"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Köhnə DHCP klient istifadə edin"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobil data həmişə aktivdir"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Aktiv olanda, Wi‑Fi sianqlı zəif olan zaman, Mobil şəbəkə data bağlantısına nisbətən, Wi‑Fi daha aqressiv olacaq"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Wi‑Fi Axtarışlarına data trafikinə əsasən İcazə verin/Qadağan edin"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Logger bufer ölçüləri"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Hər jurnal buferinı Logger ölçüsü seçin"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB Sazlaması seçin"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB Sazlaması seçin"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Sınaq yerləşmələrə icazə verin"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Sınaq yerləşmələrə icazə verin"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Atribut inspeksiyasına baxışa icazə verin"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Android DHCP klienti əvəzinə Lollipopdan DHCP klient istifadə edin."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hətta Wi‑Fi aktiv olanda da mobil datanı həmişə aktiv saxlayın (sürətli şəbəkək keçidi üçün)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB debaq funksiyasına icazə verilsin?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB sazlanması yalnız inkişaf məqsədlidir. Kompüteriniz və cihazınız arasında datanı kopyalamaq üçün ondan istifadə edin, bildiriş olmadan tətbiqləri cihazınıza quraşdırın və qeydiyyat datasını oxuyun."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Əvvəl icazə verdiyiniz kompüterlərdən USB debaq əməliyyatına giriş ləğv olunsun?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"İnkişaf ayarlarına icazə verilsin mi?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu parametrlər yalnız inkişafetdirici istifadə üçün nəzərdə tutulub. Onlar cihaz və tətbiqlərinizin sınması və ya pis işləməsinə səbəb ola bilər."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB üzərindən tətbiqləri yoxlayın"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT vasitəsi ilə quraşdırılmış tətbiqləri zərərli davranış üzrə yoxlayın."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Yerli terminal"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Yerli örtük girişini təklif edən terminal tətbiqi aktiv edin"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP yoxlanılır"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP davranış yoxlamasını ayarlayın"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Sazlama"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Debaq tətbiqi seçin"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Debaq tətbiqi ayarlanmayıb"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Tətbiq debaq olunur: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Tətbiq seçin"</string>
+    <string name="no_application" msgid="2813387563129153880">"Heç nə"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Sazlamanı gözləyin"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Sazlanmış tətbiq icradan əvvəl qoşulmaq üçün sazlayıcı gözləyir"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Daxiletmə"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Təsvir"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Avadanlıq qaldırma renderi"</string>
+    <string name="media_category" msgid="4388305075496848353">"Media"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorinq"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Məhdud rejim aktivdir"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Əsas axında tətbiqlərin əlavə əməliyyatlar etməsi zamanı ekran işartısı olsun"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Pointer yeri"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Cari əlaqə datasını göstərən ekran örtüyü"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Toxunmaları göstər"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Toxunmalar üçün vizual cavab rəylərini göstərin"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Səth güncəlləşməsini göstər"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Güncəlləmədən sonra bütün ekranda işartı olsun"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU görünüş güncəlləməsini göstər"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU ilə tərtib edildikdə işıq pəncərələr daxilində görüntülənir"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Avadanlıq düzənlərinin güncəlləşməsini göstərin"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Onlar güncəllənəndən sonra avadanlıq qatlarında işartı olsun"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU böyütməsini sazlayın"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW overlay deaktiv edin"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Həmişə ekran kompozisiyası üçün GPU istifadə edin"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Rəng sahəsini simulyasiya edin"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL izlərini aktivləşdirin"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB audio marşrutu deaktiv edin"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB audio periferiyalara avtomatik marşrutu deaktiv edin"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Düzən həddini göstər"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Klip sərhədləri, boşluqları və s. göstər"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL düzən istiqamətinə məcbur edin"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Ekran düzən istiqamətini RTL üzərinə bütün yerli variantlar üçün məcbur edin"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU istifadəsini göstər"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Ekran örtüşməsi cari CPU istifadəsini göstərir"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"GPU renderə məcbur edin"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d rəsm üçün GPU məcburi istifadə"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"4x MSAA məcbur edin"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 tətbiqlərində 4x MSAA aktiv et"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Qeyri-düzbucaqlı klip əməliyyatlarını debaq edin"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Profil GPU render"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Pəncərə animasiya miqyası"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Animasiya keçid miqyası"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animator müddət şkalası"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"İkincili displeyi imitasiya edin"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Tətbiqlər"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Fəaliyyətləri saxlamayın"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"İstifadəçinin tərk etdiyi hər fəaliyyəti dərhal məhv et"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Fon prosesi limiti"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Bütün ANRları göstər"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Arxa tətbiqlər dialoquna cavab verməyən tətbiqi göstər"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Tətbiqlərə xaricdən məcburi icazə"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Seçilmiş hər hansı tətbiqi bəyannamə dəyərlərindən aslı olmayaraq xarici yaddaşa yazılabilən edir."</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Ölçü dəyişdirmək üçün məcburi fəaliyyətlər"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Bəyannamə dəyərlərindən aslı olmayaraq bütün fəaliyyətləri çoxsaylı pəncərə üçün dəyişkən ölçülü edir."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Masaüstü rezerv parolu"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Masaüstü tam rezervlər hazırda qorunmayıblar."</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Masaüstünün tam rezevr kopyalanması üçün parolu dəyişmək və ya silmək üçün toxunun"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Yeni rezerv parolu ayarlandı"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Yeni parol və parolun təkrarı uyğun gəlmir"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Yedəkləmə parolu xətası"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Canlı (defolt)"</item>
+    <item msgid="8446070607501413455">"Təbii"</item>
+    <item msgid="6553408765810699025">"Standart"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Artırılmış rənglər"</item>
+    <item msgid="8280754435979370728">"Gözlə göründüyü kimi təbii rənglər"</item>
+    <item msgid="5363960654009010371">"Rəqəmsal məzmun üçün optimallaşdırılan rənglər"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"İnaktiv tətbiqlər"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"İnaktiv. Keçid etmək üçün toxunun."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktiv. Keçid etmək üçün toxunun."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"İşləyən xidmətlər"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Hazırda prosesdə olan xidmətləri görüntüləyin və onlara nəzarət edin"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Gecə rejimi"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Qeyri-aktiv"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Həmişə aktiv"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Avtomatik"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Fayl şifrələnməsinə çevirin"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Çevirin..."</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Fayl artıq şifrələnib"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Fayl əsaslı şifrələnməyə çevrilir"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Data bölgüsünü fayl əsaslı şifrələməyə çevirin.\n !!Xəbərdarlıq!! Bu, bütün datanızı siləcək.\n Bu xüsusiyyət alfadır və düzgün işləməyə bilər.\n Davam etmək üçün \'Silin və çevirin...\' düyməsinə basın."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Silin və çevirin..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Şəkil rəng rejimi"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB istifadə edin"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Deaktiv"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Təkrənglik"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaliya (qırmızı-yaşıl)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaliya (qırmızı-yaşıl)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaliya (göy-sarı)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Rəng düzəlişi"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Bu funksiya eksperimentaldır və performansa təsir edə bilər."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> tərəfindən qəbul edilmir"</string>
 </resources>

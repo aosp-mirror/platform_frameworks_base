@@ -48,4 +48,104 @@
     <item msgid="5660739516542454527">"தடுக்கப்பட்டது"</item>
     <item msgid="1805837518286731242">"வேகம் குறைந்த இணைப்பைத் தற்காலிகமாகத் தவிர்க்கிறது"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"எப்போதும் சரிபார்க்க வேண்டாம்"</item>
+    <item msgid="6042769699089883931">"DRM உள்ளடக்கத்தை மட்டும் சரிபார்"</item>
+    <item msgid="9174900380056846820">"எப்போதும் சரிபார்"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"HDCP சரிபார்ப்பை எப்போதும் பயன்படுத்தாதே"</item>
+    <item msgid="3878793616631049349">"DRM உள்ளடக்கத்திற்கு மட்டும் HDCP சோதனையைப் பயன்படுத்து"</item>
+    <item msgid="45075631231212732">"HDCP சரிபார்ப்பை எப்போதும் பயன்படுத்து"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64K / லாக் பஃபர்"</item>
+    <item msgid="2822309747675758628">"256K / லாக் பஃபர்"</item>
+    <item msgid="6699306198357496731">"1M / லாக் பஃபர்"</item>
+    <item msgid="5748528643937500349">"4M / லாக் பஃபர்"</item>
+    <item msgid="1978629051085111592">"16M / லாக் பஃபர்"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"அனிமேஷனை முடக்கு"</item>
+    <item msgid="6624864048416710414">"அனிமேஷன் அளவு .5x"</item>
+    <item msgid="2219332261255416635">"அனிமேஷன் அளவு 1x"</item>
+    <item msgid="3544428804137048509">"அனிமேஷன் அளவு 1.5x"</item>
+    <item msgid="3110710404225974514">"அனிமேஷன் அளவு 2x"</item>
+    <item msgid="4402738611528318731">"அனிமேஷன் அளவு 5x"</item>
+    <item msgid="6189539267968330656">"அனிமேஷன் அளவு 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"அனிமேஷனை முடக்கு"</item>
+    <item msgid="3375781541913316411">"அனிமேஷன் அளவு .5x"</item>
+    <item msgid="1991041427801869945">"அனிமேஷன் அளவு 1x"</item>
+    <item msgid="4012689927622382874">"அனிமேஷன் அளவு 1.5x"</item>
+    <item msgid="3289156759925947169">"அனிமேஷன் அளவு 2x"</item>
+    <item msgid="7705857441213621835">"அனிமேஷன் அளவு 5x"</item>
+    <item msgid="6660750935954853365">"அனிமேஷன் அளவு 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"அனிமேஷனை முடக்கு"</item>
+    <item msgid="1138649021950863198">"அனிமேஷன் அளவு .5x"</item>
+    <item msgid="4394388961370833040">"அனிமேஷன் அளவு 1x"</item>
+    <item msgid="8125427921655194973">"அனிமேஷன் அளவு 1.5x"</item>
+    <item msgid="3334024790739189573">"அனிமேஷன் அளவு 2x"</item>
+    <item msgid="3170120558236848008">"அனிமேஷன் அளவு 5x"</item>
+    <item msgid="1069584980746680398">"அனிமேஷன் அளவு 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"ஏதுமில்லை"</item>
+    <item msgid="9033194758688161545">"480பி"</item>
+    <item msgid="1025306206556583600">"480பி (பாதுகாப்பானது)"</item>
+    <item msgid="1853913333042744661">"720பி"</item>
+    <item msgid="3414540279805870511">"720பி (பாதுகாப்பானது)"</item>
+    <item msgid="9039818062847141551">"1080பி"</item>
+    <item msgid="4939496949750174834">"1080பி (பாதுகாப்பானது)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (பாதுகாப்பானது)"</item>
+    <item msgid="3547211260846843098">"4K (மேம்படுத்தப்பட்டது)"</item>
+    <item msgid="5411365648951414254">"4K (மேம்படுத்தப்பட்டது, பாதுகாப்பானது)"</item>
+    <item msgid="1311305077526792901">"720பி, 1080பி (இரட்டைத் திரை)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"ஏதுமில்லை"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (கிராஃபிக்ஸ்)"</item>
+    <item msgid="1340692776955662664">"glGetError இல் அழைப்பின் அடுக்கு"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"முடக்கத்தில்"</item>
+    <item msgid="675719912558941285">"செவ்வகம் அல்லாத கிளிப் பகுதியை நீல நிறத்தில் வரையவும்"</item>
+    <item msgid="1064373276095698656">"சோதிக்கப்பட்ட வரைதல் கட்டளைகளைப் பச்சை நிறத்தில் தனிப்படுத்தவும்"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"முடக்கத்தில்"</item>
+    <item msgid="2751513398307949636">"திரையில் பட்டிகளாக"</item>
+    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo இல்"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"முடக்கத்தில்"</item>
+    <item msgid="7688197031296835369">"ஓவர்டிரா பகுதிகளைக் காட்டு"</item>
+    <item msgid="2290859360633824369">"நிறக்குருடின் பகுதிகளைக் காட்டு"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"நிலையான வரம்பு"</item>
+    <item msgid="4071574792028999443">"பின்புலச் செயல்முறைகள் இல்லை"</item>
+    <item msgid="4810006996171705398">"அதிகபட்சமாக 1 செயல்முறை"</item>
+    <item msgid="8586370216857360863">"அதிகபட்சமாக 2 செயல்முறைகள்"</item>
+    <item msgid="836593137872605381">"அதிகபட்சமாக 3 செயல்முறைகள்"</item>
+    <item msgid="7899496259191969307">"அதிகபட்சமாக 4 செயல்முறைகள்"</item>
+  </string-array>
+    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
 </resources>

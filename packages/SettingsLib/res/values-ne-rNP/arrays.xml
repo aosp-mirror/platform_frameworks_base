@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"रोकियो"</item>
     <item msgid="1805837518286731242">"अस्थायी रूपमा कमजोर जडान हटाइँदै"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"कहिल्यै जाँच नगर्नुहोस्"</item>
+    <item msgid="6042769699089883931">"DRM सामग्रीको मात्र जाँच गर्नुहोस्"</item>
+    <item msgid="9174900380056846820">"सधैँ जाँच गर्नुहोस्"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"HDCP परीक्षण कहिल्यै प्रयोग नगर्नुहोस्"</item>
+    <item msgid="3878793616631049349">"DRM सामग्रीको लागि मात्र HDCP जाँचको प्रयोग गर्नुहोस्"</item>
+    <item msgid="45075631231212732">"सधैँ HDCP जाँच प्रयोग गर्नुहोस्"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"६४K"</item>
+    <item msgid="3534782711045262344">"२५६K"</item>
+    <item msgid="8085867209202153403">"१ मेगा पिक्सेल"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64K प्रति लग बफर"</item>
+    <item msgid="2822309747675758628">"256K प्रति लग बफर"</item>
+    <item msgid="6699306198357496731">"1M प्रति लग बफर"</item>
+    <item msgid="5748528643937500349">"4M प्रति लग बफर"</item>
+    <item msgid="1978629051085111592">"16M प्रति लग बफर"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"सजीविकरण बन्द"</item>
+    <item msgid="6624864048416710414">"सजीविकरण मापन .5x"</item>
+    <item msgid="2219332261255416635">"सजीविकरण मापन 1x"</item>
+    <item msgid="3544428804137048509">"सजीविकरण मापन 1.5x"</item>
+    <item msgid="3110710404225974514">"एनिमेसन मापन 2x"</item>
+    <item msgid="4402738611528318731">"एनिमेसन मापन 5x"</item>
+    <item msgid="6189539267968330656">"सजीविकरण मापन 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"एनिमेसन बन्द छ"</item>
+    <item msgid="3375781541913316411">"सजीविकरण मापन .5x"</item>
+    <item msgid="1991041427801869945">"सजीविकरण मापन 1x"</item>
+    <item msgid="4012689927622382874">"सजीविकरण मापन 1.5x"</item>
+    <item msgid="3289156759925947169">"सजीविकरण मापन 2x"</item>
+    <item msgid="7705857441213621835">"एनिमेसन मापन 5x"</item>
+    <item msgid="6660750935954853365">"10x सजीविकरण स्केल"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"सजीविकरण बन्द"</item>
+    <item msgid="1138649021950863198">"सजीविकरण मापन .5x"</item>
+    <item msgid="4394388961370833040">"सजीविकरण स्केल १x"</item>
+    <item msgid="8125427921655194973">"सजीविकरण मापन 1.5x"</item>
+    <item msgid="3334024790739189573">"सजीविकरण मापन 2x"</item>
+    <item msgid="3170120558236848008">"सजीविकरण मापन 5x"</item>
+    <item msgid="1069584980746680398">"सजीविकरण मापन 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"कुनै पनि होइन"</item>
+    <item msgid="9033194758688161545">"४८० पिक्सेल"</item>
+    <item msgid="1025306206556583600">"४८० पिक्सेल (सुरक्षित)"</item>
+    <item msgid="1853913333042744661">"७२० पिक्सेल"</item>
+    <item msgid="3414540279805870511">"७२० पिक्सेल (सुरक्षित)"</item>
+    <item msgid="9039818062847141551">"१०८० पिक्सेल"</item>
+    <item msgid="4939496949750174834">"१०८० पिक्सेल (सुरक्षित)"</item>
+    <item msgid="1833612718524903568">"४ हजार"</item>
+    <item msgid="238303513127879234">"४ हजार (सुरक्षित)"</item>
+    <item msgid="3547211260846843098">"४ हजार (upscaled)"</item>
+    <item msgid="5411365648951414254">"४ हजार (upscaled, सुरक्षित)"</item>
+    <item msgid="1311305077526792901">"७२० पिक्सेल, १०८० पिक्सेल (दोहरो स्क्रिन)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"कुनै पनि होइन"</item>
+    <item msgid="9089630089455370183">"लगक्याट"</item>
+    <item msgid="5397807424362304288">"सिस्ट्रेस (ग्राफिक्स)"</item>
+    <item msgid="1340692776955662664">"glGetError मा स्ट्याक कल गर्नुहोस्"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"बन्द"</item>
+    <item msgid="675719912558941285">"गैर आयातकार क्षेत्र नीलो रङमा कोर्नुहोस्"</item>
+    <item msgid="1064373276095698656">"हाइलाइट परीक्षण चित्र कोर्ने आदेशहरू हरियोमा"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"बन्द"</item>
+    <item msgid="2751513398307949636">"स्क्रिनमा बारको रूपमा"</item>
+    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo मा"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"बन्द"</item>
+    <item msgid="7688197031296835369">"overdraw क्षेत्रहरू देखाउनुहोस्"</item>
+    <item msgid="2290859360633824369">"Deuteranomaly का लागि क्षेत्रहरू देखाउनुहोस्"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"मानक सीमा"</item>
+    <item msgid="4071574792028999443">"कुनै पृष्ठभूमि प्रक्रियाहरू छैनन्"</item>
+    <item msgid="4810006996171705398">"बढीमा १ प्रक्रिया"</item>
+    <item msgid="8586370216857360863">"बढीमा २ प्रक्रियाहरू"</item>
+    <item msgid="836593137872605381">"बढीमा ३ प्रक्रियाहरू"</item>
+    <item msgid="7899496259191969307">"बढीमा ४ प्रक्रियाहरू"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"चार्ज हुँदै"</item>
+    <item msgid="5220695614993094977">"MTP (मिडिया स्थानान्तरण प्रोटोकल)"</item>
+    <item msgid="2086000968159047375">"PTP (चित्र स्थानान्तरण प्रोटोकल)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB इथरनेट)"</item>
+    <item msgid="1718924214939774352">"अडियो स्रोत"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

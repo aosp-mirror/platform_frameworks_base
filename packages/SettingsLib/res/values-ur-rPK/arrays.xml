@@ -48,4 +48,104 @@
     <item msgid="5660739516542454527">"مسدود ہے"</item>
     <item msgid="1805837518286731242">"عارضی طور پر خراب کنکشن سے اجتناب کر رہا ہے"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"کبھی چیک نہ کریں"</item>
+    <item msgid="6042769699089883931">"‏صرف DRM مواد چیک کریں"</item>
+    <item msgid="9174900380056846820">"ہمیشہ چیک کریں"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"‏کبھی بھی HDCP چیکنگ استعمال نہ کریں"</item>
+    <item msgid="3878793616631049349">"‏HDCP چیکنگ صرف DRM مواد کیلئے استعمال کریں"</item>
+    <item msgid="45075631231212732">"‏ہمیشہ HDCP چیکنگ استعمال کریں"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"‏64K فی لاگ بفر"</item>
+    <item msgid="2822309747675758628">"‏256K فی لاگ بفر"</item>
+    <item msgid="6699306198357496731">"‏1M فی لاگ بفر"</item>
+    <item msgid="5748528643937500349">"‏4M فی لاگ بفر"</item>
+    <item msgid="1978629051085111592">"‏16M فی لاگ بفر"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"اینیمیشن آف ہے"</item>
+    <item msgid="6624864048416710414">"‏اینیمیشن اسکیل ‎.5x"</item>
+    <item msgid="2219332261255416635">"‏اینیمیشن اسکیل 1x"</item>
+    <item msgid="3544428804137048509">"‏اینیمیشن اسکیل 1.5x"</item>
+    <item msgid="3110710404225974514">"‏اینیمیشن اسکیل 2x"</item>
+    <item msgid="4402738611528318731">"‏اینیمیشن اسکیل 5x"</item>
+    <item msgid="6189539267968330656">"‏اینیمیشن اسکیل 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"اینیمیشن آف ہے"</item>
+    <item msgid="3375781541913316411">"‏اینیمیشن اسکیل ‎.5x"</item>
+    <item msgid="1991041427801869945">"‏اینیمیشن اسکیل 1x"</item>
+    <item msgid="4012689927622382874">"‏اینیمیشن اسکیل 1.5x"</item>
+    <item msgid="3289156759925947169">"‏اینیمیشن اسکیل 2x"</item>
+    <item msgid="7705857441213621835">"‏اینیمیشن اسکیل 5x"</item>
+    <item msgid="6660750935954853365">"‏اینیمیشن اسکیل 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"انیمیشن آف ہے"</item>
+    <item msgid="1138649021950863198">"‏انیمیشن اسکیل 5x."</item>
+    <item msgid="4394388961370833040">"‏انیمیشن اسکیل 1x"</item>
+    <item msgid="8125427921655194973">"‏انیمیشن اسکیل 1.5x"</item>
+    <item msgid="3334024790739189573">"‏انیمیشن اسکیل 2x"</item>
+    <item msgid="3170120558236848008">"‏اینیمیشن اسکیل 5x"</item>
+    <item msgid="1069584980746680398">"‏انیمیشن اسکیل 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"کوئی نہیں"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"‏480p (محفوظ)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"‏720p (محفوظ)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"‏1080p (محفوظ)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"‏4K (محفوظ)"</item>
+    <item msgid="3547211260846843098">"‏4K (اعلی سکیل شدہ)"</item>
+    <item msgid="5411365648951414254">"‏4K (اعلی سکیل شدہ، محفوظ)"</item>
+    <item msgid="1311305077526792901">"‏720p, 1080p (دوہری سکرین)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"کوئی نہیں"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"‏Systrace (گرافکس)"</item>
+    <item msgid="1340692776955662664">"‏glGetError پر کال کا انبار"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"آف"</item>
+    <item msgid="675719912558941285">"نیلا غیر مستطیل نما کلپ خطہ بنائیں"</item>
+    <item msgid="1064373276095698656">"سبز رنگ میں آزمودہ ڈرائنگ کمانڈز کو نمایاں کریں"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"آف"</item>
+    <item msgid="2751513398307949636">"بارز کے بطور اسکرین پر"</item>
+    <item msgid="1851438178120770973">"‏adb shell dumpsys gfxinfo میں"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"آف"</item>
+    <item msgid="7688197031296835369">"اوور ڈرا والے حصے دکھائیں"</item>
+    <item msgid="2290859360633824369">"‏Deuteranomaly کیلئے حصے دکھائیں"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"معیاری حد"</item>
+    <item msgid="4071574792028999443">"کوئی پس منظر والے پروسیسز نہیں ہیں"</item>
+    <item msgid="4810006996171705398">"زیادہ سے زیادہ 1 پروسیس"</item>
+    <item msgid="8586370216857360863">"زیادہ سے زیادہ 2 پروسیسز"</item>
+    <item msgid="836593137872605381">"زیادہ سے زیادہ 3 پروسیسز"</item>
+    <item msgid="7899496259191969307">"زیادہ سے زیادہ 4 پروسیسز"</item>
+  </string-array>
+    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
 </resources>

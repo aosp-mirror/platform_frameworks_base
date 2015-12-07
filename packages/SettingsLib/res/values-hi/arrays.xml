@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"अवरोधित"</item>
     <item msgid="1805837518286731242">"खराब कनेक्शन को अस्थायी रूप से अनदेखा कर रहा है"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"कभी नही जांचें"</item>
+    <item msgid="6042769699089883931">"केवल DRM सामग्री जांचें"</item>
+    <item msgid="9174900380056846820">"हमेशा जांचें"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"कभी भी HDCP जांच का उपयोग न करें"</item>
+    <item msgid="3878793616631049349">"HDCP जांच का उपयोग केवल DRM सामग्री के लिए करें"</item>
+    <item msgid="45075631231212732">"हमेशा HDCP जांच का उपयोग करें"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64K प्रति लॉग बफ़र"</item>
+    <item msgid="2822309747675758628">"256K प्रति लॉग बफ़र"</item>
+    <item msgid="6699306198357496731">"1M प्रति लॉग बफ़र"</item>
+    <item msgid="5748528643937500349">"4M प्रति लॉग बफ़र"</item>
+    <item msgid="1978629051085111592">"16M प्रति लॉग बफ़र"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"एनिमेशन बंद"</item>
+    <item msgid="6624864048416710414">"एनिमेशन स्‍केल .5x"</item>
+    <item msgid="2219332261255416635">"एनिमेशन स्‍केल 1x"</item>
+    <item msgid="3544428804137048509">"एनिमेशन स्‍केल 1.5x"</item>
+    <item msgid="3110710404225974514">"एनिमेशन स्‍केल 2x"</item>
+    <item msgid="4402738611528318731">"एनिमेशन स्‍केल 5x"</item>
+    <item msgid="6189539267968330656">"एनिमेशन स्‍केल 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"एनिमेशन बंद"</item>
+    <item msgid="3375781541913316411">"एनिमेशन स्‍केल .5x"</item>
+    <item msgid="1991041427801869945">"एनिमेशन स्‍केल 1x"</item>
+    <item msgid="4012689927622382874">"एनिमेशन स्‍केल 1.5x"</item>
+    <item msgid="3289156759925947169">"एनिमेशन स्‍केल 2x"</item>
+    <item msgid="7705857441213621835">"एनिमेशन स्‍केल 5x"</item>
+    <item msgid="6660750935954853365">"एनिमेशन स्‍केल 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"एनिमेशन बंद"</item>
+    <item msgid="1138649021950863198">"एनिमेशन स्‍केल .5x"</item>
+    <item msgid="4394388961370833040">"एनिमेशन स्‍केल 1x"</item>
+    <item msgid="8125427921655194973">"एनिमेशन स्‍केल 1.5x"</item>
+    <item msgid="3334024790739189573">"एनिमेशन स्‍केल 2x"</item>
+    <item msgid="3170120558236848008">"एनिमेशन स्‍केल 5x"</item>
+    <item msgid="1069584980746680398">"एनिमेशन स्‍केल 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"कोई नहीं"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (सुरक्षित)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (सुरक्षित)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (सुरक्षित)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (सुरक्षित)"</item>
+    <item msgid="3547211260846843098">"4K (बेहतर)"</item>
+    <item msgid="5411365648951414254">"4K (बेहतर, सुरक्षित)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (ड्यूअल स्‍क्रीन)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"कोई नहीं"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (ग्राफ़िक)"</item>
+    <item msgid="1340692776955662664">"glGetError पर स्टैक कॉल करें"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"बंद"</item>
+    <item msgid="675719912558941285">"गैर-आयताकार क्लिप क्षेत्र नीले रंग से बनाएं"</item>
+    <item msgid="1064373276095698656">"परीक्षित ड्रॉइंग आदेशों को हरे रंग से हाइलाइट करें"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"बंद"</item>
+    <item msgid="2751513398307949636">"बार के रूप में स्‍क्रीन पर"</item>
+    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo में"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"बंद"</item>
+    <item msgid="7688197031296835369">"ओवरड्रॉ क्षेत्रों को दिखाएं"</item>
+    <item msgid="2290859360633824369">"हरा रंग पहचानने में कमी के क्षेत्र दिखाएं"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"मानक सीमा"</item>
+    <item msgid="4071574792028999443">"कोई पृष्ठभूमि प्रक्रियाएं नहीं"</item>
+    <item msgid="4810006996171705398">"अधिकतम 1 प्रक्रिया"</item>
+    <item msgid="8586370216857360863">"अधिकतम 2 प्रक्रियाएं"</item>
+    <item msgid="836593137872605381">"अधिकतम 3 प्रक्रियाएं"</item>
+    <item msgid="7899496259191969307">"अधिकतम 4 प्रक्रियाएं"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"चार्ज हो रहा है"</item>
+    <item msgid="5220695614993094977">"MTP (मीडिया ट्रांसफर प्रोटोकॉल)"</item>
+    <item msgid="2086000968159047375">"PTP (पिक्चर ट्रांसफर प्रोटोकॉल)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB ईथरनेट)"</item>
+    <item msgid="1718924214939774352">"ऑडियो स्रोत"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

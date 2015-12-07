@@ -135,4 +135,159 @@
     <string name="choose_profile" msgid="8229363046053568878">"Profil Seçin"</string>
     <string name="category_personal" msgid="1299663247844969448">"Kişisel"</string>
     <string name="category_work" msgid="8699184680584175622">"İş"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Geliştirici seçenekleri"</string>
+    <!-- no translation found for development_settings_enable (542530994778109538) -->
+    <skip />
+    <string name="development_settings_summary" msgid="1815795401632854041">"Uygulama geliştirme için seçenekleri ayarla"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Bu kullanıcı, geliştirici seçeneklerini kullanamaz"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN ayarları bu kullanıcı için kullanılamıyor"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Tethering ayarları bu kullanıcı için kullanılamıyor"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Erişim Noktası Adı ayarları bu kullanıcı için kullanılamıyor"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB hata ayıklaması"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB bağlandığında hata ayıklama modu"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"USB hata ayıklama yetkilerini kaldır"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Hata raporu kısayolu"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Hata raporu almak için güç menüsünde bir düğme göster"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Uyanık kal"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Şarj edilirken ekran hiçbir zaman uykuya geçmez"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI araştırmayı etkinleştir"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Bir dosyadaki tüm Bluetooth HCI paketlerini yakala"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM kilit açma"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Önyükleyicinin kilidinin açılmasına izin ver"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM kilit açmaya izin verilsin mi?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UYARI: Bu ayar açıkken cihaz koruma özellikleri bu cihazda çalışmayacaktır."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Sahte konum uygulamasını seç"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Sahte konum uygulaması ayarlanmadı"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Sahte konum uygulaması: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Ağ işlemleri"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Kablosuz ekran sertifikası"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Kablosuz\'dan Hücresel Ağa agresif geçiş"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Kablosuz Dolaşım Taramalarına daima izin ver"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Eski DHCP istemcisini kullan"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Hücresel veri her zaman etkin"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Etkinleştirildiğinde, Kablosuz ağ sinyali zayıfken veri bağlantısının Hücresel ağa geçirilmesinde daha agresif olunur"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Arayüzde mevcut veri trafiği miktarına bağlı olarak Kablosuz Dolaşım Taramalarına İzin Verin/Vermeyin"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Günlük Kaydedici arabellek boyutları"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Gün. arabel. başına Gün. Kayd. boyutunu seç"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB Yapılandırmasını seç"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB Yapılandırmasını seç"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Sahte konumlara izin ver"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Sahte konumlara izin ver"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Görünüm özelliği incelemeyi etkinleştir"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Yeni Android DHCP istemcisi yerine Lollipop DHCP istemcisini kullan."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Kablosuz bağlantı etkin bile olsa mobil veri kullanımını her zaman etkin tut (ağlar arasında hızlı geçiş yapmak için)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB hata ayıklamasına izin verilsin mi?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB hata ayıklaması yalnızca geliştirme amaçlıdır. Verileri bilgisayarınızla cihazınız arasında kopyalamak, bildirim göndermeksizin uygulamaları cihazınıza yüklemek ve günlük verilerini okumak için kullanın."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Daha önce yetki verdiğiniz tüm bilgisayarların USB hata ayıklama erişimini iptal etmek istiyor musunuz?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Geliştirme amaçlı ayarlara izin verilsin mi?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu ayarlar yalnızca geliştirme amaçlıdır. Cihazınızın veya cihazdaki uygulamaların bozulmasına veya hatalı çalışmasına neden olabilir."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB\'den yüklenen uygulamaları doğrula"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT üzerinden yüklenen uygulamaları zararlı davranışlara karşı denetle."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Yerel terminal"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Yerel kabuk erişimi sunan terminal uygulamasını etkinleştir"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP denetimi"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP denetimini ayarla"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Hata ayıklama"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Hata ayıklama uygulaması seç"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Hata ayıklama uygulaması ayarlanmadı"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Hata ayıklama uygulaması: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Uygulama seçin"</string>
+    <string name="no_application" msgid="2813387563129153880">"Hiçbiri"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Hata ayıklayıcıyı bekle"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Hata ayıklanan uygulama, çalıştırılmadan önce hata ayıklayıcının eklenmesini bekler"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Girdi"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Çizim"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Donanım hızlandırmalı oluşturma"</string>
+    <string name="media_category" msgid="4388305075496848353">"Medya"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"İzleme"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Yüksek düzey modu etkin"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Uyg. ana işlem parçasında uzun işlem yap. ekr. yakıp söndür"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"İşaretçi konumu"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Mevcut dokunmatik verilerini gösteren yer paylaşımı"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Dokunmaları göster"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Dokunmalarda görsel geri bildirim göster"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Yüzey güncellemelerini göster"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Güncelleme sırasında tüm pencere yüzeylerini çiz"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU görünüm güncellemelerini göster"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU ile çizim yapılırken pencerelerdeki görünümleri çiz"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Donanım katmanı güncellemelerini göster"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Flash donanım katmanları güncellendiğinde yeşildir"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU fazla çizim hatasını ayıkla"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Donanım katmanlarını devre dışı bırak"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Ekran oluştururken her zaman GPU\'yu kullan"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Renk uzayını simüle et"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL izlerini etkinleştir"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ses yönlendirmesini kapat"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ses çevre birimlerine otomatik yönlendirmeyi kapat"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Düzen sınırlarını göster"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Sağdan sola düzenini zorla"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU kullanımını göster"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Mevcut CPU kullanımını gösteren yer paylaşımı"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"GPU oluşturmayı zorla"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D çizimde GPU kullanımını zorla"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"4x MSAA\'yı zorla"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 uygulamalarda 4x MSAA\'yı etkinleştir"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Dikdörtgen olmayan kırpma işlemlerinde hata ayıkla"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Profil GPU oluşturma"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Pencere animasyonu ölçeği"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Geçiş animasyonu ölçeği"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatör süre ölçeği"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"İkincil ekranları simüle et"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Uygulamalar"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Etkinlikleri saklama"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Kullanıcının ayrıldığı her etkinliği hemen yok et"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Arka plan işlem sınırı"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Tüm ANR\'leri göster"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Bildirilen değerlerden bağımsız olarak uygulamaları harici depolamaya yazmak için uygun hale getirir"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Etkinlikleri yeniden boyutlandırılabilmeye zorla"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Manifest değerlerinden bağımsız olarak, tüm etkinlikleri birden fazla pencerede yeniden boyutlandırılabilir hale getirir."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Masaüstü yedekleme şifresi"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Masaüstü tam yedeklemeleri şu an korunmuyor"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Masaüstü tam yedeklemelerinin şifresini değiştirmek veya kaldırmak için dokunun"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Yeni yedekleme şifresi ayarlandı"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Yeni şifre ve onayı eşleşmiyor."</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Yedekleme şifresi ayarlanamadı"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Canlı (varsayılan)"</item>
+    <item msgid="8446070607501413455">"Doğal"</item>
+    <item msgid="6553408765810699025">"Standart"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Geliştirilmiş renkler"</item>
+    <item msgid="8280754435979370728">"Göze göründüğü şekilde doğal renkler"</item>
+    <item msgid="5363960654009010371">"Dijital içerik için optimize edilmiş renkler"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Devre dışı uygulamalar"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Devre dışı. Değiştirmek için dokunun."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Etkin. Değiştirmek için dokunun."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Çalışan hizmetler"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Şu anda çalışan hizmetleri görüntüle ve denetle"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Gece modu"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Devre dışı"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Her zaman açık"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Otomatik"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Dosya şifrelemeye dönüştür"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Dönüştür…"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Dosya şifreleme zaten uygulandı"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Dosya tabanlı şifrelemeye dönüştürme"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Veri bölmesini dosya tabanlı şifrelemeye dönüştür.\n !!Dikkat!! Bu işlem tüm verilerinizi siler\n Bu özellik henüz alfa aşamasındadır ve düzgün çalışmayabilir.\n Devam etmek için \"Sil ve dönüştür…\" seçeneğine basın."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Sil ve dönüştür…"</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Resim renk modu"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB\'yi kullan"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Devre dışı"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Tam renk körlüğü"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Yeşil renk körlüğü (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Kırmızı renk körlüğü (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Mavi renk körlüğü (mavi-sarı)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Renk düzeltme"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Bu özellik deneyseldir ve performansı etkileyebilir."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> tarafından geçersiz kılındı"</string>
 </resources>

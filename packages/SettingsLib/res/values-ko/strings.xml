@@ -135,4 +135,159 @@
     <string name="choose_profile" msgid="8229363046053568878">"프로필 선택"</string>
     <string name="category_personal" msgid="1299663247844969448">"개인"</string>
     <string name="category_work" msgid="8699184680584175622">"직장"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"개발자 옵션"</string>
+    <!-- no translation found for development_settings_enable (542530994778109538) -->
+    <skip />
+    <string name="development_settings_summary" msgid="1815795401632854041">"앱 개발 옵션 설정"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"이 사용자는 개발자 옵션을 사용할 수 없습니다."</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"이 사용자는 VPN 설정을 수정할 수 없습니다."</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"이 사용자는 테더링 설정을 수정할 수 없습니다."</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"이 사용자는 액세스포인트 네임(APN) 설정을 수정할 수 없습니다."</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB 디버깅"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB가 연결된 경우 디버그 모드 사용"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"USB 디버깅 권한 승인 취소"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"버그 신고 바로가기"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"전원 메뉴에 버그 신고 버튼 표시"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"화면 켜짐 상태 유지"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"충전하는 동안 화면이 꺼지지 않음"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"블루투스 HCI 스누프 로그 사용"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"모든 블루투스 HCI 패킷을 하나의 파일에 캡처"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM 잠금 해제"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"부트로더 잠금 해제 허용"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM 잠금 해제를 허용하시겠습니까?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"경고: 이 설정을 사용하는 동안에는 이 기기에서 기기 보호 기능이 작동하지 않습니다."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"모의 위치 앱 선택"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"모의 위치 앱이 설정되어 있지 않음"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"모의 위치 앱: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"네트워크"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"무선 디스플레이 인증서"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi 상세 로깅 사용"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Wi-Fi-셀룰러 적극 핸드오버"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi 로밍 스캔 항상 허용"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"이전 DHCP 클라이언트 사용"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"모바일 데이터 항상 활성화"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시합니다."</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"사용 설정하면 Wi-Fi 신호가 약할 때 데이터 연결을 Wi-Fi에서 데이터 네트워크로 더욱 적극적으로 핸드오버합니다."</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"인터페이스에 표시되는 데이터 트래픽의 양을 기반으로 Wi-Fi 로밍 스캔을 허용하거나 허용하지 않습니다."</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB 설정 선택"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB 설정 선택"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"모의 위치 허용"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"모의 위치 허용"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"보기 속성 검사 사용"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"새로운 Android DHCP 클라이언트 대신 Lollipop의 DHCP 클라이언트 사용"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi가 활성화되어 있을 때에도 빠른 네트워크 전환을 위하여 항상 모바일 데이터를 활성 상태로 유지합니다."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB 디버깅을 허용하시겠습니까?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"이전에 승인한 모든 컴퓨터에서 USB 디버깅에 대한 액세스 권한을 취소하시겠습니까?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"개발자 설정을 허용하시겠습니까?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"이 설정은 개발자용으로만 설계되었습니다. 이 설정을 사용하면 기기 및 애플리케이션에 예기치 않은 중단이나 오류가 발생할 수 있습니다."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB를 통해 설치된 앱 확인"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT을 통해 설치된 앱에 유해한 동작이 있는지 확인"</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"로컬 터미널"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"로컬 셸 액세스를 제공하는 터미널 앱 사용"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 확인"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP 확인 동작 설정"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"디버깅"</string>
+    <string name="debug_app" msgid="8349591734751384446">"디버깅할 앱 선택"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"디버깅할 애플리케이션이 설정되지 않음"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"디버깅할 애플리케이션: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"애플리케이션 선택"</string>
+    <string name="no_application" msgid="2813387563129153880">"없음"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"디버거 연결을 위해 대기"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"디버깅된 애플리케이션이 실행되기 전에 디버거 연결을 위해 대기"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"입력"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"그림"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"하드웨어 가속 렌더링"</string>
+    <string name="media_category" msgid="4388305075496848353">"미디어"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"모니터링"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"엄격 모드 사용"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"앱이 기본 스레드에서 오래 작업하면 화면 깜박이기"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"포인터 위치"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"현재 터치 데이터 오버레이 표시"</string>
+    <string name="show_touches" msgid="1356420386500834339">"터치한 항목 표시"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"터치한 항목에 대해 시각적으로 표시"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"표면 업데이트 표시"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 표면이 업데이트되었을 때 플래시 처리"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU 보기 업데이트 표시"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU로 드로잉했을 때 창 내부 보기 플래시 처리"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"하드웨어 업데이트 표시"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"업데이트 할 때 하드웨어 레이어 깜박이기"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 오버드로 디버깅"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW 오버레이 사용 안함"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"화면 합성 목적으로 항상 GPU 사용"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"색상 공간 시뮬레이션"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL 추적 사용 설정"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB 오디오 연결 사용 중지"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB 오디오 주변기기로 자동 연결 사용 중지"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"레이아웃 범위 표시"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"클립 경계, 여백 등을 표시"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL 레이아웃 방향 강제 적용"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU 사용량 표시"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"현재 CPU 사용량 오버레이 표시"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"GPU 렌더링 강제 설정"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D 드로잉용으로 GPU 강제 사용"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"4x MSAA 강제 사용"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"사각형이 아닌 클립 작업 디버그"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"프로필 GPU 렌더링"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"창 애니메이션 배율"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"전환 애니메이션 배율"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animator 길이 배율"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"보조 디스플레이 시뮬레이션"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"앱"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"액티비티 유지 안함"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"사용자가 종료하는 즉시 바로 제거"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"백그라운드 프로세스 수 제한"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"모든 ANR 보기"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"백그라운드 앱에 대해 앱 응답 없음 대화상자 표시"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"외부에서 앱 강제 허용"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"매니페스트 값에 관계없이 앱을 외부 저장소에 작성"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"활동의 크기가 조정 가능하도록 설정"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"모든 활동을 매니페스트 값에 관계없이 멀티 윈도우용으로 크기 조정 가능하도록 설정"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"데스크톱 백업 비밀번호"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"데스크톱 전체 백업에 비밀번호가 설정되어 있지 않음"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"데스크톱 전체 백업에 대한 비밀번호를 변경하거나 삭제하려면 터치하세요."</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"새 백업 비밀번호가 설정되었습니다."</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"새 비밀번호와 확인한 비밀번호가 일치하지 않습니다."</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"백업 비밀번호를 설정하지 못했습니다."</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"생동감(기본값)"</item>
+    <item msgid="8446070607501413455">"내츄럴"</item>
+    <item msgid="6553408765810699025">"표준"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"보정 색상"</item>
+    <item msgid="8280754435979370728">"눈으로 보는 듯한 내츄럴 색상"</item>
+    <item msgid="5363960654009010371">"디지털 콘텐츠에 최적화된 색상"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"비활성 앱"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"비활성 상태입니다. 전환하려면 터치하세요."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"활성 상태입니다. 전환하려면 터치하세요."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"실행 중인 서비스"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"현재 실행 중인 서비스 보기 및 제어"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"야간 모드"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"사용 안함"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"항상 사용"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"자동"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"파일 암호화로 변환"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"변환..."</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"파일이 이미 암호화됨"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"파일 기반 암호화로 변환"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"데이터 파티션을 파일 기반 암호화로 변환하세요.\n !!경고!! 이 기능을 사용하면 모든 데이터가 삭제됩니다.\n 이 기능은 알파 버전이며 제대로 작동하지 않을 수 있습니다.\n 계속하려면 \'삭제 및 변환...\'을 누르세요."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"삭제 및 변환..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"사진 색상 모드"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB 사용"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"사용 중지됨"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"전색맹"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"녹색약(적녹)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"적색약(적녹)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"청색약(청황)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"색보정"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"실험실 기능이며 성능에 영향을 줄 수 있습니다."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
 </resources>

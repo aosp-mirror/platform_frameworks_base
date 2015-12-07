@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"തടഞ്ഞിരിക്കുന്നു"</item>
     <item msgid="1805837518286731242">"മോശം കണക്ഷൻ താൽക്കാലികമായി ഒഴിവാക്കുന്നു"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"ഒരിക്കലും പരിശോധിക്കരുത്"</item>
+    <item msgid="6042769699089883931">"DRM ഉള്ളടക്കത്തിനുമാത്രമായി പരിശോധിക്കുക"</item>
+    <item msgid="9174900380056846820">"എല്ലായ്‌പ്പോഴും പരിശോധിക്കുക"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"ഒരിക്കലും HDCP പരിശോധന ഉപയോഗിക്കരുത്"</item>
+    <item msgid="3878793616631049349">"DRM ഉള്ളടക്കത്തിനുമാത്രമായി HDCP പരിശോധന ഉപയോഗിക്കുക"</item>
+    <item msgid="45075631231212732">"എല്ലായ്‌പ്പോഴും HDCP പരിശോധന ഉപയോഗിക്കുക"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"ഓരോ ലോഗ് ബഫറിനും 64K"</item>
+    <item msgid="2822309747675758628">"ഓരോ ലോഗ് ബഫറിനും 256K"</item>
+    <item msgid="6699306198357496731">"ഓരോ ലോഗ് ബഫറിനും 1M"</item>
+    <item msgid="5748528643937500349">"ഓരോ ലോഗ് ബഫറിനും 4M"</item>
+    <item msgid="1978629051085111592">"ഓരോ ലോഗ് ബഫറിനും 16M"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"ആനിമേഷൻ ഓഫുചെയ്യുക"</item>
+    <item msgid="6624864048416710414">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>
+    <item msgid="2219332261255416635">"ആനിമേഷൻ സ്‌കെയിൽ 1x"</item>
+    <item msgid="3544428804137048509">"ആനിമേഷൻ സ്‌കെയിൽ 1.5x"</item>
+    <item msgid="3110710404225974514">"ആനിമേഷൻ സ്‌കെയിൽ 2x"</item>
+    <item msgid="4402738611528318731">"ആനിമേഷൻ സ്‌കെയിൽ 5x"</item>
+    <item msgid="6189539267968330656">"ആനിമേഷൻ സ്‌കെയിൽ 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"ആനിമേഷൻ ഓഫുചെയ്യുക"</item>
+    <item msgid="3375781541913316411">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>
+    <item msgid="1991041427801869945">"ആനിമേഷൻ സ്‌കെയിൽ 1x"</item>
+    <item msgid="4012689927622382874">"ആനിമേഷൻ സ്‌കെയിൽ 1.5x"</item>
+    <item msgid="3289156759925947169">"ആനിമേഷൻ സ്‌കെയിൽ 2x"</item>
+    <item msgid="7705857441213621835">"ആനിമേഷൻ സ്‌കെയിൽ 5x"</item>
+    <item msgid="6660750935954853365">"ആനിമേഷൻ സ്‌കെയിൽ 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"ആനിമേഷൻ രഹിതം"</item>
+    <item msgid="1138649021950863198">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>
+    <item msgid="4394388961370833040">"ആനിമേഷൻ സ്‌കെയിൽ 1x"</item>
+    <item msgid="8125427921655194973">"ആനിമേഷൻ സ്‌കെയിൽ 1.5x"</item>
+    <item msgid="3334024790739189573">"ആനിമേഷൻ സ്‌കെയിൽ 2x"</item>
+    <item msgid="3170120558236848008">"ആനിമേഷൻ സ്‌കെയിൽ 5x"</item>
+    <item msgid="1069584980746680398">"ആനിമേഷൻ സ്‌കെയിൽ 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"ഒന്നുമില്ല"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (സുരക്ഷിതം)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (സുരക്ഷിതം)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (സുരക്ഷിതം)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (സുരക്ഷിതം)"</item>
+    <item msgid="3547211260846843098">"4K (അപ്‌സ്കെയിൽ ചെയ്തത്)"</item>
+    <item msgid="5411365648951414254">"4K (അപ്‌സ്കെയിൽ ചെയ്തത്, സുരക്ഷിതം)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (ഇരട്ട സ്ക്രീൻ)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"ഒന്നുമില്ല"</item>
+    <item msgid="9089630089455370183">"ലോഗ്‌ക്യാറ്റ്"</item>
+    <item msgid="5397807424362304288">"സിസ്‌ട്രേസ് (ഗ്രാഫിക്‌സ്)"</item>
+    <item msgid="1340692776955662664">"glGetError-ലെ കോൾ സ്റ്റാക്ക്"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"ഓഫ്"</item>
+    <item msgid="675719912558941285">"നീലനിറത്തിൽ ചതുരമല്ലാത്ത ക്ലിപ്പ് ഭാഗം വരയ്‌ക്കുക"</item>
+    <item msgid="1064373276095698656">"പരിശോധിച്ച ഡ്രോയിംഗ് കമാൻഡുകൾ പച്ചനിറത്തിൽ ഹൈലൈറ്റുചെയ്യുക"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ഓഫ്"</item>
+    <item msgid="2751513398307949636">"സ്‌ക്രീനിൽ ബാറുകളായി"</item>
+    <item msgid="1851438178120770973">"adb ഷെൽ dumpsys gfxinfo-യിൽ"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"ഓഫ്"</item>
+    <item msgid="7688197031296835369">"ഓവർഡ്രോ ഭാഗങ്ങൾ ദൃശ്യമാക്കുക"</item>
+    <item msgid="2290859360633824369">"വർണ്ണാന്ധതയ്‌ക്കായുള്ള ഭാഗങ്ങൾ ദൃശ്യമാക്കുക"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"അടിസ്ഥാന പരിധി"</item>
+    <item msgid="4071574792028999443">"പശ്ചാത്തല പ്രോസ‌സ്സുകൾ ഒന്നുമില്ല"</item>
+    <item msgid="4810006996171705398">"പരമാവധി ഒരു പ്രോസ‌സ്സ്"</item>
+    <item msgid="8586370216857360863">"പരമാവധി 2 പ്രോസസ്സുകൾ"</item>
+    <item msgid="836593137872605381">"പരമാവധി 3 പ്രോസ‌സ്സുകൾ"</item>
+    <item msgid="7899496259191969307">"പരമാവധി 4 പ്രോസ‌സ്സുകൾ"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"ചാർജ്ജുചെയ്യുന്നു"</item>
+    <item msgid="5220695614993094977">"MTP (മീഡിയ ട്രാൻസ്‌ഫർ പ്രോട്ടോക്കോള്‍)"</item>
+    <item msgid="2086000968159047375">"PTP (പിക്‌ചർ ട്രാൻസ്‌ഫർ പ്രോട്ടോക്കോള്‍)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB ഇതർനെറ്റ്)"</item>
+    <item msgid="1718924214939774352">"ഓഡിയോ ഉറവിടം"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

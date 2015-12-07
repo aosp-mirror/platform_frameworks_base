@@ -135,4 +135,158 @@
     <string name="choose_profile" msgid="8229363046053568878">"प्रोफाइल रोज्नुहोस्"</string>
     <string name="category_personal" msgid="1299663247844969448">"व्यक्तिगत"</string>
     <string name="category_work" msgid="8699184680584175622">"काम"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"विकासकर्ता विकल्पहरू"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"विकासकर्ता विकल्प सक्रिया गर्नुहोस्"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"अनुप्रयोग विकासको लागि विकल्पहरू सेट गर्नुहोस्"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"विकासकर्ता विकल्पहरू यस प्रयोगकर्ताका लागि उपलब्ध छैन"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN सेटिङ्हरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"कार्यक्षेत्र सीमा सेटिङ्हरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"पहुँच बिन्दु नामको सेटिङ्हरू यो प्रयोगकर्ताको लागि उपलब्ध छैन"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB डिबग गर्दै"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB जडित हुँदा डिबग मोड"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"USB डिबग गर्ने प्राधिकरणहरू उल्टाउनुहोस्"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"बग प्रतिवेदन सर्टकट"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"बग रिपोर्ट लिनका लागि पावर मेनुमा बटन देखाउनुहोस्"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"जागा रहनुहोस्"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"चार्ज गर्ने बेलामा स्क्रिन कहिल्यै सुत्दैन।"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ब्लुटुथ HCI snoop लग सक्षम पार्नुहोस्"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"सम्पूर्ण ब्लुटुथ HCI प्याकेटहरू एक फाइलमा कैद गर्नुहोस्"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM अनलक गर्दै"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"अनलक हुन बूटलोडरलाई अनुमति दिनुहोस्"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM अनलक गर्न अनुमति दिने?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"चेतावनी: यो सेटिङ खुला हुँदा, यस उपकरणमा उपकरण सुरक्षा सुविधाहरूले काम गर्ने छैनन्।"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"नमूना स्थान अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"कुनै नमूना स्थान अनुप्रयोग सेट गरिएन"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"नमूना स्थान अनुप्रयोग: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किङ"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाइफाइ वर्बोज लग सक्षम पार्नुहोस्"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"सेलुलर समायोजनका लागि आक्रामक वाइफाइ"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"वाइफाइ घुम्ने स्क्यान गर्न सधैँ अनुमति दिनुहोस्"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"लिगेसी DHCP ग्राहक प्रयोग गर्नुहोस्"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"सेलुलर डेटा सधैं सक्रिय"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाइफाइ लग स्तर बढाउनुहोस्, वाइफाइ चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"वाइफाइ संकेत कम हुँदा, सक्षम जब गरिन्छ, वाइफाइ सेलुलर लागि डेटा जडान सुम्पनामा बढी आक्रामक हुनेछ"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"वाइफाइ घुम्ने स्क्यान इन्टरफेसमा रहेको डेटा यातायातको मात्रामा आधारित अनुमति दिनुहोस्/नदिनुहोस्"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"लगर बफर आकारहरू"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB विन्यास चयन गर्नुहोस्"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB विन्यास चयन गर्नुहोस्"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"नक्कली स्थानहरूलाई अनुमति दिनुहोस्"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"नक्कली स्थानहरूलाई अनुमति दिनुहोस्"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"दृष्टिकोण विशेषता निरीक्षण सक्षम पार्नुहोस्"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"नयाँ Android DHCP ग्राहकको सट्टा Lollipop बाट DHCP ग्राहक प्रयोग गर्नुहोस्।"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi सक्रिय हुँदा पनि मोबाइल डेटा सधैँ सक्रिय राख्नुहोस् (द्रूत नेटवर्क स्विच गर्नको लागि)।"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB डिबग गर्न लागि अनुमति दिने हो?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"युएसबी डिबगिङ विकास प्रयोजनका लागि मात्र निर्मित हुन्छ। यसलाई तपाईँको कम्प्युटर र तपाईँको उपकरणका बीच डेटा प्रतिलिपि गर्न, बिना सूचना तपाईँको उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लग डेटा पढ्नका लागि प्रयोग गर्नुहोस्।"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"तपाईँ पहिले नै अधिकृत गर्नुभएका सबै कम्प्यूटरबाट USB डिबग गर्नको लागि पहुँच रद्द गर्ने हो?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"विकास सेटिङहरू अनुमति दिने हो?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र अनुप्रयोगहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB मा अनुप्रयोगहरू रुजु गर्नुहोस्"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक व्यवहारको लागि ADB/ADT को माध्यमबाट स्थापित अनुप्रयोगहरूको जाँच गर्नुहोस्।"</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल अनुप्रयोग सक्षम गर्नुहोस्"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP जाँच गर्दै"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP जाँच व्यवहार सेट गर्नुहोस्"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"डिबग गरिँदै"</string>
+    <string name="debug_app" msgid="8349591734751384446">"डिबग अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"कुनै पनि डिबग अनुप्रयोग सेट छैन"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"डिबग गर्ने अनुप्रयोग: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"अनुप्रयोग चयन गर्नुहोस्"</string>
+    <string name="no_application" msgid="2813387563129153880">"केही पनि होइन"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"डिबग गर्नेलाई पर्खनुहोस्"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"डिबग भएको अनुप्रयोग कार्यन्वयन हुनु अघि संलग्न हुन डिबग गर्नेलाई पर्खन्छ"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"इनपुट"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"रेखाचित्र"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"हार्डवेयर प्रतिपादन फुर्तिलो बनाइयो"</string>
+    <string name="media_category" msgid="4388305075496848353">"मिडिया"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"अनुगमन गर्दै"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"स्ट्रिक्ट मोड सक्षम पारियो"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"मुख्य थ्रेडमा लामा कार्यहरू अनुप्रयोगले सञ्चालन गर्दा स्क्रिनमा फ्ल्यास गर्नुहोस्"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"सूचक स्थान"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"स्क्रिन ओवरले हालको छुने डेटा देखाउँदै"</string>
+    <string name="show_touches" msgid="1356420386500834339">"छुवाइहरू देखाउनुहोस्"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"छुवाइका लागि देखिने प्रतिक्रिया देखाउनुहोस्"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"सतह अद्यावधिक देखाउनुहोस्"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"तिनीहरू अपडेट हुँदा पुरै विन्डो सतहहरूमा फ्यास गर्नुहोस्"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU दृश्य अद्यावधिक देखाउनुहोस्"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU को साथ कोरिएको बेला विन्डोहरू भित्र फ्ल्यास दृश्यहरू"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"हार्डवेयर तह अद्यावधिक देखाउनुहोस्"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"फ्ल्यास हार्डवेयर तहहरू अपडेट हुँदा हरिया हुन्छन्"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU overdraw डिबग गर्नुहोस्"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW ओवरले असक्षम पार्नुहोस्"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"स्क्रिन कोम्पजिट गर्न लागि सधैँ GPU प्रयोग गर्नुहोस्"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"रंग स्पेस अनुकरण गर्नुहोस्"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ट्रेसहरू सक्षम गर्नुहोस्"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB अडियो अनुमार्ग बन्द"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB अडियो परिधीयलाई स्वचालित अनुमार्ग असक्षम"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"लेआउट सीमाहरू देखाउनुहोस्"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"क्लिप सीमा, मार्जिन, इत्यादि देखाउनुहोस्।"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL लेआउट दिशामा जबर्जस्ती गर्नुहोस्"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"सबै लोकेलहरूको लागि RTLमा स्क्रिन लेआउट दिशामा जबर्जस्ती गर्नुहोस्"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU उपयोग देखाउनुहोस्"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"स्क्रिन ओभरले वर्तमान CPU प्रयोग देखाउँदै"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"GPU रेन्डर गर्न जोड गर्नुहोस्"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d चित्र कोर्नका लागि GPU को प्रयोगलाई जोड दिनुहोस्"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"4x MSAA जोड गर्नुहोस्"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES २.० अनुप्रयोगमा ४x MSAA सक्षम पार्नुहोस्"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"गैर आयातकर क्लिप कार्यहरू डिबग गर्नुहोस्"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"प्रोफाइल GPU रेन्डर गर्दै"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"विन्डो सजीविकरण स्केल"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"संक्रमण सजीविकरण मापन"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"सजीविकरण अवधि मापन"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"सहायक प्रदर्शनलाई सिमुलेट गर्नुहोस्"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"अनुप्रयोगहरू"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"गतिविधिहरू नराख्नुहोस्"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"प्रयोगकर्ताले यसलाई छोड्ने बित्तिकै जति सक्दो चाँडो हरेक गतिविधि ध्वस्त पार्नुहोस्"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"पृष्ठभूमि प्रक्रिया सीमा"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"सबै ANRs देखाउनुहोस्"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"पृष्ठभूमि अनुप्रयोगका लागि जवाफ नदिइरहेका अनुप्रयोगहरू देखाउनुहोस्"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यमा बल प्रयोगको अनुमति प्राप्त अनुप्रयोगहरू"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"म्यानिफेेस्टको उपेक्षा गरी, कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न योग्य बनाउँछ"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"गतिविधिहरू रिसाइज गर्नको लागि बाध्य गर्नुहोस्"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउँछ।"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"डेस्कटप ब्याकअप पासवर्ड"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"डेस्कटप पूर्ण जगेडाहरू हाललाई सुरक्षित छैनन्"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"डेस्कटप पूर्ण ब्याकअपको लागि पासवर्ड बदल्न वा हटाउन छुनुहोस्"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"नयाँ जगेडा पासवर्ड सेट गर्नुहोस्"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"नयाँ पासवर्ड र पुष्टिकरण मेल खाँदैनन्"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"विफलता सेटिङ ब्याकअप पासवर्ड"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"जोसिलो (पूर्व निर्धारित)"</item>
+    <item msgid="8446070607501413455">"प्राकृतिक"</item>
+    <item msgid="6553408765810699025">"मानक"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"परिष्कृत रङ्गहरू"</item>
+    <item msgid="8280754435979370728">"आँखाले देख्ने प्राकृतिक रङ्गहरू"</item>
+    <item msgid="5363960654009010371">"डिजिटल सामग्रीको लागि अनुकूलित रङ्गहरु"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"निष्क्रिय अनुप्रयोगहरू"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"निष्क्रिय। टगल गर्न छुनुहोस्।"</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"सक्रिय। टगल गर्न छुनुहोस्।"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"चलिरहेका सेवाहरू"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"रात्री मोड"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"असक्षम गरियो"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"सधैं खुल्‍ला"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"स्वचालित"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"फाइल इन्क्रिप्सनमा रूपान्तरण गर्नुहोस्"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रुपान्तरण गर्नुहोस्…"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"पहिल्यै फाइल इन्क्रिप्ट गरिएको छ"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"इन्क्रिप्सन आधारित फाइलमा रुपान्तरण गर्दै"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"डेटा विभाजनलाई इन्क्रिप्सन आधारित फाइलमा रूपान्तर गर्नुहोस्।\n !!चेतावनी!! यसले तपाईँको सबै डेटा मेट्नेछ।\n यो विशेषता अल्फा चरणमा छ, र ठीकसँग काम नगर्न सक्छ।\n जारी गर्न \'हटाएर रुपान्तरण गर्नुहोस्...\' मा थिच्नुहोस्।"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"हटाएर रूपान्तरण गर्नुहोस्..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"चित्र रङ्ग मोड"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB प्रयोग गर्नुहोस्"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"असक्षम गरिएको छ"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"मोनोक्रोमेसी"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaly (रातो-हरियो)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"प्रोटानोमेली (रातो, हरियो)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"रङ्ग सुधार"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"यो सुविधा प्रयोगात्मक छ र प्रदर्शनमा असर गर्न सक्छ।"</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
 </resources>

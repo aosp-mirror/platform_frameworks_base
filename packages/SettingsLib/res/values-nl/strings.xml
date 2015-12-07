@@ -135,4 +135,159 @@
     <string name="choose_profile" msgid="8229363046053568878">"Profiel kiezen"</string>
     <string name="category_personal" msgid="1299663247844969448">"Persoonlijk"</string>
     <string name="category_work" msgid="8699184680584175622">"Werk"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opties voor ontwikkelaars"</string>
+    <!-- no translation found for development_settings_enable (542530994778109538) -->
+    <skip />
+    <string name="development_settings_summary" msgid="1815795401632854041">"Opties instellen voor appontwikkeling"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Ontwikkelaarsopties zijn niet beschikbaar voor deze gebruiker"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"Instellingen voor VPN zijn niet beschikbaar voor deze gebruiker"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Instellingen voor tethering zijn niet beschikbaar voor deze gebruiker"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Instellingen voor toegangspuntnamen zijn niet beschikbaar voor deze gebruiker"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB-foutopsporing"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Foutopsporingsmodus bij USB-verbinding"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Autorisatie USB-foutopsporing intrekken"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Snelkoppeling naar foutenrapport"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Een knop in het voedingsmenu weergeven om een foutenrapport te maken"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Stand-by"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Scherm gaat nooit uit tijdens het opladen"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Snoop-logbestand voor Bluetooth-HCI inschakelen"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Alle Bluetooth-HCI-pakketten tot één bestand samenvoegen"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-ontgrendeling"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Toestaan dat de bootloader wordt ontgrendeld"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM-ontgrendeling toestaan?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"WAARSCHUWING: De apparaatbeveiligingsfuncties werken niet op dit apparaat wanneer deze instelling is ingeschakeld."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"App voor neplocatie selecteren"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Geen app voor neplocatie ingesteld"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"App voor neplocatie: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Netwerken"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Certificering van draadloze weergave"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Uitgebreide wifi-logregistratie insch."</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agressieve handover van wifi naar mobiel"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Altijd roamingscans voor wifi toestaan"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Oude DHCP-client gebruiken"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele gegevens altijd actief"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Indien ingeschakeld, is wifi agressiever bij het overgeven van de gegevensverbinding aan mobiel wanneer het wifi-signaal zwak is"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Roamingscans voor wifi (niet) toestaan op basis van de hoeveelheid dataverkeer die aanwezig is bij de interface"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-buffergrootten"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Kies Logger-grootten per logbuffer"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB-configuratie selecteren"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB-configuratie selecteren"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Neplocaties toestaan"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Neplocaties toestaan"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Inspectie van weergavekenmerk inschakelen"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"De DHCP-client van Lollipop gebruiken in plaats van de nieuwe Android DHCP-client."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobiele gegevens altijd actief houden, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB-foutopsporing toestaan?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Toegang tot USB-foutopsporing intrekken voor alle computers waarvoor je dit eerder hebt toegestaan?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Ontwikkelingsinstellingen toestaan?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Apps verifiëren via USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Apps die zijn geïnstalleerd via ADB/ADT, controleren op schadelijk gedrag"</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Lokale terminal"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Terminal-app inschakelen die lokale shell-toegang biedt"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-controle"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP-controlegedrag instellen"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Foutopsporing"</string>
+    <string name="debug_app" msgid="8349591734751384446">"App voor foutopsporing selecteren"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Geen app voor foutopsporing ingesteld"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"App voor foutopsporing: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"App selecteren"</string>
+    <string name="no_application" msgid="2813387563129153880">"Niets"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Wachten op debugger"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Gedebugde app wacht op koppelen van debugger vóór uitvoering"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Invoer"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Tekening"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Rendering met hardwareversnelling"</string>
+    <string name="media_category" msgid="4388305075496848353">"Media"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Controle"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Strikte modus ingeschakeld"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Knipperend scherm bij lange bewerkingen door apps"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Cursorlocatie"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Schermoverlay met huidige aanraakgegevens"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Aanraakbewerkingen weergeven"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Visuele feedback voor aanraakbewerkingen weergeven"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Oppervlakupdates weergeven"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Volledige vensteroppervlakken flashen bij updates"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU-weergave-updates weergeven"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Flash-weergaven in vensters indien getekend met de GPU"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Updaten hardwarelgn wrgvn"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardwarelagen knipperen groen bij updates"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Foutopsporing GPU-overbelasting"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW-overlays uitschakelen"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"GPU altijd gebruiken voor schermcompositing"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Kleurruimte simuleren"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL-sporen inschakelen"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB-audiorouting uitsch."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Autom. routing naar USB-randapparatuur uitsch."</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Indelingsgrenzen weerg."</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Clipgrenzen, marges en meer weergeven"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"V.r.n.l.-indelingsrichting afdwingen"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Schermindelingsrichting geforceerd instellen op v.r.n.l. voor alle talen"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"CPU-gebruik weergeven"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Schermoverlay met huidig CPU-gebruik"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"GPU-rendering afdwingen"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Gebruik van GPU voor 2D-tekening forceren"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"4x MSAA forceren"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"4x MSAA inschakelen in OpenGL ES 2.0-apps"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Fouten met niet-rechthoekige bijsnijdbewerkingen opsporen"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"GPU-rendering van profiel"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Vensteranimatieschaal"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimatieschaal"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Duur van animatieschaal"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Secundaire displays simuleren"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Activiteiten niet opslaan"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Activiteit wissen zodra de gebruiker deze verlaat"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Achtergrondproceslimiet"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Alle ANR\'s weergeven"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"\'App reageert niet\' weerg. voor apps op achtergr."</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Toestaan van apps op externe opslag afdwingen"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Hierdoor komt een app in aanmerking om te worden geschreven naar externe opslag, ongeacht de manifestwaarden"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Formaat activiteiten geforceerd aanpasbaar maken"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Hiermee wordt het formaat van alle activiteiten aanpasbaar gemaakt, ongeacht de manifestwaarden."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Wachtwoord desktopback-up"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Volledige back-ups naar desktops zijn momenteel niet beveiligd"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Raak dit aan om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nieuw back-upwachtwoord ingesteld"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nieuw wachtwoord en bevestiging komen niet overeen."</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Instellen van back-upwachtwoord is mislukt"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Levendig (standaard)"</item>
+    <item msgid="8446070607501413455">"Natuurlijk"</item>
+    <item msgid="6553408765810699025">"Standaard"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Verbeterde kleuren"</item>
+    <item msgid="8280754435979370728">"Natuurlijke kleuren zoals gezien door het menselijk oog"</item>
+    <item msgid="5363960654009010371">"Kleuren geoptimaliseerd voor digitale content"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Inactieve apps"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Inactief. Tik om te schakelen."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Actief. Tik om te schakelen."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Actieve services"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Services die momenteel actief zijn, weergeven en beheren"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Nachtmodus"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Uitgeschakeld"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Altijd aan"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Automatisch"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converteren naar versleuteling op basis van bestanden"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converteren…"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Al versleuteld op basis van bestanden"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Converteren naar versleuteling op basis van bestanden"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Gegevenspartitie converteren naar versleuteling op basis van bestanden.\n !!Waarschuwing!! Al je gegevens worden gewist.\n Deze functie bevindt zich in de alfafase en werkt mogelijk niet correct.\n Druk op \'Wissen en converteren\' om door te gaan."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Wissen en converteren…"</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Kleurenmodus voor afbeeldingen"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB gebruiken"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Uitgeschakeld"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Totale kleurenblindheid"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomalie (rood-groen)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalie (rood-groen)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalie (blauw-geel)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Kleurcorrectie"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Deze functie is experimenteel en kan invloed hebben op de prestaties."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Overschreven door <xliff:g id="TITLE">%1$s</xliff:g>"</string>
 </resources>

@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"חסומה"</item>
     <item msgid="1805837518286731242">"נמנע זמנית מחיבור חלש"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"אל תבדוק לעולם"</item>
+    <item msgid="6042769699089883931">"‏בדוק אם יש תוכן DRM בלבד"</item>
+    <item msgid="9174900380056846820">"בדוק תמיד"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"‏לעולם אל תשתמש בבדיקת HDCP"</item>
+    <item msgid="3878793616631049349">"‏השתמש בבדיקת HDCP עבור תוכן DRM בלבד"</item>
+    <item msgid="45075631231212732">"‏תמיד השתמש בבדיקת HDCP"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"‎256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"‎256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"‏64K לכל מאגר יומן"</item>
+    <item msgid="2822309747675758628">"‏256K לכל מאגר יומן"</item>
+    <item msgid="6699306198357496731">"‏1M לכל מאגר יומן"</item>
+    <item msgid="5748528643937500349">"‏4M לכל מאגר יומן"</item>
+    <item msgid="1978629051085111592">"‏16M לכל מאגר יומן"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"אנימציה כבויה"</item>
+    <item msgid="6624864048416710414">"‏קנה מידה לאנימציה 5x."</item>
+    <item msgid="2219332261255416635">"‏קנה מידה לאנימציה 1x"</item>
+    <item msgid="3544428804137048509">"‏קנה מידה לאנימציה 1.5x"</item>
+    <item msgid="3110710404225974514">"‏קנה מידה לאנימציה 2x"</item>
+    <item msgid="4402738611528318731">"‏קנה מידה לאנימציה 5x"</item>
+    <item msgid="6189539267968330656">"‏קנה מידה לאנימציה 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"אנימציה כבויה"</item>
+    <item msgid="3375781541913316411">"‏קנה מידה לאנימציה 5x."</item>
+    <item msgid="1991041427801869945">"‏קנה מידה לאנימציה 1x"</item>
+    <item msgid="4012689927622382874">"‏קנה מידה לאנימציה 1.5x"</item>
+    <item msgid="3289156759925947169">"‏קנה מידה לאנימציה 2x"</item>
+    <item msgid="7705857441213621835">"‏קנה מידה לאנימציה 5x"</item>
+    <item msgid="6660750935954853365">"‏קנה מידה לאנימציה 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"אנימציה כבויה"</item>
+    <item msgid="1138649021950863198">"‏קנה מידה לאנימציה 5x."</item>
+    <item msgid="4394388961370833040">"‏קנה מידה לאנימציה 1x"</item>
+    <item msgid="8125427921655194973">"‏קנה מידה לאנימציה 1.5x"</item>
+    <item msgid="3334024790739189573">"‏קנה מידה לאנימציה 2x"</item>
+    <item msgid="3170120558236848008">"‏קנה מידה לאנימציה 5x"</item>
+    <item msgid="1069584980746680398">"‏קנה מידה לאנימציה 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"אין"</item>
+    <item msgid="9033194758688161545">"‎480p"</item>
+    <item msgid="1025306206556583600">"‏480p (מאובטח)"</item>
+    <item msgid="1853913333042744661">"‎720p"</item>
+    <item msgid="3414540279805870511">"‏720p (מאובטח)"</item>
+    <item msgid="9039818062847141551">"‎1080p"</item>
+    <item msgid="4939496949750174834">"‏1080p (מאובטח)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"‏4K (מאובטח)"</item>
+    <item msgid="3547211260846843098">"‏4K (משופר)"</item>
+    <item msgid="5411365648951414254">"‏4K (משופר, מאובטח)"</item>
+    <item msgid="1311305077526792901">"‏720p‏, 1080p (מסך כפול)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"ללא"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"‏Systrace (גרפיקה)"</item>
+    <item msgid="1340692776955662664">"‏Call Stack ב-glGetError"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"כבוי"</item>
+    <item msgid="675719912558941285">"שרטט אזור חיתוך שאינו מלבני בצבע כחול"</item>
+    <item msgid="1064373276095698656">"הדגש את פקודות האיור שנבדקות בצבע ירוק"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"כבוי"</item>
+    <item msgid="2751513398307949636">"במסך כעמודות"</item>
+    <item msgid="1851438178120770973">"‏ב-adb shell dumpsys gfxinfo"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"כבוי"</item>
+    <item msgid="7688197031296835369">"הצגת אזורים עם חריגה"</item>
+    <item msgid="2290859360633824369">"הצגת אזורים לעיוורון צבעים"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"הגבלה סטנדרטית"</item>
+    <item msgid="4071574792028999443">"אין תהליכים ברקע"</item>
+    <item msgid="4810006996171705398">"תהליך אחד לכל היותר"</item>
+    <item msgid="8586370216857360863">"2 תהליכים לכל היותר"</item>
+    <item msgid="836593137872605381">"3 תהליכים לכל היותר"</item>
+    <item msgid="7899496259191969307">"4 תהליכים לכל היותר"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"בטעינה"</item>
+    <item msgid="5220695614993094977">"‏MTP (פרוטוקול העברת מדיה)"</item>
+    <item msgid="2086000968159047375">"‏PTP (פרוטוקול העברת תמונות)"</item>
+    <item msgid="7398830860950841822">"‏RNDIS (אתרנט ב-USB)"</item>
+    <item msgid="1718924214939774352">"מקור אודיו"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"ပိတ်ထားသည်"</item>
     <item msgid="1805837518286731242">"နှေးကွေးသောဆက်သွယ်မှုကို ယာယီရှောင်ရှားထားသည်"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"မည်သည့်အခါမှ မစစ်ဆေးပါနှင့်"</item>
+    <item msgid="6042769699089883931">"DRMအကြောင်းအရာကိုသာ စစ်ဆေးမည်"</item>
+    <item msgid="9174900380056846820">"အမြဲစစ်ဆေးရန်"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"HDCP checkingအားမည်သည့်အခါမျှမသုံးပါနှင့်"</item>
+    <item msgid="3878793616631049349">"DRMအကြောင်းအရာအတွက် HDCPစစ်ဆေးခြင်းကိုသုံးမည်"</item>
+    <item msgid="45075631231212732">"HDCP checkingအားအမြဲသုံးပါ"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"၆၄K"</item>
+    <item msgid="3534782711045262344">"၂၅၆K"</item>
+    <item msgid="8085867209202153403">"၁M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64K လော့ ဘာဖားတွက်"</item>
+    <item msgid="2822309747675758628">"256K လော့ ဘာဖားတွက်"</item>
+    <item msgid="6699306198357496731">"1M လော့ ဘာဖားတွက်"</item>
+    <item msgid="5748528643937500349">"4M လော့ ဘာဖားတွက်"</item>
+    <item msgid="1978629051085111592">"16M လော့ ဘာဖားတွက်"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"လှုပ်ရှားသက်ဝင်မှုပုံများကိုပိတ်ပါ"</item>
+    <item msgid="6624864048416710414">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၅ဆ"</item>
+    <item msgid="2219332261255416635">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၁ဆ"</item>
+    <item msgid="3544428804137048509">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၁.၅ဆ"</item>
+    <item msgid="3110710404225974514">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၂ဆ"</item>
+    <item msgid="4402738611528318731">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၅ဆ"</item>
+    <item msgid="6189539267968330656">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၁၀ဆ"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"လှုပ်ရှားသက်ဝင်မှုပုံများကိုပိတ်ပါ"</item>
+    <item msgid="3375781541913316411">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၅ဆ"</item>
+    <item msgid="1991041427801869945">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၁ဆ"</item>
+    <item msgid="4012689927622382874">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၁.၅ဆ"</item>
+    <item msgid="3289156759925947169">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၂ဆ"</item>
+    <item msgid="7705857441213621835">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၅ဆ"</item>
+    <item msgid="6660750935954853365">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၁၀ဆ"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"လှုပ်ရှားသက်ဝင်ပုံများကိုပိတ်ပါ"</item>
+    <item msgid="1138649021950863198">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၀.၅ဆ"</item>
+    <item msgid="4394388961370833040">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၁ဆ"</item>
+    <item msgid="8125427921655194973">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၁.၅ဆ"</item>
+    <item msgid="3334024790739189573">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၂ဆ"</item>
+    <item msgid="3170120558236848008">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၅ဆ"</item>
+    <item msgid="1069584980746680398">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၁၀ဆ"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"တစ်ခုမှမဟုတ်ပါ"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (secure)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (secure)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (secure)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (secure)"</item>
+    <item msgid="3547211260846843098">"4K (upscaled)"</item>
+    <item msgid="5411365648951414254">"4K (upscaled, secure)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (dual screen)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"တစ်ခုမှမဟုတ်ပါ"</item>
+    <item msgid="9089630089455370183">"လော့ဂ်ကက်"</item>
+    <item msgid="5397807424362304288">"စနစ်ခြေရာခံခြင်း (ရုပ်ပုံများ)"</item>
+    <item msgid="1340692776955662664">"glGetError အမှားတက်လျှင်ခေါ်သောလုပ်ငန်းစဉ်"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"ပိတ်"</item>
+    <item msgid="675719912558941285">"စတုဂံမဟုတ်သော ဖောက်ရန်အပိုင်းကို အပြာရောင်ဖြင့်ဆွဲပါ"</item>
+    <item msgid="1064373276095698656">"စမ်းသပ်ထားသော ပုံဆွဲရန်ညွှန်ကြားချက်များကို အစိမ်းရောင်ဖြင့် အသားပေး ဖော်ပြပါ"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ပိတ်"</item>
+    <item msgid="2751513398307949636">"ဖန်သားပြင်ပေါ်မှာ မျဉ်းတန်းကဲ့သို့"</item>
+    <item msgid="1851438178120770973">"adb shell dumpsys ထဲမှ gfxinfo"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"ပိတ်"</item>
+    <item msgid="7688197031296835369">"ရှိရင်းစွဲထက်ပိုသော ဧရိယာများကိုပြရန်"</item>
+    <item msgid="2290859360633824369">"အရောင်ရောနှောသောဧရိယာများပြရန်"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"သတ်မှတ်စံနှုန်း"</item>
+    <item msgid="4071574792028999443">"နောက်ခံပြုလုပ်နေသောလုပ်ငန်းစဉ်မရှိ"</item>
+    <item msgid="4810006996171705398">"အများဆုံးလုပ်ငန်းစဉ်(၁)ခု"</item>
+    <item msgid="8586370216857360863">"အများဆုံးလုပ်ငန်းစဉ်ခု"</item>
+    <item msgid="836593137872605381">"အများဆုံးလုပ်ငန်းစဉ်(၃)ခု"</item>
+    <item msgid="7899496259191969307">"အများဆုံးလုပ်ငန်းစဉ်(၄)ခု"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"အားသွင်းနေပါသည်"</item>
+    <item msgid="5220695614993094977">"MTP (မီဒီယာ လွှဲပြောင်းမှု ပရိုတိုကော)"</item>
+    <item msgid="2086000968159047375">"PTP (ပုံ လွှဲပြောင်းမှု ပရိုတိုကော)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB အီသာနက်)"</item>
+    <item msgid="1718924214939774352">"အသံ ရင်းမြစ်"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>
