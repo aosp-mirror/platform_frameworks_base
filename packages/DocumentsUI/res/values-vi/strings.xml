@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Tài liệu"</string>
     <string name="files_label" msgid="6051402950202690279">"Tệp"</string>
+    <string name="downloads_label" msgid="959113951084633612">"Tài nguyên đã tải xuống"</string>
     <string name="title_open" msgid="4353228937663917801">"Mở từ"</string>
     <string name="title_save" msgid="2433679664882857999">"Lưu vào"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Thư mục mới"</string>

@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"ලේඛන"</string>
     <string name="files_label" msgid="6051402950202690279">"ගොනු"</string>
+    <string name="downloads_label" msgid="959113951084633612">"බාගැනීම්"</string>
     <string name="title_open" msgid="4353228937663917801">"විවෘත වන්නේ"</string>
     <string name="title_save" msgid="2433679664882857999">"සුරකින්නේ"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"නව ෆෝල්ඩරය"</string>

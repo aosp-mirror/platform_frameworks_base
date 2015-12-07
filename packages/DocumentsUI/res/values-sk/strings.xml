@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumenty"</string>
     <string name="files_label" msgid="6051402950202690279">"Súbory"</string>
+    <string name="downloads_label" msgid="959113951084633612">"Stiahnuté súbory"</string>
     <string name="title_open" msgid="4353228937663917801">"Otvoriť z"</string>
     <string name="title_save" msgid="2433679664882857999">"Uložiť do"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Nový priečinok"</string>
