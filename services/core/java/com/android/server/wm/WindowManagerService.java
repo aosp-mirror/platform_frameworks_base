@@ -8693,9 +8693,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (!force) {
             final TaskStack stack = w.getStack();
-            if (stack != null && (StackId.isAlwaysOnTop(stack.mStackId)
-                    || stack.mStackId == DOCKED_STACK_ID)) {
-                // If the window's stack is always on top, we want to make it above other windows
+            if (stack != null && (StackId.shouldIncreaseApplicationWindowLayer(stack.mStackId))) {
+                // For pinned and docked stack window, we want to make them above other windows
                 // also when these windows are animating.
                 force = true;
             }

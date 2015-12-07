@@ -259,13 +259,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     int mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 
-    /**
-     * This is rectangle of the window's surface that is not covered by
-     * system decorations.
-     */
-    final Rect mSystemDecorRect = new Rect();
-    final Rect mLastSystemDecorRect = new Rect();
-
     // Current transformation being applied.
     float mGlobalScale=1;
     float mInvGlobalScale=1;
@@ -2084,13 +2077,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (dumpAll) {
             pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                     pw.print(" last="); mLastFrame.printShortString(pw);
-                    pw.println();
-            pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
-                    pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
-                    if (mWinAnimator.mHasClipRect) {
-                        pw.print(" mLastClipRect=");
-                        mWinAnimator.mLastClipRect.printShortString(pw);
-                    }
                     pw.println();
         }
         if (mEnforceSizeCompat) {
