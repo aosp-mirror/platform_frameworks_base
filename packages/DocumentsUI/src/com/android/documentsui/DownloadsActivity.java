@@ -185,8 +185,8 @@ public class DownloadsActivity extends BaseActivity {
     @Override
     public void onDocumentPicked(DocumentInfo doc, DocumentContext context) {
         final FragmentManager fm = getFragmentManager();
-        if (doc.isDirectory()) {
-            openDirectory(doc);
+        if (doc.isContainer()) {
+            openContainerDocument(doc);
         } else {
             // First try managing the document; we expect manager to filter
             // based on authority, so we don't grant.
