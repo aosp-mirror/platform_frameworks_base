@@ -1246,6 +1246,36 @@ public class UserManager {
     }
 
     /**
+     * Set quiet mode of a managed profile.
+     *
+     * @param userHandle The user handle of the profile.
+     * @param enableQuietMode Whether quiet mode should be enabled or disabled.
+     * @hide
+     */
+    public void setQuietModeEnabled(int userHandle, boolean enableQuietMode) {
+        try {
+            mService.setQuietModeEnabled(userHandle, enableQuietMode);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not change the profile's quiet mode", e);
+        }
+    }
+
+    /**
+     * Returns whether the given profile is in quiet mode or not.
+     *
+     * @param userHandle The user handle of the profile to be queried.
+     * @return true if the profile is in quiet mode, false otherwise.
+     */
+    public boolean isQuietModeEnabled(UserHandle userHandle) {
+        try {
+            return mService.isQuietModeEnabled(userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not query the profile's quiet mode", e);
+        }
+        return false;
+    }
+
+    /**
      * If the target user is a managed profile of the calling user or the caller
      * is itself a managed profile, then this returns a badged copy of the given
      * icon to be able to distinguish it from the original icon. For badging an

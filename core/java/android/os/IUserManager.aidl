@@ -63,4 +63,6 @@ interface IUserManager {
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
     boolean markGuestForDeletion(int userHandle);
+    void setQuietModeEnabled(int userHandle, boolean enableQuietMode);
+    boolean isQuietModeEnabled(int userHandle);
 }

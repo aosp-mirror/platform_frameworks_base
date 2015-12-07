@@ -2991,6 +2991,28 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGED_PROFILE_REMOVED";
 
     /**
+     * Broadcast sent to the primary user when an associated managed profile's availability has
+     * changed. This includes when the user toggles the profile's quiet mode, or when the profile
+     * owner suspends the profile. Carries an extra {@link #EXTRA_USER} that specifies the
+     * UserHandle of the profile. When quiet mode is changed, this broadcast will carry a boolean
+     * extra {@link #EXTRA_QUIET_MODE} indicating the new state of quiet mode. This is only sent to
+     * registered receivers, not manifest receivers.
+     */
+    public static final String ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED =
+            "android.intent.action.MANAGED_PROFILE_AVAILABILITY_CHANGED";
+
+    /**
+     * Broadcast sent to the managed profile when its availability has changed. This includes when
+     * the user toggles the profile's quiet mode, or when the profile owner suspends the profile.
+     * When quiet mode is changed, this broadcast will carry a boolean extra
+     * {@link #EXTRA_QUIET_MODE} indicating the new state of quiet mode. This is only sent to
+     * registered receivers, not manifest receivers. See also
+     * {@link #ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED}
+     */
+    public static final String ACTION_AVAILABILITY_CHANGED =
+            "android.intent.action.AVAILABILITY_CHANGED";
+
+    /**
      * Sent when the user taps on the clock widget in the system's "quick settings" area.
      */
     public static final String ACTION_QUICK_CLOCK =
@@ -4028,6 +4050,10 @@ public class Intent implements Parcelable, Cloneable {
     /** {@hide} */
     public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
 
+    /**
+     * Optional boolean extra indicating whether quiet mode has been switched on or off.
+     */
+    public static final String EXTRA_QUIET_MODE = "android.intent.extra.QUIET_MODE";
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
