@@ -728,6 +728,7 @@ package android {
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
     field public static final int labelTextSize = 16843317; // 0x1010235
+    field public static final int languageTag = 16844041; // 0x1010509
     field public static final int largeHeap = 16843610; // 0x101035a
     field public static final int largeScreens = 16843398; // 0x1010286
     field public static final int largestWidthLimitDp = 16843622; // 0x1010366
@@ -43183,7 +43184,8 @@ package android.view.inputmethod {
     method public java.lang.String getExtraValue();
     method public java.lang.String getExtraValueOf(java.lang.String);
     method public int getIconResId();
-    method public java.lang.String getLocale();
+    method public java.lang.String getLanguageTag();
+    method public deprecated java.lang.String getLocale();
     method public java.lang.String getMode();
     method public int getNameResId();
     method public boolean isAsciiCapable();
@@ -43198,6 +43200,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.InputMethodSubtype build();
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setIsAsciiCapable(boolean);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setIsAuxiliary(boolean);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setLanguageTag(java.lang.String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setOverridesImplicitlyEnabledSubtype(boolean);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeExtraValue(java.lang.String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeIconResId(int);
@@ -43261,7 +43264,8 @@ package android.view.textservice {
     method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);
     method public java.lang.String getExtraValue();
     method public java.lang.String getExtraValueOf(java.lang.String);
-    method public java.lang.String getLocale();
+    method public java.lang.String getLanguageTag();
+    method public deprecated java.lang.String getLocale();
     method public int getNameResId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.textservice.SpellCheckerSubtype> CREATOR;

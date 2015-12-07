@@ -3536,6 +3536,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private static final String ATTR_LABEL = "label";
         private static final String ATTR_ICON = "icon";
         private static final String ATTR_IME_SUBTYPE_LOCALE = "imeSubtypeLocale";
+        private static final String ATTR_IME_SUBTYPE_LANGUAGE_TAG = "languageTag";
         private static final String ATTR_IME_SUBTYPE_MODE = "imeSubtypeMode";
         private static final String ATTR_IME_SUBTYPE_EXTRA_VALUE = "imeSubtypeExtraValue";
         private static final String ATTR_IS_AUXILIARY = "isAuxiliary";
@@ -3629,6 +3630,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         out.attribute(null, ATTR_ICON, String.valueOf(subtype.getIconResId()));
                         out.attribute(null, ATTR_LABEL, String.valueOf(subtype.getNameResId()));
                         out.attribute(null, ATTR_IME_SUBTYPE_LOCALE, subtype.getLocale());
+                        out.attribute(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG,
+                                subtype.getLanguageTag());
                         out.attribute(null, ATTR_IME_SUBTYPE_MODE, subtype.getMode());
                         out.attribute(null, ATTR_IME_SUBTYPE_EXTRA_VALUE, subtype.getExtraValue());
                         out.attribute(null, ATTR_IS_AUXILIARY,
@@ -3690,6 +3693,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 parser.getAttributeValue(null, ATTR_LABEL));
                         final String imeSubtypeLocale =
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LOCALE);
+                        final String languageTag =
+                                parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG);
                         final String imeSubtypeMode =
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_MODE);
                         final String imeSubtypeExtraValue =
@@ -3700,6 +3705,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 .setSubtypeNameResId(label)
                                 .setSubtypeIconResId(icon)
                                 .setSubtypeLocale(imeSubtypeLocale)
+                                .setLanguageTag(languageTag)
                                 .setSubtypeMode(imeSubtypeMode)
                                 .setSubtypeExtraValue(imeSubtypeExtraValue)
                                 .setIsAuxiliary(isAuxiliary)
