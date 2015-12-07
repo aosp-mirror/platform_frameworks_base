@@ -37,6 +37,7 @@ import static android.support.test.espresso.action.ViewActions.typeTextIntoFocus
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 import com.android.frameworks.coretests.R;
 
@@ -142,6 +143,40 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
         onView(withId(R.id.textview)).check(hasSelection(""));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("i")));
+    }
+
+    @SmallTest
+    public void testDragAndDrop() throws Exception {
+        final String text = "abc def ghi.";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(
+                mouseDragOnText(text.indexOf("d"), text.indexOf("f") + 1));
+
+        onView(withId(R.id.textview)).perform(
+                mouseDragOnText(text.indexOf("e"), text.length()));
+
+        onView(withId(R.id.textview)).check(matches(withText("abc ghi.def")));
+        onView(withId(R.id.textview)).check(hasSelection(""));
+        assertNoSelectionHandles();
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex("abc ghi.def".length()));
+    }
+
+    @SmallTest
+    public void testDragAndDrop_longClick() throws Exception {
+        final String text = "abc def ghi.";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(
+                mouseDragOnText(text.indexOf("d"), text.indexOf("f") + 1));
+
+        onView(withId(R.id.textview)).perform(
+                mouseLongClickAndDragOnText(text.indexOf("e"), text.length()));
+
+        onView(withId(R.id.textview)).check(matches(withText("abc ghi.def")));
+        onView(withId(R.id.textview)).check(hasSelection(""));
+        assertNoSelectionHandles();
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex("abc ghi.def".length()));
     }
 
     @SmallTest
