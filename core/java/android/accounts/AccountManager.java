@@ -1853,6 +1853,22 @@ public class AccountManager {
         }.start();
     }
 
+    /**
+     * @hide
+     * Checks if the given account exists on any of the users on the device.
+     * Only the system process can call this method.
+     *
+     * @param account The account to check for existence.
+     * @return whether any user has this account
+     */
+    public boolean someUserHasAccount(@NonNull final Account account) {
+        try {
+            return mService.someUserHasAccount(account);
+        } catch (RemoteException re) {
+            throw new RuntimeException(re);
+        }
+    }
+
     private void ensureNotOnMainThread() {
         final Looper looper = Looper.myLooper();
         if (looper != null && looper == mContext.getMainLooper()) {

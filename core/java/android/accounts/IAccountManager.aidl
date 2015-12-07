@@ -95,4 +95,7 @@ interface IAccountManager {
     /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...) */
     void finishSession(in IAccountManagerResponse response, in Bundle sessionBundle,
         boolean expectActivityLaunch, in Bundle appInfo);
+
+    /* Check if an account exists on any user on the device. */
+    boolean someUserHasAccount(in Account account);
 }

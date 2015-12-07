@@ -2819,6 +2819,25 @@ public class AccountManagerService
         }
     }
 
+    @Override
+    public boolean someUserHasAccount(@NonNull final Account account) {
+        if (!UserHandle.isSameApp(Process.SYSTEM_UID, Binder.getCallingUid())) {
+            throw new SecurityException("Only system can check for accounts across users");
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            AccountAndUser[] allAccounts = getAllAccounts();
+            for (int i = allAccounts.length - 1; i >= 0; i--) {
+                if (allAccounts[i].account.equals(account)) {
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     private class GetAccountsByTypeAndFeatureSession extends Session {
         private final String[] mFeatures;
         private volatile Account[] mAccountsOfType = null;

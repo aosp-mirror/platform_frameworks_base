@@ -145,6 +145,10 @@ public class UserInfo implements Parcelable {
         return (flags & FLAG_EPHEMERAL) == FLAG_EPHEMERAL;
     }
 
+    public boolean isInitialized() {
+        return (flags & FLAG_INITIALIZED) == FLAG_INITIALIZED;
+    }
+
     /**
      * Returns true if the user is a split system user.
      * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,

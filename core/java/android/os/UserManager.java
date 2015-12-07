@@ -26,6 +26,7 @@ import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -566,6 +567,37 @@ public class UserManager {
      *      android.content.ComponentName, String)
      */
     public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
+
+    private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
+
+    /**
+     * Extra containing a name for the user being created. Optional parameter passed to
+     * ACTION_CREATE_USER activity.
+     * @hide
+     */
+    public static final String EXTRA_USER_NAME = "android.os.extra.USER_NAME";
+
+    /**
+     * Extra containing account name for the user being created. Optional parameter passed to
+     * ACTION_CREATE_USER activity.
+     * @hide
+     */
+    public static final String EXTRA_USER_ACCOUNT_NAME = "android.os.extra.USER_ACCOUNT_NAME";
+
+    /**
+     * Extra containing account type for the user being created. Optional parameter passed to
+     * ACTION_CREATE_USER activity.
+     * @hide
+     */
+    public static final String EXTRA_USER_ACCOUNT_TYPE = "android.os.extra.USER_ACCOUNT_TYPE";
+
+    /**
+     * Extra containing account-specific data for the user being created. Optional parameter passed
+     * to ACTION_CREATE_USER activity.
+     * @hide
+     */
+    public static final String EXTRA_USER_ACCOUNT_OPTIONS
+            = "android.os.extra.USER_ACCOUNT_OPTIONS";
 
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
@@ -1139,6 +1171,137 @@ public class UserManager {
             Log.w(TAG, "Could not create a restricted profile", e);
         }
         return null;
+    }
+
+    /**
+     * Returns an intent to create a user for the provided name and email address. The name
+     * and email address will be used when the setup process for the new user is started.
+     * If this device does not support multiple users, null is returned.
+     * <p/>
+     * The intent should be launched using startActivityForResult and the return result will
+     * indicate if the user consented to adding a new user and if the operation succeeded.
+     * <p/>
+     * The new user is created but not initialized. After switching into the user for the first
+     * time, the preferred user name and account information are used by the setup process for that
+     * user.
+     *
+     * @param userName Optional name to assign to the user.
+     * @param accountName Optional email address that will be used by the setup wizard to initialize
+     *                    the user.
+     * @param accountType Optional account type for the account to be created. This is required
+     *                    if the account name is specified.
+     * @param accountOptions Optional bundle of data to be passed in during account creation in the
+     *                       new user via {@link AccountManager#addAccount(String, String, String[],
+     *                       Bundle, android.app.Activity, android.accounts.AccountManagerCallback,
+     *                       Handler)}.
+     * @return An Intent that can be launched from an Activity or null if creating users is not
+     *         supported on this device.
+     */
+    public static Intent createUserCreationIntent(@Nullable String userName,
+            @Nullable String accountName,
+            @Nullable String accountType, @Nullable PersistableBundle accountOptions) {
+        if (!supportsMultipleUsers() || getMaxSupportedUsers() < 2) {
+            return null;
+        }
+        Intent intent = new Intent(ACTION_CREATE_USER);
+        if (userName != null) {
+            intent.putExtra(EXTRA_USER_NAME, userName);
+        }
+        if (accountName != null && accountType == null) {
+            throw new IllegalArgumentException("accountType must be specified if accountName is "
+                    + "specified");
+        }
+        if (accountName != null) {
+            intent.putExtra(EXTRA_USER_ACCOUNT_NAME, accountName);
+        }
+        if (accountType != null) {
+            intent.putExtra(EXTRA_USER_ACCOUNT_TYPE, accountType);
+        }
+        if (accountOptions != null) {
+            intent.putExtra(EXTRA_USER_ACCOUNT_OPTIONS, accountOptions);
+        }
+        return intent;
+    }
+
+    /**
+     * @hide
+     *
+     * Returns the preferred account name for user creation. Requires MANAGE_USERS permission.
+     */
+    @SystemApi
+    public String getSeedAccountName() {
+        try {
+            return mService.getSeedAccountName();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get the seed account name", re);
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     *
+     * Returns the preferred account type for user creation. Requires MANAGE_USERS permission.
+     */
+    @SystemApi
+    public String getSeedAccountType() {
+        try {
+            return mService.getSeedAccountType();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get the seed account type", re);
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     *
+     * Returns the preferred account's options bundle for user creation. Requires MANAGE_USERS
+     * permission.
+     * @return Any options set by the requestor that created the user.
+     */
+    @SystemApi
+    public PersistableBundle getSeedAccountOptions() {
+        try {
+            return mService.getSeedAccountOptions();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get the seed account options", re);
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     *
+     * Called by a system activity to set the seed account information of a user created
+     * through the user creation intent.
+     * @param userId
+     * @param accountName
+     * @param accountType
+     * @param accountOptions
+     * @see #createUserCreationIntent(String, String, String, PersistableBundle)
+     */
+    public void setSeedAccountData(int userId, String accountName, String accountType,
+            PersistableBundle accountOptions) {
+        try {
+            mService.setSeedAccountData(userId, accountName, accountType, accountOptions,
+                    /* persist= */ true);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set the seed account data", re);
+        }
+    }
+
+    /**
+     * @hide
+     * Clears the seed information used to create this user. Requires MANAGE_USERS permission.
+     */
+    @SystemApi
+    public void clearSeedAccountData() {
+        try {
+            mService.clearSeedAccountData();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not clear the seed account data", re);
+        }
     }
 
     /**
@@ -1754,6 +1917,23 @@ public class UserManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user creation time", re);
             return 0;
+        }
+    }
+
+    /**
+     * @hide
+     * Checks if any uninitialized user has the specific seed account name and type.
+     *
+     * @param mAccountName The account name to check for
+     * @param mAccountType The account type of the account to check for
+     * @return whether the seed account was found
+     */
+    public boolean someUserHasSeedAccount(String accountName, String accountType) {
+        try {
+            return mService.someUserHasSeedAccount(accountName, accountType);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check seed accounts", re);
+            return false;
         }
     }
 }

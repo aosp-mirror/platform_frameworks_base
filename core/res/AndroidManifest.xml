@@ -2986,6 +2986,18 @@
             </intent-filter>
         </activity>
 
+        <!-- Activity to prompt user if it's ok to create a new user sandbox for a
+             specified account. -->
+        <activity android:name="com.android.internal.app.ConfirmUserCreationActivity"
+                android:excludeFromRecents="true"
+                android:process=":ui"
+                android:theme="@style/Theme.Material.DayNight.Dialog.Alert">
+            <intent-filter android:priority="1000">
+                <action android:name="android.os.action.CREATE_USER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver"
                 android:systemUserOnly="true">
             <intent-filter android:priority="1000">

@@ -28494,6 +28494,7 @@ package android.os {
   }
 
   public class UserManager {
+    method public static android.content.Intent createUserCreationIntent(java.lang.String, java.lang.String, java.lang.String, android.os.PersistableBundle);
     method public android.os.Bundle getApplicationRestrictions(java.lang.String);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
