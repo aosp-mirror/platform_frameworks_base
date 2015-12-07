@@ -27,8 +27,6 @@
     <ImageButton
         style="@style/DockedDividerHandle"
         android:id="@+id/docked_divider_handle"
-        android:layout_height="48dp"
-        android:layout_width="48dp"
         android:background="@null"
         android:src="@drawable/docked_divider_handle"/>
 

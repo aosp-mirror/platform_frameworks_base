@@ -311,6 +311,8 @@
 
     <style name="DockedDividerHandle">
         <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">48dp</item>
     </style>
 
 </resources>
