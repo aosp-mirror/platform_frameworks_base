@@ -15,24 +15,24 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.WindowManagerService.DEBUG;
-import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
-import static com.android.server.wm.WindowManagerService.DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.WindowManagerService.DEBUG_TOKEN_MOVEMENT;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerService.DEBUG_WALLPAPER_LIGHT;
-import static com.android.server.wm.WindowManagerService.DEBUG_WINDOW_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerService.H.*;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
-import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerService.TAG;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
@@ -153,7 +153,7 @@ class WindowSurfacePlacer {
             if (DEBUG) {
                 throw new RuntimeException("Recursive call!");
             }
-            Slog.w(TAG, "performLayoutAndPlaceSurfacesLocked called while in layout. Callers="
+            Slog.w(TAG_WM, "performLayoutAndPlaceSurfacesLocked called while in layout. Callers="
                     + Debug.getCallers(3));
             return;
         }
@@ -179,10 +179,10 @@ class WindowSurfacePlacer {
             // Wait a little bit for things to settle down, and off we go.
             while (!mService.mForceRemoves.isEmpty()) {
                 WindowState ws = mService.mForceRemoves.remove(0);
-                Slog.i(TAG, "Force removing: " + ws);
+                Slog.i(TAG_WM, "Force removing: " + ws);
                 mService.removeWindowInnerLocked(ws);
             }
-            Slog.w(TAG,
+            Slog.w(TAG_WM,
                     "Due to memory failure, waiting a bit for next layout");
             Object tmp = new Object();
             synchronized (tmp) {
@@ -202,7 +202,7 @@ class WindowSurfacePlacer {
                 if (++mLayoutRepeatCount < 6) {
                     requestTraversal();
                 } else {
-                    Slog.e(TAG, "Performed 6 layouts in a row. Skipping");
+                    Slog.e(TAG_WM, "Performed 6 layouts in a row. Skipping");
                     mLayoutRepeatCount = 0;
                 }
             } else {
@@ -215,7 +215,7 @@ class WindowSurfacePlacer {
             }
         } catch (RuntimeException e) {
             mInLayout = false;
-            Slog.wtf(TAG, "Unhandled exception while laying out windows", e);
+            Slog.wtf(TAG_WM, "Unhandled exception while laying out windows", e);
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -223,7 +223,7 @@ class WindowSurfacePlacer {
 
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {
         if (mLayoutRepeatCount >= LAYOUT_REPEAT_THRESHOLD) {
-            Slog.v(TAG, "Layouts looping: " + msg +
+            Slog.v(TAG_WM, "Layouts looping: " + msg +
                     ", mPendingLayoutChanges = 0x" + Integer.toHexString(pendingLayoutChanges));
         }
     }
@@ -231,7 +231,7 @@ class WindowSurfacePlacer {
     // "Something has changed!  Let's make it correct now."
     private void performSurfacePlacementInner(boolean recoveringMemory) {
         if (DEBUG_WINDOW_TRACE) {
-            Slog.v(TAG,
+            Slog.v(TAG_WM,
                     "performSurfacePlacementInner: entry. Called by "
                     + Debug.getCallers(3));
         }
@@ -276,16 +276,16 @@ class WindowSurfacePlacer {
         final int defaultDw = defaultInfo.logicalWidth;
         final int defaultDh = defaultInfo.logicalHeight;
 
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
         SurfaceControl.openTransaction();
         try {
             applySurfaceChangesTransaction(recoveringMemory, numDisplays, defaultDw, defaultDh);
         } catch (RuntimeException e) {
-            Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
+            Slog.wtf(TAG_WM, "Unhandled exception in Window Manager", e);
         } finally {
             SurfaceControl.closeTransaction();
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
 
@@ -332,7 +332,7 @@ class WindowSurfacePlacer {
 
         if (mWallpaperMayChange) {
             if (DEBUG_WALLPAPER_LIGHT)
-                Slog.v(TAG, "Wallpaper may change!  Adjusting");
+                Slog.v(TAG_WM, "Wallpaper may change!  Adjusting");
             defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("WallpaperMayChange",
                     defaultDisplay.pendingLayoutChanges);
@@ -368,7 +368,7 @@ class WindowSurfacePlacer {
         }
 
         if (DEBUG_ORIENTATION && mService.mDisplayFrozen)
-            Slog.v(TAG,
+            Slog.v(TAG_WM,
                 "With display frozen, orientationChangeComplete="
                 + mOrientationChangeComplete);
         if (mOrientationChangeComplete) {
@@ -429,7 +429,7 @@ class WindowSurfacePlacer {
                     token.mAppAnimator.clearAnimation();
                     token.mAppAnimator.animating = false;
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT)
-                        Slog.v(TAG,
+                        Slog.v(TAG_WM,
                                 "performLayout: App token exiting now removed" + token);
                     token.removeAppFromTaskLocked();
                 }
@@ -475,7 +475,7 @@ class WindowSurfacePlacer {
                     || Settings.Global.getInt(mService.mContext.getContentResolver(),
                         Settings.Global.THEATER_MODE_ON, 0) == 0) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
-                    Slog.v(TAG, "Turning screen on after layout!");
+                    Slog.v(TAG_WM, "Turning screen on after layout!");
                 }
                 mService.mPowerManager.wakeUp(SystemClock.uptimeMillis(),
                         "android.server.wm:TURN_ON");
@@ -484,7 +484,7 @@ class WindowSurfacePlacer {
         }
 
         if (mUpdateRotation) {
-            if (DEBUG_ORIENTATION) Slog.d(TAG,
+            if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
                     "Performing post-rotate rotation");
             if (mService.updateRotationUncheckedLocked(false)) {
                 mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
@@ -538,7 +538,7 @@ class WindowSurfacePlacer {
 
         mService.scheduleAnimationLocked();
 
-        if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
+        if (DEBUG_WINDOW_TRACE) Slog.e(TAG_WM,
                 "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
     }
 
@@ -582,7 +582,7 @@ class WindowSurfacePlacer {
             do {
                 repeats++;
                 if (repeats > 6) {
-                    Slog.w(TAG, "Animation repeat aborted after too many iterations");
+                    Slog.w(TAG_WM, "Animation repeat aborted after too many iterations");
                     displayContent.layoutNeeded = false;
                     break;
                 }
@@ -598,7 +598,7 @@ class WindowSurfacePlacer {
 
                 if (isDefaultDisplay
                         && (displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
+                    if (DEBUG_LAYOUT) Slog.v(TAG_WM, "Computing new config from layout");
                     if (mService.updateOrientationFromAppTokensLocked(true)) {
                         displayContent.layoutNeeded = true;
                         mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
@@ -614,7 +614,7 @@ class WindowSurfacePlacer {
                     performLayoutLockedInner(displayContent, repeats == 1,
                             false /* updateInputWindows */);
                 } else {
-                    Slog.w(TAG, "Layout repeat skipped after too many iterations");
+                    Slog.w(TAG_WM, "Layout repeat skipped after too many iterations");
                 }
 
                 // FIRST AND ONE HALF LOOP: Make WindowManagerPolicy think
@@ -700,7 +700,7 @@ class WindowSurfacePlacer {
                     }
                 }
 
-                //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
+                //Slog.i(TAG_WM, "Window " + this + " clearing mContentChanged - done placing");
                 w.mContentChanged = false;
 
                 // Moved from updateWindowsAndWallpaperLocked().
@@ -722,7 +722,7 @@ class WindowSurfacePlacer {
                         }
                         if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                             if (DEBUG_WALLPAPER_LIGHT)
-                                Slog.v(TAG, "First draw done in potential wallpaper target " + w);
+                                Slog.v(TAG_WM, "First draw done in potential wallpaper target " + w);
                             mWallpaperMayChange = true;
                             displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                             if (DEBUG_LAYOUT_REPEATS) {
@@ -743,7 +743,7 @@ class WindowSurfacePlacer {
 
                 final AppWindowToken atoken = w.mAppToken;
                 if (DEBUG_STARTING_WINDOW && atoken != null && w == atoken.startingWindow) {
-                    Slog.d(TAG, "updateWindows: starting " + w
+                    Slog.d(TAG_WM, "updateWindows: starting " + w
                             + " isOnScreen=" + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
                             + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
                 }
@@ -757,11 +757,11 @@ class WindowSurfacePlacer {
                             || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
                             && !w.mExiting && !w.mDestroying) {
                         if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
-                            Slog.v(TAG, "Eval win " + w + ": isDrawn="
+                            Slog.v(TAG_WM, "Eval win " + w + ": isDrawn="
                                     + w.isDrawnLw()
                                     + ", isAnimating=" + winAnimator.isAnimating());
                             if (!w.isDrawnLw()) {
-                                Slog.v(TAG, "Not displayed: s="
+                                Slog.v(TAG_WM, "Not displayed: s="
                                         + winAnimator.mSurfaceController
                                         + " pv=" + w.mPolicyVisibility
                                         + " mDrawState=" + winAnimator.drawStateToString()
@@ -776,7 +776,7 @@ class WindowSurfacePlacer {
                                 if (w.isDrawnLw()) {
                                     atoken.numDrawnWindows++;
                                     if (DEBUG_VISIBILITY || DEBUG_ORIENTATION)
-                                        Slog.v(TAG, "tokenMayBeDrawn: " + atoken
+                                        Slog.v(TAG_WM, "tokenMayBeDrawn: " + atoken
                                                 + " freezingScreen="
                                                 + atoken.mAppAnimator.freezingScreen
                                                 + " mAppFreezing=" + w.mAppFreezing);
@@ -844,8 +844,8 @@ class WindowSurfacePlacer {
         int i;
 
         if (DEBUG_LAYOUT) {
-            Slog.v(TAG, "-------------------------------------");
-            Slog.v(TAG, "performLayout: needed="
+            Slog.v(TAG_WM, "-------------------------------------");
+            Slog.v(TAG_WM, "performLayout: needed="
                     + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
         }
 
@@ -878,18 +878,18 @@ class WindowSurfacePlacer {
                     || win.isGoneForLayoutLw();
 
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
-                Slog.v(TAG, "1ST PASS " + win
+                Slog.v(TAG_WM, "1ST PASS " + win
                         + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
                         + " mLayoutAttached=" + win.mLayoutAttached
                         + " screen changed=" + win.isConfigChanged());
                 final AppWindowToken atoken = win.mAppToken;
-                if (gone) Slog.v(TAG, "  GONE: mViewVisibility="
+                if (gone) Slog.v(TAG_WM, "  GONE: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
                         + (atoken != null && atoken.hiddenRequested)
                         + " mAttachedHidden=" + win.mAttachedHidden);
-                else Slog.v(TAG, "  VIS: mViewVisibility="
+                else Slog.v(TAG_WM, "  VIS: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
@@ -909,7 +909,7 @@ class WindowSurfacePlacer {
                             win.mAppToken.layoutConfigChanges)))) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
-                        //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
+                        //Slog.i(TAG_WM, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
                     if (win.mAttrs.type == TYPE_DREAM) {
@@ -929,7 +929,7 @@ class WindowSurfacePlacer {
                         displayContent.mDimLayerController.updateDimLayer(task);
                     }
 
-                    if (DEBUG_LAYOUT) Slog.v(TAG,
+                    if (DEBUG_LAYOUT) Slog.v(TAG_WM,
                             "  LAYOUT: mFrame="
                             + win.mFrame + " mContainingFrame="
                             + win.mContainingFrame + " mDisplayFrame="
@@ -950,7 +950,7 @@ class WindowSurfacePlacer {
             final WindowState win = windows.get(i);
 
             if (win.mLayoutAttached) {
-                if (DEBUG_LAYOUT) Slog.v(TAG,
+                if (DEBUG_LAYOUT) Slog.v(TAG_WM,
                         "2ND PASS " + win + " mHaveFrame=" + win.mHaveFrame + " mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled=" + win.mRelayoutCalled);
                 // If this view is GONE, then skip it -- keep the current
@@ -964,14 +964,14 @@ class WindowSurfacePlacer {
                 if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                         || !win.mHaveFrame || win.mLayoutNeeded) {
                     if (initial) {
-                        //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
+                        //Slog.i(TAG_WM, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
                     win.mLayoutNeeded = false;
                     win.prelayout();
                     mService.mPolicy.layoutWindowLw(win, win.mAttachedWindow);
                     win.mLayoutSeq = seq;
-                    if (DEBUG_LAYOUT) Slog.v(TAG,
+                    if (DEBUG_LAYOUT) Slog.v(TAG_WM,
                             "  LAYOUT: mFrame=" + win.mFrame + " mContainingFrame="
                             + win.mContainingFrame + " mDisplayFrame=" + win.mDisplayFrame);
                 }
@@ -1002,7 +1002,7 @@ class WindowSurfacePlacer {
         if (!transitionGoodToGo(appsCount)) {
             return 0;
         }
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "**** GOOD TO GO");
         int transit = mService.mAppTransition.getAppTransition();
         if (mService.mSkipAppTransitionAnimation) {
             transit = AppTransition.TRANSIT_UNSET;
@@ -1094,7 +1094,7 @@ class WindowSurfacePlacer {
         // example, when this transition is being done behind
         // the lock screen.
         if (!mService.mPolicy.allowAppAnimationsLw()) {
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "Animations disallowed by keyguard or dream.");
             animLp = null;
         }
@@ -1107,7 +1107,7 @@ class WindowSurfacePlacer {
         for (i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mClosingApps.valueAt(i);
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "Now closing app " + wtoken);
             appAnimator.clearThumbnail();
             appAnimator.animation = null;
@@ -1147,7 +1147,7 @@ class WindowSurfacePlacer {
         for (i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "Now opening app" + wtoken);
 
             if (!appAnimator.usingTransferredAnimation) {
@@ -1170,14 +1170,14 @@ class WindowSurfacePlacer {
             for (int j = 0; j < windowsCount; j++) {
                 appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
             }
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
             SurfaceControl.openTransaction();
             try {
                 mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
             } finally {
                 SurfaceControl.closeTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION handleAppTransitionReadyLocked()");
             }
             mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
@@ -1237,14 +1237,14 @@ class WindowSurfacePlacer {
     }
 
     private boolean transitionGoodToGo(int appsCount) {
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                 "Checking " + appsCount + " opening apps (frozen="
                         + mService.mDisplayFrozen + " timeout="
                         + mService.mAppTransition.isTimeout() + ")...");
         if (!mService.mAppTransition.isTimeout()) {
             for (int i = 0; i < appsCount; i++) {
                 AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                         "Check opening app=" + wtoken + ": allDrawn="
                         + wtoken.allDrawn + " startingDisplayed="
                         + wtoken.startingDisplayed + " startingMoved="
@@ -1260,7 +1260,7 @@ class WindowSurfacePlacer {
 
             // We also need to wait for the specs to be fetched, if needed.
             if (mService.mAppTransition.isFetchingAppTransitionsSpecs()) {
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "isFetchingAppTransitionSpecs=true");
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "isFetchingAppTransitionSpecs=true");
                 return false;
             }
 
@@ -1281,7 +1281,7 @@ class WindowSurfacePlacer {
                         ? null : wallpaperTarget;
         final ArraySet<AppWindowToken> openingApps = mService.mOpeningApps;
         final ArraySet<AppWindowToken> closingApps = mService.mClosingApps;
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                 "New wallpaper target=" + wallpaperTarget
                         + ", oldWallpaper=" + oldWallpaper
                         + ", lower target=" + lowerWallpaperTarget
@@ -1291,7 +1291,7 @@ class WindowSurfacePlacer {
         mService.mAnimateWallpaperWithTarget = false;
         if (closingAppHasWallpaper && openingAppHasWallpaper) {
             if (DEBUG_APP_TRANSITIONS)
-                Slog.v(TAG, "Wallpaper animation!");
+                Slog.v(TAG_WM, "Wallpaper animation!");
             switch (transit) {
                 case AppTransition.TRANSIT_ACTIVITY_OPEN:
                 case AppTransition.TRANSIT_TASK_OPEN:
@@ -1304,14 +1304,14 @@ class WindowSurfacePlacer {
                     transit = AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
                     break;
             }
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "New transit: " + AppTransition.appTransitionToString(transit));
         } else if (oldWallpaper != null && !mService.mOpeningApps.isEmpty()
                 && !openingApps.contains(oldWallpaper.mAppToken)
                 && closingApps.contains(oldWallpaper.mAppToken)) {
             // We are transitioning from an activity with a wallpaper to one without.
             transit = AppTransition.TRANSIT_WALLPAPER_CLOSE;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "New transit away from wallpaper: "
                     + AppTransition.appTransitionToString(transit));
         } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw() &&
@@ -1319,7 +1319,7 @@ class WindowSurfacePlacer {
             // We are transitioning from an activity without
             // a wallpaper to now showing the wallpaper
             transit = AppTransition.TRANSIT_WALLPAPER_OPEN;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
                     "New transit into wallpaper: "
                     + AppTransition.appTransitionToString(transit));
         } else {
@@ -1414,7 +1414,7 @@ class WindowSurfacePlacer {
                         int numInteresting = wtoken.numInterestingWindows;
                         if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
                             if (DEBUG_VISIBILITY)
-                                Slog.v(TAG, "allDrawn: " + wtoken
+                                Slog.v(TAG_WM, "allDrawn: " + wtoken
                                     + " interesting=" + numInteresting
                                     + " drawn=" + wtoken.numDrawnWindows);
                             wtoken.allDrawn = true;
@@ -1443,7 +1443,7 @@ class WindowSurfacePlacer {
                 final AppWindowToken wtoken = win.mAppToken;
                 final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
                 if (DEBUG_APP_TRANSITIONS)
-                    Slog.v(TAG, "Now animating app in place " + wtoken);
+                    Slog.v(TAG_WM, "Now animating app in place " + wtoken);
                 appAnimator.clearThumbnail();
                 appAnimator.animation = null;
                 mService.updateTokenInPlaceLocked(wtoken, transit);
@@ -1469,7 +1469,7 @@ class WindowSurfacePlacer {
         final int taskId = appToken.mTask.mTaskId;
         Bitmap thumbnailHeader = mService.mAppTransition.getAppTransitionThumbnailHeader(taskId);
         if (thumbnailHeader == null || thumbnailHeader.getConfig() == Bitmap.Config.ALPHA_8) {
-            if (DEBUG_APP_TRANSITIONS) Slog.d(TAG, "No thumbnail header bitmap for: " + taskId);
+            if (DEBUG_APP_TRANSITIONS) Slog.d(TAG_WM, "No thumbnail header bitmap for: " + taskId);
             return;
         }
         // This thumbnail animation is very special, we need to have
@@ -1487,7 +1487,7 @@ class WindowSurfacePlacer {
                     PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
             surfaceControl.setLayerStack(display.getLayerStack());
             if (SHOW_TRANSACTIONS) {
-                Slog.i(TAG, "  THUMBNAIL " + surfaceControl + ": CREATE");
+                Slog.i(TAG_WM, "  THUMBNAIL " + surfaceControl + ": CREATE");
             }
 
             // Draw the thumbnail onto the surface
@@ -1530,7 +1530,7 @@ class WindowSurfacePlacer {
             openingAppAnimator.thumbnailX = mTmpStartRect.left;
             openingAppAnimator.thumbnailY = mTmpStartRect.top;
         } catch (Surface.OutOfResourcesException e) {
-            Slog.e(TAG, "Can't allocate thumbnail/Canvas surface w="
+            Slog.e(TAG_WM, "Can't allocate thumbnail/Canvas surface w="
                     + dirty.width() + " h=" + dirty.height(), e);
             openingAppAnimator.clearThumbnail();
         }

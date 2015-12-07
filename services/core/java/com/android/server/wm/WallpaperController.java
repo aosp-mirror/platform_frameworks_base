@@ -22,13 +22,15 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
-import static com.android.server.wm.WindowManagerService.DEBUG_WINDOW_MOVEMENT;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerService.DEBUG_WALLPAPER;
-import static com.android.server.wm.WindowManagerService.DEBUG_WALLPAPER_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
@@ -51,7 +53,7 @@ import java.util.ArrayList;
  * NOTE: All methods in this class must be called with the window manager service lock held.
  */
 class WallpaperController {
-    private static final String TAG = com.android.server.wm.WindowManagerService.TAG;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperController" : TAG_WM;
     final private WindowManagerService mService;
 
     private final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<>();

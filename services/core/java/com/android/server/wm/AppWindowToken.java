@@ -17,9 +17,12 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerService.TAG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
@@ -44,6 +47,8 @@ class AppTokenList extends ArrayList<AppWindowToken> {
  * really activity) that is displaying windows.
  */
 class AppWindowToken extends WindowToken {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowToken" : TAG_WM;
+
     // Non-null only for application tokens.
     final IApplicationToken appToken;
 
@@ -152,7 +157,7 @@ class AppWindowToken extends WindowToken {
                 continue;
             }
             try {
-                if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
+                if (DEBUG_VISIBILITY) Slog.v(TAG,
                         "Setting visibility of " + win + ": " + (!clientHidden));
                 win.mClient.dispatchAppVisibility(!clientHidden);
             } catch (RemoteException e) {
@@ -170,7 +175,7 @@ class AppWindowToken extends WindowToken {
         int numDrawn = 0;
         boolean nowGone = true;
 
-        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
+        if (DEBUG_VISIBILITY) Slog.v(TAG,
                 "Update reported visibility: " + this);
         final int N = allAppWindows.size();
         for (int i=0; i<N; i++) {
@@ -181,12 +186,12 @@ class AppWindowToken extends WindowToken {
                     || win.mDestroying) {
                 continue;
             }
-            if (WindowManagerService.DEBUG_VISIBILITY) {
-                Slog.v(WindowManagerService.TAG, "Win " + win + ": isDrawn="
+            if (DEBUG_VISIBILITY) {
+                Slog.v(TAG, "Win " + win + ": isDrawn="
                         + win.isDrawnLw()
                         + ", isAnimating=" + win.mWinAnimator.isAnimating());
                 if (!win.isDrawnLw()) {
-                    Slog.v(WindowManagerService.TAG, "Not displayed: s=" +
+                    Slog.v(TAG, "Not displayed: s=" +
                             win.mWinAnimator.mSurfaceController
                             + " pv=" + win.mPolicyVisibility
                             + " mDrawState=" + win.mWinAnimator.mDrawState
@@ -220,7 +225,7 @@ class AppWindowToken extends WindowToken {
                 nowVisible = reportedVisible;
             }
         }
-        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "VIS " + this + ": interesting="
+        if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
         if (nowDrawn != reportedDrawn) {
             if (nowDrawn) {
@@ -231,8 +236,8 @@ class AppWindowToken extends WindowToken {
             reportedDrawn = nowDrawn;
         }
         if (nowVisible != reportedVisible) {
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(
-                    WindowManagerService.TAG, "Visibility changed in " + this
+            if (DEBUG_VISIBILITY) Slog.v(
+                    TAG, "Visibility changed in " + this
                     + ": vis=" + nowVisible);
             reportedVisible = nowVisible;
             Message m = service.mH.obtainMessage(
@@ -295,7 +300,7 @@ class AppWindowToken extends WindowToken {
         final Task task = mTask;
         if (task != null) {
             if (!task.removeAppToken(this)) {
-                Slog.e(WindowManagerService.TAG, "removeAppFromTaskLocked: token=" + this
+                Slog.e(TAG, "removeAppFromTaskLocked: token=" + this
                         + " not found.");
             }
             task.mStack.mExitingAppTokens.remove(this);
@@ -330,7 +335,7 @@ class AppWindowToken extends WindowToken {
             return;
         }
 
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG_WM,
                 "Restoring saved surfaces: " + this + ", allDrawn=" + allDrawn);
 
         mAnimatingWithSavedSurface = true;
@@ -357,8 +362,8 @@ class AppWindowToken extends WindowToken {
                 // and never beyond allAppWindows bounds.
                 winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
             WindowState win = allAppWindows.get(winNdx);
-            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) {
-                Slog.w(WindowManagerService.TAG, "removeAllWindows: removing win=" + win);
+            if (DEBUG_WINDOW_MOVEMENT) {
+                Slog.w(TAG, "removeAllWindows: removing win=" + win);
             }
 
             service.removeWindowLocked(win);
@@ -377,8 +382,8 @@ class AppWindowToken extends WindowToken {
                 winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
             WindowState win = allAppWindows.get(winNdx);
             if (win.mAppDied) {
-                if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) {
-                    Slog.w(WindowManagerService.TAG, "removeAllDeadWindows: " + win);
+                if (DEBUG_WINDOW_MOVEMENT) {
+                    Slog.w(TAG, "removeAllDeadWindows: " + win);
                 }
                 // Set mDestroying, we don't want any animation or delayed removal here.
                 win.mDestroying = true;

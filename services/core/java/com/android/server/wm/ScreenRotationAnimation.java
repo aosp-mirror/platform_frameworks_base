@@ -16,11 +16,16 @@
 
 package com.android.server.wm;
 
-import java.io.PrintWriter;
-
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
-import static com.android.server.wm.WindowSurfaceController.SurfaceTrace;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
+import static com.android.server.wm.WindowSurfaceController.SurfaceTrace;
+
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -28,16 +33,18 @@ import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.Surface.OutOfResourcesException;
 import android.view.Surface;
+import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
+import java.io.PrintWriter;
+
 class ScreenRotationAnimation {
-    static final String TAG = "ScreenRotationAnimation";
+    static final String TAG = TAG_WITH_CLASS_NAME ? "ScreenRotationAnimation" : TAG_WM;
     static final boolean DEBUG_STATE = false;
     static final boolean DEBUG_TRANSFORMS = false;
     static final boolean TWO_PHASE_ANIMATION = false;
@@ -244,7 +251,7 @@ class ScreenRotationAnimation {
         mOriginalHeight = originalHeight;
 
         if (!inTransaction) {
-            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation");
             SurfaceControl.openTransaction();
         }
@@ -256,7 +263,7 @@ class ScreenRotationAnimation {
                     flags |= SurfaceControl.SECURE;
                 }
 
-                if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+                if (DEBUG_SURFACE_TRACE) {
                     mSurfaceControl = new SurfaceTrace(session, "ScreenshotSurface",
                             mWidth, mHeight,
                             PixelFormat.OPAQUE, flags);
@@ -282,15 +289,14 @@ class ScreenRotationAnimation {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
 
-            if (WindowManagerService.SHOW_TRANSACTIONS ||
-                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
-                            "  FREEZE " + mSurfaceControl + ": CREATE");
+            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
+                    "  FREEZE " + mSurfaceControl + ": CREATE");
 
             setRotationInTransaction(originalRotation);
         } finally {
             if (!inTransaction) {
                 SurfaceControl.closeTransaction();
-                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation");
             }
         }
@@ -537,8 +543,8 @@ class ScreenRotationAnimation {
 
         final int layerStack = mDisplayContent.getDisplay().getLayerStack();
         if (USE_CUSTOM_BLACK_FRAME && mCustomBlackFrame == null) {
-            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                    WindowManagerService.TAG,
+            if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                    TAG_WM,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
             SurfaceControl.openTransaction();
 
@@ -561,15 +567,15 @@ class ScreenRotationAnimation {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
-                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                        WindowManagerService.TAG,
+                if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                        TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
             }
         }
 
         if (!customAnim && mExitingBlackFrame == null) {
-            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                    WindowManagerService.TAG,
+            if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                    TAG_WM,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
             SurfaceControl.openTransaction();
             try {
@@ -601,15 +607,15 @@ class ScreenRotationAnimation {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
-                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                        WindowManagerService.TAG,
+                if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                        TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
             }
         }
 
         if (customAnim && mEnteringBlackFrame == null) {
-            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                    WindowManagerService.TAG,
+            if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                    TAG_WM,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
             SurfaceControl.openTransaction();
 
@@ -623,8 +629,8 @@ class ScreenRotationAnimation {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
                 SurfaceControl.closeTransaction();
-                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                        WindowManagerService.TAG,
+                if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                        TAG_WM,
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
             }
         }
@@ -657,8 +663,8 @@ class ScreenRotationAnimation {
     public void kill() {
         if (DEBUG_STATE) Slog.v(TAG, "Kill!");
         if (mSurfaceControl != null) {
-            if (WindowManagerService.SHOW_TRANSACTIONS ||
-                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+            if (SHOW_TRANSACTIONS ||
+                    SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
                             "  FREEZE " + mSurfaceControl + ": DESTROY");
             mSurfaceControl.destroy();
             mSurfaceControl = null;

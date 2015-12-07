@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Service;
@@ -219,7 +222,7 @@ final class AccessibilityController {
      */
     private static final class DisplayMagnifier {
 
-        private static final String LOG_TAG = "DisplayMagnifier";
+        private static final String LOG_TAG = TAG_WITH_CLASS_NAME ? "DisplayMagnifier" : TAG_WM;
 
         private static final boolean DEBUG_WINDOW_TRANSITIONS = false;
         private static final boolean DEBUG_ROTATION = false;
@@ -925,7 +928,8 @@ final class AccessibilityController {
      * user can see on the screen.
      */
     private static final class WindowsForAccessibilityObserver {
-        private static final String LOG_TAG = "WindowsForAccessibilityObserver";
+        private static final String LOG_TAG = TAG_WITH_CLASS_NAME ?
+                "WindowsForAccessibilityObserver" : TAG_WM;
 
         private static final boolean DEBUG = false;
 

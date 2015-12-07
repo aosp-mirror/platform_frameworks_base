@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.os.IBinder;
 import android.util.Slog;
 
@@ -77,8 +80,7 @@ class WindowToken {
     void removeAllWindows() {
         for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
             WindowState win = windows.get(winNdx);
-            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) Slog.w(WindowManagerService.TAG,
-                    "removeAllWindows: removing win=" + win);
+            if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM, "removeAllWindows: removing win=" + win);
             win.mService.removeWindowLocked(win);
         }
         windows.clear();
