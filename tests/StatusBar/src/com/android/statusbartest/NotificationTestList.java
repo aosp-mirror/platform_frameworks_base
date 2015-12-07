@@ -162,8 +162,11 @@ public class NotificationTestList extends TestActivity
 
         new Test("with topic Hello") {
             public void run() {
+                Notification.BigTextStyle bigText = new Notification.BigTextStyle();
+                bigText.bigText("FgBHreherhethethethe\ntwetwrterter\netetweterteryetry");
                 Notification n = new Notification.Builder(NotificationTestList.this)
                         .setSmallIcon(R.drawable.icon1)
+                        .setStyle(bigText)
                         .setWhen(mActivityCreateTime)
                         .setContentTitle("hihi")
                         .setContentText("This is a notification!!!")

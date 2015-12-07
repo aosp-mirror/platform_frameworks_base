@@ -1246,7 +1246,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setTopicImportance(String pkg, int uid, Notification.Topic topic,
                 int importance) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("Caller not system or systemui");
             mRankingHelper.setTopicImportance(pkg, uid, topic, importance);
             savePolicyFile();
         }

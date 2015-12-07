@@ -21,12 +21,14 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 
 /**
  * The guts of a notification revealed when performing a long press.
  */
-public class NotificationGuts extends FrameLayout {
+public class NotificationGuts extends LinearLayout {
 
     private Drawable mBackground;
     private int mClipTopAmount;

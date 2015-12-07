@@ -833,29 +833,29 @@ public abstract class NotificationListenerService extends Service {
         /**
          * A notification with no importance: shows nowhere, is blocked.
          */
-        public static final int IMPORTANCE_NONE = -2;
+        public static final int IMPORTANCE_NONE = 0;
 
         /**
          * Low notification importance: only shows in the shade, below the fold.
          */
-        public static final int IMPORTANCE_LOW = -1;
+        public static final int IMPORTANCE_LOW = 1;
 
         /**
          * Default notification importance: shows everywhere, but is not intrusive.
          */
-        public static final int IMPORTANCE_DEFAULT = 0;
+        public static final int IMPORTANCE_DEFAULT = 2;
 
         /**
          * Higher notification importance: shows everywhere, makes noise,
          * but does not visually intrude.
          */
-        public static final int IMPORTANCE_HIGH = 1;
+        public static final int IMPORTANCE_HIGH = 3;
 
         /**
          * Highest notification importance: shows everywhere, makes noise,
          * and also visually intrudes.
          */
-        public static final int IMPORTANCE_MAX = 2;
+        public static final int IMPORTANCE_MAX = 4;
 
         private String mKey;
         private int mRank = -1;

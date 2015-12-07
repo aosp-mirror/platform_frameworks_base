@@ -2088,6 +2088,7 @@
   <java-symbol type="string" name="notification_importance_default" />
   <java-symbol type="string" name="notification_importance_high" />
   <java-symbol type="string" name="notification_importance_max" />
+  <java-symbol type="string" name="notification_importance_title" />
 
   <java-symbol type="string" name="select_day" />
   <java-symbol type="string" name="select_year" />
