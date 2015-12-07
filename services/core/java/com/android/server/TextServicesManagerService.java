@@ -29,7 +29,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
-import android.app.IUserSwitchObserver;
+import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -45,7 +45,6 @@ import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IRemoteCallback;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -102,17 +101,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         int userId = UserHandle.USER_SYSTEM;
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                    new IUserSwitchObserver.Stub() {
+                    new SynchronousUserSwitchObserver() {
                         @Override
-                        public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                        public void onUserSwitching(int newUserId) throws RemoteException {
                             synchronized(mSpellCheckerMap) {
                                 switchUserLocked(newUserId);
-                            }
-                            if (reply != null) {
-                                try {
-                                    reply.sendResult(null);
-                                } catch (RemoteException e) {
-                                }
                             }
                         }
 

@@ -43,11 +43,11 @@ import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -80,7 +80,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.os.IRemoteCallback;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Process;
@@ -788,17 +787,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int userId = 0;
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                    new IUserSwitchObserver.Stub() {
+                    new SynchronousUserSwitchObserver() {
                         @Override
-                        public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                        public void onUserSwitching(int newUserId)
+                                throws RemoteException {
                             synchronized(mMethodMap) {
                                 switchUserLocked(newUserId);
-                            }
-                            if (reply != null) {
-                                try {
-                                    reply.sendResult(null);
-                                } catch (RemoteException e) {
-                                }
                             }
                         }
 

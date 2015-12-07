@@ -19,12 +19,11 @@ package com.android.server.fingerprint;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
-import android.app.IUserSwitchObserver;
 import android.app.PendingIntent;
+import android.app.SynchronousUserSwitchObserver;
 import android.content.ComponentName;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,7 +37,6 @@ import android.os.DeadObjectException;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -1134,17 +1132,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private void listenForUserSwitches() {
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                new IUserSwitchObserver.Stub() {
+                new SynchronousUserSwitchObserver() {
                     @Override
-                    public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                    public void onUserSwitching(int newUserId) throws RemoteException {
                         mHandler.obtainMessage(MSG_USER_SWITCHING, newUserId, 0 /* unused */)
                                 .sendToTarget();
-                        if (reply != null) {
-                            try {
-                                reply.sendResult(null);
-                            } catch (RemoteException e) {
-                            }
-                        }
                     }
                     @Override
                     public void onUserSwitchComplete(int newUserId) throws RemoteException {

@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
-import android.app.IUserSwitchObserver;
 import android.app.StatusBarManager;
+import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +28,6 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Handler;
-import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -378,17 +377,11 @@ public class PhoneStatusBarPolicy implements Callback {
         }
     }
 
-    private final IUserSwitchObserver.Stub mUserSwitchListener =
-            new IUserSwitchObserver.Stub() {
+    private final SynchronousUserSwitchObserver mUserSwitchListener =
+            new SynchronousUserSwitchObserver() {
                 @Override
-                public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                public void onUserSwitching(int newUserId) throws RemoteException {
                     mUserInfoController.reloadUserInfo();
-                    if (reply != null) {
-                        try {
-                            reply.sendResult(null);
-                        } catch (RemoteException e) {
-                        }
-                    }
                 }
 
                 @Override
