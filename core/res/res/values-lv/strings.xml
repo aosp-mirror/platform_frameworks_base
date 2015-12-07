@@ -223,8 +223,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Balss palīgs"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloķēt tūlīt"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"Pārsniedz"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Drošais režīms"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistēma"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Personisks"</string>
@@ -1450,6 +1449,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izdzēsa jūsu administrators"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek samazināta ierīces veiktspēja un tiek ierobežota vibrācija, atrašanās vietu pakalpojumi un lielākā daļa fona datu. E-pasta, ziņojumapmaiņas un cita veida lietotnes, kuru darbības pamatā ir datu sinhronizācija, var netikt atjauninātas, ja tās neatverat.\n\nTiklīdz tiek sākta ierīces uzlāde, akumulatora jaudas taupīšanas režīms automātiski tiek izslēgts."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloķēts: nekad nerādīt šos paziņojumus"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Zemu: rādīt paziņojumu saraksta apakšdaļā bez skaņas signāla"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normāli: rādīt šos paziņojumus bez skaņas signāla"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Augstu: rādīt paziņojumu saraksta augšdaļā un ar skaņas signālu"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Steidzami: rādīt ekrānā ar skaņas signālu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="zero">%1$d minūtes (līdz <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">%1$d minūti (līdz <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

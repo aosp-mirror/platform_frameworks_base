@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ຊ່ວຍ​ເຫຼືອ​ທາງ​ສຽງ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ລັອກ​ດຽວ​ນີ້"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ລະບົບ Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"​ສ່ວນ​ໂຕ"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອ​ຊ່ວຍ​ເພີ່ມ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີ​ຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ການ​ເຮັດ​ວຽກ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ, ການ​ບໍ​ລິ​ການ​ຫາທີ່ຕັ້ງ, ແລະ​ຂໍ້​ມູນ​ພື້ນ​ຫຼັງ​ເກືອບ​ທັງ​ໝົດ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ, ແລະ​ແອັບອື່ນໆ​ທີ່ອາ​ໄສການ​ຊິງ​ຄ໌​ອາດ​ຈະ​ບໍ່​ອັບ​ເດດ ນອກ​ຈາກວ່າ​ທ່ານ​ເປີດ​ມັນ.\n\nຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີຈະ​ປິດ​ອັດ​ຕະ​ໂນ​ມັດ ເມື່ອ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ກຳ​ລັງ​ສາກຢູ່."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"ບລັອກແລ້ວ: ຢ່າສະແດງການແຈ້ງເຕືອນເຫຼົ່ານີ້"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"ຕໍ່າ: ສະແດງຢູ່ສ່ວນລຸ່ມຂອງລາຍການແຈ້ງເຕືອນແບບມີບໍ່ສຽງ"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"ປົກກະຕິ: ສະແດງການແຈ້ງເຕືອນເຫຼົ່ານີ້ແບບບໍ່ມີສຽງ"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"ສູງ: ສະແດງຢູ່ສ່ວນເທິງຂອງລາຍການແຈ້ງເຕືອນ ແລະສົ່ງສຽງດັງ"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"ດ່ວນ: ເດັ້ງຂຶ້ນເທິງຫນ້າຈໍ ແລະສົ່ງສຽງດັງ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

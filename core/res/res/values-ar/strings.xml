@@ -226,8 +226,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"المساعد الصوتي"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"قفل الآن"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"شخصي"</string>
@@ -1477,6 +1476,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفر البطارية في تقليل أداء الجهاز ويفرض قيدًا على الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية. قد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم تفتحها.\n\nيتم إيقاف موفر البطارية تلقائيًا أثناء شحن الجهاز."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"محظور: عدم عرض هذه الإشعارات مطلقًا"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"منخفض الأهمية: عرض بأسفل قائمة الإشعارات وبدون تنبيه صوتي"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"عادي: عرض هذه الإشعارات بدون تنبيه صوتي"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"عالي الأهمية: عرض بأعلى قائمة الإشعارات مع إصدار تنبيه صوتي"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"عاجل: الظهور سريعًا على الشاشة مع إصدار تنبيه صوتي"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">‏لمدة دقيقتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

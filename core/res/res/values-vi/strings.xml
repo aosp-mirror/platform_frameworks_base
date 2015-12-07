@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Trợ lý thoại"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Khóa ngay"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Hệ thống Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Cá nhân"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Được cập nhật bởi quản trị viên của bạn"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Đã bị xóa bởi quản trị viên của bạn"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Đã chặn: Không bao giờ hiển thị các thông báo này"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Thấp: Hiển thị im lặng ở cuối danh sách thông báo"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Bình thường: Hiển thị im lặng các thông báo này"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Cao: Hiển thị ở đầu danh sách thông báo và phát ra âm thanh"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Khẩn cấp: Hiển thị trên màn hình và phát ra âm thanh"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Trong %1$d phút (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Trong một phút (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

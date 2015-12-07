@@ -1440,6 +1440,16 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"管理者によって更新されています"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"管理者によって削除されました"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
+    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (6447640449918427187) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (7991157697609575271) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (3152238637737215654) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (1153693080467904474) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d分間（<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>まで）</item>
       <item quantity="one">1分間（<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>まで）</item>

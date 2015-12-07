@@ -1440,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opdateret af administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet af din administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen slukker automatisk, når enheden oplader."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokeret: Vis aldrig disse underretninger"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Lav: Vis lydløst nederst på listen over underretninger"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Vis disse underretninger lydløst"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Høj: Vis øverst på listen over underretninger, og giv lyd"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Presserende: Vis på skærmen, og giv lyd"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

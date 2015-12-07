@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ajuda de voz"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloquear agora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Pessoal"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Excluído pelo seu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a duração da bateria, o economizador de bateria reduz o desempenho e os limites de vibração do dispositivo, os serviços de localização e a maioria dos dados de segundo plano. E-mail, mensagens e outros aplicativos que dependem de sincronização não podem ser atualizados, a não ser que você os abra.\n\nO economizador de bateria é desligado automaticamente quando o dispositivo está sendo carregado."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloqueada: nunca mostrar essas notificações"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Baixa: mostrar na parte inferior da lista de notificações de forma silenciosa"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: mostrar essas notificações de forma silenciosa"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Alta: mostrar na parte superior da lista de notificações e emitir som"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Urgente: mostrar parcialmente na tela e emitir som"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

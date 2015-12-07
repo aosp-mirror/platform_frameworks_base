@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Дуут туслах"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Одоо түгжих"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Аюулгүй горим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Андройд систем"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Хувийн"</string>
@@ -1441,6 +1440,16 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Танай админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Таны админ устгасан байна"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг юм. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтрах юм."</string>
+    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (6447640449918427187) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (7991157697609575271) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (3152238637737215654) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (1153693080467904474) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d минутын турш ( <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> хүртэл)</item>
       <item quantity="one">нэг минутын турш (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> хүртэл)</item>

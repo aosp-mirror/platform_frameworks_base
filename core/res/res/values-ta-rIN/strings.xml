@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"குரல் உதவி"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"இப்போது பூட்டு"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"தனிப்பட்ட"</string>
@@ -1441,6 +1440,16 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"நிர்வாகி நீக்கிவிட்டார்"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகள் திறக்கும்வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
+    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (6447640449918427187) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (7991157697609575271) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (3152238637737215654) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (1153693080467904474) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
       <item quantity="one">ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>

@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"വോയ്‌സ് സഹായം"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ഇപ്പോൾ ലോക്കുചെയ്യുക"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"സുരക്ഷിത മോഡ്"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"വ്യക്തിഗതം"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അപ്‌ഡേറ്റുചെയ്‌തു"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"ബ്ലോക്കുചെയ്തു: ഈ അറിയിപ്പുകൾ ഒരിക്കലും കാണിക്കരുത്"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"താഴ്ന്നത്: അറിയിപ്പ് ലിസ്റ്റിന്റെ താഴെ ശബ്ദമുണ്ടാക്കാതെ കാണിക്കുക"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"സാധാരണം: ഈ അറിയിപ്പുകൾ നിശബ്ദമായി കാണിക്കുക"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"ഉയർന്നത്: അറിയിപ്പ് ലിസ്റ്റിന്റെ ഏറ്റവും മുകളിൽ കാണിക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"അടിയന്തിരം: സ്ക്രീനിൽ ദൃശ്യമാക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>

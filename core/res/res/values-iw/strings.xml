@@ -224,8 +224,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"נעל עכשיו"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"מצב בטוח"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏מערכת Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"אישי"</string>
@@ -1459,6 +1458,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"חסימה: לעולם אל תציג הודעות אלה"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"נמוכה: הצג בתחתית רשימת ההודעות בלי להשמיע צליל"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"רגילה: הצג הודעות אלה בלי להשמיע צליל"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"גבוהה: הצג בראש רשימת ההודעות והשמע צליל"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"דחופה: הצג לרגע על המסך והשמע צליל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

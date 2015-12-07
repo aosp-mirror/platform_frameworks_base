@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"語音小幫手"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即鎖定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"超過 999"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"個人"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已遭管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"封鎖：一律不顯示這些通知"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"低：顯示在通知清單底部且不發出任何音效"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"一般：顯示這些通知且不發出任何音效"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"高：顯示在通知清單頂端並發出音效"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"緊急：持續顯示在螢幕上並發出音效"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">持續 %1$d 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">持續 1 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
