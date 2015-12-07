@@ -383,6 +383,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_HARDWARE_ACCELERATED = 1<<29;
 
     /**
+     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
+     * and for most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int FLAG_EPHEMERAL = 1<<30;
+
+    /**
      * Value for {@link #flags}: true if code from this application will need to be
      * loaded into other applications' processes. On devices that support multiple
      * instruction sets, this implies the code might be loaded into a process that's

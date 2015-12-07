@@ -462,6 +462,14 @@ public abstract class PackageManager {
     public static final int INSTALL_QUICK = 0x00000800;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that this package is
+     * to be installed as a lightweight "ephemeral" app.
+     *
+     * @hide
+     */
+    public static final int INSTALL_EPHEMERAL = 0x00001000;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
@@ -868,6 +876,14 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public static final int INSTALL_FAILED_ABORTED = -115;
+
+    /**
+     * Installation failed return code: ephemeral app installs are incompatible with some
+     * other installation flags supplied for the operation; or other circumstances such
+     * as trying to upgrade a system app via an ephemeral install.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_EPHEMERAL_INVALID = -116;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the

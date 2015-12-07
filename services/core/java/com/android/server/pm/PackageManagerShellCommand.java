@@ -729,6 +729,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--abi":
                     sessionParams.abiOverride = checkAbiArgument(getNextArg());
                     break;
+                case "--ephemeral":
+                    sessionParams.installFlags |= PackageManager.INSTALL_EPHEMERAL;
+                    break;
                 case "--user":
                     params.userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;

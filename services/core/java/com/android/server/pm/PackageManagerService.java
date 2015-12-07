@@ -37,6 +37,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_CONFLICTING_PROVI
 import static android.content.pm.PackageManager.INSTALL_FAILED_DEXOPT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
+import static android.content.pm.PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
@@ -452,6 +453,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Directory where installed third-party apps stored */
     final File mAppInstallDir;
+    final File mEphemeralInstallDir;
 
     /**
      * Directory to which applications installed internally have their
@@ -1372,6 +1374,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } break;
                 case POST_INSTALL: {
                     if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
+
                     PostInstallData data = mRunningInstalls.get(msg.arg1);
                     mRunningInstalls.delete(msg.arg1);
                     boolean deleteOld = false;
@@ -1429,19 +1432,33 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     }
                                 }
                             }
-                            sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    packageName, extras, 0, null, null, firstUsers);
+                            // don't broadcast for ephemeral installs/updates
+                            final boolean isEphemeral = isEphemeral(res.pkg);
+                            if (!isEphemeral) {
+                                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                                        extras, 0 /*flags*/, null /*targetPackage*/,
+                                        null /*finishedReceiver*/, firstUsers);
+                            }
                             final boolean update = res.removedInfo.removedPackage != null;
                             if (update) {
                                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
                             }
-                            sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                                    packageName, extras, 0, null, null, updateUsers);
+                            if (!isEphemeral) {
+                                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                                        extras, 0 /*flags*/, null /*targetPackage*/,
+                                        null /*finishedReceiver*/, updateUsers);
+                            }
                             if (update) {
-                                sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                                        packageName, extras, 0, null, null, updateUsers);
-                                sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
-                                        null, null, 0, packageName, null, updateUsers);
+                                if (!isEphemeral) {
+                                    sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                                            packageName, extras, 0 /*flags*/,
+                                            null /*targetPackage*/, null /*finishedReceiver*/,
+                                            updateUsers);
+                                    sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
+                                            null /*package*/, null /*extras*/, 0 /*flags*/,
+                                            packageName /*targetPackage*/,
+                                            null /*finishedReceiver*/, updateUsers);
+                                }
 
                                 // treat asec-hosted packages like removable media on upgrade
                                 if (res.pkg.isForwardLocked() || isExternal(res.pkg)) {
@@ -1968,6 +1985,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mAppDataDir = new File(dataDir, "data");
             mAppInstallDir = new File(dataDir, "app");
             mAppLib32InstallDir = new File(dataDir, "app-lib");
+            mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
@@ -2200,6 +2218,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 scanDirTracedLI(mAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
                 scanDirTracedLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
+                        scanFlags | SCAN_REQUIRE_KNOWN, 0);
+
+                scanDirLI(mEphemeralInstallDir, PackageParser.PARSE_IS_EPHEMERAL,
                         scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
                 /**
@@ -9889,6 +9910,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     void installStage(String packageName, File stagedDir, String stagedCid,
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user) {
+        if (DEBUG_EPHEMERAL) {
+            if ((sessionParams.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
+                Slog.d(TAG, "Ephemeral install of " + packageName);
+            }
+        }
         final VerificationParams verifParams = new VerificationParams(
                 null, sessionParams.originatingUri, sessionParams.referrerUri,
                 sessionParams.originatingUid, null);
@@ -10278,6 +10304,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         // TODO: fix b/25118622; don't bypass verification
         if (Build.IS_DEBUGGABLE && (installFlags & PackageManager.INSTALL_QUICK) != 0) {
+            return false;
+        }
+        // Ephemeral apps don't get the full verification treatment
+        if ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "INSTALL_EPHEMERAL so skipping verification");
+            }
             return false;
         }
 
@@ -10929,15 +10962,23 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
             final boolean onInt = (installFlags & PackageManager.INSTALL_INTERNAL) != 0;
+            final boolean ephemeral = (installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
             PackageInfoLite pkgLite = null;
 
             if (onInt && onSd) {
                 // Check if both bits are set.
                 Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            } else if (onSd && ephemeral) {
+                Slog.w(TAG,  "Conflicting flags specified for installing ephemeral on external");
+                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
                 pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath, installFlags,
                         packageAbiOverride);
+
+                if (DEBUG_EPHEMERAL && ephemeral) {
+                    Slog.v(TAG, "pkgLite for install: " + pkgLite);
+                }
 
                 /*
                  * If we have too little free space, try to free cache
@@ -10998,6 +11039,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // Set the flag to install on external media.
                             installFlags |= PackageManager.INSTALL_EXTERNAL;
                             installFlags &= ~PackageManager.INSTALL_INTERNAL;
+                        } else if (loc == PackageHelper.RECOMMEND_INSTALL_EPHEMERAL) {
+                            if (DEBUG_EPHEMERAL) {
+                                Slog.v(TAG, "...setting INSTALL_EPHEMERAL install flag");
+                            }
+                            installFlags |= PackageManager.INSTALL_EPHEMERAL;
+                            installFlags &= ~(PackageManager.INSTALL_EXTERNAL
+                                    |PackageManager.INSTALL_INTERNAL);
                         } else {
                             // Make sure the flag for installing on external
                             // media is unset
@@ -11330,6 +11378,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             return (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
         }
 
+        protected boolean isEphemeral() {
+            return (installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+        }
+
         UserHandle getUser() {
             return user;
         }
@@ -11407,7 +11459,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             try {
-                final File tempDir = mInstallerService.allocateStageDirLegacy(volumeUuid);
+                final boolean isEphemeral = (installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+                final File tempDir =
+                        mInstallerService.allocateStageDirLegacy(volumeUuid, isEphemeral);
                 codeFile = tempDir;
                 resourceFile = tempDir;
             } catch (IOException e) {
@@ -12202,6 +12256,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void replacePackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
             UserHandle user, String installerPackageName, String volumeUuid,
             PackageInstalledInfo res) {
+        final boolean isEphemeral = (parseFlags & PackageParser.PARSE_IS_EPHEMERAL) != 0;
+
         final PackageParser.Package oldPackage;
         final String pkgName = pkg.packageName;
         final int[] allUsers;
@@ -12210,6 +12266,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
+            final boolean oldIsEphemeral
+                    = ((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_EPHEMERAL) != 0);
+            if (isEphemeral && !oldIsEphemeral) {
+                // can't downgrade from full to ephemeral
+                Slog.w(TAG, "Can't replace app with ephemeral: " + pkgName);
+                res.returnCode = PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID;
+                return;
+            }
             if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
@@ -12606,6 +12670,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
                 || (args.volumeUuid != null));
         final boolean quickInstall = ((installFlags & PackageManager.INSTALL_QUICK) != 0);
+        final boolean ephemeral = ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0);
         boolean replace = false;
         int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.move != null) {
@@ -12617,12 +12682,21 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installPackageLI: path=" + tmpPackageFile);
 
+        // Sanity check
+        if (ephemeral && (forwardLocked || onExternal)) {
+            Slog.i(TAG, "Incompatible ephemeral install; fwdLocked=" + forwardLocked
+                    + " external=" + onExternal);
+            res.returnCode = PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID;
+            return;
+        }
+
         // Retrieve PackageSettings and parse package
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | PackageParser.PARSE_ENFORCE_CODE
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
                 | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0)
-                | (quickInstall ? PackageParser.PARSE_SKIP_VERIFICATION : 0);
+                | (quickInstall ? PackageParser.PARSE_SKIP_VERIFICATION : 0)
+                | (ephemeral ? PackageParser.PARSE_IS_EPHEMERAL : 0);
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setDisplayMetrics(mMetrics);
@@ -12804,11 +12878,18 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         }
 
-        if (systemApp && onExternal) {
-            // Disable updates to system apps on sdcard
-            res.setError(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                    "Cannot install updates to system apps on sdcard");
-            return;
+        if (systemApp) {
+            if (onExternal) {
+                // Abort update; system app can't be replaced with app on sdcard
+                res.setError(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
+                        "Cannot install updates to system apps on sdcard");
+                return;
+            } else if (ephemeral) {
+                // Abort update; system app can't be replaced with an ephemeral app
+                res.setError(INSTALL_FAILED_EPHEMERAL_INVALID,
+                        "Cannot update a system app with an ephemeral app");
+                return;
+            }
         }
 
         if (args.move != null) {
@@ -13004,6 +13085,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         return (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
+    private static boolean isEphemeral(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EPHEMERAL) != 0;
+    }
+
+    private static boolean isEphemeral(PackageSetting ps) {
+        return (ps.pkgFlags & ApplicationInfo.FLAG_EPHEMERAL) != 0;
+    }
+
     private static boolean isSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
@@ -13026,6 +13115,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private int packageFlagsToInstallFlags(PackageSetting ps) {
         int installFlags = 0;
+        if (isEphemeral(ps)) {
+            installFlags |= PackageManager.INSTALL_EPHEMERAL;
+        }
         if (isExternal(ps) && TextUtils.isEmpty(ps.volumeUuid)) {
             // This existing package was an external ASEC install when we have
             // the external flag without a UUID

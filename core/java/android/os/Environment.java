@@ -235,6 +235,11 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataAppEphemeralDirectory(String volumeUuid) {
+        return new File(getDataDirectory(volumeUuid), "app-ephemeral");
+    }
+
+    /** {@hide} */
     @Deprecated
     public static File getDataUserDirectory(String volumeUuid) {
         return getDataUserCredentialEncryptedDirectory(volumeUuid);

@@ -458,6 +458,8 @@ public final class Pm {
                 params.setSize(Long.parseLong(nextOptionData()));
             } else if (opt.equals("--abi")) {
                 params.abiOverride = checkAbiArgument(nextOptionData());
+            } else if (opt.equals("--ephemeral")) {
+                params.installFlags |= PackageManager.INSTALL_EPHEMERAL;
             } else if (opt.equals("--user")) {
                 userId = Integer.parseInt(nextOptionData());
             } else if (opt.equals("--install-location")) {

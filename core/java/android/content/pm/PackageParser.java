@@ -627,6 +627,7 @@ public class PackageParser {
     public final static int PARSE_ENFORCE_CODE = 1<<10;
     // TODO: fix b/25118622; remove this entirely once signature processing is quick
     public final static int PARSE_SKIP_VERIFICATION = 1<<11;
+    public final static int PARSE_IS_EPHEMERAL = 1<<12;
 
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
 

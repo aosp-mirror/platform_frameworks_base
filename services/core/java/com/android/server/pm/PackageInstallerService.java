@@ -157,7 +157,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private final PackageManagerService mPm;
 
     private AppOpsManager mAppOps;
-    private StorageManager mStorage;
 
     private final HandlerThread mInstallThread;
     private final Handler mInstallHandler;
@@ -220,7 +219,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         synchronized (mSessions) {
             readSessionsLocked();
 
-            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL);
+            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL, false /*isEphemeral*/);
+            reconcileStagesLocked(StorageManager.UUID_PRIVATE_INTERNAL, true /*isEphemeral*/);
 
             final ArraySet<File> unclaimedIcons = newArraySet(
                     mSessionsDir.listFiles());
@@ -241,11 +241,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     public void systemReady() {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
-        mStorage = mContext.getSystemService(StorageManager.class);
     }
 
-    private void reconcileStagesLocked(String volumeUuid) {
-        final File stagingDir = buildStagingDir(volumeUuid);
+    private void reconcileStagesLocked(String volumeUuid, boolean isEphemeral) {
+        final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
         final ArraySet<File> unclaimedStages = newArraySet(
                 stagingDir.listFiles(sStageFilter));
 
@@ -270,7 +269,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     public void onPrivateVolumeMounted(String volumeUuid) {
         synchronized (mSessions) {
-            reconcileStagesLocked(volumeUuid);
+            reconcileStagesLocked(volumeUuid, false /*isEphemeral*/);
         }
     }
 
@@ -311,12 +310,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Deprecated
-    public File allocateStageDirLegacy(String volumeUuid) throws IOException {
+    public File allocateStageDirLegacy(String volumeUuid, boolean isEphemeral) throws IOException {
         synchronized (mSessions) {
             try {
                 final int sessionId = allocateSessionIdLocked();
                 mLegacySessions.put(sessionId, true);
-                final File stageDir = buildStageDir(volumeUuid, sessionId);
+                final File stageDir = buildStageDir(volumeUuid, sessionId, isEphemeral);
                 prepareStageDir(stageDir);
                 return stageDir;
             } catch (IllegalStateException e) {
@@ -678,7 +677,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             File stageDir = null;
             String stageCid = null;
             if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-                stageDir = buildStageDir(params.volumeUuid, sessionId);
+                final boolean isEphemeral =
+                        (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+                stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
             } else {
                 stageCid = buildExternalStageCid(sessionId);
             }
@@ -777,12 +778,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         throw new IllegalStateException("Failed to allocate session ID");
     }
 
-    private File buildStagingDir(String volumeUuid) {
+    private File buildStagingDir(String volumeUuid, boolean isEphemeral) {
+        if (isEphemeral) {
+            return Environment.getDataAppEphemeralDirectory(volumeUuid);
+        }
         return Environment.getDataAppDirectory(volumeUuid);
     }
 
-    private File buildStageDir(String volumeUuid, int sessionId) {
-        final File stagingDir = buildStagingDir(volumeUuid);
+    private File buildStageDir(String volumeUuid, int sessionId, boolean isEphemeral) {
+        final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
         return new File(stagingDir, "vmdl" + sessionId + ".tmp");
     }
 
