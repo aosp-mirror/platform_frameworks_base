@@ -183,7 +183,7 @@ public class DownloadsActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc, DocumentContext context) {
+    public void onDocumentPicked(DocumentInfo doc, SiblingProvider siblings) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isContainer()) {
             openContainerDocument(doc);

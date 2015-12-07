@@ -233,12 +233,6 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         final DirectoryResult result = new DirectoryResult();
         result.sortOrder = SORT_ORDER_LAST_MODIFIED;
 
-        // Hint to UI if we're still loading
-        final Bundle extras = new Bundle();
-        if (!allDone) {
-            extras.putBoolean(DocumentsContract.EXTRA_LOADING, true);
-        }
-
         final Cursor merged;
         if (cursors.size() > 0) {
             merged = new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
@@ -247,14 +241,13 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
             merged = new MatrixCursor(new String[0]);
         }
 
-        final SortingCursorWrapper sorted = new SortingCursorWrapper(merged, result.sortOrder) {
-            @Override
-            public Bundle getExtras() {
-                return extras;
-            }
-        };
+        // Tell the UI if this is an in-progress result. When loading is complete, another update is
+        // sent with EXTRA_LOADING set to false.
+        Bundle extras = new Bundle();
+        extras.putBoolean(DocumentsContract.EXTRA_LOADING, !allDone);
+        merged.setExtras(extras);
 
-        result.cursor = sorted;
+        result.cursor = merged;
 
         return result;
     }

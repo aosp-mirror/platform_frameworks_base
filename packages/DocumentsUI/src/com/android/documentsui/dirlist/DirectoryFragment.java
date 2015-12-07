@@ -86,7 +86,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.documentsui.BaseActivity;
-import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.CopyService;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
@@ -106,7 +105,6 @@ import com.android.documentsui.RecentsProvider;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.RootsCache;
-import com.android.documentsui.Shared;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
@@ -436,6 +434,9 @@ public class DirectoryFragment extends Fragment {
                 if (container != null && !getArguments().getBoolean(EXTRA_IGNORE_STATE, false)) {
                     getView().restoreHierarchyState(container);
                 } else if (mLastSortOrder != state.derivedSortOrder) {
+                    // The derived sort order takes the user sort order into account, but applies
+                    // directory-specific defaults when the user doesn't explicitly set the sort
+                    // order. Scroll to the top if the sort order actually changed.
                     mRecView.smoothScrollToPosition(0);
                 }
 
@@ -996,16 +997,14 @@ public class DirectoryFragment extends Fragment {
     }
 
     final class DocumentsAdapter
-        extends RecyclerView.Adapter<DocumentHolder>
-        implements Model.UpdateListener {
+            extends RecyclerView.Adapter<DocumentHolder>
+            implements Model.UpdateListener {
 
         static private final String TAG = "DocumentsAdapter";
         private final Context mContext;
         /**
          * Map of model IDs to adapter positions. This is the data structure that determines what
-         * shows up in the UI, and where. Note that item positions can change if items are
-         * removed/added, so this list should only be used in onBindViewHolder. See
-         * {@link RecyclerView.Adapter.onCreateViewHolder} for details.
+         * shows up in the UI, and where.
          */
         // TODO(stable-id): need to keep this up-to-date when items are added/removed
         private List<String> mModelIds = new ArrayList<>();
@@ -1063,8 +1062,8 @@ public class DirectoryFragment extends Fragment {
             final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                     context, mThumbSize);
 
-            final String modelId = mModelIds.get(position);
-            final Cursor cursor = mModel.getItem(modelId);
+            holder.modelId = mModelIds.get(position);
+            final Cursor cursor = mModel.getItem(holder.modelId);
             checkNotNull(cursor, "Cursor cannot be null.");
 
             final String docAuthority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
@@ -1078,10 +1077,9 @@ public class DirectoryFragment extends Fragment {
             final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
             final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-            holder.modelId = Model.createId(cursor);
             final View itemView = holder.itemView;
 
-            holder.setSelected(isSelected(modelId));
+            holder.setSelected(isSelected(holder.modelId));
 
             final ImageView iconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
             final ImageView iconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
@@ -1222,15 +1220,13 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            if (DEBUG) Log.d(TAG, "getItemCount called: " + mModelIds.size());
             return mModelIds.size();
         }
 
         @Override
         public void onModelUpdate(Model model) {
             // TODO(stable-id): Sort model IDs, categorize by dir/file, etc
-            if (DEBUG) Log.d(TAG, "onModelUpdate called");
-            mModelIds = Lists.newArrayList(model.getIds());
+            mModelIds = Lists.newArrayList(model.getModelIds());
         }
 
         @Override
@@ -1284,6 +1280,16 @@ public class DirectoryFragment extends Fragment {
                 mModelIds.add(pos, id);
                 notifyItemInserted(pos);
             }
+        }
+
+        /**
+         * Returns a list of model IDs of items currently in the adapter. Excludes items that are
+         * currently hidden (see {@link #hide(String...)}).
+         *
+         * @return A list of Model IDs.
+         */
+        public List<String> getModelIds() {
+            return mModelIds;
         }
     }
 
@@ -1440,7 +1446,7 @@ public class DirectoryFragment extends Fragment {
                 Snackbars.makeSnackbar(activity,
                         activity.getResources().getQuantityString(
                                 R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
-                                Snackbar.LENGTH_SHORT).show();
+                        Snackbar.LENGTH_SHORT).show();
             }
         }.execute(selection);
     }
@@ -1476,7 +1482,8 @@ public class DirectoryFragment extends Fragment {
     }
 
     public void selectAllFiles() {
-        boolean changed = mSelectionManager.setItemsSelected(mModel.getIds(), true);
+        // Only select things currently visible in the adapter.
+        boolean changed = mSelectionManager.setItemsSelected(mAdapter.getModelIds(), true);
         if (changed) {
             updateDisplayState();
         }

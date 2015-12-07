@@ -34,7 +34,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.documentsui.BaseActivity.DocumentContext;
+import com.android.documentsui.BaseActivity.SiblingProvider;
 import com.android.documentsui.model.DocumentInfo;
 
 /**
@@ -43,7 +43,7 @@ import com.android.documentsui.model.DocumentInfo;
 final class QuickViewIntentBuilder {
 
     private final DocumentInfo mDocument;
-    private final DocumentContext mContext;
+    private final SiblingProvider mSiblings;
 
     private final PackageManager mPkgManager;
     private final Resources mResources;
@@ -55,12 +55,12 @@ final class QuickViewIntentBuilder {
             PackageManager pkgManager,
             Resources resources,
             DocumentInfo doc,
-            DocumentContext context) {
+            SiblingProvider siblings) {
 
         mPkgManager = pkgManager;
         mResources = resources;
         mDocument = doc;
-        mContext = context;
+        mSiblings = siblings;
     }
 
     /**
@@ -84,7 +84,7 @@ final class QuickViewIntentBuilder {
             intent.setPackage(trustedPkg);
             if (hasRegisteredHandler(intent)) {
                 // We have a trusted handler. Load all of the docs into the intent.
-                Cursor cursor = mContext.getCursor();
+                Cursor cursor = mSiblings.getCursor();
                 for (int i = 0; i < cursor.getCount(); i++) {
                     onNextItem(i, cursor);
                 }

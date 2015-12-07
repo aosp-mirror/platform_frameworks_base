@@ -17,6 +17,10 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.State.SORT_ORDER_DISPLAY_NAME;
+import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.State.SORT_ORDER_SIZE;
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
@@ -34,7 +38,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
-import com.android.documentsui.BaseActivity.DocumentContext;
+import com.android.documentsui.BaseActivity.SiblingProvider;
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.RootCursorWrapper;
@@ -44,44 +48,47 @@ import com.android.documentsui.model.DocumentInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * The data model for the current loaded directory.
  */
 @VisibleForTesting
-public class Model implements DocumentContext {
+public class Model implements SiblingProvider {
     private static final String TAG = "Model";
+
     private Context mContext;
-    private int mCursorCount;
     private boolean mIsLoading;
     private List<UpdateListener> mUpdateListeners = new ArrayList<>();
     @Nullable private Cursor mCursor;
+    private int mCursorCount;
+    /** Maps Model ID to cursor positions, for looking up items by Model ID. */
+    private Map<String, Integer> mPositions = new HashMap<>();
+    /**
+     * A sorted array of model IDs for the files currently in the Model.  Sort order is determined
+     * by {@link #mSortOrder}
+     */
+    private List<String> mIds = new ArrayList<>();
+    private int mSortOrder = SORT_ORDER_DISPLAY_NAME;
+
     @Nullable String info;
     @Nullable String error;
-    private HashMap<String, Integer> mPositions = new HashMap<>();
 
     Model(Context context, RecyclerView.Adapter<?> viewAdapter) {
         mContext = context;
     }
 
     /**
-     * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a
-     * unique string that can be used to identify the document referred to by the cursor.
+     * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a unique
+     * string that can be used to identify the document referred to by the cursor.
      *
      * @param c A cursor that refers to a document.
      */
-    public static String createId(Cursor c) {
+    private static String createModelId(Cursor c) {
+        // TODO: Maybe more efficient to use just the document ID, in cases where there is only one
+        // authority (which should be the majority of cases).
         return getCursorString(c, RootCursorWrapper.COLUMN_AUTHORITY) +
                 "|" + getCursorString(c, Document.COLUMN_DOCUMENT_ID);
-    }
-
-    /**
-     * @return Model IDs for all known items in the model. Note that this will include items
-     *         pending deletion.
-     */
-    public Set<String> getIds() {
-        return mPositions.keySet();
     }
 
     private void notifyUpdateListeners() {
@@ -102,6 +109,8 @@ public class Model implements DocumentContext {
         if (result == null) {
             mCursor = null;
             mCursorCount = 0;
+            mIds.clear();
+            mPositions.clear();
             info = null;
             error = null;
             mIsLoading = false;
@@ -117,8 +126,9 @@ public class Model implements DocumentContext {
 
         mCursor = result.cursor;
         mCursorCount = mCursor.getCount();
+        mSortOrder = result.sortOrder;
 
-        updatePositions();
+        updateModelData();
 
         final Bundle extras = mCursor.getExtras();
         if (extras != null) {
@@ -136,14 +146,171 @@ public class Model implements DocumentContext {
     }
 
     /**
-     * Update the ModelId-position map.
+     * Scan over the incoming cursor data, generate Model IDs for each row, and sort the IDs
+     * according to the current sort order.
      */
-    private void updatePositions() {
-        mPositions.clear();
+    private void updateModelData() {
+        int[] positions = new int[mCursorCount];
+        mIds.clear();
+        String[] strings = null;
+        long[] longs = null;
+
+        switch (mSortOrder) {
+            case SORT_ORDER_DISPLAY_NAME:
+                strings = new String[mCursorCount];
+                break;
+            case SORT_ORDER_LAST_MODIFIED:
+            case SORT_ORDER_SIZE:
+                longs = new long[mCursorCount];
+                break;
+        }
+
         mCursor.moveToPosition(-1);
         for (int pos = 0; pos < mCursorCount; ++pos) {
             mCursor.moveToNext();
-            mPositions.put(Model.createId(mCursor), pos);
+            positions[pos] = pos;
+            mIds.add(createModelId(mCursor));
+
+            switch(mSortOrder) {
+                case SORT_ORDER_DISPLAY_NAME:
+                    final String mimeType = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
+                    final String displayName = getCursorString(
+                            mCursor, Document.COLUMN_DISPLAY_NAME);
+                    if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+                        strings[pos] = DocumentInfo.DIR_PREFIX + displayName;
+                    } else {
+                        strings[pos] = displayName;
+                    }
+                    break;
+                case SORT_ORDER_LAST_MODIFIED:
+                    longs[pos] = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+                    break;
+                case SORT_ORDER_SIZE:
+                    longs[pos] = getCursorLong(mCursor, Document.COLUMN_SIZE);
+                    break;
+            }
+        }
+
+        switch (mSortOrder) {
+            case SORT_ORDER_DISPLAY_NAME:
+                binarySort(positions, strings, mIds);
+                break;
+            case SORT_ORDER_LAST_MODIFIED:
+            case SORT_ORDER_SIZE:
+                binarySort(positions, longs, mIds);
+                break;
+        }
+
+        // Populate the positions.
+        mPositions.clear();
+        for (int i = 0; i < mCursorCount; ++i) {
+            mPositions.put(mIds.get(i), positions[i]);
+        }
+    }
+
+    /**
+     * Borrowed from TimSort.binarySort(), but modified to sort three-column data set.
+     */
+    private static void binarySort(int[] positions, String[] strings, List<String> ids) {
+        final int count = positions.length;
+        for (int start = 1; start < count; start++) {
+            final int pivotPosition = positions[start];
+            final String pivotValue = strings[start];
+            final String pivotId = ids.get(start);
+
+            int left = 0;
+            int right = start;
+
+            while (left < right) {
+                int mid = (left + right) >>> 1;
+
+                final String lhs = pivotValue;
+                final String rhs = strings[mid];
+                final int compare = DocumentInfo.compareToIgnoreCaseNullable(lhs, rhs);
+
+                if (compare < 0) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+
+            int n = start - left;
+            switch (n) {
+                case 2:
+                    positions[left + 2] = positions[left + 1];
+                    strings[left + 2] = strings[left + 1];
+                    ids.set(left + 2, ids.get(left + 1));
+                case 1:
+                    positions[left + 1] = positions[left];
+                    strings[left + 1] = strings[left];
+                    ids.set(left + 1, ids.get(left));
+                    break;
+                default:
+                    System.arraycopy(positions, left, positions, left + 1, n);
+                    System.arraycopy(strings, left, strings, left + 1, n);
+                    for (int i = n; i >= 1; --i) {
+                        ids.set(left + i, ids.get(left + i - 1));
+                    }
+            }
+
+            positions[left] = pivotPosition;
+            strings[left] = pivotValue;
+            ids.set(left, pivotId);
+        }
+    }
+
+    /**
+     * Borrowed from TimSort.binarySort(), but modified to sort three-column data set.
+     */
+   private static void binarySort(int[] positions, long[] longs, List<String> ids) {
+        final int count = positions.length;
+        for (int start = 1; start < count; start++) {
+            final int pivotPosition = positions[start];
+            final long pivotValue = longs[start];
+            final String pivotId = ids.get(start);
+
+            int left = 0;
+            int right = start;
+
+            while (left < right) {
+                int mid = (left + right) >>> 1;
+
+                final long lhs = pivotValue;
+                final long rhs = longs[mid];
+                // Sort in descending numerical order. This matches legacy behaviour, which yields
+                // largest or most recent items on top.
+                final int compare = -Long.compare(lhs, rhs);
+
+                if (compare < 0) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+
+            int n = start - left;
+            switch (n) {
+                case 2:
+                    positions[left + 2] = positions[left + 1];
+                    longs[left + 2] = longs[left + 1];
+                    ids.set(left + 2, ids.get(left + 1));
+                case 1:
+                    positions[left + 1] = positions[left];
+                    longs[left + 1] = longs[left];
+                    ids.set(left + 1, ids.get(left));
+                    break;
+                default:
+                    System.arraycopy(positions, left, positions, left + 1, n);
+                    System.arraycopy(longs, left, longs, left + 1, n);
+                    for (int i = n; i >= 1; --i) {
+                        ids.set(left + i, ids.get(left + i - 1));
+                    }
+            }
+
+            positions[left] = pivotPosition;
+            longs[left] = pivotValue;
+            ids.set(left, pivotId);
         }
     }
 
@@ -278,5 +445,13 @@ public class Model implements DocumentContext {
          * Called when an update has been attempted but failed.
          */
         void onModelUpdateFailed(Exception e);
+    }
+
+    /**
+     * @return An ordered array of model IDs representing the documents in the model. It is sorted
+     *         according to the current sort order, which was set by the last model update.
+     */
+    public List<String> getModelIds() {
+        return mIds;
     }
 }
