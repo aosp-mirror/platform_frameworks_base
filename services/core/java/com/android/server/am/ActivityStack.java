@@ -1070,6 +1070,7 @@ final class ActivityStack {
         if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Complete pause: " + prev);
 
         if (prev != null) {
+            final boolean wasStopping = prev.state == ActivityState.STOPPING;
             prev.state = ActivityState.PAUSED;
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Executing finish of activity: " + prev);
@@ -1088,9 +1089,15 @@ final class ActivityStack {
                     // the current instance before starting the new one.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Destroying after pause: " + prev);
                     destroyActivityLocked(prev, true, "pause-config");
+                } else if (wasStopping) {
+                    // We are also stopping, the stop request must have gone soon after the pause.
+                    // We can't clobber it, because the stop confirmation will not be handled.
+                    // We don't need to schedule another stop, we only need to let it happen.
+                    prev.state = ActivityState.STOPPING;
                 } else if (!hasVisibleBehindActivity() || mService.isSleepingOrShuttingDown()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
+
                     mStackSupervisor.mStoppingActivities.add(prev);
                     if (mStackSupervisor.mStoppingActivities.size() > 3 ||
                             prev.frontOfTask && mTaskHistory.size() <= 1) {
