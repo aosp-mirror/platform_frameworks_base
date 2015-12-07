@@ -1141,7 +1141,15 @@ status_t compileResourceFile(Bundle* bundle,
                 }
                 pkg = String16(block.getAttributeStringValue(pkgIdx, &len));
                 if (!localHasErrors) {
-                    assets->setSymbolsPrivatePackage(String8(pkg));
+                    SourcePos(in->getPrintableSource(), block.getLineNumber()).warning(
+                            "<private-symbols> is deprecated. Use the command line flag "
+                            "--private-symbols instead.\n");
+                    if (assets->havePrivateSymbols()) {
+                        SourcePos(in->getPrintableSource(), block.getLineNumber()).warning(
+                                "private symbol package already specified. Ignoring...\n");
+                    } else {
+                        assets->setSymbolsPrivatePackage(String8(pkg));
+                    }
                 }
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
