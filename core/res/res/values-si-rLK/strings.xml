@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"හඬ සහායක"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"දැන් අගුළු දමන්න"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"ආරක්‍ෂිත ආකාරය"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android පද්ධතිය"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"පෞද්ගලික"</string>
@@ -1443,6 +1442,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"අවහිර කළ: මෙම දැනුම්දීම් කිසිදා නොපෙන්වන්න"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"අඩු: දැනුම්දීම් ලැයිස්තුවෙහි පහළින්ම නිශ්ශබ්දව පෙන්වන්න"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"සාමාන්‍ය: නිශ්ශබ්දව මෙම දැනුම්දීම් පෙන්වන්න"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"වැඩි: දැනුම්දීම් ලැයිස්තුවෙහි ඉහළින්ම පෙන්වන්න සහ ශබ්ද කරන්න"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"හදිසි: තිරයට පැමිණ ශබ්ද කරන්න"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
       <item quantity="other">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>

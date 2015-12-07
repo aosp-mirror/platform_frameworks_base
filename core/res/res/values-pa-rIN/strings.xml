@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ਵੌਇਸ ਅਸਿਸਟ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ਹੁਣ ਲੌਕ ਕਰੋ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"ਸੁਰੱਖਿਅਤ ਮੋਡ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"ਨਿੱਜੀ"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਅਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ਬੈਟਰੀ ਸਮਰੱਥਾ ਨੂੰ ਬਿਹਤਰ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ, ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਪਿਛੋਕੜ ਡਾਟਾ ਨੂੰ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਮੈਸੇਜਿੰਗ ਅਤੇ ਹੋਰ ਐਪਸ, ਜੋ ਸਿੰਕਿੰਗ ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਆਟੋਮੈਟਿਕਲੀ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਚਾਰਜ ਹੋ ਰਹੀ ਹੁੰਦੀ ਹੈ।"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"ਬਲੌਕ ਕੀਤਾ: ਇਹ ਸੂਚਨਾਵਾਂ ਕਦੇ ਨਾ ਵਿਖਾਓ"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"ਘੱਟ: ਚੁੱਪਚਾਪ ਢੰਗ ਨਾਲ ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਵਿਖਾਓ"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"ਸਧਾਰਨ: ਇਹ ਸੂਚਨਾਵਾਂ ਚੁੱਪਚਾਪ ਢੰਗ ਨਾਲ ਵਿਖਾਓ"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"ਵੱਧ: ਸੂਚਨਾਵਾਂ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਵਿਖਾਓ ਅਤੇ ਆਵਾਜ਼ ਕਰੋ"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"ਜ਼ਰੂਰੀ: ਸਕਰੀਨ \'ਤੇ ਝਾਤੀ ਮਾਰੋ ਅਤੇ ਆਵਾਜ਼ ਕਰੋ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ) </item>
       <item quantity="other">%1$d ਮਿੰਟਾਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>

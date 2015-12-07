@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"အသံ အကူအညီ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ယခု သော့ပိတ်ရန်"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"၉၉၉+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"အန္တရာယ်ကင်းမှု စနစ်(Safe mode)"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android စနစ်"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"ကိုယ်ရေး"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"သင့်စီမံခန့်ခွဲသူမှ အဆင့်မြှင့်ထားပါသည်။"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"သင့် အက်ဒမင်အား ဖျက်ပစ်ရန်"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်၊ ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကို  လျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့်၊ နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်လုပ်ပေးရလေ့ရှိသည့် အီးမေး၊ စာပို့ခြင်းနှင့်၊ အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အဆင့်မြှင့်မွမ်းမံမည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းအား အလိုအလျောက် ပိတ်ထားသည်။"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"ပိတ်ဆို့ထား- ဤသတိပေးချက်များကို ဘယ်တော့မှ မပြပါနှင့်"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"နိမ့်- တိတ်ဆိတ်စွာ သတိပေးချက်များ၏ စာရင်း အောက်ပိုင်းမှာ ပြပါ"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"\'ပုံမှန်- ဤသတိပေးချက်များကို တိတ်ဆိတ်စွာ ပြပါ"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"မြင့်မား- သတိပေးချက်များ၏ စာရင်းထိပ်မှာ ပြလျက် အသံမြည်ပေးပါ"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"အရေးကြီး- : မျက်နှာပြင်မှာ ပြပေးလျက် အသံမြည်ပေးပါ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
       <item quantity="one">တစ်မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>

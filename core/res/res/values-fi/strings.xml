@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ääniapuri"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lukitse nyt"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Suojattu tila"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Henkilökoht."</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Järjestelmänvalvojasi on päivittänyt paketin."</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Järjestelmänvalvoja on poistanut paketin."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Jos haluat parantaa akun kestoa, virransäästö vähentää laitteesi suorituskykyä ja rajoittaa värinää, sijaintipalveluita ja useimpia taustatietoja. Sähköposti, viestit ja muut synkronointiin perustuvat sovellukset eivät välttämättä päivity, ellet avaa niitä.\n\nVirransäästö poistuu käytöstä automaattisesti, kun laitteesi latautuu."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Estetty: älä koskaan näytä näitä ilmoituksia."</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Matala: näytä nämä ilmoitukset huomaamattomasti luettelon alaosassa."</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Tavallinen: näytä nämä ilmoitukset huomaamattomasti."</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Korkea: näytä nämä ilmoitukset luettelon yläosassa ja toista äänimerkki."</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Kiireellinen: näytä ilmoitus näytöllä ja toista äänimerkki."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Yhdeksi minuutiksi (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

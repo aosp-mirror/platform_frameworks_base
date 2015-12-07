@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Bantuan Suara"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Kunci sekarang"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode aman"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Pribadi"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Diperbarui oleh administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dihapus oleh administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran, layanan lokasi, dan kebanyakan data latar belakang. Email, perpesanan, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diperbarui kecuali jika dibuka.\n\nPenghemat baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Diblokir: Jangan pernah menampilkan notifikasi ini"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Rendah: Menampilkan di bagian bawah daftar notifikasi secara diam-diam"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Menampilkan notifikasi ini secara diam-diam"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Tinggi: Menampilkan di bagian atas daftar notifikasi dan membunyikan suara"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Darurat: Muncul di layar dan membunyikan suara"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Selama %1$d menit (hingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Selama satu menit (hingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

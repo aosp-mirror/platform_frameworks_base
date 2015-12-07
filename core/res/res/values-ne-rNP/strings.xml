@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"आवाज सहायता"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"अब बन्द गर्नुहोस्"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"९९९+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"एन्ड्रोइड प्रणाली"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"व्यक्तिगत"</string>
@@ -1447,6 +1446,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"रोकिएको: यी सूचनाहरू कहिल्यै नदेखाउनुहोस्"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"कम: चुपचाप सूचना सूचीको फेदमा देखाउनुहोस्"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"सामान्य: चुपचाप यी सूचनाहरू देखाउनुहोस्"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"उच्च: सूचना सूचीको शीर्षमा देखाउनुहोस् र आवाज निकाल्नुहोस्"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"जरुरी: स्क्रिनमा झलक्क हेर्नुहोस् र आवाज निकाल्नुहोस्"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
       <item quantity="one">एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>

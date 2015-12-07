@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"વૉઇસ સહાય"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"હવે લૉક કરો"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"સુરક્ષિત મોડ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android સિસ્ટમ"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"વ્યક્તિગત"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ થયેલ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખેલ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય એપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"અવરોધિત: આ સૂચનાઓ ક્યારેય બતાવશો નહીં"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"નિમ્ન: સૂચનાની સૂચિની નીચે ચુપચાપ બતાવો"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"સામાન્ય: આ સૂચનાઓ ચુપચાપ બતાવો"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"ઉચ્ચ: સૂચનાઓની સૂચિની ટોચ પર બતાવો અને અવાજ કરો"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"તાત્કાલિક : સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજ કરો"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
       <item quantity="other">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>

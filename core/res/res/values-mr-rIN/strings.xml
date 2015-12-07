@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"व्हॉइस सहाय्य"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"आता लॉक करा"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"वैयक्तिक"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपल्या प्रशासकाद्वारे अद्यतनित केले"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपल्या प्रशासकाद्वारे हटविले आहे"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"अवरोधित केले: या सूचना कधीही दर्शवू नका"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"कमी: शांतपणे सूचना सूचीच्या तळाशी दर्शवा"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"सामान्य: या सूचना शांतपणे दर्शवा"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"सर्वोच्च: सूचना सूचीच्या शीर्षस्थानी दर्शवा आणि ध्वनी चालू करा"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"त्वरित: स्क्रीनवर डोकावून पहा आणि ध्वनी चालू करा"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d मिनिटासाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>
       <item quantity="other">%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>

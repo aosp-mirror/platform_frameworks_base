@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ಈಗ ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"ಸುರಕ್ಷಿತ ಮೋಡ್"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android ಸಿಸ್ಟಂ"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"ವೈಯಕ್ತಿಕ"</string>
@@ -1441,6 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ನವೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ನಿಮ್ಮ ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ನವೀಕರಣಗೊಳ್ಳುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ: ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಎಂದಿಗೂ ತೋರಿಸಬೇಡ"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"ಕಡಿಮೆ: ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"ಸಾಮಾನ್ಯ: ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"ಅಧಿಕ: ಅಧಿಸೂಚನೆಗಳ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸು ಮತ್ತು ಧ್ವನಿ ಮಾಡು"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"ತುರ್ತು: ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಧ್ವನಿ ಮಾಡು"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>
       <item quantity="other">%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ವರೆಗೆ)</item>

@@ -373,7 +373,7 @@
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Овозможува апликацијата да го користи инфрацрвениот предавател на телефонот."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"подеси тапет"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Дозволува апликацијата да го постави системскиот тапет."</string>
-    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"прилагоди ја големината на твојот тапет"</string>
+    <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"приспособи ја големината на твојот тапет"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дозволува апликацијата да постави сугестии за големина на системски тапет."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"подеси временска зона"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дозволува апликацијата да ја промени часовната зона на таблетот."</string>
@@ -537,7 +537,7 @@
     <item msgid="1735177144948329370">"Факс дома"</item>
     <item msgid="603878674477207394">"Пејџер"</item>
     <item msgid="1650824275177931637">"Други"</item>
-    <item msgid="9192514806975898961">"Прилагоди"</item>
+    <item msgid="9192514806975898961">"Приспособен"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Дома"</item>
@@ -622,8 +622,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Работа"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Друго"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Прилагоди"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Прилагоди"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Приспособен"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Приспособена"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Помошник"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Брат"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Дете"</string>
@@ -1442,6 +1442,16 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
+    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (6447640449918427187) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (7991157697609575271) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (3152238637737215654) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (1153693080467904474) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

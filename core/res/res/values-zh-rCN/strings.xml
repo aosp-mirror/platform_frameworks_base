@@ -222,8 +222,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"（<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g> 条）"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"个人"</string>
@@ -1441,6 +1440,16 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
+    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (6447640449918427187) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (7991157697609575271) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (3152238637737215654) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (1153693080467904474) -->
+    <skip />
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>

@@ -224,8 +224,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Usaidizi wa Sauti"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Funga sasa"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <!-- no translation found for notification_children_count_bracketed (1769425473168347839) -->
-    <skip />
+    <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Binafsi"</string>
@@ -1443,6 +1442,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Imezuiwa: Usionyeshe kamwe arifa hizi"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Chini: Onyesha katika sehemu ya chini ya orodha ya arifa bila kutoa sauti"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Kawaida: Onyesha arifa hizi bila sauti"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Juu: Onyesha katika sehemu ya juu ya orodha ya arifa na itoe sauti"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Muhimu: Weka onyesho la kuchungulia kwenye skrini na itoe sauti"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
