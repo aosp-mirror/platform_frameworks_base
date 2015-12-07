@@ -1636,8 +1636,14 @@ public class GradientDrawable extends Drawable {
     public void getOutline(Outline outline) {
         final GradientState st = mGradientState;
         final Rect bounds = getBounds();
-        // only report non-zero alpha if shape being drawn is opaque
-        outline.setAlpha(st.mOpaqueOverShape && isOpaqueForState() ? (mAlpha / 255.0f) : 0.0f);
+        // only report non-zero alpha if shape being drawn has consistent opacity over shape. Must
+        // either not have a stroke, or have same stroke/fill opacity
+        boolean useFillOpacity = st.mOpaqueOverShape && (mGradientState.mStrokeWidth <= 0
+                || mStrokePaint == null
+                || mStrokePaint.getAlpha() == mFillPaint.getAlpha());
+        outline.setAlpha(useFillOpacity
+                ? modulateAlpha(mFillPaint.getAlpha()) / 255.0f
+                : 0.0f);
 
         switch (st.mShape) {
             case RECTANGLE:
