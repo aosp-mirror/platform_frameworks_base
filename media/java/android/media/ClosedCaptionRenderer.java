@@ -23,12 +23,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.os.Parcel;
-import android.text.ParcelableSpan;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
-import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
@@ -52,7 +49,7 @@ import java.util.Vector;
 /** @hide */
 public class ClosedCaptionRenderer extends SubtitleController.Renderer {
     private final Context mContext;
-    private ClosedCaptionWidget mRenderingWidget;
+    private Cea608CCWidget mCCWidget;
 
     public ClosedCaptionRenderer(Context context) {
         mContext = context;
@@ -61,31 +58,35 @@ public class ClosedCaptionRenderer extends SubtitleController.Renderer {
     @Override
     public boolean supports(MediaFormat format) {
         if (format.containsKey(MediaFormat.KEY_MIME)) {
-            return format.getString(MediaFormat.KEY_MIME).equals(
-                    MediaPlayer.MEDIA_MIMETYPE_TEXT_CEA_608);
+            String mimeType = format.getString(MediaFormat.KEY_MIME);
+            return MediaPlayer.MEDIA_MIMETYPE_TEXT_CEA_608.equals(mimeType);
         }
         return false;
     }
 
     @Override
     public SubtitleTrack createTrack(MediaFormat format) {
-        if (mRenderingWidget == null) {
-            mRenderingWidget = new ClosedCaptionWidget(mContext);
+        String mimeType = format.getString(MediaFormat.KEY_MIME);
+        if (MediaPlayer.MEDIA_MIMETYPE_TEXT_CEA_608.equals(mimeType)) {
+            if (mCCWidget == null) {
+                mCCWidget = new Cea608CCWidget(mContext);
+            }
+            return new Cea608CaptionTrack(mCCWidget, format);
         }
-        return new ClosedCaptionTrack(mRenderingWidget, format);
+        throw new RuntimeException("No matching format: " + format.toString());
     }
 }
 
 /** @hide */
-class ClosedCaptionTrack extends SubtitleTrack {
-    private final ClosedCaptionWidget mRenderingWidget;
-    private final CCParser mCCParser;
+class Cea608CaptionTrack extends SubtitleTrack {
+    private final Cea608CCParser mCCParser;
+    private final Cea608CCWidget mRenderingWidget;
 
-    ClosedCaptionTrack(ClosedCaptionWidget renderingWidget, MediaFormat format) {
+    Cea608CaptionTrack(Cea608CCWidget renderingWidget, MediaFormat format) {
         super(format);
 
         mRenderingWidget = renderingWidget;
-        mCCParser = new CCParser(renderingWidget);
+        mCCParser = new Cea608CCParser(mRenderingWidget);
     }
 
     @Override
@@ -105,6 +106,149 @@ class ClosedCaptionTrack extends SubtitleTrack {
 }
 
 /**
+ * Abstract widget class to render a closed caption track.
+ *
+ * @hide
+ */
+abstract class ClosedCaptionWidget extends ViewGroup implements SubtitleTrack.RenderingWidget {
+
+    /** @hide */
+    interface ClosedCaptionLayout {
+        void setCaptionStyle(CaptionStyle captionStyle);
+        void setFontScale(float scale);
+    }
+
+    private static final CaptionStyle DEFAULT_CAPTION_STYLE = CaptionStyle.DEFAULT;
+
+    /** Captioning manager, used to obtain and track caption properties. */
+    private final CaptioningManager mManager;
+
+    /** Current caption style. */
+    protected CaptionStyle mCaptionStyle;
+
+    /** Callback for rendering changes. */
+    protected OnChangedListener mListener;
+
+    /** Concrete layout of CC. */
+    protected ClosedCaptionLayout mClosedCaptionLayout;
+
+    /** Whether a caption style change listener is registered. */
+    private boolean mHasChangeListener;
+
+    public ClosedCaptionWidget(Context context) {
+        this(context, null);
+    }
+
+    public ClosedCaptionWidget(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public ClosedCaptionWidget(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, 0);
+    }
+
+    public ClosedCaptionWidget(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        // Cannot render text over video when layer type is hardware.
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+        mManager = (CaptioningManager) context.getSystemService(Context.CAPTIONING_SERVICE);
+        mCaptionStyle = DEFAULT_CAPTION_STYLE.applyStyle(mManager.getUserStyle());
+
+        mClosedCaptionLayout = createCaptionLayout(context);
+        mClosedCaptionLayout.setCaptionStyle(mCaptionStyle);
+        mClosedCaptionLayout.setFontScale(mManager.getFontScale());
+        addView((ViewGroup) mClosedCaptionLayout, LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT);
+
+        requestLayout();
+    }
+
+    public abstract ClosedCaptionLayout createCaptionLayout(Context context);
+
+    @Override
+    public void setOnChangedListener(OnChangedListener listener) {
+        mListener = listener;
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        final int widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+        final int heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+
+        measure(widthSpec, heightSpec);
+        layout(0, 0, width, height);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        if (visible) {
+            setVisibility(View.VISIBLE);
+        } else {
+            setVisibility(View.GONE);
+        }
+
+        manageChangeListener();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        manageChangeListener();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        manageChangeListener();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        ((ViewGroup) mClosedCaptionLayout).measure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        ((ViewGroup) mClosedCaptionLayout).layout(l, t, r, b);
+    }
+
+    /**
+     * Manages whether this renderer is listening for caption style changes.
+     */
+    private final CaptioningChangeListener mCaptioningListener = new CaptioningChangeListener() {
+        @Override
+        public void onUserStyleChanged(CaptionStyle userStyle) {
+            mCaptionStyle = DEFAULT_CAPTION_STYLE.applyStyle(userStyle);
+            mClosedCaptionLayout.setCaptionStyle(mCaptionStyle);
+        }
+
+        @Override
+        public void onFontScaleChanged(float fontScale) {
+            mClosedCaptionLayout.setFontScale(fontScale);
+        }
+    };
+
+    private void manageChangeListener() {
+        final boolean needsListener = isAttachedToWindow() && getVisibility() == View.VISIBLE;
+        if (mHasChangeListener != needsListener) {
+            mHasChangeListener = needsListener;
+
+            if (needsListener) {
+                mManager.addCaptioningChangeListener(mCaptioningListener);
+            } else {
+                mManager.removeCaptioningChangeListener(mCaptioningListener);
+            }
+        }
+    }
+}
+
+/**
  * @hide
  *
  * CCParser processes CEA-608 closed caption data.
@@ -113,11 +257,11 @@ class ClosedCaptionTrack extends SubtitleTrack {
  * display change with styled text for rendering.
  *
  */
-class CCParser {
+class Cea608CCParser {
     public static final int MAX_ROWS = 15;
     public static final int MAX_COLS = 32;
 
-    private static final String TAG = "CCParser";
+    private static final String TAG = "Cea608CCParser";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int INVALID = -1;
@@ -160,11 +304,11 @@ class CCParser {
     private CCMemory mNonDisplay = new CCMemory();
     private CCMemory mTextMem = new CCMemory();
 
-    CCParser(DisplayListener listener) {
+    Cea608CCParser(DisplayListener listener) {
         mListener = listener;
     }
 
-    void parse(byte[] data) {
+    public void parse(byte[] data) {
         CCData[] ccData = CCData.fromByteArray(data);
 
         for (int i = 0; i < ccData.length; i++) {
@@ -184,8 +328,8 @@ class CCParser {
     }
 
     interface DisplayListener {
-        public void onDisplayChanged(SpannableStringBuilder[] styledTexts);
-        public CaptionStyle getCaptionStyle();
+        void onDisplayChanged(SpannableStringBuilder[] styledTexts);
+        CaptionStyle getCaptionStyle();
     }
 
     private CCMemory getMemory() {
@@ -480,6 +624,33 @@ class CCParser {
         }
     }
 
+    /**
+     * Mutable version of BackgroundSpan to facilitate text rendering with edge styles.
+     *
+     * @hide
+     */
+    public static class MutableBackgroundColorSpan extends CharacterStyle
+            implements UpdateAppearance {
+        private int mColor;
+
+        public MutableBackgroundColorSpan(int color) {
+            mColor = color;
+        }
+
+        public void setBackgroundColor(int color) {
+            mColor = color;
+        }
+
+        public int getBackgroundColor() {
+            return mColor;
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds) {
+            ds.bgColor = mColor;
+        }
+    }
+
     /* CCLineBuilder keeps track of displayable chars, as well as
      * MidRow styles and PACs, for a single line of CC memory.
      *
@@ -682,8 +853,7 @@ class CCParser {
         }
 
         SpannableStringBuilder[] getStyledText(CaptionStyle captionStyle) {
-            ArrayList<SpannableStringBuilder> rows =
-                    new ArrayList<SpannableStringBuilder>(MAX_ROWS);
+            ArrayList<SpannableStringBuilder> rows = new ArrayList<>(MAX_ROWS);
             for (int i = 1; i <= MAX_ROWS; i++) {
                 rows.add(mLines[i] != null ?
                         mLines[i].getStyledText(captionStyle) : null);
@@ -1044,127 +1214,39 @@ class CCParser {
 }
 
 /**
- * Mutable version of BackgroundSpan to facilitate text rendering with edge
- * styles.
- *
- * @hide
- */
-class MutableBackgroundColorSpan extends CharacterStyle implements UpdateAppearance {
-    private int mColor;
-
-    public MutableBackgroundColorSpan(int color) {
-        mColor = color;
-    }
-
-    public void setBackgroundColor(int color) {
-        mColor = color;
-    }
-
-    public int getBackgroundColor() {
-        return mColor;
-    }
-
-    @Override
-    public void updateDrawState(TextPaint ds) {
-        ds.bgColor = mColor;
-    }
-}
-
-/**
  * Widget capable of rendering CEA-608 closed captions.
  *
  * @hide
  */
-class ClosedCaptionWidget extends ViewGroup implements
-        SubtitleTrack.RenderingWidget,
-        CCParser.DisplayListener {
-    private static final String TAG = "ClosedCaptionWidget";
-
+class Cea608CCWidget extends ClosedCaptionWidget implements Cea608CCParser.DisplayListener {
     private static final Rect mTextBounds = new Rect();
     private static final String mDummyText = "1234567890123456789012345678901234";
-    private static final CaptionStyle DEFAULT_CAPTION_STYLE = CaptionStyle.DEFAULT;
 
-    /** Captioning manager, used to obtain and track caption properties. */
-    private final CaptioningManager mManager;
-
-    /** Callback for rendering changes. */
-    private OnChangedListener mListener;
-
-    /** Current caption style. */
-    private CaptionStyle mCaptionStyle;
-
-    /* Closed caption layout. */
-    private CCLayout mClosedCaptionLayout;
-
-    /** Whether a caption style change listener is registered. */
-    private boolean mHasChangeListener;
-
-    public ClosedCaptionWidget(Context context) {
+    public Cea608CCWidget(Context context) {
         this(context, null);
     }
 
-    public ClosedCaptionWidget(Context context, AttributeSet attrs) {
-        this(context, null, 0);
+    public Cea608CCWidget(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public ClosedCaptionWidget(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public Cea608CCWidget(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, 0);
+    }
 
-        // Cannot render text over video when layer type is hardware.
-        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
-        mManager = (CaptioningManager) context.getSystemService(Context.CAPTIONING_SERVICE);
-        mCaptionStyle = DEFAULT_CAPTION_STYLE.applyStyle(mManager.getUserStyle());
-
-        mClosedCaptionLayout = new CCLayout(context);
-        mClosedCaptionLayout.setCaptionStyle(mCaptionStyle);
-        addView(mClosedCaptionLayout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-
-        requestLayout();
+    public Cea608CCWidget(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
-    public void setOnChangedListener(OnChangedListener listener) {
-        mListener = listener;
-    }
-
-    @Override
-    public void setSize(int width, int height) {
-        final int widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
-        final int heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-
-        measure(widthSpec, heightSpec);
-        layout(0, 0, width, height);
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        if (visible) {
-            setVisibility(View.VISIBLE);
-        } else {
-            setVisibility(View.GONE);
-        }
-
-        manageChangeListener();
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        manageChangeListener();
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        manageChangeListener();
+    public ClosedCaptionLayout createCaptionLayout(Context context) {
+        return new CCLayout(context);
     }
 
     @Override
     public void onDisplayChanged(SpannableStringBuilder[] styledTexts) {
-        mClosedCaptionLayout.update(styledTexts);
+        ((CCLayout) mClosedCaptionLayout).update(styledTexts);
 
         if (mListener != null) {
             mListener.onChanged(this);
@@ -1174,41 +1256,6 @@ class ClosedCaptionWidget extends ViewGroup implements
     @Override
     public CaptionStyle getCaptionStyle() {
         return mCaptionStyle;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mClosedCaptionLayout.measure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        mClosedCaptionLayout.layout(l, t, r, b);
-    }
-
-    /**
-     * Manages whether this renderer is listening for caption style changes.
-     */
-    private final CaptioningChangeListener mCaptioningListener = new CaptioningChangeListener() {
-        @Override
-        public void onUserStyleChanged(CaptionStyle userStyle) {
-            mCaptionStyle = DEFAULT_CAPTION_STYLE.applyStyle(userStyle);
-            mClosedCaptionLayout.setCaptionStyle(mCaptionStyle);
-        }
-    };
-
-    private void manageChangeListener() {
-        final boolean needsListener = isAttachedToWindow() && getVisibility() == View.VISIBLE;
-        if (mHasChangeListener != needsListener) {
-            mHasChangeListener = needsListener;
-
-            if (needsListener) {
-                mManager.addCaptioningChangeListener(mCaptioningListener);
-            } else {
-                mManager.removeCaptioningChangeListener(mCaptioningListener);
-            }
-        }
     }
 
     private static class CCLineBox extends TextView {
@@ -1260,8 +1307,7 @@ class ClosedCaptionWidget extends ViewGroup implements
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            float fontSize = MeasureSpec.getSize(heightMeasureSpec)
-                    * FONT_PADDING_RATIO;
+            float fontSize = MeasureSpec.getSize(heightMeasureSpec) * FONT_PADDING_RATIO;
             setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
 
             mOutlineWidth = EDGE_OUTLINE_RATIO * fontSize + 1.0f;
@@ -1358,8 +1404,8 @@ class ClosedCaptionWidget extends ViewGroup implements
             CharSequence text = getText();
             if (text instanceof Spannable) {
                 Spannable spannable = (Spannable) text;
-                MutableBackgroundColorSpan[] bgSpans = spannable.getSpans(
-                        0, spannable.length(), MutableBackgroundColorSpan.class);
+                Cea608CCParser.MutableBackgroundColorSpan[] bgSpans = spannable.getSpans(
+                        0, spannable.length(), Cea608CCParser.MutableBackgroundColorSpan.class);
                 for (int i = 0; i < bgSpans.length; i++) {
                     bgSpans[i].setBackgroundColor(color);
                 }
@@ -1367,8 +1413,8 @@ class ClosedCaptionWidget extends ViewGroup implements
         }
     }
 
-    private static class CCLayout extends LinearLayout {
-        private static final int MAX_ROWS = CCParser.MAX_ROWS;
+    private static class CCLayout extends LinearLayout implements ClosedCaptionLayout {
+        private static final int MAX_ROWS = Cea608CCParser.MAX_ROWS;
         private static final float SAFE_AREA_RATIO = 0.9f;
 
         private final CCLineBox[] mLineBoxes = new CCLineBox[MAX_ROWS];
@@ -1383,10 +1429,16 @@ class ClosedCaptionWidget extends ViewGroup implements
             }
         }
 
-        void setCaptionStyle(CaptionStyle captionStyle) {
+        @Override
+        public void setCaptionStyle(CaptionStyle captionStyle) {
             for (int i = 0; i < MAX_ROWS; i++) {
                 mLineBoxes[i].setCaptionStyle(captionStyle);
             }
+        }
+
+        @Override
+        public void setFontScale(float fontScale) {
+            // Ignores the font scale changes of the system wide CC preference.
         }
 
         void update(SpannableStringBuilder[] textBuffer) {
@@ -1455,4 +1507,4 @@ class ClosedCaptionWidget extends ViewGroup implements
             }
         }
     }
-};
+}
