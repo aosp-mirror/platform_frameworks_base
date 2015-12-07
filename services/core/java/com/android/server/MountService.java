@@ -57,6 +57,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -175,8 +176,8 @@ class MountService extends IMountService.Stub
         }
 
         @Override
-        public void onStartUser(int userHandle) {
-            mMountService.onStartUser(userHandle);
+        public void onUnlockUser(int userHandle) {
+            mMountService.onUnlockUser(userHandle);
         }
 
         @Override
@@ -286,10 +287,12 @@ class MountService extends IMountService.Stub
      */
     private final Object mLock = new Object();
 
+    /** Set of users that we know are unlocked. */
     @GuardedBy("mLock")
-    private int[] mStartedUsers = EmptyArray.INT;
+    private int[] mLocalUnlockedUsers = EmptyArray.INT;
+    /** Set of users that system knows are unlocked. */
     @GuardedBy("mLock")
-    private int[] mUnlockedUsers = EmptyArray.INT;
+    private int[] mSystemUnlockedUsers = EmptyArray.INT;
 
     /** Map from disk ID to disk */
     @GuardedBy("mLock")
@@ -834,12 +837,21 @@ class MountService extends IMountService.Stub
     private void initIfReadyAndConnected() {
         Slog.d(TAG, "Thinking about init, mSystemReady=" + mSystemReady
                 + ", mDaemonConnected=" + mDaemonConnected);
-        if (mSystemReady && mDaemonConnected && StorageManager.isFileBasedEncryptionEnabled()) {
-            final List<UserInfo> users = mContext.getSystemService(UserManager.class)
-                    .getUsers();
+        if (mSystemReady && mDaemonConnected
+                && !StorageManager.isNativeFileBasedEncryptionEnabled()) {
+            // When booting a device without native support, make sure that our
+            // user directories are locked or unlocked based on the current
+            // emulation status.
+            final boolean initLocked = StorageManager.isEmulatedFileBasedEncryptionEnabled();
+            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
                 try {
-                    mCryptConnector.execute("cryptfs", "lock_user_key", user.id);
+                    if (initLocked) {
+                        mCryptConnector.execute("cryptfs", "lock_user_key", user.id);
+                    } else {
+                        mCryptConnector.execute("cryptfs", "unlock_user_key", user.id,
+                                user.serialNumber, "!");
+                    }
                 } catch (NativeDaemonConnectorException e) {
                     Slog.w(TAG, "Failed to init vold", e);
                 }
@@ -854,9 +866,9 @@ class MountService extends IMountService.Stub
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             killMediaProvider(users);
 
-            final int[] startedUsers;
+            final int[] systemUnlockedUsers;
             synchronized (mLock) {
-                startedUsers = mStartedUsers;
+                systemUnlockedUsers = mSystemUnlockedUsers;
 
                 mDisks.clear();
                 mVolumes.clear();
@@ -871,7 +883,7 @@ class MountService extends IMountService.Stub
                 for (UserInfo user : users) {
                     mConnector.execute("volume", "user_added", user.id, user.serialNumber);
                 }
-                for (int userId : startedUsers) {
+                for (int userId : systemUnlockedUsers) {
                     mConnector.execute("volume", "user_started", userId);
                 }
             } catch (NativeDaemonConnectorException e) {
@@ -880,8 +892,8 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private void onStartUser(int userId) {
-        Slog.d(TAG, "onStartUser " + userId);
+    private void onUnlockUser(int userId) {
+        Slog.d(TAG, "onUnlockUser " + userId);
 
         // We purposefully block here to make sure that user-specific
         // staging area is ready so it's ready for zygote-forked apps to
@@ -904,7 +916,7 @@ class MountService extends IMountService.Stub
                     mCallbacks.notifyStorageStateChanged(userVol.getPath(), envState, envState);
                 }
             }
-            mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userId);
+            mSystemUnlockedUsers = ArrayUtils.appendInt(mSystemUnlockedUsers, userId);
         }
     }
 
@@ -917,7 +929,7 @@ class MountService extends IMountService.Stub
         }
 
         synchronized (mVolumes) {
-            mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userId);
+            mSystemUnlockedUsers = ArrayUtils.removeInt(mSystemUnlockedUsers, userId);
         }
     }
 
@@ -1337,7 +1349,7 @@ class MountService extends IMountService.Stub
             // Kick state changed event towards all started users. Any users
             // started after this point will trigger additional
             // user-specific broadcasts.
-            for (int userId : mStartedUsers) {
+            for (int userId : mSystemUnlockedUsers) {
                 if (vol.isVisibleForRead(userId)) {
                     final StorageVolume userVol = vol.buildStorageVolume(mContext, userId, false);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
@@ -1926,8 +1938,16 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
+            if (StorageManager.isNativeFileBasedEncryptionEnabled()) {
+                throw new IllegalStateException(
+                        "Emulation not available on device with native FBE");
+            }
+
             final boolean emulateFbe = (flags & StorageManager.DEBUG_EMULATE_FBE) != 0;
             SystemProperties.set(StorageManager.PROP_EMULATE_FBE, Boolean.toString(emulateFbe));
+
+            // Perform hard reboot to kick policy into place
+            mContext.getSystemService(PowerManager.class).reboot(null);
         }
 
         if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
@@ -2745,7 +2765,7 @@ class MountService extends IMountService.Stub
         }
 
         synchronized (mLock) {
-            mUnlockedUsers = ArrayUtils.appendInt(mUnlockedUsers, userId);
+            mLocalUnlockedUsers = ArrayUtils.appendInt(mLocalUnlockedUsers, userId);
         }
     }
 
@@ -2761,7 +2781,7 @@ class MountService extends IMountService.Stub
         }
 
         synchronized (mLock) {
-            mUnlockedUsers = ArrayUtils.removeInt(mUnlockedUsers, userId);
+            mLocalUnlockedUsers = ArrayUtils.removeInt(mLocalUnlockedUsers, userId);
         }
     }
 
@@ -2769,7 +2789,7 @@ class MountService extends IMountService.Stub
     public boolean isUserKeyUnlocked(int userId) {
         if (StorageManager.isFileBasedEncryptionEnabled()) {
             synchronized (mLock) {
-                return ArrayUtils.contains(mUnlockedUsers, userId);
+                return ArrayUtils.contains(mLocalUnlockedUsers, userId);
             }
         } else {
             return true;
@@ -2836,21 +2856,25 @@ class MountService extends IMountService.Stub
 
     @Override
     public StorageVolume[] getVolumeList(int uid, String packageName, int flags) {
+        final int userId = UserHandle.getUserId(uid);
         final boolean forWrite = (flags & StorageManager.FLAG_FOR_WRITE) != 0;
 
-        final ArrayList<StorageVolume> res = new ArrayList<>();
+        boolean reportUnmounted = false;
         boolean foundPrimary = false;
 
-        final int userId = UserHandle.getUserId(uid);
-        final boolean reportUnmounted;
         final long identity = Binder.clearCallingIdentity();
         try {
-            reportUnmounted = !mMountServiceInternal.hasExternalStorage(
-                    uid, packageName);
+            if (!mMountServiceInternal.hasExternalStorage(uid, packageName)) {
+                reportUnmounted = true;
+            }
+            if (!isUserKeyUnlocked(userId)) {
+                reportUnmounted = true;
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
+        final ArrayList<StorageVolume> res = new ArrayList<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
@@ -3530,8 +3554,8 @@ class MountService extends IMountService.Stub
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
             pw.println("Force adoptable: " + mForceAdoptable);
             pw.println();
-            pw.println("Started users: " + Arrays.toString(mStartedUsers));
-            pw.println("Unlocked users: " + Arrays.toString(mUnlockedUsers));
+            pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
+            pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
         }
 
         synchronized (mObbMounts) {

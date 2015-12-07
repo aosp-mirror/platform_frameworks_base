@@ -1021,8 +1021,17 @@ public class StorageManager {
 
     /** {@hide} */
     public static boolean isFileBasedEncryptionEnabled() {
-        return "file".equals(SystemProperties.get("ro.crypto.type", "none"))
-                || SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
+        return isNativeFileBasedEncryptionEnabled() || isEmulatedFileBasedEncryptionEnabled();
+    }
+
+    /** {@hide} */
+    public static boolean isNativeFileBasedEncryptionEnabled() {
+        return "file".equals(SystemProperties.get("ro.crypto.type", "none"));
+    }
+
+    /** {@hide} */
+    public static boolean isEmulatedFileBasedEncryptionEnabled() {
+        return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
     }
 
     /** {@hide} */
