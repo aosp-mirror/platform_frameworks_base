@@ -16,10 +16,10 @@
 
 package android.net;
 
+import com.google.caliper.BeforeExperiment;
 import com.google.caliper.Param;
-import com.google.caliper.SimpleBenchmark;
 
-public class NetworkStatsBenchmark extends SimpleBenchmark {
+public class NetworkStatsBenchmark {
     private static final String UNDERLYING_IFACE = "wlan0";
     private static final String TUN_IFACE = "tun0";
     private static final int TUN_UID = 999999999;
@@ -28,10 +28,8 @@ public class NetworkStatsBenchmark extends SimpleBenchmark {
     private int mSize;
     private NetworkStats mNetworkStats;
 
-    @Override
+    @BeforeExperiment
     protected void setUp() throws Exception {
-        super.setUp();
-
         mNetworkStats = new NetworkStats(0, mSize + 2);
         int uid = 0;
         NetworkStats.Entry recycle = new NetworkStats.Entry();
