@@ -58,10 +58,12 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioPort;
+import android.media.AudioRecordConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
+import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.MediaPlayer;
@@ -705,6 +707,8 @@ public class AudioService extends IAudioService.Stub {
         LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
 
         mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
+
+        mRecordMonitor.initMonitor();
     }
 
     public void systemReady() {
@@ -6097,7 +6101,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     //======================
-    // Audio policy callback from AudioSystem
+    // Audio policy callbacks from AudioSystem for dynamic policies
     //======================
     private final AudioSystem.DynamicPolicyCallback mDynPolicyCallback =
             new AudioSystem.DynamicPolicyCallback() {
@@ -6126,7 +6130,23 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
         }
+    }
 
+    //======================
+    // Audio policy callbacks from AudioSystem for recording configuration updates
+    //======================
+    private final RecordingActivityMonitor mRecordMonitor = new RecordingActivityMonitor();
+
+    public void registerRecordingCallback(IRecordingConfigDispatcher rcdb) {
+        mRecordMonitor.registerRecordingCallback(rcdb);
+    }
+
+    public void unregisterRecordingCallback(IRecordingConfigDispatcher rcdb) {
+        mRecordMonitor.unregisterRecordingCallback(rcdb);
+    }
+
+    public AudioRecordConfiguration[] getActiveRecordConfigurations() {
+        return mRecordMonitor.getActiveRecordConfigurations();
     }
 
     //======================

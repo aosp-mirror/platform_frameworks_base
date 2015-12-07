@@ -152,7 +152,8 @@ static struct {
 
 static struct {
     jmethodID postDynPolicyEventFromNative;
-} gDynPolicyEventHandlerMethods;
+    jmethodID postRecordConfigEventFromNative;
+} gAudioPolicyEventHandlerMethods;
 
 static Mutex gLock;
 
@@ -378,12 +379,26 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
     const char* zechars = regId.string();
     jstring zestring = env->NewStringUTF(zechars);
 
-    env->CallStaticVoidMethod(clazz, gDynPolicyEventHandlerMethods.postDynPolicyEventFromNative,
+    env->CallStaticVoidMethod(clazz, gAudioPolicyEventHandlerMethods.postDynPolicyEventFromNative,
             event, zestring, val);
 
     env->ReleaseStringUTFChars(zestring, zechars);
     env->DeleteLocalRef(clazz);
+}
 
+static void
+android_media_AudioSystem_recording_callback(int event, int session, int source)
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        return;
+    }
+
+    jclass clazz = env->FindClass(kClassPathName);
+    env->CallStaticVoidMethod(clazz,
+            gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative,
+            event, session, source);
+    env->DeleteLocalRef(clazz);
 }
 
 static jint
@@ -1487,6 +1502,12 @@ android_media_AudioSystem_registerDynPolicyCallback(JNIEnv *env, jobject thiz)
     AudioSystem::setDynPolicyCallback(android_media_AudioSystem_dyn_policy_callback);
 }
 
+static void
+android_media_AudioSystem_registerRecordingCallback(JNIEnv *env, jobject thiz)
+{
+    AudioSystem::setRecordConfigCallback(android_media_AudioSystem_recording_callback);
+}
+
 
 static jint convertAudioMixToNative(JNIEnv *env,
                                     AudioMix *nAudioMix,
@@ -1659,6 +1680,8 @@ static const JNINativeMethod gMethods[] = {
                                             (void *)android_media_AudioSystem_registerPolicyMixes},
     {"native_register_dynamic_policy_callback", "()V",
                                     (void *)android_media_AudioSystem_registerDynPolicyCallback},
+    {"native_register_recording_callback", "()V",
+                                    (void *)android_media_AudioSystem_registerRecordingCallback},
     {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
 };
 
@@ -1762,9 +1785,12 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gEventHandlerFields.mJniCallback = GetFieldIDOrDie(env,
                                                     eventHandlerClass, "mJniCallback", "J");
 
-    gDynPolicyEventHandlerMethods.postDynPolicyEventFromNative =
+    gAudioPolicyEventHandlerMethods.postDynPolicyEventFromNative =
             GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
                     "dynamicPolicyCallbackFromNative", "(ILjava/lang/String;I)V");
+    gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative =
+            GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
+                    "recordingCallbackFromNative", "(III)V");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);

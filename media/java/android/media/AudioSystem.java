@@ -227,7 +227,7 @@ public class AudioSystem
     }
 
     /**
-     * Handles events for the audio policy manager about dynamic audio policies
+     * Handles events from the audio policy manager about dynamic audio policies
      * @see android.media.audiopolicy.AudioPolicy
      */
     public interface DynamicPolicyCallback
@@ -267,6 +267,33 @@ public class AudioSystem
         }
     }
 
+    /**
+     * Handles events from the audio policy manager about recording events
+     * @see android.media.AudioManager.AudioRecordingCallback
+     */
+    public interface AudioRecordingCallback
+    {
+        void onRecordingConfigurationChanged(int event, int session, int source);
+    }
+
+    private static AudioRecordingCallback sRecordingCallback;
+
+    public static void setRecordingCallback(AudioRecordingCallback cb) {
+        synchronized (AudioSystem.class) {
+            sRecordingCallback = cb;
+            native_register_recording_callback();
+        }
+    }
+
+    private static void recordingCallbackFromNative(int event, int session, int source) {
+        AudioRecordingCallback cb = null;
+        synchronized (AudioSystem.class) {
+            cb = sRecordingCallback;
+        }
+        if (cb != null) {
+            cb.onRecordingConfigurationChanged(event, session, source);
+        }
+    }
 
     /*
      * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
@@ -641,6 +668,8 @@ public class AudioSystem
 
     // declare this instance as having a dynamic policy callback handler
     private static native final void native_register_dynamic_policy_callback();
+    // declare this instance as having a recording configuration update callback handler
+    private static native final void native_register_recording_callback();
 
     // must be kept in sync with value in include/system/audio.h
     public static final int AUDIO_HW_SYNC_INVALID = 0;
