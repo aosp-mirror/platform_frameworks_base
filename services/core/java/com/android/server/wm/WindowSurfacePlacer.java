@@ -54,7 +54,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
 import java.io.PrintWriter;
@@ -111,6 +111,12 @@ class WindowSurfacePlacer {
 
     private boolean mTraversalScheduled;
     private int mDeferDepth = 0;
+
+    private static final class LayerAndToken {
+        public int layer;
+        public AppWindowToken token;
+    }
+    private final LayerAndToken mTmpLayerAndToken = new LayerAndToken();
 
     public WindowSurfacePlacer(WindowManagerService service) {
         mService = service;
@@ -1018,7 +1024,7 @@ class WindowSurfacePlacer {
 
         // The top-most window will supply the layout params,
         // and we will determine it below.
-        WindowManager.LayoutParams animLp = null;
+        LayoutParams animLp = null;
         int bestAnimLayer = -1;
         boolean fullscreenAnim = false;
         boolean voiceInteraction = false;
@@ -1101,54 +1107,49 @@ class WindowSurfacePlacer {
 
         processApplicationsAnimatingInPlace(transit);
 
-        AppWindowToken topClosingApp = null;
-        int topClosingLayer = 0;
-        appsCount = mService.mClosingApps.size();
-        for (i = 0; i < appsCount; i++) {
-            AppWindowToken wtoken = mService.mClosingApps.valueAt(i);
-            final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
-                    "Now closing app " + wtoken);
-            appAnimator.clearThumbnail();
-            appAnimator.animation = null;
-            wtoken.inPendingTransaction = false;
-            mService.setTokenVisibilityLocked(wtoken, animLp, false, transit, false,
-                    voiceInteraction);
-            wtoken.updateReportedVisibilityLocked();
-            // Force the allDrawn flag, because we want to start
-            // this guy's animations regardless of whether it's
-            // gotten drawn.
-            wtoken.allDrawn = true;
-            wtoken.deferClearAllDrawn = false;
-            // Ensure that apps that are mid-starting are also scheduled to have their
-            // starting windows removed after the animation is complete
-            if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
-                mService.scheduleRemoveStartingWindowLocked(wtoken);
-            }
-            mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
+        handleClosingApps(transit, animLp, voiceInteraction, mTmpLayerAndToken);
+        final AppWindowToken topClosingApp = mTmpLayerAndToken.token;
+        final int topClosingLayer = mTmpLayerAndToken.layer;
 
-            if (animLp != null) {
-                int layer = -1;
-                for (int j = 0; j < wtoken.windows.size(); j++) {
-                    WindowState win = wtoken.windows.get(j);
-                    if (win.mWinAnimator.mAnimLayer > layer) {
-                        layer = win.mWinAnimator.mAnimLayer;
-                    }
-                }
-                if (topClosingApp == null || layer > topClosingLayer) {
-                    topClosingApp = wtoken;
-                    topClosingLayer = layer;
-                }
-            }
+        final AppWindowToken topOpeningApp = handleOpeningApps(transit,
+                animLp, voiceInteraction, topClosingLayer);
+
+        final AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
+                topOpeningApp.mAppAnimator;
+        final AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
+                topClosingApp.mAppAnimator;
+
+        mService.mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator);
+        mService.mAppTransition.postAnimationCallback();
+        mService.mAppTransition.clear();
+
+        mService.mOpeningApps.clear();
+        mService.mClosingApps.clear();
+
+        // This has changed the visibility of windows, so perform
+        // a new layout to get them all up-to-date.
+        mService.getDefaultDisplayContentLocked().layoutNeeded = true;
+
+        // TODO(multidisplay): IMEs are only supported on the default display.
+        if (windows == mService.getDefaultWindowListLocked()
+                && !mService.moveInputMethodWindowsIfNeededLocked(true)) {
+            mService.assignLayersLocked(windows);
         }
+        mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
+                true /*updateInputWindows*/);
+        mService.mFocusMayChange = false;
+        mService.notifyActivityDrawnForKeyguard();
+        return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
+    }
 
+    private AppWindowToken handleOpeningApps(int transit, LayoutParams animLp,
+            boolean voiceInteraction, int topClosingLayer) {
         AppWindowToken topOpeningApp = null;
-        appsCount = mService.mOpeningApps.size();
-        for (i = 0; i < appsCount; i++) {
+        final int appsCount = mService.mOpeningApps.size();
+        for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
-                    "Now opening app" + wtoken);
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Now opening app" + wtoken);
 
             if (!appAnimator.usingTransferredAnimation) {
                 appAnimator.clearThumbnail();
@@ -1203,37 +1204,58 @@ class WindowSurfacePlacer {
                     topOpeningLayer = layer;
                 }
             }
-            createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
+            if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
+                createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
+            }
 
             wtoken.restoreSavedSurfaces();
         }
+        return topOpeningApp;
+    }
 
-        AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
-                topOpeningApp.mAppAnimator;
-        AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
-                topClosingApp.mAppAnimator;
+    private void handleClosingApps(int transit, LayoutParams animLp, boolean voiceInteraction,
+            LayerAndToken layerAndToken) {
+        final int appsCount;
+        appsCount = mService.mClosingApps.size();
+        for (int i = 0; i < appsCount; i++) {
+            AppWindowToken wtoken = mService.mClosingApps.valueAt(i);
+            final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Now closing app " + wtoken);
+            appAnimator.clearThumbnail();
+            appAnimator.animation = null;
+            wtoken.inPendingTransaction = false;
+            mService.setTokenVisibilityLocked(wtoken, animLp, false, transit, false,
+                    voiceInteraction);
+            wtoken.updateReportedVisibilityLocked();
+            // Force the allDrawn flag, because we want to start
+            // this guy's animations regardless of whether it's
+            // gotten drawn.
+            wtoken.allDrawn = true;
+            wtoken.deferClearAllDrawn = false;
+            // Ensure that apps that are mid-starting are also scheduled to have their
+            // starting windows removed after the animation is complete
+            if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
+                mService.scheduleRemoveStartingWindowLocked(wtoken);
+            }
+            mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
-        mService.mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator);
-        mService.mAppTransition.postAnimationCallback();
-        mService.mAppTransition.clear();
-
-        mService.mOpeningApps.clear();
-        mService.mClosingApps.clear();
-
-        // This has changed the visibility of windows, so perform
-        // a new layout to get them all up-to-date.
-        mService.getDefaultDisplayContentLocked().layoutNeeded = true;
-
-        // TODO(multidisplay): IMEs are only supported on the default display.
-        if (windows == mService.getDefaultWindowListLocked()
-                && !mService.moveInputMethodWindowsIfNeededLocked(true)) {
-            mService.assignLayersLocked(windows);
+            if (animLp != null) {
+                int layer = -1;
+                for (int j = 0; j < wtoken.windows.size(); j++) {
+                    WindowState win = wtoken.windows.get(j);
+                    if (win.mWinAnimator.mAnimLayer > layer) {
+                        layer = win.mWinAnimator.mAnimLayer;
+                    }
+                }
+                if (layerAndToken.token == null || layer > layerAndToken.layer) {
+                    layerAndToken.token = wtoken;
+                    layerAndToken.layer = layer;
+                }
+            }
+            if (mService.mAppTransition.isNextAppTransitionThumbnailDown()) {
+                createThumbnailAppAnimator(transit, wtoken, 0, layerAndToken.layer);
+            }
         }
-        mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
-                true /*updateInputWindows*/);
-        mService.mFocusMayChange = false;
-        mService.notifyActivityDrawnForKeyguard();
-        return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
     }
 
     private boolean transitionGoodToGo(int appsCount) {
@@ -1333,7 +1355,7 @@ class WindowSurfacePlacer {
      * @param dispInfo info of the display that the window's obscuring state is checked against.
      */
     private void handleNotObscuredLocked(final WindowState w, final DisplayInfo dispInfo) {
-        final WindowManager.LayoutParams attrs = w.mAttrs;
+        final LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
 

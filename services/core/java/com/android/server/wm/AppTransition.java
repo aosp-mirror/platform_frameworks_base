@@ -74,6 +74,7 @@ import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -307,6 +308,16 @@ public class AppTransition implements Dump {
     /** Returns whether the next thumbnail transition is scaling up. */
     boolean isNextThumbnailTransitionScaleUp() {
         return mNextAppTransitionScaleUp;
+    }
+
+    boolean isNextAppTransitionThumbnailUp() {
+        return mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP ||
+                mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP;
+    }
+
+    boolean isNextAppTransitionThumbnailDown() {
+        return mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN ||
+                mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
     }
 
     /**
