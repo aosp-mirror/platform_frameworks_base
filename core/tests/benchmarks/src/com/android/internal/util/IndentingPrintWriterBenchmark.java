@@ -17,15 +17,15 @@
 package com.android.internal.util;
 
 import com.google.android.collect.Lists;
-import com.google.caliper.SimpleBenchmark;
-
+import com.google.caliper.AfterExperiment;
+import com.google.caliper.BeforeExperiment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class IndentingPrintWriterBenchmark extends SimpleBenchmark {
+public class IndentingPrintWriterBenchmark {
 
     private PrintWriter mDirect;
     private IndentingPrintWriter mIndenting;
@@ -33,7 +33,7 @@ public class IndentingPrintWriterBenchmark extends SimpleBenchmark {
     private Node mSimple;
     private Node mComplex;
 
-    @Override
+    @BeforeExperiment
     protected void setUp() throws IOException {
         final FileOutputStream os = new FileOutputStream(new File("/dev/null"));
         mDirect = new PrintWriter(os);
@@ -49,7 +49,7 @@ public class IndentingPrintWriterBenchmark extends SimpleBenchmark {
                 manyChildren);
     }
 
-    @Override
+    @AfterExperiment
     protected void tearDown() {
         mIndenting.close();
         mIndenting = null;

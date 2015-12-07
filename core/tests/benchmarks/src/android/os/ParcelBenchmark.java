@@ -16,18 +16,19 @@
 
 package android.os;
 
-import com.google.caliper.SimpleBenchmark;
+import com.google.caliper.AfterExperiment;
+import com.google.caliper.BeforeExperiment;
 
-public class ParcelBenchmark extends SimpleBenchmark {
+public class ParcelBenchmark {
 
     private Parcel mParcel;
 
-    @Override
+    @BeforeExperiment
     protected void setUp() {
         mParcel = Parcel.obtain();
     }
 
-    @Override
+    @AfterExperiment
     protected void tearDown() {
         mParcel.recycle();
         mParcel = null;

@@ -15,13 +15,9 @@
  */
 package android.util;
 
-import com.google.caliper.Param;
-import com.google.caliper.Runner;
-import com.google.caliper.SimpleBenchmark;
-
 import android.util.FloatMath;
 
-public class FloatMathBenchmark extends SimpleBenchmark {
+public class FloatMathBenchmark {
 
     public float timeFloatMathCeil(int reps) {
         // Keep an answer so we don't optimize the method call away.
@@ -112,5 +108,4 @@ public class FloatMathBenchmark extends SimpleBenchmark {
         }
         return f;
     }
-
 }
