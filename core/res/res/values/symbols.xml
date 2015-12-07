@@ -16,10 +16,6 @@
 */
 -->
 <resources>
-  <!-- We don't want to publish private symbols in android.R as part of the
-       SDK.  Instead, put them here. -->
-  <private-symbols package="com.android.internal" />
-
   <!-- Private symbols that we need to reference from framework code.  See
        frameworks/base/core/res/MakeJavaSymbols.sed for how to easily generate
        this.
