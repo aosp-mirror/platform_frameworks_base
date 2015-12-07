@@ -1176,7 +1176,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.Light.FastScroll" parent="Widget.Holo.FastScroll" />
 
-    <style name="Widget.Holo.SuggestionItem" parent="@android:attr/textAppearanceMedium">
+    <style name="Widget.Holo.SuggestionItem" parent="TextAppearance.Holo.Medium">
         <item name="background">@color/white</item>
         <item name="drawablePadding">8dip</item>
         <item name="ellipsize">marquee</item>
