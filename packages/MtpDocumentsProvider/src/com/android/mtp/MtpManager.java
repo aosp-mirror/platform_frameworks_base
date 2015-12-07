@@ -26,6 +26,7 @@ import android.mtp.MtpEvent;
 import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -63,7 +64,7 @@ class MtpManager {
 
         if (!mManager.hasPermission(rawDevice)) {
             // Permission should be obtained via app selection dialog for intent.
-            throw new IOException("No parmission to operate USB device.");
+            throw new IOException("No permission to operate USB device.");
         }
 
         final MtpDevice device = new MtpDevice(rawDevice);
@@ -97,6 +98,10 @@ class MtpManager {
             result[i] = mDevices.keyAt(i);
         }
         return result;
+    }
+
+    String getDeviceName(int deviceId) throws IOException {
+        return getDevice(deviceId).getDeviceInfo().getModel();
     }
 
     MtpRoot[] getRoots(int deviceId) throws IOException {

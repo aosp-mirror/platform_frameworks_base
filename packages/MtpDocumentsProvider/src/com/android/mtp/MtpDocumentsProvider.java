@@ -253,9 +253,15 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mRootScanner.notifyChange();
     }
 
-    boolean hasOpenedDevices() {
+    int[] getOpenedDeviceIds() {
         synchronized (mDeviceListLock) {
-            return mMtpManager.getOpenedDeviceIds().length != 0;
+            return mMtpManager.getOpenedDeviceIds();
+        }
+    }
+
+    String getDeviceName(int deviceId) throws IOException {
+        synchronized (mDeviceListLock) {
+            return mMtpManager.getDeviceName(deviceId);
         }
     }
 
@@ -308,7 +314,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
         mDeviceToolkits.remove(deviceId);
         mMtpManager.closeDevice(deviceId);
-        if (!hasOpenedDevices()) {
+        if (getOpenedDeviceIds().length == 0) {
             mRootScanner.pause();
         }
     }
