@@ -9531,6 +9531,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_NFC = "android.hardware.nfc";
     field public static final java.lang.String FEATURE_NFC_HOST_CARD_EMULATION = "android.hardware.nfc.hce";
     field public static final java.lang.String FEATURE_OPENGLES_EXTENSION_PACK = "android.hardware.opengles.aep";
+    field public static final java.lang.String FEATURE_PICTURE_IN_PICTURE = "android.software.picture_in_picture";
     field public static final java.lang.String FEATURE_PRINTING = "android.software.print";
     field public static final java.lang.String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final java.lang.String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";

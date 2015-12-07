@@ -252,6 +252,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
@@ -1279,6 +1280,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mAlwaysFinishActivities = false;
     boolean mForceResizableActivities;
     boolean mSupportsFreeformWindowManagement;
+    boolean mSupportsPictureInPicture;
     IActivityController mController = null;
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
@@ -9400,6 +9402,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "moveTopActivityToPinnedStack()");
         synchronized (this) {
+            if (!mSupportsPictureInPicture) {
+                throw new IllegalStateException("moveTopActivityToPinnedStack:"
+                        + "Device doesn't support picture-in-pciture mode");
+            }
+
             long ident = Binder.clearCallingIdentity();
             try {
                 return mStackSupervisor.moveTopStackActivityToPinnedStackLocked(stackId, bounds);
@@ -12014,6 +12021,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         final ContentResolver resolver = mContext.getContentResolver();
         final boolean freeformWindowManagement =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+        final boolean supportsPictureInPicture =
+                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
 
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
@@ -12039,20 +12048,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             mAlwaysFinishActivities = alwaysFinishActivities;
             mForceResizableActivities = forceResizable;
             mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
+            mSupportsPictureInPicture = supportsPictureInPicture || forceResizable;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
             updateConfigurationLocked(configuration, null, true);
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Initial config: " + mConfiguration);
-        }
-    }
 
-    /** Loads resources after the current configuration has been set. */
-    private void loadResourcesOnSystemReady() {
-        final Resources res = mContext.getResources();
-        mHasRecents = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
-        mThumbnailWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
-        mThumbnailHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+            // Load resources only after the current configuration has been set.
+            final Resources res = mContext.getResources();
+            mHasRecents = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
+            mThumbnailWidth = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.thumbnail_width);
+            mThumbnailHeight = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.thumbnail_height);
+        }
     }
 
     public boolean testIsSystemReady() {
@@ -12368,7 +12378,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         retrieveSettings();
-        loadResourcesOnSystemReady();
         final int currentUserId;
         synchronized (this) {
             currentUserId = mUserController.getCurrentUserIdLocked();
