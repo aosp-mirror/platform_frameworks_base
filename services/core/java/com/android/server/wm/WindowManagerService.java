@@ -526,7 +526,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
     int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-    int mLastKeyguardForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+    int mLastKeyguardForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
     int mLayoutSeq = 0;
 
