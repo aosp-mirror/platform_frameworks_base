@@ -253,7 +253,18 @@ public:
         bottom = ceilf(bottom);
     }
 
-    void expandToCoverVertex(float x, float y) {
+    /*
+     * Similar to unionWith, except this makes the assumption that both rects are non-empty
+     * to avoid both emptiness checks.
+     */
+    void expandToCover(const Rect& other) {
+        left = std::min(left, other.left);
+        top = std::min(top, other.top);
+        right = std::max(right, other.right);
+        bottom = std::max(bottom, other.bottom);
+    }
+
+    void expandToCover(float x, float y) {
         left = std::min(left, x);
         top = std::min(top, y);
         right = std::max(right, x);

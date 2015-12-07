@@ -248,10 +248,7 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
 
     Rect unmappedBounds(points[0], points[1], points[0], points[1]);
     for (int i = 2; i < floatCount; i += 2) {
-        unmappedBounds.left = std::min(unmappedBounds.left, points[i]);
-        unmappedBounds.right = std::max(unmappedBounds.right, points[i]);
-        unmappedBounds.top = std::min(unmappedBounds.top, points[i + 1]);
-        unmappedBounds.bottom = std::max(unmappedBounds.bottom, points[i + 1]);
+        unmappedBounds.expandToCover(points[i], points[i + 1]);
     }
 
     // since anything AA stroke with less than 1.0 pixel width is drawn with an alpha-reduced
@@ -413,6 +410,7 @@ void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, i
     glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
     positions = refBuffer<float>(positions, glyphCount * 2);
 
+    // TODO: either must account for text shadow in bounds, or record separate ops for text shadows
     addOp(new (alloc()) TextOp(
             Rect(boundsLeft, boundsTop, boundsRight, boundsBottom),
             *(mState.currentSnapshot()->transform),

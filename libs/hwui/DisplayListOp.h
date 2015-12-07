@@ -612,7 +612,7 @@ public:
     AssetAtlas::Entry* getAtlasEntry(OpenGLRenderer& renderer) {
         if (!mEntryValid) {
             mEntryValid = true;
-            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap);
+            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap->pixelRef());
         }
         return mEntry;
     }
@@ -777,7 +777,7 @@ public:
     AssetAtlas::Entry* getAtlasEntry(OpenGLRenderer& renderer) {
         if (!mEntryValid) {
             mEntryValid = true;
-            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap);
+            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap->pixelRef());
         }
         return mEntry;
     }

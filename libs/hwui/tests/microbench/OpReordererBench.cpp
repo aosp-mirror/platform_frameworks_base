@@ -25,7 +25,7 @@
 #include "RecordingCanvas.h"
 #include "tests/common/TestUtils.h"
 #include "Vector.h"
-#include "microbench/MicroBench.h"
+#include "tests/microbench/MicroBench.h"
 
 #include <vector>
 

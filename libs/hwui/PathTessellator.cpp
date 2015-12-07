@@ -799,7 +799,7 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
     dstBuffer.alloc<TYPE>(numPoints * verticesPerPoint + (numPoints - 1) * 2);
 
     for (int i = 0; i < count; i += 2) {
-        bounds.expandToCoverVertex(points[i + 0], points[i + 1]);
+        bounds.expandToCover(points[i + 0], points[i + 1]);
         dstBuffer.copyInto<TYPE>(srcBuffer, points[i + 0], points[i + 1]);
     }
     dstBuffer.createDegenerateSeparators<TYPE>(verticesPerPoint);
@@ -878,8 +878,8 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
         }
 
         // calculate bounds
-        bounds.expandToCoverVertex(tempVerticesData[0].x, tempVerticesData[0].y);
-        bounds.expandToCoverVertex(tempVerticesData[1].x, tempVerticesData[1].y);
+        bounds.expandToCover(tempVerticesData[0].x, tempVerticesData[0].y);
+        bounds.expandToCover(tempVerticesData[1].x, tempVerticesData[1].y);
     }
 
     // since multiple objects tessellated into buffer, separate them with degen tris

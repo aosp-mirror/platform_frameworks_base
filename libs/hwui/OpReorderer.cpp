@@ -202,6 +202,9 @@ public:
         if (newClipSideFlags & OpClipSideFlags::Bottom) mClipRect.bottom = opClip.bottom;
     }
 
+    bool getClipSideFlags() const { return mClipSideFlags; }
+    const Rect& getClipRect() const { return mClipRect; }
+
 private:
     int mClipSideFlags = 0;
     Rect mClipRect;
@@ -291,12 +294,31 @@ void OpReorderer::LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
     }
 }
 
-void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg, BakedOpDispatcher* receivers) const {
+void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg,
+        BakedOpReceiver* unmergedReceivers, MergedOpReceiver* mergedReceivers) const {
     ATRACE_NAME("flush drawing commands");
     for (const BatchBase* batch : mBatches) {
-        // TODO: different behavior based on batch->isMerging()
-        for (const BakedOpState* op : batch->getOps()) {
-            receivers[op->op->opId](arg, *op->op, *op);
+        size_t size = batch->getOps().size();
+        if (size > 1 && batch->isMerging()) {
+            int opId = batch->getOps()[0]->op->opId;
+            const MergingOpBatch* mergingBatch = static_cast<const MergingOpBatch*>(batch);
+            MergedBakedOpList data = {
+                    batch->getOps().data(),
+                    size,
+                    mergingBatch->getClipSideFlags(),
+                    mergingBatch->getClipRect()
+            };
+            if (data.clipSideFlags) {
+                // if right or bottom sides aren't used to clip, init them to viewport bounds
+                // in the clip rect, so it can be used to scissor
+                if (!(data.clipSideFlags & OpClipSideFlags::Right)) data.clip.right = width;
+                if (!(data.clipSideFlags & OpClipSideFlags::Bottom)) data.clip.bottom = height;
+            }
+            mergedReceivers[opId](arg, data);
+        } else {
+            for (const BakedOpState* op : batch->getOps()) {
+                unmergedReceivers[op->op->opId](arg, *op);
+            }
         }
     }
 }
@@ -639,7 +661,8 @@ void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
 #define OP_RECEIVER(Type) \
         [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.on##Type(static_cast<const Type&>(op)); },
 void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
-    static std::function<void(OpReorderer& reorderer, const RecordedOp&)> receivers[] = {
+    typedef void (*OpDispatcher) (OpReorderer& reorderer, const RecordedOp& op);
+    static OpDispatcher receivers[] = {
         MAP_OPS(OP_RECEIVER)
     };
 
@@ -692,42 +715,57 @@ static batchid_t tessellatedBatchId(const SkPaint& paint) {
 }
 
 void OpReorderer::onBitmapOp(const BitmapOp& op) {
-    BakedOpState* bakedStateOp = tryBakeOpState(op);
-    if (!bakedStateOp) return; // quick rejected
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
 
-    mergeid_t mergeId = (mergeid_t) op.bitmap->getGenerationID();
-    // TODO: AssetAtlas
-    currentLayer().deferMergeableOp(mAllocator, bakedStateOp, OpBatchType::Bitmap, mergeId);
+    // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
+    // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
+    // MergingDrawBatch::canMergeWith()
+    if (bakedState->computedState.transform.isSimple()
+            && bakedState->computedState.transform.positiveScale()
+            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && op.bitmap->colorType() != kAlpha_8_SkColorType) {
+        mergeid_t mergeId = (mergeid_t) op.bitmap->getGenerationID();
+        // TODO: AssetAtlas in mergeId
+        currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::Bitmap, mergeId);
+    } else {
+        currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
+    }
 }
 
 void OpReorderer::onLinesOp(const LinesOp& op) {
-    BakedOpState* bakedStateOp = tryBakeOpState(op);
-    if (!bakedStateOp) return; // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
-
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, tessellatedBatchId(*op.paint));
 }
 
 void OpReorderer::onRectOp(const RectOp& op) {
-    BakedOpState* bakedStateOp = tryBakeOpState(op);
-    if (!bakedStateOp) return; // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, tessellatedBatchId(*op.paint));
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, tessellatedBatchId(*op.paint));
 }
 
 void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
-    BakedOpState* bakedStateOp = tryBakeOpState(op);
-    if (!bakedStateOp) return; // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedStateOp, OpBatchType::Vertices);
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
 void OpReorderer::onTextOp(const TextOp& op) {
-    BakedOpState* bakedStateOp = tryBakeOpState(op);
-    if (!bakedStateOp) return; // quick rejected
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
 
     // TODO: better handling of shader (since we won't care about color then)
     batchid_t batchId = op.paint->getColor() == SK_ColorBLACK
             ? OpBatchType::Text : OpBatchType::ColorText;
-    mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
-    currentLayer().deferMergeableOp(mAllocator, bakedStateOp, batchId, mergeId);
+
+    if (bakedState->computedState.transform.isPureTranslate()
+            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode) {
+        mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
+        currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);
+    } else {
+        currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
+    }
 }
 
 void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,

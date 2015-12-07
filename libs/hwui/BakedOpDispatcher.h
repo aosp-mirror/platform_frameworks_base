@@ -26,16 +26,21 @@ namespace uirenderer {
 /**
  * Provides all "onBitmapOp(...)" style static methods for every op type, which convert the
  * RecordedOps and their state to Glops, and renders them with the provided BakedOpRenderer.
- *
- * This dispatcher is separate from the renderer so that the dispatcher / renderer interaction is
- * minimal through public BakedOpRenderer APIs.
  */
 class BakedOpDispatcher {
 public:
+    // Declares all "onMergedBitmapOps(...)" style methods for mergeable op types
+#define X(Type) \
+        static void onMerged##Type##s(BakedOpRenderer& renderer, const MergedBakedOpList& opList);
+    MAP_MERGED_OPS(X)
+#undef X
+
     // Declares all "onBitmapOp(...)" style methods for every op type
-#define DISPATCH_METHOD(Type) \
+#define X(Type) \
         static void on##Type(BakedOpRenderer& renderer, const Type& op, const BakedOpState& state);
-    MAP_OPS(DISPATCH_METHOD);
+    MAP_OPS(X)
+#undef X
+
 };
 
 }; // namespace uirenderer

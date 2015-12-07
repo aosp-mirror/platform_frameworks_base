@@ -67,7 +67,16 @@ public:
     Texture* getTexture(const SkBitmap* bitmap);
     const LightInfo& getLightInfo() { return mLightInfo; }
 
-    void renderGlop(const BakedOpState& state, const Glop& glop);
+    void renderGlop(const BakedOpState& state, const Glop& glop) {
+        bool useScissor = state.computedState.clipSideFlags != OpClipSideFlags::None;
+        renderGlop(&state.computedState.clippedBounds,
+                useScissor ? &state.computedState.clipRect : nullptr,
+                glop);
+    }
+
+    void renderGlop(const Rect* dirtyBounds, const Rect* clip, const Glop& glop);
+    bool offscreenRenderTarget() { return mRenderTarget.offscreenBuffer != nullptr; }
+    void dirtyRenderTarget(const Rect& dirtyRect);
     bool didDraw() { return mHasDrawn; }
 private:
     void setViewport(uint32_t width, uint32_t height);

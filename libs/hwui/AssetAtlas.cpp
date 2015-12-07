@@ -79,13 +79,13 @@ void AssetAtlas::updateTextureId() {
 // Entries
 ///////////////////////////////////////////////////////////////////////////////
 
-AssetAtlas::Entry* AssetAtlas::getEntry(const SkBitmap* bitmap) const {
-    ssize_t index = mEntries.indexOfKey(bitmap->pixelRef());
+AssetAtlas::Entry* AssetAtlas::getEntry(const SkPixelRef* pixelRef) const {
+    ssize_t index = mEntries.indexOfKey(pixelRef);
     return index >= 0 ? mEntries.valueAt(index) : nullptr;
 }
 
-Texture* AssetAtlas::getEntryTexture(const SkBitmap* bitmap) const {
-    ssize_t index = mEntries.indexOfKey(bitmap->pixelRef());
+Texture* AssetAtlas::getEntryTexture(const SkPixelRef* pixelRef) const {
+    ssize_t index = mEntries.indexOfKey(pixelRef);
     return index >= 0 ? mEntries.valueAt(index)->texture : nullptr;
 }
 

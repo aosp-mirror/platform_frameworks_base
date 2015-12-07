@@ -121,29 +121,34 @@ void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
 }
 
 Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap->pixelRef());
     if (!texture) {
         return mCaches.textureCache.get(bitmap);
     }
     return texture;
 }
 
-void BakedOpRenderer::renderGlop(const BakedOpState& state, const Glop& glop) {
-    bool useScissor = state.computedState.clipSideFlags != OpClipSideFlags::None;
-    mRenderState.scissor().setEnabled(useScissor);
-    if (useScissor) {
-        const Rect& clip = state.computedState.clipRect;
-        mRenderState.scissor().set(clip.left, mRenderTarget.viewportHeight - clip.bottom,
-            clip.getWidth(), clip.getHeight());
+void BakedOpRenderer::renderGlop(const Rect* dirtyBounds, const Rect* clip, const Glop& glop) {
+    mRenderState.scissor().setEnabled(clip != nullptr);
+    if (clip) {
+        mRenderState.scissor().set(clip->left, mRenderTarget.viewportHeight - clip->bottom,
+            clip->getWidth(), clip->getHeight());
     }
-    if (mRenderTarget.offscreenBuffer) { // TODO: not with multi-draw
+    if (dirtyBounds && mRenderTarget.offscreenBuffer) {
         // register layer damage to draw-back region
-        const Rect& uiDirty = state.computedState.clippedBounds;
-        android::Rect dirty(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
+        android::Rect dirty(dirtyBounds->left, dirtyBounds->top,
+                dirtyBounds->right, dirtyBounds->bottom);
         mRenderTarget.offscreenBuffer->region.orSelf(dirty);
     }
     mRenderState.render(glop, mRenderTarget.orthoMatrix);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
+}
+
+void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {
+    if (mRenderTarget.offscreenBuffer) {
+        android::Rect dirty(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
+        mRenderTarget.offscreenBuffer->region.orSelf(dirty);
+    }
 }
 
 } // namespace uirenderer

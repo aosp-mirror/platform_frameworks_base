@@ -103,10 +103,11 @@ public:
         return snapshot;
     }
 
-    static SkBitmap createSkBitmap(int width, int height) {
+    static SkBitmap createSkBitmap(int width, int height,
+            SkColorType colorType = kN32_SkColorType) {
         SkBitmap bitmap;
         SkImageInfo info = SkImageInfo::Make(width, height,
-                kN32_SkColorType, kPremul_SkAlphaType);
+                colorType, kPremul_SkAlphaType);
         bitmap.setInfo(info);
         bitmap.allocPixels(info);
         return bitmap;

@@ -26,7 +26,7 @@ namespace uirenderer {
 static void handlePoint(Rect& transformedBounds, const Matrix4& transform, float x, float y) {
     Vertex v = {x, y};
     transform.mapPoint(v.x, v.y);
-    transformedBounds.expandToCoverVertex(v.x, v.y);
+    transformedBounds.expandToCover(v.x, v.y);
 }
 
 Rect transformAndCalculateBounds(const Rect& r, const Matrix4& transform) {

@@ -1525,7 +1525,7 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
         colors = tempColors.get();
     }
 
-    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap->pixelRef());
     const UvMapper& mapper(getMapper(texture));
 
     for (int32_t y = 0; y < meshHeight; y++) {
@@ -2146,7 +2146,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     bool status;
 #if HWUI_NEW_OPS
     LOG_ALWAYS_FATAL("unsupported");
-    TextDrawFunctor functor(nullptr, nullptr, x, y, pureTranslate, alpha, mode, paint);
+    TextDrawFunctor functor(nullptr, nullptr, nullptr, x, y, pureTranslate, alpha, mode, paint);
 #else
     TextDrawFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
 #endif
@@ -2190,7 +2190,7 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(paint);
 #if HWUI_NEW_OPS
     LOG_ALWAYS_FATAL("unsupported");
-    TextDrawFunctor functor(nullptr, nullptr, 0.0f, 0.0f, false, alpha, mode, paint);
+    TextDrawFunctor functor(nullptr, nullptr, nullptr, 0.0f, 0.0f, false, alpha, mode, paint);
 #else
     TextDrawFunctor functor(this, 0.0f, 0.0f, false, alpha, mode, paint);
 #endif
@@ -2308,7 +2308,7 @@ void OpenGLRenderer::setDrawFilter(SkDrawFilter* filter) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap->pixelRef());
     if (!texture) {
         return mCaches.textureCache.get(bitmap);
     }
