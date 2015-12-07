@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -58,6 +59,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -90,6 +92,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import libcore.io.IoUtils;
+import libcore.util.Objects;
 
 /**
  * Service for {@link UserManager}.
@@ -107,6 +110,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final boolean DBG_WITH_STACKTRACE = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG_NAME = "name";
+    private static final String TAG_ACCOUNT = "account";
     private static final String ATTR_FLAGS = "flags";
     private static final String ATTR_ICON_PATH = "icon";
     private static final String ATTR_ID = "id";
@@ -176,6 +180,14 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mUsersLock")
     private final SparseArray<UserInfo> mUsers = new SparseArray<>();
+
+    /**
+     * This collection contains each user's account name if the user chose to set one up
+     * during the initial user creation process.  Keeping this information separate from mUsers
+     * to avoid accidentally leak it.
+     */
+    @GuardedBy("mUsersLock")
+    private final SparseArray<String> mUserAccounts = new SparseArray<>();
 
     /**
      * User restrictions set via UserManager.  This doesn't include restrictions set by
@@ -332,6 +344,33 @@ public class UserManagerService extends IUserManager.Stub {
 
         synchronized (mRestrictionsLock) {
             applyUserRestrictionsLR(UserHandle.USER_SYSTEM);
+        }
+    }
+
+    @Override
+    public String getUserAccount(int userId) {
+        checkManageUserAndAcrossUsersFullPermission("get user account");
+        synchronized (mUsersLock) {
+            return mUserAccounts.get(userId);
+        }
+    }
+
+    @Override
+    public void setUserAccount(int userId, String accountName) {
+        checkManageUserAndAcrossUsersFullPermission("set user account");
+        UserInfo userToUpdate = null;
+        synchronized (mPackagesLock) {
+            synchronized (mUsersLock) {
+                String currentAccount = mUserAccounts.get(userId);
+                if (!Objects.equal(currentAccount, accountName)) {
+                    mUserAccounts.put(userId, accountName);
+                    userToUpdate = mUsers.get(userId);
+                }
+            }
+
+            if (userToUpdate != null) {
+                writeUserLP(userToUpdate);
+            }
         }
     }
 
@@ -983,6 +1022,30 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Enforces that only the system UID or root's UID or apps that have the
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} and
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL INTERACT_ACROSS_USERS_FULL}
+     * permissions can make certain calls to the UserManager.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller does not have enough privilege.
+     */
+    private static final void checkManageUserAndAcrossUsersFullPermission(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != 0
+                && ActivityManager.checkComponentPermission(
+                Manifest.permission.MANAGE_USERS,
+                uid, -1, true) != PackageManager.PERMISSION_GRANTED
+                && ActivityManager.checkComponentPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS and INTERACT_ACROSS_USERS_FULL permission to: "
+                            + message);
+        }
+    }
+
+    /**
+     * Enforces that only the system UID or root's UID or apps that have the
      * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS}
      * permission can make certain calls to the UserManager.
      *
@@ -996,13 +1059,6 @@ public class UserManagerService extends IUserManager.Stub {
                         android.Manifest.permission.MANAGE_USERS,
                         uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("You need MANAGE_USERS permission to: " + message);
-        }
-    }
-
-    private static void checkSystemOrRoot(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != 0) {
-            throw new SecurityException("Only system may call: " + message);
         }
     }
 
@@ -1087,11 +1143,14 @@ public class UserManagerService extends IUserManager.Stub {
                     final String name = parser.getName();
                     if (name.equals(TAG_USER)) {
                         String id = parser.getAttributeValue(null, ATTR_ID);
-                        UserInfo user = readUserLP(Integer.parseInt(id));
+                        Pair<UserInfo, String> userPair = readUserLP(Integer.parseInt(id));
 
-                        if (user != null) {
+                        if (userPair != null) {
+                            UserInfo user = userPair.first;
+                            String account = userPair.second;
                             synchronized (mUsersLock) {
                                 mUsers.put(user.id, user);
+                                mUserAccounts.put(user.id, account);
                                 if (mNextSerialNumber < 0 || mNextSerialNumber <= user.id) {
                                     mNextSerialNumber = user.id + 1;
                                 }
@@ -1291,6 +1350,17 @@ public class UserManagerService extends IUserManager.Stub {
                         mDevicePolicyLocalUserRestrictions.get(userInfo.id),
                         TAG_DEVICE_POLICY_RESTRICTIONS);
             }
+            // Update the account field if it is set.
+            String account;
+            synchronized (mUsersLock) {
+                account = mUserAccounts.get(userInfo.id);
+            }
+            if (account != null) {
+                serializer.startTag(null, TAG_ACCOUNT);
+                serializer.text(account);
+                serializer.endTag(null, TAG_ACCOUNT);
+            }
+
             serializer.endTag(null, TAG_USER);
 
             serializer.endDocument();
@@ -1363,10 +1433,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private UserInfo readUserLP(int id) {
+    private Pair<UserInfo, String> readUserLP(int id) {
         int flags = 0;
         int serialNumber = id;
         String name = null;
+        String account = null;
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
@@ -1435,6 +1506,11 @@ public class UserManagerService extends IUserManager.Stub {
                         UserRestrictionsUtils.readRestrictions(parser, baseRestrictions);
                     } else if (TAG_DEVICE_POLICY_RESTRICTIONS.equals(tag)) {
                         UserRestrictionsUtils.readRestrictions(parser, localRestrictions);
+                    } else if (TAG_ACCOUNT.equals(tag)) {
+                        type = parser.next();
+                        if (type == XmlPullParser.TEXT) {
+                            account = parser.getText();
+                        }
                     }
                 }
             }
@@ -1451,7 +1527,7 @@ public class UserManagerService extends IUserManager.Stub {
                 mBaseUserRestrictions.put(id, baseRestrictions);
                 mDevicePolicyLocalUserRestrictions.put(id, localRestrictions);
             }
-            return userInfo;
+            return new Pair<>(userInfo, account);
 
         } catch (IOException ioe) {
         } catch (XmlPullParserException pe) {
@@ -1873,6 +1949,7 @@ public class UserManagerService extends IUserManager.Stub {
         // Remove this user from the list
         synchronized (mUsersLock) {
             mUsers.remove(userHandle);
+            mUserAccounts.delete(userHandle);
             mIsUserManaged.delete(userHandle);
         }
         synchronized (mRestrictionsLock) {
@@ -2433,6 +2510,11 @@ public class UserManagerService extends IUserManager.Stub {
                                 pw, "      ", mCachedEffectiveUserRestrictions.get(user.id));
                     }
                     pw.println();
+                    String accountName = mUserAccounts.get(userId);
+                    if (accountName != null) {
+                        pw.print("    Account name: " + accountName);
+                        pw.println();
+                    }
                 }
             }
             pw.println("  Device policy global restrictions:");

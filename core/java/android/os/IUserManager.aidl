@@ -48,6 +48,8 @@ interface IUserManager {
     UserInfo getProfileParent(int userHandle);
     boolean isSameProfileGroup(int userId, int otherUserId);
     UserInfo getUserInfo(int userHandle);
+    String getUserAccount(int userId);
+    void setUserAccount(int userId, String accountName);
     long getUserCreationTime(int userHandle);
     boolean isRestricted();
     boolean canHaveRestrictedProfile(int userId);
