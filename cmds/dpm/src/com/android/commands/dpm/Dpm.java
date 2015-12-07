@@ -16,6 +16,8 @@
 
 package com.android.commands.dpm;
 
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -51,19 +53,21 @@ public final class Dpm extends BaseCommand {
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: dpm [subcommand] [options]\n" +
-                "usage: dpm set-active-admin [ --user <USER_ID> ] <COMPONENT>\n" +
+                "usage: dpm set-active-admin [ --user <USER_ID> | current ] <COMPONENT>\n" +
                 // STOPSHIP Finalize it
-                "usage: dpm set-device-owner [ --user <USER_ID> *EXPERIMENTAL* ] [ --name <NAME> ] <COMPONENT>\n" +
-                "usage: dpm set-profile-owner [ --user <USER_ID> ] [ --name <NAME> ] <COMPONENT>\n" +
+                "usage: dpm set-device-owner [ --user <USER_ID> | current *EXPERIMENTAL* ] " +
+                "[ --name <NAME> ] <COMPONENT>\n" +
+                "usage: dpm set-profile-owner [ --user <USER_ID> | current ] [ --name <NAME> ] " +
+                "<COMPONENT>\n" +
                 "\n" +
                 "dpm set-active-admin: Sets the given component as active admin" +
                 " for an existing user.\n" +
                 "\n" +
-                "dpm set-device-owner: Sets the given component as active admin, and its\n" +
-                "  package as device owner.\n" +
+                "dpm set-device-owner: Sets the given component as active admin, and its" +
+                " package as device owner.\n" +
                 "\n" +
                 "dpm set-profile-owner: Sets the given component as active admin and profile" +
-                "  owner for an existing user.\n");
+                " owner for an existing user.\n");
     }
 
     @Override
@@ -91,11 +95,24 @@ public final class Dpm extends BaseCommand {
         }
     }
 
-    private void parseArgs(boolean canHaveUser, boolean canHaveName) {
+    private void parseArgs(boolean canHaveName) {
         String opt;
         while ((opt = nextOption()) != null) {
-            if (canHaveUser && "--user".equals(opt)) {
-                mUserId = parseInt(nextArgRequired());
+            if ("--user".equals(opt)) {
+                String arg = nextArgRequired();
+                if ("current".equals(arg) || "cur".equals(arg)) {
+                    mUserId = UserHandle.USER_CURRENT;
+                } else {
+                    mUserId = parseInt(arg);
+                }
+                if (mUserId == UserHandle.USER_CURRENT) {
+                    IActivityManager activityManager = ActivityManagerNative.getDefault();
+                    try {
+                        mUserId = activityManager.getCurrentUser().id;
+                    } catch (RemoteException e) {
+                        e.rethrowAsRuntimeException();
+                    }
+                }
             } else if (canHaveName && "--name".equals(opt)) {
                 mName = nextArgRequired();
             } else {
@@ -106,14 +123,14 @@ public final class Dpm extends BaseCommand {
     }
 
     private void runSetActiveAdmin() throws RemoteException {
-        parseArgs(/*canHaveUser=*/ true, /*canHaveName=*/ false);
+        parseArgs(/*canHaveName=*/ false);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         System.out.println("Success: Active admin set to component " + mComponent.toShortString());
     }
 
     private void runSetDeviceOwner() throws RemoteException {
-        parseArgs(/*canHaveUser=*/ true, /*canHaveName=*/ true);
+        parseArgs(/*canHaveName=*/ true);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         try {
@@ -131,7 +148,7 @@ public final class Dpm extends BaseCommand {
     }
 
     private void runSetProfileOwner() throws RemoteException {
-        parseArgs(/*canHaveUser=*/ true, /*canHaveName=*/ true);
+        parseArgs(/*canHaveName=*/ true);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         try {
