@@ -2759,6 +2759,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(pipMode ? 1 : 0);
             return true;
         }
+        case ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final IBinder token = data.readStrongBinder();
+            enterPictureInPictureMode(token);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6431,6 +6438,18 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return pipMode;
+    }
+
+    @Override
+    public void enterPictureInPictureMode(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     private IBinder mRemote;

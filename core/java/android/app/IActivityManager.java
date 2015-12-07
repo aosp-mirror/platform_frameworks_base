@@ -550,6 +550,8 @@ public interface IActivityManager extends IInterface {
 
     public boolean inPictureInPictureMode(IBinder token) throws RemoteException;
 
+    public void enterPictureInPictureMode(IBinder token) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -914,4 +916,5 @@ public interface IActivityManager extends IInterface {
     int IN_MULTI_WINDOW_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 352;
     int IN_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 353;
     int KILL_PACKAGE_DEPENDENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 354;
+    int ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 355;
 }

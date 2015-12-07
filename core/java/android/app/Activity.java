@@ -1782,6 +1782,17 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Puts the activity in picture-in-picture mode.
+     * @see android.R.attr#supportsPictureInPicture
+     */
+    public void enterPictureInPictureMode() {
+        try {
+            ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Called by the system when the device configuration changes while your
      * activity is running.  Note that this will <em>only</em> be called if
      * you have selected configurations you would like to handle with the
