@@ -1161,6 +1161,12 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         printf("Creating resources for package %s\n", assets->getPackage().string());
     }
 
+    // Set the private symbols package if it was declared.
+    // This can also be declared in XML as <private-symbols name="package" />
+    if (bundle->getPrivateSymbolsPackage().size() != 0) {
+        assets->setSymbolsPrivatePackage(bundle->getPrivateSymbolsPackage());
+    }
+
     ResourceTable::PackageType packageType = ResourceTable::App;
     if (bundle->getBuildSharedLibrary()) {
         packageType = ResourceTable::SharedLibrary;

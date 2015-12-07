@@ -220,7 +220,9 @@ void usage(void)
         "       Prevents symbols from being generated for strings that do not have a default\n"
         "       localization\n"
         "   --no-version-vectors\n"
-        "       Do not automatically generate versioned copies of vector XML resources.\n",
+        "       Do not automatically generate versioned copies of vector XML resources.\n"
+        "   --private-symbols\n"
+        "       Java package name to use when generating R.java for private resources.\n",
         gDefaultIgnoreAssets);
 }
 
@@ -689,6 +691,16 @@ int main(int argc, char* const argv[])
                     bundle.setPseudolocalize(PSEUDO_ACCENTED | PSEUDO_BIDI);
                 } else if (strcmp(cp, "-no-version-vectors") == 0) {
                     bundle.setNoVersionVectors(true);
+                } else if (strcmp(cp, "-private-symbols") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for "
+                                "'--private-symbols' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setPrivateSymbolsPackage(String8(argv[0]));
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;

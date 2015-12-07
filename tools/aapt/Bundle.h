@@ -127,6 +127,12 @@ public:
     const android::String8& getPlatformBuildVersionName() { return mPlatformVersionName; }
     void setPlatformBuildVersionName(const android::String8& name) { mPlatformVersionName = name; }
 
+    const android::String8& getPrivateSymbolsPackage() const { return mPrivateSymbolsPackage; }
+
+    void setPrivateSymbolsPackage(const android::String8& package) {
+        mPrivateSymbolsPackage = package;
+    }
+
     bool getUTF16StringsOption() {
         return mWantUTF16 || !isMinSdkAtLeast(SDK_FROYO);
     }
@@ -333,6 +339,7 @@ private:
     bool        mBuildAppAsSharedLibrary;
     android::String8 mPlatformVersionCode;
     android::String8 mPlatformVersionName;
+    android::String8 mPrivateSymbolsPackage;
 
     /* file specification */
     int         mArgc;
