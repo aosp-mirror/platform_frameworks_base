@@ -390,9 +390,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                                 // screenshot.
                                 mHandler.postDelayed(new Runnable() {
                                     @Override public void run() {
+                                        //  TODO: select 'progress' flag according to menu choice
                                         try {
                                             ActivityManagerNative.getDefault()
-                                                    .requestBugReport();
+                                                    .requestBugReport(true);
                                         } catch (RemoteException e) {
                                         }
                                     }
