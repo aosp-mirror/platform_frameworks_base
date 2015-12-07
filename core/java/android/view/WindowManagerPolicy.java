@@ -430,6 +430,11 @@ public interface WindowManagerPolicy {
         public int getLidState();
 
         /**
+         * Lock the device now.
+         */
+        public void lockDeviceNow();
+
+        /**
          * Returns a code that descripbes whether the camera lens is covered or not.
          */
         public int getCameraLensCoverState();
