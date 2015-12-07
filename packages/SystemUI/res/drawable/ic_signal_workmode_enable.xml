@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2015 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="root"
+    android:alpha="0.3"
+    android:height="42dp"
+    android:width="42dp"
+    android:viewportHeight="42"
+    android:viewportWidth="42" >
+    <group
+        android:name="ic_signal_briefcase"
+        android:translateX="21.9995"
+        android:translateY="25.73401" >
+        <group
+            android:name="ic_signal_briefcase_pivot"
+            android:translateX="-23.21545"
+            android:translateY="-18.86649" >
+            <clip-path
+                android:name="mask"
+                android:pathData="M 37.8337860107,-40.3974914551 c 0.0,0.0 -35.8077850342,31.5523681641 -35.8077850342,31.5523681641 c 0.0,0.0 40.9884796143,40.9278411865 40.9884796143,40.9278411865 c 0.0,0.0 -2.61700439453,2.0938873291 -2.61700439453,2.0938873291 c 0.0,0.0 -41.1884460449,-40.9392852783 -41.1884460449,-40.9392852783 c 0.0,0.0 -34.6200408936,25.4699249268 -34.6200408936,25.4699249268 c 0.0,0.0 55.9664764404,69.742401123 55.9664764404,69.742401123 c 0.0,0.0 73.2448120117,-59.1047973633 73.2448120117,-59.1047973633 c 0.0,0.0 -55.9664916992,-69.7423400879 -55.9664916992,-69.7423400879 Z" />
+            <group
+                android:name="cross" >
+                <path
+                    android:name="cross_1"
+                    android:pathData="M 7.54049682617,3.9430847168 c 0.0,0.0 31.5749816895,31.4499664307 31.5749816895,31.4499664307 "
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="1"
+                    android:strokeWidth="3.5"
+                    android:fillColor="#00000000" />
+            </group>
+            <group
+                android:name="briefcase"
+                android:translateX="23.481"
+                android:translateY="18.71151" >
+                <path
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1"
+                    android:pathData="M-4.83333,-14.3333 L-7.16667,-11.8333 L-7.16667,-9.5 L-4.83333,-9.5 L-4.83333,-11.8333 L4.83333,-11.8333 L4.83333,-9.5 L7.16667,-9.5 L7.16667,-11.8333 L4.83333,-14.3333 Z" />
+                <path
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1"
+                    android:pathData="M13.1667,-9.5 L-13.1667,-9.5 C-14.5,-9.5,-15.5,-8.5,-15.5,-7.16666 L-15.5,0.00000286102 C-15.5,1.33334,-14.5,2.33334,-13.1667,2.33334 L-3.66667,2.33334 L-3.66667,0.00000286102 L3.5,0.00000286102 L3.5,2.33334 L13,2.33334 C14.3333,2.33334,15.3333,1.33334,15.3333,0 L15.3333,-7.16666 C15.5,-8.5,14.3333,-9.5,13.1667,-9.5 Z" />
+                <path
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1"
+                    android:pathData="M-3.5,7.16667 L-3.5,4.83334 L-14.3333,4.83334 L-14.3333,10.8333 C-14.3333,12.1667,-13.3333,13.1667,-12,13.1667 L11.8333,13.1667 C13.1667,13.1667,14.1667,12.1667,14.1667,10.8333 L14.1667,4.83334 L3.5,4.83334 L3.5,7.16667 L-3.5,7.16667 Z" />
+            </group>
+        </group>
+    </group>
+</vector>

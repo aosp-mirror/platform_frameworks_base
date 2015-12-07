@@ -401,6 +401,9 @@
     <!-- Content description of the cast icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting">@string/quick_settings_casting</string>
 
+    <!-- Content description of the work mode icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_work_mode">Work mode</string>
+
     <!-- Content description to tell the user that this button will remove an application from recents -->
     <string name="accessibility_recents_item_will_be_dismissed">Dismiss <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
     <!-- Content description to tell the user an application has been removed from recents -->
@@ -505,6 +508,14 @@
     <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
+    <!-- Content description of the work mode title in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_work_mode_off">Work mode off.</string>
+    <!-- Content description of the work mode title in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_work_mode_on">Work mode on.</string>
+    <!-- Announcement made when the work mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_work_mode_changed_off">Work mode turned off.</string>
+    <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_work_mode_changed_on">Work mode turned on.</string>
 
     <!-- Content description of the display brightness slider (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_brightness">Display brightness</string>
@@ -687,6 +698,8 @@
     <string name="quick_settings_cellular_detail_data_limit"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> limit</string>
     <!-- QuickSettings: Cellular detail panel, data warning format string [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_data_warning"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> warning</string>
+    <!-- QuickSettings: Work mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_work_mode_label">Work mode</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
     <string name="recents_empty_message">Your recent screens appear here</string>
