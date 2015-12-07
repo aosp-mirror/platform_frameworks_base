@@ -135,4 +135,159 @@
     <string name="choose_profile" msgid="8229363046053568878">"Изаберите профил"</string>
     <string name="category_personal" msgid="1299663247844969448">"Лично"</string>
     <string name="category_work" msgid="8699184680584175622">"Посао"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Опције за програмера"</string>
+    <!-- no translation found for development_settings_enable (542530994778109538) -->
+    <skip />
+    <string name="development_settings_summary" msgid="1815795401632854041">"Подешавање опција за програмирање апликације"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Опције за програмере нису доступне за овог корисника"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"Подешавања VPN-а нису доступна за овог корисника"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Подешавања привезивања нису доступна за овог корисника"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Подешавања назива приступне тачке нису доступна за овог корисника"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Отклањање USB грешака"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Режим отклањања грешака када је USB повезан"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Опозивање одобрења за уклањање USB грешака"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Пречица за извештај о грешкама"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Прикажи дугме у менију напајања за прављење извештаја о грешкама"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Не закључавај"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Екран неће бити у режиму спавања током пуњења"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Омогући snoop евиденцију за Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Сними све Bluetooth HCI пакете у датотеци"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"Откључавање OEM-a"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Дозволи откључавање функције за покретање"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Желите ли да дозволите откључавање произвођача оригиналне опреме (OEM)?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"УПОЗОРЕЊЕ: Функције за заштиту уређаја неће функционисати на овом уређају док је ово подешавање укључено."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Изабери апликацију за лажну локацију"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Апликација за лажну локацију није подешена"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Апликација за лажну локацију: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Умрежавање"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Сертификација бежичног екрана"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Омогући детаљнију евиденцију за Wi‑Fi"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Агресиван прелаз са Wi‑Fi мреже на мобилну"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Увек дозволи скенирање Wi‑Fi-ја у ромингу"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Користи застарели DHCP клијент"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Подаци за мобилне уређаје су увек активни"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Приказ опција за сертификацију бежичног екрана"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Када се омогући, Wi‑Fi ће бити агресивнији при пребацивању мреже за пренос података на Мобилну, када је Wi‑Fi сигнал слаб"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дозволи/забрани скенирање Wi-Fi-ја у ромингу на основу присутног протока података на интерфејсу"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Величине бафера података у програму за евидентирање"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Изаберите величине по баферу евиденције"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Изаберите конфигурацију USB-а"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Изаберите конфигурацију USB-а"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Дозволи лажне локације"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Дозволи лажне локације"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Омогући проверу атрибута за преглед"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Користите DHCP клијент из Lollipop-а уместо новог Android DHCP клијента."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Нека подаци за мобилне уређаје увек буду активни, чак и када је Wi‑Fi активан (ради брзе промене мреже)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Дозволи отклањање USB грешака?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Отклањање USB грешака намењено је само за сврхе програмирања. Користите га за копирање података са рачунара на уређај и обрнуто, инсталирање апликација на уређају без обавештења и читање података из евиденције."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Желите ли да опозовете приступ отклањању USB грешака са свих рачунара које сте претходно одобрили?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Желите ли да омогућите програмерска подешавања?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ова подешавања су намењена само за програмирање. Могу да изазову престанак функционисања или неочекивано понашање уређаја и апликација на њему."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Верификуј апликације преко USB-а"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверава да ли су апликације инсталиране преко ADB-а/ADT-а штетне."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Локални терминал"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Омогући аплик. терминала за приступ локалном командном окружењу"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP провера"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Подешавање понашања HDCP провере"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Отклањање грешака"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Изаберите апликацију за отклањање грешака"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Нема подешених апликација за отклањање грешака"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Апликација за отклањање грешака: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Бирање апликације"</string>
+    <string name="no_application" msgid="2813387563129153880">"Ниједна"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Сачекај програм за отклањање грешака"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Апликација чека програм за отклањање грешака да приложи пре извршавања"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Унос"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Цртање"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Хардверски убрзано приказивање"</string>
+    <string name="media_category" msgid="4388305075496848353">"Медији"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Надгледање"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Омогућен је строги режим"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Нека екран трепери када апликације обављају дуге операције на главној нити"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Локација показивача"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Постав. елемент са тренутним подацима о додиру"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Прикажи додире"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Прикажи визуелне повратне информације за додире"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Прикажи ажурирања површине"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Осветли све површине прозора када се ажурирају"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Прикажи ажур. GPU приказа"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Осветли приказе у прозор. када се црта са GPU-ом"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Прикажи ажурирања хардверских слојева"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Хардверски слојеви трепере зелено када се ажурирају"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Отклони грешке GPU преклапања"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Онемог. HW пост. елементе"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Увек користи GPU за компоновање екрана"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Симулирај простор боје"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Омогући OpenGL трагове"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Онемогући USB преусм. звука"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Онемогући аутомат. преусмер. на USB аудио периферне уређаје"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Прикажи границе распореда"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Прикажи границе клипа, маргине итд."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Наметни смер распореда здесна налево"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Наметни смер распореда екрана здесна налево за све локалитете"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"Прик. употребу процесора"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Постав. елемент са тренутном употребом процесора"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Принудни приказ пом. GPU"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Принудно користи GPU за 2D цртање"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Наметни 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"Омогући 4x MSAA у OpenGL ES 2.0 апликацијама"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке у вези са радњама за исецање области које нису правоугаоног облика"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Прикажи профил помоћу GPU"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Размера анимације прозора"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Размера анимације прелаза"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Аниматорова размера трајања"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Симулирај секундарне екране"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Апликације"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Не чувај активности"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Уништи сваку активност чим је корисник напусти"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Ограничење позадинских процеса"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Прикажи све ANR-ове"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Прикажи дијалог Апликација не реагује за апликације у позадини"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Принудно дозволи апликације у спољној"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Омогућава уписивање свих апликација у спољну меморију, без обзира на вредности манифеста"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Принудно омогући промену величине активности"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Омогућава промену величине свих активности за режим са више прозора, без обзира на вредности манифеста."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Лозинка резервне копије за рачунар"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Резервне копије читавог система тренутно нису заштићене"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Додирните да бисте променили или уклонили лозинку за прављење резервних копија читавог система на рачунару"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Постављена је нова лозинка резервне копије"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Нова лозинка и њена потврда се не подударају"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Постављање лозинке резервне копије није успело"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Живописан (подразумевано)"</item>
+    <item msgid="8446070607501413455">"Природан"</item>
+    <item msgid="6553408765810699025">"Стандардан"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Побољшане боје"</item>
+    <item msgid="8280754435979370728">"Природне боје налик онима које региструје око"</item>
+    <item msgid="5363960654009010371">"Боје оптимизоване за дигитални садржај"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Неактивне апликације"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Неактивна. Додирните да бисте је активирали."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Активна. Додирните да бисте је деактивирали."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Покренуте услуге"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Приказ и контрола тренутно покренутих услуга"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Ноћни режим"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Онемогућено"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Увек укључено"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Аутоматски"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Конвертуј у шифровање датотека"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертуј..."</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Већ се користи шифровање датотека"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Конвертовање у шифровање појединачних датотека"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Конвертујте шифровање партиције података у шифровање појединачних датотека.\n !!Упозорење!! Тиме бришете све податке.\n Ово је алфа верзија функције и вероватно неће функционисати исправно.\n Притисните „Избриши и конвертуј...“ да бисте наставили."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Избриши и конвертуј..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Режим боја слика"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"Користи sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Онемогућено је"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Једнобојност"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Деутераномалија (црвено-зелено)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Протаномалија (црвено-зелено)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Тританомалија (плаво-жуто)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекција боја"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ова функција је експериментална и може да утиче на перформансе."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Замењује га <xliff:g id="TITLE">%1$s</xliff:g>"</string>
 </resources>

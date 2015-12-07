@@ -135,4 +135,158 @@
     <string name="choose_profile" msgid="8229363046053568878">"選擇設定檔"</string>
     <string name="category_personal" msgid="1299663247844969448">"個人"</string>
     <string name="category_work" msgid="8699184680584175622">"公司"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"開發人員選項"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"啟用開發人員選項"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"設定應用程式開發選項"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"這位使用者無法使用開發人員選項"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"這位使用者無法修改 VPN 設定"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"這位使用者無法修改網絡共享設定"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"這位使用者無法修改接入點名稱設定"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB 偵錯"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"連接 USB 時進入偵錯模式"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"撤銷 USB 偵錯授權"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"錯誤舉報捷徑"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"在電源選單中顯示提交錯誤舉報的按鈕"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"保持啟用"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"充電時螢幕永不休眠"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"啟用藍牙 HCI 窺探記錄"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"擷取單一檔案內的所有藍牙 HCI 封包"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"原始設備製造商 (OEM) 解鎖"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"允許 Bootloader 被解鎖"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"允許原始設備製造商 (OEM) 解鎖嗎？"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"警告：這項設定開啟時，這部裝置上的裝置保護功能將無法運作。"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"選擇模擬位置應用程式"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"尚未設定模擬位置應用程式"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"模擬位置應用程式：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"網絡"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"無線螢幕分享認證"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細記錄"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"加強 Wi-Fi 至流動數據轉換"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"永遠允許 Wi-Fi 漫遊掃瞄"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"使用舊的 DHCP 用戶端"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"經常啟用流動數據"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"啟用時，Wi-Fi 連線會在訊號不穩的情況下更積極轉換成流動數據連線"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根據介面中目前的數據流量允許/禁止 WiFi 漫遊掃瞄"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"記錄器緩衝區空間"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個記錄緩衝區的記錄器空間"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"選取 USB 設定"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"選取 USB 設定"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"允許模擬位置"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"允許模擬位置"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"啟用檢視屬性檢查"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"使用 Lollipop 的 DHCP 用戶端，而不是新的 Android DHCP 用戶端。"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"即使 Wi‑Fi 已啟用，仍永遠啟用流動數據 (可快速切換網絡)。"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"允許 USB 偵錯嗎？"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB 偵錯是針對應用程式開發而設計的功能，可讓您在電腦與裝置間複製資料、不用通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"要針對先前授權的所有電腦撤銷 USB 偵錯存取權嗎？"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"允許開發設定？"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"這些設定僅供開發用途，可能會導致您的裝置及應用程式損毀或運作不正常。"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"透過 USB 驗證應用程式"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"透過 ADB/ADT 檢查安裝的應用程式有否有害的行為。"</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"本機終端機"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 檢查"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"設定 HDCP 檢查行為"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"除錯"</string>
+    <string name="debug_app" msgid="8349591734751384446">"選取除錯應用程式"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"未設定除錯應用程式"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"正在為應用程式除錯：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"選取應用程式"</string>
+    <string name="no_application" msgid="2813387563129153880">"無"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"等待除錯程式"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"執行已除錯的應用程式前等待附加除錯程式"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"輸入"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"繪圖"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"硬件加速轉譯"</string>
+    <string name="media_category" msgid="4388305075496848353">"媒體"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"監控"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"嚴格模式已啟用"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"當應用程式在主執行緒中進行長時間作業時，讓螢幕閃爍"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"指標位置"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"在螢幕上重疊顯示目前的觸控資料"</string>
+    <string name="show_touches" msgid="1356420386500834339">"顯示觸控回應"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"顯示觸控位置的視覺回應"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"顯示表層更新"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"更新表層時閃動整個視窗表層"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"顯示 GPU 畫面更新"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"使用 GPU 繪圖時在視窗中閃動畫面"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"顯示硬件層更新"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"在硬件層更新時閃動綠燈"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 透支偵錯"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"停用 HW 重疊效果"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"永遠使用 GPU 進行畫面合成"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"模擬色彩空間"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"啟用 OpenGL 追蹤"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"停用 USB 音效檔案路由功能"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"停用 USB 音效檔案周邊設備的自動路由功能"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"顯示版面界限"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"顯示剪輯範圍、邊界等"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"強制使用從右至左的版面配置方向"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"顯示 CPU 使用量"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"在螢幕上重疊顯示目前的 CPU 使用量"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"強制使用 GPU 轉譯"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"強制使用 GPU 進行 2D 繪圖"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"強制 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"對非矩形裁剪操作進行偵錯"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"分析 GPU 轉譯"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"視窗動畫比例"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"轉場動畫比例"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animator 片長比例"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"模擬次要顯示器"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"應用程式"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"不要保留活動"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"使用者離開活動後隨即銷毀活動"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"背景處理程序限制"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"顯示所有 ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"顯示背景應用程式的「應用程式無回應」對話框"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許應用程式寫入到外部儲存空間"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"允許將所有應用程式寫入到外部儲存完間 (所有資訊清單值)"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"強制可變更活動尺寸"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"在任何資訊清單值下，允許為多個視窗變更所有活動的尺寸。"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"桌面電腦備份密碼"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"桌上電腦的完整備份目前未受保護"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"輕觸即可更改或移除桌上電腦完整備份的密碼"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"已設定新備份密碼"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"新密碼與確認密碼不符"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"無法設定備份密碼"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"生動 (預設)"</item>
+    <item msgid="8446070607501413455">"自然"</item>
+    <item msgid="6553408765810699025">"標準"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"顏色已強化"</item>
+    <item msgid="8280754435979370728">"如眼前所見的自然顏色"</item>
+    <item msgid="5363960654009010371">"優化作數碼內容使用的顏色"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"已暫停的應用程式"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"已暫停。輕觸即可切換。"</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"運作中。輕觸即可切換。"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"執行中的服務"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"查看並控制目前正在執行中的服務"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"夜間模式"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"已停用"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"永遠開啟"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"自動"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"轉換為檔案加密"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"轉換…"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"已加密檔案"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"正在轉換為檔案式加密"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"轉換資料分區至檔案式加密。\n！警告！這會清除您的所有資料。\n 這是測試功能，可能未能正常運作。\n如要繼續，請按 [清除並轉換…] 。"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"清除並轉換…"</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"相片顏色模式"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"使用 sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"已停用"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"全色盲"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"綠色弱視 (紅綠)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"紅色弱視 (紅綠)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"藍色弱視 (藍黃)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"這是一項實驗性功能，可能會影響效能。"</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
 </resources>

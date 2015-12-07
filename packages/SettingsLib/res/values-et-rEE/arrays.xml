@@ -48,4 +48,104 @@
     <item msgid="5660739516542454527">"Blokeeritud"</item>
     <item msgid="1805837518286731242">"Kehva ühenduse ajutine vältimine"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Ära kunagi kontrolli"</item>
+    <item msgid="6042769699089883931">"Kontrolli ainult DRM-sisu"</item>
+    <item msgid="9174900380056846820">"Pidev kontrollimine"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Ära kunagi kasuta HDCP-kontrollimist"</item>
+    <item msgid="3878793616631049349">"Kasuta HDCP-kontrolli ainult DRM-sisu korral"</item>
+    <item msgid="45075631231212732">"Kasuta alati HDCP-kontrollimist"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64 000"</item>
+    <item msgid="505611754508988476">"256 000"</item>
+    <item msgid="6361286924268716397">"1 000 000"</item>
+    <item msgid="6405203239560695266">"4 000 000"</item>
+    <item msgid="3025431211013424097">"16 000 000"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64 000"</item>
+    <item msgid="3534782711045262344">"256 000"</item>
+    <item msgid="8085867209202153403">"1 000 000"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64 k / logipuhver"</item>
+    <item msgid="2822309747675758628">"256 k / logipuhver"</item>
+    <item msgid="6699306198357496731">"1 mln / logipuhver"</item>
+    <item msgid="5748528643937500349">"4 mln / logipuhver"</item>
+    <item msgid="1978629051085111592">"16 mln / logipuhver"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Animatsioon väljas"</item>
+    <item msgid="6624864048416710414">"Animatsiooni skaala 0,5 korda"</item>
+    <item msgid="2219332261255416635">"Animatsiooni skaala 1 kord"</item>
+    <item msgid="3544428804137048509">"Animatsiooni skaala 1,5 korda"</item>
+    <item msgid="3110710404225974514">"Animatsiooni skaala 2 korda"</item>
+    <item msgid="4402738611528318731">"Animatsiooni skaala 5 korda"</item>
+    <item msgid="6189539267968330656">"Animatsiooni skaala 10 korda"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Animatsioon väljas"</item>
+    <item msgid="3375781541913316411">"Animatsiooni skaala 0,5 korda"</item>
+    <item msgid="1991041427801869945">"Animatsiooni skaala 1 kord"</item>
+    <item msgid="4012689927622382874">"Animatsiooni skaala 1,5 korda"</item>
+    <item msgid="3289156759925947169">"Animatsiooni skaala 2 korda"</item>
+    <item msgid="7705857441213621835">"Animatsiooni skaala 5 korda"</item>
+    <item msgid="6660750935954853365">"Animatsiooni skaala 10 korda"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Animatsioon väljas"</item>
+    <item msgid="1138649021950863198">"0,5-kordne animatsiooni skaala"</item>
+    <item msgid="4394388961370833040">"1-kordne animatsiooni skaala"</item>
+    <item msgid="8125427921655194973">"1,5-kordne animatsiooni skaala"</item>
+    <item msgid="3334024790739189573">"2-kordne animatsiooni skaala"</item>
+    <item msgid="3170120558236848008">"5-kordne animatsiooni skaala"</item>
+    <item msgid="1069584980746680398">"10-kordne animatsiooni skaala"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Puudub"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (turvaline)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (turvaline)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (turvaline)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (turvaline)"</item>
+    <item msgid="3547211260846843098">"4K (üles skaleeritud)"</item>
+    <item msgid="5411365648951414254">"4K (üles skaleeritud, turvaline)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (kahel ekraanil)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Puudub"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (graafika)"</item>
+    <item msgid="1340692776955662664">"Helistamise virn glGetErrori kohta"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Väljas"</item>
+    <item msgid="675719912558941285">"Joonista mittetäisnurkne osa siniselt"</item>
+    <item msgid="1064373276095698656">"Muuda testitud käsud roheliseks"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Väljas"</item>
+    <item msgid="2751513398307949636">"Ekraanil ribadena"</item>
+    <item msgid="1851438178120770973">"Adb-kestas dumpsys gfxinfo"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Väljas"</item>
+    <item msgid="7688197031296835369">"Kuva ülejoonistatud alad"</item>
+    <item msgid="2290859360633824369">"Deuteranomaly jaoks alade kuvamine"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Standardpiir"</item>
+    <item msgid="4071574792028999443">"Taustaprotsessideta"</item>
+    <item msgid="4810006996171705398">"Maksimaalselt 1 protsess"</item>
+    <item msgid="8586370216857360863">"Maksimaalselt 2 protsessi"</item>
+    <item msgid="836593137872605381">"Maksimaalselt 3 protsessi"</item>
+    <item msgid="7899496259191969307">"Maksimaalselt 4 protsessi"</item>
+  </string-array>
+    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
 </resources>

@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"අවහිර කරන ලදි"</item>
     <item msgid="1805837518286731242">"දුර්වල සම්බන්ධතාවය තාවකාලිකව මඟහරිමින්"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"කිසිදා පරික්ෂා නොකරන්න"</item>
+    <item msgid="6042769699089883931">"DRM අන්තර්ගතය සඳහා පමණක් පිරික්සන්න"</item>
+    <item msgid="9174900380056846820">"සැමවිටම පරික්ෂා කරන්න"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"කිසිවිටෙකත් HDCP පරීක්ෂාකිරීම භාවිතා නොකරන්න"</item>
+    <item msgid="3878793616631049349">"DRM අන්තර්ගත සඳහා පමණක් HDCP පරික්ෂාව භාවිතා කරන්න"</item>
+    <item msgid="45075631231212732">"සැමවිටම HDCP පිරික්සුම භාවිතා කරන්න"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"ලොග අන්තරාවකට 64K"</item>
+    <item msgid="2822309747675758628">"ලොග අන්තරාවකට 256K"</item>
+    <item msgid="6699306198357496731">"ලොග අන්තරාවකට 1M"</item>
+    <item msgid="5748528643937500349">"ලොග අන්තරාවකට 4M"</item>
+    <item msgid="1978629051085111592">"ලොග අන්තරාවකට 16M"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"සජිවිකරණය අක්‍රිය කිරීම"</item>
+    <item msgid="6624864048416710414">"සජීවීකරණ පරිමාණය .5x"</item>
+    <item msgid="2219332261255416635">"සජීවීකරණ පරිමාණය 1x"</item>
+    <item msgid="3544428804137048509">"සජීවීකරණ පරිමාණය 1.5x"</item>
+    <item msgid="3110710404225974514">"සජීවීකරණ පරිමාණය 2x"</item>
+    <item msgid="4402738611528318731">"සජීවිකරණ පරිමාණය 5x"</item>
+    <item msgid="6189539267968330656">"සජීවිතා පරාසය 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"සජීවිකරණ අක්‍රියයි"</item>
+    <item msgid="3375781541913316411">"සජීවීකරණ පරිමාණය .5x"</item>
+    <item msgid="1991041427801869945">"සජීවීකරණ පරිමාණය 1x"</item>
+    <item msgid="4012689927622382874">"සජීවීකරණ පරිමාණය 1.5x"</item>
+    <item msgid="3289156759925947169">"සජිවිකරණ පරාසය 2x"</item>
+    <item msgid="7705857441213621835">"සජීවිකරණ පරිමාණය 5x"</item>
+    <item msgid="6660750935954853365">"සජීවිතා පරාසය 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"සජිවිකරණය අක්‍රිය කිරීම"</item>
+    <item msgid="1138649021950863198">"සජීවීකරණ පරිමාණය .5x"</item>
+    <item msgid="4394388961370833040">"සජීවීකරණ පරිමාණය 1x"</item>
+    <item msgid="8125427921655194973">"සජීවීකරණ පරිමාණය 1.5x"</item>
+    <item msgid="3334024790739189573">"සජිවිකරණ පරාසය 2x"</item>
+    <item msgid="3170120558236848008">"සජීවිකරණ පරිමාණය 5x"</item>
+    <item msgid="1069584980746680398">"සජිවිකරණ පරාසය 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"කිසිවක් නැත"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (ආරක්ෂිත)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (ආරක්ෂිත)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (ආරක්ෂිත)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (ආරක්ෂිත)"</item>
+    <item msgid="3547211260846843098">"4K (පරිමාණය වැඩි කළ)"</item>
+    <item msgid="5411365648951414254">"4K (පරිමාණය වැඩි කළ, ආරක්ෂිත)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (ද්විත්ව තිරය)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"කිසිවක් නැත"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (චිත්‍රක)"</item>
+    <item msgid="1340692776955662664">"glGetError මත ඇමතීමේ අට්ටිය"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"අක්‍රියව ඇත"</item>
+    <item msgid="675719912558941285">"ඍජුකෝණාස‍්‍ර-නොවන ක්ලිප් ප්‍රදේශය නිල් පාටින් අදින්න"</item>
+    <item msgid="1064373276095698656">"පරික්ෂා කරන ලද ඇඳීමේ විධාන කොළ පැහැයෙන් ඉස්මතු කරන්න"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"අක්‍රියයි"</item>
+    <item msgid="2751513398307949636">"තිරයෙහි පටි ලෙස"</item>
+    <item msgid="1851438178120770973">"Adb shell dumpsys gfxinfo තුළ"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"අක්‍රියයි"</item>
+    <item msgid="7688197031296835369">"වැඩිකොට දක්වනවා ඇති ප්‍රදේශ පෙන්වන්න"</item>
+    <item msgid="2290859360633824369">"අපවිෂවීම සඳහා ප්‍රදේශ පෙන්වන්න"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"සම්මත සීමාව"</item>
+    <item msgid="4071574792028999443">"පසුබිම් ක්‍රියාවලි නොමැත"</item>
+    <item msgid="4810006996171705398">"උපරිම වශයෙන් 1 ක්‍රියාවලියක්"</item>
+    <item msgid="8586370216857360863">"උපරිම ලෙස ක්‍රියාවලි 2 කි"</item>
+    <item msgid="836593137872605381">"උපරිම ලෙස ක්‍රියාවලි 3 කි"</item>
+    <item msgid="7899496259191969307">"උපරිම ලෙස ක්‍රියාවලි 4 කි"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"ආරෝපණය වෙමින්"</item>
+    <item msgid="5220695614993094977">"MTP (මාධ්‍ය මාරු කිරීමේ ප්‍රොටෝකෝලය)"</item>
+    <item msgid="2086000968159047375">"PTP (පින්තූර මාරු කිරීමේ ප්‍රොටෝකෝලය)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB ඊතර නෙට්)"</item>
+    <item msgid="1718924214939774352">"ශ්‍රව්‍ය මූලය"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

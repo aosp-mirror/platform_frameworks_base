@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"Letiltva"</item>
     <item msgid="1805837518286731242">"A rossz minőségű kapcsolatok átmeneti elkerülése"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Soha ne ellenőrizze"</item>
+    <item msgid="6042769699089883931">"Csak DRM-tartalom ellenőrzése"</item>
+    <item msgid="9174900380056846820">"Mindig ellenőrizze"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Soha ne használjon HDCP ellenőrzést"</item>
+    <item msgid="3878793616631049349">"Csak DRM-tartalomhoz használjon HDCP ellenőrzést"</item>
+    <item msgid="45075631231212732">"Mindig használjon HDCP ellenőrzést"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64 KB"</item>
+    <item msgid="505611754508988476">"256 KB"</item>
+    <item msgid="6361286924268716397">"1 MB"</item>
+    <item msgid="6405203239560695266">"4 MB"</item>
+    <item msgid="3025431211013424097">"16 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64 KB"</item>
+    <item msgid="3534782711045262344">"256 KB"</item>
+    <item msgid="8085867209202153403">"1 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64 KB/naplópuffer"</item>
+    <item msgid="2822309747675758628">"256 KB/naplópuffer"</item>
+    <item msgid="6699306198357496731">"1 MB/naplópuffer"</item>
+    <item msgid="5748528643937500349">"4 MB/naplópuffer"</item>
+    <item msgid="1978629051085111592">"16 MB/naplópuffer"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Animáció ki"</item>
+    <item msgid="6624864048416710414">"Animáció tempója: 0,5x"</item>
+    <item msgid="2219332261255416635">"Animáció tempója: 1x"</item>
+    <item msgid="3544428804137048509">"Animáció tempója: 1,5x"</item>
+    <item msgid="3110710404225974514">"Animáció tempója: 2x"</item>
+    <item msgid="4402738611528318731">"Animáció tempója: 5x"</item>
+    <item msgid="6189539267968330656">"Animáció tempója: 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Animáció ki"</item>
+    <item msgid="3375781541913316411">"Animáció tempója: 0,5x"</item>
+    <item msgid="1991041427801869945">"Animáció tempója: 1x"</item>
+    <item msgid="4012689927622382874">"Animáció tempója: 1,5x"</item>
+    <item msgid="3289156759925947169">"Animáció tempója: 2x"</item>
+    <item msgid="7705857441213621835">"Animáció tempója: 5x"</item>
+    <item msgid="6660750935954853365">"Animáció tempója: 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Animáció ki"</item>
+    <item msgid="1138649021950863198">"Animáció tempója: 0,5x"</item>
+    <item msgid="4394388961370833040">"Animáció tempója: 1x"</item>
+    <item msgid="8125427921655194973">"Animáció tempója: 1,5x"</item>
+    <item msgid="3334024790739189573">"Animáció tempója: 2x"</item>
+    <item msgid="3170120558236848008">"Animáció tempója: 5x"</item>
+    <item msgid="1069584980746680398">"Animáció tempója: 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Egyik sem"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (biztonságos)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (biztonságos)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (biztonságos)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (biztonságos)"</item>
+    <item msgid="3547211260846843098">"4K (felskálázott)"</item>
+    <item msgid="5411365648951414254">"4K (felskálázott, biztonságos)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (két képernyő)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Semelyik"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (grafika)"</item>
+    <item msgid="1340692776955662664">"Verem meghívása glGetError esetén"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Kikapcsolva"</item>
+    <item msgid="675719912558941285">"Nem négyzetes kivágás kékkel"</item>
+    <item msgid="1064373276095698656">"Tesztelt rajzolási parancsok kiemelése zölddel"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Ki"</item>
+    <item msgid="2751513398307949636">"A képernyőn sávként"</item>
+    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo elemben"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Ki"</item>
+    <item msgid="7688197031296835369">"Tartalom-felülírási területek mutatása"</item>
+    <item msgid="2290859360633824369">"A deuteranomália területeinek megjelenítése"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Normál korlátozás"</item>
+    <item msgid="4071574792028999443">"Nincsenek háttérfolyamatok"</item>
+    <item msgid="4810006996171705398">"Legfeljebb 1 folyamat"</item>
+    <item msgid="8586370216857360863">"Legfeljebb 2 folyamat"</item>
+    <item msgid="836593137872605381">"Legfeljebb 3 folyamat"</item>
+    <item msgid="7899496259191969307">"Legfeljebb 4 folyamat"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Töltés"</item>
+    <item msgid="5220695614993094977">"MTP (Media Transfer Protocol, médiaátviteli protokoll)"</item>
+    <item msgid="2086000968159047375">"PTP (Picture Transfer Protocol, képátviteli protokoll)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB Ethernet)"</item>
+    <item msgid="1718924214939774352">"Hangforrás"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

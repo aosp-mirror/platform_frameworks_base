@@ -135,4 +135,159 @@
     <string name="choose_profile" msgid="8229363046053568878">"เลือกโปรไฟล์"</string>
     <string name="category_personal" msgid="1299663247844969448">"ส่วนตัว"</string>
     <string name="category_work" msgid="8699184680584175622">"ที่ทำงาน"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"สำหรับนักพัฒนาซอฟต์แวร์"</string>
+    <!-- no translation found for development_settings_enable (542530994778109538) -->
+    <skip />
+    <string name="development_settings_summary" msgid="1815795401632854041">"ตั้งค่าตัวเลือกสำหรับการพัฒนาแอปพลิเคชัน"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"ตัวเลือกสำหรับนักพัฒนาซอฟต์แวร์ไม่สามารถใช้ได้สำหรับผู้ใช้นี้"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"การตั้งค่า VPN ไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"การตั้งค่าการปล่อยสัญญาณไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"การตั้งค่าจุดเข้าใช้งานไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"การแก้ไขข้อบกพร่อง USB"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"ยกเลิกการให้สิทธิ์การแก้ปัญหา USB"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"ทางลัดรายงานข้อบกพร่อง"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"แสดงปุ่มในเมนูเปิด/ปิดสำหรับการใช้รายงานข้อบกพร่อง"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"เปิดหน้าจอค้าง"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"หน้าจอจะไม่เข้าสู่โหมดสลีปขณะชาร์จ"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"เปิดใช้งานบันทึกสอดแนมบลูทูธ HCI"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"บันทึกแพ็คเก็ตบลูทูธ HCI ทั้งหมดในไฟล์"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"การปลดล็อก OEM"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"อนุญาตการปลดล็อก OEM ไหม"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: คุณลักษณะการปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองตำแหน่ง"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองตำแหน่ง"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองตำแหน่ง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"เครือข่าย"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"การรับรองการแสดงผลแบบไร้สาย"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"สลับ Wi‑Fi เป็นมือถือเมื่อสัญญาณอ่อน"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ใช้การสแกน Wi-Fi ข้ามเครือข่ายเสมอ"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"ใช้ไคลเอ็นต์ DHCP เดิม"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"เปิดใช้ข้อมูลมือถือเสมอ"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"เมื่อเปิดใช้แล้ว Wi-Fi จะส่งผ่านการเชื่อมต่อข้อมูลไปยังเครือข่ายมือถือในทันทีที่พบสัญญาณ Wi-Fi อ่อน"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"อนุญาต/ไม่อนุญาตการสแกน Wi-Fi ข้ามเครือข่าย ตามปริมาณข้อมูลการเข้าชมที่ปรากฏในอินเทอร์เฟซ"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"ขนาดบัฟเฟอร์ของ Logger"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"เลือกขนาด Logger ต่อบัฟเฟอร์ไฟล์บันทึก"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"เลือกการกำหนดค่า USB"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"เลือกการกำหนดค่า USB"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"อนุญาตให้จำลองตำแหน่ง"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"อนุญาตให้จำลองตำแหน่ง"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"เปิดใช้การตรวจสอบแอตทริบิวต์มุมมอง"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ใช้ไคลเอ็นต์ DHCP จาก Lollipop แทนไคลเอ็นต์ DHCP ใหม่บน Android"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"เปิดใช้ข้อมูลมือถืออยู่เสมอ แม้ในเวลาที่ใช้งาน Wi-Fi อยู่ (สำหรับสวิตชิงเครือข่ายความเร็วสูง)"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"อนุญาตให้แก้ไขข้อบกพร่อง USB หรือไม่"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"การแก้ไขข้อบกพร่อง USB มีไว้เพื่อการพัฒนาเท่านั้น ให้ใช้การแก้ไขนี้เพื่อคัดลอกข้อมูลระหว่างคอมพิวเตอร์และอุปกรณ์ ติดตั้งแอปพลิเคชันบนอุปกรณ์โดยไม่มีการแจ้งเตือน และอ่านข้อมูลบันทึก"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"ยกเลิกการเข้าถึงเพื่อแก้ปัญหาผ่าน USB จากคอมพิวเตอร์ทุกเครื่องที่คุณได้ให้สิทธิ์ก่อนหน้านี้ไหม"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"อนุญาตการตั้งค่าสำหรับการพัฒนาหรือไม่"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"การตั้งค่านี้มีไว้เพื่อการพัฒนาเท่านั้น จึงอาจทำให้อุปกรณ์และแอปพลิเคชันที่มีอยู่เสียหายหรือทำงานผิดพลาดได้"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"ตั้งค่าการตรวจสอบ HDCP"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"การแก้ไขข้อบกพร่อง"</string>
+    <string name="debug_app" msgid="8349591734751384446">"เลือกแอปพลิเคชันที่จะแก้ไขข้อบกพร่อง"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"ไม่มีชุดแอปพลิเคชันแก้ไขข้อบกพร่อง"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"แอปพลิเคชันแก้ไขข้อบกพร่อง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"เลือกแอปพลิเคชัน"</string>
+    <string name="no_application" msgid="2813387563129153880">"ไม่มี"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"รอโปรแกรมแก้ไขข้อบกพร่อง"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"แอปพลิเคชันที่มีการแก้ปัญหาจะรอให้โปรแกรมแก้ไขข้อบกพร่องแนบข้อมูลก่อนปฏิบัติการ"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"อินพุต"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"การวาดภาพ"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"การแสดงผลที่มีการเร่งด้วยฮาร์ดแวร์"</string>
+    <string name="media_category" msgid="4388305075496848353">"สื่อ"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"กำลังตรวจสอบ"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"เปิดใช้งานโหมดเข้มงวด"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"แสดงหน้าจอเมื่อแอปพลิเคชันทำงาน ในชุดข้อความหลักนาน"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"ตำแหน่งของตัวชี้"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะ ในปัจจุบัน"</string>
+    <string name="show_touches" msgid="1356420386500834339">"แสดงการแตะ"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"แสดงความคิดเห็นด้วยภาพสำหรับการแตะ"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"แสดงการอัปเดตพื้นผิว"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"แฟลชพื้นผิวหน้าต่างทั้งหมดเมื่อมีการอัปเดต"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"แสดงการอัปเดตมุมมอง GPU"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"แฟลชมุมมองภายในหน้าต่างเมื่อวาดด้วย GPU"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"แสดงอัปเดตเลเยอร์ฮาร์ดแวร์"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"เลเยอร์ฮาร์ดแวร์กะพริบเป็นสีเขียว เมื่อมีการอัปเดต"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"แก้ปัญหาการวาดทับด้วย GPU"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"ปิดใช้งานการวางซ้อน HW"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"ใช้ GPU ในการจัดวางองค์ประกอบหน้าจอเสมอ"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"จำลองระบบสี"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"เปิดใช้การติดตามใน OpenGL"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"ปิดการกำหนดเส้นทางเสียงทาง USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"ปิดการกำหนดเส้นทางโดยอัตโนมัติไปยังอุปกรณ์ต่อพ่วงเสียงทาง USB"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"แสดงขอบของการจัดวาง"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"แสดงหน้าปกคลิป ขอบ ฯลฯ"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"บังคับทิศทางการจัดวาง RTL"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"บังคับทิศทางการจัดวางหน้าจอเป็น RTL สำหรับทุกภาษา"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"แสดงการใช้ CPU"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"การวางซ้อนหน้าจอที่แสดงการใช้ CPU ในปัจจุบัน"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"เร่งการแสดงผลของ GPU"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"ต้องใช้ GPU สำหรับการวาดภาพ 2 มิติ"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"บังคับใช้ 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"เปิดใช้งาน 4x MSAA ในแอปพลิเคชัน OpenGL ES 2.0"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"แก้ไขการทำงานของคลิปที่ไม่ใช่สี่เหลี่ยม"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"การแสดงผล GPU ตามโปรไฟล์"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"ขนาดหน้าต่างภาพเคลื่อนไหว"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"อัตราการสลับภาพเคลื่อนไหว"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"ความเร็วตามผู้สร้างกำหนด"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"จำลองจอแสดงผลที่สอง"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"แอปพลิเคชัน"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"ไม่เก็บกิจกรรม"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"ขีดจำกัดกระบวนการพื้นหลัง"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"แสดง ANR ทั้งหมด"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"แสดงหน้าต่างแอปไม่ตอบสนอง สำหรับแอปพื้นหลัง"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ให้สามารถเขียนแอปต่างๆ ไปยังที่เก็บภายนอกได้ โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"บังคับให้กิจกรรมปรับขนาดได้"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"ทำให้กิจกรรมทั้งหมดปรับขนาดได้สำหรับหน้าต่างหลายบาน โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"รหัสผ่านการสำรองข้อมูลในเดสก์ท็อป"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"การสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อป ไม่ได้รับการป้องกันในขณะนี้"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"แตะเพื่อเปลี่ยนหรือลบรหัสผ่านสำหรับการสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อป"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"ตั้งรหัสผ่านสำหรับการสำรองข้อมูลใหม่แล้ว"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"รหัสผ่านใหม่และการพิมพ์ยืนยันไม่ตรงกัน"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ไม่สามารถตั้งรหัสผ่านสำหรับการสำรองข้อมูล"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"สด (ค่าเริ่มต้น)"</item>
+    <item msgid="8446070607501413455">"ธรรมชาติ"</item>
+    <item msgid="6553408765810699025">"มาตรฐาน"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"สีที่ได้รับการปรับปรุง"</item>
+    <item msgid="8280754435979370728">"สีธรรมชาติตามที่ดวงตามองเห็น"</item>
+    <item msgid="5363960654009010371">"สีที่เหมาะกับเนื้อหาดิจิทัล"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"แอปที่ไม่ได้ใช้งาน"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"ไม่ได้ใช้งานอยู่ แตะเพื่อสลับ"</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"ใช้งานอยู่ แตะเพื่อสลับ"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"บริการที่ทำงานอยู่"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"ดูและควบคุมบริการที่ทำงานอยู่"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"โหมดกลางคืน"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"ปิดใช้แล้ว"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"เปิดใช้เสมอ"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"อัตโนมัติ"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"แปลงเป็นการเข้ารหัสไฟล์"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"แปลง…"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"เข้ารหัสไฟล์แล้ว"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"การแปลงเป็นการเข้ารหัสตามไฟล์"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"แปลงพาร์ทิชันข้อมูลเป็นการเข้ารหัสแบบไฟล์\n !!คำเตือน!! การดำเนินการนี้จะลบข้อมูลทั้งหมดของคุณ\n คุณลักษณะนี้เป็นแบบอัลฟา และอาจทำงานไม่เป็นปกติ\n กด \"ลบและแปลง...\" เพื่อดำเนินการต่อ"</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"ลบและแปลง…"</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"โหมดสีของรูปภาพ"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"ใช้ sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ปิดใช้"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"ตาบอดสีแบบไม่เห็นสีเลย"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"ตาบอดจางสีเขียว (สีแดง/เขียว)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"ตาบอดจางสีแดง (สีแดง/เขียว)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ตาบอดจางสีน้ำเงิน (สีน้ำเงิน/เหลือง)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"การแก้สี"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"คุณลักษณะนี้เป็นแบบทดลองและอาจส่งผลต่อประสิทธิภาพการทำงาน"</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"แทนที่โดย <xliff:g id="TITLE">%1$s</xliff:g>"</string>
 </resources>

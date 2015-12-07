@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"ታግዷል"</item>
     <item msgid="1805837518286731242">"ለጊዜያዊነት ከደካማ ግኑኝነት በመታቀብ ላይ"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"በፍፁም አትመልከት"</item>
+    <item msgid="6042769699089883931">"የDRM ይዘት ብቻ ተመልከት"</item>
+    <item msgid="9174900380056846820">"ሁልጊዜ ተመልከት"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"በፍፁም HDCP ምልከታ አትጠቀም"</item>
+    <item msgid="3878793616631049349">"ለDRM ይዘት ብቻ HDCP  ምልከታን ተጠቀም"</item>
+    <item msgid="45075631231212732">"ሁልጊዜ የHDCP ምልከታ ተጠቀም"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64 ኪባ"</item>
+    <item msgid="505611754508988476">"256 ኪባ"</item>
+    <item msgid="6361286924268716397">"1 ሜባ"</item>
+    <item msgid="6405203239560695266">"4 ሜባ"</item>
+    <item msgid="3025431211013424097">"16 ሜባ"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64 ኪባ"</item>
+    <item msgid="3534782711045262344">"256 ኪባ"</item>
+    <item msgid="8085867209202153403">"1 ሜባ"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64 ኪባ በምዝግብ ማስታወሻ ቋጥ"</item>
+    <item msgid="2822309747675758628">"256 ኪባ በምዝግብ ማስታወሻ ቋጥ"</item>
+    <item msgid="6699306198357496731">"1 ሜ በምዝግብ ማስታወሻ ቋጥ"</item>
+    <item msgid="5748528643937500349">"4 ሜ በምዝግብ ማስታወሻ ቋጥ"</item>
+    <item msgid="1978629051085111592">"16 ሜ በምዝግብ ማስታወሻ ቋጥ"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"እነማ ጠፍቷል"</item>
+    <item msgid="6624864048416710414">"የእነማ ልኬት ለውጥ.5x"</item>
+    <item msgid="2219332261255416635">"የእነማ ልኬት ለውጥ1x"</item>
+    <item msgid="3544428804137048509">"የእነማ ልኬት ለውጥ1.5x"</item>
+    <item msgid="3110710404225974514">"የእነማ ልኬት ለውጥ2x"</item>
+    <item msgid="4402738611528318731">"የእነማ ልኬት ለውጥ5x"</item>
+    <item msgid="6189539267968330656">"የእነማ ልኬት ለውጥ10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"እነማ ጠፍቷል"</item>
+    <item msgid="3375781541913316411">"የእነማ ልኬት ለውጥ.5x"</item>
+    <item msgid="1991041427801869945">"የእነማ ልኬት ለውጥ1x"</item>
+    <item msgid="4012689927622382874">"የእነማ  ልኬት ለውጥ1.5x"</item>
+    <item msgid="3289156759925947169">"የእነማ ልኬት ለውጥ2x"</item>
+    <item msgid="7705857441213621835">"የእነማ ልኬት ለውጥ5x"</item>
+    <item msgid="6660750935954853365">"የእነማ ልኬት ለውጥ10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"እነማ ጠፍቷል"</item>
+    <item msgid="1138649021950863198">"የእነማ ልኬት ለውጥ .5x"</item>
+    <item msgid="4394388961370833040">"የእነማ ልኬት ለውጥ 1x"</item>
+    <item msgid="8125427921655194973">"የእነማ ልኬት ለውጥ 1.5x"</item>
+    <item msgid="3334024790739189573">"የእነማ ልኬት ለውጥ 2x"</item>
+    <item msgid="3170120558236848008">"የእነማ ልኬት ለውጥ 5x"</item>
+    <item msgid="1069584980746680398">"የእነማ ልኬት ለውጥ 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"ምንም የለም"</item>
+    <item msgid="9033194758688161545">"480ፒክሰል"</item>
+    <item msgid="1025306206556583600">"480ፒ (የተጠበቀ)"</item>
+    <item msgid="1853913333042744661">"720ፒ"</item>
+    <item msgid="3414540279805870511">"720ፒ (የተጠበቀ)"</item>
+    <item msgid="9039818062847141551">"1080ፒ"</item>
+    <item msgid="4939496949750174834">"1080ፒ (የተጠበቀ)"</item>
+    <item msgid="1833612718524903568">"4ኬ"</item>
+    <item msgid="238303513127879234">"4ኬ (የተጠበቀ)"</item>
+    <item msgid="3547211260846843098">"4ኬ (ከፍ ተድርጎ የተመጣጠነ)"</item>
+    <item msgid="5411365648951414254">"4ኬ (ከፍ ተድርጎ የተመጣጠነ፣ የተጠበቀ)"</item>
+    <item msgid="1311305077526792901">"720ፒ፣ 1080ፒ (ሁለትዮሽ ማያ ገጽ)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"ምንም"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (ግራፊክስ)"</item>
+    <item msgid="1340692776955662664">"የጥሪ ቁልል በ glGetError ላይ"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"ጠፍቷል"</item>
+    <item msgid="675719912558941285">"አራት ማእዘን ያልሆነ የቅንጥብ ክልልን በሰማያዊ ይሳሉ"</item>
+    <item msgid="1064373276095698656">"የተሞከሩ የስእል ትእዛዞችን በአረንጓዴ ያድምቁ"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ጠፍቷል"</item>
+    <item msgid="2751513398307949636">"ማያ ገጽ ላይ እንደ አሞሌዎች"</item>
+    <item msgid="1851438178120770973">"በ adb shell dumpsys gfxinfo ውስጥ"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"ጠፍቷል"</item>
+    <item msgid="7688197031296835369">"ስዕሉ አልፎ የፈሰሰባቸው አካባቢዎችን አሳይ"</item>
+    <item msgid="2290859360633824369">"ቀይ እና አረንጓዴ የማይለይባቸው ቦታዎች አሳይ"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"መደበኛ ወሰኖች"</item>
+    <item msgid="4071574792028999443">"ምንም የዳራ ሂደቶች የሉም"</item>
+    <item msgid="4810006996171705398">"ቢበዛ 1  ሂደት"</item>
+    <item msgid="8586370216857360863">"ቢበዛ 2  ሂደቶች"</item>
+    <item msgid="836593137872605381">"ቢበዛ 3  ሂደቶች"</item>
+    <item msgid="7899496259191969307">"ቢበዛ 4  ሂደቶች"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"ኃይል በመሙላት ላይ"</item>
+    <item msgid="5220695614993094977">"MTP (የሚዲያ ማስተላለፍ ፕሮቶኮል)"</item>
+    <item msgid="2086000968159047375">"PTP (የስዕል ማስተላለፍ ፕሮቶኮል)"</item>
+    <item msgid="7398830860950841822">"RNDIS (ዩኤስቢ ኤተርኔት)"</item>
+    <item msgid="1718924214939774352">"የኦዲዮ ምንጭ"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

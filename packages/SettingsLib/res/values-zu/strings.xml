@@ -135,4 +135,158 @@
     <string name="choose_profile" msgid="8229363046053568878">"Khetha iphrofayela"</string>
     <string name="category_personal" msgid="1299663247844969448">"Okomuntu siqu"</string>
     <string name="category_work" msgid="8699184680584175622">"Umsebenzi"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Izinketho Zonjiniyela"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Nika amandla izinketho zonjiniyela"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"Setha okukhethwayo kwentuthuko yohlelo lokusebenza"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Izinketho zonjiniyela azitholakali kulo msebenzisi"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"Izilungiselelo ze-VPN azitholakaleli lo msebenzisi"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Izilungiselelo zokusebenzisa njengemodemu azitholakaleli lo msebenzisi"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Izilungiselelo ze-Igama Lephoyinti Lokufinyelela azitholakaleli lo msebenzisi"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Ukulungisa iphutha le-USB"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Lungisa iphutha lemodi lapho i-USB ixhunyiwe"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Buyisa ukugunyaza kokususa iphutha le-USB"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Isinqamuleli sombiko wesiphazamisi"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Bonisa inkinobho kwimenyu yamandla ngokuthatha umbiko wesiphazamiso"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Hlala uphapheme"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Isikrini asisoze salala ngenkathi sishaja"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Nika amandla i-Bluetooth HCI yelogu lokuhlola"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Shutha wonke amaphakethe we-bluetooth HCI kufayela"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"Ukuvula i-OEM"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Vumela ukuthi i-bootloader ivulwe"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Vumela ukuvula i-OEM?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ISEXWAYISO: Izici zokuvikela idivayisi ngeke zisebenze kule divayisi ngenkathi le sethingi ivuliwe."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Khetha uhlelo lokusebenza lwendawo mbumbulu"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Alikho uhlelo lokusebenza lwendawo mbumbulu esethiwe"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Uhlelo lokusebenza lwendawo mbumbulu: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Ukunethiwekha"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Ukunikezwa isitifiketi sokubukeka okungenantambo"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Nika amandlaukungena kwe-Wi-Fi Verbose"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Ukunikezela kwe-Wi-Fi kuya kuselula okunamandla"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vumela njalo ukuskena kokuzula kwe-Wi-Fi"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Sebenzisa iklayenti le-legacy le-DHCP"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Idatha yeselula ihlala isebenza"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Bonisa izinketho zokunikeza isitifiketi ukubukeka okungenantambo"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"khuphula izinga lokungena le-Wi-Fi, bonisa nge-SSID RSSI engayodwana kusikhethi se-Wi-Fi"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Uma inikwe amandla, i-Wi-Fi izoba namandla kakhulu ekunikezeleni ukuxhumeka kwedatha kuselula, uma isiginali ye-Wi-Fi iphansi"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Vumela/Ungavumeli ukuskena kokuzula kwe-Wi-Fi okususelwa kunani ledatha yethrafikhi ekhona ekusebenzisaneni"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Amasayizi weloga ngebhafa"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Khetha amasayizi weloga ngebhafa ngayinye yelogu"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Khetha ukulungiselelwa kwe-USB"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Khetha ukulungiselelwa kwe-USB"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Vumela izindawo mbumbulu"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Vumela izindawo mbumbulu"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Nika amandla ukubuka"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Sebenzisa iklayenti le-DHCP kusukela ku-Lollipop esikhundleni seklayenti elisha le-Android DHCP."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hlala ugcine idatha yeselula isebenza, nanoma i-Wi-Fi isebenza (ngokushintshwa kwenethiwekhi okusheshayo)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Vumela ukulungisa iphutha le-USB?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Ukulungisa iphutha le-USB kuhloselwe izinjongo zokuthuthukisa kuphela. Ingasebenziselwa ukukopisha idatha phakathi kwekhompyutha yakho nedivaysi yakho, faka izinhlelo zokusebenza kwidivaysi yakho ngaphandle kwesaziso, bese ufunda idatha yefayela lokungena."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Buyisa ukufinyelela ekususeni iphutha le-USB kusuka kuwo wonke amakhompyutha owagunyaze ngaphambilini?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vumele izilungiselelo zokuthuthukisa?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Lezi zilungiselelo zenzelwe ukusetshenziswa ukuthuthukisa kuphela. Zingadala ukuthi idivayisi yakho kanye nensiza ekuyona ukuthi iphuke noma iziphathe kabi."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Qiniseka izinhlelo zokusebenza nge-USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Hlola izinhlelo zokusebenza ezifakiwe nge-ADB/ADT ngokuziphatha okuyingozi."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Itheminali yasendaweni"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Nika amandla uhlelo lokusebenza letheminali olunikeza ukufinyelela kwasendaweni kwe-shell"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"Ihlola i-HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Hlela ukuhlola ukuziphatha kwe-HDCP"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Ilungisa inkinga"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Khetha uhlelo lokusebenza lokulungisa inkinga"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Alukho uhlelo lokusebenza lokulungisa inkinga olusethiwe"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Uhlelo lokusebenza lokulungisa inkinga: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Khetha uhlelo lokusebenza"</string>
+    <string name="no_application" msgid="2813387563129153880">"Lutho"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Linda isilungisi senkinga"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Uhlelo lokusebenza olulungiswe inkinga lulinda isilungisi senkinga ukuba sinamathisele ngaphambi kokuphuma"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Okufakwayo"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Umdwebo"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Ukunikezelwa okusheshisiwe kwezingxenyekazi zekhompyutha"</string>
+    <string name="media_category" msgid="4388305075496848353">"Imidiya"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Ukwengamela"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Imodi eqinile ivumelwe"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Ukuphazimisa isikrini uma izinhlelo zokusebenza ziyenza umsebenzi ngesikhathi eside kuchungechunge olukhulu"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Isikhombi sendawo"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Imbondela yesikrini ibonisa idatha yokuthinta yamanje"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Khombisa okuthintiwe"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Khombisa umbiko obonwayo wokuthintiwe"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Buka izibuyekezo ezibonakalayo"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Khanyisa ukubonakala kwalo lonke iwindi uma libuyekezwa"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Buka izibuyekezo ze-GPU"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Ukubuka okukhanyayo phakathi kwamawindi uma kudwetshwe nge-GPU"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Bonisa izibuyekezo zezendlalelo izingxenyekazi zekhompyutha"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Izendlalelo zengxenyekazi zekhompyutha eziluhlaza uma zibuyekeza"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Susa iphutha lokukhipha okungaphezulu kwe-GPU"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Khubaza izimbondela ze-HW"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Njalo sebenzisa i-GPU ukwakha isikrini"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Qoqa isikhala sombala"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Nika amandla ukulandelwa komkhondo kwe-OpenGL"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Khubaza umzila womsindo we-USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Khubaza ukwenza umzila ngokuzenzakalelayo kuma-pheripherals womsindo we-USB"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Khombisa imingcele yokumiseka"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Bonisa imikhawulo, imiphetho, njll, yesiqeshana."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Phoqelela isikhombisi-ndlela sesakhiwo se-RTL"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Phoqelela isikhombisi-ndlela sesikrini ku-RTL kuzo zonke izifunda"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"Bonisa ukusebenzisa i-CPU"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Imbondela yesikrini ibonisa ukusetshenziswa kwe-CPU okwamanje"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Phoqa ukunikeza i-GPU"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Phoqelela ukusetshenziswa kwe-GPU ngomdwebo we-2d"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Phoqelela i-4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"Nika amandla i-4x MSAA ezinhlelweni zokusebenza ze-OpenGL ES 2.0"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Susa iphutha ekusebenzeniokungekhona unxantathu kwesiqeshana"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Iphrofayela ye-GPU iyasebenzeka"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Iwindi yesilinganisi sesithombe esinyakazayo"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Isilinganiso sesithombe soku"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Isilinganiso sobude besikhathi somenzi womfanekiso onyakazayo"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Hlalisa kahle ukubukwa kwesibili"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Izinhlelo zokusebenza"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ungagcini imisibenzi"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Phihliza zonke izenzo ngokushesha ngemva kokuna umsebenzisi awuyeka"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Isilinganiso senqubo yesithombe sanemuva"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Bonisa wonke ama-ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Boniso idayalogi Yohlelo Lokusebenza Olungasabeli kwizinhlelo zokusebenza zasemuva"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Phoqelela ukuvumela izinhlelo zokusebenza ngaphandle"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Yenza noma uluphi uhlelo lokusebenza lifaneleke ukuthi libhalwe kusitoreji sangaphandle, ngaphandle kwamavelu we-manifest"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Imisebenzi yamandla izonikezwa usayizi omusha"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Yenza yonke imisebenzi ibe nosayizi abasha kuwindi lokuningi, ngokunganaki amanani we-manifest."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Iphasiwedi yokusekela ngokulondoloza ye-Desktop"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Ukusekela ngokulondoloza okugcwele kwe-Desktop akuvikelekile okwamanje."</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Khetha ukushintsha noma ukususa iphasiwedi yokwenziwa kwezipele ngokugcwele kwideskithophu"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Iphasiwedi entsha eyisipele isethiwe"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Iphasiwedi entsha nokuqinisekisa akufani"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Ukungaphumeleli kokusetha iphasiwedi eyisipele"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Dlidlizela (okuzenzakalelayo)"</item>
+    <item msgid="8446070607501413455">"Kwemvelo"</item>
+    <item msgid="6553408765810699025">"Okujwayelekile"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Imibala ethuthukisiwe"</item>
+    <item msgid="8280754435979370728">"Imibala yemvelo njengoba ibonwa yilihlo"</item>
+    <item msgid="5363960654009010371">"Imibala elungiselelwe yokuqukethwe kwedijithali"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Izinhlelo zokusebenza ezingasebenzi"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Akusebenzi. Shintsha ukuze ushintshe."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Kuyasebenza. Thinta ukuze ushintshe."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Amasevisi asebenzayo"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Buka futhi ulawule amasevisi  asebenzayo okwamanje"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Imodi yasebusuku"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Kukhutshaziwe"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Njalo ivuliwe"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Okuzenzakalelayo"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Phendulisela ekubethelweni kwefayela"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Iyaphendulela..."</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Sekuvele kubethelwe ngefayela"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Ukuphendulela kuya ekubethelweni okususelwe kwifayela"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Phendulela kwehlukaniswa kwedatha kuya ekubethelweni okususelwe kufayela.\n !!Isexwayiso!! Lokhu kuzosula yonke idatha yakho.\n Lesi sici siyi-alpha, futhi singahle singasebenzi kahle.\n Cindezela okuthi \'Sula futhi uphendulele...\' ukuze uqhubeke."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Sula futhi uphendulele..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Imodi yombala wesithombe"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"Sebenzisa i-sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Kukhutshaziwe"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"I-Monochromacy"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"I-Deuteranomaly (bomvu-luhlaza)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"I-Protanomaly (bomvu-luhlaza)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"I-Tritanomaly (luhlaza okwesibhakabhaka-phuzi)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Ukulungiswa kombala"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Lesi sici esesilingo futhi singathinta ukusebenza."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Igitshezwe ngaphezulu yi-<xliff:g id="TITLE">%1$s</xliff:g>"</string>
 </resources>

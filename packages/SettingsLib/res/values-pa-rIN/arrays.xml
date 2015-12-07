@@ -48,4 +48,111 @@
     <item msgid="5660739516542454527">"ਬਲੌਕ ਕੀਤਾ"</item>
     <item msgid="1805837518286731242">"ਅਸਥਾਈ ਤੌਰ ਤੇ ਖ਼ਰਾਬ ਕਨੈਕਸ਼ਨ ਤੋਂ ਬਚਣ ਲਈ"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"ਕਦੇ ਵੀ ਜਾਂਚ ਨਾ ਕਰੋ"</item>
+    <item msgid="6042769699089883931">"ਕੇਵਲ DRM ਸਮੱਗਰੀ ਲਈ ਜਾਂਚ ਕਰੋ"</item>
+    <item msgid="9174900380056846820">"ਹਮੇਸ਼ਾਂ ਜਾਂਚ ਕਰੋ"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"ਕਦੇ ਵੀ HDCP ਜਾਂਚ ਨਾ ਵਰਤੋ"</item>
+    <item msgid="3878793616631049349">"ਕੇਵਲ DRM ਸਮੱਗਰੀ ਲਈ HDCP ਜਾਂਚ"</item>
+    <item msgid="45075631231212732">"ਹਮੇਸਾਂ HDCP ਜਾਂਚ ਵਰਤੋ"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64K"</item>
+    <item msgid="505611754508988476">"256K"</item>
+    <item msgid="6361286924268716397">"1M"</item>
+    <item msgid="6405203239560695266">"4M"</item>
+    <item msgid="3025431211013424097">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64K"</item>
+    <item msgid="3534782711045262344">"256K"</item>
+    <item msgid="8085867209202153403">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64K ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
+    <item msgid="2822309747675758628">"256K ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
+    <item msgid="6699306198357496731">"1M ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
+    <item msgid="5748528643937500349">"4M ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
+    <item msgid="1978629051085111592">"16M ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"ਐਨੀਮੇਸ਼ਨ ਬੰਦ"</item>
+    <item msgid="6624864048416710414">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ .5x"</item>
+    <item msgid="2219332261255416635">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 1x"</item>
+    <item msgid="3544428804137048509">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 1.5x"</item>
+    <item msgid="3110710404225974514">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 2x"</item>
+    <item msgid="4402738611528318731">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 5x"</item>
+    <item msgid="6189539267968330656">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"ਐਨੀਮੇਸ਼ਨ ਬੰਦ"</item>
+    <item msgid="3375781541913316411">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ .5x"</item>
+    <item msgid="1991041427801869945">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 1x"</item>
+    <item msgid="4012689927622382874">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 1.5x"</item>
+    <item msgid="3289156759925947169">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 2x"</item>
+    <item msgid="7705857441213621835">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 5x"</item>
+    <item msgid="6660750935954853365">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"ਐਨੀਮੇਸ਼ਨ ਬੰਦ"</item>
+    <item msgid="1138649021950863198">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ .5x"</item>
+    <item msgid="4394388961370833040">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 1x"</item>
+    <item msgid="8125427921655194973">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 1.5x"</item>
+    <item msgid="3334024790739189573">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 2x"</item>
+    <item msgid="3170120558236848008">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 5x"</item>
+    <item msgid="1069584980746680398">"ਐਨੀਮੇਸ਼ਨ ਸਕੇਲ 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"ਕੋਈ ਨਹੀਂ"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (ਸੁਰੱਖਿਅਤ)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (ਸੁਰੱਖਿਅਤ)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (ਸੁਰੱਖਿਅਤ)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (ਸੁਰੱਖਿਅਤ)"</item>
+    <item msgid="3547211260846843098">"4K (ਪੂਰਾ ਕੀਤਾ)"</item>
+    <item msgid="5411365648951414254">"4K (ਪੂਰਾ ਕੀਤਾ, ਸੁਰੱਖਿਅਤ)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (ਦੂਹਰੀ ਸਕ੍ਰੀਨ)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"ਕੋਈ ਨਹੀਂ"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (ਗ੍ਰਾਫਿਕਸ)"</item>
+    <item msgid="1340692776955662664">"glGetError ਤੇ ਕਾਲ ਸਟੈਕ"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"ਬੰਦ"</item>
+    <item msgid="675719912558941285">"ਨੀਲੇ ਵਿੱਚ ਗ਼ੈਰ-ਆਇਤਾਕਾਰ ਕਲਿਪ ਖੇਤਰ ਡ੍ਰਾ ਕਰੋ"</item>
+    <item msgid="1064373276095698656">"ਹਾਈਲਾਈਟ ਜਾਂਚ ਕੀਤੀਆਂ ਡ੍ਰਾਇੰਗ ਕਮਾਂਡਾਂ ਹਰੇ ਵਿੱਚ ਹਨ"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ਬੰਦ"</item>
+    <item msgid="2751513398307949636">"ਬਾਰਸ ਦੇ ਤੌਰ ਤੇ ਸਕ੍ਰੀਨ ਤੇ"</item>
+    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo ਵਿੱਚ"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"ਬੰਦ"</item>
+    <item msgid="7688197031296835369">"ਓਵਰਡ੍ਰਾ ਖੇਤਰ ਦਿਖਾਓ"</item>
+    <item msgid="2290859360633824369">"Deuteranomaly ਲਈ ਖੇਤਰ ਦਿਖਾਓ"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"ਸਟੈਂਡਰਡ ਸੀਮਾ"</item>
+    <item msgid="4071574792028999443">"ਕੋਈ ਪਿਛੋਕੜ ਪ੍ਰਕਿਰਿਆਵਾਂ ਨਹੀਂ"</item>
+    <item msgid="4810006996171705398">"ਵੱਧ ਤੋਂ ਵੱਧ 1 ਪ੍ਰਕਿਰਿਆ"</item>
+    <item msgid="8586370216857360863">"ਵੱਧ ਤੋਂ ਵੱਧ 2 ਪ੍ਰਕਿਰਿਆਵਾਂ"</item>
+    <item msgid="836593137872605381">"ਵੱਧ ਤੋਂ ਵੱਧ 3 ਪ੍ਰਕਿਰਿਆਵਾਂ"</item>
+    <item msgid="7899496259191969307">"ਵੱਧ ਤੋਂ ਵੱਧ 4 ਪ੍ਰਕਿਰਿਆਵਾਂ"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"ਚਾਰਜਿੰਗ"</item>
+    <item msgid="5220695614993094977">"MTP (ਮੀਡੀਆ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
+    <item msgid="2086000968159047375">"PTP (ਤਸਵੀਰ ਟ੍ਰਾਂਸਫਰ ਪ੍ਰੋਟੋਕੋਲ)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB ਈਥਰਨੈਟ)"</item>
+    <item msgid="1718924214939774352">"ਔਡੀਓ ਸ੍ਰੋਤ"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

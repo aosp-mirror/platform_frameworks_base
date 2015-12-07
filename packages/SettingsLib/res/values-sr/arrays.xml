@@ -48,4 +48,104 @@
     <item msgid="5660739516542454527">"Блокирано"</item>
     <item msgid="1805837518286731242">"Привремено избегавање лоше везе"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Никад не проверавај"</item>
+    <item msgid="6042769699089883931">"Потражи само DRM садржај"</item>
+    <item msgid="9174900380056846820">"Увек проверавај"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Никада не користи HDCP проверу"</item>
+    <item msgid="3878793616631049349">"Користи HDCP проверу само за DRM садржај"</item>
+    <item msgid="45075631231212732">"Увек користи HDCP проверу"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64 kB"</item>
+    <item msgid="505611754508988476">"256 kB"</item>
+    <item msgid="6361286924268716397">"1 MB"</item>
+    <item msgid="6405203239560695266">"4 MB"</item>
+    <item msgid="3025431211013424097">"16 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64 kB"</item>
+    <item msgid="3534782711045262344">"256 kB"</item>
+    <item msgid="8085867209202153403">"1 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64 kB по баферу евиденције"</item>
+    <item msgid="2822309747675758628">"256 kB по баферу евиденције"</item>
+    <item msgid="6699306198357496731">"1 MB по баферу евиденције"</item>
+    <item msgid="5748528643937500349">"4 MB по баферу евиденције"</item>
+    <item msgid="1978629051085111592">"16 MB по баферу евиденције"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Анимација је искључена"</item>
+    <item msgid="6624864048416710414">"Размера анимације 0,5x"</item>
+    <item msgid="2219332261255416635">"Размера анимације 1x"</item>
+    <item msgid="3544428804137048509">"Размера анимације 1,5x"</item>
+    <item msgid="3110710404225974514">"Размера анимације 2x"</item>
+    <item msgid="4402738611528318731">"Размера анимације 5x"</item>
+    <item msgid="6189539267968330656">"Размера анимације 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Анимација је искључена"</item>
+    <item msgid="3375781541913316411">"Размера анимације 0,5x"</item>
+    <item msgid="1991041427801869945">"Размера анимације 1x"</item>
+    <item msgid="4012689927622382874">"Размера анимације 1,5x"</item>
+    <item msgid="3289156759925947169">"Размера анимације 2x"</item>
+    <item msgid="7705857441213621835">"Размера анимације 5x"</item>
+    <item msgid="6660750935954853365">"Размера анимације 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Анимација је искључена"</item>
+    <item msgid="1138649021950863198">"Размера анимације 0,5x"</item>
+    <item msgid="4394388961370833040">"Размера анимације 1x"</item>
+    <item msgid="8125427921655194973">"Размера анимације 1,5x"</item>
+    <item msgid="3334024790739189573">"Размера анимације 2x"</item>
+    <item msgid="3170120558236848008">"Размера анимације 5x"</item>
+    <item msgid="1069584980746680398">"Размера анимације 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Ниједно"</item>
+    <item msgid="9033194758688161545">"480 пиксела"</item>
+    <item msgid="1025306206556583600">"480 пиксела (безбедно)"</item>
+    <item msgid="1853913333042744661">"720 пиксела"</item>
+    <item msgid="3414540279805870511">"720 пиксела (безбедно)"</item>
+    <item msgid="9039818062847141551">"1080 пиксела"</item>
+    <item msgid="4939496949750174834">"1080 пиксела (безбедно)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (безбедно)"</item>
+    <item msgid="3547211260846843098">"4K (увећана резолуција)"</item>
+    <item msgid="5411365648951414254">"4K (увећана резолуција, безбедно)"</item>
+    <item msgid="1311305077526792901">"720 пиксела, 1080 пикс. (2 екрана)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Ниједан"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (графика)"</item>
+    <item msgid="1340692776955662664">"Групно позивање функције glGetError"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Искључено"</item>
+    <item msgid="675719912558941285">"Нацртај област за исецање која није правоугаоног облика плавом бојом"</item>
+    <item msgid="1064373276095698656">"Истакни зеленом тестиране команде за цртање"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Искључено"</item>
+    <item msgid="2751513398307949636">"На екрану у виду трака"</item>
+    <item msgid="1851438178120770973">"У adb shell dumpsys gfxinfo"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Искључи"</item>
+    <item msgid="7688197031296835369">"Прикажи области преклапања"</item>
+    <item msgid="2290859360633824369">"Прикажи области за деутераномалију"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Стандардно ограничење"</item>
+    <item msgid="4071574792028999443">"Без позадинских процеса"</item>
+    <item msgid="4810006996171705398">"Највише један процес"</item>
+    <item msgid="8586370216857360863">"Највише два процеса"</item>
+    <item msgid="836593137872605381">"Највише три процеса"</item>
+    <item msgid="7899496259191969307">"Највише четири процеса"</item>
+  </string-array>
+    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
 </resources>

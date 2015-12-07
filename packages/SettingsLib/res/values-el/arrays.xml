@@ -48,4 +48,104 @@
     <item msgid="5660739516542454527">"Αποκλεισμένο"</item>
     <item msgid="1805837518286731242">"Προσωρινή αποφυγή αδύναμης σύνδεσης"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Να μην γίνεται ποτέ έλεγχος"</item>
+    <item msgid="6042769699089883931">"Έλεγχος μόνο για περιεχόμενο DRM"</item>
+    <item msgid="9174900380056846820">"Να γίνεται πάντα έλεγχος"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Να μην χρησιμοποιείται ποτέ έλεγχος HDCP"</item>
+    <item msgid="3878793616631049349">"Χρήση ελέγχου HDCP μόνο για περιεχόμενο DRM"</item>
+    <item msgid="45075631231212732">"Να χρησιμοποιείται πάντα έλεγχος HDCP"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="3100534874529240291">"64 K"</item>
+    <item msgid="505611754508988476">"256 K"</item>
+    <item msgid="6361286924268716397">"1 M"</item>
+    <item msgid="6405203239560695266">"4 M"</item>
+    <item msgid="3025431211013424097">"16 M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="524799395770610154">"64 K"</item>
+    <item msgid="3534782711045262344">"256 K"</item>
+    <item msgid="8085867209202153403">"1 M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="7346595473588765019">"64 K ανά μεγ.πρ.μν.καταγρ."</item>
+    <item msgid="2822309747675758628">"256 K ανά μεγ.πρ.μν.καταγρ."</item>
+    <item msgid="6699306198357496731">"1 Μ ανά μεγ.πρ.μν.καταγρ."</item>
+    <item msgid="5748528643937500349">"4 M ανά μεγ.πρ.μν.καταγρ."</item>
+    <item msgid="1978629051085111592">"16 M ανά μεγ.πρ.μν.καταγρ."</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Κινούμ.εικόνες απενεργοποιημένες"</item>
+    <item msgid="6624864048416710414">"Κλίμ. κινούμ. εικ. 0,5x"</item>
+    <item msgid="2219332261255416635">"Κλίμ. κινούμ. εικ. 1x"</item>
+    <item msgid="3544428804137048509">"Κλίμ. κινούμ. εικ. 1,5x"</item>
+    <item msgid="3110710404225974514">"Κλίμ. κινούμ. εικ. 2x"</item>
+    <item msgid="4402738611528318731">"Κλίμ. κινούμ. εικ. 5x"</item>
+    <item msgid="6189539267968330656">"Κλίμ. κινούμ. εικ. 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Κινούμ.εικόνες απενεργοποιημένες"</item>
+    <item msgid="3375781541913316411">"Κλίμ. κινούμ. εικ. 0,5x"</item>
+    <item msgid="1991041427801869945">"Κλίμ. κινούμ. εικ. 1x"</item>
+    <item msgid="4012689927622382874">"Κλίμ. κινούμ. εικ. 1,5x"</item>
+    <item msgid="3289156759925947169">"Κλίμ. κινούμ. εικ. 2x"</item>
+    <item msgid="7705857441213621835">"Κλίμ. κινούμ. εικ. 5x"</item>
+    <item msgid="6660750935954853365">"Κλίμ. κινούμ. εικ. 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Κινούμ. εικόνες απενεργοποιημένες"</item>
+    <item msgid="1138649021950863198">"Κλίμακα κινούμενων εικόνων 0,5x"</item>
+    <item msgid="4394388961370833040">"Κλίμακα κινούμενων εικόνων 1x"</item>
+    <item msgid="8125427921655194973">"Κλίμακα κινούμενων εικόνων 1,5x"</item>
+    <item msgid="3334024790739189573">"Κλίμακα κινούμενων εικόνων 2x"</item>
+    <item msgid="3170120558236848008">"Κλίμακα κινούμενων εικόνων 5x"</item>
+    <item msgid="1069584980746680398">"Κλίμακα κινούμενων εικόνων 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Καμία"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (ασφαλής)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (ασφαλής)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (ασφαλής)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (ασφαλής)"</item>
+    <item msgid="3547211260846843098">"4K (αναβαθμισμένη)"</item>
+    <item msgid="5411365648951414254">"4K (αναβαθμισμένη, ασφαλής)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (διπλή οθόνη)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Τίποτα"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (Γραφικά)"</item>
+    <item msgid="1340692776955662664">"Κλήση στοίβας σε glGetError"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Απενεργοποίηση"</item>
+    <item msgid="675719912558941285">"Σχεδίαση μη ορθογώνιας περιοχής με μπλε χρώμα"</item>
+    <item msgid="1064373276095698656">"Επισ/ση ελεγμένων εντολών με πράσ."</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Απενεργοποιημένο"</item>
+    <item msgid="2751513398307949636">"Στην οθόνη ως ράβδοι"</item>
+    <item msgid="1851438178120770973">"Σε adb shell dumpsys gfxinfo"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Ανενεργές"</item>
+    <item msgid="7688197031296835369">"Εμφάνιση περιοχών υπέρβασης"</item>
+    <item msgid="2290859360633824369">"Εμφάνιση περιοχών για Deuteranomaly"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Τυπικό όριο"</item>
+    <item msgid="4071574792028999443">"Δεν υπάρχουν διεργασίες παρασκηνίου"</item>
+    <item msgid="4810006996171705398">"Το πολύ 1 διεργασία"</item>
+    <item msgid="8586370216857360863">"Το πολύ 2 διεργασίες"</item>
+    <item msgid="836593137872605381">"Το πολύ 3 διαδικασίες"</item>
+    <item msgid="7899496259191969307">"Το πολύ 4 διεργασίες"</item>
+  </string-array>
+    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
 </resources>

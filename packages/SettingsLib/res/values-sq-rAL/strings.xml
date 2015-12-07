@@ -135,4 +135,159 @@
     <string name="choose_profile" msgid="8229363046053568878">"Zgjidh profilin"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personale"</string>
     <string name="category_work" msgid="8699184680584175622">"Punë"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opsionet e zhvilluesit"</string>
+    <!-- no translation found for development_settings_enable (542530994778109538) -->
+    <skip />
+    <string name="development_settings_summary" msgid="1815795401632854041">"Cakto opsionet për zhvillimin e aplikacionit"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Opsionet e programuesit nuk mundësohen për këtë përdorues"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"Cilësimet e VPN-së nuk ofrohen për këtë përdorues"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Cilësimet e ndarjes nuk ofrohen për këtë përdorues"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Cilësimet e \"Emrit të pikës së qasjes\" nuk mund të përdoren për këtë përdorues"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Korrigjimi i USB-së"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Korrigjo gabimet e modalitetit kur UBS-ja është e lidhur"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Anulo autorizimet e korrigjimeve të gabimeve të USB-së"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Shkurtorja e raportit të defektit në kod"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Shfaq një buton në menynë e fikjes për marrjen e raportit të defekteve"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Qëndro zgjuar"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekrani nuk do të kalojë asnjëherë në gjendje gjumi gjatë ngarkimit"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivizo regjistrin testues të Bluetooth HCI-së"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Kap të gjitha paketat HCI të Bluetooth-it në një skedar"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"Shkyçja e OEM-së"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Lejo shkyçjen e ngarkimit të sistemit"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Të lejohet shkyçja e OEM-së?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"PARALAJMËRIM! Funksionet e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Zgjidh apl. që simulon vendndodhjen"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Nuk është vendosur asnjë aplikacion që simulon vendndodhjen"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Dorëzimi agresiv i Wi‑Fi te rrjeti celular"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Lejo gjithmonë skanimet për Wi-Fi edhe kur je në lëvizje"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Përdor klientin DHCP të versionit paraprak"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Të dhënat celulare gjithmonë aktive"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kur ky funksion aktivizohet, Wi‑Fi bëhet më agresiv në kalimin e lidhjes së të dhënave te rrjeti celular, në rastet kur sinjali Wi‑Fi është i dobët"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Lejo/Ndalo skanimet për Wi‑Fi në roaming, bazuar në sasinë e trafikut të të dhënave të pranishme në ndërfaqe"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Përzgjidh madhësitë e regjistruesit"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Konfigurimi i USB-së"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Konfigurimi i USB-së"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Lejo vendndodhje të simuluara"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Lejo vendndodhje të simuluara"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Aktivizo shikimin e inspektimit të atributeve"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Përdor klientin DHCP nga Lollipop në vend të klientit të ri DHCP të Androidit."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mbaji të dhënat celulare gjithmonë aktive edhe kur Wi‑Fi është aktiv (për ndërrim të shpejtë të rrjetit)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Të lejohet korrigjimi i USB-së?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Korrigjuesi i USB-së është vetëm për qëllime zhvillimore. Përdore për të kopjuar të dhëna mes kompjuterit dhe pajisjes tënde, për të instaluar aplikacione në pajisjen tënde pa asnjë njoftim si dhe për të lexuar të dhënat e ditarit."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Të bllokohet qasja për korrigjim të USB-së nga të gjithë kompjuterët që ke autorizuar më parë?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Të lejohen cilësimet e zhvillimit?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Këto cilësime janë të projektuara vetëm për përdorim në programim. Ato mund të shkaktojnë që pajisja dhe aplikacionet në të, të mos punojnë ose të veprojnë në mënyrë të gabuar."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiko apl. përmes USB-së"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollo aplikacionet e instaluara nëpërmjet ADB/ADT për sjellje të dëmshme."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Terminali lokal"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivizo aplikacionin terminal që ofron qasje në guaskën lokale"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrolli HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Cakto kontrollin e HDCP-së"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Korrigjimi i gabimeve"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Zgjidh aplikacionin e korrigjimit"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Nuk është caktuar asnjë aplikacion korrigjimi"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Aplikacioni i korrigjimit: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Zgjidh aplikacionin"</string>
+    <string name="no_application" msgid="2813387563129153880">"Asnjë"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Prit për korrigjuesin"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacioni i korrigjimit të gabimeve pret që korrigjuesi të bashkëngjitet para ekzekutimit"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Hyrja"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Vizatime"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Interpretimi i përshpejtuar i harduerit"</string>
+    <string name="media_category" msgid="4388305075496848353">"Media"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorimi"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Aktivizo modalitetin e rreptë"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Ndriço ekranin kur aplikacionet kryejnë operacione të gjata teksa bashkëveprojnë"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Vendndodhja e treguesit"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Mbivendosja e ekranit tregon të dhënat e prekjes"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Shfaq prekjet"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Shfaq trajektoren vizuale për prekjet"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Shfaq përditësimet e sipërfaqes"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Ndriço të gjitha sipërfaqet e dritares kur ato të përditësohen"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Shfaq përditësimet e pamjes së GPU-së"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Ndriço pamjet brenda dritareve kur dizajnohen me GPU-në"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Shfaq përditësimet e shtresave të harduerit"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Ndriço në të gjelbër shtresat e harduerit që përditësohen"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Korrigjo konfliktet e GPU-së"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Çaktivizo mbishtresimin e HW-së"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Përdor gjithmonë GPU-në për përbërjen e ekranit"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Simulo hapësirën e ngjyrës"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Aktivizo gjurmët e OpenGL-së"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Çaktivizo rrugëzuezin e audios përmes USB-së"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Çaktivizo rrugëzuesin automatik për te kufjet ose altoparlantët"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Shfaq konturet e kuadrit"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Shfaq konturet e klipit, hapësirat etj."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Ndrysho me detyrim drejtimin e planit të ekranit nga e djathta në të majtë për të gjitha vendet"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"Shfaq përdorimin e CPU-së"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Mbivendosja e ekranit tregon përdorimin e CPU-së"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Detyro interpretimin e GPU-së"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Detyro përdorimin e GPU-së për vizatimin e dytë"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Detyro 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivizo 4x MSAA në aplikacionet OpenGL ES 2.0"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Korrigjo veprimet mbi klipet jodrejtkëndore"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Interpretimi i profilit të GPU-së"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Animacioni i dritares"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Animacioni kalimtar"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Kohëzgjatja e animatorit"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulo ekranet dytësore"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Aplikacionet"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Mos i ruaj aktivitetet"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Fshi çdo aktivitet sapo të largohet përdoruesi"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Kufizimi i proceseve në sfond"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Shfaq raportet ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Shfaq raportet ANR (Aplikacioni nuk përgjigjet) për aplikacionet në sfond"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Detyro lejimin në hapësirën e jashtme"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Bën që të gjitha aktivitetet të kenë madhësi të ndryshueshme për përdorimin me shumë dritare, pavarësisht vlerave të manifestit."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Fjalëkalimi rezervë i kompjuterit"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Rezervimet e plota në kompjuter nuk janë të mbrojtura aktualisht"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Prek për të ndryshuar ose hequr fjalëkalimin për rezervime të plota të desktopit"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Fjalëkalimi i ri u vendos"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Fjalëkalimi i ri dhe konfirmimi nuk përputhen"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Vendosja e fjalëkalimit dështoi"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Të gjalla (parazgjedhja)"</item>
+    <item msgid="8446070607501413455">"Natyrale"</item>
+    <item msgid="6553408765810699025">"Standarde"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Ngjyra të përmirësuara"</item>
+    <item msgid="8280754435979370728">"Ngjyra natyrale siç shikohen me sy të lirë"</item>
+    <item msgid="5363960654009010371">"Ngjyra të optimizuara për përmbajtjet dixhitale"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Aplikacionet joaktive"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Joaktiv. Preke për ta ndryshuar."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktiv. Preke për ta ndryshuar."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Shërbimet në ekzekutim"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Modaliteti i natës"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Çaktivizuar"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Gjithmonë aktive"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Automatike"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konverto në enkriptimin e skedarit"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konverto..."</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Enkriptimi i skedarit është kryer tashmë"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Po konvertohet në enkriptimin e bazuar te skedari"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Konverto ndarjen e të dhënave në enkriptimin e bazuar te skedari.\n !!Paralajmërim!! Kjo gjë do të spastrojë të gjitha të dhënat e tua.\n Ky funksion është alfa dhe mund të mos punojë si duhet.\n Shtyp \"Pastro dhe konverto...\" për të vazhduar."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Pastro dhe konverto..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Modalitti i ngjyrave të figurës"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"Përdor sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Çaktivizuar"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monokromaci"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomali (e kuqe - e gjelbër)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomali (e kuqe - e gjelbër)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomali (e kaltër - e verdhë)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korrigjimi i ngjyrës"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ky funksion është eksperimental dhe mund të ndikojë në veprimtari."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Mbivendosur nga <xliff:g id="TITLE">%1$s</xliff:g>"</string>
 </resources>
