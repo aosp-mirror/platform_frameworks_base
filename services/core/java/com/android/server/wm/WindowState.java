@@ -84,6 +84,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
@@ -401,6 +403,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
+
+    // Whether the window has a saved surface from last pause, which can be
+    // used to start an entering animation earlier.
+    public boolean mSurfaceSaved = false;
 
     /**
      * Wake lock for drawing.
@@ -1670,22 +1676,45 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null && mAppToken.mAnimatingWithSavedSurface;
     }
 
-    boolean shouldSaveSurface() {
+    // Returns true if the surface is saved.
+    boolean destroyOrSaveSurface() {
+        Task task = getTask();
         if (ActivityManager.isLowRamDeviceStatic()) {
             // Don't save surfaces on Svelte devices.
-            return false;
-        }
-
-        Task task = getTask();
-        if (task == null || task.inHomeStack()
+            mSurfaceSaved = false;
+        } else if (task == null || task.inHomeStack()
                 || task.getTopVisibleAppToken() != mAppToken) {
             // Don't save surfaces for home stack apps. These usually resume and draw
             // first frame very fast. Saving surfaces are mostly a waste of memory.
             // Don't save if the window is not the topmost window.
-            return false;
+            mSurfaceSaved = false;
+        } else if (mAttachedWindow != null) {
+            mSurfaceSaved = false;
+        } else {
+            mSurfaceSaved = mAppToken.shouldSaveSurface();
         }
+        if (mSurfaceSaved == false) {
+            mWinAnimator.destroySurfaceLocked();
+        }
+        return mSurfaceSaved;
+    }
 
-        return mAppToken.shouldSaveSurface();
+    public void destroySavedSurface() {
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                "Destroying saved surface: " + this);
+
+        if (mSurfaceSaved) {
+            mWinAnimator.destroySurfaceLocked();
+        }
+    }
+
+    public boolean hasSavedSurface() {
+        return mSurfaceSaved;
+    }
+
+    public void restoreSavedSurface() {
+        mSurfaceSaved = false;
+        mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
     }
 
     @Override

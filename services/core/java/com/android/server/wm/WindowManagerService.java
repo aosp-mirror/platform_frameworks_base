@@ -2816,9 +2816,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodWindow == win) {
                 mInputMethodWindow = null;
             }
-            if (!win.shouldSaveSurface()) {
-                winAnimator.destroySurfaceLocked();
-            }
+            win.destroyOrSaveSurface();
         }
         //TODO (multidisplay): Magnification is supported only for the default
         if (mAccessibilityController != null
@@ -8985,11 +8983,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             Slog.w(TAG, "LEAKED SURFACE (app token hidden): "
                                     + ws + " surface=" + wsa.mSurfaceController
                                     + " token=" + ws.mAppToken
-                                    + " saved=" + ws.mAppToken.mHasSavedSurface);
+                                    + " saved=" + ws.mAppToken.hasSavedSurface());
                             if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
                             wsa.destroySurface();
                             ws.setHasSurface(false);
-                            ws.mAppToken.mHasSavedSurface = false;
                             leakedSurface = true;
                         }
                     }

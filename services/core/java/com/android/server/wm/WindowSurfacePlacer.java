@@ -394,9 +394,7 @@ class WindowSurfacePlacer {
                 if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
                     wallpaperDestroyed = true;
                 }
-                if (!win.shouldSaveSurface()) {
-                    win.mWinAnimator.destroySurfaceLocked();
-                }
+                win.destroyOrSaveSurface();
             } while (i > 0);
             mService.mDestroySurface.clear();
         }
@@ -1252,7 +1250,7 @@ class WindowSurfacePlacer {
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved);
 
-                if (wtoken.mHasSavedSurface || wtoken.mAnimatingWithSavedSurface) {
+                if (wtoken.hasSavedSurface() || wtoken.mAnimatingWithSavedSurface) {
                     continue;
                 }
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
