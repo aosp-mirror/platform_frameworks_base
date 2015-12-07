@@ -18,29 +18,31 @@ package com.android.internal.net;
 
 import android.net.NetworkStats;
 import android.os.SystemClock;
-
-import com.google.caliper.SimpleBenchmark;
-
+import com.google.caliper.AfterExperiment;
+import com.google.caliper.BeforeExperiment;
 import java.io.File;
 
-public class NetworkStatsFactoryBenchmark extends SimpleBenchmark {
+public class NetworkStatsFactoryBenchmark {
     private File mStats;
 
     // TODO: consider staging stats file with different number of rows
 
-    @Override
+    @BeforeExperiment
     protected void setUp() {
         mStats = new File("/proc/net/xt_qtaguid/stats");
     }
 
-    @Override
+    @AfterExperiment
     protected void tearDown() {
         mStats = null;
     }
 
     public void timeReadNetworkStatsDetailJava(int reps) throws Exception {
         for (int i = 0; i < reps; i++) {
-            NetworkStatsFactory.javaReadNetworkStatsDetail(mStats, NetworkStats.UID_ALL);
+            NetworkStatsFactory.javaReadNetworkStatsDetail(mStats, NetworkStats.UID_ALL,
+                    // Looks like this was broken by change d0c5b9abed60b7bc056d026bf0f2b2235410fb70
+                    // Fixed compilation problem but needs addressing properly.
+                    new String[0], 999);
         }
     }
 
@@ -48,7 +50,10 @@ public class NetworkStatsFactoryBenchmark extends SimpleBenchmark {
         for (int i = 0; i < reps; i++) {
             final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
             NetworkStatsFactory.nativeReadNetworkStatsDetail(
-                    stats, mStats.getAbsolutePath(), NetworkStats.UID_ALL);
+                    stats, mStats.getAbsolutePath(), NetworkStats.UID_ALL,
+                    // Looks like this was broken by change d0c5b9abed60b7bc056d026bf0f2b2235410fb70
+                    // Fixed compilation problem but needs addressing properly.
+                    new String[0], 999);
         }
     }
 }
