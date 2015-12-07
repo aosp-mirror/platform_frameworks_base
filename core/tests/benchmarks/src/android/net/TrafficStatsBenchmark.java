@@ -16,9 +16,7 @@
 
 package android.net;
 
-import com.google.caliper.SimpleBenchmark;
-
-public class TrafficStatsBenchmark extends SimpleBenchmark {
+public class TrafficStatsBenchmark {
     public void timeGetUidRxBytes(int reps) {
         for (int i = 0; i < reps; i++) {
             TrafficStats.getUidRxBytes(android.os.Process.myUid());
