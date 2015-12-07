@@ -3897,9 +3897,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 saveSettingsLocked(userHandle);
                 updatePasswordExpirationsLocked(userHandle);
                 setExpirationAlarmCheckLocked(mContext, policy);
-                sendAdminCommandToSelfAndProfilesLocked(
-                        DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
-                        DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
+
+                // Send a broadcast to each profile using this password as its primary unlock.
+                if (LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+                    sendAdminCommandLocked(
+                            DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
+                            DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
+                } else {
+                    sendAdminCommandToSelfAndProfilesLocked(
+                            DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
+                            DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, userHandle);
+                }
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
