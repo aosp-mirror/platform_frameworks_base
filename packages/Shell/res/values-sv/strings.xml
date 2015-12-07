@@ -17,7 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Skal"</string>
-    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"Felrapportering pågår"</string>
+    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
+    <skip />
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Felrapporten har skapats"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Svep åt vänster om du vill dela felrapporten"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tryck om du vill dela felrapporten"</string>
@@ -25,4 +26,6 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Visa det här meddelandet nästa gång"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Felrapporter"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Det gick inte att läsa felrapporten"</string>
+    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
+    <skip />
 </resources>
