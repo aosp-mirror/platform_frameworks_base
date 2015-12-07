@@ -198,7 +198,6 @@
   <java-symbol type="id" name="inbox_text5" />
   <java-symbol type="id" name="inbox_text6" />
   <java-symbol type="id" name="status_bar_latest_event_content" />
-  <java-symbol type="id" name="action_divider" />
   <java-symbol type="id" name="notification_main_column" />
   <java-symbol type="id" name="sms_short_code_confirm_message" />
   <java-symbol type="id" name="sms_short_code_detail_layout" />

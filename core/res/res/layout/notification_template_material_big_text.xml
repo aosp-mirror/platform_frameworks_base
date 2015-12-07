@@ -62,14 +62,6 @@
                 android:contentDescription="@string/notification_work_profile_content_description"
                 />
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginStart="-16dp"
-            android:layout_marginEnd="-16dp"
-            android:id="@+id/action_divider"
-            android:visibility="gone"
-            android:background="@drawable/notification_template_divider" />
         <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />
