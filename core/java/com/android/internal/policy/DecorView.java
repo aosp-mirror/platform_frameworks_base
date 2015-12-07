@@ -1158,6 +1158,17 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 lp.height = insets.getSystemWindowInsetBottom();
                 mNavigationGuard.setLayoutParams(lp);
             }
+            updateNavigationGuardColor();
+        }
+    }
+
+    void updateNavigationGuardColor() {
+        if (mNavigationGuard != null) {
+            // Make navigation bar guard invisible if the transparent color is specified.
+            // Only TRANSPARENT is sufficient for hiding the navigation bar if the no software
+            // keyboard is shown by IMS.
+            mNavigationGuard.setVisibility(mWindow.getNavigationBarColor() == Color.TRANSPARENT ?
+                    View.INVISIBLE : View.VISIBLE);
         }
     }
 
