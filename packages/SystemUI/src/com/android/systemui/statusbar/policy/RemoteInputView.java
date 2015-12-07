@@ -28,6 +28,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,7 +51,7 @@ import java.util.ArrayList;
 /**
  * Host for the remote input.
  */
-public class RemoteInputView extends LinearLayout implements View.OnClickListener {
+public class RemoteInputView extends LinearLayout implements View.OnClickListener, TextWatcher {
 
     private static final String TAG = "RemoteInput";
 
@@ -101,6 +103,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             }
         });
         mEditText.setOnClickListener(this);
+        mEditText.addTextChangedListener(this);
         mEditText.setInnerFocusable(false);
         mEditText.mDefocusListener = this;
     }
@@ -115,6 +118,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setEnabled(false);
         mSendButton.setVisibility(INVISIBLE);
         mProgressBar.setVisibility(VISIBLE);
+        mController.removeRemoteInput(mEntry);
+        mEditText.mShowImeOnInputConnection = false;
 
         try {
             mPendingIntent.send(mContext, 0, fillInIntent);
@@ -175,6 +180,40 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setText(mEntry.remoteInputText);
         mEditText.setSelection(mEditText.getText().length());
         mEditText.requestFocus();
+        updateSendButton();
+    }
+
+    public void onNotificationUpdate() {
+        boolean sending = mProgressBar.getVisibility() == VISIBLE;
+
+        if (sending) {
+            // Update came in after we sent the reply, time to reset.
+            reset();
+        }
+    }
+
+    private void reset() {
+        mEditText.getText().clear();
+        mEditText.setEnabled(true);
+        mSendButton.setVisibility(VISIBLE);
+        mProgressBar.setVisibility(INVISIBLE);
+        updateSendButton();
+        onDefocus();
+    }
+
+    private void updateSendButton() {
+        mSendButton.setEnabled(mEditText.getText().length() != 0);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        updateSendButton();
     }
 
     /**

@@ -1874,7 +1874,6 @@
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
-  <java-symbol type="color" name="notification_action_color_filter" />
   <java-symbol type="color" name="notification_icon_default_color" />
   <java-symbol type="color" name="notification_progress_background_color" />
   <java-symbol type="id" name="media_actions" />

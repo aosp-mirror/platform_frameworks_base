@@ -1602,7 +1602,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private void applyRemoteInput(final Entry entry) {
         if (!ENABLE_REMOTE_INPUT) return;
 
-        RemoteInput remoteInput = null;
+        boolean hasRemoteInput = false;
 
         Notification.Action[] actions = entry.notification.getNotification().actions;
         if (actions != null) {
@@ -1610,7 +1610,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (a.getRemoteInputs() != null) {
                     for (RemoteInput ri : a.getRemoteInputs()) {
                         if (ri.getAllowFreeFormInput()) {
-                            remoteInput = ri;
+                            hasRemoteInput = true;
                             break;
                         }
                     }
@@ -1618,34 +1618,50 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
-        // See if we have somewhere to put that remote input
-        if (remoteInput != null) {
-            View bigContentView = entry.getExpandedContentView();
-            if (bigContentView != null) {
-                inflateRemoteInput(bigContentView, entry);
-            }
-            View headsUpContentView = entry.getHeadsUpContentView();
-            if (headsUpContentView != null) {
-                inflateRemoteInput(headsUpContentView, entry);
-            }
+        View bigContentView = entry.getExpandedContentView();
+        if (bigContentView != null) {
+            applyRemoteInput(bigContentView, entry, hasRemoteInput);
+        }
+        View headsUpContentView = entry.getHeadsUpContentView();
+        if (headsUpContentView != null) {
+            applyRemoteInput(headsUpContentView, entry, hasRemoteInput);
         }
 
     }
 
-    private RemoteInputView inflateRemoteInput(View view, Entry entry) {
+    private RemoteInputView applyRemoteInput(View view, Entry entry, boolean hasRemoteInput) {
         View actionContainerCandidate = view.findViewById(
                 com.android.internal.R.id.actions_container);
         if (actionContainerCandidate instanceof FrameLayout) {
-            ViewGroup actionContainer = (FrameLayout) actionContainerCandidate;
-            RemoteInputView riv = inflateRemoteInputView(actionContainer, entry);
-            if (riv != null) {
-                riv.setVisibility(View.INVISIBLE);
-                actionContainer.addView(riv, new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT)
-                );
-                riv.setBackgroundColor(entry.notification.getNotification().color);
-                return riv;
+            RemoteInputView existing = (RemoteInputView)
+                    view.findViewWithTag(RemoteInputView.VIEW_TAG);
+
+            if (hasRemoteInput) {
+                if (existing != null) {
+                    existing.onNotificationUpdate();
+                    return existing;
+                }
+
+                ViewGroup actionContainer = (FrameLayout) actionContainerCandidate;
+                RemoteInputView riv = inflateRemoteInputView(actionContainer, entry);
+                if (riv != null) {
+                    riv.setVisibility(View.INVISIBLE);
+                    actionContainer.addView(riv, new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT)
+                    );
+                    int color = entry.notification.getNotification().color;
+                    if (color == Notification.COLOR_DEFAULT) {
+                        color = mContext.getColor(R.color.default_remote_input_background);
+                    }
+                    riv.setBackgroundColor(color);
+                    return riv;
+                }
+            } else {
+                if (existing != null) {
+                    existing.onNotificationUpdate();
+                    return null;
+                }
             }
         }
         return null;
