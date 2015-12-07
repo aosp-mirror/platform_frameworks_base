@@ -17,7 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Κέλυφος"</string>
-    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"Αναφορά σφάλματος σε εξέλιξη"</string>
+    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
+    <skip />
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Η λήψη της αναφοράς ήταν επιτυχής"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Σύρετε προς τα αριστερά για κοινή χρήση της αναφοράς σφαλμάτων"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Αγγίξτε για να μοιραστείτε τη αναφορά σφαλμάτων"</string>
@@ -25,4 +26,6 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Εμφάνιση αυτού του μηνύματος την επόμενη φορά"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Αναφορές σφαλμάτων"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Δεν ήταν δυνατή η ανάγνωση του αρχείου της αναφοράς σφαλμάτων"</string>
+    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
+    <skip />
 </resources>

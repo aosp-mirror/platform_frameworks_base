@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"מעטפת"</string>
-    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"הדוח על הבאג מתבצע כעת"</string>
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"מופק דוח על באג"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"דוח הבאגים צולם"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"החלק שמאלה כדי לשתף את דוח הבאגים"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"גע כדי לשתף את דוח הבאגים שלך"</string>
@@ -25,4 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"הצג את ההודעה הזו בפעם הבאה"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"דוחות באגים"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"לא ניתן היה לקרוא את קובץ הדוח על הבאג"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"ללא שם"</string>
 </resources>

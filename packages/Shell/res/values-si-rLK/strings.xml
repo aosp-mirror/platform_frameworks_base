@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ෂෙල්"</string>
-    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"දෝෂය වාර්තා කිරීම සිදු කරමින් පවතී"</string>
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"දෝෂ වාර්තාවක් ජනනය කරමින් පවතී"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"දෝෂ වාර්තාව ලබාගන්නා ලදි"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"ඔබගේ දෝෂ වාර්තාව බෙදාගැනීමට වමට ස්වයිප් කරන්න"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට ස්පර්ශ කරන්න"</string>
@@ -25,4 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ඊළඟ වෙලාවේ මෙම පණිවිඩය පෙන්වන්න"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"දෝෂ වාර්තා"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"දෝෂ වාර්තා ගොනුව කියවීමට නොහැකි විය"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"නම් නොකළ"</string>
 </resources>

@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"షెల్"</string>
-    <string name="bugreport_in_progress_title" msgid="6125357428413919520">"బగ్ నివేదిక ప్రోగ్రెస్‌లో ఉంది"</string>
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"బగ్ నివేదిక ఉత్పాదించబడుతోంది"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"బగ్ నివేదిక క్యాప్చర్ చేయబడింది"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"మీ బగ్ నివేదికను భాగస్వామ్యం చేయడానికి ఎడమవైపుకు స్వైప్ చేయండి"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"మీ బగ్ నివేదికను భాగస్వామ్యం చేయడానికి తాకండి"</string>
@@ -25,4 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"తదుపరిసారి ఈ సందేశాన్ని చూపు"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"బగ్ నివేదికలు"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"బగ్ నివేదిక ఫైల్‌ను చదవడం సాధ్యపడలేదు"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"పేరు లేనివి"</string>
 </resources>

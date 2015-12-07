@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"सेल"</string>
-    <!-- no translation found for bugreport_in_progress_title (6125357428413919520) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"बग रिपोर्ट उत्पन्न भइरहेको छ"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"बग प्रतिवेदन समातियो"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"तपाईँको बग रिपोर्ट साझेदारी गर्न बायाँ स्वाइप गर्नुहोस्"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"तपाईंको बग रिपोर्ट साझेदारी गर्न छुनुहोस्"</string>
@@ -26,4 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"यो सन्देश अर्को पटक देखाउनुहोस्"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रिपोर्टहरू"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग रिपोर्ट फाइल पढ्न सकिएन"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"(बेनामी)"</string>
 </resources>

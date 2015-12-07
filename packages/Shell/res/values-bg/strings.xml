@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Команден ред"</string>
-    <!-- no translation found for bugreport_in_progress_title (6125357428413919520) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Сигналът за програмна грешка се генерира"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Отчетът за програмни грешки е записан"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Прекарайте пръст наляво, за да споделите сигнала си за програмна грешка"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Докоснете, за да споделите отчета си за програмни грешки"</string>
@@ -26,4 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Това съобщение да се показва следващия път"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Отчети за прогр. грешки"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Файлът със сигнал за програмна грешка не можа да бъде прочетен"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"без име"</string>
 </resources>
