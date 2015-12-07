@@ -612,12 +612,15 @@ public class CarrierConfigManager {
     @Nullable
     public PersistableBundle getConfigForSubId(int subId) {
         try {
-            return getICarrierConfigLoader().getConfigForSubId(subId);
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error getting config for subId " + subId
+                        + " ICarrierConfigLoader is null");
+                return null;
+            }
+            return loader.getConfigForSubId(subId);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error getting config for subId " + Integer.toString(subId) + ": "
-                    + ex.toString());
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "Error getting config for subId " + Integer.toString(subId) + ": "
+            Rlog.e(TAG, "Error getting config for subId " + subId + ": "
                     + ex.toString());
         }
         return null;
@@ -653,10 +656,14 @@ public class CarrierConfigManager {
      */
     public void notifyConfigChangedForSubId(int subId) {
         try {
-            getICarrierConfigLoader().notifyConfigChangedForSubId(subId);
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error reloading config for subId=" + subId
+                        + " ICarrierConfigLoader is null");
+                return;
+            }
+            loader.notifyConfigChangedForSubId(subId);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error reloading config for subId=" + subId + ": " + ex.toString());
-        } catch (NullPointerException ex) {
             Rlog.e(TAG, "Error reloading config for subId=" + subId + ": " + ex.toString());
         }
     }
@@ -673,10 +680,14 @@ public class CarrierConfigManager {
     @SystemApi
     public void updateConfigForPhoneId(int phoneId, String simState) {
         try {
-            getICarrierConfigLoader().updateConfigForPhoneId(phoneId, simState);
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error updating config for phoneId=" + phoneId
+                        + " ICarrierConfigLoader is null");
+                return;
+            }
+            loader.updateConfigForPhoneId(phoneId, simState);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error updating config for phoneId=" + phoneId + ": " + ex.toString());
-        } catch (NullPointerException ex) {
             Rlog.e(TAG, "Error updating config for phoneId=" + phoneId + ": " + ex.toString());
         }
     }
@@ -693,6 +704,7 @@ public class CarrierConfigManager {
     }
 
     /** @hide */
+    @Nullable
     private ICarrierConfigLoader getICarrierConfigLoader() {
         return ICarrierConfigLoader.Stub
                 .asInterface(ServiceManager.getService(Context.CARRIER_CONFIG_SERVICE));
