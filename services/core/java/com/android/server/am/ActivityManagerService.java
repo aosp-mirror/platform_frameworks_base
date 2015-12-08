@@ -7463,13 +7463,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public int getAppStartMode(int uid, String packageName) {
         synchronized (this) {
-            boolean bg = checkAllowBackgroundLocked(uid, packageName, -1);
-            return bg ? ActivityManager.APP_START_MODE_NORMAL
-                    : ActivityManager.APP_START_MODE_DISABLED;
+            return checkAllowBackgroundLocked(uid, packageName, -1);
         }
     }
 
-    boolean checkAllowBackgroundLocked(int uid, String packageName, int callingPid) {
+    int checkAllowBackgroundLocked(int uid, String packageName, int callingPid) {
         UidRecord uidRec = mActiveUids.get(uid);
         if (uidRec == null || uidRec.idle) {
             if (callingPid >= 0) {
@@ -7480,15 +7478,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (proc != null && proc.curProcState < ActivityManager.PROCESS_STATE_RECEIVER) {
                     // Whoever is instigating this is in the foreground, so we will allow it
                     // to go through.
-                    return true;
+                    return ActivityManager.APP_START_MODE_NORMAL;
                 }
             }
             if (mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND, uid, packageName)
                     != AppOpsManager.MODE_ALLOWED) {
-                return false;
+                return ActivityManager.APP_START_MODE_DELAYED;
             }
         }
-        return true;
+        return ActivityManager.APP_START_MODE_NORMAL;
     }
 
     private ProviderInfo getProviderInfoLocked(String authority, int userHandle) {
