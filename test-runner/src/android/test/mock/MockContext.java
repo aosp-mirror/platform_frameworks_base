@@ -181,18 +181,6 @@ public class MockContext extends Context {
     }
 
     @Override
-    public File getDeviceEncryptedFilesDir() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@hide} */
-    @SystemApi
-    @Override
-    public File getCredentialEncryptedFilesDir() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public File getNoBackupFilesDir() {
         throw new UnsupportedOperationException();
     }
@@ -703,6 +691,26 @@ public class MockContext extends Context {
 
     @Override
     public File[] getExternalMediaDirs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Context createDeviceEncryptedContext(Context context) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Context createCredentialEncryptedContext(Context context) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isDeviceEncrypted() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isCredentialEncrypted() {
         throw new UnsupportedOperationException();
     }
 }

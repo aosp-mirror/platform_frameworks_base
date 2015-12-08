@@ -771,27 +771,6 @@ public abstract class Context {
     public abstract File getFilesDir();
 
     /**
-     * Return the filesystem directory for storing device-encrypted private app
-     * data. Files stored in this location are typically encrypted with a key
-     * tied to the physical device, and they can be accessed whenever the device
-     * has booted successfully, both <em>before and after</em> the user has
-     * entered their credentials (such as a lock pattern or PIN).
-     */
-    public abstract File getDeviceEncryptedFilesDir();
-
-    /**
-     * Return the filesystem directory for storing credential-encrypted private
-     * app data. Files stored in this location are typically encrypted with a
-     * key tied to user credentials, and they can be accessed
-     * <em>only after</em> the user has entered their credentials (such as a
-     * lock pattern or PIN).
-     *
-     * @hide
-     */
-    @SystemApi
-    public abstract File getCredentialEncryptedFilesDir();
-
-    /**
      * Returns the absolute path to the directory on the filesystem similar to
      * {@link #getFilesDir()}. The difference is that files placed under this
      * directory will be excluded from automatic backup to remote storage. See
@@ -3886,6 +3865,26 @@ public abstract class Context {
     public static final int CONTEXT_RESTRICTED = 0x00000004;
 
     /**
+     * Flag for use with {@link #createPackageContext}: point all file APIs at
+     * device-encrypted storage.
+     *
+     * @hide
+     */
+    public static final int CONTEXT_STORAGE_DEVICE_ENCRYPTED = 0x00000008;
+
+    /**
+     * Flag for use with {@link #createPackageContext}: point all file APIs at
+     * credential-encrypted storage.
+     *
+     * @hide
+     */
+    public static final int CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED = 0x00000010;
+
+    /** {@hide} */
+    public static final int CONTEXT_STORAGE_MASK = CONTEXT_STORAGE_DEVICE_ENCRYPTED
+            | CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED;
+
+    /**
      * @hide Used to indicate we should tell the activity manager about the process
      * loading this code.
      */
@@ -3985,6 +3984,42 @@ public abstract class Context {
     public abstract Context createDisplayContext(@NonNull Display display);
 
     /**
+     * Return a new Context object for the current Context but whose storage
+     * APIs are backed by device-encrypted storage.
+     * <p>
+     * Data stored in device-encrypted storage is typically encrypted with a
+     * key tied to the physical device, and they can be accessed whenever the
+     * device has booted successfully, both <em>before and after</em> the user
+     * has entered their credentials (such as a lock pattern or PIN).
+     * <p>
+     * Each call to this method returns a new instance of a Context object;
+     * Context objects are not shared, however common state (ClassLoader, other
+     * Resources for the same configuration) may be so the Context itself can be
+     * fairly lightweight.
+     *
+     * @see #isDeviceEncrypted()
+     */
+    public abstract Context createDeviceEncryptedContext(Context context);
+
+    /**
+     * Return a new Context object for the current Context but whose storage
+     * APIs are backed by credential-encrypted storage.
+     * <p>
+     * Data stored in credential-encrypted storage is typically encrypted with a
+     * key tied to user credentials, and they can be accessed
+     * <em>only after</em> the user has entered their credentials (such as a
+     * lock pattern or PIN).
+     * <p>
+     * Each call to this method returns a new instance of a Context object;
+     * Context objects are not shared, however common state (ClassLoader, other
+     * Resources for the same configuration) may be so the Context itself can be
+     * fairly lightweight.
+     *
+     * @see #isCredentialEncrypted()
+     */
+    public abstract Context createCredentialEncryptedContext(Context context);
+
+    /**
      * Gets the display adjustments holder for this context.  This information
      * is provided on a per-application or activity basis and is used to simulate lower density
      * display metrics for legacy applications and restricted screen sizes.
@@ -4005,4 +4040,20 @@ public abstract class Context {
     public boolean isRestricted() {
         return false;
     }
+
+    /**
+     * Indicates if the storage APIs of this Context are backed by
+     * device-encrypted storage.
+     *
+     * @see #createDeviceEncryptedContext(Context)
+     */
+    public abstract boolean isDeviceEncrypted();
+
+    /**
+     * Indicates if the storage APIs of this Context are backed by
+     * credential-encrypted storage.
+     *
+     * @see #createCredentialEncryptedContext(Context)
+     */
+    public abstract boolean isCredentialEncrypted();
 }

@@ -208,18 +208,6 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public File getDeviceEncryptedFilesDir() {
-        return mBase.getDeviceEncryptedFilesDir();
-    }
-
-    /** {@hide} */
-    @SystemApi
-    @Override
-    public File getCredentialEncryptedFilesDir() {
-        return mBase.getCredentialEncryptedFilesDir();
-    }
-
-    @Override
     public File getNoBackupFilesDir() {
         return mBase.getNoBackupFilesDir();
     }
@@ -801,5 +789,25 @@ public class ContextWrapper extends Context {
     @Override
     public DisplayAdjustments getDisplayAdjustments(int displayId) {
         return mBase.getDisplayAdjustments(displayId);
+    }
+
+    @Override
+    public Context createDeviceEncryptedContext(Context context) {
+        return mBase.createDeviceEncryptedContext(context);
+    }
+
+    @Override
+    public Context createCredentialEncryptedContext(Context context) {
+        return mBase.createCredentialEncryptedContext(context);
+    }
+
+    @Override
+    public boolean isDeviceEncrypted() {
+        return mBase.isDeviceEncrypted();
+    }
+
+    @Override
+    public boolean isCredentialEncrypted() {
+        return mBase.isCredentialEncrypted();
     }
 }
