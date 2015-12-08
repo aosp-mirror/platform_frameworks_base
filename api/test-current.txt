@@ -5802,6 +5802,7 @@ package android.app.admin {
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean removeCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
+    method public boolean removeKeyPair(android.content.ComponentName, java.lang.String);
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
