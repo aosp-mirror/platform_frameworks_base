@@ -34,7 +34,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
-import static android.content.pm.PackageManager.INSTALL_FAILED_DEXOPT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID;
@@ -94,8 +93,6 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16842,13 +16839,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             mPendingBroadcasts.remove(userHandle);
         }
         synchronized (mInstallLock) {
-            if (mInstaller != null) {
-                final StorageManager storage = mContext.getSystemService(StorageManager.class);
-                for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                    final String volumeUuid = vol.getFsUuid();
-                    if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
-                    mInstaller.removeUserDataDirs(volumeUuid, userHandle);
-                }
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                final String volumeUuid = vol.getFsUuid();
+                if (DEBUG_INSTALL) Slog.d(TAG, "Removing user data on volume " + volumeUuid);
+                mInstaller.removeUserDataDirs(volumeUuid, userHandle);
             }
             synchronized (mPackages) {
                 removeUnusedPackagesLILPw(userManager, userHandle);
@@ -16910,17 +16905,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Called by UserManagerService */
     void createNewUser(int userHandle) {
-        if (mInstaller != null) {
-            synchronized (mInstallLock) {
-                synchronized (mPackages) {
-                    mInstaller.createUserConfig(userHandle);
-                    mSettings.createNewUserLILPw(this, mInstaller, userHandle);
-                }
-            }
-            synchronized (mPackages) {
-                applyFactoryDefaultBrowserLPw(userHandle);
-                primeDomainVerificationsLPw(userHandle);
-            }
+        synchronized (mInstallLock) {
+            mInstaller.createUserConfig(userHandle);
+            mSettings.createNewUserLI(this, mInstaller, userHandle);
+        }
+        synchronized (mPackages) {
+            applyFactoryDefaultBrowserLPw(userHandle);
+            primeDomainVerificationsLPw(userHandle);
         }
     }
 
