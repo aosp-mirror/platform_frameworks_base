@@ -256,6 +256,15 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_TOUCH_NAVIGATION = 0x00200000 | SOURCE_CLASS_NONE;
 
     /**
+     * The input source is a rotating encoder device whose motions should be interpreted as akin to
+     * those of a scroll wheel.
+     *
+     * @see #SOURCE_CLASS_NONE
+     * {@hide}
+     */
+    public static final int SOURCE_ROTARY_ENCODER = 0x00400000 | SOURCE_CLASS_NONE;
+
+    /**
      * The input source is a joystick.
      * (It may also be a {@link #SOURCE_GAMEPAD}).
      *
