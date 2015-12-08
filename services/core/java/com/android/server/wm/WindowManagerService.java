@@ -5252,6 +5252,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Called by window manager policy. Not exposed externally.
     @Override
+    public void lockDeviceNow() {
+        lockNow(null);
+    }
+
+    // Called by window manager policy. Not exposed externally.
+    @Override
     public int getCameraLensCoverState() {
         int sw = mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY,
                 InputManagerService.SW_CAMERA_LENS_COVER);
