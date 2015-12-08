@@ -104,9 +104,15 @@ public class CustomTile extends QSTile<QSTile.State> {
                         mServiceConnection, Service.BIND_AUTO_CREATE,
                         new UserHandle(ActivityManager.getCurrentUser()));
                 mBound = true;
+            } else {
+                if (mService != null) {
+                    mService.onStartListening();
+                } else {
+                    Log.d(TAG, "Can't start service listening");
+                }
             }
         } else {
-            if (mService!= null) {
+            if (mService != null) {
                 mService.onStopListening();
             }
             if (mIsTokenGranted && !mIsShowingDialog) {

@@ -25,14 +25,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.PagedTileLayout;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.QuickTileLayout;
 
 import java.util.ArrayList;
@@ -75,13 +73,12 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     public void addTile(TileRecord record) {
         mTiles.add(record);
         distributeTiles();
-        if (record.tile.getTileType() == QSTileView.QS_TYPE_QUICK
-                || record.tileView.getTag() == record.tile) {
+        if (record.tileView.getTag() == record.tile) {
             return;
         }
         record.tileView.setTag(record.tile);
         record.tileView.setVisibility(View.VISIBLE);
-        record.tileView.init(null, null, null);
+        record.tileView.init(null, null);
         record.tileView.setOnTouchListener(this);
         if (mCurrentClip != null && mCurrentClip.getItemAt(0)
                 .getText().toString().equals(record.tile.getTileSpec())) {
@@ -107,10 +104,6 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
         final int NT = mTiles.size();
         for (int i = 0; i < NT; i++) {
             TileRecord tile = mTiles.get(i);
-            if (tile.tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
-                // Ignore quick tiles for now.
-                continue;
-            }
             mPages.get(index).addTile(tile);
             // Keep everything in one layout for now.
             if (false && mPages.get(index).isFull()) {

@@ -26,8 +26,8 @@ import android.view.ViewGroup;
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.net.MobileDataController;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTileBaseView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -71,7 +71,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    public QSTileBaseView createTileView(Context context) {
+    public QSIconView createTileView(Context context) {
         return new SignalTileView(context);
     }
 

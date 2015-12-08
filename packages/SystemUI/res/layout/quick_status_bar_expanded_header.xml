@@ -25,9 +25,10 @@
     android:layout_gravity="@integer/notification_panel_layout_gravity"
     android:paddingStart="@dimen/notification_side_padding"
     android:paddingEnd="@dimen/notification_side_padding"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:baselineAligned="false"
-    android:elevation="4dp"
-    android:background="@drawable/notification_header_bg"
+    android:background="@drawable/quick_header_bg"
     android:clickable="true"
     android:focusable="true"
     >
@@ -35,9 +36,11 @@
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
         android:background="#0000"
-        android:layout_width="144dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:layout_marginEnd="12dp" />
 
     <LinearLayout
@@ -49,7 +52,7 @@
         android:clipToPadding="false"
         android:orientation="horizontal"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp">
+        android:layout_marginEnd="12dp">
 
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/settings_button_container"

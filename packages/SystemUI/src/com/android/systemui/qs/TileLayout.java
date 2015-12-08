@@ -18,14 +18,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private static final String TAG = "TileLayout";
 
-    private int mDualTileUnderlap;
     protected int mColumns;
     private int mCellWidth;
     private int mCellHeight;
-    private int mLargeCellWidth;
-    private int mLargeCellHeight;
-
-    protected boolean mAllowDual = true;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
@@ -69,11 +64,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
         mCellHeight = getCellHeight();
         mCellWidth = (int) (mCellHeight * TILE_ASPECT);
-        mLargeCellHeight = mAllowDual ? res.getDimensionPixelSize(R.dimen.qs_dual_tile_height)
-                : mCellHeight;
-        mLargeCellWidth = mAllowDual ? (int) (mLargeCellHeight * TILE_ASPECT) : mCellWidth;
-        mDualTileUnderlap = mAllowDual
-                ? res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical) : 0;
         if (mColumns != columns) {
             mColumns = columns;
             postInvalidate();
@@ -90,16 +80,13 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int r = -1;
         int c = -1;
         int rows = 0;
-        boolean rowIsDual = false;
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
             // wrap to next column if we've reached the max # of columns
             // also don't allow dual + single tiles on the same row
-            if (r == -1 || c == (mColumns - 1)
-                    || rowIsDual != (mAllowDual && record.tile.supportsDualTargets())) {
+            if (r == -1 || c == (mColumns - 1)) {
                 r++;
                 c = 0;
-                rowIsDual = mAllowDual && record.tile.supportsDualTargets();
             } else {
                 c++;
             }
@@ -110,13 +97,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
         View previousView = this;
         for (TileRecord record : mRecords) {
-            if (record.tileView.setType(mAllowDual ? record.tile.getTileType()
-                    : QSTileView.QS_TYPE_NORMAL)) {
-                record.tileView.handleStateChanged(record.tile.getState());
-            }
             if (record.tileView.getVisibility() == GONE) continue;
-            final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
-            final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
+            final int cw = mCellWidth;
+            final int ch = mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));
             previousView = record.tileView.updateAccessibilityOrder(previousView);
         }
@@ -135,7 +118,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
             final int cols = getColumnCount(record.row);
-            final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
+            final int cw = mCellWidth;
             final int extra = (w - cw * cols) / (cols + 1);
             int left = record.col * cw + (record.col + 1) * extra;
             final int top = getRowTop(record.row);
@@ -153,7 +136,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private int getRowTop(int row) {
         if (row <= 0) return 0;
-        return mLargeCellHeight - mDualTileUnderlap + (row - 1) * mCellHeight;
+        return row * mCellHeight;
     }
 
     private int getColumnCount(int row) {

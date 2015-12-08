@@ -23,15 +23,13 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
+import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTileBaseView;
-import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
@@ -51,19 +49,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     protected final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
 
-    private final boolean mAlwaysDetail;
-
-    public WifiTile(Host host, boolean alwaysDetail) {
+    public WifiTile(Host host) {
         super(host);
-        mAlwaysDetail = alwaysDetail;
         mController = host.getNetworkController();
         mWifiController = mController.getAccessPointController();
         mDetailAdapter = new WifiDetailAdapter();
-    }
-
-    @Override
-    public int getTileType() {
-        return QSTileView.QS_TYPE_DUAL;
     }
 
     @Override
@@ -95,23 +85,20 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    public QSTileBaseView createTileView(Context context) {
+    public QSIconView createTileView(Context context) {
         return new SignalTileView(context);
     }
 
     @Override
-    protected void handleClick() {
-        if (mAlwaysDetail) {
-            handleSecondaryClick();
-            return;
-        }
+    protected void handleSecondaryClick() {
+        // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.enabled);
         mController.setWifiEnabled(!mState.enabled);
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleClick() {
         if (!mWifiController.canConfigWifi()) {
             mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_WIFI_SETTINGS));
             return;

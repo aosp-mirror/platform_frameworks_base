@@ -19,7 +19,6 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,9 +29,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Version of QSPanel that only shows 4 Quick Tiles in the QS Header.
+ * Version of QSPanel that only shows N Quick Tiles in the QS Header.
  */
 public class QuickQSPanel extends QSPanel {
+
+    private int mMaxTiles;
+    private QSPanel mFullPanel;
+    private View mHeader;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -44,6 +47,36 @@ public class QuickQSPanel extends QSPanel {
         }
         mTileLayout = new HeaderTileLayout(context);
         mQsContainer.addView((View) mTileLayout, 1 /* Between brightness and footer */);
+    }
+
+    public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
+        mFullPanel = fullPanel;
+        mHeader = header;
+    }
+
+    @Override
+    protected void handleShowDetail(QSPanel.Record r, boolean show) {
+        if (show) {
+            mHeader.performClick();
+            mFullPanel.showDetail(show, r);
+        } else {
+            // Not sure how we would end up here...
+            super.handleShowDetail(r, show);
+        }
+    }
+
+    @Override
+    protected QSTileBaseView createTileView(QSTile<?> tile) {
+        return new QSTileBaseView(mContext, tile.createTileView(mContext));
+    }
+
+    public void setMaxTiles(int maxTiles) {
+        mMaxTiles = maxTiles;
+    }
+
+    @Override
+    protected void onTileClick(QSTile<?> tile) {
+        tile.secondaryClick();
     }
 
     @Override
@@ -59,11 +92,8 @@ public class QuickQSPanel extends QSPanel {
     public void setTiles(Collection<QSTile<?>> tiles) {
         ArrayList<QSTile<?>> quickTiles = new ArrayList<>();
         for (QSTile<?> tile : tiles) {
-            if (tile.getTileType() == QSTileView.QS_TYPE_QUICK) {
-                Log.d("QSPanel", "Adding " + tile.getTileSpec());
-                quickTiles.add(tile);
-            }
-            if (quickTiles.size() == 2) {
+            quickTiles.add(tile);
+            if (quickTiles.size() == mMaxTiles) {
                 break;
             }
         }
@@ -74,6 +104,8 @@ public class QuickQSPanel extends QSPanel {
 
         public HeaderTileLayout(Context context) {
             super(context);
+            setClipChildren(false);
+            setClipToPadding(false);
             setGravity(Gravity.CENTER_VERTICAL);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
@@ -92,17 +124,13 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public void addTile(TileRecord tile) {
             tile.tileView.setLayoutParams(generateLayoutParams());
-            // These shouldn't be normal tiles, but they will be for now so that the circles don't
-            // show up.
-            tile.tileView.setType(QSTileView.QS_TYPE_NORMAL);
             addView(tile.tileView, getChildCount() - 1 /* Leave icon at end */);
         }
 
         private LayoutParams generateLayoutParams() {
             int size =
                     mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(0, size);
-            lp.weight = 1;
+            LayoutParams lp = new LayoutParams(size, size);
             return lp;
         }
 
