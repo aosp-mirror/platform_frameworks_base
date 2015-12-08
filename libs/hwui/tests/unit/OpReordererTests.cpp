@@ -144,6 +144,32 @@ TEST(OpReorderer, simple) {
     EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
 }
 
+TEST(OpReorderer, simpleStroke) {
+    class SimpleStrokeTestRenderer : public TestRendererBase {
+    public:
+        void onPointsOp(const PointsOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            // even though initial bounds are empty...
+            EXPECT_TRUE(op.unmappedBounds.isEmpty())
+                    << "initial bounds should be empty, since they're unstroked";
+            EXPECT_EQ(Rect(45, 45, 55, 55), state.computedState.clippedBounds)
+                    << "final bounds should account for stroke";
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 100, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        SkPaint strokedPaint;
+        strokedPaint.setStrokeWidth(10);
+        canvas.drawPoint(50, 50, strokedPaint);
+    });
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+            createSyncedNodeList(node), sLightCenter);
+    SimpleStrokeTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex());
+}
+
 TEST(OpReorderer, simpleRejection) {
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {

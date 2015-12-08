@@ -245,6 +245,10 @@ private:
         mFrameAllocatedPaths.emplace_back(new SkPath);
         return mFrameAllocatedPaths.back().get();
     }
+
+    void onStrokeableOp(const RecordedOp& op, batchid_t batchId,
+            BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
+
     /**
      * Declares all OpReorderer::onXXXXOp() methods for every RecordedOp type.
      *

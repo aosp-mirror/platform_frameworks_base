@@ -40,6 +40,7 @@
 
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <SkPaintDefaults.h>
 #include <SkPathOps.h>
 #include <SkShader.h>
 #include <SkTypeface.h>
@@ -1908,9 +1909,6 @@ void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
     drawConvexPath(path, p);
 }
 
-// See SkPaintDefaults.h
-#define SkPaintDefaults_MiterLimit SkIntToScalar(4)
-
 void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
         const SkPaint* p) {
     if (mState.currentlyIgnored()
@@ -1921,6 +1919,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
 
     if (p->getStyle() != SkPaint::kFill_Style) {
         // only fill style is supported by drawConvexPath, since others have to handle joins
+        static_assert(SkPaintDefaults_MiterLimit == 4.0f, "Miter limit has changed");
         if (p->getPathEffect() != nullptr || p->getStrokeJoin() != SkPaint::kMiter_Join ||
                 p->getStrokeMiter() != SkPaintDefaults_MiterLimit) {
             mCaches.textureState().activateTexture(0);

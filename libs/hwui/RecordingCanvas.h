@@ -140,13 +140,13 @@ public:
         float points[2] = { x, y };
         drawPoints(points, 2, paint);
     }
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint) override;
+    virtual void drawPoints(const float* points, int floatCount, const SkPaint& paint) override;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
             const SkPaint& paint) override {
         float points[4] = { startX, startY, stopX, stopY };
         drawLines(points, 4, paint);
     }
-    virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
+    virtual void drawLines(const float* points, int floatCount, const SkPaint& paint) override;
     virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,

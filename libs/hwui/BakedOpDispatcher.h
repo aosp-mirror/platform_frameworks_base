@@ -26,6 +26,10 @@ namespace uirenderer {
 /**
  * Provides all "onBitmapOp(...)" style static methods for every op type, which convert the
  * RecordedOps and their state to Glops, and renders them with the provided BakedOpRenderer.
+ *
+ * onXXXOp methods must either render directly with the renderer, or call a static renderYYY
+ * method to render content. There should never be draw content rejection in BakedOpDispatcher -
+ * it must happen at a higher level (except in error-ish cases, like texture-too-big).
  */
 class BakedOpDispatcher {
 public:

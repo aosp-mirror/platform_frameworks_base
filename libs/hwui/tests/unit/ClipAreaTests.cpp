@@ -92,12 +92,10 @@ TEST(ClipArea, basics) {
 
 TEST(ClipArea, paths) {
     ClipArea area(createClipArea());
-    Matrix4 transform;
-    transform.loadIdentity();
     SkPath path;
     SkScalar r = 100;
     path.addCircle(r, r, r);
-    area.clipPathWithTransform(path, &transform, SkRegion::kIntersect_Op);
+    area.clipPathWithTransform(path, &Matrix4::identity(), SkRegion::kIntersect_Op);
     EXPECT_FALSE(area.isEmpty());
     EXPECT_FALSE(area.isSimple());
     EXPECT_FALSE(area.isRectangleList());
@@ -116,11 +114,10 @@ TEST(ClipArea, replaceNegative) {
     ClipArea area(createClipArea());
     area.setClip(0, 0, 100, 100);
 
-    Matrix4 transform;
-    transform.loadIdentity();
     Rect expected(-50, -50, 50, 50);
-    area.clipRectWithTransform(expected, &transform, SkRegion::kReplace_Op);
+    area.clipRectWithTransform(expected, &Matrix4::identity(), SkRegion::kReplace_Op);
     EXPECT_EQ(expected, area.getClipRect());
 }
+
 }
 }

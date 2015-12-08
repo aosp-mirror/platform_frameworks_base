@@ -31,13 +31,11 @@ using namespace android::uirenderer;
 // as the output.
 TEST(DamageAccumulator, identity) {
     DamageAccumulator da;
-    Matrix4 identity;
     SkRect curDirty;
-    identity.loadIdentity();
-    da.pushTransform(&identity);
+    da.pushTransform(&Matrix4::identity());
     da.dirty(50, 50, 100, 100);
     {
-        da.pushTransform(&identity);
+        da.pushTransform(&Matrix4::identity());
         da.peekAtDirty(&curDirty);
         ASSERT_EQ(SkRect(), curDirty);
         da.popTransform();
@@ -68,15 +66,13 @@ TEST(DamageAccumulator, translate) {
 // Test that dirty rectangles are being unioned across "siblings
 TEST(DamageAccumulator, union) {
     DamageAccumulator da;
-    Matrix4 identity;
     SkRect curDirty;
-    identity.loadIdentity();
-    da.pushTransform(&identity);
+    da.pushTransform(&Matrix4::identity());
     {
-        da.pushTransform(&identity);
+        da.pushTransform(&Matrix4::identity());
         da.dirty(50, 50, 100, 100);
         da.popTransform();
-        da.pushTransform(&identity);
+        da.pushTransform(&Matrix4::identity());
         da.dirty(150, 50, 200, 125);
         da.popTransform();
     }

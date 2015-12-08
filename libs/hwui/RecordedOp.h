@@ -43,10 +43,15 @@ struct Vertex;
  * This serves as the authoritative list of ops, used for generating ID enum, and ID based LUTs.
  */
 #define MAP_OPS_BASED_ON_MERGEABILITY(U_OP_FN, M_OP_FN) \
+        U_OP_FN(ArcOp) \
         M_OP_FN(BitmapOp) \
         U_OP_FN(LinesOp) \
+        U_OP_FN(OvalOp) \
+        U_OP_FN(PathOp) \
+        U_OP_FN(PointsOp) \
         U_OP_FN(RectOp) \
         U_OP_FN(RenderNodeOp) \
+        U_OP_FN(RoundRectOp) \
         U_OP_FN(ShadowOp) \
         U_OP_FN(SimpleRectsOp) \
         M_OP_FN(TextOp) \
@@ -74,7 +79,7 @@ namespace RecordedOpId {
         Count,
     };
 }
-static_assert(RecordedOpId::BitmapOp == 0,
+static_assert(RecordedOpId::ArcOp == 0,
         "First index must be zero for LUTs to work");
 
 #define BASE_PARAMS const Rect& unmappedBounds, const Matrix4& localMatrix, const Rect& localClipRect, const SkPaint* paint
@@ -86,7 +91,7 @@ struct RecordedOp {
     /* ID from RecordedOpId - generally used for jumping into function tables */
     const int opId;
 
-    /* bounds in *local* space, without accounting for DisplayList transformation */
+    /* bounds in *local* space, without accounting for DisplayList transformation, or stroke */
     const Rect unmappedBounds;
 
     /* transform in recording space (vs DisplayList origin) */
@@ -128,6 +133,17 @@ struct RenderNodeOp : RecordedOp {
 // Standard Ops
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct ArcOp : RecordedOp {
+    ArcOp(BASE_PARAMS, float startAngle, float sweepAngle, bool useCenter)
+            : SUPER(ArcOp)
+            , startAngle(startAngle)
+            , sweepAngle(sweepAngle)
+            , useCenter(useCenter) {}
+    const float startAngle;
+    const float sweepAngle;
+    const bool useCenter;
+};
+
 struct BitmapOp : RecordedOp {
     BitmapOp(BASE_PARAMS, const SkBitmap* bitmap)
             : SUPER(BitmapOp)
@@ -145,9 +161,39 @@ struct LinesOp : RecordedOp {
     const int floatCount;
 };
 
+struct OvalOp : RecordedOp {
+    OvalOp(BASE_PARAMS)
+            : SUPER(OvalOp) {}
+};
+
+struct PathOp : RecordedOp {
+    PathOp(BASE_PARAMS, const SkPath* path)
+            : SUPER(PathOp)
+            , path(path) {}
+    const SkPath* path;
+};
+
+struct PointsOp : RecordedOp {
+    PointsOp(BASE_PARAMS, const float* points, const int floatCount)
+            : SUPER(PointsOp)
+            , points(points)
+            , floatCount(floatCount) {}
+    const float* points;
+    const int floatCount;
+};
+
 struct RectOp : RecordedOp {
     RectOp(BASE_PARAMS)
             : SUPER(RectOp) {}
+};
+
+struct RoundRectOp : RecordedOp {
+    RoundRectOp(BASE_PARAMS, float rx, float ry)
+            : SUPER(RoundRectOp)
+            , rx(rx)
+            , ry(ry) {}
+    const float rx;
+    const float ry;
 };
 
 /**

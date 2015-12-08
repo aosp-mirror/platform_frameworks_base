@@ -20,6 +20,7 @@
 #include "Caches.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
+#include "PathTessellator.h"
 #include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/RenderState.h"
 #include "utils/GLUtils.h"
@@ -27,6 +28,7 @@
 
 #include <algorithm>
 #include <math.h>
+#include <SkPaintDefaults.h>
 
 namespace android {
 namespace uirenderer {
@@ -206,6 +208,90 @@ void BakedOpDispatcher::onEndLayerOp(BakedOpRenderer&, const EndLayerOp&, const 
     LOG_ALWAYS_FATAL("unsupported operation");
 }
 
+namespace VertexBufferRenderFlags {
+    enum {
+        Offset = 0x1,
+        ShadowInterp = 0x2,
+    };
+}
+
+static void renderVertexBuffer(BakedOpRenderer& renderer, const BakedOpState& state,
+        const VertexBuffer& vertexBuffer, float translateX, float translateY,
+        const SkPaint& paint, int vertexBufferRenderFlags) {
+    if (CC_LIKELY(vertexBuffer.getVertexCount())) {
+        bool shadowInterp = vertexBufferRenderFlags & VertexBufferRenderFlags::ShadowInterp;
+        const int transformFlags = TransformFlags::OffsetByFudgeFactor;
+        Glop glop;
+        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+                .setRoundRectClipState(state.roundRectClipState)
+                .setMeshVertexBuffer(vertexBuffer, shadowInterp)
+                .setFillPaint(paint, state.alpha)
+                .setTransform(state.computedState.transform, transformFlags)
+                .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
+                .build();
+        renderer.renderGlop(state, glop);
+    }
+}
+
+static void renderConvexPath(BakedOpRenderer& renderer, const BakedOpState& state,
+        const SkPath& path, const SkPaint& paint) {
+    VertexBuffer vertexBuffer;
+    // TODO: try clipping large paths to viewport
+    PathTessellator::tessellatePath(path, &paint, state.computedState.transform, vertexBuffer);
+    renderVertexBuffer(renderer, state, vertexBuffer, 0.0f, 0.0f, paint, 0);
+}
+
+static void renderPathTexture(BakedOpRenderer& renderer, const BakedOpState& state,
+        PathTexture& texture, const RecordedOp& op) {
+    Rect dest(texture.width, texture.height);
+    dest.translate(texture.left + op.unmappedBounds.left - texture.offset,
+            texture.top + op.unmappedBounds.top - texture.offset);
+    Glop glop;
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+            .setRoundRectClipState(state.roundRectClipState)
+            .setMeshTexturedUnitQuad(nullptr)
+            .setFillPathTexturePaint(texture, *(op.paint), state.alpha)
+            .setTransform(state.computedState.transform,  TransformFlags::None)
+            .setModelViewMapUnitToRect(dest)
+            .build();
+    renderer.renderGlop(state, glop);
+}
+
+SkRect getBoundsOfFill(const RecordedOp& op) {
+    SkRect bounds = op.unmappedBounds.toSkRect();
+    if (op.paint->getStyle() == SkPaint::kStrokeAndFill_Style) {
+        float outsetDistance = op.paint->getStrokeWidth() / 2;
+        bounds.outset(outsetDistance, outsetDistance);
+    }
+    return bounds;
+}
+
+void BakedOpDispatcher::onArcOp(BakedOpRenderer& renderer, const ArcOp& op, const BakedOpState& state) {
+    // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
+    if (op.paint->getStyle() != SkPaint::kStroke_Style
+            || op.paint->getPathEffect() != nullptr
+            || op.useCenter) {
+        PathTexture* texture = renderer.caches().pathCache.getArc(
+                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(),
+                op.startAngle, op.sweepAngle, op.useCenter, op.paint);
+        const AutoTexture holder(texture);
+        if (CC_LIKELY(holder.texture)) {
+            renderPathTexture(renderer, state, *texture, op);
+        }
+    } else {
+        SkRect rect = getBoundsOfFill(op);
+        SkPath path;
+        if (op.useCenter) {
+            path.moveTo(rect.centerX(), rect.centerY());
+        }
+        path.arcTo(rect, op.startAngle, op.sweepAngle, !op.useCenter);
+        if (op.useCenter) {
+            path.close();
+        }
+        renderConvexPath(renderer, state, path, *(op.paint));
+    }
+}
+
 void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op, const BakedOpState& state) {
     Texture* texture = renderer.getTexture(op.bitmap);
     if (!texture) return;
@@ -225,43 +311,101 @@ void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op
 }
 
 void BakedOpDispatcher::onLinesOp(BakedOpRenderer& renderer, const LinesOp& op, const BakedOpState& state) {
-    LOG_ALWAYS_FATAL("todo");
+    VertexBuffer buffer;
+    PathTessellator::tessellateLines(op.points, op.floatCount, op.paint,
+            state.computedState.transform, buffer);
+    int displayFlags = op.paint->isAntiAlias() ? 0 : VertexBufferRenderFlags::Offset;
+    renderVertexBuffer(renderer, state, buffer, 0, 0, *(op.paint), displayFlags);
 }
+
+void BakedOpDispatcher::onOvalOp(BakedOpRenderer& renderer, const OvalOp& op, const BakedOpState& state) {
+    if (op.paint->getPathEffect() != nullptr) {
+        PathTexture* texture = renderer.caches().pathCache.getOval(
+                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
+        const AutoTexture holder(texture);
+        if (CC_LIKELY(holder.texture)) {
+            renderPathTexture(renderer, state, *texture, op);
+        }
+    } else {
+        SkPath path;
+        SkRect rect = getBoundsOfFill(op);
+        path.addOval(rect);
+        renderConvexPath(renderer, state, path, *(op.paint));
+    }
+}
+
+void BakedOpDispatcher::onPathOp(BakedOpRenderer& renderer, const PathOp& op, const BakedOpState& state) {
+    PathTexture* texture = renderer.caches().pathCache.get(op.path, op.paint);
+    const AutoTexture holder(texture);
+    if (CC_LIKELY(holder.texture)) {
+        renderPathTexture(renderer, state, *texture, op);
+    }
+}
+
+void BakedOpDispatcher::onPointsOp(BakedOpRenderer& renderer, const PointsOp& op, const BakedOpState& state) {
+    VertexBuffer buffer;
+    PathTessellator::tessellatePoints(op.points, op.floatCount, op.paint,
+            state.computedState.transform, buffer);
+    int displayFlags = op.paint->isAntiAlias() ? 0 : VertexBufferRenderFlags::Offset;
+    renderVertexBuffer(renderer, state, buffer, 0, 0, *(op.paint), displayFlags);
+}
+
+// See SkPaintDefaults.h
+#define SkPaintDefaults_MiterLimit SkIntToScalar(4)
 
 void BakedOpDispatcher::onRectOp(BakedOpRenderer& renderer, const RectOp& op, const BakedOpState& state) {
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(state.roundRectClipState)
-            .setMeshUnitQuad()
-            .setFillPaint(*op.paint, state.alpha)
-            .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRect(op.unmappedBounds)
-            .build();
-    renderer.renderGlop(state, glop);
+    if (op.paint->getStyle() != SkPaint::kFill_Style) {
+        // only fill + default miter is supported by drawConvexPath, since others must handle joins
+        static_assert(SkPaintDefaults_MiterLimit == 4.0f, "Miter limit has changed");
+        if (CC_UNLIKELY(op.paint->getPathEffect() != nullptr
+                || op.paint->getStrokeJoin() != SkPaint::kMiter_Join
+                || op.paint->getStrokeMiter() != SkPaintDefaults_MiterLimit)) {
+             PathTexture* texture = renderer.caches().pathCache.getRect(
+                     op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
+             const AutoTexture holder(texture);
+             if (CC_LIKELY(holder.texture)) {
+                 renderPathTexture(renderer, state, *texture, op);
+             }
+        } else {
+            SkPath path;
+            path.addRect(getBoundsOfFill(op));
+            renderConvexPath(renderer, state, path, *(op.paint));
+        }
+    } else {
+        if (op.paint->isAntiAlias() && !state.computedState.transform.isSimple()) {
+            SkPath path;
+            path.addRect(op.unmappedBounds.toSkRect());
+            renderConvexPath(renderer, state, path, *(op.paint));
+        } else {
+            // render simple unit quad, no tessellation required
+            Glop glop;
+            GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+                    .setRoundRectClipState(state.roundRectClipState)
+                    .setMeshUnitQuad()
+                    .setFillPaint(*op.paint, state.alpha)
+                    .setTransform(state.computedState.transform, TransformFlags::None)
+                    .setModelViewMapUnitToRect(op.unmappedBounds)
+                    .build();
+            renderer.renderGlop(state, glop);
+        }
+    }
 }
 
-namespace VertexBufferRenderFlags {
-    enum {
-        Offset = 0x1,
-        ShadowInterp = 0x2,
-    };
-}
-
-static void renderVertexBuffer(BakedOpRenderer& renderer, const BakedOpState& state,
-        const VertexBuffer& vertexBuffer, float translateX, float translateY,
-        SkPaint& paint, int vertexBufferRenderFlags) {
-    if (CC_LIKELY(vertexBuffer.getVertexCount())) {
-        bool shadowInterp = vertexBufferRenderFlags & VertexBufferRenderFlags::ShadowInterp;
-        const int transformFlags = TransformFlags::OffsetByFudgeFactor;
-        Glop glop;
-        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-                .setRoundRectClipState(state.roundRectClipState)
-                .setMeshVertexBuffer(vertexBuffer, shadowInterp)
-                .setFillPaint(paint, state.alpha)
-                .setTransform(state.computedState.transform, transformFlags)
-                .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
-                .build();
-        renderer.renderGlop(state, glop);
+void BakedOpDispatcher::onRoundRectOp(BakedOpRenderer& renderer, const RoundRectOp& op, const BakedOpState& state) {
+    if (op.paint->getPathEffect() != nullptr) {
+        PathTexture* texture = renderer.caches().pathCache.getRoundRect(
+                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(),
+                op.rx, op.ry, op.paint);
+        const AutoTexture holder(texture);
+        if (CC_LIKELY(holder.texture)) {
+            renderPathTexture(renderer, state, *texture, op);
+        }
+    } else {
+        const VertexBuffer* buffer = renderer.caches().tessellationCache.getRoundRect(
+                state.computedState.transform, *(op.paint),
+                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.rx, op.ry);
+        renderVertexBuffer(renderer, state, *buffer,
+                op.unmappedBounds.left, op.unmappedBounds.top, *(op.paint), 0);
     }
 }
 
@@ -323,8 +467,6 @@ void BakedOpDispatcher::onTextOp(BakedOpRenderer& renderer, const TextOp& op, co
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
     OffscreenBuffer* buffer = *op.layerHandle;
 
-    // TODO: extend this to handle HW layers & paint properties which
-    // reside in node.properties().layerProperties()
     float layerAlpha = op.alpha * state.alpha;
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)

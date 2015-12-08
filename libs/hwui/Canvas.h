@@ -113,10 +113,10 @@ public:
 
     // Geometry
     virtual void drawPoint(float x, float y, const SkPaint& paint) = 0;
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint) = 0;
+    virtual void drawPoints(const float* points, int floatCount, const SkPaint& paint) = 0;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
                 const SkPaint& paint) = 0;
-    virtual void drawLines(const float* points, int count, const SkPaint& paint) = 0;
+    virtual void drawLines(const float* points, int floatCount, const SkPaint& paint) = 0;
     virtual void drawRect(float left, float top, float right, float bottom,
             const SkPaint& paint) = 0;
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) = 0;
