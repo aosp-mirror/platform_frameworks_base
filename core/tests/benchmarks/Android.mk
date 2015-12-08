@@ -23,7 +23,6 @@ LOCAL_MODULE := frameworks-base-core-benchmarks
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_SRC_FILES := $(call all-java-files-under, src/)
-LOCAL_NO_STANDARD_LIBRARIES := true
 
 LOCAL_JAVA_LIBRARIES := \
   caliper-api-target \
