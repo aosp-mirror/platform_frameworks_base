@@ -16,9 +16,12 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 
 import android.graphics.Matrix;
@@ -35,7 +38,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class AppWindowAnimator {
-    static final String TAG = "AppWindowAnimator";
+    static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowAnimator" : TAG_WM;
 
     private static final int PROLONG_ANIMATION_DISABLED = 0;
     static final int PROLONG_ANIMATION_AT_END = 1;
@@ -410,8 +413,7 @@ public class AppWindowAnimator {
         final int NW = mAllAppWinAnimators.size();
         for (int i=0; i<NW; i++) {
             WindowStateAnimator winAnimator = mAllAppWinAnimators.get(i);
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
-                    "performing show on: " + winAnimator);
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "performing show on: " + winAnimator);
             winAnimator.performShowLocked();
             isAnimating |= winAnimator.isAnimating();
         }

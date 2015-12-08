@@ -39,6 +39,8 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -46,7 +48,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Debug;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -82,10 +83,10 @@ import java.util.concurrent.Executors;
 // mOpeningApps and mClosingApps are the lists of tokens that will be
 // made visible or hidden at the next transition.
 public class AppTransition implements Dump {
-    private static final String TAG = "AppTransition";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppTransition" : TAG_WM;
     private static final boolean DEBUG_APP_TRANSITIONS =
-            WindowManagerService.DEBUG_APP_TRANSITIONS;
-    private static final boolean DEBUG_ANIM = WindowManagerService.DEBUG_ANIM;
+            WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+    private static final boolean DEBUG_ANIM = WindowManagerDebugConfig.DEBUG_ANIM;
     private static final int CLIP_REVEAL_TRANSLATION_Y_DP = 8;
 
     /** Not set up for a transition. */

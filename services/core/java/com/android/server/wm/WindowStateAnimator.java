@@ -20,15 +20,20 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
-import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerService.DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.HIDE_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowState.DRAG_RESIZE_MODE_FREEFORM;
@@ -64,7 +69,7 @@ import java.io.PrintWriter;
  * Keep track of animations and surface operations for a single WindowState.
  **/
 class WindowStateAnimator {
-    static final String TAG = "WindowStateAnimator";
+    static final String TAG = TAG_WITH_CLASS_NAME ? "WindowStateAnimator" : TAG_WM;
     static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
 
     // Unchanging local convenience fields.
@@ -402,7 +407,7 @@ class WindowStateAnimator {
         finishExit();
         final int displayId = mWin.getDisplayId();
         mAnimator.setPendingLayoutChanges(displayId, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
-        if (WindowManagerService.DEBUG_LAYOUT_REPEATS)
+        if (DEBUG_LAYOUT_REPEATS)
             mService.mWindowPlacerLocked.debugLayoutRepeats(
                     "WindowStateAnimator", mAnimator.getPendingLayoutChanges(displayId));
 
@@ -414,7 +419,7 @@ class WindowStateAnimator {
     }
 
     void finishExit() {
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
+        if (DEBUG_ANIM) Slog.v(
                 TAG, "finishExit in " + this
                 + ": exiting=" + mWin.mExiting
                 + " remove=" + mWin.mRemoveOnExit
@@ -660,7 +665,7 @@ class WindowStateAnimator {
 
             // Start a new transaction and apply position & offset.
             final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
-            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                     "POS " + mTmpSize.left + ", " + mTmpSize.top, null);
             mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack,
                     mAnimLayer);
@@ -750,7 +755,7 @@ class WindowStateAnimator {
             try {
                 if (DEBUG_VISIBILITY) {
                     RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                    if (!HIDE_STACK_CRAWLS) {
                         e = new RuntimeException();
                         e.fillInStackTrace();
                     }
@@ -762,7 +767,7 @@ class WindowStateAnimator {
                         if (mPendingDestroySurface != null) {
                             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                                 RuntimeException e = null;
-                                if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                                if (!HIDE_STACK_CRAWLS) {
                                     e = new RuntimeException();
                                     e.fillInStackTrace();
                                 }
@@ -775,7 +780,7 @@ class WindowStateAnimator {
                 } else {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                         RuntimeException e = null;
-                        if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                        if (!HIDE_STACK_CRAWLS) {
                             e = new RuntimeException();
                             e.fillInStackTrace();
                         }
@@ -811,7 +816,7 @@ class WindowStateAnimator {
             if (mPendingDestroySurface != null) {
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                     RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                    if (!HIDE_STACK_CRAWLS) {
                         e = new RuntimeException();
                         e.fillInStackTrace();
                     }
@@ -850,7 +855,7 @@ class WindowStateAnimator {
                     wallpaperAnimator.mAnimation != null &&
                     !wallpaperAnimator.mAnimation.getDetachWallpaper()) {
                 attachedTransformation = wallpaperAnimator.mTransformation;
-                if (WindowManagerService.DEBUG_WALLPAPER && attachedTransformation != null) {
+                if (DEBUG_WALLPAPER && attachedTransformation != null) {
                     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
                 }
             }
@@ -860,7 +865,7 @@ class WindowStateAnimator {
                     && wpAppAnimator.animation != null
                     && !wpAppAnimator.animation.getDetachWallpaper()) {
                 appTransformation = wpAppAnimator.transformation;
-                if (WindowManagerService.DEBUG_WALLPAPER && appTransformation != null) {
+                if (DEBUG_WALLPAPER && appTransformation != null) {
                     Slog.v(TAG, "WP target app xform: " + appTransformation);
                 }
             }
@@ -931,7 +936,7 @@ class WindowStateAnimator {
             // (a 2x2 matrix + an offset)
             // Here we must not transform the position of the surface
             // since it is already included in the transformation.
-            //Slog.i(TAG, "Transform: " + matrix);
+            //Slog.i(TAG_WM, "Transform: " + matrix);
 
             mHaveMatrix = true;
             tmpMatrix.getValues(tmpFloats);
@@ -953,7 +958,7 @@ class WindowStateAnimator {
                     || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
                     || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
                             && x == frame.left && y == frame.top))) {
-                //Slog.i(TAG, "Applying alpha transform");
+                //Slog.i(TAG_WM, "Applying alpha transform");
                 if (selfTransformation) {
                     mShownAlpha *= mTransformation.getAlpha();
                 }
@@ -971,7 +976,7 @@ class WindowStateAnimator {
                     mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
                 }
             } else {
-                //Slog.i(TAG, "Not applying alpha transform");
+                //Slog.i(TAG_WM, "Not applying alpha transform");
             }
 
             if ((DEBUG_SURFACE_TRACE || WindowManagerService.localLOGV)
@@ -1263,7 +1268,7 @@ class WindowStateAnimator {
             mLastDtDy = mDtDy;
             w.mLastHScale = w.mHScale;
             w.mLastVScale = w.mVScale;
-            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                     "controller=" + mSurfaceController +
                     "alpha=" + mShownAlpha + " layer=" + mAnimLayer
                     + " matrix=[" + mDsDx + "*" + w.mHScale
@@ -1461,10 +1466,8 @@ class WindowStateAnimator {
                 mWin.mAppToken.removeAllDeadWindows();
 
                 if (mWin.mAppToken.startingData != null) {
-                    if (WindowManagerService.DEBUG_STARTING_WINDOW ||
-                            WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
-                            "Finish starting " + mWin.mToken
-                            + ": first real window is shown, no animation");
+                    if (DEBUG_STARTING_WINDOW || DEBUG_ANIM) Slog.v(TAG, "Finish starting "
+                            + mWin.mToken + ": first real window is shown, no animation");
                     // If this initial window is animating, stop it -- we
                     // will do an animation to reveal it from behind the
                     // starting window, so there is no need for it to also
@@ -1575,16 +1578,16 @@ class WindowStateAnimator {
                     a = mService.mAppTransition.loadAnimationAttr(mWin.mAttrs, attr);
                 }
             }
-            if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+            if (DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation: win=" + this
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
                     + " a=" + a
                     + " transit=" + transit
                     + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
             if (a != null) {
-                if (WindowManagerService.DEBUG_ANIM) {
+                if (DEBUG_ANIM) {
                     RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                    if (!HIDE_STACK_CRAWLS) {
                         e = new RuntimeException();
                         e.fillInStackTrace();
                     }

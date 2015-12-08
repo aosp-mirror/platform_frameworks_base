@@ -19,12 +19,11 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
-import static com.android.server.wm.WindowManagerService.TAG;
-import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
-import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
 import static com.android.server.wm.WindowManagerService.H.SHOW_NON_RESIZEABLE_DOCK_TOAST;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -156,11 +155,11 @@ class Task implements DimLayer.DimLayerUser {
 
     void removeLocked() {
         if (!mAppTokens.isEmpty() && mStack.isAnimating()) {
-            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
+            if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
             return;
         }
-        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
+        if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
         DisplayContent content = getDisplayContent();
@@ -175,7 +174,7 @@ class Task implements DimLayer.DimLayerUser {
         if (stack == mStack) {
             return;
         }
-        if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: removing taskId=" + mTaskId
+        if (DEBUG_STACK) Slog.i(TAG_WM, "moveTaskToStack: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
         if (mStack != null) {
@@ -186,7 +185,7 @@ class Task implements DimLayer.DimLayerUser {
 
     void positionTaskInStack(TaskStack stack, int position, Rect bounds, Configuration config) {
         if (mStack != null && stack != mStack) {
-            if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
+            if (DEBUG_STACK) Slog.i(TAG_WM, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
             mStack.removeTask(this);
@@ -464,7 +463,7 @@ class Task implements DimLayer.DimLayerUser {
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
                 if (!resizingWindows.contains(win)) {
-                    if (DEBUG_RESIZE) Slog.d(TAG, "setBounds: Resizing " + win);
+                    if (DEBUG_RESIZE) Slog.d(TAG_WM, "setBounds: Resizing " + win);
                     resizingWindows.add(win);
                 }
             }

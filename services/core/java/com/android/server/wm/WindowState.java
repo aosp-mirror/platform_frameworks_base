@@ -83,16 +83,18 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static com.android.server.wm.WindowManagerService.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerService.DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
-import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
-import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
-import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 class WindowList extends ArrayList<WindowState> {
 }
@@ -101,7 +103,7 @@ class WindowList extends ArrayList<WindowState> {
  * A window in the window manager.
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
-    static final String TAG = "WindowState";
+    static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
     // The minimal size of a window within the usable area of the freeform stack.
     // TODO(multi-window): fix the min sizes when we have mininum width/height support,
@@ -479,8 +481,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + WindowManagerService.TYPE_LAYER_OFFSET;
             mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
             mAttachedWindow = attachedWindow;
-            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to "
-                    + mAttachedWindow);
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mAttachedWindow);
 
             final WindowList childWindows = mAttachedWindow.mChildWindows;
             final int numChildWindows = childWindows.size();
@@ -626,7 +627,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int ph = mContainingFrame.height();
 
         if (!mParentFrame.equals(pf)) {
-            //Slog.i(TAG, "Window " + this + " content frame from " + mParentFrame
+            //Slog.i(TAG_WM, "Window " + this + " content frame from " + mParentFrame
             //        + " to " + pf);
             mParentFrame.set(pf);
             mContentChanged = true;
@@ -1242,7 +1243,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         disposeInputChannel();
 
         if (mAttachedWindow != null) {
-            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
         mWinAnimator.destroyDeferredSurfaceLocked();
@@ -1700,9 +1701,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     public void destroySavedSurface() {
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
-                "Destroying saved surface: " + this);
-
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "Destroying saved surface: " + this);
         if (mSurfaceSaved) {
             mWinAnimator.destroySurfaceLocked();
         }

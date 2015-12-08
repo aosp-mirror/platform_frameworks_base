@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerService.DEBUG_INPUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
@@ -79,7 +81,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         synchronized (mService.mWindowMap) {
             WindowState windowState = (WindowState) inputWindowHandle.windowState;
             if (windowState != null) {
-                Slog.i(WindowManagerService.TAG, "WINDOW DIED " + windowState);
+                Slog.i(TAG_WM, "WINDOW DIED " + windowState);
                 mService.removeWindowLocked(windowState);
             }
         }
@@ -108,7 +110,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
 
             if (windowState != null) {
-                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                Slog.i(TAG_WM, "Input event dispatching timed out "
                         + "sending to " + windowState.mAttrs.getTitle()
                         + ".  Reason: " + reason);
                 // Figure out whether this window is layered above system windows.
@@ -118,11 +120,11 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                         WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                 aboveSystem = windowState.mBaseLayer > systemAlertLayer;
             } else if (appWindowToken != null) {
-                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                Slog.i(TAG_WM, "Input event dispatching timed out "
                         + "sending to application " + appWindowToken.stringName
                         + ".  Reason: " + reason);
             } else {
-                Slog.i(WindowManagerService.TAG, "Input event dispatching timed out "
+                Slog.i(TAG_WM, "Input event dispatching timed out "
                         + ".  Reason: " + reason);
             }
 
@@ -212,7 +214,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         if (DEBUG_INPUT) {
-            Slog.d(WindowManagerService.TAG, "addInputWindowHandle: "
+            Slog.d(TAG_WM, "addInputWindowHandle: "
                     + child + ", " + inputWindowHandle);
         }
         addInputWindowHandleLw(inputWindowHandle);
@@ -235,7 +237,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
         mUpdateInputWindowsNeeded = false;
 
-        if (false) Slog.d(WindowManagerService.TAG, ">>>>>> ENTERED updateInputWindowsLw");
+        if (false) Slog.d(TAG_WM, ">>>>>> ENTERED updateInputWindowsLw");
 
         // Populate the input window list with information about all of the windows that
         // could potentially receive input.
@@ -247,28 +249,28 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // If there's a drag in flight, provide a pseudowindow to catch drag input
         final boolean inDrag = (mService.mDragState != null);
         if (inDrag) {
-            if (WindowManagerService.DEBUG_DRAG) {
-                Log.d(WindowManagerService.TAG, "Inserting drag window");
+            if (DEBUG_DRAG) {
+                Log.d(TAG_WM, "Inserting drag window");
             }
             final InputWindowHandle dragWindowHandle = mService.mDragState.mDragWindowHandle;
             if (dragWindowHandle != null) {
                 addInputWindowHandleLw(dragWindowHandle);
             } else {
-                Slog.w(WindowManagerService.TAG, "Drag is in progress but there is no "
+                Slog.w(TAG_WM, "Drag is in progress but there is no "
                         + "drag window handle.");
             }
         }
 
         final boolean inPositioning = (mService.mTaskPositioner != null);
         if (inPositioning) {
-            if (WindowManagerService.DEBUG_TASK_POSITIONING) {
-                Log.d(WindowManagerService.TAG, "Inserting window handle for repositioning");
+            if (DEBUG_TASK_POSITIONING) {
+                Log.d(TAG_WM, "Inserting window handle for repositioning");
             }
             final InputWindowHandle dragWindowHandle = mService.mTaskPositioner.mDragWindowHandle;
             if (dragWindowHandle != null) {
                 addInputWindowHandleLw(dragWindowHandle);
             } else {
-                Slog.e(WindowManagerService.TAG,
+                Slog.e(TAG_WM,
                         "Repositioning is in progress but there is no drag window handle.");
             }
         }
@@ -328,7 +330,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // Clear the list in preparation for the next round.
         clearInputWindowHandlesLw();
 
-        if (false) Slog.d(WindowManagerService.TAG, "<<<<<<< EXITED updateInputWindowsLw");
+        if (false) Slog.d(TAG_WM, "<<<<<<< EXITED updateInputWindowsLw");
     }
 
     /* Notifies that the input device configuration has changed. */
@@ -416,7 +418,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
         if (DEBUG_FOCUS_LIGHT || DEBUG_INPUT) {
-            Slog.d(WindowManagerService.TAG, "Input focus has changed to " + newWindow);
+            Slog.d(TAG_WM, "Input focus has changed to " + newWindow);
         }
 
         if (newWindow != mInputFocus) {
@@ -452,7 +454,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public void pauseDispatchingLw(WindowToken window) {
         if (! window.paused) {
             if (DEBUG_INPUT) {
-                Slog.v(WindowManagerService.TAG, "Pausing WindowToken " + window);
+                Slog.v(TAG_WM, "Pausing WindowToken " + window);
             }
 
             window.paused = true;
@@ -463,7 +465,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public void resumeDispatchingLw(WindowToken window) {
         if (window.paused) {
             if (DEBUG_INPUT) {
-                Slog.v(WindowManagerService.TAG, "Resuming WindowToken " + window);
+                Slog.v(TAG_WM, "Resuming WindowToken " + window);
             }
 
             window.paused = false;
@@ -474,7 +476,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public void freezeInputDispatchingLw() {
         if (! mInputDispatchFrozen) {
             if (DEBUG_INPUT) {
-                Slog.v(WindowManagerService.TAG, "Freezing input dispatching");
+                Slog.v(TAG_WM, "Freezing input dispatching");
             }
 
             mInputDispatchFrozen = true;
@@ -485,7 +487,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public void thawInputDispatchingLw() {
         if (mInputDispatchFrozen) {
             if (DEBUG_INPUT) {
-                Slog.v(WindowManagerService.TAG, "Thawing input dispatching");
+                Slog.v(TAG_WM, "Thawing input dispatching");
             }
 
             mInputDispatchFrozen = false;
@@ -496,7 +498,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     public void setEventDispatchingLw(boolean enabled) {
         if (mInputDispatchEnabled != enabled) {
             if (DEBUG_INPUT) {
-                Slog.v(WindowManagerService.TAG, "Setting event dispatching to " + enabled);
+                Slog.v(TAG_WM, "Setting event dispatching to " + enabled);
             }
 
             mInputDispatchEnabled = enabled;

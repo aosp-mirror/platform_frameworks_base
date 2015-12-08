@@ -1,6 +1,8 @@
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.DEBUG_DIM_LAYER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DIM_LAYER;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
 
 import android.graphics.Rect;
@@ -16,7 +18,7 @@ import java.io.PrintWriter;
  * as well as other use cases (such as dimming above a dead window).
  */
 class DimLayerController {
-    private static final String TAG = "DimLayerController";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DimLayerController" : TAG_WM;
 
     /** Amount of time in milliseconds to animate the dim surface from one value to another,
      * when no window animation is driving it. */

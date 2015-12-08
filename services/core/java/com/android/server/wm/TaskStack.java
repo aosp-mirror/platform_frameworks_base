@@ -39,9 +39,9 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
-import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
-import static com.android.server.wm.WindowManagerService.TAG;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 public class TaskStack implements DimLayer.DimLayerUser {
 
@@ -138,7 +138,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     task.setBounds(bounds, config);
                 }
             } else {
-                Slog.wtf(TAG, "No config for task: " + task + ", is there a mismatch with AM?");
+                Slog.wtf(TAG_WM, "No config for task: " + task + ", is there a mismatch with AM?");
             }
         }
         return true;
@@ -285,7 +285,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         // Reset position based on minimum/maximum possible positions.
         position = Math.min(Math.max(position, minPosition), maxPosition);
 
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG,
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM,
                 "positionTask: task=" + task + " position=" + position);
         mTasks.add(position, task);
 
@@ -338,14 +338,14 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     void moveTaskToTop(Task task) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToTop: task=" + task + " Callers="
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "moveTaskToTop: task=" + task + " Callers="
                 + Debug.getCallers(6));
         mTasks.remove(task);
         addTask(task, true);
     }
 
     void moveTaskToBottom(Task task) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToBottom: task=" + task);
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "moveTaskToBottom: task=" + task);
         mTasks.remove(task);
         addTask(task, false);
     }
@@ -356,7 +356,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
      * @param task The Task to delete.
      */
     void removeTask(Task task) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeTask: task=" + task);
         mTasks.remove(task);
         if (mDisplayContent != null) {
             if (mTasks.isEmpty()) {
@@ -433,7 +433,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final int dockedSide = dockedStack.getDockSide();
         if (dockedSide == DOCKED_INVALID) {
             // Not sure how you got here...Only thing we can do is return current bounds.
-            Slog.e(TAG, "Failed to get valid docked side for docked stack=" + dockedStack);
+            Slog.e(TAG_WM, "Failed to get valid docked side for docked stack=" + dockedStack);
             outBounds.set(mBounds);
             return;
         }

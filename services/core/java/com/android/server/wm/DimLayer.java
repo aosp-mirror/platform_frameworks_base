@@ -16,6 +16,12 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.SystemClock;
@@ -26,7 +32,7 @@ import android.view.SurfaceControl;
 import java.io.PrintWriter;
 
 public class DimLayer {
-    private static final String TAG = "DimLayer";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DimLayer" : TAG_WM;
     private static final boolean DEBUG = false;
 
     public static final float RESIZING_HINT_ALPHA = 0.5f;
@@ -81,7 +87,7 @@ public class DimLayer {
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
         SurfaceControl.openTransaction();
         try {
-            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+            if (DEBUG_SURFACE_TRACE) {
                 mDimSurface = new WindowSurfaceController.SurfaceTrace(service.mFxSession,
                     "DimSurface",
                     16, 16, PixelFormat.OPAQUE,
@@ -91,12 +97,11 @@ public class DimLayer {
                     16, 16, PixelFormat.OPAQUE,
                     SurfaceControl.FX_SURFACE_DIM | SurfaceControl.HIDDEN);
             }
-            if (WindowManagerService.SHOW_TRANSACTIONS ||
-                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(TAG,
-                            "  DIM " + mDimSurface + ": CREATE");
+            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
+                    "  DIM " + mDimSurface + ": CREATE");
             mDimSurface.setLayerStack(displayId);
         } catch (Exception e) {
-            Slog.e(WindowManagerService.TAG, "Exception creating Dim surface", e);
+            Slog.e(TAG_WM, "Exception creating Dim surface", e);
         } finally {
             SurfaceControl.closeTransaction();
         }

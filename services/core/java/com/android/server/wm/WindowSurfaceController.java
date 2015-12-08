@@ -16,12 +16,14 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerService.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
-import static com.android.server.wm.WindowManagerService.HIDE_STACK_CRAWLS;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.HIDE_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -41,7 +43,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class WindowSurfaceController {
-    static final String TAG = "WindowSurfaceController";
+    static final String TAG = TAG_WITH_CLASS_NAME ? "WindowSurfaceController" : TAG_WM;
 
     final WindowStateAnimator mAnimator;
 
@@ -392,7 +394,7 @@ class WindowSurfaceController {
     }
 
     static class SurfaceTrace extends SurfaceControl {
-        private final static String SURFACE_TAG = "SurfaceTrace";
+        private final static String SURFACE_TAG = TAG_WITH_CLASS_NAME ? "SurfaceTrace" : TAG_WM;
         private final static boolean LOG_SURFACE_TRACE = DEBUG_SURFACE_TRACE;
         final static ArrayList<SurfaceTrace> sSurfaces = new ArrayList<SurfaceTrace>();
 

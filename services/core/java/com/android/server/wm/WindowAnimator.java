@@ -21,15 +21,17 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerService.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerService.DEBUG_KEYGUARD;
-import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerService.DEBUG_WALLPAPER;
-import static com.android.server.wm.WindowManagerService.DEBUG_WINDOW_TRACE;
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
@@ -56,7 +58,7 @@ import java.util.ArrayList;
  * on behalf of WindowManagerService.
  */
 public class WindowAnimator {
-    private static final String TAG = "WindowAnimator";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowAnimator" : TAG_WM;
 
     /** How long to give statusbar to clear the private keyguard flag when animating out */
     private static final long KEYGUARD_ANIM_TIMEOUT_MS = 1000;

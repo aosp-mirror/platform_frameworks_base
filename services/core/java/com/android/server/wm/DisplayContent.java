@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerService.TAG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
 import android.app.ActivityManager.StackId;
@@ -180,7 +180,7 @@ class DisplayContent {
 
     TaskStack getHomeStack() {
         if (mHomeStack == null && mDisplayId == Display.DEFAULT_DISPLAY) {
-            Slog.e(TAG, "getHomeStack: Returning null from this=" + this);
+            Slog.e(TAG_WM, "getHomeStack: Returning null from this=" + this);
         }
         return mHomeStack;
     }
@@ -239,12 +239,12 @@ class DisplayContent {
     void moveStack(TaskStack stack, boolean toTop) {
         if (StackId.isAlwaysOnTop(stack.mStackId) && !toTop) {
             // This stack is always-on-top silly...
-            Slog.w(TAG, "Ignoring move of always-on-top stack=" + stack + " to bottom");
+            Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + stack + " to bottom");
             return;
         }
 
         if (!mStacks.remove(stack)) {
-            Slog.wtf(TAG, "moving stack that was not added: " + stack, new Throwable());
+            Slog.wtf(TAG_WM, "moving stack that was not added: " + stack, new Throwable());
         }
 
         int addIndex = toTop ? mStacks.size() : 0;
@@ -422,7 +422,7 @@ class DisplayContent {
         for (int i = 0; i < windows.size(); i++) {
             final WindowState win = windows.get(i);
             if (win.isHiddenFromUserLocked()) {
-                if (DEBUG_VISIBILITY) Slog.w(TAG, "user changing, hiding " + win
+                if (DEBUG_VISIBILITY) Slog.w(TAG_WM, "user changing, hiding " + win
                         + ", attrs=" + win.mAttrs.type + ", belonging to " + win.mOwnerUid);
                 win.hideLw(false);
             }

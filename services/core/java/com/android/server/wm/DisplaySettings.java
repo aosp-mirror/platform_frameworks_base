@@ -16,16 +16,17 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.graphics.Rect;
 import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
+
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,11 +36,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 /**
  * Current persistent settings about a display
  */
 public class DisplaySettings {
-    private static final String TAG = WindowManagerService.TAG;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplaySettings" : TAG_WM;
 
     private final AtomicFile mFile;
     private final HashMap<String, Entry> mEntries = new HashMap<String, Entry>();

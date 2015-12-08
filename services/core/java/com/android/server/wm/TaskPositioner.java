@@ -18,15 +18,18 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
 import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.server.wm.DimLayer.RESIZING_HINT_ALPHA;
 import static com.android.server.wm.DimLayer.RESIZING_HINT_DURATION_MS;
-import static com.android.server.wm.WindowManagerService.DEBUG_TASK_POSITIONING;
-import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
@@ -40,13 +43,13 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.BatchedInputEventReceiver;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -59,7 +62,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 class TaskPositioner implements DimLayer.DimLayerUser {
-    private static final String TAG = "TaskPositioner";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskPositioner" : TAG_WM;
 
     // The margin the pointer position has to be within the side of the screen to be
     // considered at the side of the screen.
@@ -277,7 +280,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mDragWindowHandle.frameBottom = p.y;
 
         // Pause rotations before a drag.
-        if (WindowManagerService.DEBUG_ORIENTATION) {
+        if (DEBUG_ORIENTATION) {
             Slog.d(TAG, "Pausing rotation during re-position");
         }
         mService.pauseRotationLocked();
@@ -321,7 +324,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mDragEnded = true;
 
         // Resume rotations after a drag.
-        if (WindowManagerService.DEBUG_ORIENTATION) {
+        if (DEBUG_ORIENTATION) {
             Slog.d(TAG, "Resuming rotation after re-position");
         }
         mService.resumeRotationLocked();

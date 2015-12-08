@@ -17,6 +17,9 @@
 package com.android.server.wm;
 
 
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.util.Slog;
 
 import java.net.ServerSocket;
@@ -47,7 +50,7 @@ class ViewServer implements Runnable {
     private static final int VIEW_SERVER_MAX_CONNECTIONS = 10;
 
     // Debug facility
-    private static final String LOG_TAG = "ViewServer";
+    private static final String LOG_TAG = TAG_WITH_CLASS_NAME ? "ViewServer" : TAG_WM;
 
     private static final String VALUE_PROTOCOL_VERSION = "4";
     private static final String VALUE_SERVER_VERSION = "4";
@@ -150,7 +153,7 @@ class ViewServer implements Runnable {
      *
      * @see #start()
      * @see #stop()
-     * @see WindowManagerService#isViewServerRunning()  
+     * @see WindowManagerService#isViewServerRunning()
      */
     boolean isRunning() {
         return mThread != null && mThread.isAlive();

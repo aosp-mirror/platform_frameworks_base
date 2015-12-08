@@ -27,13 +27,15 @@ import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 /**
  * Keeps information about the docked stack divider.
  */
 public class DockedStackDividerController {
 
-    private static final String TAG = "DockedStackDividerController";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DockedStackDividerController" : TAG_WM;
 
     private final DisplayContent mDisplayContent;
     private final int mDividerWindowWidth;

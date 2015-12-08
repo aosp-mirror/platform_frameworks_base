@@ -16,22 +16,15 @@
 
 package com.android.server.wm;
 
-import android.graphics.Matrix;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.Transformation;
-import android.view.animation.TranslateAnimation;
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
-import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
-import com.android.server.wm.WindowManagerService.H;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -47,6 +40,19 @@ import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
+
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputWindowHandle;
+import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
+import com.android.server.wm.WindowManagerService.H;
 
 import java.util.ArrayList;
 
@@ -114,9 +120,9 @@ class DragState {
      */
     void register(Display display) {
         mDisplay = display;
-        if (WindowManagerService.DEBUG_DRAG) Slog.d(WindowManagerService.TAG, "registering drag input channel");
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
         if (mClientChannel != null) {
-            Slog.e(WindowManagerService.TAG, "Duplicate register of drag input channel");
+            Slog.e(TAG_WM, "Duplicate register of drag input channel");
         } else {
             InputChannel[] channels = InputChannel.openInputChannelPair("drag");
             mServerChannel = channels[0];
@@ -161,17 +167,17 @@ class DragState {
             mDragWindowHandle.frameBottom = p.y;
 
             // Pause rotations before a drag.
-            if (WindowManagerService.DEBUG_ORIENTATION) {
-                Slog.d(WindowManagerService.TAG, "Pausing rotation during drag");
+            if (DEBUG_ORIENTATION) {
+                Slog.d(TAG_WM, "Pausing rotation during drag");
             }
             mService.pauseRotationLocked();
         }
     }
 
     void unregister() {
-        if (WindowManagerService.DEBUG_DRAG) Slog.d(WindowManagerService.TAG, "unregistering drag input channel");
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "unregistering drag input channel");
         if (mClientChannel == null) {
-            Slog.e(WindowManagerService.TAG, "Unregister of nonexistent drag input channel");
+            Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
         } else {
             mService.mInputManager.unregisterInputChannel(mServerChannel);
             mInputEventReceiver.dispose();
@@ -185,8 +191,8 @@ class DragState {
             mDragApplicationHandle = null;
 
             // Resume rotations after a drag.
-            if (WindowManagerService.DEBUG_ORIENTATION) {
-                Slog.d(WindowManagerService.TAG, "Resuming rotation after drag");
+            if (DEBUG_ORIENTATION) {
+                Slog.d(TAG_WM, "Resuming rotation after drag");
             }
             mService.resumeRotationLocked();
         }
@@ -210,8 +216,8 @@ class DragState {
         mNotifiedWindows.clear();
         mDragInProgress = true;
 
-        if (WindowManagerService.DEBUG_DRAG) {
-            Slog.d(WindowManagerService.TAG, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
+        if (DEBUG_DRAG) {
+            Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
         final WindowList windows = mService.getWindowListLocked(mDisplay);
@@ -238,8 +244,8 @@ class DragState {
         if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
             final IBinder winBinder = newWin.mClient.asBinder();
             if (winBinder != mLocalWin) {
-                if (WindowManagerService.DEBUG_DRAG) {
-                    Slog.d(WindowManagerService.TAG, "Not dispatching local DRAG_STARTED to " + newWin);
+                if (DEBUG_DRAG) {
+                    Slog.d(TAG_WM, "Not dispatching local DRAG_STARTED to " + newWin);
                 }
                 return;
             }
@@ -253,7 +259,7 @@ class DragState {
                 // track each window that we've notified that the drag is starting
                 mNotifiedWindows.add(newWin);
             } catch (RemoteException e) {
-                Slog.w(WindowManagerService.TAG, "Unable to drag-start window " + newWin);
+                Slog.w(TAG_WM, "Unable to drag-start window " + newWin);
             } finally {
                 // if the callee was local, the dispatch has already recycled the event
                 if (Process.myPid() != newWin.mSession.mPid) {
@@ -275,8 +281,8 @@ class DragState {
                     return;
                 }
             }
-            if (WindowManagerService.DEBUG_DRAG) {
-                Slog.d(WindowManagerService.TAG, "need to send DRAG_STARTED to new window " + newWin);
+            if (DEBUG_DRAG) {
+                Slog.d(TAG_WM, "need to send DRAG_STARTED to new window " + newWin);
             }
             sendDragStartedLw(newWin, mCurrentX, mCurrentY, mDataDescription);
         }
@@ -285,8 +291,8 @@ class DragState {
     private void broadcastDragEndedLw() {
         final int myPid = Process.myPid();
 
-        if (WindowManagerService.DEBUG_DRAG) {
-            Slog.d(WindowManagerService.TAG, "broadcasting DRAG_ENDED");
+        if (DEBUG_DRAG) {
+            Slog.d(TAG_WM, "broadcasting DRAG_ENDED");
         }
         for (WindowState ws : mNotifiedWindows) {
             float x = 0;
@@ -301,7 +307,7 @@ class DragState {
             try {
                 ws.mClient.dispatchDragEvent(evt);
             } catch (RemoteException e) {
-                Slog.w(WindowManagerService.TAG, "Unable to drag-end window " + ws);
+                Slog.w(TAG_WM, "Unable to drag-end window " + ws);
             }
             // if the current window is in the same process,
             // the dispatch has already recycled the event
@@ -356,24 +362,24 @@ class DragState {
         final int myPid = Process.myPid();
 
         // Move the surface to the given touch
-        if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                WindowManagerService.TAG, ">>> OPEN TRANSACTION notifyMoveLw");
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
+                TAG_WM, ">>> OPEN TRANSACTION notifyMoveLw");
         SurfaceControl.openTransaction();
         try {
             mSurfaceControl.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DRAG "
+            if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  DRAG "
                     + mSurfaceControl + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
             SurfaceControl.closeTransaction();
-            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS) Slog.i(
-                    WindowManagerService.TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
+                    TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLw");
         }
 
         // Tell the affected window
         WindowState touchedWin = getTouchedWinAtPointLw(x, y);
         if (touchedWin == null) {
-            if (WindowManagerService.DEBUG_DRAG) Slog.d(WindowManagerService.TAG, "No touched win at x=" + x + " y=" + y);
+            if (DEBUG_DRAG) Slog.d(TAG_WM, "No touched win at x=" + x + " y=" + y);
             return;
         }
         if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
@@ -387,8 +393,8 @@ class DragState {
         try {
             // have we dragged over a new window?
             if ((touchedWin != mTargetWindow) && (mTargetWindow != null)) {
-                if (WindowManagerService.DEBUG_DRAG) {
-                    Slog.d(WindowManagerService.TAG, "sending DRAG_EXITED to " + mTargetWindow);
+                if (DEBUG_DRAG) {
+                    Slog.d(TAG_WM, "sending DRAG_EXITED to " + mTargetWindow);
                 }
                 // force DRAG_EXITED_EVENT if appropriate
                 DragEvent evt = obtainDragEvent(mTargetWindow, DragEvent.ACTION_DRAG_EXITED,
@@ -399,8 +405,8 @@ class DragState {
                 }
             }
             if (touchedWin != null) {
-                if (false && WindowManagerService.DEBUG_DRAG) {
-                    Slog.d(WindowManagerService.TAG, "sending DRAG_LOCATION to " + touchedWin);
+                if (false && DEBUG_DRAG) {
+                    Slog.d(TAG_WM, "sending DRAG_LOCATION to " + touchedWin);
                 }
                 DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DRAG_LOCATION,
                         x, y, null, null, null, null, false);
@@ -410,7 +416,7 @@ class DragState {
                 }
             }
         } catch (RemoteException e) {
-            Slog.w(WindowManagerService.TAG, "can't send drag notification to windows");
+            Slog.w(TAG_WM, "can't send drag notification to windows");
         }
         mTargetWindow = touchedWin;
     }
@@ -437,8 +443,8 @@ class DragState {
             return true;
         }
 
-        if (WindowManagerService.DEBUG_DRAG) {
-            Slog.d(WindowManagerService.TAG, "sending DROP to " + touchedWin);
+        if (DEBUG_DRAG) {
+            Slog.d(TAG_WM, "sending DROP to " + touchedWin);
         }
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
@@ -452,7 +458,7 @@ class DragState {
             Message msg = mService.mH.obtainMessage(H.DRAG_END_TIMEOUT, token);
             mService.mH.sendMessageDelayed(msg, 5000);
         } catch (RemoteException e) {
-            Slog.w(WindowManagerService.TAG, "can't send drop notification to win " + touchedWin);
+            Slog.w(TAG_WM, "can't send drop notification to win " + touchedWin);
             return true;
         } finally {
             if (myPid != touchedWin.mSession.mPid) {
