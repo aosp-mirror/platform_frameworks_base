@@ -247,6 +247,14 @@ public class TelecomManager {
             "android.telecom.extra.CONNECTION_SERVICE";
 
     /**
+     * Optional extra for communicating the call technology used by a
+     * {@link com.android.internal.telephony.Connection} to Telecom
+     * @hide
+     */
+    public static final String EXTRA_CALL_TECHNOLOGY_TYPE =
+            "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
+
+    /**
      * An optional {@link android.content.Intent#ACTION_CALL} intent extra denoting the
      * package name of the app specifying an alternative gateway for the call.
      * The value is a string.
