@@ -131,6 +131,11 @@ page.tags="databinding", "layouts"
           </li>
         </ol>
       </li>
+
+      <li>
+        <a href="#studio_support">Android Studio Support for Data Binding</a>
+      </li>
+
     </ol>
   </div><!-- qv -->
 </div><!-- qv-wrapper -->
@@ -211,8 +216,9 @@ android {
  must configure data binding in its <code>build.gradle</code> file as well.</p>
 
 <p>Also, make sure you are using a compatible version of Android Studio.
-<strong>Android Studio 1.3</strong> adds the code-completion and layout-preview
-support for data binding.</p>
+<strong>Android Studio 1.3</strong> and later provides support for data binding as described in
+<a href="#studio_support">Android Studio Support for Data Binding</a>.
+</p>
 
 <h2 id="data_binding_layout_files">
   Data Binding Layout Files
@@ -1643,3 +1649,28 @@ public static ColorDrawable convertColorToDrawable(int color) {
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 </pre>
+
+<h3 id="studio_support">Android Studio Support for Data Binding</h3>
+
+<p>
+Android Studio supports syntax highlighting of data binding expressions, and flags any expression
+language syntax errors in the editor.
+</p>
+<p>
+The Preview pane displays default values for data binding expressions if provided. In the following
+example excerpt of an element from a layout XML file, the Preview pane displays the
+{@code PLACEHOLDER} default text value in the <code>TextView</code>.
+</p>
+
+<pre>
+&lt;TextView android:layout_width="wrap_content"
+   android:layout_height="wrap_content"
+   android:text="&commat;{user.firstName, default=PLACEHOLDER}"/&gt;
+</pre>
+
+<p>
+If you need to display a default value during the design phase of your project, you
+can also use tools attributes instead of default expression values, as described in
+<a class="external-link" href="http://tools.android.com/tips/layout-designtime-attributes">
+Designtime Layout Attributes</a>.
+</p>
