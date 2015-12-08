@@ -662,6 +662,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
+    @Override
+    public void onMultiWindowModeChanged() {
+        if (mDecor != null) {
+            mDecor.onConfigurationChanged();
+        }
+    }
+
     private static void clearMenuViews(PanelFeatureState st) {
         // This can be called on config changes, so we should make sure
         // the views will be reconstructed based on the new orientation, etc.

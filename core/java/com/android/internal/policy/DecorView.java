@@ -67,6 +67,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
+import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.View.MeasureSpec.AT_MOST;
@@ -1188,7 +1189,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         invalidate();
 
         int opacity = PixelFormat.OPAQUE;
-        if (ActivityManager.StackId.hasWindowShadow(mStackId)) {
+        if (StackId.hasWindowShadow(mStackId)) {
             // If the window has a shadow, it must be translucent.
             opacity = PixelFormat.TRANSLUCENT;
         } else{
@@ -1571,13 +1572,25 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     void onConfigurationChanged() {
         int workspaceId = getStackId();
-        if (mDecorCaptionView != null) {
-            if (mStackId != workspaceId) {
-                mStackId = workspaceId;
+        if (mStackId != workspaceId) {
+            mStackId = workspaceId;
+            if (mDecorCaptionView == null && StackId.hasWindowDecor(mStackId)) {
+                // Configuration now requires a caption.
+                final LayoutInflater inflater = mWindow.getLayoutInflater();
+                mDecorCaptionView = createDecorCaptionView(inflater);
+                if (mDecorCaptionView != null) {
+                    if (mDecorCaptionView.getParent() == null) {
+                        addView(mDecorCaptionView, 0,
+                                new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+                    }
+                    removeView(mContentRoot);
+                    mDecorCaptionView.addView(mContentRoot,
+                            new ViewGroup.MarginLayoutParams(MATCH_PARENT, MATCH_PARENT));
+                }
+            } else if (mDecorCaptionView != null) {
                 // We might have to change the kind of surface before we do anything else.
-                mDecorCaptionView.onConfigurationChanged(
-                        ActivityManager.StackId.hasWindowDecor(mStackId));
-                enableCaption(ActivityManager.StackId.hasWindowDecor(workspaceId));
+                mDecorCaptionView.onConfigurationChanged(StackId.hasWindowDecor(mStackId));
+                enableCaption(StackId.hasWindowDecor(workspaceId));
             }
         }
         initializeElevation();
@@ -1630,8 +1643,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
                 attrs.type == TYPE_APPLICATION;
         // Only a non floating application window on one of the allowed workspaces can get a caption
-        if (!mWindow.isFloating() && isApplication
-                && ActivityManager.StackId.hasWindowDecor(mStackId)) {
+        if (!mWindow.isFloating() && isApplication && StackId.hasWindowDecor(mStackId)) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (decorCaptionView == null) {
@@ -1854,7 +1866,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean wasAdjustedForStack = mElevationAdjustedForStack;
         // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
         // since the shadow is bound to the content size and not the target size.
-        if (ActivityManager.StackId.hasWindowShadow(mStackId) && !isResizing()) {
+        if (StackId.hasWindowShadow(mStackId) && !isResizing()) {
             elevation = hasWindowFocus() ?
                     DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
             // TODO(skuhne): Remove this if clause once b/22668382 got fixed.

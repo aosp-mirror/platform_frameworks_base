@@ -1733,9 +1733,13 @@ public class Activity extends ContextThemeWrapper
      *
      * @param multiWindowMode True if the activity is in multi-window mode.
      */
+    @CallSuper
     public void onMultiWindowModeChanged(boolean multiWindowMode) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "onMultiWindowModeChanged " + this + ": " + multiWindowMode);
+        if (mWindow != null) {
+            mWindow.onMultiWindowModeChanged();
+        }
     }
 
     /**

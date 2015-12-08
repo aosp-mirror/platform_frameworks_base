@@ -2106,4 +2106,10 @@ public abstract class Window {
      * to better match your application.
      */
     public abstract void setResizingCaptionDrawable(Drawable drawable);
+
+    /**
+     * Called when the activity changes from fullscreen mode to multi-window mode and visa-versa.
+     * @hide
+     */
+    public abstract void onMultiWindowModeChanged();
 }
