@@ -1363,7 +1363,7 @@ class AlarmManagerService extends SystemService {
 
             pw.print("  nowRTC="); pw.print(nowRTC);
             pw.print("="); pw.print(sdf.format(new Date(nowRTC)));
-            pw.print(" nowELAPSED="); TimeUtils.formatDuration(nowELAPSED, pw);
+            pw.print(" nowELAPSED="); pw.print(nowELAPSED);
             pw.println();
             pw.print("  mLastTimeChangeClockTime="); pw.print(mLastTimeChangeClockTime);
             pw.print("="); pw.println(sdf.format(new Date(mLastTimeChangeClockTime)));
@@ -1463,6 +1463,15 @@ class AlarmManagerService extends SystemService {
             pw.println();
             pw.print("  Broadcast ref count: "); pw.println(mBroadcastRefCount);
             pw.println();
+
+            if (mInFlight.size() > 0) {
+                pw.println("Outstanding deliveries:");
+                for (int i = 0; i < mInFlight.size(); i++) {
+                    pw.print("   #"); pw.print(i); pw.print(": ");
+                    pw.println(mInFlight.get(i));
+                }
+                pw.println();
+            }
 
             pw.print("  mAllowWhileIdleMinTime=");
             TimeUtils.formatDuration(mAllowWhileIdleMinTime, pw);
@@ -2956,6 +2965,11 @@ class AlarmManagerService extends SystemService {
                         // is a repeating alarm, so toss it
                         removeImpl(alarm.operation);
                     }
+                    // No actual delivery was possible, so the delivery tracker's
+                    // 'finished' callback won't be invoked.  We also don't need
+                    // to do any wakelock or stats tracking, so we have nothing
+                    // left to do here but go on to the next thing.
+                    return;
                 }
             } else {
                 // Direct listener callback alarm
@@ -2974,6 +2988,11 @@ class AlarmManagerService extends SystemService {
                         Slog.i(TAG, "Alarm undeliverable to listener "
                                 + alarm.listener.asBinder(), e);
                     }
+                    // As in the PendingIntent.CanceledException case, delivery of the
+                    // alarm was not possible, so we have no wakelock or timeout or
+                    // stats management to do.  It threw before we posted the delayed
+                    // timeout message, so we're done here.
+                    return;
                 }
             }
 
