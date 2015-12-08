@@ -1958,7 +1958,6 @@
   <java-symbol type="bool" name="config_built_in_sip_phone" />
   <java-symbol type="id" name="maximize_window" />
   <java-symbol type="id" name="close_window" />
-  <java-symbol type="id" name="client_decor_placeholder" />
   <java-symbol type="layout" name="decor_caption_light" />
   <java-symbol type="layout" name="decor_caption_dark" />
   <java-symbol type="drawable" name="decor_caption_title_focused" />
