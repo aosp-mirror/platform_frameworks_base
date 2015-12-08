@@ -101,6 +101,8 @@ public:
     void setOpaqueConsumer(const sp<BufferItemConsumer>& consumer) { mOpaqueConsumer = consumer; }
     BufferItemConsumer* getOpaqueConsumer() { return mOpaqueConsumer.get(); }
     // This is the only opaque format exposed in the ImageFormat public API.
+    // Note that we do support CPU access for HAL_PIXEL_FORMAT_RAW_OPAQUE
+    // (ImageFormat#RAW_PRIVATE) so it doesn't count as opaque here.
     bool isOpaque() { return mFormat == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED; }
 
     void setProducer(const sp<IGraphicBufferProducer>& producer) { mProducer = producer; }
@@ -470,7 +472,8 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
         case HAL_PIXEL_FORMAT_BLOB:
             // Used for JPEG data, height must be 1, width == size, single plane.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
-            ALOG_ASSERT(buffer->height == 1, "JPEG should has height value %d", buffer->height);
+            ALOG_ASSERT(buffer->height == 1,
+                    "JPEG should has height value one but got %d", buffer->height);
 
             pData = buffer->data;
             dataSize = Image_getJpegSize(buffer, usingRGBAOverride);
@@ -481,6 +484,14 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             pData = buffer->data;
             dataSize = buffer->stride * buffer->height * bytesPerPixel;
+            break;
+        case HAL_PIXEL_FORMAT_RAW_OPAQUE:
+            // Used for RAW_OPAQUE data, height must be 1, width == size, single plane.
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            ALOG_ASSERT(buffer->height == 1,
+                    "RAW_PRIVATE should has height value one but got %d", buffer->height);
+            pData = buffer->data;
+            dataSize = buffer->width;
             break;
         case HAL_PIXEL_FORMAT_RAW10:
             // Single plane 10bpp bayer data.
@@ -593,6 +604,10 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             pixelStride = 3;
             break;
+        case HAL_PIXEL_FORMAT_RAW_OPAQUE:
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pixelStride = 0; // RAW OPAQUE doesn't have pixel stride
+            break;
         default:
             jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
                                  "Pixel format: 0x%x is unsupported", fmt);
@@ -668,6 +683,10 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
             // Single plane, 24bpp.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             rowStride = buffer->stride * 3;
+            break;
+        case HAL_PIXEL_FORMAT_RAW_OPAQUE:
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            rowStride = 0; // RAW OPAQUE doesn't have row stride
             break;
         default:
             ALOGE("%s Pixel format: 0x%x is unsupported", __FUNCTION__, fmt);

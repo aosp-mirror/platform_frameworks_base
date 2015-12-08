@@ -834,6 +834,7 @@ public final class StreamConfigurationMap {
      * <ul>
      * <li>{@link ImageFormat#JPEG JPEG}
      * <li>{@link ImageFormat#RAW_SENSOR RAW16}
+     * <li>{@link ImageFormat#RAW_PRIVATE RAW_PRIVATE}
      * </ul>
      * </p>
      *
@@ -1328,9 +1329,7 @@ public final class StreamConfigurationMap {
         SparseIntArray map = getFormatsMap(output);
         for (int j = 0; j < map.size(); j++) {
             int format = map.keyAt(j);
-            if (format != HAL_PIXEL_FORMAT_RAW_OPAQUE) {
-                formats[i++] = imageFormatToPublic(format);
-            }
+            formats[i++] = imageFormatToPublic(format);
         }
         if (output) {
             for (int j = 0; j < mDepthOutputFormats.size(); j++) {
@@ -1392,9 +1391,6 @@ public final class StreamConfigurationMap {
     private int getPublicFormatCount(boolean output) {
         SparseIntArray formatsMap = getFormatsMap(output);
         int size = formatsMap.size();
-        if (formatsMap.indexOfKey(HAL_PIXEL_FORMAT_RAW_OPAQUE) >= 0) {
-            size -= 1;
-        }
         if (output) {
             size += mDepthOutputFormats.size();
         }
@@ -1603,6 +1599,8 @@ public final class StreamConfigurationMap {
                 return "Y16";
             case ImageFormat.RAW_SENSOR:
                 return "RAW_SENSOR";
+            case ImageFormat.RAW_PRIVATE:
+                return "RAW_PRIVATE";
             case ImageFormat.RAW10:
                 return "RAW10";
             case ImageFormat.DEPTH16:

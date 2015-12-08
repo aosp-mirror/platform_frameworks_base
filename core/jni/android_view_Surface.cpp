@@ -149,7 +149,9 @@ android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
         case PublicFormat::DEPTH16:
             return HAL_DATASPACE_DEPTH;
         case PublicFormat::RAW_SENSOR:
+        case PublicFormat::RAW_PRIVATE:
         case PublicFormat::RAW10:
+        case PublicFormat::RAW12:
             return HAL_DATASPACE_ARBITRARY;
         case PublicFormat::YUV_420_888:
         case PublicFormat::NV21:
@@ -170,6 +172,7 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
         case HAL_PIXEL_FORMAT_RGB_565:
         case HAL_PIXEL_FORMAT_Y8:
         case HAL_PIXEL_FORMAT_RAW10:
+        case HAL_PIXEL_FORMAT_RAW12:
         case HAL_PIXEL_FORMAT_YCbCr_420_888:
         case HAL_PIXEL_FORMAT_YV12:
             // Enums overlap in both name and value
@@ -177,6 +180,9 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
         case HAL_PIXEL_FORMAT_RAW16:
             // Name differs, though value is the same
             return PublicFormat::RAW_SENSOR;
+        case HAL_PIXEL_FORMAT_RAW_OPAQUE:
+            // Name differs, though value is the same
+            return PublicFormat::RAW_PRIVATE;
         case HAL_PIXEL_FORMAT_YCbCr_422_SP:
             // Name differs, though the value is the same
             return PublicFormat::NV16;
@@ -212,7 +218,6 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
             }
             break;
         case HAL_PIXEL_FORMAT_BGRA_8888:
-        case HAL_PIXEL_FORMAT_RAW_OPAQUE:
             // Not defined in public API
             return PublicFormat::UNKNOWN;
 
