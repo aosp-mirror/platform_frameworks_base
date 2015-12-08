@@ -60,6 +60,11 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     private static final int CACHE_SIZE = 10;
 
     /**
+     * Special hash array value that indicates the container is immutable.
+     */
+    static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
+
+    /**
      * @hide Special immutable empty ArrayMap.
      */
     public static final ArrayMap EMPTY = new ArrayMap(true);
@@ -74,11 +79,6 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     static int mBaseCacheSize;
     static Object[] mTwiceBaseCache;
     static int mTwiceBaseCacheSize;
-
-    /**
-     * Special hash array value that indicates the container is immutable.
-     */
-    static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
 
     int[] mHashes;
     Object[] mArray;
