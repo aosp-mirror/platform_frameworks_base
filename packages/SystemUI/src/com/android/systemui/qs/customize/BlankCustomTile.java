@@ -72,12 +72,10 @@ public class BlankCustomTile extends QSTile<QSTile.State> {
         try {
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent, 0);
-            state.visible = true;
             state.icon = new DrawableIcon(info.loadIcon(pm));
             state.label = info.loadLabel(pm).toString();
             state.contentDescription = state.label;
         } catch (Exception e) {
-            state.visible = false;
         }
     }
 

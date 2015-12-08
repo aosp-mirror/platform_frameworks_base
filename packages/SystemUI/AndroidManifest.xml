@@ -180,13 +180,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".qs.tiles.HotspotTile$APChangedReceiver"
-                androidprv:systemUserOnly="true">
-            <intent-filter>
-                <action android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
                   android:icon="@drawable/tuner"

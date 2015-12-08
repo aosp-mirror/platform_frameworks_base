@@ -302,15 +302,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
     }
 
-    private void setTileVisibility(TileRecord record, int visibility) {
-        mHandler.obtainMessage(H.SET_TILE_VISIBILITY, visibility, 0, record).sendToTarget();
-    }
-
-    private void handleSetTileVisibility(TileRecord tile, int visibility) {
-        if (visibility == tile.tileView.getVisibility()) return;
-        mTileLayout.setTileVisibility(tile, visibility);
-    }
-
     public void setTiles(Collection<QSTile<?>> tiles) {
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
@@ -325,8 +316,6 @@ public class QSPanel extends FrameLayout implements Tunable {
     }
 
     private void drawTile(TileRecord r, QSTile.State state) {
-        final int visibility = state.visible ? VISIBLE : GONE;
-        setTileVisibility(r, visibility);
         r.tileView.onStateChanged(state);
     }
 
@@ -338,7 +327,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = createTileView(tile);
-        r.tileView.setVisibility(View.GONE);
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {
@@ -517,9 +505,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     private void logTiles() {
         for (int i = 0; i < mRecords.size(); i++) {
             TileRecord tileRecord = mRecords.get(i);
-            if (tileRecord.tile.getState().visible) {
-                MetricsLogger.visible(mContext, tileRecord.tile.getMetricsCategory());
-            }
+            MetricsLogger.visible(mContext, tileRecord.tile.getMetricsCategory());
         }
     }
 
@@ -556,8 +542,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         public void handleMessage(Message msg) {
             if (msg.what == SHOW_DETAIL) {
                 handleShowDetail((Record)msg.obj, msg.arg1 != 0);
-            } else if (msg.what == SET_TILE_VISIBILITY) {
-                handleSetTileVisibility((TileRecord) msg.obj, msg.arg1);
             }
         }
     }
@@ -621,7 +605,6 @@ public class QSPanel extends FrameLayout implements Tunable {
     public interface QSTileLayout {
         void addTile(TileRecord tile);
         void removeTile(TileRecord tile);
-        void setTileVisibility(TileRecord tile, int visibility);
         int getOffsetTop(TileRecord tile);
         void updateResources();
     }

@@ -174,7 +174,6 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        state.visible = true;
         Drawable drawable = mTile.getIcon().loadDrawable(mContext);
         drawable.setTint(mContext.getColor(android.R.color.white));
         state.icon = new DrawableIcon(drawable);

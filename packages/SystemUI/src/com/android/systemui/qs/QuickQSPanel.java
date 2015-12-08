@@ -140,11 +140,6 @@ public class QuickQSPanel extends QSPanel {
         }
 
         @Override
-        public void setTileVisibility(TileRecord tile, int visibility) {
-            tile.tileView.setVisibility(visibility);
-        }
-
-        @Override
         public int getOffsetTop(TileRecord tile) {
             return 0;
         }

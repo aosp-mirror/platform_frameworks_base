@@ -118,12 +118,6 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     }
 
     @Override
-    public void setTileVisibility(TileRecord tile, int visibility) {
-        // All tiles visible here, so that they can be re-arranged.
-        tile.tileView.setVisibility(View.VISIBLE);
-    }
-
-    @Override
     public int getOffsetTop(TileRecord tile) {
         // No touch feedback, so this isn't required.
         return 0;

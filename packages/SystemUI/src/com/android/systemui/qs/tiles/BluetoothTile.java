@@ -85,11 +85,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        final boolean supported = mController.isBluetoothSupported();
         final boolean enabled = mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();
         final boolean connecting = mController.isBluetoothConnecting();
-        state.visible = supported;
         state.value = enabled;
         state.autoMirrorDrawable = false;
         if (enabled) {
@@ -139,6 +137,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         } else {
             return mContext.getString(R.string.accessibility_quick_settings_bluetooth_changed_off);
         }
+    }
+
+    public static boolean isSupported(Host host) {
+        return host.getBluetoothController().isBluetoothSupported();
     }
 
     private final BluetoothController.Callback mCallback = new BluetoothController.Callback() {

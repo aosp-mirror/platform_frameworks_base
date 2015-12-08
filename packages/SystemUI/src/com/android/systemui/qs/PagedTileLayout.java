@@ -73,11 +73,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
-    public void setTileVisibility(TileRecord tile, int visibility) {
-        tile.tileView.setVisibility(visibility);
-    }
-
-    @Override
     public void addTile(TileRecord tile) {
         mTiles.add(tile);
         distributeTiles();

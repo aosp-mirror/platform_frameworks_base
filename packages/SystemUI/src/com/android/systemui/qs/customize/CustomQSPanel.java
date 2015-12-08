@@ -176,13 +176,16 @@ public class CustomQSPanel extends QSPanel {
             if (mTiles.get(i).startsWith(CustomTile.PREFIX)) {
                 mCurrentTiles.add(BlankCustomTile.create(mHost, mTiles.get(i)));
             } else {
-                mCurrentTiles.add(mHost.createTile(mTiles.get(i)));
+                QSTile<?> tile = mHost.createTile(mTiles.get(i));
+                if (tile != null) {
+                    mCurrentTiles.add(tile);
+                }
             }
             mCurrentTiles.get(mCurrentTiles.size() - 1).setTileSpec(mTiles.get(i));
         }
         super.setTiles(mCurrentTiles);
     }
-    
+
     public void addTile(String spec) {
         mTiles.add(spec);
         setTilesInternal();

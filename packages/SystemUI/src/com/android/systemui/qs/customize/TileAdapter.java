@@ -88,6 +88,9 @@ public class TileAdapter extends BaseAdapter {
                 }
                 Log.d(TAG, "Trying " + spec);
                 final QSTile<?> tile = host.createTile(spec);
+                if (tile == null) {
+                    continue;
+                }
                 // Bad, bad, very bad.
                 tile.setListening(true);
                 tile.clearState();
