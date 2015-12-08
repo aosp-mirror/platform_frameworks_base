@@ -40,7 +40,6 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -505,7 +504,7 @@ public class RippleDrawable extends LayerDrawable {
                 updateStateFromTypedArray(a);
                 verifyRequiredAttributes(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }

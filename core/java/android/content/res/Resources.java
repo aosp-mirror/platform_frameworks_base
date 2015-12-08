@@ -2421,75 +2421,93 @@ public class Resources {
 
     @Nullable
     Drawable loadDrawable(TypedValue value, int id, Theme theme) throws NotFoundException {
-        if (TRACE_FOR_PRELOAD) {
-            // Log only framework resources
-            if ((id >>> 24) == 0x1) {
-                final String name = getResourceName(id);
-                if (name != null) {
-                    Log.d("PreloadDrawable", name);
+        try {
+            if (TRACE_FOR_PRELOAD) {
+                // Log only framework resources
+                if ((id >>> 24) == 0x1) {
+                    final String name = getResourceName(id);
+                    if (name != null) {
+                        Log.d("PreloadDrawable", name);
+                    }
                 }
             }
-        }
 
-        final boolean isColorDrawable;
-        final DrawableCache caches;
-        final long key;
-        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
-                && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            isColorDrawable = true;
-            caches = mColorDrawableCache;
-            key = value.data;
-        } else {
-            isColorDrawable = false;
-            caches = mDrawableCache;
-            key = (((long) value.assetCookie) << 32) | value.data;
-        }
-
-        // First, check whether we have a cached version of this drawable
-        // that was inflated against the specified theme.
-        if (!mPreloading) {
-            final Drawable cachedDrawable = caches.getInstance(key, theme);
-            if (cachedDrawable != null) {
-                return cachedDrawable;
+            final boolean isColorDrawable;
+            final DrawableCache caches;
+            final long key;
+            if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
+                    && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                isColorDrawable = true;
+                caches = mColorDrawableCache;
+                key = value.data;
+            } else {
+                isColorDrawable = false;
+                caches = mDrawableCache;
+                key = (((long) value.assetCookie) << 32) | value.data;
             }
-        }
 
-        // Next, check preloaded drawables. These may contain unresolved theme
-        // attributes.
-        final ConstantState cs;
-        if (isColorDrawable) {
-            cs = sPreloadedColorDrawables.get(key);
-        } else {
-            cs = sPreloadedDrawables[mConfiguration.getLayoutDirection()].get(key);
-        }
+            // First, check whether we have a cached version of this drawable
+            // that was inflated against the specified theme.
+            if (!mPreloading) {
+                final Drawable cachedDrawable = caches.getInstance(key, theme);
+                if (cachedDrawable != null) {
+                    return cachedDrawable;
+                }
+            }
 
-        Drawable dr;
-        if (cs != null) {
-            dr = cs.newDrawable(this);
-        } else if (isColorDrawable) {
-            dr = new ColorDrawable(value.data);
-        } else {
-            dr = loadDrawableForCookie(value, id, null);
-        }
+            // Next, check preloaded drawables. These may contain unresolved theme
+            // attributes.
+            final ConstantState cs;
+            if (isColorDrawable) {
+                cs = sPreloadedColorDrawables.get(key);
+            } else {
+                cs = sPreloadedDrawables[mConfiguration.getLayoutDirection()].get(key);
+            }
 
-        // Determine if the drawable has unresolved theme attributes. If it
-        // does, we'll need to apply a theme and store it in a theme-specific
-        // cache.
-        final boolean canApplyTheme = dr != null && dr.canApplyTheme();
-        if (canApplyTheme && theme != null) {
-            dr = dr.mutate();
-            dr.applyTheme(theme);
-            dr.clearMutated();
-        }
+            Drawable dr;
+            if (cs != null) {
+                dr = cs.newDrawable(this);
+            } else if (isColorDrawable) {
+                dr = new ColorDrawable(value.data);
+            } else {
+                dr = loadDrawableForCookie(value, id, null);
+            }
 
-        // If we were able to obtain a drawable, store it in the appropriate
-        // cache: preload, not themed, null theme, or theme-specific.
-        if (dr != null) {
-            dr.setChangingConfigurations(value.changingConfigurations);
-            cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
-        }
+            // Determine if the drawable has unresolved theme attributes. If it
+            // does, we'll need to apply a theme and store it in a theme-specific
+            // cache.
+            final boolean canApplyTheme = dr != null && dr.canApplyTheme();
+            if (canApplyTheme && theme != null) {
+                dr = dr.mutate();
+                dr.applyTheme(theme);
+                dr.clearMutated();
+            }
 
-        return dr;
+            // If we were able to obtain a drawable, store it in the appropriate
+            // cache: preload, not themed, null theme, or theme-specific.
+            if (dr != null) {
+                dr.setChangingConfigurations(value.changingConfigurations);
+                cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
+            }
+
+            return dr;
+        } catch (Exception e) {
+            String name;
+            try {
+                name = getResourceName(id);
+            } catch (NotFoundException e2) {
+                name = "(missing name)";
+            }
+
+            // The target drawable might fail to load for any number of
+            // reasons, but we always want to include the resource name.
+            // Since the client already expects this method to throw a
+            // NotFoundException, just throw one of those.
+            final NotFoundException nfe = new NotFoundException("Drawable " + name
+                    + " with resource ID #0x" + Integer.toHexString(id), e);
+            nfe.setStackTrace(new StackTraceElement[0]);
+            throw nfe;
+        }
     }
 
     private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCache caches,

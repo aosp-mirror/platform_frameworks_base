@@ -511,7 +511,7 @@ public class VectorDrawable extends Drawable {
                 state.mCacheDirty = true;
                 updateStateFromTypedArray(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }

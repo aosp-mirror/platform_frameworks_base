@@ -1430,6 +1430,20 @@ public abstract class Drawable {
     }
 
     /**
+     * Re-throws an exception as a {@link RuntimeException} with an empty stack
+     * trace to avoid cluttering the log. The original exception's stack trace
+     * will still be included.
+     *
+     * @param cause the exception to re-throw
+     * @throws RuntimeException
+     */
+    static void rethrowAsRuntimeException(Exception cause) throws RuntimeException {
+        final RuntimeException e = new RuntimeException(cause);
+        e.setStackTrace(new StackTraceElement[0]);
+        throw e;
+    }
+
+    /**
      * Parses a {@link android.graphics.PorterDuff.Mode} from a tintMode
      * attribute's enum value.
      *
