@@ -18,6 +18,6 @@
 
 <resources>
     <!-- The maximum number of items to be displayed in quick settings -->
-    <integer name="quick_settings_detail_max_item_count">8</integer>
+    <integer name="quick_settings_detail_max_item_count">6</integer>
 </resources>
 

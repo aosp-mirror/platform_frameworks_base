@@ -133,7 +133,7 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
     }
 
-    PhoneStatusBar getPhoneStatusBar() {
+    public PhoneStatusBar getPhoneStatusBar() {
         return mStatusBar;
     }
 

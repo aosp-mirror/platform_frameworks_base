@@ -59,7 +59,7 @@ import java.text.NumberFormat;
  */
 public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnClickListener,
         BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
-        EmergencyListener, TunerService.Tunable {
+        EmergencyListener {
 
     private boolean mExpanded;
     private boolean mListening;
@@ -232,28 +232,6 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
 
         updateClockScale();
         updateClockCollapsedMargin();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, QSPanel.QS_THE_NEW_QS);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        TunerService.get(mContext).removeTunable(this);
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (QSPanel.QS_THE_NEW_QS.equals(key)) {
-            mAllowExpand = newValue == null || Integer.parseInt(newValue) == 0;
-            if (!mAllowExpand) {
-                setExpanded(false);
-            }
-        }
     }
 
     private void updateClockCollapsedMargin() {

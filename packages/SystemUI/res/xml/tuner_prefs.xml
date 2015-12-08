@@ -18,25 +18,10 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/system_ui_tuner">
 
-    <PreferenceScreen
-        android:title="@string/quick_settings">
-
-        <PreferenceCategory
-            android:title="@string/experimental">
-
-            <com.android.systemui.tuner.TunerSwitch
-                android:key="qs_show_brightness"
-                android:title="@string/show_brightness"
-                sysui:defValue="true" />
-
-            <com.android.systemui.tuner.QSPagingSwitch
-                android:key="qs_paged_panel"
-                android:title="@string/qs_paging" />
-
-        </PreferenceCategory>
-
-    </PreferenceScreen>
-
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="qs_show_brightness"
+        android:title="@string/show_brightness"
+        sysui:defValue="true" />
 
     <PreferenceScreen
         android:title="@string/status_bar" >

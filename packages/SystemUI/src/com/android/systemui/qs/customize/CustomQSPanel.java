@@ -81,6 +81,11 @@ public class CustomQSPanel extends QSPanel {
         }
     }
 
+    @Override
+    protected void createCustomizePanel() {
+        // Already in CustomizePanel.
+    }
+
     public void tileSelected(QSTile<?> tile, ClipData currentClip) {
         String sourceSpec = getSpec(currentClip);
         String destSpec = tile.getTileSpec();

@@ -19,7 +19,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/qs_background_primary"
-        android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:elevation="2dp">
 

@@ -98,7 +98,7 @@ public class PseudoGridView extends ViewGroup {
             }
         }
 
-        setMeasuredDimension(width, getDefaultSize(totalHeight, heightMeasureSpec));
+        setMeasuredDimension(width, resolveSizeAndState(totalHeight, heightMeasureSpec, 0));
     }
 
     @Override
