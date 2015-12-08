@@ -35,6 +35,7 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_ZEN_ALLOW_LIGHTS = 262;
     public static final int NOTIFICATION_TOPIC_NOTIFICATION = 263;
     public static final int ACTION_DEFAULT_SMS_APP_CHANGED = 264;
+    public static final int QS_COLOR_MATRIX = 265;
 
     /**
      * Logged when the user docks a window from recents by longpressing a task and dragging it to
