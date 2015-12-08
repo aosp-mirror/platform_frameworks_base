@@ -21745,7 +21745,11 @@ package android.media.browse {
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isConnected();
     method public void subscribe(java.lang.String, android.media.browse.MediaBrowser.SubscriptionCallback);
+    method public void subscribe(java.lang.String, android.os.Bundle, android.media.browse.MediaBrowser.SubscriptionCallback);
     method public void unsubscribe(java.lang.String);
+    method public void unsubscribe(java.lang.String, android.os.Bundle);
+    field public static final java.lang.String EXTRA_PAGE = "android.media.browse.extra.PAGE";
+    field public static final java.lang.String EXTRA_PAGE_SIZE = "android.media.browse.extra.PAGE_SIZE";
   }
 
   public static class MediaBrowser.ConnectionCallback {
@@ -21778,7 +21782,9 @@ package android.media.browse {
   public static abstract class MediaBrowser.SubscriptionCallback {
     ctor public MediaBrowser.SubscriptionCallback();
     method public void onChildrenLoaded(java.lang.String, java.util.List<android.media.browse.MediaBrowser.MediaItem>);
+    method public void onChildrenLoaded(java.lang.String, java.util.List<android.media.browse.MediaBrowser.MediaItem>, android.os.Bundle);
     method public void onError(java.lang.String);
+    method public void onError(java.lang.String, android.os.Bundle);
   }
 
 }
@@ -33784,9 +33790,11 @@ package android.service.media {
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public android.media.session.MediaSession.Token getSessionToken();
     method public void notifyChildrenChanged(java.lang.String);
+    method public void notifyChildrenChanged(java.lang.String, android.os.Bundle);
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.service.media.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
     method public abstract void onLoadChildren(java.lang.String, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>);
+    method public void onLoadChildren(java.lang.String, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>, android.os.Bundle);
     method public void onLoadItem(java.lang.String, android.service.media.MediaBrowserService.Result<android.media.browse.MediaBrowser.MediaItem>);
     method public void setSessionToken(android.media.session.MediaSession.Token);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";

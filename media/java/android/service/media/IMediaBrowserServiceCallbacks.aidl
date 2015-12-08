@@ -22,5 +22,5 @@ oneway interface IMediaBrowserServiceCallbacks {
      */
     void onConnect(String root, in MediaSession.Token session, in Bundle extras);
     void onConnectFailed();
-    void onLoadChildren(String mediaId, in ParceledListSlice list);
+    void onLoadChildren(String mediaId, in ParceledListSlice list, in Bundle options);
 }
