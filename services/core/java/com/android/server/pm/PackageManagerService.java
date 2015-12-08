@@ -16450,7 +16450,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (userDir.exists()) continue;
 
             try {
-                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber);
+                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, user.isEphemeral());
                 UserManagerService.enforceSerialNumber(userDir, user.serialNumber);
             } catch (IOException e) {
                 Log.wtf(TAG, "Failed to create user directory on " + volumeUuid, e);
