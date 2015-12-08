@@ -160,12 +160,6 @@ public class ContextWrapper extends Context {
         return mBase.getPackageCodePath();
     }
 
-    /** @hide */
-    @Override
-    public File getSharedPrefsFile(String name) {
-        return mBase.getSharedPrefsFile(name);
-    }
-
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return mBase.getSharedPreferences(name, mode);
@@ -196,6 +190,11 @@ public class ContextWrapper extends Context {
     @Override
     public File getFileStreamPath(String name) {
         return mBase.getFileStreamPath(name);
+    }
+
+    @Override
+    public File getSharedPreferencesPath(String name) {
+        return mBase.getSharedPreferencesPath(name);
     }
 
     @Override

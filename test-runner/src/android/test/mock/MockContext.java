@@ -130,12 +130,6 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
-    /** @hide */
-    @Override
-    public File getSharedPrefsFile(String name) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public String getPackageCodePath() {
         throw new UnsupportedOperationException();
@@ -168,6 +162,11 @@ public class MockContext extends Context {
 
     @Override
     public File getFileStreamPath(String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File getSharedPreferencesPath(String name) {
         throw new UnsupportedOperationException();
     }
 

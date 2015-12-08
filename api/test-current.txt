@@ -7823,6 +7823,7 @@ package android.content {
     method public abstract android.content.res.Resources getResources();
     method public abstract android.content.SharedPreferences getSharedPreferences(java.lang.String, int);
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
     method public final java.lang.String getString(int);
     method public final java.lang.String getString(int, java.lang.Object...);
     method public abstract java.lang.Object getSystemService(java.lang.String);
@@ -8007,6 +8008,7 @@ package android.content {
     method public android.content.res.Resources getResources();
     method public android.content.SharedPreferences getSharedPreferences(java.lang.String, int);
     method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public java.io.File getSharedPreferencesPath(java.lang.String);
     method public java.lang.Object getSystemService(java.lang.String);
     method public java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public android.content.res.Resources.Theme getTheme();
@@ -28468,6 +28470,7 @@ package android.preference {
     method public android.preference.PreferenceScreen createPreferenceScreen(android.content.Context);
     method public android.preference.Preference findPreference(java.lang.CharSequence);
     method public static android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context);
+    method public static java.lang.String getDefaultSharedPreferencesName(android.content.Context);
     method public android.content.SharedPreferences getSharedPreferences();
     method public int getSharedPreferencesMode();
     method public java.lang.String getSharedPreferencesName();
@@ -36274,6 +36277,7 @@ package android.test.mock {
     method public android.content.res.Resources getResources();
     method public android.content.SharedPreferences getSharedPreferences(java.lang.String, int);
     method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public java.io.File getSharedPreferencesPath(java.lang.String);
     method public java.lang.Object getSystemService(java.lang.String);
     method public java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public android.content.res.Resources.Theme getTheme();

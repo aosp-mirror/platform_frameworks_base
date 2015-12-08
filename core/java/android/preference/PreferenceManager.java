@@ -371,7 +371,13 @@ public class PreferenceManager {
                 getDefaultSharedPreferencesMode());
     }
 
-    private static String getDefaultSharedPreferencesName(Context context) {
+    /**
+     * Returns the name used for storing default shared preferences.
+     *
+     * @see #getDefaultSharedPreferences(Context)
+     * @see Context#getSharedPreferencesPath(String)
+     */
+    public static String getDefaultSharedPreferencesName(Context context) {
         return context.getPackageName() + "_preferences";
     }
 
