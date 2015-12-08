@@ -1135,17 +1135,19 @@ class WindowStateAnimator {
         final boolean isFreeformResizing =
                 w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
         final Rect clipRect = mTmpClipRect;
-        if (isFreeformResizing) {
-            // When we're doing a drag-resizing, the surface is set up to cover full screen.
-            // Set the clip rect to be the same size so that we don't get any scaling.
-            clipRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        } else {
-            // We use the clip rect as provided by the tranformation for non-fullscreen windows to
-            // avoid premature clipping with the system decor rect.
-            clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : mSystemDecorRect);
-            if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Initial clip rect: " + clipRect + ", mHasClipRect="
-                    + mHasClipRect + ", fullscreen=" + fullscreen);
+
+        // We use the clip rect as provided by the tranformation for non-fullscreen windows to
+        // avoid premature clipping with the system decor rect.
+        clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : mSystemDecorRect);
+        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Initial clip rect: " + clipRect + ", mHasClipRect="
+                + mHasClipRect + ", fullscreen=" + fullscreen);
+
+        if (isFreeformResizing && !w.isChildWindow()) {
+            // For freeform resizing non child windows, we are using the big surface positioned
+            // at 0,0. Thus we must express the crop in that coordinate space.
+            clipRect.offset(w.mShownPosition.x, w.mShownPosition.y);
         }
+
         // Expand the clip rect for surface insets.
         final WindowManager.LayoutParams attrs = w.mAttrs;
         clipRect.left -= attrs.surfaceInsets.left;
