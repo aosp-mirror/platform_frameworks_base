@@ -15,8 +15,10 @@
  */
 package android.os;
 
+import android.Manifest;
 import android.accounts.AccountManager;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -1117,6 +1119,39 @@ public class UserManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
             return null;
+        }
+    }
+
+    /**
+     * @return the user's account name, null if not found.
+     * @hide
+     */
+    @RequiresPermission( allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.MANAGE_USERS
+    })
+    public @Nullable String getUserAccount(int userHandle) {
+        try {
+            return mService.getUserAccount(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user account", re);
+            return null;
+        }
+    }
+
+    /**
+     * Set account name for the given user.
+     * @hide
+     */
+    @RequiresPermission( allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.MANAGE_USERS
+    })
+    public void setUserAccount(int userHandle, @Nullable String accountName) {
+        try {
+            mService.setUserAccount(userHandle, accountName);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set user account", re);
         }
     }
 
