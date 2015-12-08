@@ -28,6 +28,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WIND
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_CROP;
 import static com.android.server.wm.WindowManagerDebugConfig.HIDE_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
@@ -127,6 +128,13 @@ class WindowStateAnimator {
     Rect mTmpClipRect = new Rect();
     Rect mLastClipRect = new Rect();
     Rect mTmpStackBounds = new Rect();
+
+    /**
+     * This is rectangle of the window's surface that is not covered by
+     * system decorations.
+     */
+    private final Rect mSystemDecorRect = new Rect();
+    private final Rect mLastSystemDecorRect = new Rect();
 
     // Used to save animation distances between the time they are calculated and when they are used.
     private int mAnimDx;
@@ -599,7 +607,7 @@ class WindowStateAnimator {
             }
 
             // We may abort, so initialize to defaults.
-            w.mLastSystemDecorRect.set(0, 0, 0, 0);
+            mLastSystemDecorRect.set(0, 0, 0, 0);
             mHasClipRect = false;
             mClipRect.set(0, 0, 0, 0);
             mLastClipRect.set(0, 0, 0, 0);
@@ -1048,8 +1056,9 @@ class WindowStateAnimator {
         }
     }
 
-    private void applyDecorRect(final Rect decorRect) {
+    private void calculateSystemDecorRect() {
         final WindowState w = mWin;
+        final Rect decorRect = w.mDecorFrame;
         final int width = w.mFrame.width();
         final int height = w.mFrame.height();
 
@@ -1058,11 +1067,17 @@ class WindowStateAnimator {
         final int top = w.mYOffset + w.mFrame.top;
 
         // Initialize the decor rect to the entire frame.
-        w.mSystemDecorRect.set(0, 0, width, height);
+        mSystemDecorRect.set(0, 0, width, height);
 
-        // Intersect with the decor rect, offsetted by window position.
-        w.mSystemDecorRect.intersect(decorRect.left - left, decorRect.top - top,
-                decorRect.right - left, decorRect.bottom - top);
+        // If a freeform window is animating from a position where it would be cutoff, it would be
+        // cutoff during the animation. We don't want that, so for the duration of the animation
+        // we ignore the decor cropping and depend on layering to position windows correctly.
+        final boolean cropToDecor = !(w.inFreeformWorkspace() && w.isAnimatingLw());
+        if (cropToDecor) {
+            // Intersect with the decor rect, offsetted by window position.
+            mSystemDecorRect.intersect(decorRect.left - left, decorRect.top - top,
+                    decorRect.right - left, decorRect.bottom - top);
+        }
 
         // If size compatibility is being applied to the window, the
         // surface is scaled relative to the screen.  Also apply this
@@ -1072,10 +1087,10 @@ class WindowStateAnimator {
         // much and hide part of the window that should be seen.
         if (w.mEnforceSizeCompat && w.mInvGlobalScale != 1.0f) {
             final float scale = w.mInvGlobalScale;
-            w.mSystemDecorRect.left = (int) (w.mSystemDecorRect.left * scale - 0.5f);
-            w.mSystemDecorRect.top = (int) (w.mSystemDecorRect.top * scale - 0.5f);
-            w.mSystemDecorRect.right = (int) ((w.mSystemDecorRect.right+1) * scale - 0.5f);
-            w.mSystemDecorRect.bottom = (int) ((w.mSystemDecorRect.bottom+1) * scale - 0.5f);
+            mSystemDecorRect.left = (int) (mSystemDecorRect.left * scale - 0.5f);
+            mSystemDecorRect.top = (int) (mSystemDecorRect.top * scale - 0.5f);
+            mSystemDecorRect.right = (int) ((mSystemDecorRect.right+1) * scale - 0.5f);
+            mSystemDecorRect.bottom = (int) ((mSystemDecorRect.bottom+1) * scale - 0.5f);
         }
     }
 
@@ -1086,30 +1101,34 @@ class WindowStateAnimator {
             return;
         }
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Updating crop for window: " + w + ", " + "mLastCrop=" +
+                mLastClipRect);
 
         // Need to recompute a new system decor rect each time.
         if (!w.isDefaultDisplay()) {
             // On a different display there is no system decor.  Crop the window
             // by the screen boundaries.
-            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
-            w.mSystemDecorRect.intersect(-w.mCompatFrame.left, -w.mCompatFrame.top,
+            mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
+            mSystemDecorRect.intersect(-w.mCompatFrame.left, -w.mCompatFrame.top,
                     displayInfo.logicalWidth - w.mCompatFrame.left,
                     displayInfo.logicalHeight - w.mCompatFrame.top);
         } else if (w.mLayer >= mService.mSystemDecorLayer) {
             // Above the decor layer is easy, just use the entire window.
-            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
+            mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
         } else if (w.mDecorFrame.isEmpty()) {
             // Windows without policy decor aren't cropped.
-            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
+            mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
         } else if (w.mAttrs.type == LayoutParams.TYPE_WALLPAPER && mAnimator.isAnimating()) {
             // If we're animating, the wallpaper crop should only be updated at the end of the
             // animation.
-            mTmpClipRect.set(w.mSystemDecorRect);
-            applyDecorRect(w.mDecorFrame);
-            w.mSystemDecorRect.union(mTmpClipRect);
+            mTmpClipRect.set(mSystemDecorRect);
+            calculateSystemDecorRect();
+            mSystemDecorRect.union(mTmpClipRect);
         } else {
             // Crop to the system decor specified by policy.
-            applyDecorRect(w.mDecorFrame);
+            calculateSystemDecorRect();
+            if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Applying decor to crop for " + w + ", mDecorFrame="
+                    + w.mDecorFrame + ", mSystemDecorRect=" + mSystemDecorRect);
         }
 
         final boolean fullscreen = w.isFrameFullscreen(displayInfo);
@@ -1123,7 +1142,9 @@ class WindowStateAnimator {
         } else {
             // We use the clip rect as provided by the tranformation for non-fullscreen windows to
             // avoid premature clipping with the system decor rect.
-            clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : w.mSystemDecorRect);
+            clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : mSystemDecorRect);
+            if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Initial clip rect: " + clipRect + ", mHasClipRect="
+                    + mHasClipRect + ", fullscreen=" + fullscreen);
         }
         // Expand the clip rect for surface insets.
         final WindowManager.LayoutParams attrs = w.mAttrs;
@@ -1143,6 +1164,7 @@ class WindowStateAnimator {
         clipRect.offset(attrs.surfaceInsets.left, attrs.surfaceInsets.top);
 
         adjustCropToStackBounds(w, clipRect, isFreeformResizing);
+        if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Clip rect after stack adjustment=" + mClipRect);
 
         w.transformFromScreenToSurfaceSpace(clipRect);
 
@@ -1160,13 +1182,14 @@ class WindowStateAnimator {
         }
 
         // We don't apply the stack bounds crop if:
-        // 1. The window is currently animating docked mode, otherwise the animating window will be
-        // suddenly cut off.
+        // 1. The window is currently animating docked mode or in freeform mode, otherwise the
+        // animating window will be suddenly (docked) or for whole animation (freeform) cut off.
         // 2. The window that is being replaced during animation, because it was living in a
         // different stack. If we suddenly crop it to the new stack bounds, it might get cut off.
         // We don't want it to happen, so we let it ignore the stack bounds until it gets removed.
         // The window that will replace it will abide them.
-        if (isAnimating() && (appToken.mWillReplaceWindow || w.inDockedWorkspace())) {
+        if (isAnimating() && (appToken.mWillReplaceWindow || w.inDockedWorkspace()
+                || w.inFreeformWorkspace())) {
             return;
         }
 
@@ -1646,6 +1669,12 @@ class WindowStateAnimator {
         if (dumpAll) {
             pw.print(prefix); pw.print("mDrawState="); pw.print(drawStateToString());
             pw.print(prefix); pw.print(" mLastHidden="); pw.println(mLastHidden);
+            pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
+            pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
+            if (mHasClipRect) {
+                pw.print(" mLastClipRect="); mLastClipRect.printShortString(pw);
+            }
+            pw.println();
         }
 
         if (mPendingDestroySurface != null) {
