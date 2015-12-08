@@ -180,6 +180,7 @@ final class ActivityRecord {
     private boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
     boolean mStartingWindowShown = false;
+    boolean mUpdateTaskThumbnailWhenHidden;
     ActivityContainer mInitialActivityContainer;
 
     TaskDescription taskDescription; // the recents information for this activity

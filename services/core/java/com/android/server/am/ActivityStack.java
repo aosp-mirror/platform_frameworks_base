@@ -925,7 +925,7 @@ final class ActivityStack {
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
         if (mService.mHasRecents
                 && (next == null || next.noDisplay || next.task != prev.task || uiSleeping)) {
-            prev.updateThumbnailLocked(screenshotActivitiesLocked(prev), null);
+            prev.mUpdateTaskThumbnailWhenHidden = true;
         }
         stopFullyDrawnTraceIfNeeded();
 
@@ -1221,6 +1221,10 @@ final class ActivityStack {
 
     private void setVisible(ActivityRecord r, boolean visible) {
         r.visible = visible;
+        if (!visible && r.mUpdateTaskThumbnailWhenHidden) {
+            r.updateThumbnailLocked(r.task.stack.screenshotActivitiesLocked(r), null);
+            r.mUpdateTaskThumbnailWhenHidden = false;
+        }
         mWindowManager.setAppVisibility(r.appToken, visible);
         final ArrayList<ActivityContainer> containers = r.mChildContainers;
         for (int containerNdx = containers.size() - 1; containerNdx >= 0; --containerNdx) {
