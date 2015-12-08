@@ -17,7 +17,6 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
@@ -28,6 +27,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -89,6 +89,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.documentsui.BaseActivity;
+import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.CopyService;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
@@ -101,20 +102,18 @@ import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.MimePredicate;
 import com.android.documentsui.ProviderExecutor;
+import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentLoader;
 import com.android.documentsui.RecentsProvider;
+import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.RootsCache;
+import com.android.documentsui.Shared;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
 import com.android.documentsui.ThumbnailCache;
-import com.android.documentsui.BaseActivity.DocumentContext;
-import com.android.documentsui.ProviderExecutor.Preemptable;
-import com.android.documentsui.Shared;
-import com.android.documentsui.RecentsProvider.StateColumns;
-import com.android.documentsui.dirlist.MultiSelectManager.Callback;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -770,7 +769,9 @@ public class DirectoryFragment extends Fragment {
                     return true;
 
                 case R.id.menu_copy_to_clipboard:
-                    copySelectionToClipboard(selection);
+                    if (!selection.isEmpty()) {
+                        copySelectionToClipboard(selection);
+                    }
                     return true;
 
                 case R.id.menu_select_all:
@@ -1359,11 +1360,14 @@ public class DirectoryFragment extends Fragment {
     }
 
     public void copySelectedToClipboard() {
-        Selection sel = mSelectionManager.getSelection(new Selection());
-        copySelectionToClipboard(sel);
+        Selection selection = mSelectionManager.getSelection(new Selection());
+        if (!selection.isEmpty()) {
+            copySelectionToClipboard(selection);
+        }
     }
 
-    void copySelectionToClipboard(Selection items) {
+    void copySelectionToClipboard(Selection selection) {
+        checkArgument(!selection.isEmpty());
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
@@ -1374,7 +1378,7 @@ public class DirectoryFragment extends Fragment {
                                 R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
                                 Snackbar.LENGTH_SHORT).show();
             }
-        }.execute(items);
+        }.execute(selection);
     }
 
     public void pasteFromClipboard() {
