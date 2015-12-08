@@ -139,19 +139,19 @@ public final class Pm {
         }
 
         if ("install-create".equals(op)) {
-            return runInstallSession();
+            return runInstallCreate();
         }
 
         if ("install-write".equals(op)) {
-            return runInstallSession();
+            return runInstallWrite();
         }
 
         if ("install-commit".equals(op)) {
-            return runInstallSession();
+            return runInstallCommit();
         }
 
         if ("install-abandon".equals(op) || "install-destroy".equals(op)) {
-            return runInstallSession();
+            return runInstallAbandon();
         }
 
         if ("set-installer".equals(op)) {
@@ -346,21 +346,203 @@ public final class Pm {
         throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
     }
 
-    private void writeSessionFile(int sessionId, String path, long sizeBytes) throws RemoteException {
+    /*
+     * Keep this around to support existing users of the "pm install" command that may not be
+     * able to be updated [or, at least informed the API has changed] such as ddmlib.
+     *
+     * Moving the implementation of "pm install" to "cmd package install" changes the executing
+     * context. Instead of being a stand alone process, "cmd package install" runs in the
+     * system_server process. Due to SELinux rules, system_server cannot access many directories;
+     * one of which being the package install staging directory [/data/local/tmp].
+     *
+     * The use of "adb install" or "cmd package install" over "pm install" is highly encouraged.
+     */
+    private int runInstall() throws RemoteException {
+        final InstallParams params = makeInstallParams();
+        final int sessionId = doCreateSession(params.sessionParams,
+                params.installerPackageName, params.userId);
+
+        try {
+            final String inPath = nextArg();
+            if (inPath == null && params.sessionParams.sizeBytes == 0) {
+                System.err.println("Error: must either specify a package size or an APK file");
+                return 1;
+            }
+            if (doWriteSession(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
+                    false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            if (doCommitSession(sessionId, false /*logSuccess*/)
+                    != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            return 0;
+        } finally {
+            try {
+                mInstaller.abandonSession(sessionId);
+            } catch (Exception ignore) {
+            }
+        }
+    }
+
+    private int runInstallAbandon() throws RemoteException {
+        final int sessionId = Integer.parseInt(nextArg());
+        return doAbandonSession(sessionId, true /*logSuccess*/);
+    }
+
+    private int runInstallCommit() throws RemoteException {
+        final int sessionId = Integer.parseInt(nextArg());
+        return doCommitSession(sessionId, true /*logSuccess*/);
+    }
+
+    private int runInstallCreate() throws RemoteException {
+        final InstallParams installParams = makeInstallParams();
+        final int sessionId = doCreateSession(installParams.sessionParams,
+                installParams.installerPackageName, installParams.userId);
+
+        // NOTE: adb depends on parsing this string
+        System.out.println("Success: created install session [" + sessionId + "]");
+        return PackageInstaller.STATUS_SUCCESS;
+    }
+
+    private int runInstallWrite() throws RemoteException {
+        long sizeBytes = -1;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("-S")) {
+                sizeBytes = Long.parseLong(nextArg());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + opt);
+            }
+        }
+
+        final int sessionId = Integer.parseInt(nextArg());
+        final String splitName = nextArg();
+        final String path = nextArg();
+        return doWriteSession(sessionId, path, sizeBytes, splitName, true /*logSuccess*/);
+    }
+
+    private static class InstallParams {
+        SessionParams sessionParams;
+        String installerPackageName;
+        int userId = UserHandle.USER_ALL;
+    }
+
+    private InstallParams makeInstallParams() {
+        final SessionParams sessionParams = new SessionParams(SessionParams.MODE_FULL_INSTALL);
+        final InstallParams params = new InstallParams();
+        params.sessionParams = sessionParams;
+        String opt;
+        while ((opt = nextOption()) != null) {
+            switch (opt) {
+                case "-l":
+                    sessionParams.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
+                    break;
+                case "-r":
+                    sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+                    break;
+                case "-i":
+                    params.installerPackageName = nextArg();
+                    if (params.installerPackageName == null) {
+                        throw new IllegalArgumentException("Missing installer package");
+                    }
+                    break;
+                case "-t":
+                    sessionParams.installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+                    break;
+                case "-s":
+                    sessionParams.installFlags |= PackageManager.INSTALL_EXTERNAL;
+                    break;
+                case "-f":
+                    sessionParams.installFlags |= PackageManager.INSTALL_INTERNAL;
+                    break;
+                case "-d":
+                    sessionParams.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+                    break;
+                case "-g":
+                    sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+                    break;
+                case "--originating-uri":
+                    sessionParams.originatingUri = Uri.parse(nextOptionData());
+                    break;
+                case "--referrer":
+                    sessionParams.referrerUri = Uri.parse(nextOptionData());
+                    break;
+                case "-p":
+                    sessionParams.mode = SessionParams.MODE_INHERIT_EXISTING;
+                    sessionParams.appPackageName = nextOptionData();
+                    if (sessionParams.appPackageName == null) {
+                        throw new IllegalArgumentException("Missing inherit package name");
+                    }
+                    break;
+                case "-S":
+                    sessionParams.setSize(Long.parseLong(nextOptionData()));
+                    break;
+                case "--abi":
+                    sessionParams.abiOverride = checkAbiArgument(nextOptionData());
+                    break;
+                case "--ephemeral":
+                    sessionParams.installFlags |= PackageManager.INSTALL_EPHEMERAL;
+                    break;
+                case "--user":
+                    params.userId = UserHandle.parseUserArg(nextOptionData());
+                    break;
+                case "--install-location":
+                    sessionParams.installLocation = Integer.parseInt(nextOptionData());
+                    break;
+                case "--force-uuid":
+                    sessionParams.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
+                    sessionParams.volumeUuid = nextOptionData();
+                    if ("internal".equals(sessionParams.volumeUuid)) {
+                        sessionParams.volumeUuid = null;
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown option " + opt);
+            }
+        }
+        return params;
+    }
+
+    private int doCreateSession(SessionParams params, String installerPackageName, int userId)
+            throws RemoteException {
+        userId = translateUserId(userId, "runInstallCreate");
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
+        }
+
+        final int sessionId = mInstaller.createSession(params, installerPackageName, userId);
+        return sessionId;
+    }
+
+    private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName,
+            boolean logSuccess) throws RemoteException {
+        if ("-".equals(inPath)) {
+            inPath = null;
+        } else if (inPath != null) {
+            final File file = new File(inPath);
+            if (file.isFile()) {
+                sizeBytes = file.length();
+            }
+        }
+
         final SessionInfo info = mInstaller.getSessionInfo(sessionId);
 
         PackageInstaller.Session session = null;
         InputStream in = null;
         OutputStream out = null;
         try {
-            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+            session = new PackageInstaller.Session(
+                    mInstaller.openSession(sessionId));
 
-            if (path == null) {
-                in = new SizedInputStream(System.in, sizeBytes);
+            if (inPath != null) {
+                in = new FileInputStream(inPath);
             } else {
-                in = new FileInputStream(path);
+                in = new SizedInputStream(System.in, sizeBytes);
             }
-            out = session.openWrite("base.apk", 0, sizeBytes);
+            out = session.openWrite(splitName, 0, sizeBytes);
 
             int total = 0;
             byte[] buffer = new byte[65536];
@@ -375,7 +557,14 @@ public final class Pm {
                 }
             }
             session.fsync(out);
-        } catch (IOException ignore) {
+
+            if (logSuccess) {
+                System.out.println("Success: streamed " + total + " bytes");
+            }
+            return PackageInstaller.STATUS_SUCCESS;
+        } catch (IOException e) {
+            System.err.println("Error: failed to write; " + e.getMessage());
+            return PackageInstaller.STATUS_FAILURE;
         } finally {
             IoUtils.closeQuietly(out);
             IoUtils.closeQuietly(in);
@@ -383,10 +572,11 @@ public final class Pm {
         }
     }
 
-    private int commitSessionFile(int sessionId) throws RemoteException {
+    private int doCommitSession(int sessionId, boolean logSuccess) throws RemoteException {
         PackageInstaller.Session session = null;
         try {
-            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+            session = new PackageInstaller.Session(
+                    mInstaller.openSession(sessionId));
 
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
             session.commit(receiver.getIntentSender());
@@ -395,10 +585,13 @@ public final class Pm {
             final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_FAILURE);
             if (status == PackageInstaller.STATUS_SUCCESS) {
-                System.out.println("Success");
+                if (logSuccess) {
+                    System.out.println("Success");
+                }
             } else {
                 System.err.println("Failure ["
                         + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+                System.err.println("Failure details: " + result.getExtras());
             }
             return status;
         } finally {
@@ -406,100 +599,18 @@ public final class Pm {
         }
     }
 
-    /*
-     * Keep this around to support existing users of the "pm install" command that may not be
-     * able to be updated [or, at least informed the API has changed] such as ddmlib.
-     *
-     * Moving the implementation of "pm install" to "cmd package install" changes the executing
-     * context. Instead of being a stand alone process, "cmd package install" runs in the
-     * system_server process. Due to SELinux rules, system_server cannot access many directories;
-     * one of which being the package install staging directory [/data/local/tmp].
-     *
-     * The use of "adb install" or "cmd package install" over "pm install" is highly encouraged.
-     */
-    private int runInstall() throws RemoteException {
-        int userId = UserHandle.USER_ALL;
-        String installerPackageName = null;
-
-        final SessionParams params = new SessionParams(SessionParams.MODE_FULL_INSTALL);
-
-        String opt;
-        while ((opt = nextOption()) != null) {
-            if (opt.equals("-l")) {
-                params.installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
-            } else if (opt.equals("-r")) {
-                params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
-            } else if (opt.equals("-i")) {
-                installerPackageName = nextArg();
-                if (installerPackageName == null) {
-                    throw new IllegalArgumentException("Missing installer package");
-                }
-            } else if (opt.equals("-t")) {
-                params.installFlags |= PackageManager.INSTALL_ALLOW_TEST;
-            } else if (opt.equals("-s")) {
-                params.installFlags |= PackageManager.INSTALL_EXTERNAL;
-            } else if (opt.equals("-f")) {
-                params.installFlags |= PackageManager.INSTALL_INTERNAL;
-            } else if (opt.equals("-d")) {
-                params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
-            } else if (opt.equals("-g")) {
-                params.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
-            } else if (opt.equals("--originating-uri")) {
-                params.originatingUri = Uri.parse(nextOptionData());
-            } else if (opt.equals("--referrer")) {
-                params.referrerUri = Uri.parse(nextOptionData());
-            } else if (opt.equals("-p")) {
-                params.mode = SessionParams.MODE_INHERIT_EXISTING;
-                params.appPackageName = nextOptionData();
-                if (params.appPackageName == null) {
-                    throw new IllegalArgumentException("Missing inherit package name");
-                }
-            } else if (opt.equals("-S")) {
-                params.setSize(Long.parseLong(nextOptionData()));
-            } else if (opt.equals("--abi")) {
-                params.abiOverride = checkAbiArgument(nextOptionData());
-            } else if (opt.equals("--ephemeral")) {
-                params.installFlags |= PackageManager.INSTALL_EPHEMERAL;
-            } else if (opt.equals("--user")) {
-                userId = Integer.parseInt(nextOptionData());
-            } else if (opt.equals("--install-location")) {
-                params.installLocation = Integer.parseInt(nextOptionData());
-            } else if (opt.equals("--force-uuid")) {
-                params.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
-                params.volumeUuid = nextOptionData();
-                if ("internal".equals(params.volumeUuid)) {
-                    params.volumeUuid = null;
-                }
-            } else {
-                throw new IllegalArgumentException("Unknown option " + opt);
+    private int doAbandonSession(int sessionId, boolean logSuccess) throws RemoteException {
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
+            session.abandon();
+            if (logSuccess) {
+                System.out.println("Success");
             }
+            return PackageInstaller.STATUS_SUCCESS;
+        } finally {
+            IoUtils.closeQuietly(session);
         }
-
-        userId = translateUserId(userId, "runInstallCreate");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
-        }
-
-        long sizeBytes = params.sizeBytes;
-        String path = nextArg();
-        if ("-".equals(path)) {
-            path = null;
-        } else if (path != null) {
-            final File file = new File(path);
-            if (file.isFile()) {
-                sizeBytes = file.length();
-            }
-        }
-
-        final int sessionId = mInstaller.createSession(params, installerPackageName, userId);
-
-        writeSessionFile(sessionId, path, sizeBytes);
-        return commitSessionFile(sessionId);
-    }
-
-    private int runInstallSession() {
-        return runShellCommand("package", mArgs);
     }
 
     /**
