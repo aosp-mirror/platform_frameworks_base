@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -126,7 +125,6 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         final boolean newValue = zen != Global.ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;
         state.value = newValue;
-        state.visible = isVisible(mContext);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
@@ -214,6 +212,10 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             refreshState();
         }
     };
+
+    public static boolean isSupported(Host host) {
+        return isVisible(host.getContext());
+    }
 
     private final class DndDetailAdapter implements DetailAdapter, OnAttachStateChangeListener {
 

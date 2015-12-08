@@ -67,17 +67,19 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     @Override
     protected void handleUpdateState(State state, Object arg) {
         final Pair<String, Drawable> p = arg != null ? (Pair<String, Drawable>) arg : mLastUpdate;
-        state.visible = p != null;
-        if (!state.visible) return;
-        state.label = p.first;
-        // TODO: Better content description.
-        state.contentDescription = p.first;
-        state.icon = new Icon() {
-            @Override
-            public Drawable getDrawable(Context context) {
-                return p.second;
-            }
-        };
+        if (p != null) {
+            state.label = p.first;
+            // TODO: Better content description.
+            state.contentDescription = p.first;
+            state.icon = new Icon() {
+                @Override
+                public Drawable getDrawable(Context context) {
+                    return p.second;
+                }
+            };
+        } else {
+            // TODO: Default state.
+        }
     }
 
     @Override

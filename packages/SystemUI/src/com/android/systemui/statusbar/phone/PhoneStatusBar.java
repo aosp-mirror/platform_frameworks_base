@@ -2233,6 +2233,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHandler.post(mAnimateCollapsePanels);
     }
 
+    public void postAnimateOpenPanels() {
+        mHandler.sendEmptyMessage(MSG_OPEN_SETTINGS_PANEL);
+    }
+
     public void animateCollapsePanels(int flags) {
         animateCollapsePanels(flags, false /* force */, false /* delayed */,
                 1.0f /* speedUpFactor */);
@@ -3280,6 +3284,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public boolean shouldDisableNavbarGestures() {
         return !isDeviceProvisioned() || (mDisabled1 & StatusBarManager.DISABLE_SEARCH) != 0;
+    }
+
+    public void postQSRunnableDismissingKeyguard(final Runnable runnable) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLeaveOpenOnKeyguardHide = true;
+                executeRunnableDismissingKeyguard(runnable, null, false, true);
+            }
+        });
     }
 
     public void postStartActivityDismissingKeyguard(final PendingIntent intent) {

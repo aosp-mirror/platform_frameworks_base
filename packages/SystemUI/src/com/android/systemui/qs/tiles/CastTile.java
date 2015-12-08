@@ -23,12 +23,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
-import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -87,14 +85,23 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
+        if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
+            mHost.startRunnableDismissingKeyguard(new Runnable() {
+                @Override
+                public void run() {
+                    MetricsLogger.action(mContext, getMetricsCategory());
+                    showDetail(true);
+                    mHost.openPanels();
+                }
+            });
+            return;
+        }
         MetricsLogger.action(mContext, getMetricsCategory());
         showDetail(true);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = !mKeyguard.isSecure() || !mKeyguard.isShowing()
-                || mKeyguard.canSkipBouncer() || QSPanel.isTheNewQS(mContext);
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.value = false;
         state.autoMirrorDrawable = false;

@@ -17,7 +17,6 @@
 package com.android.systemui.qs.tiles;
 
 import android.app.ActivityManager;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -71,7 +70,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = mFlashlightController.isAvailable();
+        // TODO: Flashlight available handling...
+//        state.visible = mFlashlightController.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         if (arg instanceof UserBoolean) {
             boolean value = ((UserBoolean) arg).value;

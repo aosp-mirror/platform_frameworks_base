@@ -17,14 +17,10 @@
 package com.android.systemui.qs.tiles;
 
 import android.provider.Settings.Secure;
-
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
-import com.android.systemui.qs.UsageTracker;
 
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
@@ -34,7 +30,6 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mDisable
             = new AnimationIcon(R.drawable.ic_invert_colors_disable_animation);
     private final SecureSetting mSetting;
-    private final UsageTracker mUsageTracker;
 
     private boolean mListening;
 
@@ -45,28 +40,14 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
-                if (value != 0 || observedChange) {
-                    mUsageTracker.trackUsage();
-                }
-                if (mListening) {
-                    handleRefreshState(value);
-                }
+                handleRefreshState(value);
             }
         };
-        mUsageTracker = new UsageTracker(host.getContext(),
-                Prefs.Key.COLOR_INVERSION_TILE_LAST_USED, ColorInversionTile.class,
-                R.integer.days_to_show_color_inversion_tile);
-        if (mSetting.getValue() != 0 && !mUsageTracker.isRecentlyUsed()) {
-            mUsageTracker.trackUsage();
-        }
-        mUsageTracker.setListening(true);
-        mSetting.setListening(true);
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mUsageTracker.setListening(false);
         mSetting.setListening(false);
     }
 
@@ -77,7 +58,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void setListening(boolean listening) {
-        mListening = listening;
+        mSetting.setListening(listening);
     }
 
     @Override
@@ -95,23 +76,9 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleLongClick() {
-        if (mState.value) return;  // don't allow usage reset if inversion is active
-        final String title = mContext.getString(R.string.quick_settings_reset_confirmation_title,
-                mState.label);
-        mUsageTracker.showResetConfirmation(title, new Runnable() {
-            @Override
-            public void run() {
-                refreshState();
-            }
-        });
-    }
-
-    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
-        state.visible = enabled || mUsageTracker.isRecentlyUsed() || QSPanel.isTheNewQS(mContext);
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = enabled ? mEnable : mDisable;

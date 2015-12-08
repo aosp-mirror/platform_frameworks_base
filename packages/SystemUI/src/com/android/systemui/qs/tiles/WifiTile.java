@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
@@ -112,7 +113,6 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
-        state.visible = true;
         if (DEBUG) Log.d(TAG, "handleUpdateState arg=" + arg);
         CallbackInfo cb = (CallbackInfo) arg;
         if (cb == null) {
@@ -186,6 +186,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             return string.substring(1, length - 1);
         }
         return string;
+    }
+
+    public static boolean isSupported(Host host) {
+        return host.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
     }
 
     protected static final class CallbackInfo {

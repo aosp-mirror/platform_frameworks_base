@@ -54,11 +54,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         super.removeAllViews();
     }
 
-    @Override
-    public void setTileVisibility(TileRecord tile, int visibility) {
-        tile.tileView.setVisibility(visibility);
-    }
-
     public void updateResources() {
         final Resources res = mContext.getResources();
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));

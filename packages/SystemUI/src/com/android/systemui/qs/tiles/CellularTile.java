@@ -87,8 +87,6 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
-        state.visible = mController.hasMobileDataFeature();
-        if (!state.visible) return;
         CallbackInfo cb = (CallbackInfo) arg;
         if (cb == null) {
             cb = mSignalCallback.mInfo;
@@ -136,6 +134,10 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             return string.substring(0, length - 1);
         }
         return string;
+    }
+
+    public static boolean isSupported(Host host) {
+        return host.getNetworkController().hasMobileDataFeature();
     }
 
     private static final class CallbackInfo {

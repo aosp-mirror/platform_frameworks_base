@@ -22,14 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
-import android.os.IUserManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.ArraySet;
-import android.util.Log;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -110,8 +104,7 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (!hasActiveProfile()) {
-            state.visible = false;
-            state.value = false;
+            mHost.removeTile(getTileSpec());
             return;
         }
 
@@ -124,7 +117,6 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> {
             userInitialized = false;
         }
 
-        state.visible = true;
         final AnimationIcon icon;
         state.label = mContext.getString(R.string.quick_settings_work_mode_label);
         if (state.value) {

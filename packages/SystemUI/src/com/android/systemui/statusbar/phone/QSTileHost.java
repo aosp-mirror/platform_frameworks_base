@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,10 +28,11 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.Tile;
+import android.text.TextUtils;
 import android.util.Log;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
@@ -160,6 +162,11 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
     }
 
     @Override
+    public void startRunnableDismissingKeyguard(Runnable runnable) {
+        mStatusBar.postQSRunnableDismissingKeyguard(runnable);
+    }
+
+    @Override
     public void warn(String message, Throwable t) {
         // already logged
     }
@@ -167,6 +174,11 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
     @Override
     public void collapsePanels() {
         mStatusBar.postAnimateCollapsePanels();
+    }
+
+    @Override
+    public void openPanels() {
+        mStatusBar.postAnimateOpenPanels();
     }
 
     @Override
@@ -267,8 +279,10 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
                     QSTile<?> tile = createTile(tileSpec);
-                    tile.setTileSpec(tileSpec);
-                    newTiles.put(tileSpec, tile);
+                    if (tile != null) {
+                        tile.setTileSpec(tileSpec);
+                        newTiles.put(tileSpec, tile);
+                    }
                 } catch (Throwable t) {
                     Log.w(TAG, "Error creating tile for spec: " + tileSpec, t);
                 }
@@ -281,6 +295,14 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).onTilesChanged();
         }
+    }
+
+    @Override
+    public void removeTile(String tileSpec) {
+        ArrayList<String> specs = new ArrayList<>(mTileSpecs);
+        specs.remove(tileSpec);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
+                TextUtils.join(",", specs), ActivityManager.getCurrentUser());
     }
 
     @Override
@@ -328,13 +350,17 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
     }
 
     public QSTile<?> createTile(String tileSpec) {
-        if (tileSpec.equals("wifi")) return new WifiTile(this);
-        else if (tileSpec.equals("bt")) return new BluetoothTile(this);
+        if (tileSpec.equals("wifi")) return WifiTile.isSupported(this)
+                ? new WifiTile(this) : null;
+        else if (tileSpec.equals("bt")) return BluetoothTile.isSupported(this)
+                ? new BluetoothTile(this) : null;
+        else if (tileSpec.equals("cell")) return CellularTile.isSupported(this)
+                ? new CellularTile(this) : null;
+        else if (tileSpec.equals("dnd")) return DndTile.isSupported(this)
+                ? new DndTile(this) : null;
         else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
-        else if (tileSpec.equals("cell")) return new CellularTile(this);
         else if (tileSpec.equals("airplane")) return new AirplaneModeTile(this);
         else if (tileSpec.equals("work")) return new WorkModeTile(this);
-        else if (tileSpec.equals("dnd")) return new DndTile(this);
         else if (tileSpec.equals("rotation")) return new RotationLockTile(this);
         else if (tileSpec.equals("flashlight")) return new FlashlightTile(this);
         else if (tileSpec.equals("location")) return new LocationTile(this);

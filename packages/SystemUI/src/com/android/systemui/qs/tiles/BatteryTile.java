@@ -73,7 +73,6 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         int level = (arg != null) ? (Integer) arg : mLevel;
         String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
 
-        state.visible = true;
         state.icon = new Icon() {
             @Override
             public Drawable getDrawable(Context context) {
