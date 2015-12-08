@@ -107,7 +107,22 @@ class DisplayAdjustmentUtils {
             setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
         }
 
+        String matrix = Settings.Secure.getStringForUser(cr,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, userId);
+        if (matrix != null) {
+            colorMatrix = multiply(colorMatrix, getMatrix(matrix));
+        }
+
         setColorTransform(colorMatrix);
+    }
+
+    private static float[] getMatrix(String matrix) {
+        String[] strValues = matrix.split(",");
+        float[] values = new float[strValues.length];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = Float.parseFloat(strValues[i]);
+        }
+        return values;
     }
 
     private static float[] multiply(float[] matrix, float[] other) {

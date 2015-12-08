@@ -3987,6 +3987,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mDisplayDaltonizerUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER);
 
+        private final Uri mDisplayColorMatrixUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX);
+
         private final Uri mHighTextContrastUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
 
@@ -4016,6 +4019,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     mDisplayDaltonizerEnabledUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mDisplayDaltonizerUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mDisplayColorMatrixUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mHighTextContrastUri, false, this, UserHandle.USER_ALL);
         }
@@ -4066,6 +4071,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (readDisplayColorAdjustmentSettingsLocked(userState)) {
                         updateDisplayColorAdjustmentSettingsLocked(userState);
                     }
+                } else if (mDisplayColorMatrixUri.equals(uri)) {
+                    updateDisplayColorAdjustmentSettingsLocked(userState);
                 } else if (mHighTextContrastUri.equals(uri)) {
                     if (readHighTextContrastEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
