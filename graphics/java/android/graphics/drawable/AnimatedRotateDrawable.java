@@ -153,7 +153,7 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
                 updateStateFromTypedArray(a);
                 verifyRequiredAttributes(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }

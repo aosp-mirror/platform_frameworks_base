@@ -829,7 +829,7 @@ public class BitmapDrawable extends Drawable {
             try {
                 updateStateFromTypedArray(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }
