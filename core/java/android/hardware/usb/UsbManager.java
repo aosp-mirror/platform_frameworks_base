@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -451,6 +452,21 @@ public class UsbManager {
             mService.requestAccessoryPermission(accessory, mContext.getPackageName(), pi);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in requestPermission", e);
+        }
+    }
+
+    /**
+     * Grants permission for USB device without showing system dialog.
+     * Only system components can call this function.
+     * @param device to request permissions for
+     *
+     * {@hide}
+     */
+    public void grantPermission(UsbDevice device) {
+        try {
+            mService.grantDevicePermission(device, Process.myUid());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in grantPermission", e);
         }
     }
 

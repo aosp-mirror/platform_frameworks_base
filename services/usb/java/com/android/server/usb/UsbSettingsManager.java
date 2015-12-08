@@ -52,12 +52,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -984,14 +982,7 @@ class UsbSettingsManager {
     public boolean hasPermission(UsbDevice device) {
         synchronized (mLock) {
             int uid = Binder.getCallingUid();
-            int androidMediaUid;
-            try {
-                androidMediaUid = mPackageManager.getApplicationInfo("com.android.mtp", 0).uid;
-            } catch (NameNotFoundException e) {
-                androidMediaUid = -1;
-            }
-            if (uid == Process.SYSTEM_UID || UserHandle.getAppId(uid) == androidMediaUid ||
-                    mDisablePermissionDialogs) {
+            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
                 return true;
             }
             SparseBooleanArray uidList = mDevicePermissionMap.get(device.getDeviceName());
