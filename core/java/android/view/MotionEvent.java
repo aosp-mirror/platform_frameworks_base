@@ -962,6 +962,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int AXIS_TILT = 25;
 
     /**
+     * Axis constant: Generic scroll axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>Reports the relative movement of the generic scrolling device.
+     * </ul>
+     * </p><p>
+     * This axis should be used for scroll events that are neither strictly vertical nor horizontal.
+     * A good example would be the rotation of a rotary encoder input device.
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * {@hide}
+     */
+    public static final int AXIS_SCROLL = 26;
+
+    /**
      * Axis constant: Generic 1 axis of a motion event.
      * The interpretation of a generic axis is device-specific.
      *
@@ -1171,6 +1187,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_BRAKE, "AXIS_BRAKE");
         names.append(AXIS_DISTANCE, "AXIS_DISTANCE");
         names.append(AXIS_TILT, "AXIS_TILT");
+        names.append(AXIS_SCROLL, "AXIS_SCROLL");
         names.append(AXIS_GENERIC_1, "AXIS_GENERIC_1");
         names.append(AXIS_GENERIC_2, "AXIS_GENERIC_2");
         names.append(AXIS_GENERIC_3, "AXIS_GENERIC_3");
