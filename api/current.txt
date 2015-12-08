@@ -29683,6 +29683,7 @@ package android.provider {
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/email_v2";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DISPLAY_NAME = "data4";
+    field public static final android.net.Uri ENTERPRISE_CONTENT_FILTER_URI;
     field public static final android.net.Uri ENTERPRISE_CONTENT_LOOKUP_URI;
     field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
     field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
