@@ -20,11 +20,13 @@ import android.util.AttributeSet;
 import android.util.Xml;
 
 import com.android.internal.R;
-import com.google.caliper.SimpleBenchmark;
 
 import org.xmlpull.v1.XmlPullParser;
 
-public class ResourcesBenchmark extends SimpleBenchmark {
+import com.google.caliper.AfterExperiment;
+import com.google.caliper.BeforeExperiment;
+
+public class ResourcesBenchmark {
 
     private AssetManager mAsset;
     private Resources mRes;
@@ -34,7 +36,7 @@ public class ResourcesBenchmark extends SimpleBenchmark {
     private int mIntegerId;
     private int mLayoutId;
 
-    @Override
+    @BeforeExperiment
     protected void setUp() {
         mAsset = new AssetManager();
         mAsset.addAssetPath("/system/framework/framework-res.apk");
@@ -46,7 +48,7 @@ public class ResourcesBenchmark extends SimpleBenchmark {
         mLayoutId = mRes.getIdentifier("two_line_list_item", "layout", "android");
     }
 
-    @Override
+    @AfterExperiment
     protected void tearDown() {
         mAsset.close();
     }
