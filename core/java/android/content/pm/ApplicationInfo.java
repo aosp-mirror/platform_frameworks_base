@@ -591,13 +591,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String[] sharedLibraryFiles;
     
     /**
-     * Full path to a directory assigned to the package for its persistent data.
+     * Full path to the default directory assigned to the package for its
+     * persistent data.
      */
     public String dataDir;
 
-    /** {@hide} */
+    /**
+     * Full path to the device-encrypted directory assigned to the package for
+     * its persistent data.
+     */
     public String deviceEncryptedDataDir;
-    /** {@hide} */
+
+    /**
+     * Full path to the credential-encrypted directory assigned to the package
+     * for its persistent data.
+     */
     public String credentialEncryptedDataDir;
 
     /**

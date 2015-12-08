@@ -1377,18 +1377,6 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public File getDeviceEncryptedFilesDir() {
-        // pass
-        return null;
-    }
-
-    @Override
-    public File getCredentialEncryptedFilesDir() {
-        // pass
-        return null;
-    }
-
-    @Override
     public File getNoBackupFilesDir() {
         // pass
         return null;
@@ -1813,5 +1801,27 @@ public final class BridgeContext extends Context {
     public int getScrollYPos(@NonNull View view) {
         Integer pos = mScrollYPos.get(view);
         return pos != null ? pos : 0;
+    }
+
+    @Override
+    public Context createDeviceEncryptedContext(Context context) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public Context createCredentialEncryptedContext(Context context) {
+        // pass
+        return null;
+    }
+
+    @Override
+    public boolean isDeviceEncrypted() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialEncrypted() {
+        return false;
     }
 }

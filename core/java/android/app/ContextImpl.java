@@ -74,6 +74,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -148,7 +149,7 @@ class ContextImpl extends Context {
     private final Display mDisplay; // may be null if default display
     private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
 
-    private final boolean mRestricted;
+    private final int mFlags;
 
     private Context mOuterContext;
     private int mThemeResource = 0;
@@ -440,22 +441,6 @@ class ContextImpl extends Context {
             }
             return createFilesDirLocked(mFilesDir);
         }
-    }
-
-    @Override
-    public File getDeviceEncryptedFilesDir() {
-        if (mPackageInfo != null) {
-            return mPackageInfo.getDeviceEncryptedDataDirFile();
-        }
-        throw new RuntimeException("Not supported in system context");
-    }
-
-    @Override
-    public File getCredentialEncryptedFilesDir() {
-        if (mPackageInfo != null) {
-            return mPackageInfo.getCredentialEncryptedDataDirFile();
-        }
-        throw new RuntimeException("Not supported in system context");
     }
 
     @Override
@@ -1684,9 +1669,8 @@ class ContextImpl extends Context {
         LoadedApk pi = mMainThread.getPackageInfo(application, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE);
         if (pi != null) {
-            final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    new UserHandle(UserHandle.getUserId(application.uid)), restricted,
+                    new UserHandle(UserHandle.getUserId(application.uid)), flags,
                     mDisplay, null, Display.INVALID_DISPLAY);
             if (c.mResources != null) {
                 return c;
@@ -1707,17 +1691,16 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
-        final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
         if (packageName.equals("system") || packageName.equals("android")) {
             return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                    user, restricted, mDisplay, null, Display.INVALID_DISPLAY);
+                    user, flags, mDisplay, null, Display.INVALID_DISPLAY);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    user, restricted, mDisplay, null, Display.INVALID_DISPLAY);
+                    user, flags, mDisplay, null, Display.INVALID_DISPLAY);
             if (c.mResources != null) {
                 return c;
             }
@@ -1735,7 +1718,7 @@ class ContextImpl extends Context {
         }
 
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mRestricted, mDisplay, overrideConfiguration, Display.INVALID_DISPLAY);
+                mUser, mFlags, mDisplay, overrideConfiguration, Display.INVALID_DISPLAY);
     }
 
     @Override
@@ -1745,7 +1728,7 @@ class ContextImpl extends Context {
         }
 
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mRestricted, display, null, Display.INVALID_DISPLAY);
+                mUser, mFlags, display, null, Display.INVALID_DISPLAY);
     }
 
     Display getDisplay() {
@@ -1761,8 +1744,34 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Context createDeviceEncryptedContext(Context context) {
+        final int flags = (mFlags & ~Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED)
+                | Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED;
+        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
+    }
+
+    @Override
+    public Context createCredentialEncryptedContext(Context context) {
+        final int flags = (mFlags & ~Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED)
+                | Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED;
+        return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
+                mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
+    }
+
+    @Override
     public boolean isRestricted() {
-        return mRestricted;
+        return (mFlags & Context.CONTEXT_RESTRICTED) != 0;
+    }
+
+    @Override
+    public boolean isDeviceEncrypted() {
+        return (mFlags & Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED) != 0;
+    }
+
+    @Override
+    public boolean isCredentialEncrypted() {
+        return (mFlags & Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED) != 0;
     }
 
     @Override
@@ -1772,7 +1781,14 @@ class ContextImpl extends Context {
 
     private File getDataDirFile() {
         if (mPackageInfo != null) {
-            return mPackageInfo.getDataDirFile();
+            if (isCredentialEncrypted()) {
+                return mPackageInfo.getCredentialEncryptedDataDirFile();
+            } else if (isDeviceEncrypted()) {
+                return mPackageInfo.getDeviceEncryptedDataDirFile();
+            } else {
+                throw new RuntimeException(
+                        "Storage location is neither credential nor device encrypted");
+            }
         }
         throw new RuntimeException("Not supported in system context");
     }
@@ -1798,7 +1814,7 @@ class ContextImpl extends Context {
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
         ContextImpl context = new ContextImpl(null, mainThread,
-                packageInfo, null, null, false, null, null, Display.INVALID_DISPLAY);
+                packageInfo, null, null, 0, null, null, Display.INVALID_DISPLAY);
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetricsLocked());
         return context;
@@ -1807,24 +1823,38 @@ class ContextImpl extends Context {
     static ContextImpl createAppContext(ActivityThread mainThread, LoadedApk packageInfo) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
         return new ContextImpl(null, mainThread,
-                packageInfo, null, null, false, null, null, Display.INVALID_DISPLAY);
+                packageInfo, null, null, 0, null, null, Display.INVALID_DISPLAY);
     }
 
     static ContextImpl createActivityContext(ActivityThread mainThread,
             LoadedApk packageInfo, int displayId, Configuration overrideConfiguration) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        return new ContextImpl(null, mainThread, packageInfo, null, null, false,
+        return new ContextImpl(null, mainThread, packageInfo, null, null, 0,
                 null, overrideConfiguration, displayId);
     }
 
     private ContextImpl(ContextImpl container, ActivityThread mainThread,
-            LoadedApk packageInfo, IBinder activityToken, UserHandle user, boolean restricted,
+            LoadedApk packageInfo, IBinder activityToken, UserHandle user, int flags,
             Display display, Configuration overrideConfiguration, int createDisplayWithId) {
         mOuterContext = this;
 
+        // If creator didn't specify which storage to use, use the default
+        // location for application.
+        if ((flags & Context.CONTEXT_STORAGE_MASK) == 0) {
+            final File dataDir = packageInfo.getDataDirFile();
+            if (Objects.equals(dataDir, packageInfo.getCredentialEncryptedDataDirFile())) {
+                flags |= Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED;
+            } else if (Objects.equals(dataDir, packageInfo.getDeviceEncryptedDataDirFile())) {
+                flags |= Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED;
+            } else {
+                throw new IllegalStateException("Storage location " + dataDir
+                        + " doesn't match either credential or device encrypted storage");
+            }
+        }
+
         mMainThread = mainThread;
         mActivityToken = activityToken;
-        mRestricted = restricted;
+        mFlags = flags;
 
         if (user == null) {
             user = Process.myUserHandle();

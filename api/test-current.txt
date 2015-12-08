@@ -7779,6 +7779,8 @@ package android.content {
     method public abstract int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public abstract deprecated void clearWallpaper() throws java.io.IOException;
     method public abstract android.content.Context createConfigurationContext(android.content.res.Configuration);
+    method public abstract android.content.Context createCredentialEncryptedContext(android.content.Context);
+    method public abstract android.content.Context createDeviceEncryptedContext(android.content.Context);
     method public abstract android.content.Context createDisplayContext(android.view.Display);
     method public abstract android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.lang.String[] databaseList();
@@ -7802,7 +7804,6 @@ package android.content {
     method public final android.content.res.ColorStateList getColorStateList(int);
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDatabasePath(java.lang.String);
-    method public abstract java.io.File getDeviceEncryptedFilesDir();
     method public abstract java.io.File getDir(java.lang.String, int);
     method public final android.graphics.drawable.Drawable getDrawable(int);
     method public abstract java.io.File getExternalCacheDir();
@@ -7835,6 +7836,8 @@ package android.content {
     method public abstract deprecated int getWallpaperDesiredMinimumHeight();
     method public abstract deprecated int getWallpaperDesiredMinimumWidth();
     method public abstract void grantUriPermission(java.lang.String, android.net.Uri, int);
+    method public abstract boolean isCredentialEncrypted();
+    method public abstract boolean isDeviceEncrypted();
     method public boolean isRestricted();
     method public final android.content.res.TypedArray obtainStyledAttributes(int[]);
     method public final android.content.res.TypedArray obtainStyledAttributes(int, int[]) throws android.content.res.Resources.NotFoundException;
@@ -7966,6 +7969,8 @@ package android.content {
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public deprecated void clearWallpaper() throws java.io.IOException;
     method public android.content.Context createConfigurationContext(android.content.res.Configuration);
+    method public android.content.Context createCredentialEncryptedContext(android.content.Context);
+    method public android.content.Context createDeviceEncryptedContext(android.content.Context);
     method public android.content.Context createDisplayContext(android.view.Display);
     method public android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.lang.String[] databaseList();
@@ -7988,7 +7993,6 @@ package android.content {
     method public java.io.File getCodeCacheDir();
     method public android.content.ContentResolver getContentResolver();
     method public java.io.File getDatabasePath(java.lang.String);
-    method public java.io.File getDeviceEncryptedFilesDir();
     method public java.io.File getDir(java.lang.String, int);
     method public java.io.File getExternalCacheDir();
     method public java.io.File[] getExternalCacheDirs();
@@ -8016,6 +8020,8 @@ package android.content {
     method public deprecated int getWallpaperDesiredMinimumHeight();
     method public deprecated int getWallpaperDesiredMinimumWidth();
     method public void grantUriPermission(java.lang.String, android.net.Uri, int);
+    method public boolean isCredentialEncrypted();
+    method public boolean isDeviceEncrypted();
     method public java.io.FileInputStream openFileInput(java.lang.String) throws java.io.FileNotFoundException;
     method public java.io.FileOutputStream openFileOutput(java.lang.String, int) throws java.io.FileNotFoundException;
     method public android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory);
@@ -9097,8 +9103,10 @@ package android.content.pm {
     field public java.lang.String backupAgentName;
     field public java.lang.String className;
     field public int compatibleWidthLimitDp;
+    field public java.lang.String credentialEncryptedDataDir;
     field public java.lang.String dataDir;
     field public int descriptionRes;
+    field public java.lang.String deviceEncryptedDataDir;
     field public boolean enabled;
     field public int flags;
     field public int largestWidthLimitDp;
@@ -36236,6 +36244,8 @@ package android.test.mock {
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public void clearWallpaper();
     method public android.content.Context createConfigurationContext(android.content.res.Configuration);
+    method public android.content.Context createCredentialEncryptedContext(android.content.Context);
+    method public android.content.Context createDeviceEncryptedContext(android.content.Context);
     method public android.content.Context createDisplayContext(android.view.Display);
     method public android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.lang.String[] databaseList();
@@ -36257,7 +36267,6 @@ package android.test.mock {
     method public java.io.File getCodeCacheDir();
     method public android.content.ContentResolver getContentResolver();
     method public java.io.File getDatabasePath(java.lang.String);
-    method public java.io.File getDeviceEncryptedFilesDir();
     method public java.io.File getDir(java.lang.String, int);
     method public java.io.File getExternalCacheDir();
     method public java.io.File[] getExternalCacheDirs();
@@ -36285,6 +36294,8 @@ package android.test.mock {
     method public int getWallpaperDesiredMinimumHeight();
     method public int getWallpaperDesiredMinimumWidth();
     method public void grantUriPermission(java.lang.String, android.net.Uri, int);
+    method public boolean isCredentialEncrypted();
+    method public boolean isDeviceEncrypted();
     method public java.io.FileInputStream openFileInput(java.lang.String) throws java.io.FileNotFoundException;
     method public java.io.FileOutputStream openFileOutput(java.lang.String, int) throws java.io.FileNotFoundException;
     method public android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory);
