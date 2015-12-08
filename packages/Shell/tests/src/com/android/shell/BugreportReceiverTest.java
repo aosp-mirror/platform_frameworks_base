@@ -49,6 +49,7 @@ import android.os.Bundle;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.support.test.uiautomator.UiDevice;
+import android.support.test.uiautomator.UiObject;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
@@ -68,8 +69,7 @@ import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMult
  * <li>asserts the extras received by the custom activity
  * </ul>
  * <p>
- * TODO: currently, these tests only work if the bug report sharing warning is disabled and the
- * device screen is unlocked.
+ * <strong>NOTE</strong>: these tests only work if the device is unlocked.
  */
 public class BugreportReceiverTest extends InstrumentationTestCase {
 
@@ -99,6 +99,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mUiBot = new UiBot(UiDevice.getInstance(instrumentation), TIMEOUT);
         mListener = ActionSendMultipleConsumerActivity.getListener(mContext);
         cancelExistingNotifications();
+        BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_HIDE);
     }
 
     public void testFullWorkflow() throws Exception {
@@ -130,6 +131,36 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
 
         // TODO: assert service is down
+    }
+
+    public void testBugreportFinished_withWarning() throws Exception {
+        // Explicitly shows the warning.
+        BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_SHOW);
+
+        // Send notification and click on share.
+        createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
+        Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
+        intent.putExtra(EXTRA_BUGREPORT, PLAIN_TEXT_PATH);
+        mContext.sendBroadcast(intent);
+        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title));
+
+        // Handle the warning
+        mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm));
+        // TODO: get ok and showMessageAgain from the dialog reference above
+        UiObject showMessageAgain =
+                mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm_repeat));
+        mUiBot.click(showMessageAgain, "show-message-again");
+        UiObject ok = mUiBot.getVisibleObject(mContext.getString(com.android.internal.R.string.ok));
+        mUiBot.click(ok, "ok");
+
+        // Share the bugreport.
+        mUiBot.chooseActivity(UI_NAME);
+        Bundle extras = mListener.getExtras();
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
+
+        // Make sure it's hidden now.
+        int newState = BugreportPrefs.getWarningState(mContext, BugreportPrefs.STATE_UNKNOWN);
+        assertEquals("Didn't change state", BugreportPrefs.STATE_HIDE, newState);
     }
 
     public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
