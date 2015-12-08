@@ -411,6 +411,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
             if (launchState.launchedViaDragGesture) {
                 setTranslationY(getMeasuredHeight());
+            } else {
+                setTranslationY(0f);
             }
         }
     }
