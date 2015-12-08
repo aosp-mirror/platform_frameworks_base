@@ -48,7 +48,7 @@ public final class ParcelableCall implements Parcelable {
     private final PhoneAccountHandle mAccountHandle;
     private final boolean mIsVideoCallProviderChanged;
     private final IVideoProvider mVideoCallProvider;
-    private InCallService.VideoCall mVideoCall;
+    private VideoCallImpl mVideoCall;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
     private final StatusHints mStatusHints;
@@ -179,12 +179,13 @@ public final class ParcelableCall implements Parcelable {
 
     /**
      * Returns an object for remotely communicating through the video call provider's binder.
+
      * @return The video call.
      */
-    public InCallService.VideoCall getVideoCall(Call call) {
+    public VideoCallImpl getVideoCallImpl() {
         if (mVideoCall == null && mVideoCallProvider != null) {
             try {
-                mVideoCall = new VideoCallImpl(mVideoCallProvider, call);
+                mVideoCall = new VideoCallImpl(mVideoCallProvider);
             } catch (RemoteException ignored) {
                 // Ignore RemoteException.
             }
