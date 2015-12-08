@@ -606,13 +606,13 @@ public abstract class Context {
     public abstract String getPackageCodePath();
 
     /**
-     * {@hide}
-     * Return the full path to the shared prefs file for the given prefs group name.
-     *
-     * <p>Note: this is not generally useful for applications, since they should
-     * not be directly accessing the file system.
+     * @hide
+     * @deprecated use {@link #getSharedPreferencesPath(String)}
      */
-    public abstract File getSharedPrefsFile(String name);
+    @Deprecated
+    public File getSharedPrefsFile(String name) {
+        return getSharedPreferencesPath(name);
+    }
 
     /**
      * Retrieve and hold the contents of the preferences file 'name', returning
@@ -654,6 +654,7 @@ public abstract class Context {
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
      *
+     * @see #getSharedPreferencesPath(String)
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
@@ -737,6 +738,20 @@ public abstract class Context {
      * @see #getDir
      */
     public abstract File getFileStreamPath(String name);
+
+    /**
+     * Returns the absolute path on the filesystem where a file created with
+     * {@link #getSharedPreferences(String, int)} is stored.
+     * <p>
+     * The returned path may change over time if the calling app is moved to an
+     * adopted storage device, so only relative paths should be persisted.
+     *
+     * @param name The name of the shared preferences for which you would like
+     *            to get a path.
+     * @return An absolute path to the given file.
+     * @see #getSharedPreferences(String, int)
+     */
+    public abstract File getSharedPreferencesPath(String name);
 
     /**
      * Returns the absolute path to the directory on the filesystem where files

@@ -1365,6 +1365,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getSharedPreferencesPath(String name) {
+        // pass
+        return null;
+    }
+
+    @Override
     public File getFilesDir() {
         // pass
         return null;
@@ -1419,12 +1425,6 @@ public final class BridgeContext extends Context {
 
     @Override
     public String getPackageResourcePath() {
-        // pass
-        return null;
-    }
-
-    @Override
-    public File getSharedPrefsFile(String name) {
         // pass
         return null;
     }

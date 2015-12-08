@@ -321,11 +321,6 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public File getSharedPrefsFile(String name) {
-        return makeFilename(getPreferencesDir(), name + ".xml");
-    }
-
-    @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         // At least one application in the world actually passes in a null
         // name.  This happened to work because when we generated the file name
@@ -337,7 +332,7 @@ class ContextImpl extends Context {
             }
         }
 
-        final File file = getSharedPrefsFile(name);
+        final File file = getSharedPreferencesPath(name);
         return getSharedPreferences(file, mode);
     }
 
@@ -568,6 +563,11 @@ class ContextImpl extends Context {
     @Override
     public File getFileStreamPath(String name) {
         return makeFilename(getFilesDir(), name);
+    }
+
+    @Override
+    public File getSharedPreferencesPath(String name) {
+        return makeFilename(getPreferencesDir(), name + ".xml");
     }
 
     @Override
