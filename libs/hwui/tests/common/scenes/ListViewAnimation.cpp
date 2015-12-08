@@ -21,11 +21,11 @@
 
 class ListViewAnimation;
 
-static Benchmark _ListView(BenchmarkInfo{
+static TestScene::Registrar _ListView(TestScene::Info{
     "listview",
     "A mock ListView of scrolling content. Doesn't re-bind/re-record views as they are recycled, so"
     "won't upload much content (either glyphs, or bitmaps).",
-    simpleCreateScene<ListViewAnimation>
+    TestScene::simpleCreateScene<ListViewAnimation>
 });
 
 class ListViewAnimation : public TestScene {

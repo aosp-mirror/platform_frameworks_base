@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "TestContext.h"
+#include "tests/common/TestContext.h"
 
 namespace android {
 namespace uirenderer {

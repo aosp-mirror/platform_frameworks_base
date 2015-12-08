@@ -15,9 +15,9 @@
  */
 
 #include "AnimationContext.h"
-#include "Benchmark.h"
 #include "RenderNode.h"
-#include "TestContext.h"
+#include "tests/common/TestContext.h"
+#include "tests/common/TestScene.h"
 #include "tests/common/scenes/TestSceneBase.h"
 #include "renderthread/RenderProxy.h"
 #include "renderthread/RenderTask.h"
@@ -38,7 +38,7 @@ public:
     }
 };
 
-void run(const BenchmarkInfo& info, const BenchmarkOptions& opts) {
+void run(const TestScene::Info& info, const TestScene::Options& opts) {
     // Switch to the real display
     gDisplay = getBuiltInDisplay();
 

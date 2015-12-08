@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Benchmark.h"
+#include "tests/common/TestScene.h"
 
 #include "protos/hwui.pb.h"
 
@@ -27,23 +27,13 @@
 
 using namespace android;
 using namespace android::uirenderer;
-
-// Not a static global because we need to force the map to be constructed
-// before we try to add things to it.
-std::unordered_map<std::string, BenchmarkInfo>& testMap() {
-    static std::unordered_map<std::string, BenchmarkInfo> testMap;
-    return testMap;
-}
-
-void Benchmark::registerBenchmark(const BenchmarkInfo& info) {
-    testMap()[info.name] = info;
-}
+using namespace android::uirenderer::test;
 
 static int gFrameCount = 150;
 static int gRepeatCount = 1;
-static std::vector<BenchmarkInfo> gRunTests;
+static std::vector<TestScene::Info> gRunTests;
 
-void run(const BenchmarkInfo& info, const BenchmarkOptions& opts);
+void run(const TestScene::Info& info, const TestScene::Options& opts);
 
 static void printHelp() {
     printf("\
@@ -59,7 +49,7 @@ OPTIONS:\n\
 
 static void listTests() {
     printf("Tests: \n");
-    for (auto&& test : testMap()) {
+    for (auto&& test : TestScene::testMap()) {
         auto&& info = test.second;
         const char* col1 = info.name.c_str();
         int dlen = info.description.length();
@@ -168,8 +158,8 @@ void parseOptions(int argc, char* argv[]) {
     if (optind < argc) {
         do {
             const char* test = argv[optind++];
-            auto pos = testMap().find(test);
-            if (pos == testMap().end()) {
+            auto pos = TestScene::testMap().find(test);
+            if (pos == TestScene::testMap().end()) {
                 fprintf(stderr, "Unknown test '%s'\n", test);
                 exit(EXIT_FAILURE);
             } else {
@@ -177,14 +167,14 @@ void parseOptions(int argc, char* argv[]) {
             }
         } while (optind < argc);
     } else {
-        gRunTests.push_back(testMap()["shadowgrid"]);
+        gRunTests.push_back(TestScene::testMap()["shadowgrid"]);
     }
 }
 
 int main(int argc, char* argv[]) {
     parseOptions(argc, argv);
 
-    BenchmarkOptions opts;
+    TestScene::Options opts;
     opts.count = gFrameCount;
     for (int i = 0; i < gRepeatCount; i++) {
         for (auto&& test : gRunTests) {

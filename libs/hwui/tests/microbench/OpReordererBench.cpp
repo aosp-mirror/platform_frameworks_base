@@ -23,6 +23,8 @@
 #include "OpReorderer.h"
 #include "RecordedOp.h"
 #include "RecordingCanvas.h"
+#include "tests/common/TestContext.h"
+#include "tests/common/TestScene.h"
 #include "tests/common/TestUtils.h"
 #include "Vector.h"
 #include "tests/microbench/MicroBench.h"
@@ -31,6 +33,8 @@
 
 using namespace android;
 using namespace android::uirenderer;
+using namespace android::uirenderer::renderthread;
+using namespace android::uirenderer::test;
 
 const LayerUpdateQueue sEmptyLayerUpdateQueue;
 const Vector3 sLightCenter = {100, 100, 100};
@@ -71,7 +75,7 @@ void BM_OpReorderer_defer::Run(int iters) {
 
 BENCHMARK_NO_ARG(BM_OpReorderer_deferAndRender);
 void BM_OpReorderer_deferAndRender::Run(int iters) {
-    TestUtils::runOnRenderThread([this, iters](renderthread::RenderThread& thread) {
+    TestUtils::runOnRenderThread([this, iters](RenderThread& thread) {
         auto nodes = createTestNodeList();
         BakedOpRenderer::LightInfo lightInfo = {50.0f, 128, 128 };
 
@@ -90,3 +94,67 @@ void BM_OpReorderer_deferAndRender::Run(int iters) {
         StopBenchmarkTiming();
     });
 }
+
+static std::vector<sp<RenderNode>> getSyncedSceneNodes(const char* sceneName) {
+    gDisplay = getBuiltInDisplay(); // switch to real display if present
+
+    TestContext testContext;
+    TestScene::Options opts;
+    std::unique_ptr<TestScene> scene(TestScene::testMap()[sceneName].createScene(opts));
+
+    sp<RenderNode> rootNode = TestUtils::createNode(0, 0, gDisplay.w, gDisplay.h,
+                [&scene](RenderProperties& props, TestCanvas& canvas) {
+            scene->createContent(gDisplay.w, gDisplay.h, canvas);
+    });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(rootNode);
+    std::vector<sp<RenderNode>> nodes;
+    nodes.emplace_back(rootNode);
+    return nodes;
+}
+
+static void benchDeferScene(testing::Benchmark& benchmark, int iters, const char* sceneName) {
+    auto nodes = getSyncedSceneNodes(sceneName);
+    benchmark.StartBenchmarkTiming();
+    for (int i = 0; i < iters; i++) {
+        OpReorderer reorderer(sEmptyLayerUpdateQueue,
+                SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
+                nodes, sLightCenter);
+        MicroBench::DoNotOptimize(&reorderer);
+    }
+    benchmark.StopBenchmarkTiming();
+}
+
+static void benchDeferAndRenderScene(testing::Benchmark& benchmark,
+        int iters, const char* sceneName) {
+    TestUtils::runOnRenderThread([&benchmark, iters, sceneName](RenderThread& thread) {
+        auto nodes = getSyncedSceneNodes(sceneName);
+        BakedOpRenderer::LightInfo lightInfo = {50.0f, 128, 128 }; // TODO!
+
+        RenderState& renderState = thread.renderState();
+        Caches& caches = Caches::getInstance();
+
+        benchmark.StartBenchmarkTiming();
+        for (int i = 0; i < iters; i++) {
+            OpReorderer reorderer(sEmptyLayerUpdateQueue,
+                    SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
+                    nodes, sLightCenter);
+
+            BakedOpRenderer renderer(caches, renderState, true, lightInfo);
+            reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
+            MicroBench::DoNotOptimize(&renderer);
+        }
+        benchmark.StopBenchmarkTiming();
+    });
+}
+
+BENCHMARK_NO_ARG(BM_OpReorderer_listview_defer);
+void BM_OpReorderer_listview_defer::Run(int iters) {
+    benchDeferScene(*this, iters, "listview");
+}
+
+BENCHMARK_NO_ARG(BM_OpReorderer_listview_deferAndRender);
+void BM_OpReorderer_listview_deferAndRender::Run(int iters) {
+    benchDeferAndRenderScene(*this, iters, "listview");
+}
+

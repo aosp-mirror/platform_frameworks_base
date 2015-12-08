@@ -18,11 +18,11 @@
 
 class HwLayerAnimation;
 
-static Benchmark _HwLayer(BenchmarkInfo{
+static TestScene::Registrar _HwLayer(TestScene::Info{
     "hwlayer",
     "A nested pair of nodes with LAYER_TYPE_HARDWARE set on each. "
     "Tests the hardware layer codepath.",
-    simpleCreateScene<HwLayerAnimation>
+    TestScene::simpleCreateScene<HwLayerAnimation>
 });
 
 class HwLayerAnimation : public TestScene {

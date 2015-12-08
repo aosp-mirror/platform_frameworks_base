@@ -90,6 +90,9 @@ hwui_src_files := \
     protos/hwui.proto
 
 hwui_test_common_src_files := \
+    $(call all-cpp-files-under, tests/common/scenes) \
+    tests/common/TestContext.cpp \
+    tests/common/TestScene.cpp \
     tests/common/TestUtils.cpp
 
 hwui_cflags := \
@@ -259,11 +262,8 @@ LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
-    tests/macrobench/TestContext.cpp \
     tests/macrobench/TestSceneRunner.cpp \
     tests/macrobench/main.cpp
-
-LOCAL_SRC_FILES += $(call all-cpp-files-under, tests/common/scenes)
 
 include $(BUILD_EXECUTABLE)
 

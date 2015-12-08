@@ -16,6 +16,9 @@
 #ifndef TESTS_TESTSCENE_H
 #define TESTS_TESTSCENE_H
 
+#include <string>
+#include <unordered_map>
+
 namespace android {
 namespace uirenderer {
 class RenderNode;
@@ -32,9 +35,40 @@ namespace test {
 
 class TestScene {
 public:
+    struct Options {
+        int count = 0;
+    };
+
+    template <class T>
+    static test::TestScene* simpleCreateScene(const TestScene::Options&) {
+        return new T();
+    }
+
+    typedef test::TestScene* (*CreateScene)(const TestScene::Options&);
+
+    struct Info {
+        std::string name;
+        std::string description;
+        CreateScene createScene;
+    };
+
+    class Registrar {
+    public:
+        Registrar(const TestScene::Info& info) {
+            TestScene::registerScene(info);
+        }
+    private:
+        Registrar() = delete;
+        Registrar(const Registrar&) = delete;
+        Registrar& operator=(const Registrar&) = delete;
+    };
+
     virtual ~TestScene() {}
     virtual void createContent(int width, int height, TestCanvas& renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
+
+    static std::unordered_map<std::string, Info>& testMap();
+    static void registerScene(const Info& info);
 };
 
 } // namespace test

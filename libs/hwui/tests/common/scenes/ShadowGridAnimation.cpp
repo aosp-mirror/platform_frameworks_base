@@ -18,11 +18,11 @@
 
 class ShadowGridAnimation;
 
-static Benchmark _ShadowGrid(BenchmarkInfo{
+static TestScene::Registrar _ShadowGrid(TestScene::Info{
     "shadowgrid",
     "A grid of rounded rects that cast a shadow. Simplified scenario of an "
     "Android TV-style launcher interface. High CPU/GPU load.",
-    simpleCreateScene<ShadowGridAnimation>
+    TestScene::simpleCreateScene<ShadowGridAnimation>
 });
 
 class ShadowGridAnimation : public TestScene {
