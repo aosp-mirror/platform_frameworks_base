@@ -46,6 +46,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -63,6 +64,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A class that represents how a persistent notification is to be presented to
@@ -1692,11 +1694,21 @@ public class Notification implements Parcelable
         bigContentView = null;
         headsUpContentView = null;
         mLargeIcon = null;
-        if (extras != null) {
-            extras.remove(Notification.EXTRA_LARGE_ICON);
-            extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
-            extras.remove(Notification.EXTRA_PICTURE);
-            extras.remove(Notification.EXTRA_BIG_TEXT);
+        if (extras != null && !extras.isEmpty()) {
+            final Set<String> keyset = extras.keySet();
+            final int N = keyset.size();
+            final String[] keys = keyset.toArray(new String[N]);
+            for (int i=0; i<N; i++) {
+                final String key = keys[i];
+                final Object obj = extras.get(key);
+                if (obj != null &&
+                    (  obj instanceof Parcelable
+                    || obj instanceof Parcelable[]
+                    || obj instanceof SparseArray
+                    || obj instanceof ArrayList)) {
+                    extras.remove(key);
+                }
+            }
         }
     }
 
