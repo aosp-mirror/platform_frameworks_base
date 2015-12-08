@@ -25,7 +25,6 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_SRC_FILES := $(call all-java-files-under, src/)
 
 LOCAL_JAVA_LIBRARIES := \
-  caliper-api-target \
-  framework
+  caliper-api-target
 
 include $(BUILD_JAVA_LIBRARY)
