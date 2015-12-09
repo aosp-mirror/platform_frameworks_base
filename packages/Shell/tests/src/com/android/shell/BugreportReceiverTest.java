@@ -78,7 +78,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String TAG = "BugreportReceiverTest";
 
     // Timeout for UI operations, in milliseconds.
-    private static final int TIMEOUT = 1000;
+    private static final int TIMEOUT = (int) BugreportProgressService.POLLING_FREQUENCY * 4;
 
     private static final String ROOT_DIR = "/data/data/com.android.shell/files/bugreports";
     private static final String BUGREPORT_FILE = "test_bugreport.txt";
