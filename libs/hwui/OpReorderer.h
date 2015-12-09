@@ -45,7 +45,7 @@ namespace OpBatchType {
     enum {
         None = 0, // Don't batch
         Bitmap,
-        Patch,
+        MergedPatch,
         AlphaVertices,
         Vertices,
         AlphaMaskTexture,

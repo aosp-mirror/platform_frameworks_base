@@ -24,7 +24,8 @@
 #include "utils/LinearAllocator.h"
 #include "Vector.h"
 
-#include "SkXfermode.h"
+#include <androidfw/ResourceTypes.h>
+#include <SkXfermode.h>
 
 class SkBitmap;
 class SkPaint;
@@ -45,8 +46,11 @@ struct Vertex;
 #define MAP_OPS_BASED_ON_MERGEABILITY(U_OP_FN, M_OP_FN) \
         U_OP_FN(ArcOp) \
         M_OP_FN(BitmapOp) \
+        U_OP_FN(BitmapMeshOp) \
+        U_OP_FN(BitmapRectOp) \
         U_OP_FN(LinesOp) \
         U_OP_FN(OvalOp) \
+        M_OP_FN(PatchOp) \
         U_OP_FN(PathOp) \
         U_OP_FN(PointsOp) \
         U_OP_FN(RectOp) \
@@ -152,6 +156,31 @@ struct BitmapOp : RecordedOp {
     // TODO: asset atlas/texture id lookup?
 };
 
+struct BitmapMeshOp : RecordedOp {
+    BitmapMeshOp(BASE_PARAMS, const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors)
+            : SUPER(BitmapMeshOp)
+            , bitmap(bitmap)
+            , meshWidth(meshWidth)
+            , meshHeight(meshHeight)
+            , vertices(vertices)
+            , colors(colors) {}
+    const SkBitmap* bitmap;
+    const int meshWidth;
+    const int meshHeight;
+    const float* vertices;
+    const int* colors;
+};
+
+struct BitmapRectOp : RecordedOp {
+    BitmapRectOp(BASE_PARAMS, const SkBitmap* bitmap, const Rect& src)
+            : SUPER(BitmapRectOp)
+            , bitmap(bitmap)
+            , src(src) {}
+    const SkBitmap* bitmap;
+    const Rect src;
+};
+
 struct LinesOp : RecordedOp {
     LinesOp(BASE_PARAMS, const float* points, const int floatCount)
             : SUPER(LinesOp)
@@ -164,6 +193,16 @@ struct LinesOp : RecordedOp {
 struct OvalOp : RecordedOp {
     OvalOp(BASE_PARAMS)
             : SUPER(OvalOp) {}
+};
+
+
+struct PatchOp : RecordedOp {
+    PatchOp(BASE_PARAMS, const SkBitmap* bitmap, const Res_png_9patch* patch)
+            : SUPER(PatchOp)
+            , bitmap(bitmap)
+            , patch(patch) {}
+    const SkBitmap* bitmap;
+    const Res_png_9patch* patch;
 };
 
 struct PathOp : RecordedOp {

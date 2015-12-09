@@ -418,19 +418,35 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
         drawBitmap(&bitmap, paint);
         restore();
     } else {
-        LOG_ALWAYS_FATAL("TODO!");
+        addOp(new (alloc()) BitmapRectOp(
+                Rect(dstLeft, dstTop, dstRight, dstBottom),
+                *(mState.currentSnapshot()->transform),
+                mState.getRenderTargetClipBounds(),
+                refPaint(paint), refBitmap(bitmap),
+                Rect(srcLeft, srcTop, srcRight, srcBottom)));
     }
 }
 
 void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    int vertexCount = (meshWidth + 1) * (meshHeight + 1);
+    addOp(new (alloc()) BitmapMeshOp(
+            calcBoundsOfPoints(vertices, vertexCount * 2),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(paint), refBitmap(bitmap), meshWidth, meshHeight,
+            refBuffer<float>(vertices, vertexCount * 2), // 2 floats per vertex
+            refBuffer<int>(colors, vertexCount))); // 1 color per vertex
 }
 
-void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& patch,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    addOp(new (alloc()) PatchOp(
+            Rect(dstLeft, dstTop, dstRight, dstBottom),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(paint), refBitmap(bitmap), refPatch(&patch)));
 }
 
 // Text
@@ -452,7 +468,6 @@ void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, i
 
 void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) {
-    // NOTE: can't use refPaint() directly, since it forces left alignment
     LOG_ALWAYS_FATAL("TODO!");
 }
 
