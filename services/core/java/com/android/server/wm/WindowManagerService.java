@@ -2534,26 +2534,32 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mAttrs.height = bottom - top;
                 win.setWindowScale(win.mRequestedWidth, win.mRequestedHeight);
 
-                if (SHOW_TRANSACTIONS) {
-                    Slog.i(TAG_WM, ">>> OPEN TRANSACTION repositionChild");
-                }
+                if (win.mHasSurface) {
+                    if (SHOW_TRANSACTIONS) {
+                        Slog.i(TAG_WM, ">>> OPEN TRANSACTION repositionChild");
+                    }
 
-                SurfaceControl.openTransaction();
+                    SurfaceControl.openTransaction();
 
-                win.applyGravityAndUpdateFrame();
-                win.mWinAnimator.computeShownFrameLocked();
+                    try {
 
-                win.mWinAnimator.setSurfaceBoundariesLocked(false);
+                        win.applyGravityAndUpdateFrame();
+                        win.mWinAnimator.computeShownFrameLocked();
 
-                if (deferTransactionUntilFrame > 0) {
-                    win.mWinAnimator.mSurfaceController.deferTransactionUntil(
-                            win.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
-                            deferTransactionUntilFrame);
-                }
+                        win.mWinAnimator.setSurfaceBoundariesLocked(false);
 
-                SurfaceControl.closeTransaction();
-                if (SHOW_TRANSACTIONS) {
-                    Slog.i(TAG_WM, "<<< CLOSE TRANSACTION repositionChild");
+                        if (deferTransactionUntilFrame > 0) {
+                            win.mWinAnimator.mSurfaceController.deferTransactionUntil(
+                                    win.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
+                                    deferTransactionUntilFrame);
+                        }
+
+                    } finally {
+                        SurfaceControl.closeTransaction();
+                        if (SHOW_TRANSACTIONS) {
+                            Slog.i(TAG_WM, "<<< CLOSE TRANSACTION repositionChild");
+                        }
+                    }
                 }
 
                 outFrame = win.mCompatFrame;
