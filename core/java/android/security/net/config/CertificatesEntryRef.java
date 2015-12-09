@@ -51,4 +51,13 @@ public final class CertificatesEntryRef {
 
         return new TrustAnchor(foundCert, mOverridesPins);
     }
+
+    public TrustAnchor findByIssuerAndSignature(X509Certificate cert) {
+        X509Certificate foundCert = mSource.findByIssuerAndSignature(cert);
+        if (foundCert == null) {
+            return null;
+        }
+
+        return new TrustAnchor(foundCert, mOverridesPins);
+    }
 }
