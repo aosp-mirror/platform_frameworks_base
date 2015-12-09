@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -82,10 +83,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_LOCALE = "locale";
     private static final String KEY_LOCK_SETTINGS = "lock_settings";
     private static final String KEY_SOFTAP_CONFIG = "softap_config";
+    private static final String KEY_NET_POLICIES = "network_policies";
+
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 5;
+    private static final int STATE_VERSION = 6;
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
@@ -97,8 +100,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_GLOBAL          = 5;
     private static final int STATE_LOCK_SETTINGS   = 6;
     private static final int STATE_SOFTAP_CONFIG   = 7;
+    private static final int STATE_NET_POLICIES    = 8;
 
-    private static final int STATE_SIZE            = 8; // The current number of state items
+    private static final int STATE_SIZE            = 9; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
@@ -107,7 +111,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             5,              // version 2 added STATE_WIFI_CONFIG
             6,              // version 3 added STATE_GLOBAL
             7,              // version 4 added STATE_LOCK_SETTINGS
-            STATE_SIZE      // version 5 added STATE_SOFTAP_CONFIG
+            8,              // version 5 added STATE_SOFTAP_CONFIG
+            STATE_SIZE      // version 6 added STATE_NET_POLICIES
     };
 
     // Versioning of the 'full backup' format
@@ -115,6 +120,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
     private static final int FULL_BACKUP_ADDED_LOCK_SETTINGS = 3; // added the "lock_settings" entry
     private static final int FULL_BACKUP_ADDED_SOFTAP_CONF = 4; //added the "softap_config" entry
+    private static final int FULL_BACKUP_ADDED_NET_POLICIES = 5; //added the "network_policies" entry
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -410,6 +416,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
         byte[] softApConfigData = getSoftAPConfiguration();
+        byte[] netPoliciesData = getNetworkPolicies();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -433,6 +440,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_SOFTAP_CONFIG] =
                 writeIfChanged(stateChecksums[STATE_SOFTAP_CONFIG], KEY_SOFTAP_CONFIG,
                         softApConfigData, data);
+        stateChecksums[STATE_NET_POLICIES] =
+                writeIfChanged(stateChecksums[STATE_NET_POLICIES], KEY_NET_POLICIES,
+                        netPoliciesData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -573,6 +583,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 byte[] softapData = new byte[size];
                 data.readEntityData(softapData, 0, size);
                 restoreSoftApConfiguration(softapData);
+            } else if (KEY_NET_POLICIES.equals(key)) {
+                byte[] netPoliciesData = new byte[size];
+                data.readEntityData(netPoliciesData, 0, size);
+                restoreNetworkPolicies(netPoliciesData);
             } else {
                 data.skipEntityData();
             }
@@ -602,6 +616,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
         byte[] softApConfigData = getSoftAPConfiguration();
+        byte[] netPoliciesData = getNetworkPolicies();
 
         // Write the data to the staging file, then emit that as our tarfile
         // representation of the backed-up settings.
@@ -639,6 +654,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, softApConfigData.length + " bytes of softap config data");
             out.writeInt(softApConfigData.length);
             out.write(softApConfigData);
+            if (DEBUG_BACKUP) Log.d(TAG, netPoliciesData.length + " bytes of network policies data");
+            out.writeInt(netPoliciesData.length);
+            out.write(netPoliciesData);
 
             out.flush();    // also flushes downstream
 
@@ -738,6 +756,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (nBytes > 0) {
                     in.readFully(buffer, 0, nBytes);
                     restoreSoftApConfiguration(buffer);
+                }
+            }
+
+            if (version >= FULL_BACKUP_ADDED_NET_POLICIES){
+                nBytes = in.readInt();
+                if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of network policies data");
+                if (nBytes > buffer.length) buffer = new byte[nBytes];
+                if (nBytes > 0) {
+                    in.readFully(buffer, 0, nBytes);
+                    restoreNetworkPolicies(buffer);
                 }
             }
 
@@ -1196,6 +1224,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         wifiManager.setWifiApConfiguration(WiFiConfigurationSerializer.unmarshalWifiConfig(data));
     }
 
+    private byte[] getNetworkPolicies(){
+        NetworkPolicyManager networkPolicyManager =
+                (NetworkPolicyManager)getSystemService(NETWORK_POLICY_SERVICE);
+        return NetworkPolicySerializer
+                .marshalNetworkPolicies(networkPolicyManager.getNetworkPolicies());
+    }
+
+    private void restoreNetworkPolicies(byte[] data){
+        NetworkPolicyManager networkPolicyManager =
+                (NetworkPolicyManager)getSystemService(NETWORK_POLICY_SERVICE);
+        networkPolicyManager
+                .setNetworkPolicies(NetworkPolicySerializer.unmarshalNetworkPolicies(data));
+    }
+
     /**
      * Write an int in BigEndian into the byte array.
      * @param out byte array
@@ -1217,11 +1259,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private int readInt(byte[] in, int pos) {
-        int result =
-                ((in[pos    ] & 0xFF) << 24) |
-                        ((in[pos + 1] & 0xFF) << 16) |
-                        ((in[pos + 2] & 0xFF) <<  8) |
-                        ((in[pos + 3] & 0xFF) <<  0);
+        int result =    ((in[pos    ] & 0xFF) << 24) |
+                ((in[pos + 1] & 0xFF) << 16) |
+                ((in[pos + 2] & 0xFF) <<  8) |
+                ((in[pos + 3] & 0xFF) <<  0);
         return result;
     }
 
