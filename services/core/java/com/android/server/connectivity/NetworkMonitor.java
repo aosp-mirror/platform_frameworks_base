@@ -62,6 +62,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.internal.util.WakeupMessage;
 import com.android.server.connectivity.NetworkAgentInfo;
 
 import java.io.IOException;
@@ -565,19 +566,14 @@ public class NetworkMonitor extends StateMachine {
     private class LingeringState extends State {
         private static final String ACTION_LINGER_EXPIRED = "android.net.netmon.lingerExpired";
 
-        private CustomIntentReceiver mBroadcastReceiver;
-        private PendingIntent mIntent;
+        private WakeupMessage mWakeupMessage;
 
         @Override
         public void enter() {
-            mLingerToken = new Random().nextInt();
-            mBroadcastReceiver = new CustomIntentReceiver(ACTION_LINGER_EXPIRED, mLingerToken,
-                    CMD_LINGER_EXPIRED);
-            mIntent = mBroadcastReceiver.getPendingIntent();
+            final String cmdName = ACTION_LINGER_EXPIRED + "." + mNetworkAgentInfo.network.netId;
+            mWakeupMessage = new WakeupMessage(mContext, getHandler(), cmdName, CMD_LINGER_EXPIRED);
             long wakeupTime = SystemClock.elapsedRealtime() + mLingerDelayMs;
-            mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime,
-                    // Give a specific window so we aren't subject to unknown inexactitude.
-                    mLingerDelayMs / 6, mIntent);
+            mWakeupMessage.schedule(wakeupTime);
         }
 
         @Override
@@ -592,8 +588,6 @@ public class NetworkMonitor extends StateMachine {
                     }
                     return NOT_HANDLED;
                 case CMD_LINGER_EXPIRED:
-                    if (message.arg1 != mLingerToken)
-                        return HANDLED;
                     mConnectivityServiceHandler.sendMessage(
                             obtainMessage(EVENT_NETWORK_LINGER_COMPLETE, mNetworkAgentInfo));
                     return HANDLED;
@@ -624,8 +618,7 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void exit() {
-            mAlarmManager.cancel(mIntent);
-            mContext.unregisterReceiver(mBroadcastReceiver);
+            mWakeupMessage.cancel();
         }
     }
 

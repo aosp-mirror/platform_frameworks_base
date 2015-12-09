@@ -20,8 +20,8 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.internal.util.WakeupMessage;
 
-import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -128,7 +128,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     // System services / libraries we use.
     private final Context mContext;
-    private final AlarmManager mAlarmManager;
     private final Random mRandom;
     private final INetworkManagementService mNMService;
 
@@ -143,10 +142,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     // State variables.
     private final StateMachine mController;
-    private final AlarmListener mKickAlarm;
-    private final AlarmListener mTimeoutAlarm;
-    private final AlarmListener mRenewAlarm;
-    private final AlarmListener mOneshotTimeoutAlarm;
+    private final WakeupMessage mKickAlarm;
+    private final WakeupMessage mTimeoutAlarm;
+    private final WakeupMessage mRenewAlarm;
+    private final WakeupMessage mOneshotTimeoutAlarm;
     private final String mIfaceName;
 
     private boolean mRegisteredForPreDhcpNotification;
@@ -174,6 +173,11 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private State mWaitBeforeStartState = new WaitBeforeStartState(mDhcpInitState);
     private State mWaitBeforeRenewalState = new WaitBeforeRenewalState(mDhcpRenewingState);
 
+    private WakeupMessage makeWakeupMessage(String cmdName, int cmd) {
+        cmdName = DhcpClient.class.getSimpleName() + "." + mIfaceName + "." + cmdName;
+        return new WakeupMessage(mContext, getHandler(), cmdName, cmd);
+    }
+
     private DhcpClient(Context context, StateMachine controller, String iface) {
         super(TAG);
 
@@ -197,22 +201,21 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         setInitialState(mStoppedState);
 
-        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         mNMService = INetworkManagementService.Stub.asInterface(b);
 
         mRandom = new Random();
 
         // Used to schedule packet retransmissions.
-        mKickAlarm = new AlarmListener("KICK", CMD_KICK);
+        mKickAlarm = makeWakeupMessage("KICK", CMD_KICK);
         // Used to time out PacketRetransmittingStates.
-        mTimeoutAlarm = new AlarmListener("TIMEOUT", CMD_TIMEOUT);
+        mTimeoutAlarm = makeWakeupMessage("TIMEOUT", CMD_TIMEOUT);
         // Used to schedule DHCP renews.
-        mRenewAlarm = new AlarmListener("RENEW", DhcpStateMachine.CMD_RENEW_DHCP);
+        mRenewAlarm = makeWakeupMessage("RENEW", DhcpStateMachine.CMD_RENEW_DHCP);
         // Used to tell the caller when its request (CMD_START_DHCP or CMD_RENEW_DHCP) timed out.
         // TODO: when the legacy DHCP client is gone, make the client fully asynchronous and
         // remove this.
-        mOneshotTimeoutAlarm = new AlarmListener("ONESHOT_TIMEOUT", CMD_ONESHOT_TIMEOUT);
+        mOneshotTimeoutAlarm = makeWakeupMessage("ONESHOT_TIMEOUT", CMD_ONESHOT_TIMEOUT);
     }
 
     @Override
@@ -225,32 +228,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
         DhcpClient client = new DhcpClient(context, controller, intf);
         client.start();
         return client;
-    }
-
-    /**
-     * An AlarmListener that sends the specified command to the state machine.
-     */
-    private class AlarmListener implements AlarmManager.OnAlarmListener {
-        private final int cmd;
-        private final String name;
-
-        public AlarmListener(final String cmdName, final int cmd) {
-            this.cmd = cmd;
-            this.name = DhcpClient.class.getSimpleName() + "." + mIfaceName + "." + cmdName;
-        }
-
-        public void set(long alarmTime) {
-            mAlarmManager.setExact(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime, name, this, getHandler());
-        }
-
-        public void cancel() {
-            mAlarmManager.cancel(this);
-        }
-
-        public void onAlarm() {
-            sendMessage(cmd);
-        }
     }
 
     private boolean initInterface() {
@@ -412,11 +389,11 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     private void scheduleRenew() {
-        mAlarmManager.cancel(mRenewAlarm);
+        mRenewAlarm.cancel();
         if (mDhcpLeaseExpiry != 0) {
             long now = SystemClock.elapsedRealtime();
             long alarmTime = (now + mDhcpLeaseExpiry) / 2;
-            mRenewAlarm.set(alarmTime);
+            mRenewAlarm.schedule(alarmTime);
             Log.d(TAG, "Scheduling renewal in " + ((alarmTime - now) / 1000) + "s");
         } else {
             Log.d(TAG, "Infinite lease, no renewal needed");
@@ -548,7 +525,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     // one state, so we can just use the state timeout.
     private void scheduleOneshotTimeout() {
         final long alarmTime = SystemClock.elapsedRealtime() + DHCP_TIMEOUT_MS;
-        mOneshotTimeoutAlarm.set(alarmTime);
+        mOneshotTimeoutAlarm.schedule(alarmTime);
     }
 
     class StoppedState extends LoggingState {
@@ -713,8 +690,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
             long now = SystemClock.elapsedRealtime();
             long timeout = jitterTimer(mTimer);
             long alarmTime = now + timeout;
-            mKickAlarm.cancel();
-            mKickAlarm.set(alarmTime);
+            mKickAlarm.schedule(alarmTime);
             mTimer *= 2;
             if (mTimer > MAX_TIMEOUT_MS) {
                 mTimer = MAX_TIMEOUT_MS;
@@ -724,7 +700,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         protected void maybeInitTimeout() {
             if (mTimeout > 0) {
                 long alarmTime = SystemClock.elapsedRealtime() + mTimeout;
-                mTimeoutAlarm.set(alarmTime);
+                mTimeoutAlarm.schedule(alarmTime);
             }
         }
     }
