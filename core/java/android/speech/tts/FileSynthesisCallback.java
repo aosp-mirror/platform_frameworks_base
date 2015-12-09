@@ -104,8 +104,8 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             Log.d(TAG, "FileSynthesisRequest.start(" + sampleRateInHz + "," + audioFormat
                     + "," + channelCount + ")");
         }
-        if (audioFormat != AudioFormat.ENCODING_PCM_8BIT ||
-            audioFormat != AudioFormat.ENCODING_PCM_16BIT ||
+        if (audioFormat != AudioFormat.ENCODING_PCM_8BIT &&
+            audioFormat != AudioFormat.ENCODING_PCM_16BIT &&
             audioFormat != AudioFormat.ENCODING_PCM_FLOAT) {
             Log.e(TAG, "Audio format encoding " + audioFormat + " not supported. Please use one " +
                        "of AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT or " +
