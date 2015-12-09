@@ -933,7 +933,7 @@ static void ImageReader_imageRelease(JNIEnv* env, jobject thiz, jobject image)
         CpuConsumer* consumer = ctx->getCpuConsumer();
         CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, image);
         if (!buffer) {
-            ALOGW("Image already released!!!");
+            // Release an already closed image is harmless.
             return;
         }
         consumer->unlockBuffer(*buffer);
@@ -1078,7 +1078,8 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
     if (ctx == NULL) {
-        jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "ImageReader is not initialized or was already closed");
         return -1;
     }
 

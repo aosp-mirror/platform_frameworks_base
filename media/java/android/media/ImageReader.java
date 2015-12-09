@@ -17,10 +17,10 @@
 package android.media;
 
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;
@@ -29,6 +29,8 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -145,7 +147,7 @@ public class ImageReader implements AutoCloseable {
                     "NV21 format is not supported");
         }
 
-        mNumPlanes = getNumPlanesFromFormat();
+        mNumPlanes = ImageUtils.getNumPlanesForFormat(mFormat);
 
         nativeInit(new WeakReference<ImageReader>(this), width, height, format, maxImages);
 
@@ -323,21 +325,27 @@ public class ImageReader implements AutoCloseable {
      * @see #ACQUIRE_SUCCESS
      */
     private int acquireNextSurfaceImage(SurfaceImage si) {
+        synchronized (mCloseLock) {
+            int status = nativeImageSetup(si);
 
-        int status = nativeImageSetup(si);
+            switch (status) {
+                case ACQUIRE_SUCCESS:
+                    si.createSurfacePlanes();
+                    si.mIsImageValid = true;
+                case ACQUIRE_NO_BUFS:
+                case ACQUIRE_MAX_IMAGES:
+                    break;
+                default:
+                    throw new AssertionError("Unknown nativeImageSetup return code " + status);
+            }
 
-        switch (status) {
-            case ACQUIRE_SUCCESS:
-                si.createSurfacePlanes();
-                si.mIsImageValid = true;
-            case ACQUIRE_NO_BUFS:
-            case ACQUIRE_MAX_IMAGES:
-                break;
-            default:
-                throw new AssertionError("Unknown nativeImageSetup return code " + status);
+            // Only keep track the successfully acquired image, as the native buffer is only mapped
+            // for such case.
+            if (status == ACQUIRE_SUCCESS) {
+                mAcquiredImages.add(si);
+            }
+            return status;
         }
-
-        return status;
     }
 
     /**
@@ -398,7 +406,11 @@ public class ImageReader implements AutoCloseable {
                 "This image was not produced by an ImageReader");
         }
         SurfaceImage si = (SurfaceImage) i;
-        if (si.getReader() != this) {
+        if (si.mIsImageValid == false) {
+            return;
+        }
+
+        if (si.getReader() != this || !mAcquiredImages.contains(i)) {
             throw new IllegalArgumentException(
                 "This image was not produced by this ImageReader");
         }
@@ -406,6 +418,7 @@ public class ImageReader implements AutoCloseable {
         si.clearSurfacePlanes();
         nativeReleaseImage(i);
         si.mIsImageValid = false;
+        mAcquiredImages.remove(i);
     }
 
     /**
@@ -475,7 +488,24 @@ public class ImageReader implements AutoCloseable {
     public void close() {
         setOnImageAvailableListener(null, null);
         if (mSurface != null) mSurface.release();
-        nativeClose();
+
+        /**
+         * Close all outstanding acquired images before closing the ImageReader. It is a good
+         * practice to close all the images as soon as it is not used to reduce system instantaneous
+         * memory pressure. CopyOnWrite list will use a copy of current list content. For the images
+         * being closed by other thread (e.g., GC thread), doubling the close call is harmless. For
+         * the image being acquired by other threads, mCloseLock is used to synchronize close and
+         * acquire operations.
+         */
+        synchronized (mCloseLock) {
+            for (Image image : mAcquiredImages) {
+                image.close();
+            }
+            mAcquiredImages.clear();
+
+            nativeClose();
+        }
+
         if (mEstimatedNativeAllocBytes > 0) {
             VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
             mEstimatedNativeAllocBytes = 0;
@@ -542,45 +572,6 @@ public class ImageReader implements AutoCloseable {
         si.setDetached(true);
    }
 
-    /**
-     * Only a subset of the formats defined in
-     * {@link android.graphics.ImageFormat ImageFormat} and
-     * {@link android.graphics.PixelFormat PixelFormat} are supported by
-     * ImageReader. When reading RGB data from a surface, the formats defined in
-     * {@link android.graphics.PixelFormat PixelFormat} can be used, when
-     * reading YUV, JPEG or raw sensor data (for example, from camera or video
-     * decoder), formats from {@link android.graphics.ImageFormat ImageFormat}
-     * are used.
-     */
-    private int getNumPlanesFromFormat() {
-        switch (mFormat) {
-            case ImageFormat.YV12:
-            case ImageFormat.YUV_420_888:
-            case ImageFormat.NV21:
-                return 3;
-            case ImageFormat.NV16:
-                return 2;
-            case PixelFormat.RGB_565:
-            case PixelFormat.RGBA_8888:
-            case PixelFormat.RGBX_8888:
-            case PixelFormat.RGB_888:
-            case ImageFormat.JPEG:
-            case ImageFormat.YUY2:
-            case ImageFormat.Y8:
-            case ImageFormat.Y16:
-            case ImageFormat.RAW_SENSOR:
-            case ImageFormat.RAW10:
-            case ImageFormat.DEPTH16:
-            case ImageFormat.DEPTH_POINT_CLOUD:
-                return 1;
-            case ImageFormat.PRIVATE:
-                return 0;
-            default:
-                throw new UnsupportedOperationException(
-                        String.format("Invalid format specified %d", mFormat));
-        }
-    }
-
     private boolean isImageOwnedbyMe(Image image) {
         if (!(image instanceof SurfaceImage)) {
             return false;
@@ -612,7 +603,6 @@ public class ImageReader implements AutoCloseable {
         }
     }
 
-
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
@@ -622,8 +612,12 @@ public class ImageReader implements AutoCloseable {
     private int mEstimatedNativeAllocBytes;
 
     private final Object mListenerLock = new Object();
+    private final Object mCloseLock = new Object();
     private OnImageAvailableListener mListener;
     private ListenerHandler mListenerHandler;
+    // Keep track of the successfully acquired Images. This need to be thread safe as the images
+    // could be closed by different threads (e.g., application thread and GC thread).
+    private List<Image> mAcquiredImages = new CopyOnWriteArrayList<Image>();
 
     /**
      * This field is used by native code, do not access or modify.
@@ -657,9 +651,7 @@ public class ImageReader implements AutoCloseable {
 
         @Override
         public void close() {
-            if (mIsImageValid) {
-                ImageReader.this.releaseImage(this);
-            }
+            ImageReader.this.releaseImage(this);
         }
 
         public ImageReader getReader() {
