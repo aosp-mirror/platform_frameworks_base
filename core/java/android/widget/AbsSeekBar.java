@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -32,8 +34,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityNodeInfo;
-
-import com.android.internal.R;
 
 public abstract class AbsSeekBar extends ProgressBar {
     private final Rect mTempRect = new Rect();
@@ -424,10 +424,10 @@ public abstract class AbsSeekBar extends ProgressBar {
         if (thumbHeight > trackHeight) {
             final int offsetHeight = (paddedHeight - thumbHeight) / 2;
             trackOffset = offsetHeight + (thumbHeight - trackHeight) / 2;
-            thumbOffset = offsetHeight + 0;
+            thumbOffset = offsetHeight;
         } else {
             final int offsetHeight = (paddedHeight - trackHeight) / 2;
-            trackOffset = offsetHeight + 0;
+            trackOffset = offsetHeight;
             thumbOffset = offsetHeight + (trackHeight - thumbHeight) / 2;
         }
 
@@ -574,13 +574,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 if (isInScrollingContainer()) {
                     mTouchDownX = event.getX();
                 } else {
-                    setPressed(true);
-                    if (mThumb != null) {
-                        invalidate(mThumb.getBounds()); // This may be within the padding region
-                    }
-                    onStartTrackingTouch();
-                    trackTouchEvent(event);
-                    attemptClaimDrag();
+                    startDrag(event);
                 }
                 break;
 
@@ -590,13 +584,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 } else {
                     final float x = event.getX();
                     if (Math.abs(x - mTouchDownX) > mScaledTouchSlop) {
-                        setPressed(true);
-                        if (mThumb != null) {
-                            invalidate(mThumb.getBounds()); // This may be within the padding region
-                        }
-                        onStartTrackingTouch();
-                        trackTouchEvent(event);
-                        attemptClaimDrag();
+                        startDrag(event);
                     }
                 }
                 break;
@@ -630,6 +618,19 @@ public abstract class AbsSeekBar extends ProgressBar {
         return true;
     }
 
+    private void startDrag(MotionEvent event) {
+        setPressed(true);
+
+        if (mThumb != null) {
+            // This may be within the padding region.
+            invalidate(mThumb.getBounds());
+        }
+
+        onStartTrackingTouch();
+        trackTouchEvent(event);
+        attemptClaimDrag();
+    }
+
     private void setHotspot(float x, float y) {
         final Drawable bg = getBackground();
         if (bg != null) {
@@ -638,18 +639,20 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     private void trackTouchEvent(MotionEvent event) {
+        final int x = Math.round(event.getX());
+        final int y = Math.round(event.getY());
         final int width = getWidth();
-        final int available = width - mPaddingLeft - mPaddingRight;
-        final int x = (int) event.getX();
-        float scale;
-        float progress = 0;
+        final int availableWidth = width - mPaddingLeft - mPaddingRight;
+
+        final float scale;
+        float progress = 0.0f;
         if (isLayoutRtl() && mMirrorForRtl) {
             if (x > width - mPaddingRight) {
                 scale = 0.0f;
             } else if (x < mPaddingLeft) {
                 scale = 1.0f;
             } else {
-                scale = (float)(available - x + mPaddingLeft) / (float)available;
+                scale = (availableWidth - x + mPaddingLeft) / (float) availableWidth;
                 progress = mTouchProgressOffset;
             }
         } else {
@@ -658,15 +661,16 @@ public abstract class AbsSeekBar extends ProgressBar {
             } else if (x > width - mPaddingRight) {
                 scale = 1.0f;
             } else {
-                scale = (float)(x - mPaddingLeft) / (float)available;
+                scale = (x - mPaddingLeft) / (float) availableWidth;
                 progress = mTouchProgressOffset;
             }
         }
+
         final int max = getMax();
         progress += scale * max;
 
-        setHotspot(x, (int) event.getY());
-        setProgressInternal((int) progress, true, false);
+        setHotspot(x, y);
+        setProgressInternal(Math.round(progress), true, false);
     }
 
     /**
