@@ -43,7 +43,7 @@ public class NetworkSecurityPolicy {
 
     /**
      * Returns whether cleartext network traffic (e.g. HTTP, FTP, WebSockets, XMPP, IMAP, SMTP --
-     * without TLS or STARTTLS) is permitted for this process.
+     * without TLS or STARTTLS) is permitted for all network communication from this process.
      *
      * <p>When cleartext network traffic is not permitted, the platform's components (e.g. HTTP and
      * FTP stacks, {@link android.app.DownloadManager}, {@link android.media.MediaPlayer}) will
@@ -61,6 +61,18 @@ public class NetworkSecurityPolicy {
      */
     public boolean isCleartextTrafficPermitted() {
         return libcore.net.NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted();
+    }
+
+    /**
+     * Returns whether cleartext network traffic (e.g. HTTP, FTP, XMPP, IMAP, SMTP -- without
+     * TLS or STARTTLS) is permitted for communicating with {@code hostname} for this process.
+     *
+     * @see #isCleartextTrafficPermitted()
+     * @hide
+     */
+    public boolean isCleartextTrafficPermitted(String hostname) {
+        return libcore.net.NetworkSecurityPolicy.getInstance()
+                .isCleartextTrafficPermitted(hostname);
     }
 
     /**
