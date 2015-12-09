@@ -317,12 +317,8 @@ public class DirectoryFragment extends Fragment {
         mAdapter = new DocumentsAdapter(context);
         mRecView.setAdapter(mAdapter);
 
-        mDefaultItemColor = context.getResources().getColor(android.R.color.transparent);
-        // Get the accent color.
-        TypedValue selColor = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorAccent, selColor, true);
-        // Set the opacity to 10%.
-        mSelectedItemColor = (selColor.data & 0x00ffffff) | 0x16000000;
+        mDefaultItemColor = context.getResources().getColor(R.color.item_doc_background);
+        mSelectedItemColor = context.getResources().getColor(R.color.item_doc_background_selected);
 
         GestureDetector.SimpleOnGestureListener listener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -942,6 +938,7 @@ public class DirectoryFragment extends Fragment {
 
         public void setSelected(boolean selected) {
             itemView.setActivated(selected);
+            itemView.setBackgroundColor(selected ? mSelectedItemColor : mDefaultItemColor);
         }
 
         @Override
