@@ -776,6 +776,16 @@ public class UserManager {
     }
 
     /**
+     * Return whether the calling user is running in a "locked" state. A user is
+     * unlocked only after they've entered their credentials (such as a lock
+     * pattern or PIN), and credential-encrypted private app data storage is
+     * available.
+     */
+    public boolean isUserRunningAndLocked() {
+        return isUserRunningAndLocked(Process.myUserHandle());
+    }
+
+    /**
      * Return whether the given user is running in a "locked" state. A user
      * is unlocked only after they've entered their credentials (such as a lock
      * pattern or PIN), and credential-encrypted private app data storage is
@@ -790,6 +800,16 @@ public class UserManager {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /**
+     * Return whether the calling user is running in an "unlocked" state. A user
+     * is unlocked only after they've entered their credentials (such as a lock
+     * pattern or PIN), and credential-encrypted private app data storage is
+     * available.
+     */
+    public boolean isUserRunningAndUnlocked() {
+        return isUserRunningAndUnlocked(Process.myUserHandle());
     }
 
     /**
