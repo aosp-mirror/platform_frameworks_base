@@ -906,18 +906,6 @@ public final class MediaDrm {
             throws DeniedByServerException;
 
     /**
-     * Remove provisioning from a device.  Only system apps may unprovision a
-     * device.  Note that removing provisioning will invalidate any keys saved
-     * for offline use (KEY_TYPE_OFFLINE), which may render downloaded content
-     * unplayable until new licenses are acquired.  Since provisioning is global
-     * to the device, license invalidation will apply to all content downloaded
-     * by any app, so appropriate warnings should be given to the user.
-     * @hide
-     */
-    @SystemApi
-    public native void unprovisionDevice();
-
-    /**
      * A means of enforcing limits on the number of concurrent streams per subscriber
      * across devices is provided via SecureStop. This is achieved by securely
      * monitoring the lifetime of sessions.
