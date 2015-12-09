@@ -18,10 +18,13 @@ package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.Log;
 import com.android.systemui.Prefs;
 import com.android.systemui.recents.Recents;
@@ -66,10 +69,29 @@ public class RecentsTaskLoadPlan {
 
     List<ActivityManager.RecentTaskInfo> mRawTasks;
     TaskStack mStack;
+    ArraySet<Integer> mCurrentQuietProfiles = new ArraySet<Integer>();
 
     /** Package level ctor */
     RecentsTaskLoadPlan(Context context) {
         mContext = context;
+    }
+
+    private void updateCurrentQuietProfilesCache(int currentUserId) {
+        mCurrentQuietProfiles.clear();
+
+        if (currentUserId == UserHandle.USER_CURRENT) {
+            currentUserId = ActivityManager.getCurrentUser();
+        }
+        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        List<UserInfo> profiles = userManager.getProfiles(currentUserId);
+        if (profiles != null) {
+            for (int i = 0; i < profiles.size(); i++) {
+                UserInfo user  = profiles.get(i);
+                if (user.isManagedProfile() && user.isQuietModeEnabled()) {
+                    mCurrentQuietProfiles.add(user.id);
+                }
+            }
+        }
     }
 
     /**
@@ -77,9 +99,12 @@ public class RecentsTaskLoadPlan {
      * to most-recent order.
      */
     public synchronized void preloadRawTasks(boolean isTopTaskHome) {
+        int currentUserId = UserHandle.USER_CURRENT;
+        updateCurrentQuietProfilesCache(currentUserId);
         SystemServicesProxy ssp = Recents.getSystemServices();
         mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
-                UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
+                currentUserId, isTopTaskHome, mCurrentQuietProfiles);
+
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
 

@@ -52,6 +52,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.Pair;
@@ -154,7 +155,7 @@ public class SystemServicesProxy {
 
     /** Returns a list of the recents tasks */
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
-            boolean isTopTaskHome) {
+            boolean isTopTaskHome, ArraySet<Integer> quietProfileIds) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
@@ -215,6 +216,8 @@ public class SystemServicesProxy {
             // tasks if it is not the first active task.
             boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            // Filter out recent tasks from managed profiles which are in quiet mode.
+            isExcluded |= quietProfileIds.contains(t.userId);
             if (isExcluded && (isTopTaskHome || !isFirstValidTask)) {
                 iter.remove();
                 continue;
