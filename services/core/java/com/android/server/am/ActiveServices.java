@@ -61,6 +61,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -326,7 +327,7 @@ public final class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType, callingPackage,
-                    callingPid, callingUid, userId, true, callerFg);
+                    callingPid, callingUid, userId, true, callerFg, false);
         if (res == null) {
             return null;
         }
@@ -549,7 +550,7 @@ public final class ActiveServices {
 
         // If this service is active, make sure it is stopped.
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, null,
-                Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false);
+                Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false, false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
@@ -598,7 +599,7 @@ public final class ActiveServices {
     IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
-                UserHandle.getCallingUserId(), false, false);
+                UserHandle.getCallingUserId(), false, false, false);
 
         IBinder ret = null;
         if (r != null) {
@@ -831,10 +832,11 @@ public final class ActiveServices {
         }
 
         final boolean callerFg = callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE;
+        final boolean isBindExternal = (flags & Context.BIND_EXTERNAL_SERVICE) != 0;
 
         ServiceLookupResult res =
-            retrieveServiceLocked(service, resolvedType, callingPackage,
-                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true, callerFg);
+            retrieveServiceLocked(service, resolvedType, callingPackage, Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, true, callerFg, isBindExternal);
         if (res == null) {
             return 0;
         }
@@ -1192,7 +1194,7 @@ public final class ActiveServices {
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
             String resolvedType, String callingPackage, int callingPid, int callingUid, int userId,
-            boolean createIfNeeded, boolean callingFromFg) {
+            boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal) {
         ServiceRecord r = null;
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
@@ -1205,9 +1207,15 @@ public final class ActiveServices {
         if (comp != null) {
             r = smap.mServicesByName.get(comp);
         }
-        if (r == null) {
+        if (r == null && !isBindExternal) {
             Intent.FilterComparison filter = new Intent.FilterComparison(service);
             r = smap.mServicesByIntent.get(filter);
+        }
+        if (r != null && (r.serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0
+                && !callingPackage.equals(r.packageName)) {
+            // If an external service is running within its own package, other packages
+            // should not bind to that instance.
+            r = null;
         }
         if (r == null) {
             try {
@@ -1225,6 +1233,37 @@ public final class ActiveServices {
                 }
                 ComponentName name = new ComponentName(
                         sInfo.applicationInfo.packageName, sInfo.name);
+                if ((sInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0) {
+                    if (isBindExternal) {
+                        if (!sInfo.exported) {
+                            throw new SecurityException("BIND_EXTERNAL_SERVICE failed, " + name +
+                                    " is not exported");
+                        }
+                        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0) {
+                            throw new SecurityException("BIND_EXTERNAL_SERVICE failed, " + name +
+                                    " is not an isolatedProcess");
+                        }
+                        // Run the service under the calling package's application.
+                        ApplicationInfo aInfo = AppGlobals.getPackageManager().getApplicationInfo(
+                                callingPackage, ActivityManagerService.STOCK_PM_FLAGS, userId);
+                        if (aInfo == null) {
+                            throw new SecurityException("BIND_EXTERNAL_SERVICE failed, " +
+                                    "could not resolve client package " + callingPackage);
+                        }
+                        sInfo = new ServiceInfo(sInfo);
+                        sInfo.applicationInfo = new ApplicationInfo(sInfo.applicationInfo);
+                        sInfo.applicationInfo.packageName = aInfo.packageName;
+                        sInfo.applicationInfo.uid = aInfo.uid;
+                        name = new ComponentName(aInfo.packageName, name.getClassName());
+                        service.setComponent(name);
+                    } else {
+                        throw new SecurityException("BIND_EXTERNAL_SERVICE required for " +
+                                name);
+                    }
+                } else if (isBindExternal) {
+                    throw new SecurityException("BIND_EXTERNAL_SERVICE failed, " + name +
+                            " is not an externalService");
+                }
                 if (userId > 0) {
                     if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo,
                             sInfo.name, sInfo.flags)
