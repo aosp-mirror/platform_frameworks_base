@@ -1440,11 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"封鎖：一律不顯示這些通知"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"低：顯示在通知清單底部且不發出任何音效"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"一般：顯示這些通知且不發出任何音效"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"高：顯示在通知清單頂端並發出音效"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"緊急：持續顯示在螢幕上並發出音效"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"已封鎖：永不顯示這些通知"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"低：以靜音方式顯示在通知清單底部"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"一般：以靜音方式顯示這些通知"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"高：顯示在通知清單頂部並發出音效"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"緊急：不時於螢幕出現並發出音效"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">需時 %1$d 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

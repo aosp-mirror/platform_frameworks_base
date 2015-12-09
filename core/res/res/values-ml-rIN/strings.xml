@@ -1444,7 +1444,7 @@
     <string name="notification_importance_low" msgid="6447640449918427187">"താഴ്ന്നത്: അറിയിപ്പ് ലിസ്റ്റിന്റെ താഴെ ശബ്ദമുണ്ടാക്കാതെ കാണിക്കുക"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"സാധാരണം: ഈ അറിയിപ്പുകൾ നിശബ്ദമായി കാണിക്കുക"</string>
     <string name="notification_importance_high" msgid="3152238637737215654">"ഉയർന്നത്: അറിയിപ്പ് ലിസ്റ്റിന്റെ ഏറ്റവും മുകളിൽ കാണിക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"അടിയന്തിരം: സ്ക്രീനിൽ ദൃശ്യമാക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"അടിയന്തരം: സ്ക്രീനിൽ ദൃശ്യമാക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>

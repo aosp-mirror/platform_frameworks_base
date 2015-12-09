@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"U fshi nga administratori yt"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Për të përmirësuar jetëgjatësinë e baterisë, opsioni i kursimit të baterisë ul rendimentin e pajisjes tënde si dhe kufizon dridhjet dhe shumicën e të dhënave në sfond. Mail-i, mesazhet dhe aplikacionet e tjera që sinkronizohen automatikisht mund të mos përditësohen pa i hapur.\n\nKursimi i baterisë çaktivizohet automatikisht kur pajisja vihet në ngarkim."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Të bllokuara: Mos i shfaq asnjëherë këto njoftime"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Të ulëta: Shfaqi në heshtje në fund të listës së njoftimeve"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normale: Shfaqi këto njoftime në heshtje"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Të larta: Shfaqi në krye të listës së njoftimeve dhe lësho tingull"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Urgjente: Shfaq një vështrim të shpejtë në ekran dhe lësho tingull"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Për %1$d minuta (deri në <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Për një minutë (deri në <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

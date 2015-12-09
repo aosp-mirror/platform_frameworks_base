@@ -1442,7 +1442,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"Imezuiwa: Usionyeshe kamwe arifa hizi"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Imezuiwa: Usionyeshe arifa hizi kamwe"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Chini: Onyesha katika sehemu ya chini ya orodha ya arifa bila kutoa sauti"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Kawaida: Onyesha arifa hizi bila sauti"</string>
     <string name="notification_importance_high" msgid="3152238637737215654">"Juu: Onyesha katika sehemu ya juu ya orodha ya arifa na itoe sauti"</string>

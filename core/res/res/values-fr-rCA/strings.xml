@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Supprimé par votre administrateur"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la pile, la fonction d\'économie d\'énergie réduit les performances de votre appareil et limite la vibration, les services de localisation ainsi que la plupart des données en arrière-plan. Les applications Courriel, Messages et d\'autres qui reposent sur la synchronisation ne peuvent pas se mettre à jour, sauf si vous les ouvrez. \n\n L\'économiseur d\'énergie se désactive automatiquement lorsque votre appareil est en charge."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloquée : ne jamais afficher ces notifications"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Faible : afficher en mode silencieux au bas de la liste de notifications"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normale : afficher ces notifications en mode silencieux"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Élevée : afficher en haut de la liste des notifications et émettre un son"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Urgent : afficher sur l\'écran et émettre un son"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d minutes (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

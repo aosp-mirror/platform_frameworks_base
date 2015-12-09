@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"배터리 수명 개선을 위해, 배터리 세이버는 기기의 성능을 줄이고 진동, 위치 서비스 및 대부분의 백그라운드 데이터를 제한합니다. 이메일, 메시지 및 동기화에 의존하는 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n배터리 세이버는 기기를 충전 중일 때는 자동으로 사용 중지됩니다."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"차단: 알림 다시 표시 안함"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"낮음: 알림 목록 하단에 무음으로 표시"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"일반: 무음으로 알림 표시"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"높음: 알림 목록 상단에 표시하고 소리로 알림"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"긴급: 화면에 표시하고 소리로 알림"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
       <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>

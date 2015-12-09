@@ -1449,16 +1449,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избрисао је ваш адмиистратор"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију можда неће да се ажурирају ако их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Блокирана: Ова обавештења се никада не приказују"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Ниска: Приказују се у дну листе обавештења без звука"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Уобичајена: Ова обавештења се приказују без звука"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Висока: Приказују се у врху листе обавештења и активира се звучни сигнал"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Хитна: Накратко се приказују на екрану и активира се звучни сигнал"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d минут (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

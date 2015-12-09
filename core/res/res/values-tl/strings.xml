@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Na-update ng iyong administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Na-delete ng iyong administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Upang matulungang pagbutihin ang tagal ng baterya, binabawasan ng pangtipid ng baterya ang pagganap ng iyong device at nililimitahan ang pag-vibrate, mga serbisyo ng lokasyon at karamihan sa data ng background. Maaaring hindi mag-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung buksan mo ang mga iyon.\n\nAwtomatikong nag-o-off ang pangtipid ng baterya kapag nagcha-charge ang iyong device."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Naka-block: Huwag kailanman ipakita ang mga notification na ito"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Mababa: Tahimik na ipakita sa ibaba ng listahan ng mga notification"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Tahimik na ipakita ang mga notification na ito"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Mataas: Ipakita sa taas ng listahan ng mga notification at mag-play ng tunog"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Agaran: Ipasilip sa screen at mag-play ng tunog"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Sa loob ng %1$d minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Sa loob ng %1$d na minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
