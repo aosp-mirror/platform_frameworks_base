@@ -101,21 +101,24 @@ public class FilesActivity extends BaseActivity {
             // from EXTRA_STACK intent extra. In this case, we'll skip other means of
             // loading or restoring the stack.
             if (!mState.stack.isEmpty()) {
+                if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
                 // When restoring from a stack, if a URI is present, it should only ever
                 // be a launch URI. Launch URIs support sensible activity management, but
-                // don't specify an real content target.
-                if (uri != null) {
-                    checkState(LauncherActivity.isLaunchUri(uri));
-                }
+                // don't specify a real content target.
+                checkState(uri == null || LauncherActivity.isLaunchUri(uri));
                 onCurrentDirectoryChanged(ANIM_NONE);
             } else if (DocumentsContract.isRootUri(this, uri)) {
+                if (DEBUG) Log.d(TAG, "Launching with root URI.");
                 // If we've got a specific root to display, restore that root using a dedicated
                 // authority. That way a misbehaving provider won't result in an ANR.
                 new RestoreRootTask(uri).executeOnExecutor(
                         ProviderExecutor.forAuthority(uri.getAuthority()));
             } else {
-                // Finally, we try to restore a stack from recents.
-                new RestoreStackTask().execute();
+                if (DEBUG) Log.d(TAG, "Launching into Home directory.");
+                // If all else fails, try to load "Home" directory.
+                uri = DocumentsContract.buildHomeUri();
+                new RestoreRootTask(uri).executeOnExecutor(
+                        ProviderExecutor.forAuthority(uri.getAuthority()));
             }
 
             // TODO: Ensure we're handling CopyService errors correctly across all activities.
@@ -159,7 +162,17 @@ public class FilesActivity extends BaseActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        updateActionBar();
+        // This check avoids a flicker from "Recents" to "Home".
+        // Only update action bar at this point if there is an active
+        // serach. Why? Because this avoid an early (undesired) load of
+        // the recents root...which is the default root in other activities.
+        // In Files app "Home" is the default, but it is loaded async.
+        // updateActionBar will be called once Home root is loaded.
+        // Except while searching we need this call to ensure the
+        // search bits get layed out correctly.
+        if (mSearchManager.isSearching()) {
+            updateActionBar();
+        }
     }
 
     @Override

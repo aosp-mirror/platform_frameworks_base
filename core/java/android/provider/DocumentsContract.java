@@ -660,6 +660,16 @@ public final class DocumentsContract {
     }
 
     /**
+     * Builds URI for user home directory on external (local) storage.
+     * {@hide}
+     */
+    public static Uri buildHomeUri() {
+        // TODO: Avoid this type of interpackage copying. Added here to avoid
+        // direct coupling, but not ideal.
+        return DocumentsContract.buildRootUri("com.android.externalstorage.documents", "home");
+    }
+
+    /**
      * Build URI representing the recently modified documents of a specific root
      * in a document provider. When queried, a provider will return zero or more
      * rows with columns defined by {@link Document}.
