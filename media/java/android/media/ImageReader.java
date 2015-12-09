@@ -570,7 +570,7 @@ public class ImageReader implements AutoCloseable {
 
         nativeDetachImage(image);
         si.setDetached(true);
-   }
+    }
 
     private boolean isImageOwnedbyMe(Image image) {
         if (!(image instanceof SurfaceImage)) {
@@ -675,6 +675,7 @@ public class ImageReader implements AutoCloseable {
             switch(getFormat()) {
                 case ImageFormat.JPEG:
                 case ImageFormat.DEPTH_POINT_CLOUD:
+                case ImageFormat.RAW_PRIVATE:
                     width = ImageReader.this.getWidth();
                     break;
                 default:
@@ -690,6 +691,7 @@ public class ImageReader implements AutoCloseable {
             switch(getFormat()) {
                 case ImageFormat.JPEG:
                 case ImageFormat.DEPTH_POINT_CLOUD:
+                case ImageFormat.RAW_PRIVATE:
                     height = ImageReader.this.getHeight();
                     break;
                 default:
@@ -791,12 +793,20 @@ public class ImageReader implements AutoCloseable {
             @Override
             public int getPixelStride() {
                 SurfaceImage.this.throwISEIfImageIsInvalid();
+                if (ImageReader.this.mFormat == ImageFormat.RAW_PRIVATE) {
+                    throw new UnsupportedOperationException(
+                            "getPixelStride is not supported for RAW_PRIVATE plane");
+                }
                 return mPixelStride;
             }
 
             @Override
             public int getRowStride() {
                 SurfaceImage.this.throwISEIfImageIsInvalid();
+                if (ImageReader.this.mFormat == ImageFormat.RAW_PRIVATE) {
+                    throw new UnsupportedOperationException(
+                            "getRowStride is not supported for RAW_PRIVATE plane");
+                }
                 return mRowStride;
             }
 

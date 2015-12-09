@@ -11545,6 +11545,7 @@ package android.graphics {
     field public static final int PRIVATE = 34; // 0x22
     field public static final int RAW10 = 37; // 0x25
     field public static final int RAW12 = 38; // 0x26
+    field public static final int RAW_PRIVATE = 36; // 0x24
     field public static final int RAW_SENSOR = 32; // 0x20
     field public static final int RGB_565 = 4; // 0x4
     field public static final int UNKNOWN = 0; // 0x0

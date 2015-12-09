@@ -141,6 +141,16 @@ public abstract class Image implements AutoCloseable {
      *     {@link android.hardware.camera2.CameraDevice CameraDevice}.
      *   </td>
      * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#RAW_PRIVATE RAW_PRIVATE}</td>
+     *   <td>1</td>
+     *   <td>A single plane of raw sensor image data of private layout.
+     *   The details of the layout is implementation specific. Row stride and
+     *   pixel stride are undefined for this format. Calling {@link Plane#getRowStride()}
+     *   or {@link Plane#getPixelStride()} on RAW_PRIVATE image will cause
+     *   UnSupportedOperationException being thrown.
+     *   </td>
+     * </tr>
      * </table>
      *
      * @see android.graphics.ImageFormat
@@ -341,7 +351,13 @@ public abstract class Image implements AutoCloseable {
          * <p>The row stride for this color plane, in bytes.</p>
          *
          * <p>This is the distance between the start of two consecutive rows of
-         * pixels in the image. The row stride is always greater than 0.</p>
+         * pixels in the image. Note that row stried is undefined for some formats
+         * such as
+         * {@link android.graphics.ImageFormat#RAW_PRIVATE RAW_PRIVATE},
+         * and calling getRowStride on images of these formats will
+         * cause an UnsupportedOperationException being thrown.
+         * For formats where row stride is well defined, the row stride
+         * is always greater than 0.</p>
          */
         public abstract int getRowStride();
         /**
@@ -350,7 +366,12 @@ public abstract class Image implements AutoCloseable {
          * <p>This is the distance between two consecutive pixel values in a row
          * of pixels. It may be larger than the size of a single pixel to
          * account for interleaved image data or padded formats.
-         * The pixel stride is always greater than 0.</p>
+         * Note that pixel stride is undefined for some formats such as
+         * {@link android.graphics.ImageFormat#RAW_PRIVATE RAW_PRIVATE},
+         * and calling getPixelStride on images of these formats will
+         * cause an UnsupportedOperationException being thrown.
+         * For formats where pixel stride is well defined, the pixel stride
+         * is always greater than 0.</p>
          */
         public abstract int getPixelStride();
         /**
