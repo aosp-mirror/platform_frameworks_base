@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"தனிப்பட்டவை"</string>
     <string name="category_work" msgid="8699184680584175622">"பணியிடம்"</string>
     <string name="development_settings_title" msgid="215179176067683667">"டெவெலப்பர் விருப்பங்கள்"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"டெவெலப்பர் விருப்பங்களை இயக்கு"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"பயன்பாட்டின் மேம்பாட்டிற்காக விருப்பங்களை அமை"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"இவருக்கு, டெவெலப்பர் விருப்பங்கள் இல்லை"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"இவரால் VPN அமைப்புகளை மாற்ற முடியாது"</string>

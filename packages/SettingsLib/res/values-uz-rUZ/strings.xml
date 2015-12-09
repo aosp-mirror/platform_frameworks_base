@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"Shaxsiy"</string>
     <string name="category_work" msgid="8699184680584175622">"Ish"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Dasturchi sozlamalari"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"Dasturchi sozlamalarini yoqish"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Ilova dasturlash moslamalari"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Bu foydalanuvchiga dasturchi imkoniyatlari taqdim etilmagan"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Ushbu foydalanuvchi uchun VPN sozlamalari mavjud emas"</string>

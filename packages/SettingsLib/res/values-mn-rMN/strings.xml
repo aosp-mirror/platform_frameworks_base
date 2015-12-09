@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"Хувийн"</string>
     <string name="category_work" msgid="8699184680584175622">"Ажил"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Хөгжүүлэгчийн тохиргоо"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"Хөгжүүлэгчийн сонголтыг идэвхжүүлэх"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Апп хөгжүүлэлтэд зориулсан сонголтуудыг тохируулах"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Энэ хэрэглэгч хөгжүүлэгчийн тохиргоог ашиглах боломжгүй"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Энэ хэрэглэгчид VPN тохиргоог ашиглах боломжгүй"</string>

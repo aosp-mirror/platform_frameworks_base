@@ -147,5 +147,12 @@
     <item msgid="836593137872605381">"Το πολύ 3 διαδικασίες"</item>
     <item msgid="7899496259191969307">"Το πολύ 4 διεργασίες"</item>
   </string-array>
-    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Φόρτιση σε εξέλιξη"</item>
+    <item msgid="5220695614993094977">"MTP (Πρωτόκολλο μεταφοράς πολυμέσων)"</item>
+    <item msgid="2086000968159047375">"PTP (Πρωτόκολλο μεταφοράς εικόνων)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB Ethernet)"</item>
+    <item msgid="1718924214939774352">"Πηγή ήχου"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

@@ -147,5 +147,12 @@
     <item msgid="836593137872605381">"அதிகபட்சமாக 3 செயல்முறைகள்"</item>
     <item msgid="7899496259191969307">"அதிகபட்சமாக 4 செயல்முறைகள்"</item>
   </string-array>
-    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"சார்ஜ் ஏறுகிறது"</item>
+    <item msgid="5220695614993094977">"MTP (மீடியா பரிமாற்ற நெறிமுறை)"</item>
+    <item msgid="2086000968159047375">"PTP (படப் பரிமாற்ற நெறிமுறை)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB ஈத்தர்நெட்)"</item>
+    <item msgid="1718924214939774352">"ஆடியோ மூலம்"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

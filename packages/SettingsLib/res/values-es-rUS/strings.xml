@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Trabajo"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Opciones del programador"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"Activar opciones para programador"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Establecer opciones para desarrollar aplicaciones"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Las opciones de programador no están disponibles para este usuario."</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"La configuración de la red VPN no está disponible para este usuario."</string>
