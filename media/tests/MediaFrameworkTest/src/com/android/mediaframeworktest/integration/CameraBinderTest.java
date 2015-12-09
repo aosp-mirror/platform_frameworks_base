@@ -129,7 +129,7 @@ public class CameraBinderTest extends AndroidTestCase {
 
             int res = mUtils.getCameraService().supportsCameraApi(cameraId, API_VERSION_2);
 
-            if (res != CameraBinderTestUtils.NO_ERROR && res != CameraBinderTestUtils.EOPNOTSUPP) {
+            if (res != CameraBinderTestUtils.NO_ERROR && res != -android.system.OsConstants.EOPNOTSUPP) {
                 fail("Camera service returned bad value when queried if it supports camera2 api: "
                         + res + " for camera ID " + cameraId);
             }

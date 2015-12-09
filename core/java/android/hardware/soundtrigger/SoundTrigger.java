@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static android.system.OsConstants.*;
+
 /**
  * The SoundTrigger class provides access via JNI to the native service managing
  * the sound trigger HAL.
@@ -35,11 +37,11 @@ public class SoundTrigger {
 
     public static final int STATUS_OK = 0;
     public static final int STATUS_ERROR = Integer.MIN_VALUE;
-    public static final int STATUS_PERMISSION_DENIED = -1;
-    public static final int STATUS_NO_INIT = -19;
-    public static final int STATUS_BAD_VALUE = -22;
-    public static final int STATUS_DEAD_OBJECT = -32;
-    public static final int STATUS_INVALID_OPERATION = -38;
+    public static final int STATUS_PERMISSION_DENIED = -EPERM;
+    public static final int STATUS_NO_INIT = -ENODEV;
+    public static final int STATUS_BAD_VALUE = -EINVAL;
+    public static final int STATUS_DEAD_OBJECT = -EPIPE;
+    public static final int STATUS_INVALID_OPERATION = -ENOSYS;
 
     /*****************************************************************************
      * A ModuleProperties describes a given sound trigger hardware module

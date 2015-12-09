@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static android.system.OsConstants.*;
+
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
  * snap pictures, and retrieve frames for encoding for video.  This class is a
@@ -173,13 +175,6 @@ public class Camera {
     private final Object mAutoFocusCallbackLock = new Object();
 
     private static final int NO_ERROR = 0;
-    private static final int EACCESS = -13;
-    private static final int ENODEV = -19;
-    private static final int EBUSY = -16;
-    private static final int EINVAL = -22;
-    private static final int ENOSYS = -38;
-    private static final int EUSERS = -87;
-    private static final int EOPNOTSUPP = -95;
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -415,30 +410,28 @@ public class Camera {
     private Camera(int cameraId, int halVersion) {
         int err = cameraInitVersion(cameraId, halVersion);
         if (checkInitErrors(err)) {
-            switch(err) {
-                case EACCESS:
-                    throw new RuntimeException("Fail to connect to camera service");
-                case ENODEV:
-                    throw new RuntimeException("Camera initialization failed");
-                case ENOSYS:
-                    throw new RuntimeException("Camera initialization failed because some methods"
-                            + " are not implemented");
-                case EOPNOTSUPP:
-                    throw new RuntimeException("Camera initialization failed because the hal"
-                            + " version is not supported by this device");
-                case EINVAL:
-                    throw new RuntimeException("Camera initialization failed because the input"
-                            + " arugments are invalid");
-                case EBUSY:
-                    throw new RuntimeException("Camera initialization failed because the camera"
-                            + " device was already opened");
-                case EUSERS:
-                    throw new RuntimeException("Camera initialization failed because the max"
-                            + " number of camera devices were already opened");
-                default:
-                    // Should never hit this.
-                    throw new RuntimeException("Unknown camera error");
+            if (err == -EACCES) {
+                throw new RuntimeException("Fail to connect to camera service");
+            } else if (err == -ENODEV) {
+                throw new RuntimeException("Camera initialization failed");
+            } else if (err == -ENOSYS) {
+                throw new RuntimeException("Camera initialization failed because some methods"
+                        + " are not implemented");
+            } else if (err == -EOPNOTSUPP) {
+                throw new RuntimeException("Camera initialization failed because the hal"
+                        + " version is not supported by this device");
+            } else if (err == -EINVAL) {
+                throw new RuntimeException("Camera initialization failed because the input"
+                        + " arugments are invalid");
+            } else if (err == -EBUSY) {
+                throw new RuntimeException("Camera initialization failed because the camera"
+                        + " device was already opened");
+            } else if (err == -EUSERS) {
+                throw new RuntimeException("Camera initialization failed because the max"
+                        + " number of camera devices were already opened");
             }
+            // Should never hit this.
+            throw new RuntimeException("Unknown camera error");
         }
     }
 
@@ -490,15 +483,13 @@ public class Camera {
     Camera(int cameraId) {
         int err = cameraInitNormal(cameraId);
         if (checkInitErrors(err)) {
-            switch(err) {
-                case EACCESS:
-                    throw new RuntimeException("Fail to connect to camera service");
-                case ENODEV:
-                    throw new RuntimeException("Camera initialization failed");
-                default:
-                    // Should never hit this.
-                    throw new RuntimeException("Unknown camera error");
+            if (err == -EACCES) {
+                throw new RuntimeException("Fail to connect to camera service");
+            } else if (err == -ENODEV) {
+                throw new RuntimeException("Camera initialization failed");
             }
+            // Should never hit this.
+            throw new RuntimeException("Unknown camera error");
         }
     }
 
