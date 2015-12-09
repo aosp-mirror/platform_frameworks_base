@@ -49939,7 +49939,6 @@ package java.lang.ref {
   public abstract class Reference {
     method public void clear();
     method public boolean enqueue();
-    method public final synchronized boolean enqueueInternal();
     method public T get();
     method public boolean isEnqueued();
   }
