@@ -9,8 +9,7 @@
             android:authorities="com.android.mtp.documents"
             android:grantUriPermissions="true"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DOCUMENTS"
-            android:enabled="false">
+            android:permission="android.permission.MANAGE_DOCUMENTS">
             <intent-filter>
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
