@@ -48,6 +48,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.NotificationHeaderView;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -3000,6 +3001,7 @@ public class Notification implements Parcelable
          */
         private void resetNotificationHeader(RemoteViews contentView) {
             contentView.setImageViewResource(R.id.icon, 0);
+            contentView.setBoolean(R.id.notification_header, "setExpanded", false);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_sub_text, View.GONE);
@@ -3134,6 +3136,8 @@ public class Notification implements Parcelable
         private void bindExpandButton(RemoteViews contentView) {
             contentView.setDrawableParameters(R.id.expand_button, false, -1, resolveColor(),
                     PorterDuff.Mode.SRC_ATOP, -1);
+            contentView.setInt(R.id.notification_header, "setOriginalNotificationColor",
+                    resolveColor());
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView) {
@@ -3197,7 +3201,6 @@ public class Notification implements Parcelable
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
             big.setViewVisibility(R.id.actions, View.GONE);
-            big.setViewVisibility(R.id.action_divider, View.GONE);
             big.removeAllViews(R.id.actions);
         }
 
@@ -3209,7 +3212,6 @@ public class Notification implements Parcelable
             int N = mActions.size();
             if (N > 0) {
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
-                big.setViewVisibility(R.id.action_divider, View.VISIBLE);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
                     final RemoteViews button = generateActionButton(mActions.get(i));
@@ -3276,11 +3278,7 @@ public class Notification implements Parcelable
         }
 
         private void adaptNotificationHeaderForBigContentView(RemoteViews result) {
-            // We have to set the collapse button instead
-            result.setImageViewResource(R.id.expand_button, R.drawable.ic_arrow_up_14dp);
-            // Apply the color again
-            result.setDrawableParameters(R.id.expand_button, false, -1, resolveColor(),
-                    PorterDuff.Mode.SRC_ATOP, -1);
+            result.setBoolean(R.id.notification_header, "setExpanded", true);
         }
 
         /**
@@ -3352,10 +3350,14 @@ public class Notification implements Parcelable
          * Apply any necessariy colors to the small icon
          */
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView) {
-            if (!isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon)) {
+            boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
+            if (colorable) {
                 contentView.setDrawableParameters(R.id.icon, false, -1, resolveColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
+
             }
+            contentView.setInt(R.id.notification_header, "setOriginalIconColor",
+                    colorable ? resolveColor() : NotificationHeaderView.NO_COLOR);
         }
 
         /**

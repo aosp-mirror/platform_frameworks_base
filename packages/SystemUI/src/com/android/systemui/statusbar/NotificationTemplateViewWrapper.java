@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.MotionEvent;
+import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -64,10 +65,8 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private ImageView mIcon;
     protected ImageView mPicture;
 
-    private TextView mSubText;
-    private View mSubTextDivider;
     private ImageView mExpandButton;
-    private ViewGroup mNotificationHeader;
+    private NotificationHeaderView mNotificationHeader;
     private ProgressBar mProgressBar;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
@@ -83,8 +82,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         View mainColumn = mView.findViewById(com.android.internal.R.id.notification_main_column);
         mIcon = (ImageView) mView.findViewById(com.android.internal.R.id.icon);
         mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
-        mSubText = (TextView) mView.findViewById(com.android.internal.R.id.header_sub_text);
-        mSubTextDivider = mView.findViewById(com.android.internal.R.id.sub_text_divider);
         mExpandButton = (ImageView) mView.findViewById(com.android.internal.R.id.expand_button);
         mColor = resolveColor(mExpandButton);
         final View progress = mView.findViewById(com.android.internal.R.id.progress);
@@ -94,7 +91,7 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             // It's still a viewstub
             mProgressBar = null;
         }
-        mNotificationHeader = (ViewGroup) mView.findViewById(
+        mNotificationHeader = (NotificationHeaderView) mView.findViewById(
                 com.android.internal.R.id.notification_header);
         ArrayList<View> viewsToInvert = new ArrayList<>();
         if (mainColumn != null) {
@@ -138,12 +135,22 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             }
         }
         if (mIcon != null) {
+            boolean hadColorFilter = mNotificationHeader.getOriginalIconColor()
+                    != NotificationHeaderView.NO_COLOR;
             if (fade) {
-                fadeIconColorFilter(mIcon, dark, delay);
-                fadeIconAlpha(mIcon, dark, delay);
+                if (hadColorFilter) {
+                    fadeIconColorFilter(mIcon, dark, delay);
+                    fadeIconAlpha(mIcon, dark, delay);
+                } else {
+                    fadeGrayscale(mIcon, dark, delay);
+                }
             } else {
-                updateIconColorFilter(mIcon, dark);
-                updateIconAlpha(mIcon, dark);
+                if (hadColorFilter) {
+                    updateIconColorFilter(mIcon, dark);
+                    updateIconAlpha(mIcon, dark);
+                } else {
+                    updateGrayscale(mIcon, dark);
+                }
             }
         }
         setPictureGrayscale(dark, fade, delay);
@@ -271,21 +278,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void setSubTextVisible(boolean visible) {
-        if (mSubText == null) {
-            return;
-        }
-        boolean subTextAvailable = !TextUtils.isEmpty(mSubText.getText());
-        if (visible && subTextAvailable) {
-            mSubText.setVisibility(View.VISIBLE);
-            mSubTextDivider.setVisibility(View.VISIBLE);
-        } else {
-            mSubText.setVisibility(View.GONE);
-            mSubTextDivider.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
@@ -309,5 +301,10 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
                 (int) (rSource * (1f - t) + rTarget * t),
                 (int) (gSource * (1f - t) + gTarget * t),
                 (int) (bSource * (1f - t) + bTarget * t));
+    }
+
+    @Override
+    public NotificationHeaderView getNotificationHeader() {
+        return mNotificationHeader;
     }
 }

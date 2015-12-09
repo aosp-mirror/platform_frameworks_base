@@ -17,10 +17,10 @@
 package android.view;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -34,14 +34,20 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends LinearLayout {
+    public static final int NO_COLOR = -1;
     private final int mHeaderMinWidth;
+    private final int mExpandTopPadding;
     private View mAppName;
     private View mSubTextView;
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
-    private View mExpandButton;
+    private ImageView mExpandButton;
     private View mIcon;
     private TextView mChildCount;
+    private int mIconColor;
+    private int mOriginalNotificationColor;
+    private boolean mGroupHeader;
+    private boolean mExpanded;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -59,6 +65,7 @@ public class NotificationHeaderView extends LinearLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
         mHeaderMinWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_header_shrink_min_width);
+        mExpandTopPadding = (int) (1 * getResources().getDisplayMetrics().density);
     }
 
     @Override
@@ -66,7 +73,7 @@ public class NotificationHeaderView extends LinearLayout {
         super.onFinishInflate();
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mSubTextView = findViewById(com.android.internal.R.id.header_sub_text);
-        mExpandButton = findViewById(com.android.internal.R.id.expand_button);
+        mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mChildCount = (TextView) findViewById(com.android.internal.R.id.number_of_children);
     }
@@ -98,7 +105,7 @@ public class NotificationHeaderView extends LinearLayout {
             int overFlow = totalWidth - givenWidth;
             // We are overflowing, lets shrink
             final int appWidth = mAppName.getMeasuredWidth();
-            if (appWidth > mHeaderMinWidth) {
+            if (mAppName.getVisibility() != GONE && appWidth > mHeaderMinWidth) {
                 int newSize = appWidth - Math.min(appWidth - mHeaderMinWidth, overFlow);
                 int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
                 mAppName.measure(childWidthSpec, wrapContentHeightSpec);
@@ -144,6 +151,57 @@ public class NotificationHeaderView extends LinearLayout {
         } else {
             mChildCount.setVisibility(GONE);
         }
+    }
+
+    @RemotableViewMethod
+    public void setOriginalIconColor(int color) {
+        mIconColor = color;
+    }
+
+    public int getOriginalIconColor() {
+        return mIconColor;
+    }
+
+    @RemotableViewMethod
+    public void setOriginalNotificationColor(int color) {
+        mOriginalNotificationColor = color;
+    }
+
+    public int getOriginalNotificationColor() {
+        return mOriginalNotificationColor;
+    }
+
+    public void setIsGroupHeader(boolean isGroupHeader) {
+        mGroupHeader = isGroupHeader;
+        updateExpandButton();
+    }
+
+    @RemotableViewMethod
+    public void setExpanded(boolean expanded) {
+        mExpanded = expanded;
+        updateExpandButton();
+    }
+
+    private void updateExpandButton() {
+        int drawableId;
+        int paddingTop = 0;
+        if (mGroupHeader) {
+            if (mExpanded) {
+                drawableId = com.android.internal.R.drawable.ic_collapse_bundle;
+            } else {
+                drawableId =com.android.internal.R.drawable.ic_expand_bundle;
+            }
+        } else {
+            if (mExpanded) {
+                drawableId = com.android.internal.R.drawable.ic_collapse_notification;
+            } else {
+                drawableId = com.android.internal.R.drawable.ic_expand_notification;
+            }
+            paddingTop = mExpandTopPadding;
+        }
+        mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
+        mExpandButton.setColorFilter(mOriginalNotificationColor);
+        mExpandButton.setPadding(0, paddingTop, 0, 0);
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {

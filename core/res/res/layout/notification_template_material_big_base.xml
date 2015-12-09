@@ -55,12 +55,6 @@
         </FrameLayout>
         <include layout="@layout/notification_template_right_icon" />
     </FrameLayout>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:id="@+id/action_divider"
-        android:visibility="gone"
-        android:background="@drawable/notification_template_divider" />
     <include
         layout="@layout/notification_material_action_list"
         android:layout_width="match_parent"
