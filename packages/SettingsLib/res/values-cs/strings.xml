@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"Osobní"</string>
     <string name="category_work" msgid="8699184680584175622">"Pracovní"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Pro vývojáře"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"Aktivovat možnosti pro vývojáře"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Umožňuje nastavit možnosti pro vývoj aplikací"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Pro tohoto uživatele jsou možnosti vývojáře nedostupné."</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Nastavení sítě VPN pro tohoto uživatele není dostupné."</string>

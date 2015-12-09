@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"个人"</string>
     <string name="category_work" msgid="8699184680584175622">"工作"</string>
     <string name="development_settings_title" msgid="215179176067683667">"开发者选项"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"启用开发者选项"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"设置应用开发选项"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"此用户无法使用开发者选项"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"此用户无权修改VPN设置"</string>

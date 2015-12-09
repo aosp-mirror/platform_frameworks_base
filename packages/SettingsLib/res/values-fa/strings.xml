@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"شخصی"</string>
     <string name="category_work" msgid="8699184680584175622">"محل کار"</string>
     <string name="development_settings_title" msgid="215179176067683667">"گزینه‌های برنامه‌نویسان"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"فعال کردن گزینه‌های برنامه‌نویس"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"گزینه‌های برنامه‌نویس برای این کاربر موجود نیست"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏تنظیمات VPN برای این کاربر در دسترس نیست"</string>

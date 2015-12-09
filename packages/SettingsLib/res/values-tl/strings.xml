@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Trabaho"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Mga opsyon ng developer"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"I-enable ang mga opsyon ng developer"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Magtakda ng mga pagpipilian para sa pagbuo ng app"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Hindi available ang mga pagpipilian ng developer para sa user na ito"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Hindi available ang mga setting ng VPN para sa user na ito"</string>

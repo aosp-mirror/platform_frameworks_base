@@ -147,5 +147,12 @@
     <item msgid="836593137872605381">"Como moito 3 procesos"</item>
     <item msgid="7899496259191969307">"Como moito 4 procesos"</item>
   </string-array>
-    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Cargando"</item>
+    <item msgid="5220695614993094977">"MTP (protocolo de transferencia multimedia)"</item>
+    <item msgid="2086000968159047375">"PTP (protocolo de transferencia de imaxes)"</item>
+    <item msgid="7398830860950841822">"RNDIS (Ethernet USB)"</item>
+    <item msgid="1718924214939774352">"Fonte de audio"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

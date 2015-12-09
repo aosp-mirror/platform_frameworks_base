@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"Osobno"</string>
     <string name="category_work" msgid="8699184680584175622">"Posao"</string>
     <string name="development_settings_title" msgid="215179176067683667">"Opcije za razvojne programere"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"Omogući opcije za razvojne programere"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Postavljanje opcija za razvoj aplikacije"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Opcije razvojnih programera nisu dostupne za ovog korisnika"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Postavke VPN-a nisu dostupne ovom korisniku"</string>

@@ -136,8 +136,7 @@
     <string name="category_personal" msgid="1299663247844969448">"ব্যক্তিগত"</string>
     <string name="category_work" msgid="8699184680584175622">"কর্মক্ষেত্র"</string>
     <string name="development_settings_title" msgid="215179176067683667">"বিকাশকারী বিকল্পগুলি"</string>
-    <!-- no translation found for development_settings_enable (542530994778109538) -->
-    <skip />
+    <string name="development_settings_enable" msgid="542530994778109538">"বিকাশকারী বিকল্পগুলি সক্ষম করুন"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"অ্যাপ্লিকেশান উন্নয়নের জন্য বিকল্পগুলি সেট করুন"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"এই ব্যবহারকারীর জন্য বিকাশকারী বিকল্পগুলি উপলব্ধ নয়"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"এই ব্যবহারকারীর জন্য VPN সেটিংস উপলব্ধ নয়"</string>

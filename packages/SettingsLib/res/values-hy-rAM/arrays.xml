@@ -147,5 +147,12 @@
     <item msgid="836593137872605381">"Առավելագույնը 3  գործընթաց"</item>
     <item msgid="7899496259191969307">"Ամենաշատը 4 գործընթաց"</item>
   </string-array>
-    <!-- no translation found for usb_configuration_titles:0 (488237561639712799) -->
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Լիցքավորում"</item>
+    <item msgid="5220695614993094977">"MTP (Մեդիա ֆայլերի փոխանցման հաղորդակարգ)"</item>
+    <item msgid="2086000968159047375">"PTP (Նկարների փոխանցման հաղորդակարգ)"</item>
+    <item msgid="7398830860950841822">"RNDIS (USB Ethernet)"</item>
+    <item msgid="1718924214939774352">"Ձայնի աղբյուրը"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>
