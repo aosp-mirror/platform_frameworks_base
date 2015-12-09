@@ -188,7 +188,7 @@ final class BroadcastRecord extends Binder {
             if (o instanceof BroadcastFilter)
                 ((BroadcastFilter)o).dumpBrief(pw, p2);
             else if (o instanceof ResolveInfo)
-                ((ResolveInfo)o).dump(printer, p2);
+                ((ResolveInfo)o).dump(printer, p2, 0);
         }
     }
 

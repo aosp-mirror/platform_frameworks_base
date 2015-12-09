@@ -253,7 +253,8 @@ final class UserController {
 
                 final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                 bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
+                bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
+                        | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 mService.broadcastIntentLocked(null, null, bootIntent, null, null, 0, null, null,
                         new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
                         AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);

@@ -1086,9 +1086,17 @@ public final class BroadcastQueue {
                     // completely disabled from launches, or it is delayed and the broadcast
                     // was not explicitly sent to it and this would result in a new process
                     // for it being created.
-                    if (allowed == ActivityManager.APP_START_MODE_DISABLED
+                    if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
+                        Slog.w(TAG, "Background execution disabled: receiving "
+                                + r.intent + " to "
+                                + component.flattenToShortString());
+                        skip = true;
+                    }
+                    if (((r.intent.getFlags()&Intent.FLAG_RECEIVER_EXCLUDE_BACKGROUND) != 0)
                             || (r.intent.getComponent() == null
-                            && r.intent.getPackage() == null && app == null)) {
+                                && r.intent.getPackage() == null && app == null
+                                && ((r.intent.getFlags()
+                                        & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0))) {
                         Slog.w(TAG, "Background execution not allowed: receiving "
                                 + r.intent + " to "
                                 + component.flattenToShortString());

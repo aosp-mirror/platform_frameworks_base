@@ -150,23 +150,32 @@ public class ComponentInfo extends PackageItemInfo {
 
     protected void dumpFront(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
+        if (processName != null && !packageName.equals(processName)) {
+            pw.println(prefix + "processName=" + processName);
+        }
         pw.println(prefix + "enabled=" + enabled + " exported=" + exported
-                + " encryptionAware=" + encryptionAware + " processName=" + processName);
+                + " encryptionAware=" + encryptionAware);
         if (descriptionRes != 0) {
             pw.println(prefix + "description=" + descriptionRes);
         }
     }
-    
+
     protected void dumpBack(Printer pw, String prefix) {
-        if (applicationInfo != null) {
-            pw.println(prefix + "ApplicationInfo:");
-            applicationInfo.dump(pw, prefix + "  ");
-        } else {
-            pw.println(prefix + "ApplicationInfo: null");
+        dumpBack(pw, prefix, DUMP_FLAG_ALL);
+    }
+    
+    void dumpBack(Printer pw, String prefix, int flags) {
+        if ((flags&DUMP_FLAG_APPLICATION) != 0) {
+            if (applicationInfo != null) {
+                pw.println(prefix + "ApplicationInfo:");
+                applicationInfo.dump(pw, prefix + "  ", flags);
+            } else {
+                pw.println(prefix + "ApplicationInfo: null");
+            }
         }
         super.dumpBack(pw, prefix);
     }
-    
+
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         if ((parcelableFlags & Parcelable.PARCELABLE_ELIDE_DUPLICATES) != 0) {

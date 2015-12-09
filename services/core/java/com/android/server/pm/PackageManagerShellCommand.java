@@ -103,11 +103,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runUninstall();
                 case "resolve-activity":
                     return runResolveActivity();
-                case "query-intent-activities":
+                case "query-activities":
                     return runQueryIntentActivities();
-                case "query-intent-services":
+                case "query-services":
                     return runQueryIntentServices();
-                case "query-intent-receivers":
+                case "query-receivers":
                     return runQueryIntentReceivers();
                 default:
                     return handleDefaultCommands(cmd);
@@ -1043,13 +1043,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -s: short summary");
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
-        pw.println("  resolve-intent [--user USER_ID] INTENT");
+        pw.println("  resolve-activity [--user USER_ID] INTENT");
         pw.println("    Prints the activity that resolves to the given Intent.");
-        pw.println("  query-intent-activities [--user USER_ID] INTENT");
+        pw.println("  query-activities [--user USER_ID] INTENT");
         pw.println("    Prints all activities that can handle the given Intent.");
-        pw.println("  query-intent-services [--user USER_ID] INTENT");
+        pw.println("  query-services [--user USER_ID] INTENT");
         pw.println("    Prints all services that can handle the given Intent.");
-        pw.println("  query-intent-receivers [--user USER_ID] INTENT");
+        pw.println("  query-receivers [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given Intent.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");

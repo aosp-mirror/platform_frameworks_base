@@ -4471,6 +4471,22 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x02000000;
+    /**
+     * If set, the broadcast will always go to manifest receivers in background (cached
+     * or not running) apps, regardless of whether that would be done by default.  By
+     * default they will only receive broadcasts if the broadcast has specified an
+     * explicit component or package name.
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 0x01000000;
+    /**
+     * If set, the broadcast will never go to manifest receivers in background (cached
+     * or not running) apps, regardless of whether that would be done by default.  By
+     * default they will receive broadcasts if the broadcast has specified an
+     * explicit component or package name.
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_EXCLUDE_BACKGROUND = 0x00800000;
 
     /**
      * @hide Flags that can't be changed with PendingIntent.

@@ -115,9 +115,15 @@ public final class ProviderInfo extends ComponentInfo
     }
 
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    public void dump(Printer pw, String prefix, int flags) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "authority=" + authority);
         pw.println(prefix + "flags=0x" + Integer.toHexString(flags));
+        super.dumpBack(pw, prefix, flags);
     }
 
     public int describeContents() {
