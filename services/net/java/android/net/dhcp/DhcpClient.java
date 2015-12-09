@@ -389,7 +389,6 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     private void scheduleRenew() {
-        mRenewAlarm.cancel();
         if (mDhcpLeaseExpiry != 0) {
             long now = SystemClock.elapsedRealtime();
             long alarmTime = (now + mDhcpLeaseExpiry) / 2;
@@ -821,6 +820,11 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 default:
                     return NOT_HANDLED;
             }
+        }
+
+        @Override
+        public void exit() {
+            mRenewAlarm.cancel();
         }
     }
 
