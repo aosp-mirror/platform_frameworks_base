@@ -332,7 +332,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (!likeCollapsed && (mChildrenExpanded || mNotificationParent.isUserLocked())) {
             return NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
         }
-        if (mNotificationParent.isExpanded()) {
+        if (mNotificationParent.isExpanded() || mNotificationParent.isHeadsUp()) {
             return NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED;
         }
         return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;

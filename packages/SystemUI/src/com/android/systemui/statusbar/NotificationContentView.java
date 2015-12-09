@@ -52,7 +52,6 @@ public class NotificationContentView extends FrameLayout {
     private static final int VISIBLE_TYPE_SINGLELINE = 3;
 
     private final Rect mClipBounds = new Rect();
-    private final int mHeadsUpHeight;
     private final int mRoundRectRadius;
     private final Interpolator mLinearInterpolator = new LinearInterpolator();
     private final boolean mRoundRectClippingEnabled;
@@ -77,6 +76,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mShowingLegacyBackground;
     private boolean mIsChildInGroup;
     private int mSmallHeight;
+    private int mHeadsUpHeight;
     private StatusBarNotification mStatusBarNotification;
     private NotificationGroupManager mGroupManager;
 
@@ -103,7 +103,6 @@ public class NotificationContentView extends FrameLayout {
         super(context, attrs);
         mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-        mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
         mRoundRectRadius = getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
         mRoundRectClippingEnabled = getResources().getBoolean(
@@ -112,8 +111,9 @@ public class NotificationContentView extends FrameLayout {
         setOutlineProvider(mOutlineProvider);
     }
 
-    public void setSmallHeight(int smallHeight) {
+    public void setHeights(int smallHeight, int headsUpMaxHeight) {
         mSmallHeight = smallHeight;
+        mHeadsUpHeight = headsUpMaxHeight;
     }
 
     @Override
@@ -150,7 +150,7 @@ public class NotificationContentView extends FrameLayout {
             ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
             if (layoutParams.height >= 0) {
                 // An actual height is set
-                size = Math.min(maxSize, layoutParams.height);
+                size = Math.min(size, layoutParams.height);
             }
             mHeadsUpChild.measure(widthMeasureSpec,
                     MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST));
@@ -283,10 +283,10 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMaxHeight() {
-        if (mIsHeadsUp && mHeadsUpChild != null) {
-            return mHeadsUpChild.getHeight();
-        } else if (mExpandedChild != null) {
+        if (mExpandedChild != null) {
             return mExpandedChild.getHeight();
+        } else if (mIsHeadsUp && mHeadsUpChild != null) {
+            return mHeadsUpChild.getHeight();
         }
         return mSmallHeight;
     }
