@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.EphemeralResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -30,7 +31,6 @@ import android.os.UserHandle;
 import android.util.TimedRemoteCaller;
 
 import com.android.internal.app.EphemeralResolverService;
-import com.android.internal.app.EphemeralResolveInfo;
 import com.android.internal.app.IEphemeralResolver;
 
 import java.io.FileDescriptor;

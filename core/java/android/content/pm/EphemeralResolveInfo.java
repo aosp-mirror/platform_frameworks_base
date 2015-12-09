@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package android.content.pm;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Parcel;
@@ -27,22 +29,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Information that is returned when resolving ephemeral
- * applications.
+ * Information about an ephemeral application.
+ * @hide
  */
+@SystemApi
 public final class EphemeralResolveInfo implements Parcelable {
+    /** Algorithm that will be used to generate the domain digest */
     public static final String SHA_ALGORITHM = "SHA-256";
-    private byte[] mDigestBytes;
-    private int mDigestPrefix;
+
+    /** Full digest of the domain hash */
+    private final byte[] mDigestBytes;
+    /** The first 4 bytes of the domain hash */
+    private final int mDigestPrefix;
+    private final String mPackageName;
+    /** The filters used to match domain */
     private final List<IntentFilter> mFilters = new ArrayList<IntentFilter>();
 
-    public EphemeralResolveInfo(Uri uri, List<IntentFilter> filters) {
-        generateDigest(uri);
+    public EphemeralResolveInfo(@NonNull Uri uri, @NonNull String packageName,
+            @NonNull List<IntentFilter> filters) {
+        // validate arguments
+        if (uri == null
+                || packageName == null
+                || filters == null
+                || filters.size() == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        mDigestBytes = generateDigest(uri);
+        mDigestPrefix =
+                mDigestBytes[0] << 24
+                | mDigestBytes[1] << 16
+                | mDigestBytes[2] << 8
+                | mDigestBytes[3] << 0;
         mFilters.addAll(filters);
+        mPackageName = packageName;
     }
 
-    private EphemeralResolveInfo(Parcel in) {
-        readFromParcel(in);
+    EphemeralResolveInfo(Parcel in) {
+        mDigestBytes = in.createByteArray();
+        mDigestPrefix = in.readInt();
+        mPackageName = in.readString();
+        in.readList(mFilters, null /*loader*/);
     }
 
     public byte[] getDigestBytes() {
@@ -53,21 +80,19 @@ public final class EphemeralResolveInfo implements Parcelable {
         return mDigestPrefix;
     }
 
+    public String getPackageName() {
+        return mPackageName;
+    }
+
     public List<IntentFilter> getFilters() {
         return mFilters;
     }
 
-    private void generateDigest(Uri uri) {
+    private static byte[] generateDigest(Uri uri) {
         try {
             final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
             final byte[] hostBytes = uri.getHost().getBytes();
-            final byte[] digestBytes = digest.digest(hostBytes);
-            mDigestBytes = digestBytes;
-            mDigestPrefix =
-                    digestBytes[0] << 24
-                    | digestBytes[1] << 16
-                    | digestBytes[2] << 8
-                    | digestBytes[3] << 0;
+            return digest.digest(hostBytes);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("could not find digest algorithm");
         }
@@ -80,24 +105,10 @@ public final class EphemeralResolveInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        if (mDigestBytes == null) {
-            out.writeInt(0);
-        } else {
-            out.writeInt(mDigestBytes.length);
-            out.writeByteArray(mDigestBytes);
-        }
+        out.writeByteArray(mDigestBytes);
         out.writeInt(mDigestPrefix);
+        out.writeString(mPackageName);
         out.writeList(mFilters);
-    }
-
-    private void readFromParcel(Parcel in) {
-        int digestBytesSize = in.readInt();
-        if (digestBytesSize > 0) {
-            mDigestBytes = new byte[digestBytesSize];
-            in.readByteArray(mDigestBytes);
-        }
-        mDigestPrefix = in.readInt();
-        in.readList(mFilters, null /*loader*/);
     }
 
     public static final Parcelable.Creator<EphemeralResolveInfo> CREATOR
@@ -110,4 +121,19 @@ public final class EphemeralResolveInfo implements Parcelable {
             return new EphemeralResolveInfo[size];
         }
     };
+
+    /** @hide */
+    public static final class EphemeralResolveIntentInfo extends IntentFilter {
+        private final EphemeralResolveInfo mResolveInfo;
+
+        public EphemeralResolveIntentInfo(@NonNull IntentFilter orig,
+                @NonNull EphemeralResolveInfo resolveInfo) {
+            super(orig);
+            this.mResolveInfo = resolveInfo;
+        }
+
+        public EphemeralResolveInfo getEphemeralResolveInfo() {
+            return mResolveInfo;
+        }
+    }
 }
