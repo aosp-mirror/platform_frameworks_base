@@ -19,7 +19,6 @@ package android.util;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -209,66 +208,10 @@ public final class LocaleList implements Parcelable {
         }
     }
 
-    private static String getLikelyScript(Locale locale) {
-        final String script = locale.getScript();
-        if (!script.isEmpty()) {
-            return script;
-        } else {
-            // TODO: Cache the results if this proves to be too slow
-            return ULocale.addLikelySubtags(ULocale.forLocale(locale)).getScript();
-        }
-    }
-
-    private static int matchScore(Locale supported, Locale desired) {
-        if (supported.equals(desired)) {
-            return 1;  // return early so we don't do unnecessary computation
-        }
-        if (!supported.getLanguage().equals(desired.getLanguage())) {
-            return 0;
-        }
-        // There is no match if the two locales use different scripts. This will most imporantly
-        // take care of traditional vs simplified Chinese.
-        final String supportedScr = getLikelyScript(supported);
-        final String desiredScr = getLikelyScript(desired);
-        return supportedScr.equals(desiredScr) ? 1 : 0;
-    }
-
-    /**
-     * Returns the first match in the locale list given an unordered array of supported locales
-     * in BCP47 format.
-     *
-     * If the locale list is empty, null would be returned.
-     */
     @Nullable
-    public Locale getFirstMatch(String[] supportedLocales) {
-        if (mList.length == 1) {  // just one locale, perhaps the most common scenario
-            return mList[0];
-        }
-        if (mList.length == 0) {  // empty locale list
-            return null;
-        }
-        // TODO: Figure out what to if en-XA or ar-XB are in the locale list
-        int bestIndex = Integer.MAX_VALUE;
-        for (String tag : supportedLocales) {
-            final Locale supportedLocale = Locale.forLanguageTag(tag);
-            // We expect the average length of locale lists used for locale resolution to be
-            // smaller than three, so it's OK to do this as an O(mn) algorithm.
-            for (int idx = 0; idx < mList.length; idx++) {
-                final int score = matchScore(supportedLocale, mList[idx]);
-                if (score > 0) {
-                    if (idx == 0) {  // We have a match on the first locale, which is good enough
-                        return mList[0];
-                    } else if (idx < bestIndex) {
-                        bestIndex = idx;
-                    }
-                }
-            }
-        }
-        if (bestIndex == Integer.MAX_VALUE) {  // no match was found
-            return mList[0];
-        } else {
-            return mList[bestIndex];
-        }
+    public Locale getBestMatch(String[] locales) {
+        // TODO: Fix this to actually do locale negotiation and choose the best match
+        return getPrimary();
     }
 
     private final static Object sLock = new Object();
