@@ -595,6 +595,36 @@ enum {
     MEMINFO_COUNT
 };
 
+static long get_zram_mem_used()
+{
+#define ZRAM_SYSFS "/sys/block/zram0/"
+    FILE *f = fopen(ZRAM_SYSFS "mm_stat", "r");
+    if (f) {
+        long mem_used_total = 0;
+
+        int matched = fscanf(f, "%*d %*d %ld %*d %*d %*d %*d", &mem_used_total);
+        if (matched != 1)
+            ALOGW("failed to parse " ZRAM_SYSFS "mm_stat");
+
+        fclose(f);
+        return mem_used_total;
+    }
+
+    f = fopen(ZRAM_SYSFS "mem_used_total", "r");
+    if (f) {
+        long mem_used_total = 0;
+
+        int matched = fscanf(f, "%ld", &mem_used_total);
+        if (matched != 1)
+            ALOGW("failed to parse " ZRAM_SYSFS "mem_used_total");
+
+        fclose(f);
+        return mem_used_total;
+    }
+
+    return 0;
+}
+
 static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
 {
     char buffer[1024];
@@ -680,15 +710,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
         if (*p) p++;
     }
 
-    fd = open("/sys/block/zram0/mem_used_total", O_RDONLY);
-    if (fd >= 0) {
-        len = read(fd, buffer, sizeof(buffer)-1);
-        close(fd);
-        if (len > 0) {
-            buffer[len] = 0;
-            mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer)/1024;
-        }
-    }
+    mem[MEMINFO_ZRAM_TOTAL] = get_zram_mem_used() / 1024;
     // Recompute Vmalloc Used since the value in meminfo
     // doesn't account for I/O remapping which doesn't use RAM.
     mem[MEMINFO_VMALLOC_USED] = get_allocated_vmalloc_memory() / 1024;
