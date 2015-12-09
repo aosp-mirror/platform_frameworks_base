@@ -26,14 +26,12 @@ import android.mtp.MtpEvent;
 import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * The model wrapping android.mtp API.
@@ -63,8 +61,10 @@ class MtpManager {
         }
 
         if (!mManager.hasPermission(rawDevice)) {
-            // Permission should be obtained via app selection dialog for intent.
-            throw new IOException("No permission to operate USB device.");
+            mManager.grantPermission(rawDevice);
+            if (!mManager.hasPermission(rawDevice)) {
+                throw new IOException("Failed to grant a device permission.");
+            }
         }
 
         final MtpDevice device = new MtpDevice(rawDevice);

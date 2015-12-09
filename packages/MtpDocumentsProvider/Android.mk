@@ -5,6 +5,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_PACKAGE_NAME := MtpDocumentsProvider
 LOCAL_CERTIFICATE := media
+LOCAL_PRIVILEGED_MODULE := true
 
 include $(BUILD_PACKAGE)
 include $(LOCAL_PATH)/tests/Android.mk
