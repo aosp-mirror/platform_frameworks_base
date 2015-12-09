@@ -1075,9 +1075,18 @@ public final class BroadcastQueue {
                 }
             }
 
+            // This is safe to do even if we are skipping the broadcast, and we need
+            // this information now to evaluate whether it is going to be allowed to run.
+            final int receiverUid = info.activityInfo.applicationInfo.uid;
+            // If it's a singleton, it needs to be the same app or a special app
+            if (r.callingUid != Process.SYSTEM_UID && isSingleton
+                    && mService.isValidSingletonCall(r.callingUid, receiverUid)) {
+                info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, 0);
+            }
             String targetProcess = info.activityInfo.processName;
             ProcessRecord app = mService.getProcessRecordLocked(targetProcess,
                     info.activityInfo.applicationInfo.uid, false);
+
             if (!skip) {
                 final int allowed = mService.checkAllowBackgroundLocked(
                         info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, -1);
@@ -1118,12 +1127,6 @@ public final class BroadcastQueue {
 
             r.state = BroadcastRecord.APP_RECEIVE;
             r.curComponent = component;
-            final int receiverUid = info.activityInfo.applicationInfo.uid;
-            // If it's a singleton, it needs to be the same app or a special app
-            if (r.callingUid != Process.SYSTEM_UID && isSingleton
-                    && mService.isValidSingletonCall(r.callingUid, receiverUid)) {
-                info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, 0);
-            }
             r.curReceiver = info.activityInfo;
             if (DEBUG_MU && r.callingUid > UserHandle.PER_USER_RANGE) {
                 Slog.v(TAG_MU, "Updated broadcast record activity info for secondary user, "
