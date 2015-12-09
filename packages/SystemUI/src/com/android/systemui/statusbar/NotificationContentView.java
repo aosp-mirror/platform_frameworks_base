@@ -457,6 +457,9 @@ public class NotificationContentView extends FrameLayout {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
         mContractedWrapper.setDark(dark && !mShowingLegacyBackground, fade, delay);
+        if (mSingleLineView != null) {
+            mSingleLineView.setDark(dark, fade, delay);
+        }
     }
 
     public void setHeadsUp(boolean headsUp) {

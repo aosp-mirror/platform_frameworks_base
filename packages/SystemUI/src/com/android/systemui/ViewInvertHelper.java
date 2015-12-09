@@ -19,6 +19,7 @@ package com.android.systemui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -35,13 +36,19 @@ public class ViewInvertHelper {
 
     private final Paint mDarkPaint = new Paint();
     private final Interpolator mLinearOutSlowInInterpolator;
-    private final ArrayList<View> mTargets;
     private final ColorMatrix mMatrix = new ColorMatrix();
     private final ColorMatrix mGrayscaleMatrix = new ColorMatrix();
     private final long mFadeDuration;
+    private final ArrayList<View> mTargets = new ArrayList<>();
 
-    public ViewInvertHelper(View target, long fadeDuration) {
-        this(constructArray(target), fadeDuration);
+    public ViewInvertHelper(View v, long fadeDuration) {
+        this(v.getContext(), fadeDuration);
+        addTarget(v);
+    }
+    public ViewInvertHelper(Context context, long fadeDuration) {
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                android.R.interpolator.linear_out_slow_in);
+        mFadeDuration = fadeDuration;
     }
 
     private static ArrayList<View> constructArray(View target) {
@@ -50,11 +57,12 @@ public class ViewInvertHelper {
         return views;
     }
 
-    public ViewInvertHelper(ArrayList<View> targets, long fadeDuration) {
-        mTargets = targets;
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(mTargets.get(0).getContext(),
-                android.R.interpolator.linear_out_slow_in);
-        mFadeDuration = fadeDuration;
+    public void clearTargets() {
+        mTargets.clear();
+    }
+
+    public void addTarget(View target) {
+        mTargets.add(target);
     }
 
     public void fade(final boolean invert, long delay) {
@@ -111,5 +119,13 @@ public class ViewInvertHelper {
         mGrayscaleMatrix.setSaturation(1 - intensity);
         mMatrix.preConcat(mGrayscaleMatrix);
         mDarkPaint.setColorFilter(new ColorMatrixColorFilter(mMatrix));
+    }
+
+    public void setInverted(boolean invert, boolean fade, long delay) {
+        if (fade) {
+            fade(invert, delay);
+        } else {
+            update(invert);
+        }
     }
 }

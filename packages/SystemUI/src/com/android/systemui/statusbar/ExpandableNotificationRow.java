@@ -95,6 +95,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsHeadsUp;
     private boolean mLastChronometerRunning = true;
     private NotificationHeaderView mNotificationHeader;
+    private NotificationViewWrapper mNotificationHeaderWrapper;
     private ViewStub mChildrenContainerStub;
     private NotificationGroupManager mGroupManager;
     private boolean mChildrenExpanded;
@@ -570,6 +571,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (showing != null) {
             showing.setDark(dark, fade, delay);
         }
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setDark(dark, fade, delay);
+            mNotificationHeaderWrapper.setDark(dark, fade, delay);
+        }
     }
 
     public boolean isExpandable() {
@@ -967,9 +972,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     com.android.internal.R.id.expand_button);
             expandButton.setVisibility(VISIBLE);
             mNotificationHeader.setOnClickListener(mExpandClickListener);
+            mNotificationHeaderWrapper = NotificationViewWrapper.wrap(getContext(),
+                    mNotificationHeader);
             addView(mNotificationHeader);
         } else {
             header.reapply(getContext(), mNotificationHeader);
+            mNotificationHeaderWrapper.notifyContentUpdated();
         }
         updateHeaderExpandButton();
         updateChildrenHeaderAppearance();

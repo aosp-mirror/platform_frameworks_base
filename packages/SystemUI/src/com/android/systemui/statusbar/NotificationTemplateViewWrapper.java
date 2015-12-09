@@ -16,74 +16,31 @@
 
 package com.android.systemui.statusbar;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
-import android.view.MotionEvent;
-import android.view.NotificationHeaderView;
 import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-
-import com.android.systemui.R;
-import com.android.systemui.ViewInvertHelper;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
-
-import java.util.ArrayList;
 
 /**
  * Wraps a notification view inflated from a template.
  */
-public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
+public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
-    private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
-    private final PorterDuffColorFilter mIconColorFilter = new PorterDuffColorFilter(
-            0, PorterDuff.Mode.SRC_ATOP);
-    private final int mIconDarkAlpha;
-    private final int mIconDarkColor = 0xffffffff;
-    private final int mDarkProgressTint = 0xffffffff;
-    private final Interpolator mLinearOutSlowInInterpolator;
+    private static final int mDarkProgressTint = 0xffffffff;
 
-    private int mColor;
-    private ViewInvertHelper mInvertHelper;
-    private ImageView mIcon;
     protected ImageView mPicture;
-
-    private ImageView mExpandButton;
-    private NotificationHeaderView mNotificationHeader;
     private ProgressBar mProgressBar;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
-        super(view);
-        mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(ctx,
-                android.R.interpolator.linear_out_slow_in);
-
-        resolveViews();
+        super(ctx, view);
+        resolveTemplateViews();
     }
 
-    private void resolveViews() {
+    private void resolveTemplateViews() {
         View mainColumn = mView.findViewById(com.android.internal.R.id.notification_main_column);
-        mIcon = (ImageView) mView.findViewById(com.android.internal.R.id.icon);
         mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
-        mExpandButton = (ImageView) mView.findViewById(com.android.internal.R.id.expand_button);
-        mColor = resolveColor(mExpandButton);
         final View progress = mView.findViewById(com.android.internal.R.id.progress);
         if (progress instanceof ProgressBar) {
             mProgressBar = (ProgressBar) progress;
@@ -91,30 +48,9 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             // It's still a viewstub
             mProgressBar = null;
         }
-        mNotificationHeader = (NotificationHeaderView) mView.findViewById(
-                com.android.internal.R.id.notification_header);
-        ArrayList<View> viewsToInvert = new ArrayList<>();
         if (mainColumn != null) {
-            viewsToInvert.add(mainColumn);
+            mInvertHelper.addTarget(mainColumn);
         }
-        for (int i = 0; i < mNotificationHeader.getChildCount(); i++) {
-            View child = mNotificationHeader.getChildAt(i);
-            if (child != mIcon) {
-                viewsToInvert.add(child);
-            }
-        }
-        mInvertHelper = new ViewInvertHelper(viewsToInvert,
-                NotificationPanelView.DOZE_ANIMATION_DURATION);
-    }
-
-    private int resolveColor(ImageView icon) {
-        if (icon != null && icon.getDrawable() != null) {
-            ColorFilter filter = icon.getDrawable().getColorFilter();
-            if (filter instanceof PorterDuffColorFilter) {
-                return ((PorterDuffColorFilter) filter).getColor();
-            }
-        }
-        return 0;
     }
 
     @Override
@@ -122,37 +58,12 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         super.notifyContentUpdated();
 
         // Reinspect the notification.
-        resolveViews();
+        resolveTemplateViews();
     }
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
-        if (mInvertHelper != null) {
-            if (fade) {
-                mInvertHelper.fade(dark, delay);
-            } else {
-                mInvertHelper.update(dark);
-            }
-        }
-        if (mIcon != null) {
-            boolean hadColorFilter = mNotificationHeader.getOriginalIconColor()
-                    != NotificationHeaderView.NO_COLOR;
-            if (fade) {
-                if (hadColorFilter) {
-                    fadeIconColorFilter(mIcon, dark, delay);
-                    fadeIconAlpha(mIcon, dark, delay);
-                } else {
-                    fadeGrayscale(mIcon, dark, delay);
-                }
-            } else {
-                if (hadColorFilter) {
-                    updateIconColorFilter(mIcon, dark);
-                    updateIconAlpha(mIcon, dark);
-                } else {
-                    updateGrayscale(mIcon, dark);
-                }
-            }
-        }
+        super.setDark(dark, fade, delay);
         setPictureGrayscale(dark, fade, delay);
         setProgressBarDark(dark, fade, delay);
     }
@@ -197,96 +108,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         }
     }
 
-    private void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
-            boolean dark, long delay, Animator.AnimatorListener listener) {
-        float startIntensity = dark ? 0f : 1f;
-        float endIntensity = dark ? 1f : 0f;
-        ValueAnimator animator = ValueAnimator.ofFloat(startIntensity, endIntensity);
-        animator.addUpdateListener(updateListener);
-        animator.setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
-        animator.setInterpolator(mLinearOutSlowInInterpolator);
-        animator.setStartDelay(delay);
-        if (listener != null) {
-            animator.addListener(listener);
-        }
-        animator.start();
-    }
-
-    private void fadeIconColorFilter(final ImageView target, boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateIconColorFilter(target, (Float) animation.getAnimatedValue());
-            }
-        }, dark, delay, null /* listener */);
-    }
-
-    private void fadeIconAlpha(final ImageView target, boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float t = (float) animation.getAnimatedValue();
-                target.setImageAlpha((int) (255 * (1f - t) + mIconDarkAlpha * t));
-            }
-        }, dark, delay, null /* listener */);
-    }
-
-    protected void fadeGrayscale(final ImageView target, final boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateGrayscaleMatrix((float) animation.getAnimatedValue());
-                target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
-            }
-        }, dark, delay, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!dark) {
-                    target.setColorFilter(null);
-                }
-            }
-        });
-    }
-
-    private void updateIconColorFilter(ImageView target, boolean dark) {
-        updateIconColorFilter(target, dark ? 1f : 0f);
-    }
-
-    private void updateIconColorFilter(ImageView target, float intensity) {
-        int color = interpolateColor(mColor, mIconDarkColor, intensity);
-        mIconColorFilter.setColor(color);
-        Drawable iconDrawable = target.getDrawable();
-
-        // Also, the notification might have been modified during the animation, so background
-        // might be null here.
-        if (iconDrawable != null) {
-            iconDrawable.mutate().setColorFilter(mIconColorFilter);
-        }
-    }
-
-    private void updateIconAlpha(ImageView target, boolean dark) {
-        target.setImageAlpha(dark ? mIconDarkAlpha : 255);
-    }
-
-    protected void updateGrayscale(ImageView target, boolean dark) {
-        if (dark) {
-            updateGrayscaleMatrix(1f);
-            target.setColorFilter(new ColorMatrixColorFilter(mGrayscaleColorMatrix));
-        } else {
-            target.setColorFilter(null);
-        }
-    }
-
-    @Override
-    public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
-        mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
-        mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
-    }
-
-    private void updateGrayscaleMatrix(float intensity) {
-        mGrayscaleColorMatrix.setSaturation(1 - intensity);
-    }
-
     private static int interpolateColor(int source, int target, float t) {
         int aSource = Color.alpha(source);
         int rSource = Color.red(source);
@@ -301,10 +122,5 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
                 (int) (rSource * (1f - t) + rTarget * t),
                 (int) (gSource * (1f - t) + gTarget * t),
                 (int) (bSource * (1f - t) + bTarget * t));
-    }
-
-    @Override
-    public NotificationHeaderView getNotificationHeader() {
-        return mNotificationHeader;
     }
 }

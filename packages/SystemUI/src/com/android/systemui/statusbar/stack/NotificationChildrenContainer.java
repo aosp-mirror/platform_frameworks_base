@@ -23,9 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private final int mNotificatonTopPadding;
     private final HybridNotificationViewManager mHybridViewManager;
     private final float mCollapsedBottompadding;
+    private ViewInvertHelper mOverflowInvertHelper;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mNotificationParent;
     private HybridNotificationView mGroupOverflowContainer;
@@ -172,12 +175,17 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (hasOverflow) {
             mGroupOverflowContainer = mHybridViewManager.bindFromNotificationGroup(
                     mGroupOverflowContainer, mChildren, lastVisibleIndex + 1);
+            if (mOverflowInvertHelper == null) {
+                mOverflowInvertHelper= new ViewInvertHelper(mGroupOverflowContainer,
+                        NotificationPanelView.DOZE_ANIMATION_DURATION);
+            }
             if (mGroupOverFlowState == null) {
                 mGroupOverFlowState = new ViewState();
             }
         } else if (mGroupOverflowContainer != null) {
             removeView(mGroupOverflowContainer);
             mGroupOverflowContainer = null;
+            mOverflowInvertHelper = null;
             mGroupOverFlowState = null;
         }
     }
@@ -442,5 +450,11 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public int getMinHeight() {
         return getIntrinsicHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */));
+    }
+
+    public void setDark(boolean dark, boolean fade, long delay) {
+        if (mGroupOverflowContainer != null) {
+            mOverflowInvertHelper.setInverted(dark, fade, delay);
+        }
     }
 }
