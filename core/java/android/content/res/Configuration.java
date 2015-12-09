@@ -724,9 +724,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         fontScale = o.fontScale;
         mcc = o.mcc;
         mnc = o.mnc;
-        if (o.locale != null) {
-            locale = (Locale) o.locale.clone();
-        }
+        locale = o.locale == null ? null : (Locale) o.locale.clone();
         o.fixUpLocaleList();
         mLocaleList = o.mLocaleList;
         userSetLocale = o.userSetLocale;
