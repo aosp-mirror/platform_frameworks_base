@@ -518,6 +518,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public static final int LID_CLOSED = 0;
         public static final int LID_OPEN = 1;
 
+        public static final int LID_BEHAVIOR_NONE = 0;
+        public static final int LID_BEHAVIOR_SLEEP = 1;
+        public static final int LID_BEHAVIOR_LOCK = 2;
+
         public static final int CAMERA_LENS_COVER_ABSENT = -1;
         public static final int CAMERA_LENS_UNCOVERED = 0;
         public static final int CAMERA_LENS_COVERED = 1;

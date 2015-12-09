@@ -13047,6 +13047,15 @@ public final class Settings {
          */
         public static final String LTE_SERVICE_FORCED = "lte_service_forced";
 
+
+        /**
+         * Specifies the behaviour the lid triggers when closed
+         * <p>
+         * See WindowManagerPolicy.WindowManagerFuncs
+         * @hide
+         */
+        public static final String LID_BEHAVIOR = "lid_behavior";
+
         /**
          * Ephemeral app cookie max size in bytes.
          * <p>
