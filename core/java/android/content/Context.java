@@ -53,8 +53,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
-import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.WindowManager;
 
@@ -3870,7 +3870,7 @@ public abstract class Context {
      *
      * @hide
      */
-    public static final int CONTEXT_STORAGE_DEVICE_ENCRYPTED = 0x00000008;
+    public static final int CONTEXT_DEVICE_ENCRYPTED_STORAGE = 0x00000008;
 
     /**
      * Flag for use with {@link #createPackageContext}: point all file APIs at
@@ -3878,11 +3878,7 @@ public abstract class Context {
      *
      * @hide
      */
-    public static final int CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED = 0x00000010;
-
-    /** {@hide} */
-    public static final int CONTEXT_STORAGE_MASK = CONTEXT_STORAGE_DEVICE_ENCRYPTED
-            | CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED;
+    public static final int CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE = 0x00000010;
 
     /**
      * @hide Used to indicate we should tell the activity manager about the process
@@ -3987,19 +3983,23 @@ public abstract class Context {
      * Return a new Context object for the current Context but whose storage
      * APIs are backed by device-encrypted storage.
      * <p>
-     * Data stored in device-encrypted storage is typically encrypted with a
-     * key tied to the physical device, and they can be accessed whenever the
-     * device has booted successfully, both <em>before and after</em> the user
-     * has entered their credentials (such as a lock pattern or PIN).
+     * Data stored in device-encrypted storage is typically encrypted with a key
+     * tied to the physical device, and it can be accessed when the device has
+     * booted successfully, both <em>before and after</em> the user has
+     * authenticated with their credentials (such as a lock pattern or PIN).
+     * Because device-encrypted data is available before user authentication,
+     * you should carefully consider what data you store using this Context.
      * <p>
      * Each call to this method returns a new instance of a Context object;
      * Context objects are not shared, however common state (ClassLoader, other
      * Resources for the same configuration) may be so the Context itself can be
      * fairly lightweight.
      *
-     * @see #isDeviceEncrypted()
+     * @return new Context or {@code null} if device-encrypted storage is not
+     *         supported or available on this device.
+     * @see #isDeviceEncryptedStorage()
      */
-    public abstract Context createDeviceEncryptedContext(Context context);
+    public abstract Context createDeviceEncryptedStorageContext();
 
     /**
      * Return a new Context object for the current Context but whose storage
@@ -4015,9 +4015,11 @@ public abstract class Context {
      * Resources for the same configuration) may be so the Context itself can be
      * fairly lightweight.
      *
-     * @see #isCredentialEncrypted()
+     * @see #isCredentialEncryptedStorage()
+     * @hide
      */
-    public abstract Context createCredentialEncryptedContext(Context context);
+    @SystemApi
+    public abstract Context createCredentialEncryptedStorageContext();
 
     /**
      * Gets the display adjustments holder for this context.  This information
@@ -4045,15 +4047,17 @@ public abstract class Context {
      * Indicates if the storage APIs of this Context are backed by
      * device-encrypted storage.
      *
-     * @see #createDeviceEncryptedContext(Context)
+     * @see #createDeviceEncryptedStorageContext()
      */
-    public abstract boolean isDeviceEncrypted();
+    public abstract boolean isDeviceEncryptedStorage();
 
     /**
      * Indicates if the storage APIs of this Context are backed by
      * credential-encrypted storage.
      *
-     * @see #createCredentialEncryptedContext(Context)
+     * @see #createCredentialEncryptedStorageContext()
+     * @hide
      */
-    public abstract boolean isCredentialEncrypted();
+    @SystemApi
+    public abstract boolean isCredentialEncryptedStorage();
 }

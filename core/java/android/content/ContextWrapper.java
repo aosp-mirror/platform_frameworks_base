@@ -792,22 +792,26 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedContext(Context context) {
-        return mBase.createDeviceEncryptedContext(context);
+    public Context createDeviceEncryptedStorageContext() {
+        return mBase.createDeviceEncryptedStorageContext();
+    }
+
+    /** {@hide} */
+    @SystemApi
+    @Override
+    public Context createCredentialEncryptedStorageContext() {
+        return mBase.createCredentialEncryptedStorageContext();
     }
 
     @Override
-    public Context createCredentialEncryptedContext(Context context) {
-        return mBase.createCredentialEncryptedContext(context);
+    public boolean isDeviceEncryptedStorage() {
+        return mBase.isDeviceEncryptedStorage();
     }
 
+    /** {@hide} */
+    @SystemApi
     @Override
-    public boolean isDeviceEncrypted() {
-        return mBase.isDeviceEncrypted();
-    }
-
-    @Override
-    public boolean isCredentialEncrypted() {
-        return mBase.isCredentialEncrypted();
+    public boolean isCredentialEncryptedStorage() {
+        return mBase.isCredentialEncryptedStorage();
     }
 }

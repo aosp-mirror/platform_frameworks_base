@@ -61,6 +61,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -1744,17 +1745,21 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedContext(Context context) {
-        final int flags = (mFlags & ~Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED)
-                | Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED;
+    public Context createDeviceEncryptedStorageContext() {
+        if (!StorageManager.isFileBasedEncryptionEnabled()) {
+            return null;
+        }
+
+        final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE)
+                | Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
                 mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
     }
 
     @Override
-    public Context createCredentialEncryptedContext(Context context) {
-        final int flags = (mFlags & ~Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED)
-                | Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED;
+    public Context createCredentialEncryptedStorageContext() {
+        final int flags = (mFlags & ~Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE)
+                | Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
                 mUser, flags, mDisplay, null, Display.INVALID_DISPLAY);
     }
@@ -1765,13 +1770,13 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean isDeviceEncrypted() {
-        return (mFlags & Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED) != 0;
+    public boolean isDeviceEncryptedStorage() {
+        return (mFlags & Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE) != 0;
     }
 
     @Override
-    public boolean isCredentialEncrypted() {
-        return (mFlags & Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED) != 0;
+    public boolean isCredentialEncryptedStorage() {
+        return (mFlags & Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE) != 0;
     }
 
     @Override
@@ -1781,13 +1786,12 @@ class ContextImpl extends Context {
 
     private File getDataDirFile() {
         if (mPackageInfo != null) {
-            if (isCredentialEncrypted()) {
+            if (isCredentialEncryptedStorage()) {
                 return mPackageInfo.getCredentialEncryptedDataDirFile();
-            } else if (isDeviceEncrypted()) {
+            } else if (isDeviceEncryptedStorage()) {
                 return mPackageInfo.getDeviceEncryptedDataDirFile();
             } else {
-                throw new RuntimeException(
-                        "Storage location is neither credential nor device encrypted");
+                return mPackageInfo.getDataDirFile();
             }
         }
         throw new RuntimeException("Not supported in system context");
@@ -1840,15 +1844,13 @@ class ContextImpl extends Context {
 
         // If creator didn't specify which storage to use, use the default
         // location for application.
-        if ((flags & Context.CONTEXT_STORAGE_MASK) == 0) {
+        if ((flags & (Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE
+                | Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE)) == 0) {
             final File dataDir = packageInfo.getDataDirFile();
             if (Objects.equals(dataDir, packageInfo.getCredentialEncryptedDataDirFile())) {
-                flags |= Context.CONTEXT_STORAGE_CREDENTIAL_ENCRYPTED;
+                flags |= Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE;
             } else if (Objects.equals(dataDir, packageInfo.getDeviceEncryptedDataDirFile())) {
-                flags |= Context.CONTEXT_STORAGE_DEVICE_ENCRYPTED;
-            } else {
-                throw new IllegalStateException("Storage location " + dataDir
-                        + " doesn't match either credential or device encrypted storage");
+                flags |= Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE;
             }
         }
 

@@ -695,22 +695,26 @@ public class MockContext extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedContext(Context context) {
+    public Context createDeviceEncryptedStorageContext() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @SystemApi
+    @Override
+    public Context createCredentialEncryptedStorageContext() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Context createCredentialEncryptedContext(Context context) {
+    public boolean isDeviceEncryptedStorage() {
         throw new UnsupportedOperationException();
     }
 
+    /** {@hide} */
+    @SystemApi
     @Override
-    public boolean isDeviceEncrypted() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isCredentialEncrypted() {
+    public boolean isCredentialEncryptedStorage() {
         throw new UnsupportedOperationException();
     }
 }

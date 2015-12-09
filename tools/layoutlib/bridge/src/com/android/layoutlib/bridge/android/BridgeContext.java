@@ -1804,24 +1804,24 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public Context createDeviceEncryptedContext(Context context) {
+    public Context createDeviceEncryptedStorageContext() {
         // pass
         return null;
     }
 
     @Override
-    public Context createCredentialEncryptedContext(Context context) {
+    public Context createCredentialEncryptedStorageContext() {
         // pass
         return null;
     }
 
     @Override
-    public boolean isDeviceEncrypted() {
+    public boolean isDeviceEncryptedStorage() {
         return false;
     }
 
     @Override
-    public boolean isCredentialEncrypted() {
+    public boolean isCredentialEncryptedStorage() {
         return false;
     }
 }
