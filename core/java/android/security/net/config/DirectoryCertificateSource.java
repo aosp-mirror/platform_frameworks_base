@@ -95,6 +95,21 @@ abstract class DirectoryCertificateSource implements CertificateSource {
         });
     }
 
+    @Override
+    public X509Certificate findByIssuerAndSignature(final X509Certificate cert) {
+        return findCert(cert.getIssuerX500Principal(), new CertSelector() {
+            @Override
+            public boolean match(X509Certificate ca) {
+                try {
+                    cert.verify(ca.getPublicKey());
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        });
+    }
+
     private static interface CertSelector {
         boolean match(X509Certificate cert);
     }
