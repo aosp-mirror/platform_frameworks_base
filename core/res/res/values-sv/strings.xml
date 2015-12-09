@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Uppdaterat av administratören"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Paketet har raderats av administratören"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Blockerad: Visa aldrig dessa aviseringar"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Låg: Visa längst ned i aviseringslistan – utan ljud"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Visa aviseringarna – utan ljud"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Hög: Visa högst upp i aviseringslistan – med ljud"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"Brådskande: Visa på skärmen – med ljud"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I en minut (till kl. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>

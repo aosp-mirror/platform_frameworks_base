@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"مسدود: هرگز این اعلان‌ها نشان داده نشود"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"پایین: بدون صدا در پایین فهرست اعلان نشان داده شود"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"عادی: این اعلان‌ها بدون صدا نشان داده شود"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"بالا: در بالای فهرست اعلان‌ها و به همراه صدا نشان داده شود"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"ضروری: نمای کلی به همراه صدا در صفحه نشان داده شود"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

@@ -1440,16 +1440,11 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"آپ کے منتظم نے اپ ڈيٹ کر دیا"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"آپ کے منتظم کی جانب سے حذف کر دیا گیا"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر منحصر دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
-    <!-- no translation found for notification_importance_blocked (7118826900767047125) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (6447640449918427187) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (7991157697609575271) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3152238637737215654) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (1153693080467904474) -->
-    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"مسدود کردہ: یہ اطلاعات کبھی مت دکھائیں"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"پست: اطلاعات کی فہرست کے نیچے خاموشی سے دکھائیں"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"عام: خاموشی سے یہ اطلاعات دکھائیں"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"اعلی: اطلاعات کی فہرست پر سب سے اوپر دکھائیں اور آواز چلائیں"</string>
+    <string name="notification_importance_max" msgid="1153693080467904474">"ارجنٹ: اسکرین پر دکھائیں اور آواز چلائیں"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">‏%1$d منٹ کیلئے (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> تک)</item>
       <item quantity="one">ایک منٹ کیلئے (تک <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
