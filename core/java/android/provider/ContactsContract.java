@@ -6194,6 +6194,14 @@ public final class ContactsContract {
                     "filter");
 
             /**
+             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
+             * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * parameters, otherwise it will throw UnsupportedOperationException.
+             */
+            public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    CONTENT_URI, "filter_enterprise");
+
+            /**
              * The email address.
              * <P>Type: TEXT</P>
              */
