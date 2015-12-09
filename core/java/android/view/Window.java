@@ -29,6 +29,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -247,12 +248,30 @@ public abstract class Window {
 
     private static final String PROPERTY_HARDWARE_UI = "persist.sys.ui.hw";
 
+    /**
+     * Flag for letting the theme drive the color of the window caption controls. Use with
+     * {@link #setDecorCaptionShade(int)}. This is the default value.
+     */
+    public static final int DECOR_CAPTION_SHADE_AUTO = 0;
+    /**
+     * Flag for setting light-color controls on the window caption. Use with
+     * {@link #setDecorCaptionShade(int)}.
+     */
+    public static final int DECOR_CAPTION_SHADE_LIGHT = 1;
+    /**
+     * Flag for setting dark-color controls on the window caption. Use with
+     * {@link #setDecorCaptionShade(int)}.
+     */
+    public static final int DECOR_CAPTION_SHADE_DARK = 2;
+
     private final Context mContext;
 
     private TypedArray mWindowStyle;
     private Callback mCallback;
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
     private WindowControllerCallback mWindowControllerCallback;
+    private RestrictedCaptionAreaListener mRestrictedCaptionAreaListener;
+    private Rect mRestrictedCaptionAreaRect;
     private WindowManager mWindowManager;
     private IBinder mAppToken;
     private String mAppName;
@@ -565,6 +584,18 @@ public abstract class Window {
         int getWindowStackId() throws RemoteException;
     }
 
+    /**
+     * Callback for clients that want to be aware of where caption draws content.
+     */
+    public interface RestrictedCaptionAreaListener {
+        /**
+         * Called when the area where caption draws content changes.
+         *
+         * @param rect The area where caption content is positioned, relative to the top view.
+         */
+        void onRestrictedCaptionAreaChanged(Rect rect);
+    }
+
     public Window(Context context) {
         mContext = context;
         mFeatures = mLocalFeatures = getDefaultFeatures(context);
@@ -775,6 +806,16 @@ public abstract class Window {
     /** @hide */
     public final WindowControllerCallback getWindowControllerCallback() {
         return mWindowControllerCallback;
+    }
+
+    /**
+     * Set a callback for changes of area where caption will draw its content.
+     *
+     * @param listener Callback that will be called when the area changes.
+     */
+    public final void setRestrictedCaptionAreaListener(RestrictedCaptionAreaListener listener) {
+        mRestrictedCaptionAreaListener = listener;
+        mRestrictedCaptionAreaRect = listener != null ? new Rect() : null;
     }
 
     /**
@@ -2040,5 +2081,29 @@ public abstract class Window {
         return mOverlayWithDecorCaption;
     }
 
+    /** @hide */
+    public void notifyRestrictedCaptionAreaCallback(int left, int top, int right, int bottom) {
+        if (mRestrictedCaptionAreaListener != null) {
+            mRestrictedCaptionAreaRect.set(left, top, right, bottom);
+            mRestrictedCaptionAreaListener.onRestrictedCaptionAreaChanged(
+                    mRestrictedCaptionAreaRect);
+        }
+    }
 
+    /**
+     * Set what color should the caption controls be. By default the system will try to determine
+     * the color from the theme. You can overwrite this by using {@link #DECOR_CAPTION_SHADE_DARK}
+     * or {@link #DECOR_CAPTION_SHADE_DARK}.
+     */
+    public abstract void setDecorCaptionShade(int decorCaptionShade);
+
+    /**
+     * Set the drawable that is drawn underneath the caption during the resizing.
+     *
+     * During the resizing the caption might not be drawn fast enough to match the new dimensions.
+     * There is a second caption drawn underneath it that will be fast enough. By default the
+     * caption is constructed from the theme. You can provide a drawable, that will be drawn instead
+     * to better match your application.
+     */
+    public abstract void setResizingCaptionDrawable(Drawable drawable);
 }

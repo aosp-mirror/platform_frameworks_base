@@ -94,7 +94,6 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -272,6 +271,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private boolean mIsStartingWindow;
     private int mTheme = -1;
+
+    private int mDecorCaptionShade = DECOR_CAPTION_SHADE_AUTO;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2527,7 +2528,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         mDecor.startChanging();
-        final View in = mDecor.onResourcesLoaded(mLayoutInflater, layoutResource);
+        mDecor.onResourcesLoaded(mLayoutInflater, layoutResource);
 
         ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
         if (contentParent == null) {
@@ -3719,5 +3720,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 context.setTheme(resid);
             }
         }
+    }
+
+    @Override
+    public void setResizingCaptionDrawable(Drawable drawable) {
+        mDecor.setUserCaptionBackgroundDrawable(drawable);
+    }
+
+    @Override
+    public void setDecorCaptionShade(int decorCaptionShade) {
+        mDecorCaptionShade = decorCaptionShade;
+        if (mDecor != null) {
+            mDecor.updateDecorCaptionShade();
+        }
+    }
+
+    int getDecorCaptionShade() {
+        return mDecorCaptionShade;
     }
 }

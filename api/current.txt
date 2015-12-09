@@ -41844,6 +41844,7 @@ package android.view {
     method public abstract void setContentView(int);
     method public abstract void setContentView(android.view.View);
     method public abstract void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
+    method public abstract void setDecorCaptionShade(int);
     method protected void setDefaultWindowFormat(int);
     method public void setDimAmount(float);
     method public void setElevation(float);
@@ -41864,6 +41865,8 @@ package android.view {
     method public void setMediaController(android.media.session.MediaController);
     method public abstract void setNavigationBarColor(int);
     method public void setReenterTransition(android.transition.Transition);
+    method public abstract void setResizingCaptionDrawable(android.graphics.drawable.Drawable);
+    method public final void setRestrictedCaptionAreaListener(android.view.Window.RestrictedCaptionAreaListener);
     method public void setReturnTransition(android.transition.Transition);
     method public void setSharedElementEnterTransition(android.transition.Transition);
     method public void setSharedElementExitTransition(android.transition.Transition);
@@ -41892,6 +41895,9 @@ package android.view {
     method public abstract void takeKeyEvents(boolean);
     method public abstract void takeSurface(android.view.SurfaceHolder.Callback2);
     method public abstract void togglePanel(int, android.view.KeyEvent);
+    field public static final int DECOR_CAPTION_SHADE_AUTO = 0; // 0x0
+    field public static final int DECOR_CAPTION_SHADE_DARK = 2; // 0x2
+    field public static final int DECOR_CAPTION_SHADE_LIGHT = 1; // 0x1
     field protected static final deprecated int DEFAULT_FEATURES = 65; // 0x41
     field public static final int FEATURE_ACTION_BAR = 8; // 0x8
     field public static final int FEATURE_ACTION_BAR_OVERLAY = 9; // 0x9
@@ -41944,6 +41950,10 @@ package android.view {
     method public abstract void onWindowFocusChanged(boolean);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback, int);
+  }
+
+  public static abstract interface Window.RestrictedCaptionAreaListener {
+    method public abstract void onRestrictedCaptionAreaChanged(android.graphics.Rect);
   }
 
   public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
