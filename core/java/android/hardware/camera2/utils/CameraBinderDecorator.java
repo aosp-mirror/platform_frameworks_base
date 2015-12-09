@@ -22,6 +22,7 @@ import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 import static android.hardware.camera2.CameraAccessException.CAMERA_ERROR;
 import static android.hardware.camera2.CameraAccessException.MAX_CAMERAS_IN_USE;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DEPRECATED_HAL;
+import static android.system.OsConstants.*;
 
 import android.os.DeadObjectException;
 import android.os.RemoteException;
@@ -37,12 +38,12 @@ import java.lang.reflect.Method;
 public class CameraBinderDecorator {
 
     public static final int NO_ERROR = 0;
-    public static final int PERMISSION_DENIED = -1;
-    public static final int ALREADY_EXISTS = -17;
-    public static final int BAD_VALUE = -22;
-    public static final int DEAD_OBJECT = -32;
-    public static final int INVALID_OPERATION = -38;
-    public static final int TIMED_OUT = -110;
+    public static final int PERMISSION_DENIED = -EPERM;
+    public static final int ALREADY_EXISTS = -EEXIST;
+    public static final int BAD_VALUE = -EINVAL;
+    public static final int DEAD_OBJECT = -ENOSYS;
+    public static final int INVALID_OPERATION = -EPIPE;
+    public static final int TIMED_OUT = -ETIMEDOUT;
 
     /**
      * TODO: add as error codes in Errors.h
@@ -52,12 +53,6 @@ public class CameraBinderDecorator {
      * - NOT_SUPPORTED
      * - TOO_MANY_USERS
      */
-    public static final int EACCES = -13;
-    public static final int EBUSY = -16;
-    public static final int ENODEV = -19;
-    public static final int EOPNOTSUPP = -95;
-    public static final int EUSERS = -87;
-
 
     static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
@@ -101,35 +96,34 @@ public class CameraBinderDecorator {
      * @param errorFlag error to throw as an exception.
      */
     public static void throwOnError(int errorFlag) {
-        switch (errorFlag) {
-            case NO_ERROR:
-                return;
-            case PERMISSION_DENIED:
-                throw new SecurityException("Lacking privileges to access camera service");
-            case ALREADY_EXISTS:
-                // This should be handled at the call site. Typically this isn't bad,
-                // just means we tried to do an operation that already completed.
-                return;
-            case BAD_VALUE:
-                throw new IllegalArgumentException("Bad argument passed to camera service");
-            case DEAD_OBJECT:
-                throw new CameraRuntimeException(CAMERA_DISCONNECTED);
-            case TIMED_OUT:
-                throw new CameraRuntimeException(CAMERA_ERROR,
-                        "Operation timed out in camera service");
-            case EACCES:
-                throw new CameraRuntimeException(CAMERA_DISABLED);
-            case EBUSY:
-                throw new CameraRuntimeException(CAMERA_IN_USE);
-            case EUSERS:
-                throw new CameraRuntimeException(MAX_CAMERAS_IN_USE);
-            case ENODEV:
-                throw new CameraRuntimeException(CAMERA_DISCONNECTED);
-            case EOPNOTSUPP:
-                throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
-            case INVALID_OPERATION:
-                throw new CameraRuntimeException(CAMERA_ERROR,
-                        "Illegal state encountered in camera service.");
+        if (errorFlag == NO_ERROR) {
+            return;
+        } else if (errorFlag == PERMISSION_DENIED) {
+            throw new SecurityException("Lacking privileges to access camera service");
+        } else if (errorFlag == ALREADY_EXISTS) {
+            // This should be handled at the call site. Typically this isn't bad,
+            // just means we tried to do an operation that already completed.
+            return;
+        } else if (errorFlag == BAD_VALUE) {
+            throw new IllegalArgumentException("Bad argument passed to camera service");
+        } else if (errorFlag == DEAD_OBJECT) {
+            throw new CameraRuntimeException(CAMERA_DISCONNECTED);
+        } else if (errorFlag == TIMED_OUT) {
+            throw new CameraRuntimeException(CAMERA_ERROR,
+                    "Operation timed out in camera service");
+        } else if (errorFlag == -EACCES) {
+            throw new CameraRuntimeException(CAMERA_DISABLED);
+        } else if (errorFlag == -EBUSY) {
+            throw new CameraRuntimeException(CAMERA_IN_USE);
+        } else if (errorFlag == -EUSERS) {
+            throw new CameraRuntimeException(MAX_CAMERAS_IN_USE);
+        } else if (errorFlag == -ENODEV) {
+            throw new CameraRuntimeException(CAMERA_DISCONNECTED);
+        } else if (errorFlag == -EOPNOTSUPP) {
+            throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
+        } else if (errorFlag == INVALID_OPERATION) {
+            throw new CameraRuntimeException(CAMERA_ERROR,
+                    "Illegal state encountered in camera service.");
         }
 
         /**
