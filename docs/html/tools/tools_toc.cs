@@ -17,7 +17,7 @@
 
  <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot?>tools/studio/index.html">Android Studio</a>
+      <a href="<?cs var:toroot?>tools/studio/index.html"><span class="en">Android Studio</span></a>
     </div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/studio/studio-config.html">
@@ -26,6 +26,15 @@
           Features</a></li>
       <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
           Tips and Tricks</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
+        <span class="en">
+          Migrating from Eclipse ADT</span></a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>tools/studio/eclipse-transition-guide.html">
+            <span class="en">Transition Guide</span></a></li>
+          </ul>
+      </li>
     </ul>
 
  </li><!-- End of Android Studio menu -->
@@ -39,7 +48,9 @@
     </div>
     <ul>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/devices/index.html"><span class="en">Setting Up Virtual Devices</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/devices/index.html">
+        <span class="en">
+        Setting Up Virtual Devices</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>tools/devices/managing-avds.html"><span class="en">With AVD Manager</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/devices/managing-avds-cmdline.html"><span class="en">From the Command Line</span></a></li>
@@ -353,38 +364,6 @@ class="en">Data Binding Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/adk/adk.html">ADK 2011 Guide</a></li>
     </ul>
   </li> -->
-
-
-<!-- Eclipse ADT menu-->
-
-  <li class="nav-section">
-    <div class="nav-section-header">
-    <a href="<?cs var:toroot ?>tools/help/adt.html">
-      <span class="en">Eclipse with ADT</span></a>
-    </div>
-    <ul>
-        <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
-          <span class="en">Migrating to Android Studio</span></a></div>
-         <ul>
-            <li><a href="<?cs var:toroot ?>tools/studio/eclipse-transition-guide.html">
-            Transition Guide</span></a> </li>
-         </ul>
-        </li>
-
-    <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
-        <span class="en">Installing the Eclipse Plugin</span></a></li>
-    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
-    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
-    <li><a href="<?cs var:toroot ?>tools/building/building-cmdline-ant.html">Building with Ant</a></li>
-    <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing</a></li>
-    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
-    <li><a href="<?cs var:toroot ?>tools/publishing/app-signing-eclipse.html">Signing Your Apps</a></li>
-    </ul>
-  </li><!-- end of Eclipse  -->
-
-
-</ul><!-- nav -->
 
 <script type="text/javascript">
 <!--
