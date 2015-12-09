@@ -27,6 +27,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import static org.mockito.Mockito.*;
 import static android.hardware.camera2.utils.CameraBinderDecorator.*;
 import static android.hardware.camera2.CameraAccessException.*;
+import static android.system.OsConstants.*;
 
 import junit.framework.Assert;
 
@@ -78,9 +79,9 @@ public class CameraUtilsBinderDecoratorTest extends junit.framework.TestCase {
             when(mock.doSomethingAlreadyExists()).thenReturn(ALREADY_EXISTS);
             when(mock.doSomethingBadValue()).thenReturn(BAD_VALUE);
             when(mock.doSomethingDeadObject()).thenReturn(DEAD_OBJECT);
-            when(mock.doSomethingBadPolicy()).thenReturn(EACCES);
-            when(mock.doSomethingDeviceBusy()).thenReturn(EBUSY);
-            when(mock.doSomethingNoSuchDevice()).thenReturn(ENODEV);
+            when(mock.doSomethingBadPolicy()).thenReturn(-EACCES);
+            when(mock.doSomethingDeviceBusy()).thenReturn(-EBUSY);
+            when(mock.doSomethingNoSuchDevice()).thenReturn(-ENODEV);
             when(mock.doSomethingUnknownErrorCode()).thenReturn(SOME_ARBITRARY_NEGATIVE_INT);
             when(mock.doSomethingThrowDeadObjectException()).thenThrow(new DeadObjectException());
             when(mock.doSomethingThrowTransactionTooLargeException()).thenThrow(

@@ -19,6 +19,8 @@ package android.hardware.camera2.legacy;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.util.AndroidException;
 
+import static android.system.OsConstants.ENODEV;
+
 /**
  * Utility class containing exception handling used solely by the compatibility mode shim.
  */
@@ -51,18 +53,15 @@ public class LegacyExceptionUtils {
      * exceptions.</p>
      *
      * @param errorFlag error to throw as an exception.
-     * @throws {@link BufferQueueAbandonedException} for {@link CameraBinderDecorator#ENODEV}.
+     * @throws {@link BufferQueueAbandonedException} for -ENODEV.
      * @throws {@link UnsupportedOperationException} for an unknown negative error code.
      * @return {@code errorFlag} if the value was non-negative, throws otherwise.
      */
     public static int throwOnError(int errorFlag) throws BufferQueueAbandonedException {
-        switch (errorFlag) {
-            case CameraBinderDecorator.NO_ERROR: {
-                return CameraBinderDecorator.NO_ERROR;
-            }
-            case CameraBinderDecorator.BAD_VALUE: {
-                throw new BufferQueueAbandonedException();
-            }
+        if (errorFlag == CameraBinderDecorator.NO_ERROR) {
+            return CameraBinderDecorator.NO_ERROR;
+        } else if (errorFlag == -ENODEV) {
+            throw new BufferQueueAbandonedException();
         }
 
         if (errorFlag < 0) {
