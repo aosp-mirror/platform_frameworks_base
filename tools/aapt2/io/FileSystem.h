@@ -18,7 +18,8 @@
 #define AAPT_IO_FILESYSTEM_H
 
 #include "io/File.h"
-#include "util/Files.h"
+
+#include <map>
 
 namespace aapt {
 namespace io {
@@ -28,23 +29,26 @@ namespace io {
  */
 class RegularFile : public IFile {
 public:
-    RegularFile(const Source& source) : mSource(source) {
-    }
+    RegularFile(const Source& source);
 
-    std::unique_ptr<IData> openAsData() override {
-        android::FileMap map;
-        if (Maybe<android::FileMap> map = file::mmapPath(mSource.path, nullptr)) {
-            return util::make_unique<MmappedData>(std::move(map.value()));
-        }
-        return {};
-    }
-
-    const Source& getSource() const override {
-        return mSource;
-    }
+    std::unique_ptr<IData> openAsData() override;
+    const Source& getSource() const override;
 
 private:
     Source mSource;
+};
+
+class FileCollection;
+
+class FileCollectionIterator : public IFileCollectionIterator {
+public:
+    FileCollectionIterator(FileCollection* collection);
+
+    bool hasNext() override;
+    io::IFile* next() override;
+
+private:
+    std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
 };
 
 /**
@@ -55,21 +59,13 @@ public:
     /**
      * Adds a file located at path. Returns the IFile representation of that file.
      */
-    IFile* insertFile(const StringPiece& path) {
-        mFiles.push_back(util::make_unique<RegularFile>(Source(path)));
-        return mFiles.back().get();
-    }
-
-    const_iterator begin() const override {
-        return mFiles.begin();
-    }
-
-    const_iterator end() const override {
-        return mFiles.end();
-    }
+    IFile* insertFile(const StringPiece& path);
+    IFile* findFile(const StringPiece& path) override;
+    std::unique_ptr<IFileCollectionIterator> iterator() override;
 
 private:
-    std::vector<std::unique_ptr<IFile>> mFiles;
+    friend class FileCollectionIterator;
+    std::map<std::string, std::unique_ptr<IFile>> mFiles;
 };
 
 } // namespace io

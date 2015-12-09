@@ -85,4 +85,12 @@ const ResourceType* parseResourceType(const StringPiece16& str) {
     return &iter->second;
 }
 
+bool operator<(const ResourceKey& a, const ResourceKey& b) {
+    return std::tie(a.name, a.config) < std::tie(b.name, b.config);
+}
+
+bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b) {
+    return std::tie(a.name, a.config) < std::tie(b.name, b.config);
+}
+
 } // namespace aapt

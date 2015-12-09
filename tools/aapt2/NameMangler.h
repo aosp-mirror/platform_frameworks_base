@@ -60,7 +60,7 @@ public:
         };
     }
 
-    bool shouldMangle(const std::u16string& package) {
+    bool shouldMangle(const std::u16string& package) const {
         if (package.empty() || mPolicy.targetPackageName == package) {
             return false;
         }

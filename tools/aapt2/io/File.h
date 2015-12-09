@@ -52,6 +52,14 @@ public:
     virtual const Source& getSource() const = 0;
 };
 
+class IFileCollectionIterator {
+public:
+    virtual ~IFileCollectionIterator() = default;
+
+    virtual bool hasNext() = 0;
+    virtual IFile* next() = 0;
+};
+
 /**
  * Interface for a collection of files, all of which share a common source. That source may
  * simply be the filesystem, or a ZIP archive.
@@ -60,10 +68,8 @@ class IFileCollection {
 public:
     virtual ~IFileCollection() = default;
 
-    using const_iterator = std::vector<std::unique_ptr<IFile>>::const_iterator;
-
-    virtual const_iterator begin() const = 0;
-    virtual const_iterator end() const = 0;
+    virtual IFile* findFile(const StringPiece& path) = 0;
+    virtual std::unique_ptr<IFileCollectionIterator> iterator() = 0;
 };
 
 } // namespace io

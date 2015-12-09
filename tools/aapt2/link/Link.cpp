@@ -57,6 +57,7 @@ struct LinkOptions {
     bool staticLib = false;
     bool verbose = false;
     bool outputToDirectory = false;
+    bool autoAddOverlay = false;
     Maybe<std::u16string> privateSymbols;
     Maybe<std::u16string> minSdkVersionDefault;
     Maybe<std::u16string> targetSdkVersionDefault;
@@ -102,23 +103,6 @@ public:
 
         // Move it to the collection.
         mCollections.push_back(std::move(fileCollection));
-    }
-
-    std::string buildResourceFileName(const ResourceFile& resFile) {
-        std::stringstream out;
-        out << "res/" << resFile.name.type;
-        if (resFile.config != ConfigDescription{}) {
-            out << "-" << resFile.config;
-        }
-        out << "/";
-
-        if (mContext.getNameMangler()->shouldMangle(resFile.name.package)) {
-            out << NameMangler::mangleEntry(resFile.name.package, resFile.name.entry);
-        } else {
-            out << resFile.name.entry;
-        }
-        out << file::getExtension(resFile.source.path);
-        return out.str();
     }
 
     /**
@@ -425,45 +409,28 @@ public:
             return false;
         }
 
-        if (!mTableMerger->merge(file->getSource(), table.get(), override)) {
-            return false;
+        bool result = false;
+        if (override) {
+            result = mTableMerger->mergeOverlay(file->getSource(), table.get());
+        } else {
+            result = mTableMerger->merge(file->getSource(), table.get());
         }
-        return true;
+        return result;
     }
 
-    bool mergeCompiledFile(io::IFile* file, std::unique_ptr<ResourceFile> fileDesc, bool override) {
-        // Apply the package name used for this compilation phase if none was specified.
-        if (fileDesc->name.package.empty()) {
-            fileDesc->name.package = mContext.getCompilationPackage().toString();
+    bool mergeCompiledFile(io::IFile* file, std::unique_ptr<ResourceFile> fileDesc, bool overlay) {
+        if (mOptions.verbose) {
+            mContext.getDiagnostics()->note(DiagMessage() << "adding " << file->getSource());
         }
 
-        // Mangle the name if necessary.
-        ResourceNameRef resName = fileDesc->name;
-        Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(fileDesc->name);
-        if (mangledName) {
-            resName = mangledName.value();
-        }
-
-        // If we are overriding resources, we supply a custom resolver function.
-        std::function<int(Value*,Value*)> resolver;
-        if (override) {
-            resolver = [](Value* a, Value* b) -> int {
-                int result = ResourceTable::resolveValueCollision(a, b);
-                if (result == 0) {
-                    // Always accept the new value if it would normally conflict (override).
-                    result = 1;
-                }
-                return result;
-            };
+        bool result = false;
+        if (overlay) {
+            result = mTableMerger->mergeFileOverlay(*fileDesc, file);
         } else {
-            // Otherwise use the default resolution.
-            resolver = ResourceTable::resolveValueCollision;
+            result = mTableMerger->mergeFile(*fileDesc, file);
         }
 
-        // Add this file to the table.
-        if (!mFinalTable.addFileReference(resName, fileDesc->config, fileDesc->source,
-                                          util::utf8ToUtf16(buildResourceFileName(*fileDesc)),
-                                          resolver, mContext.getDiagnostics())) {
+        if (!result) {
             return false;
         }
 
@@ -489,10 +456,6 @@ public:
                 return false;
             }
         }
-
-        // Now add this file for later processing. Once the table is assigned IDs, we can compile
-        // this file.
-        mFilesToProcess.insert(FileToProcess{ std::move(fileDesc), file });
         return true;
     }
 
@@ -509,8 +472,8 @@ public:
         }
 
         bool error = false;
-        for (const std::unique_ptr<io::IFile>& file : *collection) {
-            if (!processFile(file.get(), override)) {
+        for (auto iter = collection->iterator(); iter->hasNext(); ) {
+            if (!processFile(iter->next(), override)) {
                 error = true;
             }
         }
@@ -588,7 +551,9 @@ public:
             return 1;
         }
 
-        mTableMerger = util::make_unique<TableMerger>(&mContext, &mFinalTable);
+        TableMergerOptions tableMergerOptions;
+        tableMergerOptions.autoAddOverlay = mOptions.autoAddOverlay;
+        mTableMerger = util::make_unique<TableMerger>(&mContext, &mFinalTable, tableMergerOptions);
 
         if (mOptions.verbose) {
             mContext.getDiagnostics()->note(
@@ -698,31 +663,47 @@ public:
             return 1;
         }
 
-        for (const FileToProcess& file : mFilesToProcess) {
-            const StringPiece path = file.file->getSource().path;
+        for (auto& mergeEntry : mTableMerger->getFilesToMerge()) {
+            const ResourceKeyRef& key = mergeEntry.first;
+            const FileToMerge& fileToMerge = mergeEntry.second;
 
-            if (file.fileExport->name.type != ResourceType::kRaw &&
-                    util::stringEndsWith<char>(path, ".xml.flat")) {
+            const StringPiece path = fileToMerge.file->getSource().path;
+
+            if (key.name.type != ResourceType::kRaw &&
+                    (util::stringEndsWith<char>(path, ".xml.flat") ||
+                    util::stringEndsWith<char>(path, ".xml"))) {
                 if (mOptions.verbose) {
                     mContext.getDiagnostics()->note(DiagMessage() << "linking " << path);
                 }
 
-                std::unique_ptr<io::IData> data = file.file->openAsData();
+                io::IFile* file = fileToMerge.file;
+                std::unique_ptr<io::IData> data = file->openAsData();
                 if (!data) {
-                    mContext.getDiagnostics()->error(DiagMessage(file.file->getSource())
+                    mContext.getDiagnostics()->error(DiagMessage(file->getSource())
                                                      << "failed to open file");
                     return 1;
                 }
 
-                std::unique_ptr<xml::XmlResource> xmlRes = loadBinaryXmlSkipFileExport(
-                        file.file->getSource(), data->data(), data->size(),
-                        mContext.getDiagnostics());
+                std::unique_ptr<xml::XmlResource> xmlRes;
+                if (util::stringEndsWith<char>(path, ".flat")) {
+                    xmlRes = loadBinaryXmlSkipFileExport(file->getSource(),
+                                                         data->data(), data->size(),
+                                                         mContext.getDiagnostics());
+                } else {
+                    xmlRes = xml::inflate(data->data(), data->size(), mContext.getDiagnostics(),
+                                          file->getSource());
+                }
+
                 if (!xmlRes) {
                     return 1;
                 }
 
-                // Move the file description over.
-                xmlRes->file = std::move(*file.fileExport);
+                // Create the file description header.
+                xmlRes->file = ResourceFile{
+                        key.name.toResourceName(),
+                        key.config,
+                        fileToMerge.originalSource,
+                };
 
                 XmlReferenceLinker xmlLinker;
                 if (xmlLinker.consume(&mContext, xmlRes.get())) {
@@ -736,7 +717,7 @@ public:
                         maxSdkLevel = std::max<size_t>(xmlRes->file.config.sdkVersion, 1u);
                     }
 
-                    if (!flattenXml(xmlRes.get(), buildResourceFileName(xmlRes->file), maxSdkLevel,
+                    if (!flattenXml(xmlRes.get(), fileToMerge.dstPath, maxSdkLevel,
                                     archiveWriter.get())) {
                         error = true;
                     }
@@ -750,19 +731,23 @@ public:
                                                                     xmlRes->file.config,
                                                                     sdkLevel)) {
                                 xmlRes->file.config.sdkVersion = sdkLevel;
+
+                                std::string genResourcePath = ResourceUtils::buildResourceFileName(
+                                        xmlRes->file, mContext.getNameMangler());
+
                                 bool added = mFinalTable.addFileReference(
                                         xmlRes->file.name,
                                         xmlRes->file.config,
                                         xmlRes->file.source,
-                                        util::utf8ToUtf16(buildResourceFileName(xmlRes->file)),
+                                        util::utf8ToUtf16(genResourcePath),
                                         mContext.getDiagnostics());
                                 if (!added) {
                                     error = true;
                                     continue;
                                 }
 
-                                if (!flattenXml(xmlRes.get(), buildResourceFileName(xmlRes->file),
-                                                sdkLevel, archiveWriter.get())) {
+                                if (!flattenXml(xmlRes.get(), genResourcePath, sdkLevel,
+                                                archiveWriter.get())) {
                                     error = true;
                                 }
                             }
@@ -777,7 +762,7 @@ public:
                     mContext.getDiagnostics()->note(DiagMessage() << "copying " << path);
                 }
 
-                if (!copyFileToArchive(file.file, buildResourceFileName(*file.fileExport), 0,
+                if (!copyFileToArchive(fileToMerge.file, fileToMerge.dstPath, 0,
                                        archiveWriter.get())) {
                     error = true;
                 }
@@ -845,15 +830,7 @@ public:
 
         if (mOptions.verbose) {
             Debug::printTable(&mFinalTable);
-            for (; !mTableMerger->getFileMergeQueue()->empty();
-                    mTableMerger->getFileMergeQueue()->pop()) {
-                const FileToMerge& f = mTableMerger->getFileMergeQueue()->front();
-                mContext.getDiagnostics()->note(
-                        DiagMessage() << f.srcPath << " -> " << f.dstPath << " from (0x"
-                                      << std::hex << (uintptr_t) f.srcTable << std::dec);
-            }
         }
-
         return 0;
     }
 
@@ -861,24 +838,15 @@ private:
     LinkOptions mOptions;
     LinkContext mContext;
     ResourceTable mFinalTable;
+
+    ResourceTable mLocalFileTable;
     std::unique_ptr<TableMerger> mTableMerger;
 
+    // A pointer to the FileCollection representing the filesystem (not archives).
     io::FileCollection* mFileCollection;
+
+    // A vector of IFileCollections. This is mainly here to keep ownership of the collections.
     std::vector<std::unique_ptr<io::IFileCollection>> mCollections;
-
-    struct FileToProcess {
-        std::unique_ptr<ResourceFile> fileExport;
-        io::IFile* file;
-    };
-
-    struct FileToProcessComparator {
-        bool operator()(const FileToProcess& a, const FileToProcess& b) {
-            return std::tie(a.fileExport->name, a.fileExport->config) <
-                    std::tie(b.fileExport->name, b.fileExport->config);
-        }
-    };
-
-    std::set<FileToProcess, FileToProcessComparator> mFilesToProcess;
 };
 
 int link(const std::vector<StringPiece>& args) {
@@ -915,6 +883,8 @@ int link(const std::vector<StringPiece>& args) {
                           "package name", &privateSymbolsPackage)
             .optionalFlagList("--extra-packages", "Generate the same R.java but with different "
                               "package names", &extraJavaPackages)
+            .optionalSwitch("--auto-add-overlay", "Allows the addition of new resources in "
+                            "overlays without <add-resource> tags", &options.autoAddOverlay)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {

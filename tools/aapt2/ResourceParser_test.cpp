@@ -563,4 +563,16 @@ TEST_F(ResourceParserTest, ExternalTypesShouldOnlyBeReferences) {
     ASSERT_FALSE(testParse(input));
 }
 
+TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol) {
+    std::string input = R"EOF(<add-resource name="bar" type="string" />)EOF";
+    ASSERT_TRUE(testParse(input));
+
+    Maybe<ResourceTable::SearchResult> result = mTable.findResource(
+            test::parseNameOrDie(u"@string/bar"));
+    AAPT_ASSERT_TRUE(result);
+    const ResourceEntry* entry = result.value().entry;
+    ASSERT_NE(nullptr, entry);
+    EXPECT_EQ(SymbolState::kUndefined, entry->symbolStatus.state);
+}
+
 } // namespace aapt

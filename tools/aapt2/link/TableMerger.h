@@ -17,21 +17,40 @@
 #ifndef AAPT_TABLEMERGER_H
 #define AAPT_TABLEMERGER_H
 
+#include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "io/File.h"
+#include "process/IResourceTableConsumer.h"
 #include "util/Util.h"
 
-#include "process/IResourceTableConsumer.h"
-
-#include <queue>
-#include <set>
+#include <functional>
+#include <map>
 
 namespace aapt {
 
 struct FileToMerge {
-    ResourceTable* srcTable;
-    std::u16string srcPath;
-    std::u16string dstPath;
+    /**
+     * The compiled file from which to read the data.
+     */
+    io::IFile* file;
+
+    /**
+     * Where the original, uncompiled file came from.
+     */
+    Source originalSource;
+
+    /**
+     * The destination path within the APK/archive.
+     */
+    std::string dstPath;
+};
+
+struct TableMergerOptions {
+    /**
+     * If true, resources in overlays can be added without previously having existed.
+     */
+    bool autoAddOverlay = false;
 };
 
 /**
@@ -50,40 +69,74 @@ struct FileToMerge {
  */
 class TableMerger {
 public:
-    TableMerger(IAaptContext* context, ResourceTable* outTable);
+    /**
+     * Note: The outTable ResourceTable must live longer than this TableMerger. References
+     * are made to this ResourceTable for efficiency reasons.
+     */
+    TableMerger(IAaptContext* context, ResourceTable* outTable, const TableMergerOptions& options);
 
-    inline std::queue<FileToMerge>* getFileMergeQueue() {
-        return &mFilesToMerge;
+    const std::map<ResourceKeyRef, FileToMerge>& getFilesToMerge() {
+        return mFilesToMerge;
     }
 
-    inline const std::set<std::u16string>& getMergedPackages() const {
+    const std::set<std::u16string>& getMergedPackages() const {
         return mMergedPackages;
     }
 
     /**
      * Merges resources from the same or empty package. This is for local sources.
      */
-    bool merge(const Source& src, ResourceTable* table, bool overrideExisting);
+    bool merge(const Source& src, ResourceTable* table);
+
+    /**
+     * Merges resources from an overlay ResourceTable.
+     */
+    bool mergeOverlay(const Source& src, ResourceTable* table);
 
     /**
      * Merges resources from the given package, mangling the name. This is for static libraries.
+     * An io::IFileCollection is needed in order to find the referenced Files and process them.
      */
-    bool mergeAndMangle(const Source& src, const StringPiece16& package, ResourceTable* table);
+    bool mergeAndMangle(const Source& src, const StringPiece16& package, ResourceTable* table,
+                        io::IFileCollection* collection);
+
+    /**
+     * Merges a compiled file that belongs to this same or empty package. This is for local sources.
+     */
+    bool mergeFile(const ResourceFile& fileDesc, io::IFile* file);
+
+    /**
+     * Merges a compiled file from an overlay, overriding an existing definition.
+     */
+    bool mergeFileOverlay(const ResourceFile& fileDesc, io::IFile* file);
 
 private:
+    using FileMergeCallback = std::function<bool(const ResourceNameRef&,
+                                                 const ConfigDescription& config,
+                                                 FileReference*,
+                                                 FileReference*)>;
+
     IAaptContext* mContext;
     ResourceTable* mMasterTable;
+    TableMergerOptions mOptions;
     ResourceTablePackage* mMasterPackage;
 
     std::set<std::u16string> mMergedPackages;
-    std::queue<FileToMerge> mFilesToMerge;
+    std::map<ResourceKeyRef, FileToMerge> mFilesToMerge;
+
+    bool mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, bool overlay);
+
+    bool mergeImpl(const Source& src, ResourceTable* srcTable,
+                   bool overlay, bool allowNew);
 
     bool doMerge(const Source& src, ResourceTable* srcTable, ResourceTablePackage* srcPackage,
-                 const bool manglePackage, const bool overrideExisting);
+                 const bool manglePackage,
+                 const bool overlay,
+                 const bool allowNewResources,
+                 FileMergeCallback callback);
 
-    std::unique_ptr<Value> cloneAndMangle(ResourceTable* table, const std::u16string& package,
-                                          Value* value);
-    std::unique_ptr<Value> clone(Value* value);
+    std::unique_ptr<FileReference> cloneAndMangleFile(const std::u16string& package,
+                                                      const FileReference& value);
 };
 
 } // namespace aapt

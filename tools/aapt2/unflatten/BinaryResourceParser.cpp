@@ -447,6 +447,10 @@ bool BinaryResourceParser::parsePublic(const ResourceTablePackage* package,
         case Public_entry::kPublic:
             symbol.state = SymbolState::kPublic;
             break;
+
+        case Public_entry::kUndefined:
+            symbol.state = SymbolState::kUndefined;
+            break;
         }
 
         if (!mTable->setSymbolStateAllowMangled(name, resId, symbol, mContext->getDiagnostics())) {

@@ -101,7 +101,7 @@ ResourceTableType* ResourceTablePackage::findOrCreateType(ResourceType type) {
     if (iter != last && (*iter)->type == type) {
         return iter->get();
     }
-    return types.emplace(iter, new ResourceTableType{ type })->get();
+    return types.emplace(iter, new ResourceTableType(type))->get();
 }
 
 ResourceEntry* ResourceTableType::findEntry(const StringPiece16& name) {
@@ -121,7 +121,7 @@ ResourceEntry* ResourceTableType::findOrCreateEntry(const StringPiece16& name) {
     if (iter != last && name == (*iter)->name) {
         return iter->get();
     }
-    return entries.emplace(iter, new ResourceEntry{ name })->get();
+    return entries.emplace(iter, new ResourceEntry(name))->get();
 }
 
 /**
@@ -342,11 +342,6 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
                                        IDiagnostics* diag) {
     assert(diag && "diagnostics can't be nullptr");
 
-    if (symbol.state == SymbolState::kUndefined) {
-        // Nothing to do.
-        return true;
-    }
-
     auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
     if (badCharIter != name.entry.end()) {
         diag->error(DiagMessage(symbol.source)
@@ -400,23 +395,30 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
         return false;
     }
 
-    // Only mark the type state as public, it doesn't care about being private.
-    if (symbol.state == SymbolState::kPublic) {
-        type->symbolStatus.state = SymbolState::kPublic;
-    }
-
-    // Downgrading to a private symbol from a public one is not allowed.
-    if (entry->symbolStatus.state != SymbolState::kPublic) {
-        if (entry->symbolStatus.state != symbol.state) {
-            entry->symbolStatus = std::move(symbol);
-        }
-    }
-
     if (resId.isValid()) {
         package->id = resId.packageId();
         type->id = resId.typeId();
         entry->id = resId.entryId();
     }
+
+    // Only mark the type state as public, it doesn't care about being private.
+    if (symbol.state == SymbolState::kPublic) {
+        type->symbolStatus.state = SymbolState::kPublic;
+    }
+
+    if (symbol.state == SymbolState::kUndefined &&
+            entry->symbolStatus.state != SymbolState::kUndefined) {
+        // We can't undefine a symbol (remove its visibility). Ignore.
+        return true;
+    }
+
+    if (symbol.state == SymbolState::kPrivate &&
+            entry->symbolStatus.state == SymbolState::kPublic) {
+        // We can't downgrade public to private. Ignore.
+        return true;
+    }
+
+    entry->symbolStatus = std::move(symbol);
     return true;
 }
 

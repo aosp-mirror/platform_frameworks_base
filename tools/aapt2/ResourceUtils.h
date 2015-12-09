@@ -17,6 +17,7 @@
 #ifndef AAPT_RESOURCEUTILS_H
 #define AAPT_RESOURCEUTILS_H
 
+#include "NameMangler.h"
 #include "Resource.h"
 #include "ResourceValues.h"
 #include "util/StringPiece.h"
@@ -153,6 +154,16 @@ std::unique_ptr<Item> parseItemForAttribute(
         std::function<void(const ResourceName&)> onCreateReference = {});
 
 uint32_t androidTypeToAttributeTypeMask(uint16_t type);
+
+/**
+ * Returns a string path suitable for use within an APK. The path will look like:
+ *
+ * res/type[-config]/<name>.<ext>
+ *
+ * Then name may be mangled if a NameMangler is supplied (can be nullptr) and the package
+ * requires mangling.
+ */
+std::string buildResourceFileName(const ResourceFile& resFile, const NameMangler* mangler);
 
 } // namespace ResourceUtils
 } // namespace aapt
