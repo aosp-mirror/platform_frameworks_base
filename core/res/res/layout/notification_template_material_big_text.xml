@@ -62,6 +62,13 @@
                 android:contentDescription="@string/notification_work_profile_content_description"
                 />
         </LinearLayout>
+        <ViewStub android:layout="@layout/notification_material_reply_text"
+                android:id="@+id/notification_material_reply_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-16dp"
+                android:layout_marginEnd="-16dp"
+        />
         <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />
