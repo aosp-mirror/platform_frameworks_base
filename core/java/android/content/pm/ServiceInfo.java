@@ -74,9 +74,15 @@ public class ServiceInfo extends ComponentInfo
     }
 
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    void dump(Printer pw, String prefix, int flags) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "permission=" + permission);
         pw.println(prefix + "flags=0x" + Integer.toHexString(flags));
+        super.dumpBack(pw, prefix, flags);
     }
     
     public String toString() {

@@ -756,13 +756,20 @@ public class ActivityInfo extends ComponentInfo
     }
 
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    public void dump(Printer pw, String prefix, int flags) {
         super.dumpFront(pw, prefix);
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
-        pw.println(prefix + "taskAffinity=" + taskAffinity
-                + " targetActivity=" + targetActivity
-                + " persistableMode=" + persistableModeToString());
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "taskAffinity=" + taskAffinity
+                    + " targetActivity=" + targetActivity
+                    + " persistableMode=" + persistableModeToString());
+        }
         if (launchMode != 0 || flags != 0 || theme != 0) {
             pw.println(prefix + "launchMode=" + launchMode
                     + " flags=0x" + Integer.toHexString(flags)
@@ -777,14 +784,17 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        pw.println(prefix + "resizeable=" + resizeable + " supportsPip=" + supportsPip);
-        pw.println(prefix + "lockTaskLaunchMode=" + lockTaskLaunchModeToString(lockTaskLaunchMode));
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "resizeable=" + resizeable + " supportsPip=" + supportsPip);
+            pw.println(prefix + "lockTaskLaunchMode="
+                    + lockTaskLaunchModeToString(lockTaskLaunchMode));
+        }
         if (layout != null) {
             pw.println(prefix + "initialLayout=" + layout.width + "|"
                     + layout.widthFraction + ", " + layout.height + "|"
                     + layout.heightFraction + ", " + layout.gravity);
         }
-        super.dumpBack(pw, prefix);
+        super.dumpBack(pw, prefix, flags);
     }
 
     public String toString() {

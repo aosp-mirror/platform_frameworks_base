@@ -266,8 +266,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         pw.print("  Session service="); pw.println(mInfo.getSessionService());
         pw.println("  Service info:");
         mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), "    ");
-        pw.println("  Application info:");
-        mInfo.getServiceInfo().applicationInfo.dump(new PrintWriterPrinter(pw), "    ");
         pw.print("  Recognition service="); pw.println(mInfo.getRecognitionService());
         pw.print("  Settings activity="); pw.println(mInfo.getSettingsActivity());
         pw.print("  Supports assist="); pw.println(mInfo.getSupportsAssist());

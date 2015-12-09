@@ -282,6 +282,21 @@ public class PackageItemInfo {
         return null;
     }
 
+    /**
+     * @hide Flag for dumping: include all details.
+     */
+    public static final int DUMP_FLAG_DETAILS = 1<<0;
+
+    /**
+     * @hide Flag for dumping: include nested ApplicationInfo.
+     */
+    public static final int DUMP_FLAG_APPLICATION = 1<<1;
+
+    /**
+     * @hide Flag for dumping: all flags to dump everything.
+     */
+    public static final int DUMP_FLAG_ALL = DUMP_FLAG_DETAILS | DUMP_FLAG_APPLICATION;
+
     protected void dumpFront(Printer pw, String prefix) {
         if (name != null) {
             pw.println(prefix + "name=" + name);

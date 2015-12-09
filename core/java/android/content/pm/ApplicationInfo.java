@@ -710,21 +710,30 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    public void dump(Printer pw, String prefix, int flags) {
         super.dumpFront(pw, prefix);
-        if (className != null) {
+        if ((flags&DUMP_FLAG_DETAILS) != 0 && className != null) {
             pw.println(prefix + "className=" + className);
         }
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
         pw.println(prefix + "processName=" + processName);
-        pw.println(prefix + "taskAffinity=" + taskAffinity);
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "taskAffinity=" + taskAffinity);
+        }
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
                 + " privateFlags=0x" + Integer.toHexString(privateFlags)
                 + " theme=0x" + Integer.toHexString(theme));
-        pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
-                + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
-                + " largestWidthLimitDp=" + largestWidthLimitDp);
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
+                    + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
+                    + " largestWidthLimitDp=" + largestWidthLimitDp);
+        }
         pw.println(prefix + "sourceDir=" + sourceDir);
         if (!Objects.equals(sourceDir, publicSourceDir)) {
             pw.println(prefix + "publicSourceDir=" + publicSourceDir);
@@ -739,31 +748,36 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (resourceDirs != null) {
             pw.println(prefix + "resourceDirs=" + resourceDirs);
         }
-        if (seinfo != null) {
+        if ((flags&DUMP_FLAG_DETAILS) != 0 && seinfo != null) {
             pw.println(prefix + "seinfo=" + seinfo);
         }
         pw.println(prefix + "dataDir=" + dataDir);
-        pw.println(prefix + "deviceEncryptedDataDir=" + deviceEncryptedDataDir);
-        pw.println(prefix + "credentialEncryptedDataDir=" + credentialEncryptedDataDir);
-        if (sharedLibraryFiles != null) {
-            pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "deviceEncryptedDataDir=" + deviceEncryptedDataDir);
+            pw.println(prefix + "credentialEncryptedDataDir=" + credentialEncryptedDataDir);
+            if (sharedLibraryFiles != null) {
+                pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
+            }
         }
         pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode);
-        if (manageSpaceActivityName != null) {
-            pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
-        }
-        if (descriptionRes != 0) {
-            pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
-        }
-        if (uiOptions != 0) {
-            pw.println(prefix + "uiOptions=0x" + Integer.toHexString(uiOptions));
-        }
-        pw.println(prefix + "supportsRtl=" + (hasRtlSupport() ? "true" : "false"));
-        if (fullBackupContent > 0) {
-            pw.println(prefix + "fullBackupContent=@xml/" + fullBackupContent);
-        } else {
-            pw.println(prefix + "fullBackupContent=" + (fullBackupContent < 0 ? "false" : "true"));
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            if (manageSpaceActivityName != null) {
+                pw.println(prefix + "manageSpaceActivityName=" + manageSpaceActivityName);
+            }
+            if (descriptionRes != 0) {
+                pw.println(prefix + "description=0x" + Integer.toHexString(descriptionRes));
+            }
+            if (uiOptions != 0) {
+                pw.println(prefix + "uiOptions=0x" + Integer.toHexString(uiOptions));
+            }
+            pw.println(prefix + "supportsRtl=" + (hasRtlSupport() ? "true" : "false"));
+            if (fullBackupContent > 0) {
+                pw.println(prefix + "fullBackupContent=@xml/" + fullBackupContent);
+            } else {
+                pw.println(prefix + "fullBackupContent="
+                        + (fullBackupContent < 0 ? "false" : "true"));
+            }
         }
         super.dumpBack(pw, prefix);
     }

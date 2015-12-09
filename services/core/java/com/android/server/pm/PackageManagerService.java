@@ -9797,6 +9797,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (r1.system != r2.system) {
                 return r1.system ? -1 : 1;
             }
+            if (r1.activityInfo != null) {
+                return r1.activityInfo.packageName.compareTo(r2.activityInfo.packageName);
+            }
+            if (r1.serviceInfo != null) {
+                return r1.serviceInfo.packageName.compareTo(r2.serviceInfo.packageName);
+            }
+            if (r1.providerInfo != null) {
+                return r1.providerInfo.packageName.compareTo(r2.providerInfo.packageName);
+            }
             return 0;
         }
     };
