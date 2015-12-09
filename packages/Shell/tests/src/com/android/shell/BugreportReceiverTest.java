@@ -40,6 +40,8 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Instrumentation;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -130,7 +132,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedIntent(42, PLAIN_TEXT_PATH, SCREENSHOT_PATH);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
 
-        // TODO: assert service is down
+        String service = BugreportProgressService.class.getName();
+        assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
     }
 
     public void testBugreportFinished_withWarning() throws Exception {
@@ -304,6 +307,17 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             }
         }
         fail("Did not find entry '" + entryName + "' on file '" + uri + "'");
+    }
+
+    private boolean isServiceRunning(String name) {
+        ActivityManager manager = (ActivityManager) mContext
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (service.service.getClassName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void createTextFile(String path, String content) throws IOException {

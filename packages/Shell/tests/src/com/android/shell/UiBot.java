@@ -118,7 +118,8 @@ final class UiBot {
     // TODO: UI Automator should provide such logic.
     public void chooseActivity(String name) {
         // First check if the activity is the default option.
-        String shareText = String.format("Share with %s", name);
+        String shareText = "Share with " + name;
+        Log.v(TAG, "Waiting for ActivityChooser text: '" + shareText + "'");
         boolean gotIt = mDevice.wait(Until.hasObject(By.text(shareText)), mTimeout);
 
         if (gotIt) {
