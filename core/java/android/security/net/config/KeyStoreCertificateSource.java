@@ -80,4 +80,14 @@ class KeyStoreCertificateSource implements CertificateSource {
         }
         return anchor.getTrustedCert();
     }
+
+    @Override
+    public X509Certificate findByIssuerAndSignature(X509Certificate cert) {
+        ensureInitialized();
+        java.security.cert.TrustAnchor anchor = mIndex.findByIssuerAndSignature(cert);
+        if (anchor == null) {
+            return null;
+        }
+        return anchor.getTrustedCert();
+    }
 }
