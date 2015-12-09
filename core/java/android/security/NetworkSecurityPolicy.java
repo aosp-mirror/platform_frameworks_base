@@ -60,7 +60,7 @@ public class NetworkSecurityPolicy {
      * <p>NOTE: {@link android.webkit.WebView} does not honor this flag.
      */
     public boolean isCleartextTrafficPermitted() {
-        return libcore.net.NetworkSecurityPolicy.isCleartextTrafficPermitted();
+        return libcore.net.NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted();
     }
 
     /**
@@ -72,6 +72,7 @@ public class NetworkSecurityPolicy {
      * @hide
      */
     public void setCleartextTrafficPermitted(boolean permitted) {
-        libcore.net.NetworkSecurityPolicy.setCleartextTrafficPermitted(permitted);
+        FrameworkNetworkSecurityPolicy policy = new FrameworkNetworkSecurityPolicy(permitted);
+        libcore.net.NetworkSecurityPolicy.setInstance(policy);
     }
 }
