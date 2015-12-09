@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"셸"</string>
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"버그 신고 생성 중"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"버그 신고서 캡처됨"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"왼쪽으로 스와이프하여 버그 신고서를 공유하세요."</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"버그 신고서를 공유하려면 터치하세요."</string>
@@ -26,6 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"다음에 이 메시지 표시"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"버그 신고"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"버그 신고 파일을 읽을 수 없습니다."</string>
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"이름 없음"</string>
 </resources>

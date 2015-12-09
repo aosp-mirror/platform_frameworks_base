@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"O relatório de erro está a ser gerado"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Relatório de erros capturado"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Deslizar rapidamente para a esquerda para partilhar o seu relatório de erros"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toque para partilhar o relatório de erros"</string>
@@ -26,6 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostrar esta mensagem da próxima vez"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Relatórios de erros"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Não foi possível ler o ficheiro de relatório de erro"</string>
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"sem nome"</string>
 </resources>

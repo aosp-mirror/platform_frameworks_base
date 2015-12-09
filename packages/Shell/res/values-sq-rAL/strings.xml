@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Guaska"</string>
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Po krijohet raporti i defekteve në kod"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Raporti i defektit në kod u regjistrua"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Rrëshqit majtas për të ndarë raportin e defektit në kod"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Prek për të ndarë raportin e defektit në kod"</string>
@@ -26,6 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Tregoje këtë mesazh herën tjetër"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Raportet e gabimeve"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Skedari i raportimit të defektit në kod nuk mund të lexohej."</string>
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"e paemërtuar"</string>
 </resources>

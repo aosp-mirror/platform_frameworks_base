@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Le rapport de bug est en cours de création."</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Rapport de bug enregistré"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Faites glisser le doigt vers la gauche pour partager votre rapport d\'erreur."</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Appuyez ici pour partager le rapport de bug"</string>
@@ -26,6 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Afficher ce message la prochaine fois"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Rapports d\'erreur"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Impossible de lire le fichier de rapport de bug."</string>
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"sans nom"</string>
 </resources>
