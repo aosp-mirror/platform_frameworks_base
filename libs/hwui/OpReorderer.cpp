@@ -708,10 +708,34 @@ void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
     }
 }
 
-static batchid_t tessellatedBatchId(const SkPaint& paint) {
+/**
+ * Defers an unmergeable, strokeable op, accounting correctly
+ * for paint's style on the bounds being computed.
+ */
+void OpReorderer::onStrokeableOp(const RecordedOp& op, batchid_t batchId,
+        BakedOpState::StrokeBehavior strokeBehavior) {
+    // Note: here we account for stroke when baking the op
+    BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
+            mAllocator, *mCanvasState.currentSnapshot(), op, strokeBehavior);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
+}
+
+/**
+ * Returns batch id for tessellatable shapes, based on paint. Checks to see if path effect/AA will
+ * be used, since they trigger significantly different rendering paths.
+ *
+ * Note: not used for lines/points, since they don't currently support path effects.
+ */
+static batchid_t tessBatchId(const RecordedOp& op) {
+    const SkPaint& paint = *(op.paint);
     return paint.getPathEffect()
             ? OpBatchType::AlphaMaskTexture
             : (paint.isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices);
+}
+
+void OpReorderer::onArcOp(const ArcOp& op) {
+    onStrokeableOp(op, tessBatchId(op));
 }
 
 void OpReorderer::onBitmapOp(const BitmapOp& op) {
@@ -734,15 +758,29 @@ void OpReorderer::onBitmapOp(const BitmapOp& op) {
 }
 
 void OpReorderer::onLinesOp(const LinesOp& op) {
-    BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedState, tessellatedBatchId(*op.paint));
+    batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
+    onStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
+}
+
+void OpReorderer::onOvalOp(const OvalOp& op) {
+    onStrokeableOp(op, tessBatchId(op));
+}
+
+void OpReorderer::onPathOp(const PathOp& op) {
+    onStrokeableOp(op, OpBatchType::Bitmap);
+}
+
+void OpReorderer::onPointsOp(const PointsOp& op) {
+    batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
+    onStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
 void OpReorderer::onRectOp(const RectOp& op) {
-    BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedState, tessellatedBatchId(*op.paint));
+    onStrokeableOp(op, tessBatchId(op));
+}
+
+void OpReorderer::onRoundRectOp(const RoundRectOp& op) {
+    onStrokeableOp(op, tessBatchId(op));
 }
 
 void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {

@@ -120,16 +120,16 @@ private:
 
 class AutoTexture {
 public:
-    AutoTexture(const Texture* texture): mTexture(texture) { }
+    AutoTexture(const Texture* texture)
+            : texture(texture) {}
     ~AutoTexture() {
-        if (mTexture && mTexture->cleanup) {
-            mTexture->deleteTexture();
-            delete mTexture;
+        if (texture && texture->cleanup) {
+            texture->deleteTexture();
+            delete texture;
         }
     }
 
-private:
-    const Texture* mTexture;
+    const Texture *const texture;
 }; // class AutoTexture
 
 }; // namespace uirenderer

@@ -237,26 +237,32 @@ void RecordingCanvas::drawPaint(const SkPaint& paint) {
             refPaint(&paint)));
 }
 
+static Rect calcBoundsOfPoints(const float* points, int floatCount) {
+    Rect unmappedBounds(points[0], points[1], points[0], points[1]);
+    for (int i = 2; i < floatCount; i += 2) {
+        unmappedBounds.expandToCover(points[i], points[i + 1]);
+    }
+    return unmappedBounds;
+}
+
 // Geometry
-void RecordingCanvas::drawPoints(const float* points, int count, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPaint& paint) {
+    if (floatCount < 2) return;
+    floatCount &= ~0x1; // round down to nearest two
+
+    addOp(new (alloc()) PointsOp(
+            calcBoundsOfPoints(points, floatCount),
+            *mState.currentSnapshot()->transform,
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint), refBuffer<float>(points, floatCount), floatCount));
 }
 
 void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPaint& paint) {
     if (floatCount < 4) return;
     floatCount &= ~0x3; // round down to nearest four
 
-    Rect unmappedBounds(points[0], points[1], points[0], points[1]);
-    for (int i = 2; i < floatCount; i += 2) {
-        unmappedBounds.expandToCover(points[i], points[i + 1]);
-    }
-
-    // since anything AA stroke with less than 1.0 pixel width is drawn with an alpha-reduced
-    // 1.0 stroke, treat 1.0 as minimum.
-    unmappedBounds.outset(std::max(paint.getStrokeWidth(), 1.0f) * 0.5f);
-
     addOp(new (alloc()) LinesOp(
-            unmappedBounds,
+            calcBoundsOfPoints(points, floatCount),
             *mState.currentSnapshot()->transform,
             mState.getRenderTargetClipBounds(),
             refPaint(&paint), refBuffer<float>(points, floatCount), floatCount));
@@ -330,20 +336,42 @@ void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
 }
 void RecordingCanvas::drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    addOp(new (alloc()) RoundRectOp(
+            Rect(left, top, right, bottom),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint), rx, ry));
 }
+
 void RecordingCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    if (radius <= 0) return;
+    drawOval(x - radius, y - radius, x + radius, y + radius, paint);
 }
+
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    addOp(new (alloc()) OvalOp(
+            Rect(left, top, right, bottom),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint)));
 }
+
 void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+        float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
+    addOp(new (alloc()) ArcOp(
+            Rect(left, top, right, bottom),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint),
+            startAngle, sweepAngle, useCenter));
 }
+
 void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    addOp(new (alloc()) PathOp(
+            Rect(path.getBounds()),
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint), refPath(&path)));
 }
 
 // Bitmap-based
@@ -375,6 +403,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
         restore();
     }
 }
+
 void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) {
@@ -392,10 +421,12 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
         LOG_ALWAYS_FATAL("TODO!");
     }
 }
+
 void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) {
     LOG_ALWAYS_FATAL("TODO!");
 }
+
 void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) {

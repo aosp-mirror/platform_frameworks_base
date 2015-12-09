@@ -44,7 +44,7 @@ TEST(RecordingCanvas, emptyPlayback) {
 TEST(RecordingCanvas, drawLines) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
-        paint.setStrokeWidth(20);
+        paint.setStrokeWidth(20); // doesn't affect recorded bounds - would be resolved at bake time
         float points[] = { 0, 0, 20, 10, 30, 40, 90 }; // NB: only 1 valid line
         canvas.drawLines(&points[0], 7, paint);
     });
@@ -54,8 +54,8 @@ TEST(RecordingCanvas, drawLines) {
     ASSERT_EQ(RecordedOpId::LinesOp, op->opId);
     EXPECT_EQ(4, ((LinesOp*)op)->floatCount)
             << "float count must be rounded down to closest multiple of 4";
-    EXPECT_EQ(Rect(-10, -10, 30, 20), op->unmappedBounds)
-            << "unmapped bounds must be size of line, outset by 1/2 stroke width";
+    EXPECT_EQ(Rect(0, 0, 20, 10), op->unmappedBounds)
+            << "unmapped bounds must be size of line, and not outset for stroke width";
 }
 
 TEST(RecordingCanvas, drawRect) {

@@ -53,7 +53,7 @@ struct MergedBakedOpList {
 class ResolvedRenderState {
 public:
     // TODO: remove the mapRects/matrix multiply when snapshot & recorded transforms are translates
-    ResolvedRenderState(const Snapshot& snapshot, const RecordedOp& recordedOp) {
+    ResolvedRenderState(const Snapshot& snapshot, const RecordedOp& recordedOp, bool expandForStroke) {
         /* TODO: benchmark a fast path for translate-only matrices, such as:
         if (CC_LIKELY(snapshot.transform->getType() == Matrix4::kTypeTranslate
                 && recordedOp.localMatrix.getType() == Matrix4::kTypeTranslate)) {
@@ -83,7 +83,17 @@ public:
 
         // resolvedClippedBounds = intersect(resolvedMatrix * opBounds, resolvedClipRect)
         clippedBounds = recordedOp.unmappedBounds;
+        if (CC_UNLIKELY(expandForStroke)) {
+            // account for non-hairline stroke
+            clippedBounds.outset(recordedOp.paint->getStrokeWidth() * 0.5f);
+        }
         transform.mapRect(clippedBounds);
+        if (CC_UNLIKELY(expandForStroke
+                && (!transform.isPureTranslate() || recordedOp.paint->getStrokeWidth() < 1.0f))) {
+            // account for hairline stroke when stroke may be < 1 scaled pixel
+            // Non translate || strokeWidth < 1 is conservative, but will cover all cases
+            clippedBounds.outset(0.5f);
+        }
 
         if (clipRect.left > clippedBounds.left) clipSideFlags |= OpClipSideFlags::Left;
         if (clipRect.top > clippedBounds.top) clipSideFlags |= OpClipSideFlags::Top;
@@ -129,13 +139,36 @@ class BakedOpState {
 public:
     static BakedOpState* tryConstruct(LinearAllocator& allocator,
             const Snapshot& snapshot, const RecordedOp& recordedOp) {
-        BakedOpState* bakedOp = new (allocator) BakedOpState(snapshot, recordedOp);
-        if (bakedOp->computedState.clippedBounds.isEmpty()) {
+        BakedOpState* bakedState = new (allocator) BakedOpState(snapshot, recordedOp, false);
+        if (bakedState->computedState.clippedBounds.isEmpty()) {
             // bounds are empty, so op is rejected
-            allocator.rewindIfLastAlloc(bakedOp);
+            allocator.rewindIfLastAlloc(bakedState);
             return nullptr;
         }
-        return bakedOp;
+        return bakedState;
+    }
+
+    enum class StrokeBehavior {
+        // stroking is forced, regardless of style on paint
+        Forced,
+        // stroking is defined by style on paint
+        StyleDefined,
+    };
+
+    static BakedOpState* tryStrokeableOpConstruct(LinearAllocator& allocator,
+            const Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior) {
+        bool expandForStroke = (strokeBehavior == StrokeBehavior::StyleDefined)
+                ? (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style)
+                : true;
+
+        BakedOpState* bakedState = new (allocator) BakedOpState(
+                snapshot, recordedOp, expandForStroke);
+        if (bakedState->computedState.clippedBounds.isEmpty()) {
+            // bounds are empty, so op is rejected
+            allocator.rewindIfLastAlloc(bakedState);
+            return nullptr;
+        }
+        return bakedState;
     }
 
     static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator,
@@ -160,8 +193,8 @@ public:
     const RecordedOp* op;
 
 private:
-    BakedOpState(const Snapshot& snapshot, const RecordedOp& recordedOp)
-            : computedState(snapshot, recordedOp)
+    BakedOpState(const Snapshot& snapshot, const RecordedOp& recordedOp, bool expandForStroke)
+            : computedState(snapshot, recordedOp, expandForStroke)
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
             , projectionPathMask(snapshot.projectionPathMask)
