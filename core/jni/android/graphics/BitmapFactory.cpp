@@ -265,7 +265,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     if (options != NULL) {
         jstring mimeType = encodedFormatToString(env, codec->getEncodedFormat());
         if (env->ExceptionCheck()) {
-            return nullObjectReturn("OOM in getEncodedFormat()");
+            return nullObjectReturn("OOM in encodedFormatToString()");
         }
         env->SetIntField(options, gOptions_widthFieldID, size.width());
         env->SetIntField(options, gOptions_heightFieldID, size.height());
