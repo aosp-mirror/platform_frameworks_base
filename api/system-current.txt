@@ -32546,6 +32546,7 @@ package android.telecom {
     field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
+    field public static final int CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE = 256; // 0x100
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
     field public static final int NO_HIGHLIGHT_COLOR = 0; // 0x0
     field public static final int NO_RESOURCE_ID = -1; // 0xffffffff
