@@ -18,8 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumente"</string>
     <string name="files_label" msgid="6051402950202690279">"Dateien"</string>
-    <!-- no translation found for downloads_label (959113951084633612) -->
-    <skip />
+    <string name="downloads_label" msgid="959113951084633612">"Downloads"</string>
     <string name="title_open" msgid="4353228937663917801">"Öffnen von"</string>
     <string name="title_save" msgid="2433679664882857999">"Speichern unter"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Neuer Ordner"</string>
