@@ -17901,7 +17901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (mSupportedSystemLocales == null) {
                         mSupportedSystemLocales = Resources.getSystem().getAssets().getLocales();
                     }
-                    final Locale locale = values.getLocales().getBestMatch(mSupportedSystemLocales);
+                    final Locale locale = values.getLocales().getFirstMatch(mSupportedSystemLocales);
                     SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
                     mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
                             locale));
