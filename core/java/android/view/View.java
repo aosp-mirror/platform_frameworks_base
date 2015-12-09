@@ -83,7 +83,6 @@ import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -2423,8 +2422,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
      *            1111111                PFLAG3_POINTER_ICON_MASK
-     *           1                       PFLAG3_PARTIAL_LAYOUT_REQUESTED
-     *          1                        PFLAG3_LAYOUT_PARAMS_CHANGED
      * |-------|-------|-------|-------|
      */
 
@@ -2512,7 +2509,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * when this view can scroll in the end direction.
      */
     static final int PFLAG3_SCROLL_INDICATOR_END = 0x2000;
-
 
     /* End of masks for mPrivateFlags3 */
 
@@ -2650,19 +2646,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The base value for other pointer icon shapes.
      */
     private static final int PFLAG3_POINTER_ICON_VALUE_START = 3 << PFLAG3_POINTER_ICON_LSHIFT;
-
-    /**
-     * Flag indicating that this view has requested a partial layout and
-     * is added to the AttachInfo's list of views that need a partial layout
-     * request handled on the next traversal.
-     */
-    static final int PFLAG3_PARTIAL_LAYOUT_REQUESTED = 0x800000;
-
-    /**
-     * Flag indicating that this view's LayoutParams have been explicitly changed
-     * since the last layout pass.
-     */
-    static final int PFLAG3_LAYOUT_PARAMS_CHANGED = 0x1000000;
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -12671,14 +12654,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * ViewGroup.LayoutParams, and these correspond to the different subclasses
      * of ViewGroup that are responsible for arranging their children.
      *
-     * <p>This method may return null if this View is not attached to a parent
+     * This method may return null if this View is not attached to a parent
      * ViewGroup or {@link #setLayoutParams(android.view.ViewGroup.LayoutParams)}
      * was not invoked successfully. When a View is attached to a parent
-     * ViewGroup, this method must not return null.</p>
-     *
-     * <p>Callers that modify the returned LayoutParams object should call
-     * {@link #setLayoutParams(LayoutParams)} to explicitly inform the view that
-     * LayoutParams have changed.</p>
+     * ViewGroup, this method must not return null.
      *
      * @return The LayoutParams associated with this view, or null if no
      *         parameters have been set yet
@@ -12695,9 +12674,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * correspond to the different subclasses of ViewGroup that are responsible
      * for arranging their children.
      *
-     * <p>If the View's existing LayoutParams object as obtained by {@link #getLayoutParams()} is
-     * modified, you should call this method to inform the view that it has changed.</p>
-     *
      * @param params The layout parameters for this view, cannot be null
      */
     public void setLayoutParams(ViewGroup.LayoutParams params) {
@@ -12705,7 +12681,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             throw new NullPointerException("Layout parameters cannot be null");
         }
         mLayoutParams = params;
-        mPrivateFlags3 |= PFLAG3_LAYOUT_PARAMS_CHANGED;
         resolveLayoutParams();
         if (mParent instanceof ViewGroup) {
             ((ViewGroup) mParent).onSetLayoutParams(this, params);
@@ -14381,12 +14356,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mParent.requestTransparentRegion(this);
         }
 
-        if ((mPrivateFlags & PFLAG_AWAKEN_SCROLL_BARS_ON_ATTACH) != 0) {
-            initialAwakenScrollBars();
-            mPrivateFlags &= ~PFLAG_AWAKEN_SCROLL_BARS_ON_ATTACH;
-        }
-
-        mPrivateFlags3 &= ~(PFLAG3_IS_LAID_OUT | PFLAG3_PARTIAL_LAYOUT_REQUESTED);
+        mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
 
         jumpDrawablesToCurrentState();
 
@@ -14724,13 +14694,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     protected void onDetachedFromWindowInternal() {
-        if (mAttachInfo != null && isPartialLayoutRequested()) {
-            mAttachInfo.mPartialLayoutViews.remove(this);
-        }
-
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
-        mPrivateFlags3 &= ~(PFLAG3_IS_LAID_OUT | PFLAG3_PARTIAL_LAYOUT_REQUESTED
-                | PFLAG3_LAYOUT_PARAMS_CHANGED);
+        mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
 
         removeUnsetPressCallback();
         removeLongPressCallback();
@@ -16917,32 +16882,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Indicates whether or not this view has requested a partial layout that
-     * may not affect its size or position within its parent. This state will be reset
-     * the next time this view is laid out.
-     *
-     * @return true if partial layout has been requested
-     */
-    public final boolean isPartialLayoutRequested() {
-        return (mPrivateFlags3 & PFLAG3_PARTIAL_LAYOUT_REQUESTED)
-                == PFLAG3_PARTIAL_LAYOUT_REQUESTED;
-    }
-
-    /**
-     * Returns true if this view's {@link ViewGroup.LayoutParams LayoutParams} changed
-     * since the last time this view was successfully laid out. Typically this happens as a
-     * result of a call to {@link #setLayoutParams(LayoutParams)}.
-     *
-     * @return true if this view's LayoutParams changed since last layout.
-     */
-    public final boolean didLayoutParamsChange() {
-        if (sLayoutParamsAlwaysChanged) {
-            return true;
-        }
-        return (mPrivateFlags3 & PFLAG3_LAYOUT_PARAMS_CHANGED) == PFLAG3_LAYOUT_PARAMS_CHANGED;
-    }
-
-    /**
      * Return true if o is a ViewGroup that is laying out using optical bounds.
      * @hide
      */
@@ -16999,7 +16938,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (changed || (mPrivateFlags & PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) {
             onLayout(changed, l, t, r, b);
             mPrivateFlags &= ~PFLAG_LAYOUT_REQUIRED;
-            mPrivateFlags3 &= ~PFLAG3_LAYOUT_PARAMS_CHANGED;
 
             ListenerInfo li = mListenerInfo;
             if (li != null && li.mOnLayoutChangeListeners != null) {
@@ -17013,7 +16951,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
-        mPrivateFlags3 &= ~PFLAG3_PARTIAL_LAYOUT_REQUESTED;
         mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
     }
 
@@ -19111,7 +19048,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags |= PFLAG_INVALIDATED;
 
         if (mParent != null && !mParent.isLayoutRequested()) {
-            mParent.requestLayoutForChild(this);
+            mParent.requestLayout();
         }
         if (mAttachInfo != null && mAttachInfo.mViewRequestingLayout == this) {
             mAttachInfo.mViewRequestingLayout = null;
@@ -19128,11 +19065,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mPrivateFlags |= PFLAG_FORCE_LAYOUT;
         mPrivateFlags |= PFLAG_INVALIDATED;
-    }
-
-    void forcePartialLayout() {
-        forceLayout();
-        mPrivateFlags3 |= PFLAG3_PARTIAL_LAYOUT_REQUESTED;
     }
 
     /**
@@ -22021,7 +21953,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         interface Callbacks {
             void playSoundEffect(int effectId);
             boolean performHapticFeedback(int effectId, boolean always);
-            void schedulePartialLayout();
         }
 
         /**

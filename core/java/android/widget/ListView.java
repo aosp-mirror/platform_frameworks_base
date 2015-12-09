@@ -1158,7 +1158,7 @@ public class ListView extends AbsListView {
             final View child = obtainView(0, mIsScrap);
 
             // Lay out child directly against the parent measure spec so that
-            // we can obtain expected minimum width and height.
+            // we can obtain exected minimum width and height.
             measureScrapChild(child, 0, widthMeasureSpec, heightSize);
 
             childWidth = child.getMeasuredWidth();

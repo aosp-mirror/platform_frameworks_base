@@ -21,8 +21,12 @@ import java.util.ArrayList;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -31,6 +35,9 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.R;
+
 
 /**
  * FrameLayout is designed to block out an area on the screen to display
@@ -164,10 +171,6 @@ public class FrameLayout extends ViewGroup {
             mPaddingBottom + mForegroundPaddingBottom;
     }
 
-    @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        return findDependentLayoutAxesHelper(child, axisFilter, LayoutParams.class);
-    }
 
     /**
      * {@inheritDoc}

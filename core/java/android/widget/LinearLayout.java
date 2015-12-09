@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import android.view.ViewParent;
 import com.android.internal.R;
 
 import android.annotation.IntDef;
@@ -38,8 +37,6 @@ import android.widget.RemoteViews.RemoteView;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * A Layout that arranges its children in a single column or a single row. The direction of 
@@ -645,60 +642,6 @@ public class LinearLayout extends ViewGroup {
         } else {
             measureHorizontal(widthMeasureSpec, heightMeasureSpec);
         }
-    }
-
-    @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        // This implementation is almost exactly equivalent to the default implementation
-        // offered to the rest of the framework in ViewGroup, but we treat weight to be
-        // functionally equivalent to MATCH_PARENT along the orientation axis.
-
-        if (!checkPartialLayoutParams(child, LayoutParams.class)) return axisFilter;
-        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        if (child.didLayoutParamsChange()) {
-            // Anything could have changed about our previous assumptions.
-            return axisFilter;
-        }
-
-        // Our layout can always end up depending on a WRAP_CONTENT child.
-        final int wrapAxisFilter = ((lp.width == WRAP_CONTENT ? FLAG_LAYOUT_AXIS_HORIZONTAL : 0)
-                | (lp.height == WRAP_CONTENT ? FLAG_LAYOUT_AXIS_VERTICAL : 0)) & axisFilter;
-
-        if (wrapAxisFilter == axisFilter) {
-            // We know all queried axes are affected, just return early.
-            return wrapAxisFilter;
-        }
-
-        // Our layout *may* depend on a MATCH_PARENT child, depending on whether we can determine
-        // that our layout will remain stable within our parent. We need to ask.
-        int matchAxisFilter = ((lp.width == MATCH_PARENT ? FLAG_LAYOUT_AXIS_HORIZONTAL : 0)
-                | (lp.height == MATCH_PARENT ? FLAG_LAYOUT_AXIS_VERTICAL : 0)) & axisFilter;
-
-        // For LinearLayout, a nonzero weight is equivalent to MATCH_PARENT for this purpose.
-        if (lp.weight > 0) {
-            if (mOrientation == HORIZONTAL) {
-                matchAxisFilter |= FLAG_LAYOUT_AXIS_HORIZONTAL & axisFilter;
-            } else {
-                matchAxisFilter |= FLAG_LAYOUT_AXIS_VERTICAL & axisFilter;
-            }
-        }
-
-        if (matchAxisFilter != 0 || wrapAxisFilter != 0) {
-            final ViewParent parent = getParent();
-            if (parent != null) {
-                // If our parent depends on us for an axis, then our layout can also be affected
-                // by a MATCH_PARENT child along that axis.
-                return getParent().findDependentLayoutAxes(this, matchAxisFilter)
-                        | wrapAxisFilter;
-            }
-
-            // If we don't have a parent, assume we're affected
-            // in any determined affected direction.
-            return matchAxisFilter | wrapAxisFilter;
-        }
-
-        // Two exact sizes and LayoutParams didn't change. We're safe.
-        return 0;
     }
 
     /**

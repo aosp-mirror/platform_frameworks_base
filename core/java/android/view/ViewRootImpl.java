@@ -91,7 +91,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -953,25 +952,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @Override
-    public void requestLayoutForChild(View child) {
-        requestLayout();
-    }
-
-    @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        if (child != mView) {
-            return 0;
-        }
-
-        final WindowManager.LayoutParams lp = (WindowManager.LayoutParams) child.getLayoutParams();
-        final int horizontal = (lp.width == WindowManager.LayoutParams.WRAP_CONTENT
-                || lp.horizontalWeight != 0) ? FLAG_LAYOUT_AXIS_HORIZONTAL : 0;
-        final int vertical = (lp.height == WindowManager.LayoutParams.WRAP_CONTENT
-                || lp.verticalWeight != 0) ? FLAG_LAYOUT_AXIS_VERTICAL : 0;
-        return (horizontal | vertical) & axisFilter;
-    }
-
-    @Override
     public boolean isLayoutRequested() {
         return mLayoutRequested;
     }
@@ -1113,10 +1093,6 @@ public final class ViewRootImpl implements ViewParent,
             }
             mPendingTransitions.add(transition);
         }
-    }
-
-    public void schedulePartialLayout() {
-        scheduleTraversals();
     }
 
     /**
@@ -1958,60 +1934,7 @@ public final class ViewRootImpl implements ViewParent,
                 || mAttachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
             performLayout(lp, desiredWindowWidth, desiredWindowHeight);
-        }
 
-        /*
-         * Handle partial layouts.
-         *
-         * Views that have requested partial layouts will not change size or position
-         * within their parent view, therefore we will re-measure and re-layout each one
-         * after any regularly scheduled layout pass. Any view that already had its
-         * isLayoutRequested bit cleared will be skipped, since this means the view has already
-         * been measured and laid out on this traversal pass naturally. Views won't be added
-         * to this list if layout was already requested when a partial layout is requested
-         * for a view, so there should not be duplicates in the list.
-         */
-        final List<View> partialLayoutViews = mAttachInfo.mPartialLayoutViews;
-        final boolean didPartialLayout;
-        if (!partialLayoutViews.isEmpty()) {
-            // Measurement or layout of views may result in changes to the list
-            // of partial-layout views. Swap in an "empty" list to prevent
-            // concurrent modification of the list being traversed.
-            if (mAttachInfo.mEmptyPartialLayoutViews == null) {
-                mAttachInfo.mPartialLayoutViews = new ArrayList<>();
-            } else {
-                mAttachInfo.mPartialLayoutViews = mAttachInfo.mEmptyPartialLayoutViews;
-            }
-
-            final int count = partialLayoutViews.size();
-            mInLayout = true;
-            for (int i = 0; i < count; i++) {
-                final View view = partialLayoutViews.get(i);
-
-                // Make sure the view is still attached and that it still has layout requested.
-                // We might have already serviced the layout request through the standard full-tree
-                // layout pass above or even through a previous partial layout view in this list.
-                if (view.isAttachedToWindow() && view.isLayoutRequested()) {
-                    final int widthSpec = MeasureSpec.makeMeasureSpec(view.getMeasuredWidth(),
-                            MeasureSpec.EXACTLY);
-                    final int heightSpec = MeasureSpec.makeMeasureSpec(view.getMeasuredHeight(),
-                            MeasureSpec.EXACTLY);
-                    view.measure(widthSpec, heightSpec);
-                    view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
-                }
-            }
-            mInLayout = false;
-            didPartialLayout = true;
-            triggerGlobalLayoutListener = true;
-
-            // The traversal list becomes the new empty list.
-            partialLayoutViews.clear();
-            mAttachInfo.mEmptyPartialLayoutViews = partialLayoutViews;
-        } else {
-            didPartialLayout = false;
-        }
-
-        if (didLayout || didPartialLayout) {
             // By this point all views have been sized and positioned
             // We can compute the transparent area
 
@@ -2041,7 +1964,7 @@ public final class ViewRootImpl implements ViewParent,
 
             if (DBG) {
                 System.out.println("======================================");
-                System.out.println("performTraversals -- after performLayout/partial layout");
+                System.out.println("performTraversals -- after setFrame");
                 host.debug();
             }
         }

@@ -6814,11 +6814,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (!compressText(ellipsisWidth)) {
+                final int height = mLayoutParams.height;
                 // If the size of the view does not depend on the size of the text, try to
                 // start the marquee immediately
-                final ViewParent parent = getParent();
-                if (parent != null && parent.findDependentLayoutAxes(this,
-                        ViewParent.FLAG_LAYOUT_AXIS_VERTICAL) == 0) {
+                if (height != LayoutParams.WRAP_CONTENT && height != LayoutParams.MATCH_PARENT) {
                     startMarquee();
                 } else {
                     // Defer the start of the marquee until we know our width (see setFrame())
@@ -7217,9 +7216,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * new view layout.
      */
     private void checkForResize() {
-        // Always request a layout. The parent will perform the correct version
-        // of the intended optimizations as part of requestLayoutForChild.
-        requestLayout();
+        boolean sizeChanged = false;
+
+        if (mLayout != null) {
+            // Check if our width changed
+            if (mLayoutParams.width == LayoutParams.WRAP_CONTENT) {
+                sizeChanged = true;
+                invalidate();
+            }
+
+            // Check if our height changed
+            if (mLayoutParams.height == LayoutParams.WRAP_CONTENT) {
+                int desiredHeight = getDesiredHeight();
+
+                if (desiredHeight != this.getHeight()) {
+                    sizeChanged = true;
+                }
+            } else if (mLayoutParams.height == LayoutParams.MATCH_PARENT) {
+                if (mDesiredHeightAtMeasure >= 0) {
+                    int desiredHeight = getDesiredHeight();
+
+                    if (desiredHeight != mDesiredHeightAtMeasure) {
+                        sizeChanged = true;
+                    }
+                }
+            }
+        }
+
+        if (sizeChanged) {
+            requestLayout();
+            // caller will have already invalidated
+        }
     }
 
     /**
@@ -7227,11 +7254,56 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * or merely a new text layout.
      */
     private void checkForRelayout() {
-        // Always request a layout. The parent will perform the correct version
-        // of the intended optimizations as part of requestLayoutForChild.
-        nullLayouts();
-        requestLayout();
-        invalidate();
+        // If we have a fixed width, we can just swap in a new text layout
+        // if the text height stays the same or if the view height is fixed.
+
+        if ((mLayoutParams.width != LayoutParams.WRAP_CONTENT ||
+                (mMaxWidthMode == mMinWidthMode && mMaxWidth == mMinWidth)) &&
+                (mHint == null || mHintLayout != null) &&
+                (mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight() > 0)) {
+            // Static width, so try making a new text layout.
+
+            int oldht = mLayout.getHeight();
+            int want = mLayout.getWidth();
+            int hintWant = mHintLayout == null ? 0 : mHintLayout.getWidth();
+
+            /*
+             * No need to bring the text into view, since the size is not
+             * changing (unless we do the requestLayout(), in which case it
+             * will happen at measure).
+             */
+            makeNewLayout(want, hintWant, UNKNOWN_BORING, UNKNOWN_BORING,
+                          mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight(),
+                          false);
+
+            if (mEllipsize != TextUtils.TruncateAt.MARQUEE) {
+                // In a fixed-height view, so use our new text layout.
+                if (mLayoutParams.height != LayoutParams.WRAP_CONTENT &&
+                    mLayoutParams.height != LayoutParams.MATCH_PARENT) {
+                    invalidate();
+                    return;
+                }
+
+                // Dynamic height, but height has stayed the same,
+                // so use our new text layout.
+                if (mLayout.getHeight() == oldht &&
+                    (mHintLayout == null || mHintLayout.getHeight() == oldht)) {
+                    invalidate();
+                    return;
+                }
+            }
+
+            // We lose: the height has changed and we have a dynamic height.
+            // Request a new view layout using our new text layout.
+            requestLayout();
+            invalidate();
+        } else {
+            // Dynamic width, so we have no choice but to request a new
+            // view layout with a new text layout.
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
     }
 
     @Override

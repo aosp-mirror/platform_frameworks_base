@@ -60,8 +60,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * <p>
@@ -5531,172 +5529,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             int l, int t, int r, int b);
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Most subclasses should not need to override this method. The default implementation
-     * will call {@link #findDependentLayoutAxes(View, int)} to determine how
-     * to optimally proceed. If neither horizontal nor vertical layout depends on the given
-     * child, this method will call {@link #requestPartialLayoutForChild(View)}. If one or both
-     * do, it will call {@link #requestLayout()}.</p>
-     *
-     * @param child Child requesting a layout
-     */
-    @Override
-    public void requestLayoutForChild(View child) {
-        if (child == null || child.getParent() != this) {
-            throw new IllegalArgumentException(
-                    "child parameter must be a direct child view of this ViewGroup");
-        }
-
-        // If we don't have a parent ourselves, record that we need a full layout.
-        // Our whole subtree is detached.
-        final ViewParent parent = getParent();
-        if (parent == null) {
-            requestLayout();
-            return;
-        }
-
-        // We can optimize the layout request for this child into a partial layout
-        // if the child has already been laid out at least once and neither horizontal nor
-        // vertical layout within ourselves is dependent on pending layout changes within
-        // this child. Otherwise we need to request a full layout for ourselves and continue
-        // to recurse up the view hierarchy.
-        if (child.isLaidOut() && findDependentLayoutAxes(child, FLAG_LAYOUT_AXIS_ANY) == 0) {
-            requestPartialLayoutForChild(child);
-        } else {
-            requestLayout();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns {@link #FLAG_LAYOUT_AXIS_ANY}.
-     * Optimized implementations for specific ViewGroup subclasses may check if the child's
-     * {@link View#didLayoutParamsChange() LayoutParams changed} and in what ways.</p>
-     *
-     * @param child Direct child of this ViewParent to check
-     * @param axisFilter Which axes to check for dependencies. Can be
-     *                   {@link #FLAG_LAYOUT_AXIS_HORIZONTAL}, {@link #FLAG_LAYOUT_AXIS_VERTICAL}
-     *                   or {@link #FLAG_LAYOUT_AXIS_ANY}.
-     * @return Axes of this ViewParent that depend on the given child's layout changes
-     */
-    @Override
-    public int findDependentLayoutAxes(View child, int axisFilter) {
-        return FLAG_LAYOUT_AXIS_ANY;
-    }
-
-    /**
-     * This is a helper implementation for {@link #findDependentLayoutAxes(View, int)} that
-     * is not the default implementation in ViewGroup. This is to preserve compatibility with
-     * existing app-side ViewGroup subclasses that existed before the partial layout system was
-     * added to Android. It explicitly checks that the LayoutParams of the child are of the
-     * expected type so that subclasses of standard framework layouts do not erroneously
-     * start believing that it's safe to do a partial layout when that assertion can't
-     * reasonably be confirmed.
-     *
-     * <p>If you're reading this as an author of a custom ViewGroup's findDependentLayoutAxes
-     * method you might be frustrated to discover that it is not a part of the Android public API.
-     * Many ViewGroup implementations will need to make small but important modifications
-     * to an implementation like this one in order to be correct. Instead of encouraging
-     * view authors to call this method, then make their own redundant recursive calls to
-     * <code>getParent().findDependentLayoutAxes(...)</code> in addition to the one
-     * that can happen here, this method is hidden and only used internally.</p>
-     *
-     * <p>Do feel free to copy this implementation and adapt it to suit your own purposes.</p>
-     *
-     * @hide
-     */
-    protected final int findDependentLayoutAxesHelper(View child, int axisFilter,
-            Class<?> layoutParamsClass) {
-        if (!checkPartialLayoutParams(child, layoutParamsClass)) return axisFilter;
-        if (child.didLayoutParamsChange()) {
-            // Anything could have changed about our previous assumptions.
-            return axisFilter;
-        }
-
-        final LayoutParams lp = child.getLayoutParams();
-
-        // Our layout can always end up depending on a WRAP_CONTENT child.
-        final int wrapAxisFilter = ((lp.width == WRAP_CONTENT ? FLAG_LAYOUT_AXIS_HORIZONTAL : 0)
-                | (lp.height == WRAP_CONTENT ? FLAG_LAYOUT_AXIS_VERTICAL : 0)) & axisFilter;
-
-        if (wrapAxisFilter == axisFilter) {
-            // We know all queried axes are affected, just return early.
-            return wrapAxisFilter;
-        }
-
-        // Our layout *may* depend on a MATCH_PARENT child, depending on whether we can determine
-        // that our layout will remain stable within our parent. We need to ask.
-        final int matchAxisFilter = ((lp.width == MATCH_PARENT ? FLAG_LAYOUT_AXIS_HORIZONTAL : 0)
-                | (lp.height == MATCH_PARENT ? FLAG_LAYOUT_AXIS_VERTICAL : 0)) & axisFilter;
-
-        if (matchAxisFilter != 0 || wrapAxisFilter != 0) {
-            final ViewParent parent = getParent();
-            if (parent != null) {
-                // If our parent depends on us for an axis, then our layout can also be affected
-                // by a MATCH_PARENT child along that axis.
-                return getParent().findDependentLayoutAxes(this, matchAxisFilter)
-                        | wrapAxisFilter;
-            }
-
-            // If we don't have a parent, assume we're affected
-            // in any determined affected direction.
-            return matchAxisFilter | wrapAxisFilter;
-        }
-
-        // Two exact sizes and LayoutParams didn't change. We're safe.
-        return 0;
-    }
-
-    /**
-     * Throw an IllegalArgumentException if the supplied view is not a direct child of
-     * this ViewGroup and return false if this view's LayoutParams is not of class lpClass.
-     * Implementations of {@link ViewGroup#findDependentLayoutAxes(View, int)} use this
-     * to check input parameters and defensively return the full axis filter mask themselves
-     * if the LayoutParams class is not of the exact expected type; e.g. it is a subclass
-     * of one of the standard framework layouts and we can't make assumptions.
-     * @hide
-     */
-    protected final boolean checkPartialLayoutParams(View child, Class<?> lpClass) {
-        if (child.getParent() != this) {
-            throw new IllegalArgumentException("View " + child
-                    + " is not a direct child of " + this);
-        }
-        final ViewGroup.LayoutParams lp = child.getLayoutParams();
-        return lp != null || lp.getClass() == lpClass;
-    }
-
-    /**
-     * Called when a child of this ViewParent requires a relayout before the next frame
-     * is drawn, but the caller can guarantee that the size of the child will not change
-     * during a measure and layout pass.
-     *
-     * <p>A call to this method will schedule a partial layout for the supplied view as long as
-     * it is a direct child of this ViewGroup and this ViewGroup is attached to a window.
-     * On the next scheduled view hierarchy traversal the given child view will be re-measured
-     * at its current measured size and re-laid out at its current position within its parent.</p>
-     *
-     * @param child Child that requires a partial layout
-     */
-    public void requestPartialLayoutForChild(View child) {
-        if (!child.isPartialLayoutRequested()) {
-            child.forcePartialLayout();
-            if (mAttachInfo != null) {
-                final List<View> partialLayoutViews = mAttachInfo.mPartialLayoutViews;
-                final boolean schedule = partialLayoutViews.isEmpty();
-                partialLayoutViews.add(child);
-                if (schedule) {
-                    mAttachInfo.mRootCallbacks.schedulePartialLayout();
-                }
-                child.invalidate();
-            } else {
-                requestLayout();
-            }
-        }
-    }
-
-    /**
      * Indicates whether the view group has the ability to animate its children
      * after the first layout.
      *
@@ -6042,7 +5874,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *         of its descendants
      */
     protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        return new LayoutParams(p);
+        return p;
     }
 
     /**

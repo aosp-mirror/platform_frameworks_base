@@ -40553,7 +40553,6 @@ package android.view {
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo();
     method public void createContextMenu(android.view.ContextMenu);
     method public void destroyDrawingCache();
-    method public final boolean didLayoutParamsChange();
     method public android.view.WindowInsets dispatchApplyWindowInsets(android.view.WindowInsets);
     method public void dispatchConfigurationChanged(android.content.res.Configuration);
     method public void dispatchDisplayHint(int);
@@ -40779,7 +40778,6 @@ package android.view {
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();
     method public boolean isPaddingRelative();
-    method public final boolean isPartialLayoutRequested();
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
@@ -41391,7 +41389,6 @@ package android.view {
     method protected void dispatchThawSelfOnly(android.util.SparseArray<android.os.Parcelable>);
     method protected boolean drawChild(android.graphics.Canvas, android.view.View, long);
     method public void endViewTransition(android.view.View);
-    method public int findDependentLayoutAxes(android.view.View, int);
     method public android.view.View focusSearch(android.view.View, int);
     method public void focusableViewAvailable(android.view.View);
     method public boolean gatherTransparentRegion(android.graphics.Region);
@@ -41458,8 +41455,6 @@ package android.view {
     method public void requestChildFocus(android.view.View, android.view.View);
     method public boolean requestChildRectangleOnScreen(android.view.View, android.graphics.Rect, boolean);
     method public void requestDisallowInterceptTouchEvent(boolean);
-    method public void requestLayoutForChild(android.view.View);
-    method public void requestPartialLayoutForChild(android.view.View);
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
     method public void scheduleLayoutAnimation();
@@ -41574,7 +41569,6 @@ package android.view {
     method public abstract void childHasTransientStateChanged(android.view.View, boolean);
     method public abstract void clearChildFocus(android.view.View);
     method public abstract void createContextMenu(android.view.ContextMenu);
-    method public abstract int findDependentLayoutAxes(android.view.View, int);
     method public abstract android.view.View focusSearch(android.view.View, int);
     method public abstract void focusableViewAvailable(android.view.View);
     method public abstract boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
@@ -41604,16 +41598,12 @@ package android.view {
     method public abstract void requestDisallowInterceptTouchEvent(boolean);
     method public abstract void requestFitSystemWindows();
     method public abstract void requestLayout();
-    method public abstract void requestLayoutForChild(android.view.View);
     method public abstract boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public abstract void requestTransparentRegion(android.view.View);
     method public abstract boolean showContextMenuForChild(android.view.View);
     method public abstract boolean showContextMenuForChild(android.view.View, float, float);
     method public abstract android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback);
     method public abstract android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback, int);
-    field public static final int FLAG_LAYOUT_AXIS_ANY = 3; // 0x3
-    field public static final int FLAG_LAYOUT_AXIS_HORIZONTAL = 1; // 0x1
-    field public static final int FLAG_LAYOUT_AXIS_VERTICAL = 2; // 0x2
   }
 
   public class ViewPropertyAnimator {
