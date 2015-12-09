@@ -116,10 +116,12 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Display the documents inside a single directory.
@@ -844,8 +846,11 @@ public class DirectoryFragment extends Fragment {
         Context context = getActivity();
         String message = Shared.getQuantityString(context, R.plurals.deleting, selected.size());
 
-        mModel.markForDeletion(selected);
+        // Hide the files in the UI.
+        final SparseArray<String> toDelete = mAdapter.hide(selected.getAll());
 
+        // Show a snackbar informing the user that files will be deleted, and give them an option to
+        // cancel.
         final Activity activity = getActivity();
         Snackbars.makeSnackbar(activity, message, Snackbar.LENGTH_LONG)
                 .setAction(
@@ -859,19 +864,22 @@ public class DirectoryFragment extends Fragment {
                             @Override
                             public void onDismissed(Snackbar snackbar, int event) {
                                 if (event == Snackbar.Callback.DISMISS_EVENT_ACTION) {
-                                    mModel.undoDeletion();
+                                    // If the delete was cancelled, just unhide the files.
+                                    mAdapter.unhide(toDelete);
                                 } else {
-                                    mModel.finalizeDeletion(
+                                    // Actually kick off the delete.
+                                    mModel.delete(
+                                            selected,
                                             new Model.DeletionListener() {
                                                 @Override
-                                                public void onError() {
-                                                    Snackbars.makeSnackbar(
-                                                            activity,
-                                                            R.string.toast_failed_delete,
-                                                            Snackbar.LENGTH_LONG)
-                                                            .show();
+                                                  public void onError() {
+                                                      Snackbars.makeSnackbar(
+                                                              activity,
+                                                              R.string.toast_failed_delete,
+                                                              Snackbar.LENGTH_LONG)
+                                                              .show();
 
-                                                }
+                                                  }
                                             });
                                 }
                             }
@@ -1049,7 +1057,6 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DocumentHolder holder, int position) {
-
             final Context context = getContext();
             final State state = getDisplayState();
             final RootsCache roots = DocumentsApplication.getRootsCache(context);
@@ -1239,6 +1246,45 @@ public class DirectoryFragment extends Fragment {
             return mModelIds.get(adapterPosition);
         }
 
+        /**
+         * Hides a set of items from the associated RecyclerView.
+         *
+         * @param ids The Model IDs of the items to hide.
+         * @return A SparseArray that maps the hidden IDs to their old positions. This can be used
+         *         to {@link #unhide} the items if necessary.
+         */
+        public SparseArray<String> hide(String... ids) {
+            Set<String> toHide = Sets.newHashSet(ids);
+
+            // Proceed backwards through the list of items, because each removal causes the
+            // positions of all subsequent items to change.
+            SparseArray<String> hiddenItems = new SparseArray<>();
+            for (int i = mModelIds.size() - 1; i >= 0; --i) {
+                String id = mModelIds.get(i);
+                if (toHide.contains(id)) {
+                    hiddenItems.put(i, mModelIds.remove(i));
+                    notifyItemRemoved(i);
+                }
+            }
+
+            return hiddenItems;
+        }
+
+        /**
+         * Unhides a set of previously hidden items.
+         *
+         * @param ids A sparse array of IDs from a previous call to {@link #hide}.
+         */
+        public void unhide(SparseArray<String> ids) {
+            // Proceed backwards through the list of items, because each addition causes the
+            // positions of all subsequent items to change.
+            for (int i = ids.size() - 1; i >= 0; --i) {
+                int pos = ids.keyAt(i);
+                String id = ids.get(pos);
+                mModelIds.add(pos, id);
+                notifyItemInserted(pos);
+            }
+        }
     }
 
     private static String formatTime(Context context, long when) {

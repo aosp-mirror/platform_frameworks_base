@@ -19,7 +19,6 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -34,7 +33,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.android.documentsui.BaseActivity.DocumentContext;
 import com.android.documentsui.DirectoryResult;
@@ -42,11 +40,9 @@ import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,14 +52,9 @@ import java.util.Set;
 @VisibleForTesting
 public class Model implements DocumentContext {
     private static final String TAG = "Model";
-    private RecyclerView.Adapter<?> mViewAdapter;
     private Context mContext;
     private int mCursorCount;
     private boolean mIsLoading;
-    @GuardedBy("mPendingDelete")
-    private Boolean mPendingDelete = false;
-    @GuardedBy("mPendingDelete")
-    private Set<String> mMarkedForDeletion = new HashSet<>();
     private List<UpdateListener> mUpdateListeners = new ArrayList<>();
     @Nullable private Cursor mCursor;
     @Nullable String info;
@@ -72,7 +63,6 @@ public class Model implements DocumentContext {
 
     Model(Context context, RecyclerView.Adapter<?> viewAdapter) {
         mContext = context;
-        mViewAdapter = viewAdapter;
     }
 
     /**
@@ -142,9 +132,7 @@ public class Model implements DocumentContext {
 
     @VisibleForTesting
     int getItemCount() {
-        synchronized(mPendingDelete) {
-            return mCursorCount - mMarkedForDeletion.size();
-        }
+        return mCursorCount;
     }
 
     /**
@@ -197,107 +185,24 @@ public class Model implements DocumentContext {
         return mCursor;
     }
 
-    List<DocumentInfo> getDocumentsMarkedForDeletion() {
-        // TODO(stable-id): This could be just a plain old selection now.
-        synchronized (mPendingDelete) {
-            final int size = mMarkedForDeletion.size();
-            List<DocumentInfo> docs =  new ArrayList<>(size);
-
-            for (String id: mMarkedForDeletion) {
-                Integer position = mPositions.get(id);
-                checkState(position != null);
-                mCursor.moveToPosition(position);
-                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(mCursor);
-                docs.add(doc);
-            }
-            return docs;
-        }
-    }
-
-    /**
-     * Marks the given files for deletion. This will remove them from the UI. Clients must then
-     * call either {@link #undoDeletion()} or {@link #finalizeDeletion()} to cancel or confirm
-     * the deletion, respectively. Only one deletion operation is allowed at a time.
-     *
-     * @param selected A selection representing the files to delete.
-     */
-    void markForDeletion(Selection selected) {
-        synchronized (mPendingDelete) {
-            mPendingDelete = true;
-            // Only one deletion operation at a time.
-            checkState(mMarkedForDeletion.size() == 0);
-            // There should never be more to delete than what exists.
-            checkState(mCursorCount >= selected.size());
-
-            // Adapter notifications must be sent in reverse order of adapter position.  This is
-            // because each removal causes subsequent item adapter positions to change.
-            SparseArray<String> ids = new SparseArray<>();
-            for (int i = ids.size() - 1; i >= 0; i--) {
-                int pos = ids.keyAt(i);
-                mMarkedForDeletion.add(ids.get(pos));
-                mViewAdapter.notifyItemRemoved(pos);
-                if (DEBUG) Log.d(TAG, "Scheduled " + pos + " for delete.");
-            }
-        }
-    }
-
-    /**
-     * Cancels an ongoing deletion operation. All files currently marked for deletion will be
-     * unmarked, and restored in the UI.  See {@link #markForDeletion(Selection)}.
-     */
-    void undoDeletion() {
-        synchronized (mPendingDelete) {
-            // Iterate over deleted items, temporarily marking them false in the deletion list, and
-            // re-adding them to the UI.
-            for (String id: mMarkedForDeletion) {
-                Integer pos= mPositions.get(id);
-                checkNotNull(pos);
-                mMarkedForDeletion.remove(id);
-                mViewAdapter.notifyItemInserted(pos);
-            }
-            resetDeleteData();
-        }
-    }
-
-    private void resetDeleteData() {
-        synchronized (mPendingDelete) {
-            mPendingDelete = false;
-            mMarkedForDeletion.clear();
-        }
-    }
-
-    /**
-     * Finalizes an ongoing deletion operation. All files currently marked for deletion will be
-     * deleted.  See {@link #markForDeletion(Selection)}.
-     *
-     * @param view The view which will be used to interact with the user (e.g. surfacing
-     * snackbars) for errors, info, etc.
-     */
-    void finalizeDeletion(DeletionListener listener) {
-        synchronized (mPendingDelete) {
-            if (mPendingDelete) {
-                // Necessary to avoid b/25072545. Even when that's resolved, this
-                // is a nice safe thing to day.
-                mPendingDelete = false;
-                final ContentResolver resolver = mContext.getContentResolver();
-                DeleteFilesTask task = new DeleteFilesTask(resolver, listener);
-                task.execute();
-            }
-        }
+    public void delete(Selection selected, DeletionListener listener) {
+        final ContentResolver resolver = mContext.getContentResolver();
+        new DeleteFilesTask(resolver, listener).execute(selected);
     }
 
     /**
      * A Task which collects the DocumentInfo for documents that have been marked for deletion,
      * and actually deletes them.
      */
-    private class DeleteFilesTask extends AsyncTask<Void, Void, List<DocumentInfo>> {
+    private class DeleteFilesTask extends AsyncTask<Selection, Void, Void> {
         private ContentResolver mResolver;
         private DeletionListener mListener;
+        private boolean mHadTrouble;
 
         /**
          * @param resolver A ContentResolver for performing the actual file deletions.
          * @param errorCallback A Runnable that is executed in the event that one or more errors
-         *     occured while copying files.  Execution will occur on the UI thread.
+         *     occurred while copying files.  Execution will occur on the UI thread.
          */
         public DeleteFilesTask(ContentResolver resolver, DeletionListener listener) {
             mResolver = resolver;
@@ -305,17 +210,14 @@ public class Model implements DocumentContext {
         }
 
         @Override
-        protected List<DocumentInfo> doInBackground(Void... params) {
-            return getDocumentsMarkedForDeletion();
-        }
+        protected Void doInBackground(Selection... selected) {
+            List<DocumentInfo> toDelete = getDocuments(selected[0]);
+            mHadTrouble = false;
 
-        @Override
-        protected void onPostExecute(List<DocumentInfo> docs) {
-            boolean hadTrouble = false;
-            for (DocumentInfo doc : docs) {
+            for (DocumentInfo doc : toDelete) {
                 if (!doc.isDeleteSupported()) {
                     Log.w(TAG, doc + " could not be deleted.  Skipping...");
-                    hadTrouble = true;
+                    mHadTrouble = true;
                     continue;
                 }
 
@@ -326,21 +228,25 @@ public class Model implements DocumentContext {
                         mResolver, doc.derivedUri.getAuthority());
                     DocumentsContract.deleteDocument(client, doc.derivedUri);
                 } catch (Exception e) {
-                    Log.w(TAG, "Failed to delete " + doc);
-                    hadTrouble = true;
+                    Log.w(TAG, "Failed to delete " + doc, e);
+                    mHadTrouble = true;
                 } finally {
                     ContentProviderClient.releaseQuietly(client);
                 }
             }
 
-            if (hadTrouble) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void _) {
+            if (mHadTrouble) {
                 // TODO show which files failed? b/23720103
                 mListener.onError();
                 if (DEBUG) Log.d(TAG, "Deletion task completed.  Some deletions failed.");
             } else {
                 if (DEBUG) Log.d(TAG, "Deletion task completed successfully.");
             }
-            resetDeleteData();
 
             mListener.onCompletion();
         }
