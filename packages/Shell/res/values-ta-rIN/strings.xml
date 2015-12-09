@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ஷெல்"</string>
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"பிழை அறிக்கை உருவாக்கப்படுகிறது"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"பிழை அறிக்கைகள் படமெடுக்கப்பட்டன"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"பிழை அறிக்கையைப் பகிர இடது புறமாகத் தேய்க்கவும்"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"உங்கள் பிழை அறிக்கையைப் பகிர, தொடவும்"</string>
@@ -26,6 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"இந்தச் செய்தியை அடுத்த முறைக் காட்டு"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"பிழை அறிக்கைகள்"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"பிழை அறிக்கையைப் படிக்க முடியவில்லை"</string>
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"பெயரிடப்படாதது"</string>
 </resources>

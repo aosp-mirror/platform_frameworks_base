@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Командалык кабык"</string>
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Мүчүлүштүктөр тууралуу билдирүү өндүрүлүүдө"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Ката тууралуу билдирүү түзүлдү"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Ката жөнүндө кабар менен бөлүшүү үчүн солго серпип коюңуз"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Ката тууралуу билдирүүңүздү жөнөтүш үчүн, тийиңиз"</string>
@@ -26,6 +25,5 @@
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Бул билдирүү кийин көрсөтүлсүн"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Мүчүлүштүктөрдү кабарлоолор"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Мүчүлүштүк тууралуу кабарлаган файл окулбай койду"</string>
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"аты жок"</string>
 </resources>
