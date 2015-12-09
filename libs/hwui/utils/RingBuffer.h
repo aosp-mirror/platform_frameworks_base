@@ -32,7 +32,7 @@ public:
     ~RingBuffer() {}
 
     constexpr size_t capacity() const { return SIZE; }
-    size_t size() { return mCount; }
+    size_t size() const { return mCount; }
 
     T& next() {
         mHead = (mHead + 1) % SIZE;
@@ -51,6 +51,10 @@ public:
     }
 
     T& operator[](size_t index) {
+        return mBuffer[(mHead + index + 1) % mCount];
+    }
+
+    const T& operator[](size_t index) const {
         return mBuffer[(mHead + index + 1) % mCount];
     }
 
