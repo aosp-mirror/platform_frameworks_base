@@ -111,8 +111,9 @@ public class MediaItemDetailsFragment extends DetailsFragment {
     private void buildDetails() {
         ClassPresenterSelector selector = new ClassPresenterSelector();
         // Attach your media item details presenter to the row presenter:
-        DetailsOverviewRowPresenter rowPresenter =
-            new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
+        FullWidthDetailsOverviewRowPresenter rowPresenter =
+            new FullWidthDetailsOverviewRowPresenter(
+                new DetailsDescriptionPresenter());
 
         selector.addClassPresenter(DetailsOverviewRow.class, rowPresenter);
         selector.addClassPresenter(ListRow.class,
