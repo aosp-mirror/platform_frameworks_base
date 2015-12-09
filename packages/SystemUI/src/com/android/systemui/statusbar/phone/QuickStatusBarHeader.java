@@ -24,12 +24,14 @@ import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
@@ -42,6 +44,7 @@ import com.android.systemui.tuner.TunerService;
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         NextAlarmController.NextAlarmChangeCallback, View.OnClickListener {
 
+    private static final String TAG = "QuickStatusBarHeader";
     private ActivityStarter mActivityStarter;
     private NextAlarmController mNextAlarmController;
     private SettingsButton mSettingsButton;
@@ -118,14 +121,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
+        updateEverything();
     }
 
     @Override
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
         mNextAlarm = nextAlarm;
+        Log.d(TAG, "Got alarm update " + (nextAlarm != null));
         if (nextAlarm != null) {
-            // TODO:...
-//            mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
+            mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
         }
         mAlarmShowing = nextAlarm != null;
         updateEverything();
@@ -154,7 +158,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     private void updateVisibilities() {
-        mAlarmStatus.setVisibility(mExpanded && mAlarmShowing ? View.VISIBLE : View.GONE);
+        mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.GONE);
         mQsDetailHeader.setVisibility(mExpanded && mShowingDetail ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
@@ -162,8 +166,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private void updateListeners() {
         if (mListening) {
+            Log.d(TAG, "Listening for Alarms");
             mNextAlarmController.addStateChangedCallback(this);
         } else {
+            Log.d(TAG, "Not listening for Alarms");
             mNextAlarmController.removeStateChangedCallback(this);
         }
     }
@@ -193,7 +199,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 host.getBatteryController());
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(myHost);
-        mHeaderQsPanel.setMaxTiles(3);
+        mHeaderQsPanel.setMaxTiles(5);
         mHeaderQsPanel.setTiles(myHost.getTiles());
         myHost.addCallback(new QSTile.Host.Callback() {
             @Override

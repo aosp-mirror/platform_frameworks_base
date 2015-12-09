@@ -86,6 +86,14 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
+    protected void handleSecondaryClick() {
+        boolean dataEnabled = mDataController.isMobileDataSupported()
+                && mDataController.isMobileDataEnabled();
+        MetricsLogger.action(mContext, MetricsLogger.QS_CELLULAR_TOGGLE, !dataEnabled);
+        mDataController.setMobileDataEnabled(!dataEnabled);
+    }
+
+    @Override
     protected void handleUpdateState(SignalState state, Object arg) {
         CallbackInfo cb = (CallbackInfo) arg;
         if (cb == null) {

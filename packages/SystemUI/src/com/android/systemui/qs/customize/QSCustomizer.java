@@ -37,9 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
-
 import com.android.systemui.R;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.DropButton.OnDropListener;
@@ -80,14 +78,13 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
-        mPhoneStatusBar = ((SystemUIApplication) mContext.getApplicationContext())
-                .getComponent(PhoneStatusBar.class);
         mClipper = new QSDetailClipper(this);
     }
 
     public void setHost(QSTileHost host) {
         mHost = host;
         mHost.addCallback(this);
+        mPhoneStatusBar = host.getPhoneStatusBar();
         mQsPanel.setTiles(mHost.getTiles());
         mQsPanel.setHost(mHost);
         mQsPanel.setSavedTiles();

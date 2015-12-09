@@ -19,14 +19,12 @@ package com.android.systemui.qs;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +34,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -56,7 +53,6 @@ import java.util.Collection;
 public class QSPanel extends FrameLayout implements Tunable {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
-    public static final String QS_THE_NEW_QS = "qs_paged_panel";
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -102,20 +98,25 @@ public class QSPanel extends FrameLayout implements Tunable {
         updateDetailText();
         mDetail.setVisibility(GONE);
         mDetail.setClickable(true);
-        mBrightnessView = LayoutInflater.from(context).inflate(
-                R.layout.quick_settings_brightness_dialog, this, false);
-        mFooter = new QSFooter(this, context);
         addView(mDetail);
 
         mQsContainer = new LinearLayout(mContext);
         mQsContainer.setOrientation(LinearLayout.VERTICAL);
         mQsContainer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT));
-
         addView(mQsContainer);
 
+        mBrightnessView = LayoutInflater.from(context).inflate(
+                R.layout.quick_settings_brightness_dialog, this, false);
         mQsContainer.addView(mBrightnessView);
+
+        mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
+                R.layout.qs_paged_tile_layout, mQsContainer, false);
+        mQsContainer.addView((View) mTileLayout);
+
+        mFooter = new QSFooter(this, context);
         mQsContainer.addView(mFooter.getView());
+
         mClipper = new QSDetailClipper(mDetail);
         updateResources();
 
@@ -136,7 +137,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS, QS_THE_NEW_QS);
+        TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS);
     }
 
     @Override
@@ -150,34 +151,13 @@ public class QSPanel extends FrameLayout implements Tunable {
         if (QS_SHOW_BRIGHTNESS.equals(key)) {
             mBrightnessView.setVisibility(newValue == null || Integer.parseInt(newValue) != 0
                     ? VISIBLE : GONE);
-        } else if (QS_THE_NEW_QS.equals(key)) {
-            boolean theNewQs = newValue != null && Integer.parseInt(newValue) != 0;
-            if (mTileLayout != null) {
-                for (int i = 0; i < mRecords.size(); i++) {
-                    mTileLayout.removeTile(mRecords.get(i));
-                }
-                mQsContainer.removeView((View) mTileLayout);
-            }
-            int layout = theNewQs
-                    ? R.layout.qs_paged_tile_layout : R.layout.qs_tile_layout;
-            mTileLayout =
-                    (QSTileLayout) LayoutInflater.from(mContext).inflate(layout, mQsContainer, false);
-            mQsContainer.addView((View) mTileLayout, 1 /* Between brightness and footer */);
-            for (int i = 0; i < mRecords.size(); i++) {
-                mTileLayout.addTile(mRecords.get(i));
-            }
-            if (theNewQs) {
-                mCustomizePanel = (QSCustomizer) LayoutInflater.from(mContext)
-                        .inflate(R.layout.qs_customize_panel, null);
-                mCustomizePanel.setHost(mHost);
-            } else {
-                if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
-                    mCustomizePanel.hide(mCustomizePanel.getWidth() / 2,
-                            mCustomizePanel.getHeight() / 2);
-                }
-                mCustomizePanel = null;
-            }
         }
+    }
+
+    protected void createCustomizePanel() {
+        mCustomizePanel = (QSCustomizer) LayoutInflater.from(mContext)
+                .inflate(R.layout.qs_customize_panel, null);
+        mCustomizePanel.setHost(mHost);
     }
 
     private void updateDetailText() {
@@ -200,6 +180,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     public void setHost(QSTileHost host) {
         mHost = host;
         mFooter.setHost(host);
+        createCustomizePanel();
     }
 
     public QSTileHost getHost() {
@@ -607,10 +588,5 @@ public class QSPanel extends FrameLayout implements Tunable {
         void removeTile(TileRecord tile);
         int getOffsetTop(TileRecord tile);
         void updateResources();
-    }
-
-    public static boolean isTheNewQS(Context context) {
-        return Settings.Secure.getIntForUser(context.getContentResolver(), QS_THE_NEW_QS,
-                ActivityManager.getCurrentUser(), 0) != 0;
     }
 }
