@@ -120,6 +120,32 @@ public final class ApplicationConfig {
         return mTrustManager;
     }
 
+    /**
+     * Returns {@code true} if cleartext traffic is permitted for this application, which is the
+     * case only if all configurations permit cleartext traffic. For finer-grained policy use
+     * {@link #isCleartextTrafficPermitted(String)}.
+     */
+    public boolean isCleartextTrafficPermitted() {
+        ensureInitialized();
+        if (mConfigs != null) {
+            for (Pair<Domain, NetworkSecurityConfig> entry : mConfigs) {
+                if (!entry.second.isCleartextTrafficPermitted()) {
+                    return false;
+                }
+            }
+        }
+
+        return mDefaultConfig.isCleartextTrafficPermitted();
+    }
+
+    /**
+     * Returns {@code true} if cleartext traffic is permitted for this application when connecting
+     * to {@code hostname}.
+     */
+    public boolean isCleartextTrafficPermitted(String hostname) {
+        return getConfigForHostname(hostname).isCleartextTrafficPermitted();
+    }
+
     private void ensureInitialized() {
         synchronized(mLock) {
             if (mInitialized) {

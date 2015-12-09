@@ -40,5 +40,6 @@ public final class NetworkSecurityConfigProvider extends Provider {
             throw new RuntimeException("Failed to install provider as highest priority provider."
                     + " Provider was installed at position " + pos);
         }
+        libcore.net.NetworkSecurityPolicy.setInstance(new ConfigNetworkSecurityPolicy(config));
     }
 }
