@@ -1158,27 +1158,6 @@ public abstract class Window {
     public abstract void setContentView(View view);
 
     /**
-     * Install a view in the decoration (title) area, to be shown when
-     * the window is in multi-window mode. This view will be placed
-     * next to the window controls.
-     *
-     * The view may be restored to defaults by passing null.
-     *
-     * @param view The desired view to display in window decorations.
-     */
-    public abstract void setDecorView(View view);
-
-    /**
-     * Convenience for
-     * {@link #setDecorView(View)}
-     * to set the custom window decoration from a layout resource. The layout will be inflated
-     * adding all top level views to the decoration
-     *
-     * @param layoutResID Resource ID to be inflated.
-     */
-    public abstract void setDecorView(@LayoutRes int layoutResID);
-
-    /**
      * Set the screen content to an explicit view.  This view is placed
      * directly into the screen's view hierarchy.  It can itself be a complex
      * view hierarchy.
@@ -2060,4 +2039,6 @@ public abstract class Window {
     public boolean getOverlayDecorCaption() {
         return mOverlayWithDecorCaption;
     }
+
+
 }

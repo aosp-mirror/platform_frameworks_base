@@ -41844,8 +41844,6 @@ package android.view {
     method public abstract void setContentView(int);
     method public abstract void setContentView(android.view.View);
     method public abstract void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
-    method public abstract void setDecorView(android.view.View);
-    method public abstract void setDecorView(int);
     method protected void setDefaultWindowFormat(int);
     method public void setDimAmount(float);
     method public void setElevation(float);

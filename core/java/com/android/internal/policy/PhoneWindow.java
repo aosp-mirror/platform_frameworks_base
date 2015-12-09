@@ -423,30 +423,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setDecorView(int layoutResID) {
-        View v = mLayoutInflater.inflate(layoutResID, null);
-        setDecorView(v);
-    }
-
-    @Override
-    public void setDecorView(View view) {
-        if (mContentParent == null) {
-            installDecor();
-        }
-
-        LinearLayout clientDecorPlaceholder =
-                (LinearLayout) findViewById(R.id.client_decor_placeholder);
-
-        if (clientDecorPlaceholder != null) {
-            clientDecorPlaceholder.removeAllViews();
-
-            if (view != null) {
-                clientDecorPlaceholder.addView(view);
-            }
-        }
-    }
-
-    @Override
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         if (mContentParent == null) {
             installDecor();

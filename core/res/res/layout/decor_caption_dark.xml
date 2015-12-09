@@ -25,16 +25,11 @@
     <LinearLayout
         android:id="@+id/caption"
         android:layout_width="match_parent"
-        android:layout_gravity="end"
         android:layout_height="wrap_content"
+        android:gravity="end"
         android:background="@drawable/decor_caption_title"
         android:focusable="false"
         android:descendantFocusability="blocksDescendants" >
-        <LinearLayout
-            android:id="@+id/client_decor_placeholder"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
         <Button
             android:id="@+id/maximize_window"
             android:layout_width="32dp"
