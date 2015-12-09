@@ -163,6 +163,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Skambutis tylus."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
+    <!-- no translation found for accessibility_work_mode (2478631941714607225) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Atsisakyti <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Atsisakyta programos „<xliff:g id="APP">%s</xliff:g>“."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Atsisakyta visų naujausių programų."</string>
@@ -214,6 +216,14 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobiliojo ryšio viešosios interneto prieigos taškas išjungtas."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiliojo ryšio viešosios interneto prieigos taškas įjungtas."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekrano perdavimas sustabdytas."</string>
+    <!-- no translation found for accessibility_quick_settings_work_mode_off (7045417396436552890) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_work_mode_on (7650588553988014341) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (5605534876107300711) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_work_mode_changed_on (249840330756998612) -->
+    <skip />
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekrano šviesumas"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G duomenys pristabdyti"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G duomenys pristabdyti"</string>
@@ -291,6 +301,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Išnaudota: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limitas: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> įspėjimas"</string>
+    <!-- no translation found for quick_settings_work_mode_label (6244915274350490429) -->
+    <skip />
     <string name="recents_empty_message" msgid="8682129509540827999">"Čia rodomi naujausi ekranai"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Programos informacija"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ekrano prisegimas"</string>
@@ -405,7 +417,8 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Atmesti"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ yra garsumo valdymo dialogo langas"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Palieskite, kad atkurtumėte originalą."</string>
-    <string name="group_summary_concadenation" msgid="2705151242008937028">","</string>
+    <!-- no translation found for group_summary_concadenation (6846402378100148789) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Naudojate darbo profilį"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistemos naudotojo sąsajos derinimo priemonė"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Rodyti įterptą akumuliat. įkrovos procentinę vertę"</string>
