@@ -4299,10 +4299,15 @@ public class Editor {
 
             boolean isExpanding;
             final float xDiff = x - mPrevX;
-            if (atRtl == isStartHandle()) {
-                isExpanding = xDiff > 0 || currLine > mPreviousLineTouched;
+            if (isStartHandle()) {
+                isExpanding = currLine < mPreviousLineTouched;
             } else {
-                isExpanding = xDiff < 0 || currLine < mPreviousLineTouched;
+                isExpanding = currLine > mPreviousLineTouched;
+            }
+            if (atRtl == isStartHandle()) {
+                isExpanding |= xDiff > 0;
+            } else {
+                isExpanding |= xDiff < 0;
             }
 
             if (mTextView.getHorizontallyScrolling()) {

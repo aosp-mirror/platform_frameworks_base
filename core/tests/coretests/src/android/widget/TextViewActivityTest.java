@@ -31,6 +31,7 @@ import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatin
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.pressKey;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -212,6 +213,39 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('r') + 1));
         onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijk\nlmn\nopqr"));
     }
+
+    @SmallTest
+    public void testSelectionHandles_multiLine_rtl() throws Exception {
+        // Arabic text.
+        final String text = "\u062A\u062B\u062C\n" + "\u062D\u062E\u062F\n"
+                + "\u0630\u0631\u0632\n" + "\u0633\u0634\u0635\n" + "\u0636\u0637\u0638\n"
+                + "\u0639\u063A\u063B";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('\u0634')));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('\u062E')));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf('\u062D'), text.indexOf('\u0635') + 1)));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('\u062A')));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf('\u062A'), text.indexOf('\u0635') + 1)));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('\u0638')));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf('\u062A'), text.indexOf('\u0638') + 1)));
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('\u063B')));
+        onView(withId(R.id.textview)).check(hasSelection(text));
+    }
+
 
     @SmallTest
     public void testSelectionHandles_doesNotPassAnotherHandle() throws Exception {
