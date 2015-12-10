@@ -95,6 +95,10 @@ public:
             return setModelViewOffsetRect(offsetX, offsetY, source);
         }
     }
+    GlopBuilder& setModelViewIdentityEmptyBounds() {
+        // pass empty rect since not needed for damage / snap
+        return setModelViewOffsetRect(0, 0, Rect());
+    }
 
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 

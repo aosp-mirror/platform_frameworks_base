@@ -73,7 +73,7 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
             .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, bakedState->alpha)
             .setTransform(bakedState->computedState.transform, transformFlags)
-            .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+            .setModelViewIdentityEmptyBounds()
             .build();
     // Note: don't pass dirty bounds here, so user must manage passing dirty bounds to renderer
     renderer->renderGlop(nullptr, clip, glop);

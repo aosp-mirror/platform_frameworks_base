@@ -757,6 +757,18 @@ void OpReorderer::onBitmapOp(const BitmapOp& op) {
     }
 }
 
+void OpReorderer::onBitmapMeshOp(const BitmapMeshOp& op) {
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
+}
+
+void OpReorderer::onBitmapRectOp(const BitmapRectOp& op) {
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
+}
+
 void OpReorderer::onLinesOp(const LinesOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
     onStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
@@ -764,6 +776,23 @@ void OpReorderer::onLinesOp(const LinesOp& op) {
 
 void OpReorderer::onOvalOp(const OvalOp& op) {
     onStrokeableOp(op, tessBatchId(op));
+}
+
+void OpReorderer::onPatchOp(const PatchOp& op) {
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+
+    if (bakedState->computedState.transform.isPureTranslate()
+            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode) {
+        mergeid_t mergeId = (mergeid_t) op.bitmap->getGenerationID();
+        // TODO: AssetAtlas in mergeId
+
+        // Only use the MergedPatch batchId when merged, so Bitmap+Patch don't try to merge together
+        currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::MergedPatch, mergeId);
+    } else {
+        // Use Bitmap batchId since Bitmap+Patch use same shader
+        currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
+    }
 }
 
 void OpReorderer::onPathOp(const PathOp& op) {
