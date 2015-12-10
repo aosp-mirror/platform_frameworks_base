@@ -3027,7 +3027,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             final List<ImeSubtypeListItem> imList =
                     mSwitchingController.getSortedInputMethodAndSubtypeListLocked(
-                            true /* showSubtypes */, showAuxSubtypes, isScreenLocked);
+                            showAuxSubtypes, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
                 final InputMethodSubtype currentSubtype = getCurrentInputMethodSubtypeLocked();
