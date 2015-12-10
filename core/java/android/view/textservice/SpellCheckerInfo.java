@@ -117,6 +117,8 @@ public final class SpellCheckerInfo implements Parcelable {
                             a.getString(com.android.internal.R.styleable
                                     .SpellChecker_Subtype_subtypeLocale),
                             a.getString(com.android.internal.R.styleable
+                                    .SpellChecker_Subtype_languageTag),
+                            a.getString(com.android.internal.R.styleable
                                     .SpellChecker_Subtype_subtypeExtraValue),
                             a.getInt(com.android.internal.R.styleable
                                     .SpellChecker_Subtype_subtypeId, 0));

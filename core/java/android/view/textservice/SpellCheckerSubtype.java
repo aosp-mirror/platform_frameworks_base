@@ -18,6 +18,7 @@ package android.view.textservice;
 
 import com.android.internal.inputmethod.InputMethodUtils;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -40,6 +41,7 @@ import java.util.Locale;
  * @see SpellCheckerInfo
  *
  * @attr ref android.R.styleable#SpellChecker_Subtype_label
+ * @attr ref android.R.styleable#SpellChecker_Subtype_languageTag
  * @attr ref android.R.styleable#SpellChecker_Subtype_subtypeLocale
  * @attr ref android.R.styleable#SpellChecker_Subtype_subtypeExtraValue
  * @attr ref android.R.styleable#SpellChecker_Subtype_subtypeId
@@ -49,11 +51,13 @@ public final class SpellCheckerSubtype implements Parcelable {
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
     private static final int SUBTYPE_ID_NONE = 0;
+    private static final String SUBTYPE_LANGUAGE_TAG_NONE = "";
 
     private final int mSubtypeId;
     private final int mSubtypeHashCode;
     private final int mSubtypeNameResId;
     private final String mSubtypeLocale;
+    private final String mSubtypeLanguageTag;
     private final String mSubtypeExtraValue;
     private HashMap<String, String> mExtraValueHashMapCache;
 
@@ -66,14 +70,17 @@ public final class SpellCheckerSubtype implements Parcelable {
      *
      * @param nameId The name of the subtype
      * @param locale The locale supported by the subtype
+     * @param languageTag The BCP-47 Language Tag associated with this subtype.
      * @param extraValue The extra value of the subtype
      * @param subtypeId The subtype ID that is supposed to be stable during package update.
      *
      * @hide
      */
-    public SpellCheckerSubtype(int nameId, String locale, String extraValue, int subtypeId) {
+    public SpellCheckerSubtype(int nameId, String locale, String languageTag, String extraValue,
+            int subtypeId) {
         mSubtypeNameResId = nameId;
         mSubtypeLocale = locale != null ? locale : "";
+        mSubtypeLanguageTag = languageTag != null ? languageTag : SUBTYPE_LANGUAGE_TAG_NONE;
         mSubtypeExtraValue = extraValue != null ? extraValue : "";
         mSubtypeId = subtypeId;
         mSubtypeHashCode = mSubtypeId != SUBTYPE_ID_NONE ?
@@ -91,7 +98,7 @@ public final class SpellCheckerSubtype implements Parcelable {
      * to instantiate {@link SpellCheckerSubtype} object.
      */
     public SpellCheckerSubtype(int nameId, String locale, String extraValue) {
-        this(nameId, locale, extraValue, SUBTYPE_ID_NONE);
+        this(nameId, locale, SUBTYPE_LANGUAGE_TAG_NONE, extraValue, SUBTYPE_ID_NONE);
     }
 
     SpellCheckerSubtype(Parcel source) {
@@ -99,6 +106,8 @@ public final class SpellCheckerSubtype implements Parcelable {
         mSubtypeNameResId = source.readInt();
         s = source.readString();
         mSubtypeLocale = s != null ? s : "";
+        s = source.readString();
+        mSubtypeLanguageTag = s != null ? s : "";
         s = source.readString();
         mSubtypeExtraValue = s != null ? s : "";
         mSubtypeId = source.readInt();
@@ -115,9 +124,24 @@ public final class SpellCheckerSubtype implements Parcelable {
 
     /**
      * @return the locale of the subtype
+     *
+     * @deprecated Use {@link #getLanguageTag()} instead.
      */
+    @Deprecated
+    @NonNull
     public String getLocale() {
         return mSubtypeLocale;
+    }
+
+    /**
+     * @return the BCP-47 Language Tag of the subtype.  Returns an empty string when no Language Tag
+     * is specified.
+     *
+     * @see Locale#forLanguageTag(String)
+     */
+    @NonNull
+    public String getLanguageTag() {
+        return mSubtypeLanguageTag;
     }
 
     /**
@@ -182,20 +206,24 @@ public final class SpellCheckerSubtype implements Parcelable {
             return (subtype.hashCode() == hashCode())
                     && (subtype.getNameResId() == getNameResId())
                     && (subtype.getLocale().equals(getLocale()))
+                    && (subtype.getLanguageTag().equals(getLanguageTag()))
                     && (subtype.getExtraValue().equals(getExtraValue()));
         }
         return false;
     }
 
     /**
-     * @return The normalized {@link Locale} object of the subtype. The returned locale may or may
-     * not equal to "locale" string parameter passed to the constructor.
+     * @return {@link Locale} constructed from {@link #getLanguageTag()}. If the Language Tag is not
+     * specified, then try to construct from {@link #getLocale()}
      *
-     * <p>TODO: Consider to make this a public API.</p>
+     * <p>TODO: Consider to make this a public API, or move this to support lib.</p>
      * @hide
      */
     @Nullable
     public Locale getLocaleObject() {
+        if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
+            return Locale.forLanguageTag(mSubtypeLanguageTag);
+        }
         return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
     }
 
@@ -234,6 +262,7 @@ public final class SpellCheckerSubtype implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(mSubtypeNameResId);
         dest.writeString(mSubtypeLocale);
+        dest.writeString(mSubtypeLanguageTag);
         dest.writeString(mSubtypeExtraValue);
         dest.writeInt(mSubtypeId);
     }

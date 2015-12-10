@@ -2683,6 +2683,7 @@
     <public type="attr" name="encryptionAware" />
     <public type="attr" name="preferenceFragmentStyle" />
     <public type="attr" name="canControlMagnification" />
+    <public type="attr" name="languageTag" />
 
     <public type="style" name="Theme.Material.DayNight" />
     <public type="style" name="Theme.Material.DayNight.DarkActionBar" />

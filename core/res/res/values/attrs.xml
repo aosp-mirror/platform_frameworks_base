@@ -3042,7 +3042,8 @@ i
         <attr name="imeSubtypeLocale" format="string" />
         <!-- The mode of the subtype. This string can be a mode (e.g. voice, keyboard...) and this
              string will be passed to the IME when the framework calls the IME with the
-             subtype.  -->
+             subtype.  {@link android.view.inputmethod.InputMethodSubtype#getLocale()} returns the
+             value specified in this attribute.  -->
         <attr name="imeSubtypeMode" format="string" />
         <!-- Set true if the subtype is auxiliary.  An auxiliary subtype won't be shown in the
              input method selection list in the settings app.
@@ -3067,6 +3068,9 @@ i
              this subtype. This is important because many password fields only allow
              ASCII-characters. -->
         <attr name="isAsciiCapable" format="boolean" />
+        <!-- The BCP-47 Language Tag of the subtype.  This replaces
+        {@link android.R.styleable#InputMethod_Subtype_imeSubtypeLocale}.  -->
+        <attr name="languageTag" format="string" />
     </declare-styleable>
 
     <!-- Use <code>spell-checker</code> as the root tag of the XML resource that
@@ -3090,7 +3094,8 @@ i
         <attr name="label" />
         <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
              This is also used by the framework to know the supported locales
-             of the spell checker.  -->
+             of the spell checker. {@link android.view.textservice.SpellCheckerSubtype#getLocale()}
+             returns the value specified in this attribute.  -->
         <attr name="subtypeLocale" format="string" />
         <!-- The extra value of the subtype. This string can be any string and will be passed to
              the SpellChecker.  -->
@@ -3102,6 +3107,9 @@ i
              {@code Arrays.hashCode(new Object[] {subtypeLocale, extraValue}) will be used instead.
               -->
         <attr name="subtypeId" />
+        <!-- The BCP-47 Language Tag of the subtype.  This replaces
+        {@link android.R.styleable#SpellChecker_Subtype_subtypeLocale}.  -->
+        <attr name="languageTag" />
     </declare-styleable>
 
     <!-- Use <code>accessibility-service</code> as the root tag of the XML resource that

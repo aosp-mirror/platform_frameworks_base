@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -50,6 +51,7 @@ import java.util.Locale;
  *
  * @attr ref android.R.styleable#InputMethod_Subtype_label
  * @attr ref android.R.styleable#InputMethod_Subtype_icon
+ * @attr ref android.R.styleable#InputMethod_Subtype_languageTag
  * @attr ref android.R.styleable#InputMethod_Subtype_imeSubtypeLocale
  * @attr ref android.R.styleable#InputMethod_Subtype_imeSubtypeMode
  * @attr ref android.R.styleable#InputMethod_Subtype_imeSubtypeExtraValue
@@ -60,6 +62,7 @@ import java.util.Locale;
  */
 public final class InputMethodSubtype implements Parcelable {
     private static final String TAG = InputMethodSubtype.class.getSimpleName();
+    private static final String LANGUAGE_TAG_NONE = "";
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
     // TODO: remove this
@@ -74,6 +77,7 @@ public final class InputMethodSubtype implements Parcelable {
     private final int mSubtypeNameResId;
     private final int mSubtypeId;
     private final String mSubtypeLocale;
+    private final String mSubtypeLanguageTag;
     private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
     private volatile HashMap<String, String> mExtraValueHashMapCache;
@@ -169,6 +173,15 @@ public final class InputMethodSubtype implements Parcelable {
             return this;
         }
         private String mSubtypeLocale = "";
+
+        /**
+         * @param languageTag is the BCP-47 Language Tag supported by this subtype.
+         */
+        public InputMethodSubtypeBuilder setLanguageTag(String languageTag) {
+            mSubtypeLanguageTag = languageTag == null ? LANGUAGE_TAG_NONE : languageTag;
+            return this;
+        }
+        private String mSubtypeLanguageTag = LANGUAGE_TAG_NONE;
 
         /**
          * @param subtypeMode is the mode supported by this subtype.
@@ -271,6 +284,7 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeNameResId = builder.mSubtypeNameResId;
         mSubtypeIconResId = builder.mSubtypeIconResId;
         mSubtypeLocale = builder.mSubtypeLocale;
+        mSubtypeLanguageTag = builder.mSubtypeLanguageTag;
         mSubtypeMode = builder.mSubtypeMode;
         mSubtypeExtraValue = builder.mSubtypeExtraValue;
         mIsAuxiliary = builder.mIsAuxiliary;
@@ -290,6 +304,8 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeIconResId = source.readInt();
         s = source.readString();
         mSubtypeLocale = s != null ? s : "";
+        s = source.readString();
+        mSubtypeLanguageTag = s != null ? s : LANGUAGE_TAG_NONE;
         s = source.readString();
         mSubtypeMode = s != null ? s : "";
         s = source.readString();
@@ -318,21 +334,38 @@ public final class InputMethodSubtype implements Parcelable {
     /**
      * @return The locale of the subtype. This method returns the "locale" string parameter passed
      * to the constructor.
+     *
+     * @deprecated Use {@link #getLanguageTag()} instead.
      */
+    @Deprecated
+    @NonNull
     public String getLocale() {
         return mSubtypeLocale;
     }
 
     /**
-     * @return The normalized {@link Locale} object of the subtype. The returned locale may or may
-     * not equal to "locale" string parameter passed to the constructor.
+     * @return the BCP-47 Language Tag of the subtype.  Returns an empty string when no Language Tag
+     * is specified.
      *
-     * <p>TODO: Consider to make this a public API.</p>
+     * @see Locale#forLanguageTag(String)
+     */
+    @NonNull
+    public String getLanguageTag() {
+        return mSubtypeLanguageTag;
+    }
+
+    /**
+     * @return {@link Locale} constructed from {@link #getLanguageTag()}. If the Language Tag is not
+     * specified, then try to construct from {@link #getLocale()}
+     *
+     * <p>TODO: Consider to make this a public API, or move this to support lib.</p>
      * @hide
      */
     @Nullable
     public Locale getLocaleObject() {
-        // TODO: Move the following method from InputMethodUtils to InputMethodSubtype.
+        if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
+            return Locale.forLanguageTag(mSubtypeLanguageTag);
+        }
         return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
     }
 
@@ -476,13 +509,14 @@ public final class InputMethodSubtype implements Parcelable {
                 return (subtype.hashCode() == hashCode());
             }
             return (subtype.hashCode() == hashCode())
-                && (subtype.getLocale().equals(getLocale()))
-                && (subtype.getMode().equals(getMode()))
-                && (subtype.getExtraValue().equals(getExtraValue()))
-                && (subtype.isAuxiliary() == isAuxiliary())
-                && (subtype.overridesImplicitlyEnabledSubtype()
-                        == overridesImplicitlyEnabledSubtype())
-                && (subtype.isAsciiCapable() == isAsciiCapable());
+                    && (subtype.getLocale().equals(getLocale()))
+                    && (subtype.getLanguageTag().equals(getLanguageTag()))
+                    && (subtype.getMode().equals(getMode()))
+                    && (subtype.getExtraValue().equals(getExtraValue()))
+                    && (subtype.isAuxiliary() == isAuxiliary())
+                    && (subtype.overridesImplicitlyEnabledSubtype()
+                            == overridesImplicitlyEnabledSubtype())
+                    && (subtype.isAsciiCapable() == isAsciiCapable());
         }
         return false;
     }
@@ -497,6 +531,7 @@ public final class InputMethodSubtype implements Parcelable {
         dest.writeInt(mSubtypeNameResId);
         dest.writeInt(mSubtypeIconResId);
         dest.writeString(mSubtypeLocale);
+        dest.writeString(mSubtypeLanguageTag);
         dest.writeString(mSubtypeMode);
         dest.writeString(mSubtypeExtraValue);
         dest.writeInt(mIsAuxiliary ? 1 : 0);
