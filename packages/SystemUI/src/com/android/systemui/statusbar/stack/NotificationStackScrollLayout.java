@@ -2750,14 +2750,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return max + getStackTranslation();
     }
 
-    /**
-     * @param qsMinHeight The minimum height of the quick settings including padding
-     *                    See {@link StackScrollAlgorithm#updateIsSmallScreen}.
-     */
-    public void updateIsSmallScreen(int qsMinHeight) {
-        mStackScrollAlgorithm.updateIsSmallScreen(mMaxLayoutHeight - qsMinHeight);
-    }
-
     public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
         this.mPhoneStatusBar = phoneStatusBar;
     }
