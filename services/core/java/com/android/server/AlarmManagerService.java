@@ -1233,14 +1233,6 @@ class AlarmManagerService extends SystemService {
                 }
             }
 
-            // direct-callback alarms must be wakeup alarms (otherwise they should just be
-            // posting work to a Handler)
-            if (directReceiver != null) {
-                if (type != RTC_WAKEUP && type != ELAPSED_REALTIME_WAKEUP) {
-                    throw new IllegalArgumentException("Only wakeup alarms can use AlarmReceivers");
-                }
-            }
-
             if (workSource != null) {
                 getContext().enforcePermission(
                         android.Manifest.permission.UPDATE_DEVICE_STATS,
