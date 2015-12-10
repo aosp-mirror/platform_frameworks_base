@@ -180,6 +180,10 @@ private:
 TestWindowContext::TestWindowContext() :
     mData (nullptr) { }
 
+TestWindowContext::~TestWindowContext() {
+    delete mData;
+}
+
 void TestWindowContext::initialize(int width, int height)  {
     mData = new TestWindowData(SkISize::Make(width, height));
 }

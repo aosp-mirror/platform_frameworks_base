@@ -35,6 +35,7 @@ class ANDROID_API TestWindowContext {
 public:
 
     TestWindowContext();
+    ~TestWindowContext();
 
     /// We need to know the size of the window.
     void initialize(int width, int height);
