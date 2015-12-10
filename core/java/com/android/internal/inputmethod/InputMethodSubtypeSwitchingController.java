@@ -175,7 +175,7 @@ public class InputMethodSubtypeSwitchingController {
         }
 
         private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
-                new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
+                new TreeMap<>(
                         new Comparator<InputMethodInfo>() {
                             @Override
                             public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
@@ -194,8 +194,7 @@ public class InputMethodSubtypeSwitchingController {
 
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
                 boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
-            final ArrayList<ImeSubtypeListItem> imList =
-                    new ArrayList<ImeSubtypeListItem>();
+            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<>();
             final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
                     mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
                             mContext);
@@ -215,7 +214,7 @@ public class InputMethodSubtypeSwitchingController {
                     continue;
                 }
                 List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
-                HashSet<String> enabledSubtypeSet = new HashSet<String>();
+                HashSet<String> enabledSubtypeSet = new HashSet<>();
                 for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
                 }
