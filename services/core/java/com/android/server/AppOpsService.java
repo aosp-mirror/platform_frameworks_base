@@ -788,6 +788,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void startWatchingMode(int op, String packageName, IAppOpsCallback callback) {
+        if (callback == null) {
+            return;
+        }
         synchronized (this) {
             op = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
             Callback cb = mModeWatchers.get(callback.asBinder());
@@ -816,6 +819,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void stopWatchingMode(IAppOpsCallback callback) {
+        if (callback == null) {
+            return;
+        }
         synchronized (this) {
             Callback cb = mModeWatchers.remove(callback.asBinder());
             if (cb != null) {
