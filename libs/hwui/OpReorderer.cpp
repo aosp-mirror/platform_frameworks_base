@@ -467,13 +467,13 @@ void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
             // (temp layers are clipped to viewport, since they don't persist offscreen content)
             SkPaint saveLayerPaint;
             saveLayerPaint.setAlpha(properties.getAlpha());
-            onBeginLayerOp(*new (mAllocator) BeginLayerOp(
+            deferBeginLayerOp(*new (mAllocator) BeginLayerOp(
                     saveLayerBounds,
                     Matrix4::identity(),
                     saveLayerBounds,
                     &saveLayerPaint));
             deferNodeOps(node);
-            onEndLayerOp(*new (mAllocator) EndLayerOp());
+            deferEndLayerOp(*new (mAllocator) EndLayerOp());
         } else {
             deferNodeOps(node);
         }
@@ -559,7 +559,7 @@ void OpReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedN
         }
 
         const RenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
-        deferRenderNodeOp(*childOp);
+        deferRenderNodeOpImpl(*childOp);
         drawIndex++;
     }
 }
@@ -645,7 +645,7 @@ void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
 
         int restoreTo = mCanvasState.save(SkCanvas::kMatrix_SaveFlag);
         mCanvasState.concatMatrix(childOp->transformFromCompositingAncestor);
-        deferRenderNodeOp(*childOp);
+        deferRenderNodeOpImpl(*childOp);
         mCanvasState.restoreToCount(restoreTo);
     }
 
@@ -653,13 +653,13 @@ void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
 }
 
 /**
- * Used to define a list of lambdas referencing private OpReorderer::onXXXXOp() methods.
+ * Used to define a list of lambdas referencing private OpReorderer::onXX::defer() methods.
  *
  * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas.
  * E.g. a BitmapOp op then would be dispatched to OpReorderer::onBitmapOp(const BitmapOp&)
  */
 #define OP_RECEIVER(Type) \
-        [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.on##Type(static_cast<const Type&>(op)); },
+        [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.defer##Type(static_cast<const Type&>(op)); },
 void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
     typedef void (*OpDispatcher) (OpReorderer& reorderer, const RecordedOp& op);
     static OpDispatcher receivers[] = {
@@ -687,7 +687,7 @@ void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
     }
 }
 
-void OpReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
+void OpReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     if (op.renderNode->nothingToDraw()) return;
     int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
 
@@ -702,9 +702,9 @@ void OpReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
     mCanvasState.restoreToCount(count);
 }
 
-void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
+void OpReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
     if (!op.skipInOrderDraw) {
-        deferRenderNodeOp(op);
+        deferRenderNodeOpImpl(op);
     }
 }
 
@@ -712,7 +712,7 @@ void OpReorderer::onRenderNodeOp(const RenderNodeOp& op) {
  * Defers an unmergeable, strokeable op, accounting correctly
  * for paint's style on the bounds being computed.
  */
-void OpReorderer::onStrokeableOp(const RecordedOp& op, batchid_t batchId,
+void OpReorderer::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
         BakedOpState::StrokeBehavior strokeBehavior) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
@@ -734,11 +734,11 @@ static batchid_t tessBatchId(const RecordedOp& op) {
             : (paint.isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices);
 }
 
-void OpReorderer::onArcOp(const ArcOp& op) {
-    onStrokeableOp(op, tessBatchId(op));
+void OpReorderer::deferArcOp(const ArcOp& op) {
+    deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::onBitmapOp(const BitmapOp& op) {
+void OpReorderer::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -757,28 +757,43 @@ void OpReorderer::onBitmapOp(const BitmapOp& op) {
     }
 }
 
-void OpReorderer::onBitmapMeshOp(const BitmapMeshOp& op) {
+void OpReorderer::deferBitmapMeshOp(const BitmapMeshOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
-void OpReorderer::onBitmapRectOp(const BitmapRectOp& op) {
+void OpReorderer::deferBitmapRectOp(const BitmapRectOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
-void OpReorderer::onLinesOp(const LinesOp& op) {
+void OpReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
+    // allocate a temporary oval op (with mAllocator, so it persists until render), so the
+    // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
+    float x = *(op.x);
+    float y = *(op.y);
+    float radius = *(op.radius);
+    Rect unmappedBounds(x - radius, y - radius, x + radius, y + radius);
+    const OvalOp* resolvedOp = new (mAllocator) OvalOp(
+            unmappedBounds,
+            op.localMatrix,
+            op.localClipRect,
+            op.paint);
+    deferOvalOp(*resolvedOp);
+}
+
+void OpReorderer::deferLinesOp(const LinesOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
-    onStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
+    deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
-void OpReorderer::onOvalOp(const OvalOp& op) {
-    onStrokeableOp(op, tessBatchId(op));
+void OpReorderer::deferOvalOp(const OvalOp& op) {
+    deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::onPatchOp(const PatchOp& op) {
+void OpReorderer::deferPatchOp(const PatchOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -795,30 +810,41 @@ void OpReorderer::onPatchOp(const PatchOp& op) {
     }
 }
 
-void OpReorderer::onPathOp(const PathOp& op) {
-    onStrokeableOp(op, OpBatchType::Bitmap);
+void OpReorderer::deferPathOp(const PathOp& op) {
+    deferStrokeableOp(op, OpBatchType::Bitmap);
 }
 
-void OpReorderer::onPointsOp(const PointsOp& op) {
+void OpReorderer::deferPointsOp(const PointsOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
-    onStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
+    deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
-void OpReorderer::onRectOp(const RectOp& op) {
-    onStrokeableOp(op, tessBatchId(op));
+void OpReorderer::deferRectOp(const RectOp& op) {
+    deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::onRoundRectOp(const RoundRectOp& op) {
-    onStrokeableOp(op, tessBatchId(op));
+void OpReorderer::deferRoundRectOp(const RoundRectOp& op) {
+    deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::onSimpleRectsOp(const SimpleRectsOp& op) {
+void OpReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
+    // allocate a temporary round rect op (with mAllocator, so it persists until render), so the
+    // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
+    const RoundRectOp* resolvedOp = new (mAllocator) RoundRectOp(
+            Rect(*(op.left), *(op.top), *(op.right), *(op.bottom)),
+            op.localMatrix,
+            op.localClipRect,
+            op.paint, *op.rx, *op.ry);
+    deferRoundRectOp(*resolvedOp);
+}
+
+void OpReorderer::deferSimpleRectsOp(const SimpleRectsOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
-void OpReorderer::onTextOp(const TextOp& op) {
+void OpReorderer::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -861,7 +887,7 @@ void OpReorderer::restoreForLayer() {
 }
 
 // TODO: test rejection at defer time, where the bounds become empty
-void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
+void OpReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
     uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
     uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
 
@@ -906,7 +932,7 @@ void OpReorderer::onBeginLayerOp(const BeginLayerOp& op) {
             &op, nullptr);
 }
 
-void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
+void OpReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     const BeginLayerOp& beginLayerOp = *currentLayer().beginLayerOp;
     int finishedLayerIndex = mLayerStack.back();
 
@@ -932,11 +958,11 @@ void OpReorderer::onEndLayerOp(const EndLayerOp& /* ignored */) {
     }
 }
 
-void OpReorderer::onLayerOp(const LayerOp& op) {
+void OpReorderer::deferLayerOp(const LayerOp& op) {
     LOG_ALWAYS_FATAL("unsupported");
 }
 
-void OpReorderer::onShadowOp(const ShadowOp& op) {
+void OpReorderer::deferShadowOp(const ShadowOp& op) {
     LOG_ALWAYS_FATAL("unsupported");
 }
 

@@ -69,6 +69,17 @@ public:
     virtual GLuint getTargetFbo() const override { return -1; }
 
 // ----------------------------------------------------------------------------
+// HWUI Canvas draw operations
+// ----------------------------------------------------------------------------
+
+    void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+            CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+            CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+            CanvasPropertyPaint* paint);
+    void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+            CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
+
+// ----------------------------------------------------------------------------
 // android/graphics/Canvas interface
 // ----------------------------------------------------------------------------
     virtual SkCanvas* asSkCanvas() override;

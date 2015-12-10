@@ -343,10 +343,48 @@ void RecordingCanvas::drawRoundRect(float left, float top, float right, float bo
             refPaint(&paint), rx, ry));
 }
 
+void RecordingCanvas::drawRoundRect(
+        CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+        CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+        CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+        CanvasPropertyPaint* paint) {
+    mDisplayList->ref(left);
+    mDisplayList->ref(top);
+    mDisplayList->ref(right);
+    mDisplayList->ref(bottom);
+    mDisplayList->ref(rx);
+    mDisplayList->ref(ry);
+    mDisplayList->ref(paint);
+    refBitmapsInShader(paint->value.getShader());
+    addOp(new (alloc()) RoundRectPropsOp(
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            &paint->value,
+            &left->value, &top->value, &right->value, &bottom->value,
+            &rx->value, &ry->value));
+}
+
 void RecordingCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
+    // TODO: move to Canvas.h
     if (radius <= 0) return;
     drawOval(x - radius, y - radius, x + radius, y + radius, paint);
 }
+
+void RecordingCanvas::drawCircle(
+        CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+        CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
+    mDisplayList->ref(x);
+    mDisplayList->ref(y);
+    mDisplayList->ref(radius);
+    mDisplayList->ref(paint);
+    refBitmapsInShader(paint->value.getShader());
+    addOp(new (alloc()) CirclePropsOp(
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            &paint->value,
+            &x->value, &y->value, &radius->value));
+}
+
 
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
     addOp(new (alloc()) OvalOp(
