@@ -48,6 +48,7 @@ struct Vertex;
         M_OP_FN(BitmapOp) \
         U_OP_FN(BitmapMeshOp) \
         U_OP_FN(BitmapRectOp) \
+        U_OP_FN(CirclePropsOp) \
         U_OP_FN(LinesOp) \
         U_OP_FN(OvalOp) \
         M_OP_FN(PatchOp) \
@@ -56,6 +57,7 @@ struct Vertex;
         U_OP_FN(RectOp) \
         U_OP_FN(RenderNodeOp) \
         U_OP_FN(RoundRectOp) \
+        U_OP_FN(RoundRectPropsOp) \
         U_OP_FN(ShadowOp) \
         U_OP_FN(SimpleRectsOp) \
         M_OP_FN(TextOp) \
@@ -181,6 +183,18 @@ struct BitmapRectOp : RecordedOp {
     const Rect src;
 };
 
+struct CirclePropsOp : RecordedOp {
+    CirclePropsOp(const Matrix4& localMatrix, const Rect& localClipRect, const SkPaint* paint,
+            float* x, float* y, float* radius)
+            : RecordedOp(RecordedOpId::CirclePropsOp, Rect(), localMatrix, localClipRect, paint)
+            , x(x)
+            , y(y)
+            , radius(radius) {}
+    const float* x;
+    const float* y;
+    const float* radius;
+};
+
 struct LinesOp : RecordedOp {
     LinesOp(BASE_PARAMS, const float* points, const int floatCount)
             : SUPER(LinesOp)
@@ -194,7 +208,6 @@ struct OvalOp : RecordedOp {
     OvalOp(BASE_PARAMS)
             : SUPER(OvalOp) {}
 };
-
 
 struct PatchOp : RecordedOp {
     PatchOp(BASE_PARAMS, const SkBitmap* bitmap, const Res_png_9patch* patch)
@@ -233,6 +246,24 @@ struct RoundRectOp : RecordedOp {
             , ry(ry) {}
     const float rx;
     const float ry;
+};
+
+struct RoundRectPropsOp : RecordedOp {
+    RoundRectPropsOp(const Matrix4& localMatrix, const Rect& localClipRect, const SkPaint* paint,
+            float* left, float* top, float* right, float* bottom, float *rx, float *ry)
+            : RecordedOp(RecordedOpId::RoundRectPropsOp, Rect(), localMatrix, localClipRect, paint)
+            , left(left)
+            , top(top)
+            , right(right)
+            , bottom(bottom)
+            , rx(rx)
+            , ry(ry) {}
+    const float* left;
+    const float* top;
+    const float* right;
+    const float* bottom;
+    const float* rx;
+    const float* ry;
 };
 
 /**

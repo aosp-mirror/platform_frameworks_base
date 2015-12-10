@@ -237,7 +237,7 @@ private:
 
     void deferNodeOps(const RenderNode& renderNode);
 
-    void deferRenderNodeOp(const RenderNodeOp& op);
+    void deferRenderNodeOpImpl(const RenderNodeOp& op);
 
     void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers);
 
@@ -246,17 +246,17 @@ private:
         return mFrameAllocatedPaths.back().get();
     }
 
-    void onStrokeableOp(const RecordedOp& op, batchid_t batchId,
+    void deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
             BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
 
     /**
-     * Declares all OpReorderer::onXXXXOp() methods for every RecordedOp type.
+     * Declares all OpReorderer::deferXXXXOp() methods for every RecordedOp type.
      *
      * These private methods are called from within deferImpl to defer each individual op
      * type differently.
      */
 #define INTERNAL_OP_HANDLER(Type) \
-    void on##Type(const Type& op);
+    void defer##Type(const Type& op);
     MAP_OPS(INTERNAL_OP_HANDLER)
 
     std::vector<std::unique_ptr<SkPath> > mFrameAllocatedPaths;
