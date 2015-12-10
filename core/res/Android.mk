@@ -23,6 +23,7 @@ LOCAL_CERTIFICATE := platform
 # Tell aapt to create "extending (non-application)" resource IDs,
 # since these resources will be used by many apps.
 LOCAL_AAPT_FLAGS := -x
+LOCAL_AAPT_FLAGS += --private-symbols com.android.internal
 
 LOCAL_MODULE_TAGS := optional
 
