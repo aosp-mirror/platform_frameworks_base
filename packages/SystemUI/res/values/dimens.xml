@@ -136,6 +136,7 @@
     <dimen name="qs_quick_actions_padding">25dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
+    <dimen name="qs_date_anim_translation">44.5dp</dimen>
     <dimen name="qs_page_indicator_size">12dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>

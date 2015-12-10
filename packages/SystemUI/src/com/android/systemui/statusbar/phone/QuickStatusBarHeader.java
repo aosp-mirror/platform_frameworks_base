@@ -62,11 +62,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private boolean mDetailTransitioning;
     private ViewGroup mExpandedGroup;
+    private ViewGroup mDateTimeGroup;
+    private View mEmergencyOnly;
     private TextView mQsDetailHeaderTitle;
     private boolean mListening;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
     private QuickQSPanel mHeaderQsPanel;
+    private boolean mShowEmergencyCallsOnly;
+    private float mDateTimeTranslation;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,6 +80,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        mEmergencyOnly = findViewById(R.id.header_emergency_calls_only);
+        mDateTimeTranslation = mContext.getResources().getDimension(
+                R.dimen.qs_date_anim_translation);
+        mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
         mExpandedGroup = (ViewGroup) findViewById(R.id.expanded_group);
 
         mHeaderQsPanel = (QuickQSPanel) findViewById(R.id.quick_qs_panel);
@@ -141,6 +149,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mExpandedGroup.setVisibility(headerExpansionFraction > 0 ? View.VISIBLE : View.INVISIBLE);
         mHeaderQsPanel.setAlpha(1 - headerExpansionFraction);
         mHeaderQsPanel.setVisibility(headerExpansionFraction < 1 ? View.VISIBLE : View.INVISIBLE);
+
+        mDateTimeGroup.setTranslationY(headerExpansionFraction * mDateTimeTranslation);
+        mEmergencyOnly.setAlpha(headerExpansionFraction);
     }
 
     public void setListening(boolean listening) {
@@ -160,6 +171,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private void updateVisibilities() {
         mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.GONE);
         mQsDetailHeader.setVisibility(mExpanded && mShowingDetail ? View.VISIBLE : View.INVISIBLE);
+        mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
+                ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
     }
@@ -256,8 +269,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     @Override
-    public void setEmergencyCallsOnly(boolean emergencyOnly) {
-        // Don't care.
+    public void setEmergencyCallsOnly(boolean show) {
+        boolean changed = show != mShowEmergencyCallsOnly;
+        if (changed) {
+            mShowEmergencyCallsOnly = show;
+            if (mExpanded) {
+                updateEverything();
+            }
+        }
     }
 
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
@@ -314,6 +333,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         private void handleShowingDetail(final QSTile.DetailAdapter detail) {
             final boolean showingDetail = detail != null;
+            transition(mDateTimeGroup, !showingDetail);
             transition(mExpandedGroup, !showingDetail);
             if (mAlarmShowing) {
                 transition(mAlarmStatus, !showingDetail);
