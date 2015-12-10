@@ -688,6 +688,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mOnKeyguard = onKeyguard;
             logExpansionEvent(false, wasExpanded);
             if (wasExpanded != isExpanded()) {
+                if (mIsSummaryWithChildren) {
+                    mChildrenContainer.updateGroupOverflow();
+                }
                 notifyHeightChanged(false  /* needsAnimation */);
             }
         }
