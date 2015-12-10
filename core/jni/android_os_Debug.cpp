@@ -595,14 +595,14 @@ enum {
     MEMINFO_COUNT
 };
 
-static long get_zram_mem_used()
+static long long get_zram_mem_used()
 {
 #define ZRAM_SYSFS "/sys/block/zram0/"
     FILE *f = fopen(ZRAM_SYSFS "mm_stat", "r");
     if (f) {
-        long mem_used_total = 0;
+        long long mem_used_total = 0;
 
-        int matched = fscanf(f, "%*d %*d %ld %*d %*d %*d %*d", &mem_used_total);
+        int matched = fscanf(f, "%*d %*d %lld %*d %*d %*d %*d", &mem_used_total);
         if (matched != 1)
             ALOGW("failed to parse " ZRAM_SYSFS "mm_stat");
 
@@ -612,9 +612,9 @@ static long get_zram_mem_used()
 
     f = fopen(ZRAM_SYSFS "mem_used_total", "r");
     if (f) {
-        long mem_used_total = 0;
+        long long mem_used_total = 0;
 
-        int matched = fscanf(f, "%ld", &mem_used_total);
+        int matched = fscanf(f, "%lld", &mem_used_total);
         if (matched != 1)
             ALOGW("failed to parse " ZRAM_SYSFS "mem_used_total");
 
