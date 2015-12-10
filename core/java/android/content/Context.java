@@ -2116,6 +2116,14 @@ public abstract class Context {
             UserHandle user);
 
     /**
+     * @hide
+     * This is just here for sending CONNECTIVITY_ACTION.
+     */
+    @Deprecated
+    public abstract void sendStickyBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, Bundle options);
+
+    /**
      * <p>Version of
      * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)}
      * that allows you to specify the

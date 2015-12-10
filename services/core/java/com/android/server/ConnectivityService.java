@@ -34,6 +34,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -72,6 +73,7 @@ import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -1529,6 +1531,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log("sendStickyBroadcast: action=" + intent.getAction());
             }
 
+            Bundle options = null;
             final long ident = Binder.clearCallingIdentity();
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 final NetworkInfo ni = intent.getParcelableExtra(
@@ -1536,6 +1539,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (ni.getType() == ConnectivityManager.TYPE_MOBILE_SUPL) {
                     intent.setAction(ConnectivityManager.CONNECTIVITY_ACTION_SUPL);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                } else {
+                    BroadcastOptions opts = BroadcastOptions.makeBasic();
+                    opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
+                    options = opts.toBundle();
                 }
                 final IBatteryStats bs = BatteryStatsService.getService();
                 try {
@@ -1546,7 +1553,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
             try {
-                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL, options);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

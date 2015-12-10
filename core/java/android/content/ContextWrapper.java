@@ -536,6 +536,13 @@ public class ContextWrapper extends Context {
         mBase.sendStickyBroadcastAsUser(intent, user);
     }
 
+    /** @hide */
+    @Override
+    @Deprecated
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user, Bundle options) {
+        mBase.sendStickyBroadcastAsUser(intent, user, options);
+    }
+
     @Override
     @Deprecated
     public void sendStickyOrderedBroadcastAsUser(Intent intent,

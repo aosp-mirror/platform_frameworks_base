@@ -1092,7 +1092,23 @@ class ContextImpl extends Context {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, true, user.getIdentifier());
+                Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, true,
+                    user.getIdentifier());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
+        }
+    }
+
+    @Override
+    @Deprecated
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user, Bundle options) {
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.prepareToLeaveProcess();
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, null,
+                Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, options, false, true,
+                user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
         }
