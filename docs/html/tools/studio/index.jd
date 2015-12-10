@@ -432,37 +432,13 @@ and enumerated constants. </p>
 <p>Run <strong>Analyze &gt; Inspect Code</strong> to validate the configured annotations. </p>
 
 <p>For a complete list of the supported annotations, either use the auto-complete feature to display
-the available options for the <code>import android.support.annotation.</code> statement or
+the available options for the <code>import android.support.annotation</code> statement or
 view the contents of the
 {@link android.support.annotation Support-Annotations}
 library. </p>
 
 <p>For more details about Android annotations, see
 <a href="{@docRoot}tools/debugging/annotations.html">Improving Code Inspection with Annotations</a>.
-
-
-
-<h3>Dynamic layout preview</h3>
-<p>Android Studio allows you to work with layouts in both a <em>Design View</em> </p>
-<p><img src="{@docRoot}images/tools/studio-helloworld-design.png" alt="" />
-</p>
-    <p class="img-caption"><strong>Figure 6.</strong> Hello World App with Design View.</p>
-
-<p>and a <em>Text View</em>. </p>
-
-    <p><img src="{@docRoot}images/tools/studio-helloworld-text.png" alt="" />
-    <pclass="img-caption"><strong>Figure 7.</strong> Hello World App with text view.</p>
-
-<p>Easily select and preview layout changes for different device images, display
-densities, UI modes, locales, and Android versions (multi-API version rendering).
-    <p><img src="{@docRoot}images/tools/studio-api-version-rendering.png" /></p>
-    <p class="img-caption"><strong>Figure 8.</strong> Multi-API version rendering.</p>
-
-
-<p>From the Design View, you can drag and drop elements from the Palette to the Preview or
-Component Tree. The Text View allows you to directly edit the XML settings, while previewing
-the device display. </p>
-
 
 <h3>Log messages</h3>
 <p>When you build and run your app with Android Studio, you can view adb and device log messages
