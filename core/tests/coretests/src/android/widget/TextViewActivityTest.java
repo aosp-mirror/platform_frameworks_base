@@ -165,6 +165,46 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     @SmallTest
+    public void testInsertionHandle() throws Exception {
+        final String text = "abcd efg hijk ";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("a")));
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('f')));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("f")));
+    }
+
+    @SmallTest
+    public void testInsertionHandle_multiLine() throws Exception {
+        final String text = "abcd\n" + "efg\n" + "hijk\n";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
+
+        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('a')));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("a")));
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('f')));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("f")));
+    }
+
+    @SmallTest
     public void testSelectionHandles() throws Exception {
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
