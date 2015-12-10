@@ -2270,6 +2270,7 @@
 
   <!-- Floating toolbar -->
   <java-symbol type="id" name="floating_toolbar_menu_item_image_button" />
+  <java-symbol type="id" name="overflow" />
   <java-symbol type="layout" name="floating_popup_container" />
   <java-symbol type="layout" name="floating_popup_menu_button" />
   <java-symbol type="layout" name="floating_popup_open_overflow_button" />

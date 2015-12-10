@@ -28,6 +28,10 @@ import static android.widget.espresso.TextViewActions.longPressOnTextAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsDisplayed;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsNotDisplayed;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloatingToolbarPopup;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarDoesNotContainItem;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.pressKey;
@@ -149,19 +153,75 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     @SmallTest
     public void testToolbarAppearsAfterSelection() throws Exception {
-        // It'll be nice to check that the toolbar is not visible (or does not exist) here
-        // I can't currently find a way to do this. I'll get to it later.
-
         final String text = "Toolbar appears after selection.";
         onView(withId(R.id.textview)).perform(click());
+        assertFloatingToolbarIsNotDisplayed();
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
         onView(withId(R.id.textview)).perform(
                 longPressOnTextAtIndex(text.indexOf("appears")));
 
-        // It takes the toolbar less than 100ms to start to animate into screen.
-        // Ideally, we'll wait using the UiController, but I guess this works for now.
-        Thread.sleep(100);
-        assertFloatingToolbarIsDisplayed(getActivity());
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
+        final String text2 = "Toolbar disappears after typing text.";
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text2));
+        assertFloatingToolbarIsNotDisplayed();
+    }
+
+    @SmallTest
+    public void testToolbarAndInsertionHandle() throws Exception {
+        final String text = "text";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
+        assertFloatingToolbarIsNotDisplayed();
+
+        onHandleView(com.android.internal.R.id.insertion_handle).perform(click());
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.selectAll));
+        assertFloatingToolbarDoesNotContainItem(
+                getActivity().getString(com.android.internal.R.string.copy));
+        assertFloatingToolbarDoesNotContainItem(
+                getActivity().getString(com.android.internal.R.string.cut));
+    }
+
+    @SmallTest
+    public void testToolbarAndSelectionHandle() throws Exception {
+        final String text = "abcd efg hijk";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf("f")));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.selectAll));
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.copy));
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.cut));
+
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('a')));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .perform(dragHandle(textView, Handle.SELECTION_END, text.length()));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+
+        assertFloatingToolbarDoesNotContainItem(
+                getActivity().getString(com.android.internal.R.string.selectAll));
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.copy));
+        assertFloatingToolbarContainsItem(
+                getActivity().getString(com.android.internal.R.string.cut));
     }
 
     @SmallTest
@@ -173,7 +233,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
 
         onHandleView(com.android.internal.R.id.insertion_handle)
                 .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('a')));
@@ -193,7 +253,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
 
         onHandleView(com.android.internal.R.id.insertion_handle)
                 .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('a')));
@@ -219,7 +279,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .check(matches(isDisplayed()));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('a')));
         onView(withId(R.id.textview)).check(hasSelection("abcd efg"));
@@ -236,7 +296,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
         onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('e')));
         onView(withId(R.id.textview)).check(hasSelection("efg\nhijk"));
@@ -294,7 +354,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
         onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('l')));
         onView(withId(R.id.textview)).check(hasSelection("g"));
@@ -312,7 +372,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
         onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('r') + 1));
         onView(withId(R.id.textview)).check(hasSelection("k"));
@@ -330,7 +390,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
         onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
 
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('f')));
@@ -383,7 +443,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
         onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('m')));
 
-        final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
+        final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
 
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('c')));
