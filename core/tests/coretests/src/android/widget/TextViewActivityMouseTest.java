@@ -24,9 +24,12 @@ import static android.widget.espresso.TextViewActions.mouseLongClickOnTextAtInde
 import static android.widget.espresso.TextViewActions.mouseDoubleClickAndDragOnText;
 import static android.widget.espresso.TextViewActions.mouseDragOnText;
 import static android.widget.espresso.TextViewActions.mouseLongClickAndDragOnText;
+import static android.widget.espresso.TextViewActions.mouseTripleClickAndDragOnText;
+import static android.widget.espresso.TextViewActions.mouseTripleClickOnTextAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -189,5 +192,103 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
         onView(withId(R.id.textview)).perform(
                 mouseLongClickAndDragOnText(text.indexOf("j"), text.indexOf("f")));
         onView(withId(R.id.textview)).check(hasSelection("efg hijk"));
+    }
+
+    @SmallTest
+    public void testSelectTextByTripleClick() throws Exception {
+        getActivity();
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append("First paragraph.\n");
+        builder.append("Second paragraph.");
+        for (int i = 0; i < 10; i++) {
+            builder.append(" This paragraph is very long.");
+        }
+        builder.append('\n');
+        builder.append("Third paragraph.");
+        final String text = builder.toString();
+
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickOnTextAtIndex(text.indexOf("rst")));
+        onView(withId(R.id.textview)).check(hasSelection("First paragraph.\n"));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickOnTextAtIndex(text.indexOf("cond")));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf("Second"), text.indexOf("Third"))));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickOnTextAtIndex(text.indexOf("ird")));
+        onView(withId(R.id.textview)).check(hasSelection("Third paragraph."));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickOnTextAtIndex(text.indexOf("very long")));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf("Second"), text.indexOf("Third"))));
+    }
+
+    @SmallTest
+    public void testSelectTextByTripleClickAndDrag() throws Exception {
+        getActivity();
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append("First paragraph.\n");
+        builder.append("Second paragraph.");
+        for (int i = 0; i < 10; i++) {
+            builder.append(" This paragraph is very long.");
+        }
+        builder.append('\n');
+        builder.append("Third paragraph.");
+        final String text = builder.toString();
+
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickAndDragOnText(text.indexOf("irst"), text.indexOf("st")));
+        onView(withId(R.id.textview)).check(hasSelection("First paragraph.\n"));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickAndDragOnText(text.indexOf("cond"), text.indexOf("Third") - 2));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf("Second"), text.indexOf("Third"))));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickAndDragOnText(text.indexOf("First"), text.indexOf("ird")));
+        onView(withId(R.id.textview)).check(hasSelection(text));
+    }
+
+    @SmallTest
+    public void testSelectTextByTripleClickAndDrag_reverse() throws Exception {
+        getActivity();
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append("First paragraph.\n");
+        builder.append("Second paragraph.");
+        for (int i = 0; i < 10; i++) {
+            builder.append(" This paragraph is very long.");
+        }
+        builder.append('\n');
+        builder.append("Third paragraph.");
+        final String text = builder.toString();
+
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickAndDragOnText(text.indexOf("st"), text.indexOf("irst")));
+        onView(withId(R.id.textview)).check(hasSelection("First paragraph.\n"));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickAndDragOnText(text.indexOf("Third") - 2, text.indexOf("cond")));
+        onView(withId(R.id.textview)).check(hasSelection(
+                text.substring(text.indexOf("Second"), text.indexOf("Third"))));
+
+        onView(withId(R.id.textview)).perform(
+                mouseTripleClickAndDragOnText(text.indexOf("ird"), text.indexOf("First")));
+        onView(withId(R.id.textview)).check(hasSelection(text));
     }
 }
