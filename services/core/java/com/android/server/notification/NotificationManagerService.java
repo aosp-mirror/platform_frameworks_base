@@ -159,8 +159,8 @@ import java.util.Objects;
 public class NotificationManagerService extends SystemService {
     static final String TAG = "NotificationService";
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
-    public static final boolean ENABLE_CHILD_NOTIFICATIONS = Build.IS_DEBUGGABLE
-            && SystemProperties.getBoolean("debug.child_notifs", false);
+    public static final boolean ENABLE_CHILD_NOTIFICATIONS
+            = SystemProperties.getBoolean("debug.child_notifs", true);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
 

@@ -26,16 +26,13 @@ import android.view.View;
  */
 public abstract class NotificationViewWrapper {
 
-    private static final String TAG_BIG_MEDIA_NARROW = "bigMediaNarrow";
-    private static final String TAG_MEDIA = "media";
-    private static final String TAG_BIG_PICTURE = "bigPicture";
-
     protected final View mView;
-    private boolean mSubTextVisible = true;
 
     public static NotificationViewWrapper wrap(Context ctx, View v) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
             return new NotificationTemplateViewWrapper(ctx, v);
+        } else if (v instanceof NotificationHeaderView) {
+            return new NotificationHeaderViewWrapper(ctx, v);
         } else {
             return new NotificationCustomViewWrapper(v);
         }
@@ -57,9 +54,7 @@ public abstract class NotificationViewWrapper {
     /**
      * Notifies this wrapper that the content of the view might have changed.
      */
-    public void notifyContentUpdated() {
-        setSubTextVisible(mSubTextVisible);
-    }
+    public void notifyContentUpdated() {};
 
     /**
      * @return true if this template might need to be clipped with a round rect to make it look
@@ -67,14 +62,6 @@ public abstract class NotificationViewWrapper {
      */
     public boolean needsRoundRectClipping() {
         return false;
-    }
-
-    /**
-     * Change the subTextVisibility
-     * @param visible Should the subtext be visible
-     */
-    public void setSubTextVisible(boolean visible) {
-        mSubTextVisible = visible;
     }
 
     /**

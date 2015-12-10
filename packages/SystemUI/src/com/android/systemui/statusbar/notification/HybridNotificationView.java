@@ -23,6 +23,8 @@ import android.widget.TextView;
 
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
+import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
  * A hybrid view which may contain information about one ore more notifications.
@@ -31,6 +33,7 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout {
 
     protected TextView mTitleView;
     protected TextView mTextView;
+    private ViewInvertHelper mInvertHelper;
 
     public HybridNotificationView(Context context) {
         this(context, null);
@@ -54,6 +57,7 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout {
         super.onFinishInflate();
         mTitleView = (TextView) findViewById(R.id.notification_title);
         mTextView = (TextView) findViewById(R.id.notification_text);
+        mInvertHelper = new ViewInvertHelper(this, NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
     public void bind(CharSequence title) {
@@ -64,5 +68,9 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout {
         mTitleView.setText(title);
         mTextView.setText(text);
         requestLayout();
+    }
+
+    public void setDark(boolean dark, boolean fade, long delay) {
+        mInvertHelper.setInverted(dark, fade, delay);
     }
 }

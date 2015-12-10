@@ -51,6 +51,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private final LinearInterpolator mLinearInterpolator = new LinearInterpolator();
     private final int mNotificationMinHeightLegacy;
+    private final int mMaxHeadsUpHeightLegacy;
+    private final int mMaxHeadsUpHeight;
     private final int mNotificationMinHeight;
     private final int mNotificationMaxHeight;
     private int mRowMinHeight;
@@ -95,6 +97,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsHeadsUp;
     private boolean mLastChronometerRunning = true;
     private NotificationHeaderView mNotificationHeader;
+    private NotificationViewWrapper mNotificationHeaderWrapper;
     private ViewStub mChildrenContainerStub;
     private NotificationGroupManager mGroupManager;
     private boolean mChildrenExpanded;
@@ -218,10 +221,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
         int minHeight = customView && beforeN && !mIsSummaryWithChildren ?
                 mNotificationMinHeightLegacy : mNotificationMinHeight;
+        boolean headsUpCustom = getPrivateLayout().getHeadsUpChild() != null &&
+                getPrivateLayout().getHeadsUpChild().getId()
+                != com.android.internal.R.id.status_bar_latest_event_content;
+        int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
+                : mMaxHeadsUpHeight;
         mRowMinHeight = minHeight;
         mMaxViewHeight = mNotificationMaxHeight;
-        mPrivateLayout.setSmallHeight(mRowMinHeight);
-        mPublicLayout.setSmallHeight(mRowMinHeight);
+        mPrivateLayout.setHeights(mRowMinHeight, headsUpheight);
+        mPublicLayout.setHeights(mRowMinHeight, headsUpheight);
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -385,6 +393,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public int getHeadsUpHeight() {
+        if (mIsSummaryWithChildren) {
+            return mChildrenContainer.getIntrinsicHeight();
+        }
         return mHeadsUpHeight;
     }
 
@@ -462,6 +473,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 R.dimen.notification_min_height);
         mNotificationMaxHeight =  getResources().getDimensionPixelSize(
                 R.dimen.notification_max_height);
+        mMaxHeadsUpHeightLegacy =  getResources().getDimensionPixelSize(
+                R.dimen.notification_max_heads_up_height_legacy);
+        mMaxHeadsUpHeight =  getResources().getDimensionPixelSize(
+                R.dimen.notification_max_heads_up_height);
     }
 
     /**
@@ -569,6 +584,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         final NotificationContentView showing = getShowingLayout();
         if (showing != null) {
             showing.setDark(dark, fade, delay);
+        }
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setDark(dark, fade, delay);
+            mNotificationHeaderWrapper.setDark(dark, fade, delay);
         }
     }
 
@@ -967,9 +986,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     com.android.internal.R.id.expand_button);
             expandButton.setVisibility(VISIBLE);
             mNotificationHeader.setOnClickListener(mExpandClickListener);
+            mNotificationHeaderWrapper = NotificationViewWrapper.wrap(getContext(),
+                    mNotificationHeader);
             addView(mNotificationHeader);
         } else {
             header.reapply(getContext(), mNotificationHeader);
+            mNotificationHeaderWrapper.notifyContentUpdated();
         }
         updateHeaderExpandButton();
         updateChildrenHeaderAppearance();

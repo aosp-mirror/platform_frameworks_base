@@ -23,9 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private final int mNotificatonTopPadding;
     private final HybridNotificationViewManager mHybridViewManager;
     private final float mCollapsedBottompadding;
+    private ViewInvertHelper mOverflowInvertHelper;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mNotificationParent;
     private HybridNotificationView mGroupOverflowContainer;
@@ -172,12 +175,17 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (hasOverflow) {
             mGroupOverflowContainer = mHybridViewManager.bindFromNotificationGroup(
                     mGroupOverflowContainer, mChildren, lastVisibleIndex + 1);
+            if (mOverflowInvertHelper == null) {
+                mOverflowInvertHelper= new ViewInvertHelper(mGroupOverflowContainer,
+                        NotificationPanelView.DOZE_ANIMATION_DURATION);
+            }
             if (mGroupOverFlowState == null) {
                 mGroupOverFlowState = new ViewState();
             }
         } else if (mGroupOverflowContainer != null) {
             removeView(mGroupOverflowContainer);
             mGroupOverflowContainer = null;
+            mOverflowInvertHelper = null;
             mGroupOverFlowState = null;
         }
     }
@@ -324,7 +332,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (!likeCollapsed && (mChildrenExpanded || mNotificationParent.isUserLocked())) {
             return NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
         }
-        if (mNotificationParent.isExpanded()) {
+        if (mNotificationParent.isExpanded() || mNotificationParent.isHeadsUp()) {
             return NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED;
         }
         return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;
@@ -387,16 +395,17 @@ public class NotificationChildrenContainer extends ViewGroup {
             boolean withDelays, long baseDelay, long duration) {
         int childCount = mChildren.size();
         ViewState tmpState = new ViewState();
-        int notGoneIndex = 0;
-        for (int i = 0; i < childCount; i++) {
+        int delayIndex = 0;
+        int maxAllowChildCount = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
+        for (int i = childCount - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mChildren.get(i);
             StackViewState viewState = state.getViewStateForView(child);
             int difference = Math.min(StackStateAnimator.DELAY_EFFECT_MAX_INDEX_DIFFERENCE_CHILDREN,
-                    notGoneIndex + 1);
+                    delayIndex);
             long delay = withDelays
                     ? difference * StackStateAnimator.ANIMATION_DELAY_PER_ELEMENT_EXPAND_CHILDREN
                     : 0;
-            delay += baseDelay;
+            delay = (long) (delay * (mChildrenExpanded ? 1.0f : 0.5f) + baseDelay);
             stateAnimator.startStackAnimations(child, viewState, state, -1, delay);
 
             // layout the divider
@@ -405,11 +414,13 @@ public class NotificationChildrenContainer extends ViewGroup {
             tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
             tmpState.alpha = mChildrenExpanded && viewState.alpha != 0 ? 0.5f : 0;
             stateAnimator.startViewAnimations(divider, tmpState, delay, duration);
-
-            notGoneIndex++;
+            if (i < maxAllowChildCount) {
+                delayIndex++;
+            }
         }
         if (mGroupOverflowContainer != null) {
-            stateAnimator.startViewAnimations(mGroupOverflowContainer, mGroupOverFlowState, -1, 0);
+            stateAnimator.startViewAnimations(mGroupOverflowContainer, mGroupOverFlowState,
+                    baseDelay, duration);
         }
     }
 
@@ -442,5 +453,11 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public int getMinHeight() {
         return getIntrinsicHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */));
+    }
+
+    public void setDark(boolean dark, boolean fade, long delay) {
+        if (mGroupOverflowContainer != null) {
+            mOverflowInvertHelper.setInverted(dark, fade, delay);
+        }
     }
 }

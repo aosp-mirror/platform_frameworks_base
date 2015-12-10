@@ -127,8 +127,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
-    public static final boolean ENABLE_CHILD_NOTIFICATIONS = Build.IS_DEBUGGABLE
-                    && SystemProperties.getBoolean("debug.child_notifs", false);
+    public static final boolean ENABLE_CHILD_NOTIFICATIONS
+            = SystemProperties.getBoolean("debug.child_notifs", true);
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
