@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 
@@ -161,6 +162,11 @@ public class BroadcastInterceptingContext extends ContextWrapper {
 
     @Override
     public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
+        sendBroadcast(intent);
+    }
+
+    @Override
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user, Bundle options) {
         sendBroadcast(intent);
     }
 
