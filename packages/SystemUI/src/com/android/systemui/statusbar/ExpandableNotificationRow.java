@@ -199,8 +199,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void onNotificationUpdated(NotificationData.Entry entry) {
         mEntry = entry;
         mStatusBarNotification = entry.notification;
-        mPrivateLayout.onNotificationUpdated(entry.notification);
-        mPublicLayout.onNotificationUpdated(entry.notification);
+        mPrivateLayout.onNotificationUpdated(entry);
+        mPublicLayout.onNotificationUpdated(entry);
         updateVetoButton();
         if (mIsSummaryWithChildren) {
             recreateNotificationHeader();
@@ -252,6 +252,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setGroupManager(NotificationGroupManager groupManager) {
         mGroupManager = groupManager;
         mPrivateLayout.setGroupManager(groupManager);
+    }
+
+    public void setRemoteInputController(RemoteInputController r) {
+        mPrivateLayout.setRemoteInputController(r);
     }
 
     public void addChildNotification(ExpandableNotificationRow row) {

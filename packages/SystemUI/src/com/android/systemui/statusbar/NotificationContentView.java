@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.Notification;
+import android.app.RemoteInput;
 import android.content.Context;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -37,6 +39,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
@@ -79,6 +82,7 @@ public class NotificationContentView extends FrameLayout {
     private int mHeadsUpHeight;
     private StatusBarNotification mStatusBarNotification;
     private NotificationGroupManager mGroupManager;
+    private RemoteInputController mRemoteInputController;
 
     private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -484,9 +488,10 @@ public class NotificationContentView extends FrameLayout {
         updateSingleLineView();
     }
 
-    public void onNotificationUpdated(StatusBarNotification statusBarNotification) {
-        mStatusBarNotification = statusBarNotification;
+    public void onNotificationUpdated(NotificationData.Entry entry) {
+        mStatusBarNotification = entry.notification;
         updateSingleLineView();
+        applyRemoteInput(entry);
         selectLayout(false /* animate */, true /* force */);
         if (mContractedChild != null) {
             mContractedWrapper.notifyContentUpdated();
@@ -508,8 +513,73 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
+    private void applyRemoteInput(final NotificationData.Entry entry) {
+        if (mRemoteInputController == null) {
+            return;
+        }
+
+        boolean hasRemoteInput = false;
+
+        Notification.Action[] actions = entry.notification.getNotification().actions;
+        if (actions != null) {
+            for (Notification.Action a : actions) {
+                if (a.getRemoteInputs() != null) {
+                    for (RemoteInput ri : a.getRemoteInputs()) {
+                        if (ri.getAllowFreeFormInput()) {
+                            hasRemoteInput = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        View bigContentView = mExpandedChild;
+        if (bigContentView != null) {
+            applyRemoteInput(bigContentView, entry, hasRemoteInput);
+        }
+        View headsUpContentView = mHeadsUpChild;
+        if (headsUpContentView != null) {
+            applyRemoteInput(headsUpContentView, entry, hasRemoteInput);
+        }
+    }
+
+    private void applyRemoteInput(View view, NotificationData.Entry entry, boolean hasRemoteInput) {
+        View actionContainerCandidate = view.findViewById(
+                com.android.internal.R.id.actions_container);
+        if (actionContainerCandidate instanceof FrameLayout) {
+            RemoteInputView existing = (RemoteInputView)
+                    view.findViewWithTag(RemoteInputView.VIEW_TAG);
+
+            if (existing != null) {
+                existing.onNotificationUpdate();
+            }
+
+            if (existing == null && hasRemoteInput) {
+                ViewGroup actionContainer = (FrameLayout) actionContainerCandidate;
+                RemoteInputView riv = RemoteInputView.inflate(
+                        mContext, actionContainer, entry, mRemoteInputController);
+
+                riv.setVisibility(View.INVISIBLE);
+                actionContainer.addView(riv, new LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT)
+                );
+                int color = entry.notification.getNotification().color;
+                if (color == Notification.COLOR_DEFAULT) {
+                    color = mContext.getColor(R.color.default_remote_input_background);
+                }
+                riv.setBackgroundColor(color);
+            }
+        }
+    }
+
     public void setGroupManager(NotificationGroupManager groupManager) {
         mGroupManager = groupManager;
+    }
+
+    public void setRemoteInputController(RemoteInputController r) {
+        mRemoteInputController = r;
     }
 
     public void setExpandClickListener(OnClickListener expandClickListener) {

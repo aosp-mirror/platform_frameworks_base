@@ -311,8 +311,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     StatusBarIconController mIconController;
 
-    private RemoteInputController mRemoteInputController;
-
     // expanded notifications
     NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     View mExpandedContents;
@@ -1098,11 +1096,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public StatusBarWindowView getStatusBarWindow() {
         return mStatusBarWindow;
-    }
-
-    @Override
-    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry) {
-        return RemoteInputView.inflate(mContext, root, entry, mRemoteInputController);
     }
 
     public int getStatusBarHeight() {
