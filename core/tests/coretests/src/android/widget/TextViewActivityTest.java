@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
+import static android.widget.espresso.DragHandleUtils.onHandleView;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.doubleTapAndDragOnText;
 import static android.widget.espresso.TextViewActions.doubleClickOnTextAtIndex;
@@ -31,19 +33,12 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.pressKey;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
-import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
 
 import com.android.frameworks.coretests.R;
 
-import android.support.test.espresso.NoMatchingRootException;
-import android.support.test.espresso.NoMatchingViewException;
-import android.support.test.espresso.ViewInteraction;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.KeyEvent;
@@ -341,26 +336,5 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('i')));
         onView(withId(R.id.textview)).check(hasSelection("hijk"));
-    }
-
-    private static void assertNoSelectionHandles() {
-        try {
-            onHandleView(com.android.internal.R.id.selection_start_handle)
-                    .check(matches(isDisplayed()));
-        } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e) {
-            try {
-                onHandleView(com.android.internal.R.id.selection_end_handle)
-                        .check(matches(isDisplayed()));
-            } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e1) {
-                return;
-            }
-        }
-        throw new AssertionError("Selection handle found");
-    }
-
-    private static ViewInteraction onHandleView(int id)
-            throws NoMatchingRootException, NoMatchingViewException, AssertionError {
-        return onView(allOf(withId(id), isAssignableFrom(Editor.HandleView.class)))
-                .inRoot(withDecorView(hasDescendant(withId(id))));
     }
 }
