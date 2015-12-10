@@ -1689,6 +1689,8 @@
   <java-symbol type="id" name="replace_message" />
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
+  <java-symbol type="fraction" name="config_autoBrightnessAdjustmentMaxGamma" />
+  <java-symbol type="integer" name="config_autoBrightnessAmbientLightHorizon"/>
   <java-symbol type="integer" name="config_autoBrightnessBrighteningLightDebounce"/>
   <java-symbol type="integer" name="config_autoBrightnessDarkeningLightDebounce"/>
   <java-symbol type="integer" name="config_autoBrightnessLightSensorRate"/>
