@@ -75,6 +75,7 @@ import android.view.ActionMode.Callback;
 import android.view.DisplayListCanvas;
 import android.view.DragEvent;
 import android.view.Gravity;
+import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -805,8 +806,8 @@ public class Editor {
         final int maxOffset = TextUtils.unpackRangeEndFromLong(lastTouchOffsets);
 
         // Safety check in case standard touch event handling has been bypassed
-        if (minOffset < 0 || minOffset >= mTextView.getText().length()) return false;
-        if (maxOffset < 0 || maxOffset >= mTextView.getText().length()) return false;
+        if (minOffset < 0 || minOffset > mTextView.getText().length()) return false;
+        if (maxOffset < 0 || maxOffset > mTextView.getText().length()) return false;
 
         int selectionStart, selectionEnd;
 
@@ -1773,7 +1774,8 @@ public class Editor {
         stopTextActionMode();
         mPreserveDetachedSelection = false;
 
-        getSelectionController().enterDrag();
+        getSelectionController().enterDrag(
+                SelectionModifierCursorController.DRAG_ACCELERATOR_MODE_WORD);
         return true;
     }
 
@@ -4492,13 +4494,21 @@ public class Editor {
 
         // Where the user first starts the drag motion.
         private int mStartOffset = -1;
-        // Indicates whether the user is selecting text and using the drag accelerator.
-        private boolean mDragAcceleratorActive;
+
         private boolean mHaventMovedEnoughToStartDrag;
         // The line that a selection happened most recently with the drag accelerator.
         private int mLineSelectionIsOn = -1;
         // Whether the drag accelerator has selected past the initial line.
         private boolean mSwitchedLines = false;
+
+        // Indicates the drag accelerator mode that the user is currently using.
+        private int mDragAcceleratorMode = DRAG_ACCELERATOR_MODE_INACTIVE;
+        // Drag accelerator is inactive.
+        private static final int DRAG_ACCELERATOR_MODE_INACTIVE = 0;
+        // Character based selection by dragging. Only for mouse.
+        private static final int DRAG_ACCELERATOR_MODE_CHARACTER = 1;
+        // Word based selection by dragging. Enabled after long pressing or double tapping.
+        private static final int DRAG_ACCELERATOR_MODE_WORD = 2;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -4510,7 +4520,6 @@ public class Editor {
             }
             initDrawables();
             initHandles();
-            hideInsertionPointCursorController();
         }
 
         private void initDrawables() {
@@ -4548,10 +4557,10 @@ public class Editor {
             if (mEndHandle != null) mEndHandle.hide();
         }
 
-        public void enterDrag() {
+        public void enterDrag(int dragAcceleratorMode) {
             // Just need to init the handles / hide insertion cursor.
             show();
-            mDragAcceleratorActive = true;
+            mDragAcceleratorMode = dragAcceleratorMode;
             // Start location of selection.
             mStartOffset = mTextView.getOffsetForPosition(mLastDownPositionX,
                     mLastDownPositionY);
@@ -4563,6 +4572,7 @@ public class Editor {
             // the user to continue dragging across the screen to select text; TextView will
             // scroll as necessary.
             mTextView.getParent().requestDisallowInterceptTouchEvent(true);
+            mTextView.cancelLongPress();
         }
 
         public void onTouchEvent(MotionEvent event) {
@@ -4570,6 +4580,7 @@ public class Editor {
             // selection and tap can move cursor from this tap position.
             final float eventX = event.getX();
             final float eventY = event.getY();
+            final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     if (extractedTextModeWillBeStarted()) {
@@ -4593,7 +4604,7 @@ public class Editor {
                                 boolean stayedInArea =
                                         distanceSquared < doubleTapSlop * doubleTapSlop;
 
-                                if (stayedInArea && isPositionOnText(eventX, eventY)) {
+                                if (stayedInArea && (isMouse || isPositionOnText(eventX, eventY))) {
                                     selectCurrentWordAndStartDrag();
                                     mDiscardNextActionUp = true;
                                 }
@@ -4639,94 +4650,136 @@ public class Editor {
                         }
                     }
 
+                    if (isMouse && !isDragAcceleratorActive()) {
+                        final int offset = mTextView.getOffsetForPosition(eventX, eventY);
+                        if (mStartOffset != offset) {
+                            // Start character based drag accelerator.
+                            if (mTextActionMode != null) {
+                                mTextActionMode.finish();
+                            }
+                            enterDrag(DRAG_ACCELERATOR_MODE_CHARACTER);
+                            mDiscardNextActionUp = true;
+                            mHaventMovedEnoughToStartDrag = false;
+                        }
+                    }
+
                     if (mStartHandle != null && mStartHandle.isShowing()) {
                         // Don't do the drag if the handles are showing already.
                         break;
                     }
 
-                    if (mStartOffset != -1 && mTextView.getLayout() != null) {
-                        if (!mHaventMovedEnoughToStartDrag) {
-
-                            float y = eventY;
-                            if (mSwitchedLines) {
-                                // Offset the finger by the same vertical offset as the handles.
-                                // This improves visibility of the content being selected by
-                                // shifting the finger below the content, this is applied once
-                                // the user has switched lines.
-                                final float fingerOffset = (mStartHandle != null)
-                                        ? mStartHandle.getIdealVerticalOffset()
-                                        : touchSlop;
-                                y = eventY - fingerOffset;
-                            }
-
-                            final int currLine = getCurrentLineAdjustedForSlop(
-                                    mTextView.getLayout(),
-                                    mLineSelectionIsOn, y);
-                            if (!mSwitchedLines && currLine != mLineSelectionIsOn) {
-                                // Break early here, we want to offset the finger position from
-                                // the selection highlight, once the user moved their finger
-                                // to a different line we should apply the offset and *not* switch
-                                // lines until recomputing the position with the finger offset.
-                                mSwitchedLines = true;
-                                break;
-                            }
-
-                            int startOffset;
-                            int offset = mTextView.getOffsetAtCoordinate(currLine, eventX);
-                            // Snap to word boundaries.
-                            if (mStartOffset < offset) {
-                                // Expanding with end handle.
-                                offset = getWordEnd(offset);
-                                startOffset = getWordStart(mStartOffset);
-                            } else {
-                                // Expanding with start handle.
-                                offset = getWordStart(offset);
-                                startOffset = getWordEnd(mStartOffset);
-                            }
-                            mLineSelectionIsOn = currLine;
-                            Selection.setSelection((Spannable) mTextView.getText(),
-                                    startOffset, offset);
-                        }
-                    }
+                    updateSelection(event);
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    if (mDragAcceleratorActive) {
-                        // No longer dragging to select text, let the parent intercept events.
-                        mTextView.getParent().requestDisallowInterceptTouchEvent(false);
+                    if (!isDragAcceleratorActive()) {
+                        break;
+                    }
+                    updateSelection(event);
 
-                        show();
-                        int startOffset = mTextView.getSelectionStart();
-                        int endOffset = mTextView.getSelectionEnd();
+                    // No longer dragging to select text, let the parent intercept events.
+                    mTextView.getParent().requestDisallowInterceptTouchEvent(false);
 
-                        // Since we don't let drag handles pass once they're visible, we need to
-                        // make sure the start / end locations are correct because the user *can*
-                        // switch directions during the initial drag.
-                        if (endOffset < startOffset) {
-                            int tmp = endOffset;
-                            endOffset = startOffset;
-                            startOffset = tmp;
+                    int startOffset = mTextView.getSelectionStart();
+                    int endOffset = mTextView.getSelectionEnd();
 
-                            // Also update the selection with the right offsets in this case.
-                            Selection.setSelection((Spannable) mTextView.getText(),
-                                    startOffset, endOffset);
-                        }
+                    // Since we don't let drag handles pass once they're visible, we need to
+                    // make sure the start / end locations are correct because the user *can*
+                    // switch directions during the initial drag.
+                    if (endOffset < startOffset) {
+                        int tmp = endOffset;
+                        endOffset = startOffset;
+                        startOffset = tmp;
 
-                        // Need to do this to display the handles.
+                        // Also update the selection with the right offsets in this case.
+                        Selection.setSelection((Spannable) mTextView.getText(),
+                                startOffset, endOffset);
+                    }
+                    if (startOffset != endOffset) {
                         mStartHandle.showAtLocation(startOffset);
                         mEndHandle.showAtLocation(endOffset);
-
-                        // No longer the first dragging motion, reset.
                         startSelectionActionMode();
-
-                        mDragAcceleratorActive = false;
-                        mStartOffset = -1;
-                        mSwitchedLines = false;
                     }
+
+                    // No longer the first dragging motion, reset.
+                    resetDragAcceleratorState();
                     break;
             }
         }
 
+        private void updateSelection(MotionEvent event) {
+            if (mTextView.getLayout() != null) {
+                switch (mDragAcceleratorMode) {
+                    case DRAG_ACCELERATOR_MODE_CHARACTER:
+                        updateCharacterBasedSelection(event);
+                        break;
+                    case DRAG_ACCELERATOR_MODE_WORD:
+                        updateWordBasedSelection(event);
+                        break;
+                }
+            }
+        }
+
+        private void updateCharacterBasedSelection(MotionEvent event) {
+            final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
+            Selection.setSelection((Spannable) mTextView.getText(), mStartOffset, offset);
+        }
+
+        private void updateWordBasedSelection(MotionEvent event) {
+            if (mHaventMovedEnoughToStartDrag) {
+                return;
+            }
+            final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
+            final ViewConfiguration viewConfig = ViewConfiguration.get(
+                    mTextView.getContext());
+            final float eventX = event.getX();
+            final float eventY = event.getY();
+            final int currLine;
+            if (isMouse) {
+                // No need to offset the y coordinate for mouse input.
+                currLine = mTextView.getLineAtCoordinate(eventY);
+            } else {
+                float y = eventY;
+                if (mSwitchedLines) {
+                    // Offset the finger by the same vertical offset as the handles.
+                    // This improves visibility of the content being selected by
+                    // shifting the finger below the content, this is applied once
+                    // the user has switched lines.
+                    final int touchSlop = viewConfig.getScaledTouchSlop();
+                    final float fingerOffset = (mStartHandle != null)
+                            ? mStartHandle.getIdealVerticalOffset()
+                            : touchSlop;
+                    y = eventY - fingerOffset;
+                }
+
+                currLine = getCurrentLineAdjustedForSlop(mTextView.getLayout(), mLineSelectionIsOn,
+                        y);
+                if (!mSwitchedLines && currLine != mLineSelectionIsOn) {
+                    // Break early here, we want to offset the finger position from
+                    // the selection highlight, once the user moved their finger
+                    // to a different line we should apply the offset and *not* switch
+                    // lines until recomputing the position with the finger offset.
+                    mSwitchedLines = true;
+                    return;
+                }
+            }
+
+            int startOffset;
+            int offset = mTextView.getOffsetAtCoordinate(currLine, eventX);
+            // Snap to word boundaries.
+            if (mStartOffset < offset) {
+                // Expanding with end handle.
+                offset = getWordEnd(offset);
+                startOffset = getWordStart(mStartOffset);
+            } else {
+                // Expanding with start handle.
+                offset = getWordStart(offset);
+                startOffset = getWordEnd(mStartOffset);
+            }
+            mLineSelectionIsOn = currLine;
+            Selection.setSelection((Spannable) mTextView.getText(),
+                    startOffset, offset);
+        }
         /**
          * @param event
          */
@@ -4749,8 +4802,12 @@ public class Editor {
 
         public void resetTouchOffsets() {
             mMinTouchOffset = mMaxTouchOffset = -1;
+            resetDragAcceleratorState();
+        }
+
+        private void resetDragAcceleratorState() {
             mStartOffset = -1;
-            mDragAcceleratorActive = false;
+            mDragAcceleratorMode = DRAG_ACCELERATOR_MODE_INACTIVE;
             mSwitchedLines = false;
         }
 
@@ -4765,7 +4822,7 @@ public class Editor {
          * @return true if the user is selecting text using the drag accelerator.
          */
         public boolean isDragAcceleratorActive() {
-            return mDragAcceleratorActive;
+            return mDragAcceleratorMode != DRAG_ACCELERATOR_MODE_INACTIVE;
         }
 
         public void onTouchModeChanged(boolean isInTouchMode) {
