@@ -192,10 +192,6 @@ public class InputMethodSubtypeSwitchingController {
                             }
                         });
 
-        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList() {
-            return getSortedInputMethodAndSubtypeList(false, false);
-        }
-
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
                 boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
             final ArrayList<ImeSubtypeListItem> imList =
@@ -532,7 +528,8 @@ public class InputMethodSubtypeSwitchingController {
     public void resetCircularListLocked(Context context) {
         mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
         mController = ControllerImpl.createFrom(mController,
-                mSubtypeList.getSortedInputMethodAndSubtypeList());
+                mSubtypeList.getSortedInputMethodAndSubtypeList(
+                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */));
     }
 
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme, InputMethodInfo imi,
