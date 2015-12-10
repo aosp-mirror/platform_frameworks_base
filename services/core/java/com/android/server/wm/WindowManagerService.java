@@ -267,6 +267,9 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
+    /** Amount of time (in milliseconds) to delay before declaring a window replacement timeout. */
+    static final int WINDOW_REPLACEMENT_TIMEOUT_DURATION = 2000;
+
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
     /**
@@ -1349,10 +1352,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final AppWindowToken appToken = win.mAppToken;
         if (appToken != null) {
             if (addToToken) {
-                appToken.allAppWindows.add(win);
-            }
-            if (appToken.mWillReplaceWindow) {
-                appToken.mReplacingWindow = win;
+                appToken.addWindow(win);
             }
         }
     }
@@ -2083,14 +2083,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void prepareWindowReplacementTransition(AppWindowToken atoken) {
-        if (atoken == null || !atoken.mWillReplaceWindow || !atoken.mAnimateReplacingWindow) {
+        if (atoken == null) {
             return;
         }
         atoken.allDrawn = false;
         WindowState replacedWindow = null;
         for (int i = atoken.windows.size() - 1; i >= 0 && replacedWindow == null; i--) {
             WindowState candidate = atoken.windows.get(i);
-            if (candidate.mExiting) {
+            if (candidate.mExiting && candidate.mWillReplaceWindow
+                    && candidate.mAnimateReplacingWindow) {
                 replacedWindow = candidate;
             }
         }
@@ -2190,7 +2191,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " app-animation="
                 + (win.mAppToken != null ? win.mAppToken.mAppAnimator.animation : null)
                 + " mWillReplaceWindow="
-                + (win.mAppToken != null ? win.mAppToken.mWillReplaceWindow : false)
+                + win.mWillReplaceWindow
                 + " inPendingTransaction="
                 + (win.mAppToken != null ? win.mAppToken.inPendingTransaction : false)
                 + " mDisplayFrozen=" + mDisplayFrozen);
@@ -2202,13 +2203,13 @@ public class WindowManagerService extends IWindowManager.Stub
         // animation wouldn't be seen.
         if (win.mHasSurface && okToDisplay()) {
             final AppWindowToken appToken = win.mAppToken;
-            if (appToken != null && appToken.mWillReplaceWindow) {
+            if (win.mWillReplaceWindow) {
                 // This window is going to be replaced. We need to keep it around until the new one
                 // gets added, then we will get rid of this one.
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Preserving " + win + " until the new one is "
                         + "added");
                 win.mExiting = true;
-                appToken.mReplacingRemoveRequested = true;
+                win.mReplacingRemoveRequested = true;
                 Binder.restoreCallingIdentity(origId);
                 return;
             }
@@ -4042,7 +4043,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // transition animation
         // * or this is an opening app and windows are being replaced.
         if (wtoken.hidden == visible || (wtoken.hidden && wtoken.mIsExiting) ||
-                (visible && wtoken.mWillReplaceWindow)) {
+                (visible && wtoken.waitingForReplacement())) {
             boolean changed = false;
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG_WM, "Changing app " + wtoken + " hidden=" + wtoken.hidden
@@ -7483,6 +7484,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int TWO_FINGER_SCROLL_START = 45;
         public static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = 46;
 
+        public static final int WINDOW_REPLACEMENT_TIMEOUT = 47;
+
         /**
          * Used to denote that an integer field in a message will not be used.
          */
@@ -8065,6 +8068,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     toast.show();
                 }
                 break;
+                case WINDOW_REPLACEMENT_TIMEOUT: {
+                    final AppWindowToken token = (AppWindowToken) msg.obj;
+                    synchronized (mWindowMap) {
+                        token.clearTimedoutReplaceesLocked();
+                    }
+                }
+                break;
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG_WM, "handleMessage: exit");
@@ -8587,7 +8597,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int numTokens = tokens.size();
                 for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    if (wtoken.mIsExiting && !wtoken.mWillReplaceWindow) {
+                    if (wtoken.mIsExiting && !wtoken.waitingForReplacement()) {
                         continue;
                     }
                     i = reAddAppWindowsLocked(displayContent, i, wtoken);
@@ -8696,8 +8706,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private void forceHigherLayerIfNeeded(WindowState w, WindowStateAnimator winAnimator,
             AppWindowToken wtoken) {
         boolean force = false;
-        if (wtoken.mWillReplaceWindow && wtoken.mReplacingWindow != w
-                && wtoken.mAnimateReplacingWindow) {
+
+        if (w.mWillReplaceWindow) {
             // We know that we will be animating a relaunching window in the near future,
             // which will receive a z-order increase. We want the replaced window to
             // immediately receive the same treatment, e.g. to be above the dock divider.
@@ -10213,26 +10223,20 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param token Application token for which the activity will be relaunched.
      */
     public void setReplacingWindow(IBinder token, boolean animate) {
+        AppWindowToken appWindowToken = null;
         synchronized (mWindowMap) {
-            AppWindowToken appWindowToken = findAppWindowToken(token);
+            appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null || !appWindowToken.isVisible()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token " + token);
                 return;
             }
-            if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
-                    + " as replacing window.");
-            appWindowToken.mWillReplaceWindow = true;
-            appWindowToken.mHasReplacedWindow = false;
-            appWindowToken.mAnimateReplacingWindow = animate;
+            appWindowToken.setReplacingWindows(animate);
+        }
 
-            if (animate) {
-                // Set-up dummy animation so we can start treating windows associated with this
-                // token like they are in transition before the new app window is ready for us to
-                // run the real transition animation.
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
-                        "setReplacingWindow() Setting dummy animation on: " + appWindowToken);
-                appWindowToken.mAppAnimator.setDummyAnimation();
-            }
+        if (appWindowToken != null) {
+            mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
+            mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_REPLACEMENT_TIMEOUT, appWindowToken),
+                    WINDOW_REPLACEMENT_TIMEOUT_DURATION);
         }
     }
 

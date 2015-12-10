@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
+
 import com.android.internal.R;
 
 import android.annotation.NonNull;
@@ -1310,6 +1312,8 @@ public class PopupWindow {
         } else {
             p.width = mLastWidth = mWidth;
         }
+
+        p.privateFlags = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 
         // Used for debugging.
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));

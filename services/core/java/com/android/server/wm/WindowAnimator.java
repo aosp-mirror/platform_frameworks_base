@@ -918,10 +918,6 @@ public class WindowAnimator {
     }
 
     void requestRemovalOfReplacedWindows(WindowState win) {
-        final AppWindowToken token = win.mAppToken;
-        if (token != null && token.mWillReplaceWindow && token.mReplacingWindow == win) {
-            token.mHasReplacedWindow = true;
-        }
         mRemoveReplacedWindows = true;
     }
 

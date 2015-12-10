@@ -506,7 +506,7 @@ class WallpaperController {
                 inFreeformSpace = stack != null && stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
             }
 
-            replacing = replacing || (w.mAppToken != null && w.mAppToken.mWillReplaceWindow);
+            replacing = replacing || w.mWillReplaceWindow;
 
             // If the app is executing an animation because the keyguard is going away,
             // keep the wallpaper during the animation so it doesn't flicker out.

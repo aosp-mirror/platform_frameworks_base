@@ -1192,7 +1192,7 @@ class WindowSurfacePlacer {
                     // if app window is removed, or window relayout to invisible. We don't want to
                     // clear it out for windows that get replaced, because the animation depends on
                     // the flag to remove the replaced window.
-                    if (win.mAppToken == null || !win.mAppToken.mWillReplaceWindow) {
+                    if (!win.mWillReplaceWindow) {
                         win.mExiting = false;
                     }
                     if (win.mWinAnimator.mAnimLayer > layer) {
