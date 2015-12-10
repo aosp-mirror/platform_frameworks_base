@@ -523,7 +523,9 @@ public final class HdmiControlService extends SystemService {
                 case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
                     for (int type : mLocalDevices) {
                         HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
-                        localDevice.setAutoDeviceOff(enabled);
+                        if (localDevice != null) {
+                            localDevice.setAutoDeviceOff(enabled);
+                        }
                     }
                     // No need to propagate to HAL.
                     break;
