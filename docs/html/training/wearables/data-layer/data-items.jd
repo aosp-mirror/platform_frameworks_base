@@ -158,7 +158,7 @@ public class MainActivity extends Activity implements
 
     &#64;Override
     protected void onResume() {
-        super.onStart();
+        super.onResume();
         mGoogleApiClient.connect();
     }
 
