@@ -78,47 +78,64 @@
             android:tint="@android:color/white" />
     </LinearLayout>
 
-    <include layout="@layout/split_clock_view"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/header_emergency_calls_only"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="2dp"
+        android:layout_width="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:id="@+id/clock"
-        />
-
-    <com.android.systemui.statusbar.policy.DateView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:layout_marginTop="8dp"
-        android:layout_toEndOf="@id/clock"
-        android:layout_alignParentTop="true"
-        android:drawableStart="@drawable/header_dot"
-        android:drawablePadding="6dp"
-        android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-        android:textSize="@dimen/qs_time_collapsed_size"
-        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
-        />
-
-    <com.android.systemui.statusbar.AlphaOptimizedButton
-        android:id="@+id/alarm_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@id/date"
-        android:drawablePadding="6dp"
-        android:drawableStart="@drawable/ic_access_alarms_small"
-        android:textColor="#64ffffff"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-        android:minHeight="36dp"
-        android:paddingStart="6dp"
-        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
         android:visibility="gone"
-        />
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+        android:text="@*android:string/emergency_calls_only"
+        android:singleLine="true"
+        android:gravity="center_vertical" />
+
+    <LinearLayout
+        android:id="@+id/date_time_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal">
+
+        <include layout="@layout/split_clock_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="2dp"
+            android:id="@+id/clock" />
+
+        <com.android.systemui.statusbar.policy.DateView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="8dp"
+            android:layout_alignParentTop="true"
+            android:drawableStart="@drawable/header_dot"
+            android:drawablePadding="6dp"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+            android:textSize="@dimen/qs_time_collapsed_size"
+            systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+
+        <com.android.systemui.statusbar.AlphaOptimizedButton
+            android:id="@+id/alarm_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:drawablePadding="6dp"
+            android:drawableStart="@drawable/ic_access_alarms_small"
+            android:textColor="#64ffffff"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+            android:minHeight="36dp"
+            android:paddingStart="6dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
