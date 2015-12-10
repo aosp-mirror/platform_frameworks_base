@@ -168,6 +168,7 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/hierarchy-viewer.html">Hierarchy Viewer</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/hprof-conv.html">hprof-conv</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/jobb.html">jobb</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">Layout Editor</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/help/lint.html">lint</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
