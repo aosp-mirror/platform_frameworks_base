@@ -23,7 +23,7 @@ Copyright (C) 2015 The Android Open Source Project
            android:translateX="8.0"
            android:translateY="8.0" >
         <path
-            android:fillColor="#33FFFFFF"
+            android:fillColor="#33000000"
             android:pathData="M6.9,4.0l-2.9,2.9 9.1,9.1 -9.1,9.200001 2.9,2.799999 9.1,-9.1 9.1,9.1 2.9,-2.799999 -9.1,-9.200001 9.1,-9.1 -2.9,-2.9 -9.1,9.2z"/>
     </group>
 </vector>

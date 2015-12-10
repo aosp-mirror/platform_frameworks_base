@@ -74,6 +74,8 @@ import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
+import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
@@ -184,9 +186,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private boolean mWindowResizeCallbacksAdded = false;
 
-    BackdropFrameRenderer mBackdropFrameRenderer = null;
+    private BackdropFrameRenderer mBackdropFrameRenderer = null;
     private Drawable mResizingBackgroundDrawable;
     private Drawable mCaptionBackgroundDrawable;
+    private Drawable mUserCaptionBackgroundDrawable;
 
     DecorView(Context context, int featureId, PhoneWindow window) {
         super(context);
@@ -1580,18 +1583,20 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         initializeElevation();
     }
 
-    View onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
+    void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
         mStackId = getStackId();
 
         mResizingBackgroundDrawable = getResizingBackgroundDrawable(
                 mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
-        mCaptionBackgroundDrawable =
-                getContext().getDrawable(R.drawable.decor_caption_title_focused);
+        if (mCaptionBackgroundDrawable == null) {
+            mCaptionBackgroundDrawable = getContext().getDrawable(
+                    R.drawable.decor_caption_title_focused);
+        }
 
         if (mBackdropFrameRenderer != null) {
             mBackdropFrameRenderer.onResourcesLoaded(
                     this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
-                    getCurrentColor(mStatusColorViewState));
+                    mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState));
         }
 
         mDecorCaptionView = createDecorCaptionView(inflater);
@@ -1608,17 +1613,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         mContentRoot = (ViewGroup) root;
         initializeElevation();
-        return root;
     }
 
     // Free floating overlapping windows require a caption.
     private DecorCaptionView createDecorCaptionView(LayoutInflater inflater) {
-        DecorCaptionView DecorCaptionView = null;
-        for (int i = getChildCount() - 1; i >= 0 && DecorCaptionView == null; i--) {
+        DecorCaptionView decorCaptionView = null;
+        for (int i = getChildCount() - 1; i >= 0 && decorCaptionView == null; i--) {
             View view = getChildAt(i);
             if (view instanceof DecorCaptionView) {
                 // The decor was most likely saved from a relaunch - so reuse it.
-                DecorCaptionView = (DecorCaptionView) view;
+                decorCaptionView = (DecorCaptionView) view;
                 removeViewAt(i);
             }
         }
@@ -1630,27 +1634,72 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 && ActivityManager.StackId.hasWindowDecor(mStackId)) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
-            if (DecorCaptionView == null) {
-                Context context = getContext();
-                TypedValue value = new TypedValue();
-                context.getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
-                inflater = inflater.from(context);
-                if (Color.luminance(value.data) < 0.5) {
-                    DecorCaptionView = (DecorCaptionView) inflater.inflate(
-                            R.layout.decor_caption_dark, null);
-                } else {
-                    DecorCaptionView = (DecorCaptionView) inflater.inflate(
-                            R.layout.decor_caption_light, null);
-                }
+            if (decorCaptionView == null) {
+                decorCaptionView = inflateDecorCaptionView(inflater);
             }
-            DecorCaptionView.setPhoneWindow(mWindow, true /*showDecor*/);
+            decorCaptionView.setPhoneWindow(mWindow, true /*showDecor*/);
         } else {
-            DecorCaptionView = null;
+            decorCaptionView = null;
         }
 
         // Tell the decor if it has a visible caption.
-        enableCaption(DecorCaptionView != null);
-        return DecorCaptionView;
+        enableCaption(decorCaptionView != null);
+        return decorCaptionView;
+    }
+
+    private DecorCaptionView inflateDecorCaptionView(LayoutInflater inflater) {
+        final Context context = getContext();
+        // We make a copy of the inflater, so it has the right context associated with it.
+        inflater = inflater.from(context);
+        final DecorCaptionView view = (DecorCaptionView) inflater.inflate(R.layout.decor_caption,
+                null);
+        setDecorCaptionShade(context, view);
+        return view;
+    }
+
+    private void setDecorCaptionShade(Context context, DecorCaptionView view) {
+        final int shade = mWindow.getDecorCaptionShade();
+        switch (shade) {
+            case DECOR_CAPTION_SHADE_LIGHT:
+                setLightDecorCaptionShade(view);
+                break;
+            case DECOR_CAPTION_SHADE_DARK:
+                setDarkDecorCaptionShade(view);
+                break;
+            default: {
+                TypedValue value = new TypedValue();
+                context.getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
+                // We invert the shade depending on brightness of the theme. Dark shade for light
+                // theme and vice versa. Thanks to this the buttons should be visible on the
+                // background.
+                if (Color.luminance(value.data) < 0.5) {
+                    setLightDecorCaptionShade(view);
+                } else {
+                    setDarkDecorCaptionShade(view);
+                }
+                break;
+            }
+        }
+    }
+
+    void updateDecorCaptionShade() {
+        if (mDecorCaptionView != null) {
+            setDecorCaptionShade(getContext(), mDecorCaptionView);
+        }
+    }
+
+    private void setLightDecorCaptionShade(DecorCaptionView view) {
+        view.findViewById(R.id.maximize_window).setBackgroundResource(
+                R.drawable.decor_maximize_button_light);
+        view.findViewById(R.id.close_window).setBackgroundResource(
+                R.drawable.decor_close_button_light);
+    }
+
+    private void setDarkDecorCaptionShade(DecorCaptionView view) {
+        view.findViewById(R.id.maximize_window).setBackgroundResource(
+                R.drawable.decor_maximize_button_dark);
+        view.findViewById(R.id.close_window).setBackgroundResource(
+                R.drawable.decor_close_button_dark);
     }
 
     /**
@@ -1735,11 +1784,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mBackdropFrameRenderer != null) {
             return;
         }
-        final ThreadedRenderer renderer = (ThreadedRenderer) getHardwareRenderer();
+        final ThreadedRenderer renderer = getHardwareRenderer();
         if (renderer != null) {
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
-                    getCurrentColor(mStatusColorViewState));
+                    mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState));
 
             // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
             // If we want to get the shadow shown while resizing, we would need to elevate a new
@@ -1847,6 +1896,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private float dipToPx(float dip) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip,
                 getResources().getDisplayMetrics());
+    }
+
+    /**
+     * Provide an override of the caption background drawable.
+     */
+    void setUserCaptionBackgroundDrawable(Drawable drawable) {
+        mUserCaptionBackgroundDrawable = drawable;
+        if (mBackdropFrameRenderer != null) {
+            mBackdropFrameRenderer.setUserCaptionBackgroundDrawable(drawable);
+        }
     }
 
     private static class ColorViewState {

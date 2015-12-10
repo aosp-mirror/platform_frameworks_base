@@ -63,17 +63,18 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     private boolean mReportNextDraw;
 
     private Drawable mCaptionBackgroundDrawable;
+    private Drawable mUserCaptionBackgroundDrawable;
     private Drawable mResizingBackgroundDrawable;
     private ColorDrawable mStatusBarColor;
 
     public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
             Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable,
-            int statusBarColor) {
+            Drawable userCaptionBackgroundDrawable, int statusBarColor) {
         setName("ResizeFrame");
 
         mRenderer = renderer;
         onResourcesLoaded(decorView, resizingBackgroundDrawable, captionBackgroundDrawable,
-                statusBarColor);
+                userCaptionBackgroundDrawable, statusBarColor);
 
         // Create a render node for the content and frame backdrop
         // which can be resized independently from the content.
@@ -92,10 +93,12 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     }
 
     void onResourcesLoaded(DecorView decorView, Drawable resizingBackgroundDrawable,
-            Drawable captionBackgroundDrawableDrawable, int statusBarColor) {
+            Drawable captionBackgroundDrawableDrawable, Drawable userCaptionBackgroundDrawable,
+            int statusBarColor) {
         mDecorView = decorView;
         mResizingBackgroundDrawable = resizingBackgroundDrawable;
         mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
+        mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable;
         if (statusBarColor != 0) {
             mStatusBarColor = new ColorDrawable(statusBarColor);
             addSystemBarNodeIfNeeded();
@@ -281,8 +284,10 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
 
         // Draw the caption and content backdrops in to our render node.
         DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
-        mCaptionBackgroundDrawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
-        mCaptionBackgroundDrawable.draw(canvas);
+        final Drawable drawable = mUserCaptionBackgroundDrawable != null
+                ? mUserCaptionBackgroundDrawable : mCaptionBackgroundDrawable;
+        drawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
+        drawable.draw(canvas);
 
         // The backdrop: clear everything with the background. Clipping is done elsewhere.
         mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
@@ -323,5 +328,9 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         if (mChoreographer != null) {
             mChoreographer.postFrameCallback(this);
         }
+    }
+
+    void setUserCaptionBackgroundDrawable(Drawable userCaptionBackgroundDrawable) {
+        mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable;
     }
 }

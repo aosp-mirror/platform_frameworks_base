@@ -319,6 +319,10 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
                         captionHeight + mContent.getMeasuredHeight());
             }
         }
+
+        // This assumes that the caption bar is at the top.
+        mOwner.notifyRestrictedCaptionAreaCallback(mMaximize.getLeft(), mMaximize.getTop(),
+                mClose.getRight(), mClose.getBottom());
     }
     /**
      * Determine if the workspace is entirely covered by the window.
