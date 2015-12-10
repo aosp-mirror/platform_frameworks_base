@@ -74,6 +74,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
@@ -733,7 +734,7 @@ final class ActivityStack {
                 "Launch completed; removing icicle of " + r.icicle);
     }
 
-    private void addRecentActivityLocked(ActivityRecord r) {
+    void addRecentActivityLocked(ActivityRecord r) {
         if (r != null) {
             mRecentTasks.addLocked(r.task);
             r.task.touchActiveTime();
@@ -2312,8 +2313,8 @@ final class ActivityStack {
         updateTaskMovement(task, true);
     }
 
-    final void startActivityLocked(ActivityRecord r, boolean newTask,
-            boolean doResume, boolean keepCurTransition, ActivityOptions options) {
+    final void startActivityLocked(ActivityRecord r, boolean newTask, boolean keepCurTransition,
+            ActivityOptions options) {
         TaskRecord rTask = r.task;
         final int taskId = rTask.taskId;
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
@@ -2458,12 +2459,6 @@ final class ActivityStack {
         }
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
-        }
-
-        if (doResume) {
-            mStackSupervisor.resumeTopActivitiesLocked(this, r, options);
-        } else {
-            addRecentActivityLocked(r);
         }
     }
 

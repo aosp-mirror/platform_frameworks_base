@@ -3484,27 +3484,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Watchdog.getInstance().processStarted(app.processName, startResult.pid);
             }
 
-            checkTime(startTime, "startProcess: building log message");
-            StringBuilder buf = mStringBuilder;
-            buf.setLength(0);
-            buf.append("Start proc ");
-            buf.append(startResult.pid);
-            buf.append(':');
-            buf.append(app.processName);
-            buf.append('/');
-            UserHandle.formatUid(buf, uid);
-            if (!isActivityProcess) {
-                buf.append(" [");
-                buf.append(entryPoint);
-                buf.append("]");
+            if (DEBUG_PROCESSES) {
+                checkTime(startTime, "startProcess: building log message");
+                StringBuilder buf = mStringBuilder;
+                buf.setLength(0);
+                buf.append("Start proc ");
+                buf.append(startResult.pid);
+                buf.append(':');
+                buf.append(app.processName);
+                buf.append('/');
+                UserHandle.formatUid(buf, uid);
+                if (!isActivityProcess) {
+                    buf.append(" [");
+                    buf.append(entryPoint);
+                    buf.append("]");
+                }
+                buf.append(" for ");
+                buf.append(hostingType);
+                if (hostingNameStr != null) {
+                    buf.append(" ");
+                    buf.append(hostingNameStr);
+                }
+                Slog.i(TAG, buf.toString());
             }
-            buf.append(" for ");
-            buf.append(hostingType);
-            if (hostingNameStr != null) {
-                buf.append(" ");
-                buf.append(hostingNameStr);
-            }
-            Slog.i(TAG, buf.toString());
             app.setPid(startResult.pid);
             app.usingWrapper = startResult.usingWrapper;
             app.removed = false;
@@ -19748,7 +19750,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         } else {
                             numEmpty++;
                             if (numEmpty > emptyProcessLimit) {
-                                app.kill("empty #" + numEmpty, true);
+                                app.kill("empty #" + numEmpty, DEBUG_PROCESSES);
                             }
                         }
                         break;
