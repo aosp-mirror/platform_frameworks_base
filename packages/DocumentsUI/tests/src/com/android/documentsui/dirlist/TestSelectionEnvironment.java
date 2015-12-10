@@ -25,6 +25,7 @@ import android.view.View;
 import com.android.documentsui.dirlist.MultiSelectManager.SelectionEnvironment;
 
 import java.util.List;
+import java.util.Set;
 
 public class TestSelectionEnvironment implements SelectionEnvironment {
 
@@ -82,6 +83,11 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     }
 
     @Override
+    public int getAdapterPositionAt(int index) {
+        return 0;
+    }
+
+    @Override
     public int getAdapterPositionForChildView(View view) {
         return 0;
     }
@@ -116,18 +122,13 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     }
 
     @Override
-    public String getModelIdAt(int index) {
-        return null;
-    }
-
-    @Override
-    public String getModelIdForChildView(View view) {
-        return null;
-    }
-
-    @Override
     public int getItemCount() {
         return mItems.size();
+    }
+
+    @Override
+    public List<String> getModelIds() {
+        return null;
     }
 
     @Override

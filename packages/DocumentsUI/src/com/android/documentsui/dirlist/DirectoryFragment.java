@@ -1003,10 +1003,9 @@ public class DirectoryFragment extends Fragment {
         static private final String TAG = "DocumentsAdapter";
         private final Context mContext;
         /**
-         * Map of model IDs to adapter positions. This is the data structure that determines what
-         * shows up in the UI, and where.
+         * An ordered list of model IDs. This is the data structure that determines what shows up in
+         * the UI, and where.
          */
-        // TODO(stable-id): need to keep this up-to-date when items are added/removed
         private List<String> mModelIds = new ArrayList<>();
 
         public DocumentsAdapter(Context context) {
@@ -1225,7 +1224,6 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void onModelUpdate(Model model) {
-            // TODO(stable-id): Sort model IDs, categorize by dir/file, etc
             mModelIds = Lists.newArrayList(model.getModelIds());
         }
 

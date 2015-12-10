@@ -20,6 +20,10 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
+import com.google.common.collect.Sets;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @SmallTest
 public class MultiSelectManager_SelectionTest extends AndroidTestCase {
@@ -98,6 +102,72 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
         Selection other = new Selection();
         other.add("foobar");
         assertFalse(selection.equals(other));
+    }
+
+    public void testIntersection_empty0() {
+        Selection testSelection = new Selection();
+        testSelection.intersect(new HashSet<String>());
+        assertTrue(testSelection.isEmpty());
+    }
+
+    public void testIntersection_empty1() {
+        Selection testSelection = new Selection();
+        testSelection.intersect(Sets.newHashSet("foo"));
+        assertTrue(testSelection.isEmpty());
+    }
+
+    public void testIntersection_empty2() {
+        assertFalse(selection.isEmpty());
+        selection.intersect(new HashSet<String>());
+        assertTrue(selection.isEmpty());
+    }
+
+    public void testIntersection_exclusive() {
+        String[] ids0 = new String[]{"foo", "bar", "baz"};
+        String[] ids1 = new String[]{"0", "1", "2"};
+
+        Selection testSelection = new Selection();
+        testSelection.add(ids0[0]);
+        testSelection.add(ids0[1]);
+        testSelection.add(ids0[2]);
+
+        Set<String> set = Sets.newHashSet(ids1);
+        testSelection.intersect(set);
+
+        assertTrue(testSelection.isEmpty());
+    }
+
+    public void testIntersection_subset() {
+        String[] ids0 = new String[]{"foo", "bar", "baz"};
+        String[] ids1 = new String[]{"0", "baz", "1", "foo", "2"};
+
+        Selection testSelection = new Selection();
+        testSelection.add(ids0[0]);
+        testSelection.add(ids0[1]);
+        testSelection.add(ids0[2]);
+
+        testSelection.intersect(Sets.newHashSet(ids1));
+
+        assertTrue(testSelection.contains("foo"));
+        assertFalse(testSelection.contains("bar"));
+        assertTrue(testSelection.contains("baz"));
+    }
+
+    public void testIntersection_all() {
+        String[] ids0 = new String[]{"foo", "bar", "baz"};
+        String[] ids1 = new String[]{"0", "baz", "1", "foo", "2", "bar"};
+
+        Selection testSelection = new Selection();
+        testSelection.add(ids0[0]);
+        testSelection.add(ids0[1]);
+        testSelection.add(ids0[2]);
+
+        Selection control = new Selection();
+        control.copyFrom(testSelection);
+
+        testSelection.intersect(Sets.newHashSet(ids1));
+
+        assertTrue(testSelection.equals(control));
     }
 
     private void assertContains(String id) {

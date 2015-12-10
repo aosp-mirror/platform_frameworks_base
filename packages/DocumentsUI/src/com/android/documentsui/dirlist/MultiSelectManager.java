@@ -30,6 +30,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -40,6 +42,7 @@ import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,21 +143,13 @@ public final class MultiSelectManager implements View.OnKeyListener {
         mEnvironment.registerDataObserver(
                 new RecyclerView.AdapterDataObserver() {
 
-                    private List<String> mModelIds = new ArrayList<>();
+                    private List<String> mModelIds;
 
                     @Override
                     public void onChanged() {
-                        // TODO(stable-id): This is causing b/22765812
+                        // TODO: This is causing b/22765812
                         mSelection.clear();
-
-                        // TODO(stable-id): Improve this. It's currently super-inefficient,
-                        // performing a bunch of lookups and inserting into a List. Maybe just add
-                        // another method to the SelectionEnvironment to just grab the whole list at
-                        // once.
-                        mModelIds.clear();
-                        for (int i = 0; i < mEnvironment.getItemCount(); ++i) {
-                            mModelIds.add(mEnvironment.getModelIdFromAdapterPosition(i));
-                        }
+                        mModelIds = mEnvironment.getModelIds();
                     }
 
                     @Override
@@ -172,14 +167,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     public void onItemRangeRemoved(int startPosition, int itemCount) {
                         checkState(startPosition >= 0);
                         checkState(itemCount > 0);
+
                         mSelection.cancelProvisionalSelection();
-                        int endPosition = startPosition + itemCount;
                         // Remove any disappeared IDs from the selection.
-                        for (int i = startPosition; i < endPosition; i++) {
-                            String id = mModelIds.get(i);
-                            mSelection.remove(id);
-                            mModelIds.remove(i);
-                        }
+                        mSelection.intersect(mModelIds);
                     }
 
                     @Override
@@ -731,6 +722,14 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mTotalSelection.clear();
         }
 
+        /**
+         * Trims this selection to be the intersection of itself with the set of given IDs.
+         */
+        public void intersect(Collection<String> ids) {
+            mSavedSelection.retainAll(ids);
+            mTotalSelection.retainAll(ids);
+        }
+
         @VisibleForTesting
         void copyFrom(Selection source) {
             mSavedSelection = new HashSet<>(source.mSavedSelection);
@@ -794,6 +793,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         void removeCallback(Runnable r);
         Point createAbsolutePoint(Point relativePoint);
         Rect getAbsoluteRectForChildViewAt(int index);
+        int getAdapterPositionAt(int index);
         int getAdapterPositionForChildView(View view);
         int getColumnCount();
         int getRowCount();
@@ -801,9 +801,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
         int getVisibleChildCount();
         void focusItem(int position);
         String getModelIdFromAdapterPosition(int position);
-        String getModelIdAt(int index);
-        String getModelIdForChildView(View view);
         int getItemCount();
+        List<String> getModelIds();
         void notifyItemChanged(String id, String selectionChangedMarker);
         void registerDataObserver(RecyclerView.AdapterDataObserver observer);
     }
@@ -833,24 +832,13 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
 
         @Override
-        public String getModelIdForChildView(View view) {
-            if (view.getParent() == mView) {
-                RecyclerView.ViewHolder vh = mView.getChildViewHolder(view);
-                if (vh instanceof DirectoryFragment.DocumentHolder) {
-                    return ((DirectoryFragment.DocumentHolder) vh).modelId;
-                }
-            }
-            return null;
+        public int getAdapterPositionAt(int index) {
+            return getAdapterPositionForChildView(mView.getChildAt(index));
         }
 
         @Override
         public String getModelIdFromAdapterPosition(int position) {
             return mAdapter.getModelId(position);
-        }
-
-        @Override
-        public String getModelIdAt(int index) {
-            return getModelIdForChildView(mView.getChildAt(index));
         }
 
         @Override
@@ -996,6 +984,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
         @Override
         public void registerDataObserver(RecyclerView.AdapterDataObserver observer) {
             mAdapter.registerAdapterDataObserver(observer);
+        }
+
+        @Override
+        public List<String> getModelIds() {
+            return mAdapter.getModelIds();
         }
     }
 
@@ -1179,15 +1172,14 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mEnvironment.hideBand();
             mSelection.applyProvisionalSelection();
             mModel.endSelection();
-            String firstSelected = mModel.getItemNearestOrigin();
-            if (!mSelection.contains(firstSelected)) {
+            int firstSelected = mModel.getPositionNearestOrigin();
+            if (!mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(firstSelected))) {
                 Log.w(TAG, "First selected by band is NOT in selection!");
                 // Sadly this is really happening. Need to figure out what's going on.
-            } else if (firstSelected != null) {
-                // TODO(stable-id): firstSelected should really be lastSelected, we want to anchor the
-                // range where the mouse-up occurred. Also figure out how to translate the model ID
-                // into a position.
-                // setSelectionRangeBegin(firstSelected);
+            } else if (firstSelected != NOT_SET) {
+                // TODO: firstSelected should really be lastSelected, we want to anchor the item
+                // where the mouse-up occurred.
+                setSelectionRangeBegin(firstSelected);
             }
 
             mModel = null;
@@ -1349,7 +1341,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         // by their y-offset. For example, if the first column of the view starts at an x-value of 5,
         // mColumns.get(5) would return an array of positions in that column. Within that array, the
         // value for key y is the adapter position for the item whose y-offset is y.
-        private final SparseArray<SparseArray<String>> mColumns = new SparseArray<>();
+        private final SparseArray<SparseIntArray> mColumns = new SparseArray<>();
 
         // List of limits along the x-axis (columns).
         // This list is sorted from furthest left to furthest right.
@@ -1360,7 +1352,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private final List<Limits> mRowBounds = new ArrayList<>();
 
         // The adapter positions which have been recorded so far.
-        private final Set<String> mKnownIds = new HashSet<>();
+        private final SparseBooleanArray mKnownPositions = new SparseBooleanArray();
 
         // Array passed to registered OnSelectionChangedListeners. One array is created and reused
         // throughout the lifetime of the object.
@@ -1377,7 +1369,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         // Tracks where the band select originated from. This is used to determine where selections
         // should expand from when Shift+click is used.
-        private String mItemNearestOrigin = null;
+        private int mPositionNearestOrigin = NOT_SET;
 
         GridModel(SelectionEnvironment helper) {
             mHelper = helper;
@@ -1434,8 +1426,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @return The adapter position for the item nearest the origin corresponding to the latest
          *         band select operation, or NOT_SET if the selection did not cover any items.
          */
-        String getItemNearestOrigin() {
-            return mItemNearestOrigin;
+        int getPositionNearestOrigin() {
+            return mPositionNearestOrigin;
         }
 
         @Override
@@ -1455,10 +1447,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
          */
         private void recordVisibleChildren() {
             for (int i = 0; i < mHelper.getVisibleChildCount(); i++) {
-                String modelId = mHelper.getModelIdAt(i);
-                if (!mKnownIds.contains(modelId)) {
-                    mKnownIds.add(modelId);
-                    recordItemData(mHelper.getAbsoluteRectForChildViewAt(i), modelId);
+                int adapterPosition = mHelper.getAdapterPositionAt(i);
+                if (!mKnownPositions.get(adapterPosition)) {
+                    mKnownPositions.put(adapterPosition, true);
+                    recordItemData(mHelper.getAbsoluteRectForChildViewAt(i), adapterPosition);
                 }
             }
         }
@@ -1468,7 +1460,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @param absoluteChildRect The absolute rectangle for the child view being processed.
          * @param adapterPosition The position of the child view being processed.
          */
-        private void recordItemData(Rect absoluteChildRect, String modelId) {
+        private void recordItemData(Rect absoluteChildRect, int adapterPosition) {
             if (mColumnBounds.size() != mHelper.getColumnCount()) {
                 // If not all x-limits have been recorded, record this one.
                 recordLimits(
@@ -1481,12 +1473,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
                         mRowBounds, new Limits(absoluteChildRect.top, absoluteChildRect.bottom));
             }
 
-            SparseArray<String> columnList = mColumns.get(absoluteChildRect.left);
+            SparseIntArray columnList = mColumns.get(absoluteChildRect.left);
             if (columnList == null) {
-                columnList = new SparseArray<>();
+                columnList = new SparseIntArray();
                 mColumns.put(absoluteChildRect.left, columnList);
             }
-            columnList.put(absoluteChildRect.top, modelId);
+            columnList.put(absoluteChildRect.top, adapterPosition);
         }
 
         /**
@@ -1523,7 +1515,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 updateSelection(computeBounds());
             } else {
                 mSelection.clear();
-                mItemNearestOrigin = null;
+                mPositionNearestOrigin = NOT_SET;
             }
         }
 
@@ -1552,11 +1544,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 columnEndIndex = i;
             }
 
-            SparseArray<String> firstColumn =
+            SparseIntArray firstColumn =
                     mColumns.get(mColumnBounds.get(columnStartIndex).lowerLimit);
             int rowStartIndex = firstColumn.indexOfKey(rect.top);
             if (rowStartIndex < 0) {
-                mItemNearestOrigin = null;
+                mPositionNearestOrigin = NOT_SET;
                 return;
             }
 
@@ -1577,15 +1569,20 @@ public final class MultiSelectManager implements View.OnKeyListener {
                 int columnStartIndex, int columnEndIndex, int rowStartIndex, int rowEndIndex) {
             mSelection.clear();
             for (int column = columnStartIndex; column <= columnEndIndex; column++) {
-                SparseArray<String> items = mColumns.get(mColumnBounds.get(column).lowerLimit);
+                SparseIntArray items = mColumns.get(mColumnBounds.get(column).lowerLimit);
                 for (int row = rowStartIndex; row <= rowEndIndex; row++) {
-                    String id = items.get(items.keyAt(row));
-                    mSelection.add(id);
+                    int position = items.get(items.keyAt(row));
+                    String id = mHelper.getModelIdFromAdapterPosition(position);
+                    if (id != null) {
+                        // The adapter inserts items for UI layout purposes that aren't associated
+                        // with files.  Those will have a null model ID.  Don't select them.
+                        mSelection.add(id);
+                    }
                     if (isPossiblePositionNearestOrigin(column, columnStartIndex, columnEndIndex,
                             row, rowStartIndex, rowEndIndex)) {
                         // If this is the position nearest the origin, record it now so that it
                         // can be returned by endSelection() later.
-                        mItemNearestOrigin = id;
+                        mPositionNearestOrigin = position;
                     }
                 }
             }
