@@ -53,6 +53,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.test.InstrumentationTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
@@ -73,6 +74,7 @@ import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMult
  * <p>
  * <strong>NOTE</strong>: these tests only work if the device is unlocked.
  */
+@LargeTest
 public class BugreportReceiverTest extends InstrumentationTestCase {
 
     private static final String TAG = "BugreportReceiverTest";
