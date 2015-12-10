@@ -32,6 +32,7 @@ public final class ConnectionRequest implements Parcelable {
     private final Uri mAddress;
     private final Bundle mExtras;
     private final int mVideoState;
+    private final String mTelecomCallId;
 
     /**
      * @param accountHandle The accountHandle which should be used to place the call.
@@ -42,7 +43,7 @@ public final class ConnectionRequest implements Parcelable {
             PhoneAccountHandle accountHandle,
             Uri handle,
             Bundle extras) {
-        this(accountHandle, handle, extras, VideoProfile.STATE_AUDIO_ONLY);
+        this(accountHandle, handle, extras, VideoProfile.STATE_AUDIO_ONLY, null);
     }
 
     /**
@@ -56,10 +57,28 @@ public final class ConnectionRequest implements Parcelable {
             Uri handle,
             Bundle extras,
             int videoState) {
+        this(accountHandle, handle, extras, videoState, null);
+    }
+
+    /**
+     * @param accountHandle The accountHandle which should be used to place the call.
+     * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
+     * @param extras Application-specific extra data.
+     * @param videoState Determines the video state for the connection.
+     * @param telecomCallId The telecom call ID.
+     * @hide
+     */
+    public ConnectionRequest(
+            PhoneAccountHandle accountHandle,
+            Uri handle,
+            Bundle extras,
+            int videoState,
+            String telecomCallId) {
         mAccountHandle = accountHandle;
         mAddress = handle;
         mExtras = extras;
         mVideoState = videoState;
+        mTelecomCallId = telecomCallId;
     }
 
     private ConnectionRequest(Parcel in) {
@@ -67,6 +86,7 @@ public final class ConnectionRequest implements Parcelable {
         mAddress = in.readParcelable(getClass().getClassLoader());
         mExtras = in.readParcelable(getClass().getClassLoader());
         mVideoState = in.readInt();
+        mTelecomCallId = in.readString();
     }
 
     /**
@@ -97,6 +117,16 @@ public final class ConnectionRequest implements Parcelable {
      */
     public int getVideoState() {
         return mVideoState;
+    }
+
+    /**
+     * Returns the internal Telecom ID associated with the connection request.
+     *
+     * @return The Telecom ID.
+     * @hide
+     */
+    public String getTelecomCallId() {
+        return mTelecomCallId;
     }
 
     @Override
@@ -134,5 +164,6 @@ public final class ConnectionRequest implements Parcelable {
         destination.writeParcelable(mAddress, 0);
         destination.writeParcelable(mExtras, 0);
         destination.writeInt(mVideoState);
+        destination.writeString(mTelecomCallId);
     }
 }

@@ -499,6 +499,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private void checkSmsSuplInit(Intent intent) {
         SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
+
+        if (messages == null) {
+            Log.e(TAG, "Message does not exist in the intent.");
+            return;
+        }
+
         for (int i=0; i <messages.length; i++) {
             byte[] supl_init = messages[i].getUserData();
             native_agps_ni_message(supl_init,supl_init.length);

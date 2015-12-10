@@ -55,11 +55,25 @@ public final class UserHandle implements Parcelable {
     /** @hide An undefined user id */
     public static final int USER_NULL = -10000;
 
-    /** @hide A user id constant to indicate the "owner" user of the device */
+    /**
+     * @hide A user id constant to indicate the "owner" user of the device
+     * @deprecated Consider using either USER_SYSTEM constant or
+     * UserInfo.isPrimary().
+     */
     public static final int USER_OWNER = 0;
 
-    /** @hide A user handle to indicate the primary/owner user of the device */
+    /**
+     * @hide A user handle to indicate the primary/owner user of the device
+     * @deprecated Consider using either SYSTEM constant or
+     * UserInfo.isPrimary().
+     */
     public static final UserHandle OWNER = new UserHandle(USER_OWNER);
+
+    /** @hide A user id constant to indicate the "system" user of the device */
+    public static final int USER_SYSTEM = 0;
+
+    /** @hide A user handle to indicate the "system" user of the device */
+    public static final UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
 
     /**
      * @hide Enable multi-user related side effects. Set this to false if
@@ -120,7 +134,7 @@ public final class UserHandle implements Parcelable {
         if (MU_ENABLED) {
             return uid / PER_USER_RANGE;
         } else {
-            return 0;
+            return UserHandle.USER_SYSTEM;
         }
     }
 

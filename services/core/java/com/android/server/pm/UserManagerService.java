@@ -219,7 +219,7 @@ public class UserManagerService extends IUserManager.Stub {
                 mUsersDir = new File(dataDir, USER_INFO_DIR);
                 mUsersDir.mkdirs();
                 // Make zeroth user directory, for services to migrate their files to that location
-                File userZeroDir = new File(mUsersDir, "0");
+                File userZeroDir = new File(mUsersDir, String.valueOf(UserHandle.USER_SYSTEM));
                 userZeroDir.mkdirs();
                 FileUtils.setPermissions(mUsersDir.toString(),
                         FileUtils.S_IRWXU|FileUtils.S_IRWXG
@@ -252,7 +252,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
         }
-        onUserForeground(UserHandle.USER_OWNER);
+        onUserForeground(UserHandle.USER_SYSTEM);
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         for (int i = 0; i < mUserIds.length; ++i) {
@@ -262,6 +262,20 @@ public class UserManagerService extends IUserManager.Stub {
                 Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
             }
         }
+    }
+
+    @Override
+    public UserInfo getPrimaryUser() {
+        checkManageUsersPermission("query users");
+        synchronized (mPackagesLock) {
+            for (int i = 0; i < mUsers.size(); i++) {
+                UserInfo ui = mUsers.valueAt(i);
+                if (ui.isPrimary()) {
+                    return ui;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -836,22 +850,23 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void fallbackToSingleUserLocked() {
-        // Create the primary user
-        UserInfo primary = new UserInfo(UserHandle.USER_OWNER,
+        // Create the system user
+        // TODO: UserInfo.FLAG_PRIMARY flag should be set on the first human user.
+        UserInfo system = new UserInfo(UserHandle.USER_SYSTEM,
                 mContext.getResources().getString(com.android.internal.R.string.owner_name), null,
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
-        mUsers.put(0, primary);
+        mUsers.put(system.id, system);
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
 
         Bundle restrictions = new Bundle();
-        mUserRestrictions.append(UserHandle.USER_OWNER, restrictions);
+        mUserRestrictions.append(UserHandle.USER_SYSTEM, restrictions);
 
         updateUserIdsLocked();
         initDefaultGuestRestrictions();
 
         writeUserListLocked();
-        writeUserLocked(primary);
+        writeUserLocked(system);
     }
 
     private void scheduleWriteUserLocked(UserInfo userInfo) {

@@ -65,6 +65,7 @@ public abstract class Conference extends Conferenceable {
     private final List<Connection> mUnmodifiableConferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
 
+    private String mTelecomCallId;
     private PhoneAccountHandle mPhoneAccount;
     private CallAudioState mCallAudioState;
     private int mState = Connection.STATE_NEW;
@@ -91,6 +92,26 @@ public abstract class Conference extends Conferenceable {
      */
     public Conference(PhoneAccountHandle phoneAccount) {
         mPhoneAccount = phoneAccount;
+    }
+
+    /**
+     * Returns the telecom internal call ID associated with this conference.
+     *
+     * @return The telecom call ID.
+     * @hide
+     */
+    public final String getTelecomCallId() {
+        return mTelecomCallId;
+    }
+
+    /**
+     * Sets the telecom internal call ID associated with this conference.
+     *
+     * @param telecomCallId The telecom call ID.
+     * @hide
+     */
+    public final void setTelecomCallId(String telecomCallId) {
+        mTelecomCallId = telecomCallId;
     }
 
     /**

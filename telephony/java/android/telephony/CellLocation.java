@@ -81,6 +81,12 @@ public abstract class CellLocation {
     public abstract boolean isEmpty();
 
     /**
+     * Invalidate this object.  The location area code and the cell id are set to -1.
+     * @hide
+     */
+    public abstract void setStateInvalid();
+
+    /**
      * Return a new CellLocation object representing an unknown
      * location, or null for unknown/none phone radio types.
      *
