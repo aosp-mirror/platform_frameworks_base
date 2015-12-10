@@ -49,6 +49,7 @@ public class NetworkStats implements Parcelable {
     /** {@link #uid} value when UID details unavailable. */
     public static final int UID_ALL = -1;
     /** {@link #tag} value matching any tag. */
+    // TODO: Rename TAG_ALL to TAG_ANY.
     public static final int TAG_ALL = -1;
     /** {@link #set} value for all sets combined, not including debug sets. */
     public static final int SET_ALL = -1;
@@ -64,6 +65,7 @@ public class NetworkStats implements Parcelable {
     public static final int SET_DBG_VPN_OUT = 1002;
 
     /** {@link #tag} value for total data across all tags. */
+    // TODO: Rename TAG_NONE to TAG_ALL.
     public static final int TAG_NONE = 0;
 
     /** {@link #set} value for all roaming values. */

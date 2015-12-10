@@ -48,7 +48,6 @@ public final class NetworkStats implements AutoCloseable {
      */
     private final long mEndTimeStamp;
 
-
     /**
      * Non-null array indicates the query enumerates over uids.
      */
@@ -165,7 +164,18 @@ public final class NetworkStats implements AutoCloseable {
          */
         public static final int ROAMING_ROAMING = 0x2;
 
+        /**
+         * Special TAG value matching any tag.
+         */
+        public static final int TAG_ANY = android.net.NetworkStats.TAG_ALL;
+
+        /**
+         * Special TAG value for total data across all tags
+         */
+        public static final int TAG_ALL = android.net.NetworkStats.TAG_NONE;
+
         private int mUid;
+        private int mTag;
         private int mState;
         private int mRoaming;
         private long mBeginTimeStamp;
@@ -192,6 +202,14 @@ public final class NetworkStats implements AutoCloseable {
             return uid;
         }
 
+        private static int convertTag(int tag) {
+            switch (tag) {
+                case android.net.NetworkStats.TAG_ALL: return TAG_ANY;
+                case android.net.NetworkStats.TAG_NONE: return TAG_ALL;
+            }
+            return tag;
+        }
+
         private static int convertRoaming(int roaming) {
             switch (roaming) {
                 case android.net.NetworkStats.ROAMING_ALL : return ROAMING_ALL;
@@ -215,6 +233,14 @@ public final class NetworkStats implements AutoCloseable {
          */
         public int getUid() {
             return mUid;
+        }
+
+        /**
+         * Tag of the bucket.<p />
+         * @return Bucket tag.
+         */
+        public int getTag() {
+            return mTag;
         }
 
         /**
@@ -363,9 +389,9 @@ public final class NetworkStats implements AutoCloseable {
      * Collects summary results and sets summary enumeration mode.
      * @throws RemoteException
      */
-    void startSummaryEnumeration() throws RemoteException {
-        mSummary = mSession.getSummaryForAllUid(mTemplate, mStartTimeStamp, mEndTimeStamp, false);
-
+    void startSummaryEnumeration(boolean includeTags) throws RemoteException {
+        mSummary = mSession.getSummaryForAllUid(mTemplate, mStartTimeStamp, mEndTimeStamp,
+                includeTags);
         mEnumerationIndex = 0;
     }
 
@@ -373,10 +399,17 @@ public final class NetworkStats implements AutoCloseable {
      * Collects history results for uid and resets history enumeration index.
      */
     void startHistoryEnumeration(int uid) {
+        startHistoryEnumeration(uid, android.net.NetworkStats.TAG_NONE);
+    }
+
+    /**
+     * Collects history results for uid and resets history enumeration index.
+     */
+    void startHistoryEnumeration(int uid, int tag) {
         mHistory = null;
         try {
             mHistory = mSession.getHistoryIntervalForUid(mTemplate, uid,
-                    android.net.NetworkStats.SET_ALL, android.net.NetworkStats.TAG_NONE,
+                    android.net.NetworkStats.SET_ALL, tag,
                     NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
             setSingleUid(uid);
         } catch (RemoteException e) {
@@ -434,6 +467,7 @@ public final class NetworkStats implements AutoCloseable {
 
     private void fillBucketFromSummaryEntry(Bucket bucketOut) {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
+        bucketOut.mTag = Bucket.convertTag(mRecycledSummaryEntry.tag);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
         bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
