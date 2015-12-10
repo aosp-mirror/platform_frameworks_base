@@ -17,11 +17,8 @@
 package com.android.server.job.controllers;
 
 import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
+import android.app.AlarmManager.OnAlarmListener;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.util.Slog;
 
@@ -40,15 +37,11 @@ import java.util.ListIterator;
  */
 public class TimeController extends StateController {
     private static final String TAG = "JobScheduler.Time";
-    private static final String ACTION_JOB_EXPIRED =
-            "android.content.jobscheduler.JOB_DEADLINE_EXPIRED";
-    private static final String ACTION_JOB_DELAY_EXPIRED =
-            "android.content.jobscheduler.JOB_DELAY_EXPIRED";
 
-    /** Set an alarm for the next job expiry. */
-    private final PendingIntent mDeadlineExpiredAlarmIntent;
-    /** Set an alarm for the next job delay expiry. This*/
-    private final PendingIntent mNextDelayExpiredAlarmIntent;
+    /** Deadline alarm tag for logging purposes */
+    private final String DEADLINE_TAG = "deadline";
+    /** Delay alarm tag for logging purposes */
+    private final String DELAY_TAG = "delay";
 
     private long mNextJobExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;
@@ -68,19 +61,9 @@ public class TimeController extends StateController {
 
     private TimeController(StateChangedListener stateChangedListener, Context context) {
         super(stateChangedListener, context);
-        mDeadlineExpiredAlarmIntent =
-                PendingIntent.getBroadcast(mContext, 0 /* ignored */,
-                        new Intent(ACTION_JOB_EXPIRED), 0);
-        mNextDelayExpiredAlarmIntent =
-                PendingIntent.getBroadcast(mContext, 0 /* ignored */,
-                        new Intent(ACTION_JOB_DELAY_EXPIRED), 0);
+
         mNextJobExpiredElapsedMillis = Long.MAX_VALUE;
         mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
-
-        // Register BR for these intents.
-        IntentFilter intentFilter = new IntentFilter(ACTION_JOB_EXPIRED);
-        intentFilter.addAction(ACTION_JOB_DELAY_EXPIRED);
-        mContext.registerReceiver(mAlarmExpiredReceiver, intentFilter);
     }
 
     /**
@@ -224,7 +207,7 @@ public class TimeController extends StateController {
     private void setDelayExpiredAlarm(long alarmTimeElapsedMillis) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
         mNextDelayExpiredElapsedMillis = alarmTimeElapsedMillis;
-        updateAlarmWithPendingIntent(mNextDelayExpiredAlarmIntent, mNextDelayExpiredElapsedMillis);
+        updateAlarmWithListener(DELAY_TAG, mNextDelayExpiredListener, mNextDelayExpiredElapsedMillis);
     }
 
     /**
@@ -235,7 +218,7 @@ public class TimeController extends StateController {
     private void setDeadlineExpiredAlarm(long alarmTimeElapsedMillis) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
         mNextJobExpiredElapsedMillis = alarmTimeElapsedMillis;
-        updateAlarmWithPendingIntent(mDeadlineExpiredAlarmIntent, mNextJobExpiredElapsedMillis);
+        updateAlarmWithListener(DEADLINE_TAG, mDeadlineExpiredListener, mNextJobExpiredElapsedMillis);
     }
 
     private long maybeAdjustAlarmTime(long proposedAlarmTimeElapsedMillis) {
@@ -246,31 +229,39 @@ public class TimeController extends StateController {
         return proposedAlarmTimeElapsedMillis;
     }
 
-    private void updateAlarmWithPendingIntent(PendingIntent pi, long alarmTimeElapsed) {
+    private void updateAlarmWithListener(String tag, OnAlarmListener listener,
+            long alarmTimeElapsed) {
         ensureAlarmService();
         if (alarmTimeElapsed == Long.MAX_VALUE) {
-            mAlarmService.cancel(pi);
+            mAlarmService.cancel(listener);
         } else {
             if (DEBUG) {
-                Slog.d(TAG, "Setting " + pi.getIntent().getAction() + " for: " + alarmTimeElapsed);
+                Slog.d(TAG, "Setting " + tag + " for: " + alarmTimeElapsed);
             }
-            mAlarmService.set(AlarmManager.ELAPSED_REALTIME, alarmTimeElapsed, pi);
+            mAlarmService.set(AlarmManager.ELAPSED_REALTIME, alarmTimeElapsed,
+                    tag, listener, null);
         }
     }
 
-    private final BroadcastReceiver mAlarmExpiredReceiver = new BroadcastReceiver() {
+    // Job/delay expiration alarm handling
+
+    private final OnAlarmListener mDeadlineExpiredListener = new OnAlarmListener() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onAlarm() {
             if (DEBUG) {
-                Slog.d(TAG, "Just received alarm: " + intent.getAction());
+                Slog.d(TAG, "Deadline-expired alarm fired");
             }
-            // A job has just expired, so we run through the list of jobs that we have and
-            // notify our StateChangedListener.
-            if (ACTION_JOB_EXPIRED.equals(intent.getAction())) {
-                checkExpiredDeadlinesAndResetAlarm();
-            } else if (ACTION_JOB_DELAY_EXPIRED.equals(intent.getAction())) {
-                checkExpiredDelaysAndResetAlarm();
+            checkExpiredDeadlinesAndResetAlarm();
+        }
+    };
+
+    private final OnAlarmListener mNextDelayExpiredListener = new OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            if (DEBUG) {
+                Slog.d(TAG, "Delay-expired alarm fired");
             }
+            checkExpiredDelaysAndResetAlarm();
         }
     };
 
