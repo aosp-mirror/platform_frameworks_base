@@ -43,12 +43,14 @@ public class FontListParser {
     }
 
     public static class Font {
-        Font(String fontName, int weight, boolean isItalic) {
+        Font(String fontName, int ttcIndex, int weight, boolean isItalic) {
             this.fontName = fontName;
+            this.ttcIndex = ttcIndex;
             this.weight = weight;
             this.isItalic = isItalic;
         }
         public String fontName;
+        public int ttcIndex;
         public int weight;
         public boolean isItalic;
     }
@@ -112,12 +114,13 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("font")) {
+                int ttcIndex = Integer.parseInt(parser.getAttributeValue("0", "ttcIndex"));
                 String weightStr = parser.getAttributeValue(null, "weight");
                 int weight = weightStr == null ? 400 : Integer.parseInt(weightStr);
                 boolean isItalic = "italic".equals(parser.getAttributeValue(null, "style"));
                 String filename = parser.nextText();
                 String fullFilename = "/system/fonts/" + filename;
-                fonts.add(new Font(fullFilename, weight, isItalic));
+                fonts.add(new Font(fullFilename, ttcIndex, weight, isItalic));
             } else {
                 skip(parser);
             }

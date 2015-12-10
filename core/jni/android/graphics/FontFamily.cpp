@@ -56,10 +56,11 @@ static jboolean addSkTypeface(FontFamily* family, SkTypeface* face) {
     return result;
 }
 
-static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jstring path) {
+static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jstring path,
+        jint ttcIndex) {
     NPE_CHECK_RETURN_ZERO(env, path);
     ScopedUtfChars str(env, path);
-    SkTypeface* face = SkTypeface::CreateFromFile(str.c_str());
+    SkTypeface* face = SkTypeface::CreateFromFile(str.c_str(), ttcIndex);
     if (face == NULL) {
         ALOGE("addFont failed to create font %s", str.c_str());
         return false;
@@ -69,10 +70,10 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
 }
 
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong familyPtr,
-        jstring path, jint weight, jboolean isItalic) {
+        jstring path, jint ttcIndex, jint weight, jboolean isItalic) {
     NPE_CHECK_RETURN_ZERO(env, path);
     ScopedUtfChars str(env, path);
-    SkTypeface* face = SkTypeface::CreateFromFile(str.c_str());
+    SkTypeface* face = SkTypeface::CreateFromFile(str.c_str(), ttcIndex);
     if (face == NULL) {
         ALOGE("addFont failed to create font %s", str.c_str());
         return false;
@@ -127,8 +128,8 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
 static const JNINativeMethod gFontFamilyMethods[] = {
     { "nCreateFamily",         "(Ljava/lang/String;I)J", (void*)FontFamily_create },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
-    { "nAddFont",              "(JLjava/lang/String;)Z", (void*)FontFamily_addFont },
-    { "nAddFontWeightStyle",   "(JLjava/lang/String;IZ)Z", (void*)FontFamily_addFontWeightStyle },
+    { "nAddFont",              "(JLjava/lang/String;I)Z", (void*)FontFamily_addFont },
+    { "nAddFontWeightStyle",   "(JLjava/lang/String;IIZ)Z", (void*)FontFamily_addFontWeightStyle },
     { "nAddFontFromAsset",     "(JLandroid/content/res/AssetManager;Ljava/lang/String;)Z",
                                            (void*)FontFamily_addFontFromAsset },
 };
