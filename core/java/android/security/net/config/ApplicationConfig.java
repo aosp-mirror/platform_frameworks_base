@@ -68,7 +68,7 @@ public final class ApplicationConfig {
      */
     public NetworkSecurityConfig getConfigForHostname(String hostname) {
         ensureInitialized();
-        if (hostname.isEmpty() || mConfigs == null) {
+        if (hostname == null || hostname.isEmpty() || mConfigs == null) {
             return mDefaultConfig;
         }
         if (hostname.charAt(0) ==  '.') {
