@@ -35,6 +35,8 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
+import dalvik.system.BaseDexClassLoader;
+
 import java.io.File;
 
 /**
@@ -93,7 +95,9 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     
     private native long loadNativeCode(String path, String funcname, MessageQueue queue,
             String internalDataPath, String obbPath, String externalDataPath, int sdkVersion,
-            AssetManager assetMgr, byte[] savedState);
+            AssetManager assetMgr, byte[] savedState, ClassLoader classLoader, String libraryPath,
+            String isolationPath);
+    private native String getDlError();
     private native void unloadNativeCode(long handle);
     private native void onStartNative(long handle);
     private native void onResumeNative(long handle);
@@ -157,15 +161,10 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("Error getting activity info", e);
         }
-        
-        String path = null;
-        
-        File libraryFile = new File(ai.applicationInfo.nativeLibraryDir,
-                System.mapLibraryName(libname));
-        if (libraryFile.exists()) {
-            path = libraryFile.getPath();
-        }
-        
+
+        BaseDexClassLoader classLoader = (BaseDexClassLoader) getClassLoader();
+        String path = classLoader.findLibrary(libname);
+
         if (path == null) {
             throw new IllegalArgumentException("Unable to find native library: " + libname);
         }
@@ -176,10 +175,13 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         mNativeHandle = loadNativeCode(path, funcname, Looper.myQueue(),
                 getAbsolutePath(getFilesDir()), getAbsolutePath(getObbDir()),
                 getAbsolutePath(getExternalFilesDir(null)),
-                Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
+                Build.VERSION.SDK_INT, getAssets(), nativeSavedState,
+                classLoader, classLoader.getLdLibraryPath(),
+                classLoader.getLibraryPermittedPath());
 
         if (mNativeHandle == 0) {
-            throw new IllegalArgumentException("Unable to load native library: " + path);
+            throw new UnsatisfiedLinkError(
+                    "Unable to load native library \"" + path + "\": " + getDlError());
         }
         super.onCreate(savedInstanceState);
     }

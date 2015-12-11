@@ -21,6 +21,8 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 
+#include <memory>
+
 #include <android_runtime/android_app_NativeActivity.h>
 #include <android_runtime/android_util_AssetManager.h>
 #include <android_runtime/android_view_Surface.h>
@@ -39,6 +41,7 @@
 #include "android_view_KeyEvent.h"
 
 #include "nativebridge/native_bridge.h"
+#include "nativeloader/native_loader.h"
 
 #include "core_jni_helpers.h"
 
@@ -255,18 +258,19 @@ static int mainWorkCallback(int fd, int events, void* data) {
 static jlong
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName,
         jobject messageQueue, jstring internalDataDir, jstring obbDir,
-        jstring externalDataDir, jint sdkVersion,
-        jobject jAssetMgr, jbyteArray savedState)
-{
+        jstring externalDataDir, jint sdkVersion, jobject jAssetMgr,
+        jbyteArray savedState, jobject classLoader, jstring libraryPath,
+        jstring isolationPath) {
     if (kLogTrace) {
         ALOGD("loadNativeCode_native");
     }
 
     const char* pathStr = env->GetStringUTFChars(path, NULL);
-    NativeCode* code = NULL;
+    std::unique_ptr<NativeCode> code;
     bool needNativeBridge = false;
 
-    void* handle = dlopen(pathStr, RTLD_LAZY);
+    void* handle = OpenNativeLibrary(env, sdkVersion, pathStr, classLoader,
+                                     libraryPath, isolationPath);
     if (handle == NULL) {
         if (NativeBridgeIsSupported(pathStr)) {
             handle = NativeBridgeLoadLibrary(pathStr, RTLD_LAZY);
@@ -284,26 +288,23 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
             funcPtr = dlsym(handle, funcStr);
         }
 
-        code = new NativeCode(handle, (ANativeActivity_createFunc*)funcPtr);
+        code.reset(new NativeCode(handle, (ANativeActivity_createFunc*)funcPtr));
         env->ReleaseStringUTFChars(funcName, funcStr);
 
         if (code->createActivityFunc == NULL) {
             ALOGW("ANativeActivity_onCreate not found");
-            delete code;
             return 0;
         }
         
         code->messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueue);
         if (code->messageQueue == NULL) {
             ALOGW("Unable to retrieve native MessageQueue");
-            delete code;
             return 0;
         }
         
         int msgpipe[2];
         if (pipe(msgpipe)) {
             ALOGW("could not create pipe: %s", strerror(errno));
-            delete code;
             return 0;
         }
         code->mainWorkRead = msgpipe[0];
@@ -315,12 +316,11 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
         SLOGW_IF(result != 0, "Could not make main work write pipe "
                 "non-blocking: %s", strerror(errno));
         code->messageQueue->getLooper()->addFd(
-                code->mainWorkRead, 0, ALOOPER_EVENT_INPUT, mainWorkCallback, code);
+                code->mainWorkRead, 0, ALOOPER_EVENT_INPUT, mainWorkCallback, code.get());
         
         code->ANativeActivity::callbacks = &code->callbacks;
         if (env->GetJavaVM(&code->vm) < 0) {
             ALOGW("NativeActivity GetJavaVM failed");
-            delete code;
             return 0;
         }
         code->env = env;
@@ -356,14 +356,18 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
             rawSavedSize = env->GetArrayLength(savedState);
         }
 
-        code->createActivityFunc(code, rawSavedState, rawSavedSize);
+        code->createActivityFunc(code.get(), rawSavedState, rawSavedSize);
 
         if (rawSavedState != NULL) {
             env->ReleaseByteArrayElements(savedState, rawSavedState, 0);
         }
     }
     
-    return (jlong)code;
+    return (jlong)code.release();
+}
+
+static jstring getDlError_native(JNIEnv* env, jobject clazz) {
+  return env->NewStringUTF(dlerror());
 }
 
 static void
@@ -651,8 +655,10 @@ onContentRectChanged_native(JNIEnv* env, jobject clazz, jlong handle,
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[B)J",
-            (void*)loadNativeCode_native },
+    { "loadNativeCode",
+        "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[BLjava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)J",
+        (void*)loadNativeCode_native },
+    { "getDlError", "()Ljava/lang/String;", (void*) getDlError_native },
     { "unloadNativeCode", "(J)V", (void*)unloadNativeCode_native },
     { "onStartNative", "(J)V", (void*)onStart_native },
     { "onResumeNative", "(J)V", (void*)onResume_native },
