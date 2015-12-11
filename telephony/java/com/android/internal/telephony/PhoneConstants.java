@@ -59,6 +59,9 @@ public class PhoneConstants {
     public static final int PHONE_TYPE_SIP = RILConstants.SIP_PHONE;
     public static final int PHONE_TYPE_THIRD_PARTY = RILConstants.THIRD_PARTY_PHONE;
     public static final int PHONE_TYPE_IMS = RILConstants.IMS_PHONE;
+    // Currently this is used only to differentiate CDMA and CDMALTE Phone in GsmCdma* files. For
+    // anything outside of that, a cdma + lte phone is still CDMA_PHONE
+    public static final int PHONE_TYPE_CDMA_LTE = RILConstants.CDMA_LTE_PHONE;
 
     // Modes for LTE_ON_CDMA
     public static final int LTE_ON_CDMA_UNKNOWN = RILConstants.LTE_ON_CDMA_UNKNOWN;

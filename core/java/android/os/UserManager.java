@@ -563,6 +563,18 @@ public class UserManager {
     }
 
     /**
+     * Used to check if this process is running under the primary user. The primary user
+     * is the first human user on a device.
+     *
+     * @return whether this process is running under the primary user.
+     * @hide
+     */
+    public boolean isPrimaryUser() {
+        UserInfo user = getUserInfo(UserHandle.myUserId());
+        return user != null ? user.isPrimary() : false;
+    }
+
+    /**
      * Used to check if this process is running under the system user. The system user
      * is the initial user that is implicitly created on first boot and hosts most of the
      * system services.
@@ -570,9 +582,8 @@ public class UserManager {
      * @return whether this process is running under the system user.
      */
     public boolean isSystemUser() {
-        return UserHandle.myUserId() == UserHandle.USER_OWNER;
+        return UserHandle.myUserId() == UserHandle.USER_SYSTEM;
     }
-
     /**
      * @hide
      * Returns whether the caller is running as an admin user. There can be more than one admin
@@ -966,6 +977,22 @@ public class UserManager {
             return mService.getUsers(false);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
+            return null;
+        }
+    }
+
+    /**
+     * Returns information for Primary user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @return the Primary user, null if not found.
+     * @hide
+     */
+    public UserInfo getPrimaryUser() {
+        try {
+            return mService.getPrimaryUser();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get Primary user", re);
             return null;
         }
     }

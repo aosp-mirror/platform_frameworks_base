@@ -282,6 +282,13 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL =
             "carrier_instant_lettering_available_bool";
 
+    /*
+     * Flag specifying whether IMS should be the first phone attempted for E911 even if the
+     * phone is not in service.
+     */
+    public static final String KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL
+            = "carrier_use_ims_first_for_emergency_bool";
+
     /**
      * When IMS instant lettering is available for a carrier (see
      * {@link #KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL}), determines the list of characters
@@ -514,6 +521,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
+        sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
         sDefaults.putBoolean(KEY_DTMF_TYPE_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);

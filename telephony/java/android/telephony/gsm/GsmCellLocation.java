@@ -72,6 +72,7 @@ public class GsmCellLocation extends CellLocation {
     /**
      * Invalidate this object.  The location area code and the cell id are set to -1.
      */
+    @Override
     public void setStateInvalid() {
         mLac = -1;
         mCid = -1;

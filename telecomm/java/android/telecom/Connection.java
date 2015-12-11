@@ -1074,6 +1074,8 @@ public abstract class Connection extends Conferenceable {
     private final List<Conferenceable> mUnmodifiableConferenceables =
             Collections.unmodifiableList(mConferenceables);
 
+    // The internal telecom call ID associated with this connection.
+    private String mTelecomCallId;
     private int mState = STATE_NEW;
     private CallAudioState mCallAudioState;
     private Uri mAddress;
@@ -1096,6 +1098,17 @@ public abstract class Connection extends Conferenceable {
      * Create a new Connection.
      */
     public Connection() {}
+
+    /**
+     * Returns the Telecom internal call ID associated with this connection.  Should only be used
+     * for debugging and tracing purposes.
+     *
+     * @return The Telecom call ID.
+     * @hide
+     */
+    public final String getTelecomCallId() {
+        return mTelecomCallId;
+    }
 
     /**
      * @return The address (e.g., phone number) to which this Connection is currently communicating.
@@ -1256,6 +1269,17 @@ public abstract class Connection extends Conferenceable {
      */
     public final DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
+    }
+
+    /**
+     * Sets the telecom call ID associated with this Connection.  The Telecom Call ID should be used
+     * ONLY for debugging purposes.
+     *
+     * @param callId The telecom call ID.
+     * @hide
+     */
+    public void setTelecomCallId(String callId) {
+        mTelecomCallId = callId;
     }
 
     /**

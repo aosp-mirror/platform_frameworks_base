@@ -1012,7 +1012,7 @@ public class GsmAlphabet {
      *
      * @param tables the new list of enabled single shift tables
      */
-    static synchronized void setEnabledSingleShiftTables(int[] tables) {
+    public static synchronized void setEnabledSingleShiftTables(int[] tables) {
         sEnabledSingleShiftTables = tables;
         sDisableCountryEncodingCheck = true;
 
@@ -1030,7 +1030,7 @@ public class GsmAlphabet {
      *
      * @param tables the new list of enabled locking shift tables
      */
-    static synchronized void setEnabledLockingShiftTables(int[] tables) {
+    public static synchronized void setEnabledLockingShiftTables(int[] tables) {
         sEnabledLockingShiftTables = tables;
         sDisableCountryEncodingCheck = true;
     }
@@ -1042,7 +1042,7 @@ public class GsmAlphabet {
      *
      * @return the list of enabled single shift tables
      */
-    static synchronized int[] getEnabledSingleShiftTables() {
+    public static synchronized int[] getEnabledSingleShiftTables() {
         return sEnabledSingleShiftTables;
     }
 
@@ -1053,7 +1053,7 @@ public class GsmAlphabet {
      *
      * @return the list of enabled locking shift tables
      */
-    static synchronized int[] getEnabledLockingShiftTables() {
+    public static synchronized int[] getEnabledLockingShiftTables() {
         return sEnabledLockingShiftTables;
     }
 

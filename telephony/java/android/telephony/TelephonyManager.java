@@ -4848,4 +4848,21 @@ public class TelephonyManager {
         }
         return null;
     }
+
+    /**
+     * Returns the service state information on specified subscription. Callers require
+     * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     * @hide
+     */
+    public ServiceState getServiceStateForSubscriber(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getServiceStateForSubscriber(subId, getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+        }
+        return null;
+    }
 }
