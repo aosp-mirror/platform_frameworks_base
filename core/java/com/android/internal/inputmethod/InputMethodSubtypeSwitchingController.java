@@ -175,7 +175,7 @@ public class InputMethodSubtypeSwitchingController {
         }
 
         private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
-                new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
+                new TreeMap<>(
                         new Comparator<InputMethodInfo>() {
                             @Override
                             public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
@@ -192,14 +192,9 @@ public class InputMethodSubtypeSwitchingController {
                             }
                         });
 
-        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList() {
-            return getSortedInputMethodAndSubtypeList(true, false, false);
-        }
-
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
-                boolean showSubtypes, boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
-            final ArrayList<ImeSubtypeListItem> imList =
-                    new ArrayList<ImeSubtypeListItem>();
+                boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
+            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<>();
             final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
                     mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
                             mContext);
@@ -219,12 +214,12 @@ public class InputMethodSubtypeSwitchingController {
                     continue;
                 }
                 List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
-                HashSet<String> enabledSubtypeSet = new HashSet<String>();
+                HashSet<String> enabledSubtypeSet = new HashSet<>();
                 for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
                 }
                 final CharSequence imeLabel = imi.loadLabel(mPm);
-                if (showSubtypes && enabledSubtypeSet.size() > 0) {
+                if (enabledSubtypeSet.size() > 0) {
                     final int subtypeCount = imi.getSubtypeCount();
                     if (DEBUG) {
                         Slog.v(TAG, "Add subtypes: " + subtypeCount + ", " + imi.getId());
@@ -532,7 +527,8 @@ public class InputMethodSubtypeSwitchingController {
     public void resetCircularListLocked(Context context) {
         mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
         mController = ControllerImpl.createFrom(mController,
-                mSubtypeList.getSortedInputMethodAndSubtypeList());
+                mSubtypeList.getSortedInputMethodAndSubtypeList(
+                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */));
     }
 
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme, InputMethodInfo imi,
@@ -546,10 +542,10 @@ public class InputMethodSubtypeSwitchingController {
         return mController.getNextInputMethod(onlyCurrentIme, imi, subtype);
     }
 
-    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(boolean showSubtypes,
+    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(
             boolean includingAuxiliarySubtypes, boolean isScreenLocked) {
         return mSubtypeList.getSortedInputMethodAndSubtypeList(
-                showSubtypes, includingAuxiliarySubtypes, isScreenLocked);
+                includingAuxiliarySubtypes, isScreenLocked);
     }
 
     public void dump(final Printer pw) {
