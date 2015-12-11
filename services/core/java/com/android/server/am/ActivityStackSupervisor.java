@@ -2628,9 +2628,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         targetStack.mLastPausedActivity = null;
-        targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);
-        if (!launchTaskBehind && doResume) {
-            mService.setFocusedActivityLocked(r, "startedActivity");
+        targetStack.startActivityLocked(r, newTask, keepCurTransition, options);
+        if (doResume) {
+            if (!launchTaskBehind) {
+                mService.setFocusedActivityLocked(r, "startedActivity");
+            }
+            resumeTopActivitiesLocked(targetStack, r, options);
+        } else {
+            targetStack.addRecentActivityLocked(r);
         }
         updateUserStackLocked(r.userId, targetStack);
 
