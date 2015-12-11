@@ -218,7 +218,6 @@ public final class NotificationRecord {
                         action.actionIntent.toString()
                         ));
             }
-            }
             pw.println(prefix + "  }");
         }
         if (notification.extras != null && notification.extras.size() > 0) {
@@ -342,10 +341,8 @@ public final class NotificationRecord {
     }
 
     public void setTopicImportance(int importance) {
-        if (importance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
-            mTopicImportance = importance;
-            applyTopicImportance();
-        }
+        mTopicImportance = importance;
+        applyTopicImportance();
     }
 
     private String getTopicExplanation() {

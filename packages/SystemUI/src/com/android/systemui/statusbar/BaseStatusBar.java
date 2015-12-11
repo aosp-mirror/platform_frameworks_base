@@ -2271,7 +2271,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
 
         if (mNotificationData.shouldSuppressPeek(sbn.getKey())) {
-            if (DEBUG) Log.d(TAG, "No peeking: suppressed by manager: " + sbn.getKey());
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
 
