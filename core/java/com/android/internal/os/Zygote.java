@@ -145,8 +145,9 @@ public final class Zygote {
     native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int debugFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
-    private static void callPostForkChildHooks(int debugFlags, String instructionSet) {
-        VM_HOOKS.postForkChild(debugFlags, instructionSet);
+    private static void callPostForkChildHooks(int debugFlags, boolean isSystemServer,
+            String instructionSet) {
+        VM_HOOKS.postForkChild(debugFlags, isSystemServer, instructionSet);
     }
 
 

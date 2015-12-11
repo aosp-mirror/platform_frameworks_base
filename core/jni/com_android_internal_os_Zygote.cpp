@@ -581,7 +581,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     UnsetSigChldHandler();
 
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags,
-                              is_system_server ? NULL : instructionSet);
+                              is_system_server, instructionSet);
     if (env->ExceptionCheck()) {
       RuntimeAbort(env, __LINE__, "Error calling post fork hooks.");
     }
@@ -674,7 +674,7 @@ static const JNINativeMethod gMethods[] = {
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
-                                                   "(ILjava/lang/String;)V");
+                                                   "(IZLjava/lang/String;)V");
 
   return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }
