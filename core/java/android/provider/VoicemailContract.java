@@ -245,6 +245,13 @@ public class VoicemailContract {
         public static final String DELETED = "deleted";
 
         /**
+         * The date the row is last inserted, updated, or marked as deleted, in milliseconds
+         * since the epoch. Read only.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String LAST_MODIFIED = "last_modified";
+
+        /**
          * A convenience method to build voicemail URI specific to a source package by appending
          * {@link VoicemailContract#PARAM_KEY_SOURCE_PACKAGE} param to the base URI.
          */
@@ -449,6 +456,26 @@ public class VoicemailContract {
         public static final int NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING = 2;
 
         /**
+         * Amount of resource that is used by existing voicemail in the visual voicemail inbox,
+         * or {@link #QUOTA_UNAVAILABLE}. Unit is not specified.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String QUOTA_OCCUPIED = "quota_occupied";
+
+        /**
+         * Total resource in the visual voicemail inbox that can be used, or
+         * {@link #QUOTA_UNAVAILABLE}. Unit is not specified.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String QUOTA_TOTAL = "quota_total";
+
+        /**
+         * Value for {@link #QUOTA_OCCUPIED} and {@link #QUOTA_TOTAL} to indicate that no
+         * information is available.
+         */
+        public static final int QUOTA_UNAVAILABLE = -1;
+
+        /**
          * A convenience method to build status URI specific to a source package by appending
          * {@link VoicemailContract#PARAM_KEY_SOURCE_PACKAGE} param to the base URI.
          */
@@ -480,6 +507,39 @@ public class VoicemailContract {
             values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
             values.put(Status.NOTIFICATION_CHANNEL_STATE, notificationChannelState);
 
+            if (isStatusPresent(contentResolver, statusUri)) {
+                contentResolver.update(statusUri, values, null, null);
+            } else {
+                contentResolver.insert(statusUri, values);
+            }
+        }
+
+        /**
+         * A helper method to set the quota of a voicemail source. Unit is unspecified.
+         *
+         * @param context The context from the package calling the method. This will be the source.
+         * @param accountHandle The handle for the account the source is associated with.
+         * @param occupied See {@link Status#QUOTA_OCCUPIED}
+         * @param total See {@link Status#QUOTA_TOTAL}
+         */
+        public static void setQuota(Context context, PhoneAccountHandle accountHandle, int occupied,
+                int total) {
+            if (occupied == QUOTA_UNAVAILABLE && total == QUOTA_UNAVAILABLE) {
+                return;
+            }
+            ContentValues values = new ContentValues();
+            values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
+                    accountHandle.getComponentName().flattenToString());
+            values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
+            if (occupied != QUOTA_UNAVAILABLE) {
+                values.put(Status.QUOTA_OCCUPIED,occupied);
+            }
+            if (total != QUOTA_UNAVAILABLE) {
+                values.put(Status.QUOTA_TOTAL,total);
+            }
+
+            ContentResolver contentResolver = context.getContentResolver();
+            Uri statusUri = buildSourceUri(context.getPackageName());
             if (isStatusPresent(contentResolver, statusUri)) {
                 contentResolver.update(statusUri, values, null, null);
             } else {

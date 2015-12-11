@@ -29312,6 +29312,7 @@ package android.provider {
     field public static final java.lang.String GEOCODED_LOCATION = "geocoded_location";
     field public static final int INCOMING_TYPE = 1; // 0x1
     field public static final java.lang.String IS_READ = "is_read";
+    field public static final java.lang.String LAST_MODIFIED = "last_modified";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
     field public static final int MISSED_TYPE = 3; // 0x3
     field public static final java.lang.String NEW = "new";
@@ -31581,6 +31582,7 @@ package android.provider {
 
   public static final class VoicemailContract.Status implements android.provider.BaseColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
+    method public static void setQuota(android.content.Context, android.telecom.PhoneAccountHandle, int, int);
     field public static final java.lang.String CONFIGURATION_STATE = "configuration_state";
     field public static final int CONFIGURATION_STATE_CAN_BE_CONFIGURED = 2; // 0x2
     field public static final int CONFIGURATION_STATE_NOT_CONFIGURED = 1; // 0x1
@@ -31597,6 +31599,9 @@ package android.provider {
     field public static final int NOTIFICATION_CHANNEL_STATE_OK = 0; // 0x0
     field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "phone_account_component_name";
     field public static final java.lang.String PHONE_ACCOUNT_ID = "phone_account_id";
+    field public static final java.lang.String QUOTA_OCCUPIED = "quota_occupied";
+    field public static final java.lang.String QUOTA_TOTAL = "quota_total";
+    field public static final int QUOTA_UNAVAILABLE = -1; // 0xffffffff
     field public static final java.lang.String SETTINGS_URI = "settings_uri";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
     field public static final java.lang.String VOICEMAIL_ACCESS_URI = "voicemail_access_uri";
@@ -31613,6 +31618,7 @@ package android.provider {
     field public static final java.lang.String HAS_CONTENT = "has_content";
     field public static final java.lang.String IS_READ = "is_read";
     field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail";
+    field public static final java.lang.String LAST_MODIFIED = "last_modified";
     field public static final java.lang.String MIME_TYPE = "mime_type";
     field public static final java.lang.String NUMBER = "number";
     field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
