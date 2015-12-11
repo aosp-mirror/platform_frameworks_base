@@ -20,7 +20,7 @@ package android.text.method;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 
-import java.text.BreakIterator;
+import android.icu.text.BreakIterator;
 import java.util.Locale;
 
 /**
