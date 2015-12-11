@@ -48,6 +48,8 @@
     <color name="primary_text_default_material_light">#de000000</color>
     <!-- 54% black -->
     <color name="secondary_text_default_material_light">#8a000000</color>
+    <!-- 38% black -->
+    <color name="tertiary_text_default_material_light">#61000000</color>
 
     <!-- 100% white -->
     <color name="primary_text_default_material_dark">#ffffffff</color>
