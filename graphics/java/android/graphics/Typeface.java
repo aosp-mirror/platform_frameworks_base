@@ -209,7 +209,7 @@ public class Typeface {
     public static Typeface createFromFile(String path) {
         if (sFallbackFonts != null) {
             FontFamily fontFamily = new FontFamily();
-            if (fontFamily.addFont(path)) {
+            if (fontFamily.addFont(path, 0 /* ttcIndex */)) {
                 FontFamily[] families = { fontFamily };
                 return createFromFamiliesWithDefault(families);
             }
@@ -262,7 +262,7 @@ public class Typeface {
     private static FontFamily makeFamilyFromParsed(FontListParser.Family family) {
         FontFamily fontFamily = new FontFamily(family.lang, family.variant);
         for (FontListParser.Font font : family.fonts) {
-            fontFamily.addFontWeightStyle(font.fontName, font.weight, font.isItalic);
+            fontFamily.addFontWeightStyle(font.fontName, font.ttcIndex, font.weight, font.isItalic);
         }
         return fontFamily;
     }
