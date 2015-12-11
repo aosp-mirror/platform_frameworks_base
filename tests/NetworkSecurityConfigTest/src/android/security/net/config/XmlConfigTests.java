@@ -22,6 +22,7 @@ import android.test.MoreAsserts;
 import android.util.ArraySet;
 import android.util.Pair;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.security.KeyStore;
@@ -34,6 +35,7 @@ import java.util.Set;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -103,6 +105,15 @@ public class XmlConfigTests extends AndroidTestCase {
         TestUtils.assertConnectionFails(context, "developer.android.com", 443);
         TestUtils.assertUrlConnectionFails(context, "google.com", 443);
         TestUtils.assertUrlConnectionSucceeds(context, "android.com", 443);
+        // Check that sockets created without the hostname fail with per-domain configs
+        SSLSocket socket = (SSLSocket) context.getSocketFactory()
+                .createSocket(InetAddress.getByName("android.com"), 443);
+        try {
+        socket.startHandshake();
+        socket.getInputStream();
+        fail();
+        } catch (IOException expected) {
+        }
     }
 
     public void testBasicPinning() throws Exception {
