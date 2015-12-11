@@ -28,7 +28,6 @@ package com.android.systemui.recents;
 public class RecentsActivityLaunchState {
 
     public boolean launchedWithAltTab;
-    public boolean launchedWithNoRecentTasks;
     public boolean launchedFromAppWithThumbnail;
     public boolean launchedFromHome;
     public boolean launchedFromSearchHome;
@@ -47,28 +46,6 @@ public class RecentsActivityLaunchState {
         // Set this flag to indicate that the configuration has changed since Recents last launched
         launchedHasConfigurationChanged = true;
         launchedViaDragGesture = false;
-    }
-
-    /** Returns whether the status bar scrim should be animated when shown for the first time. */
-    public boolean shouldAnimateStatusBarScrim() {
-        return true;
-    }
-
-    /** Returns whether the status bar scrim should be visible. */
-    public boolean hasStatusBarScrim() {
-        return !launchedWithNoRecentTasks;
-    }
-
-    /** Returns whether the nav bar scrim should be animated when shown for the first time. */
-    public boolean shouldAnimateNavBarScrim() {
-        return true;
-    }
-
-    /** Returns whether the nav bar scrim should be visible. */
-    public boolean hasNavBarScrim() {
-        // Only show the scrim if we have recent tasks, and if the nav bar is not transposed
-        RecentsConfiguration config = Recents.getConfiguration();
-        return !launchedWithNoRecentTasks && !config.hasTransposedNavBar;
     }
 
     /**
@@ -102,14 +79,5 @@ public class RecentsActivityLaunchState {
             // know to return home
             return -1;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "RecentsActivityLaunchState altTab: " + launchedWithAltTab +
-                ", noTasks: " + launchedWithNoRecentTasks +
-                ", fromHome: " + launchedFromHome +
-                ", fromSearchHome: " + launchedFromSearchHome +
-                ", reuse: " + launchedReuseTaskStackViews;
     }
 }
