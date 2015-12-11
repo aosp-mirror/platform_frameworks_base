@@ -17,11 +17,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-# Use full Noto Sans Japanese font on non-smaller footprints
-ifneq ($(SMALLER_FONT_FOOTPRINT),true)
-FONT_NOTOSANS_JP_FULL := true
-endif
-
 ##########################################
 # create symlink for given font
 # $(1): new font $(2): link target
@@ -50,24 +45,6 @@ $(eval $(call create-font-symlink,DroidSerif-BoldItalic.ttf,NotoSerif-BoldItalic
 extra_font_files := \
     DroidSans.ttf \
     DroidSans-Bold.ttf
-
-################################
-# Do not include Motoya on space-constrained devices
-ifneq ($(SMALLER_FONT_FOOTPRINT),true)
-# Do not include Motoya if we are including Noto Sans Japanese
-ifneq ($(FONT_NOTOSANS_JP_FULL),true)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := MTLmr3m.ttf
-LOCAL_SRC_FILES := $(LOCAL_MODULE)
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-include $(BUILD_PREBUILT)
-extra_font_files += MTLmr3m.ttf
-
-endif  # !FONT_NOTOSANS_JP_FULL
-endif  # !SMALLER_FONT_FOOTPRINT
 
 ################################
 # Use DroidSansMono to hang extra_font_files on
