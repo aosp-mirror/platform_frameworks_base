@@ -1323,9 +1323,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
-     * Called when the panel was layouted expanded for the first time after being collapsed.
+     * Called when the size of the notification panel changes
      */
-    public void onPanelExpandedAndLayouted() {
+    public void onPanelHeightChanged() {
         if (mState == StatusBarState.KEYGUARD) {
             // Since the number of notifications is determined based on the height of the view, we
             // need to update them.
