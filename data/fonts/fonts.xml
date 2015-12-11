@@ -330,16 +330,16 @@
         <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted.ttf</font>
     </family>
     <family lang="zh-Hans">
-        <font weight="400" style="normal">NotoSansSC-Regular.otf</font>
+        <font weight="400" style="normal" ttcIndex="2">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="zh-Hant">
-        <font weight="400" style="normal">NotoSansTC-Regular.otf</font>
+        <font weight="400" style="normal" ttcIndex="3">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal">NotoSansJP-Regular.otf</font>
+        <font weight="400" style="normal" ttcIndex="0">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="ko">
-        <font weight="400" style="normal">NotoSansKR-Regular.otf</font>
+        <font weight="400" style="normal" ttcIndex="1">NotoSansCJK-Regular.ttc</font>
     </family>
     <family>
         <font weight="400" style="normal">NanumGothic.ttf</font>
@@ -349,9 +349,6 @@
     </family>
     <family>
         <font weight="400" style="normal">DroidSansFallback.ttf</font>
-    </family>
-    <family lang="ja">
-        <font weight="400" style="normal">MTLmr3m.ttf</font>
     </family>
     <!--
         Tai Le and Mongolian are intentionally kept last, to make sure they don't override
