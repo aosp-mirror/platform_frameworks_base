@@ -29,6 +29,7 @@ import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTE
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +46,7 @@ import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Instrumentation;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -80,15 +82,17 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     // Timeout for UI operations, in milliseconds.
     private static final int TIMEOUT = 1000;
 
-    private static final String ROOT_DIR = "/data/data/com.android.shell/files/bugreports";
+    private static final String BUGREPORTS_DIR = "bugreports";
     private static final String BUGREPORT_FILE = "test_bugreport.txt";
     private static final String ZIP_FILE = "test_bugreport.zip";
-    private static final String PLAIN_TEXT_PATH = ROOT_DIR + "/" + BUGREPORT_FILE;
-    private static final String ZIP_PATH = ROOT_DIR + "/" + ZIP_FILE;
-    private static final String SCREENSHOT_PATH = ROOT_DIR + "/test_screenshot.png";
+    private static final String SCREENSHOT_FILE = "test_screenshot.png";
 
     private static final String BUGREPORT_CONTENT = "Dump, might as well dump!\n";
     private static final String SCREENSHOT_CONTENT = "A picture is worth a thousand words!\n";
+
+    private String mPlainTextPath;
+    private String mZipPath;
+    private String mScreenshotPath;
 
     private Context mContext;
     private UiBot mUiBot;
@@ -100,6 +104,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mContext = instrumentation.getTargetContext();
         mUiBot = new UiBot(UiDevice.getInstance(instrumentation), TIMEOUT);
         mListener = ActionSendMultipleConsumerActivity.getListener(mContext);
+        mPlainTextPath = getPath(BUGREPORT_FILE);
+        mZipPath = getPath(ZIP_FILE);
+        mScreenshotPath = getPath(SCREENSHOT_FILE);
         cancelExistingNotifications();
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_HIDE);
     }
@@ -127,9 +134,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         SystemProperties.set("dumpstate.42.max", "2000");
         assertProgressNotification(name, "25.00%");
 
-        createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
-        createTextFile(SCREENSHOT_PATH, SCREENSHOT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(42, PLAIN_TEXT_PATH, SCREENSHOT_PATH);
+        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
+        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
+        Bundle extras = sendBugreportFinishedIntent(42, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
 
         String service = BugreportProgressService.class.getName();
@@ -141,9 +148,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_SHOW);
 
         // Send notification and click on share.
-        createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
+        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
         Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
-        intent.putExtra(EXTRA_BUGREPORT, PLAIN_TEXT_PATH);
+        intent.putExtra(EXTRA_BUGREPORT, mPlainTextPath);
         mContext.sendBroadcast(intent);
         mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title));
 
@@ -167,28 +174,28 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
-        createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
-        createTextFile(SCREENSHOT_PATH, SCREENSHOT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(PLAIN_TEXT_PATH, SCREENSHOT_PATH);
+        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
+        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
+        Bundle extras = sendBugreportFinishedIntent(mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
     }
 
     public void testBugreportFinished_zippedBugreportAndScreenshot() throws Exception {
-        createZipFile(ZIP_PATH, BUGREPORT_FILE, BUGREPORT_CONTENT);
-        createTextFile(SCREENSHOT_PATH, SCREENSHOT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(ZIP_PATH, SCREENSHOT_PATH);
+        createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
+        Bundle extras = sendBugreportFinishedIntent(mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
     }
 
     public void testBugreportFinished_plainBugreportAndNoScreenshot() throws Exception {
-        createTextFile(PLAIN_TEXT_PATH, BUGREPORT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(PLAIN_TEXT_PATH, null);
+        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
+        Bundle extras = sendBugreportFinishedIntent(mPlainTextPath, null);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
     }
 
     public void testBugreportFinished_zippedBugreportAndNoScreenshot() throws Exception {
-        createZipFile(ZIP_PATH, BUGREPORT_FILE, BUGREPORT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(ZIP_PATH, null);
+        createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        Bundle extras = sendBugreportFinishedIntent(mZipPath, null);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
     }
 
@@ -338,5 +345,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             zos.write(data, 0, data.length);
             zos.closeEntry();
         }
+    }
+
+    private String getPath(String file) {
+        File rootDir = new ContextWrapper(mContext).getFilesDir();
+        File dir = new File(rootDir, BUGREPORTS_DIR);
+        String path = new File(dir, file).getAbsolutePath();
+        Log.v(TAG, "Path for '" + file + "': " + path);
+        return path;
     }
 }

@@ -19,6 +19,7 @@ package com.android.shell;
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
 import static com.android.shell.BugreportProgressService.EXTRA_ORIGINAL_INTENT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
+import static com.android.shell.BugreportProgressService.TAG;
 import static com.android.shell.BugreportProgressService.getFileExtra;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.FileUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 /**
  * Receiver that handles finished bugreports, usually by attaching them to an
@@ -63,6 +65,10 @@ public class BugreportReceiver extends BroadcastReceiver {
             return;
         }
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
+        if (bugreportFile == null || !bugreportFile.exists()) {
+            Log.e(TAG, "Not deleting old files because file " + bugreportFile + " doesn't exist");
+            return;
+        }
         final PendingResult result = goAsync();
         new AsyncTask<Void, Void, Void>() {
             @Override
