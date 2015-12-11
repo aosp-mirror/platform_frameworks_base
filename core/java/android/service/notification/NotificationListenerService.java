@@ -863,6 +863,8 @@ public abstract class NotificationListenerService extends Service {
         private boolean mMatchesInterruptionFilter;
         private int mVisibilityOverride;
         private int mSuppressedVisualEffects;
+        private int mImportance;
+        private CharSequence mImportanceExplanation;
 
         public Ranking() {}
 
@@ -928,7 +930,7 @@ public abstract class NotificationListenerService extends Service {
          * @return the rank of the notification
          */
         public int getImportance() {
-            return IMPORTANCE_DEFAULT;  // TODO implement;
+            return mImportance;
         }
 
         /**
@@ -939,18 +941,21 @@ public abstract class NotificationListenerService extends Service {
          * @return the explanation for the importance, or null if it is the natural importance
          */
         public CharSequence getImportanceExplanation() {
-            return null;  // TODO implement
+            return mImportanceExplanation;
         }
 
         private void populate(String key, int rank, boolean isAmbient,
                 boolean matchesInterruptionFilter, int visibilityOverride,
-                int suppressedVisualEffects) {
+                int suppressedVisualEffects, int importance,
+                CharSequence explanation) {
             mKey = key;
             mRank = rank;
             mIsAmbient = isAmbient;
             mMatchesInterruptionFilter = matchesInterruptionFilter;
             mVisibilityOverride = visibilityOverride;
             mSuppressedVisualEffects = suppressedVisualEffects;
+            mImportance = importance;
+            mImportanceExplanation = explanation;
         }
 
         /**
@@ -990,6 +995,8 @@ public abstract class NotificationListenerService extends Service {
         private ArraySet<Object> mIntercepted;
         private ArrayMap<String, Integer> mVisibilityOverrides;
         private ArrayMap<String, Integer> mSuppressedVisualEffects;
+        private ArrayMap<String, Integer> mImportance;
+        private ArrayMap<String, String> mImportanceExplanation;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1015,7 +1022,8 @@ public abstract class NotificationListenerService extends Service {
         public boolean getRanking(String key, Ranking outRanking) {
             int rank = getRank(key);
             outRanking.populate(key, rank, isAmbient(key), !isIntercepted(key),
-                    getVisibilityOverride(key), getSuppressedVisualEffects(key));
+                    getVisibilityOverride(key), getSuppressedVisualEffects(key),
+                    getImportance(key), getImportanceExplanation(key));
             return rank >= 0;
         }
 
@@ -1073,6 +1081,28 @@ public abstract class NotificationListenerService extends Service {
             return suppressed.intValue();
         }
 
+        private int getImportance(String key) {
+            synchronized (this) {
+                if (mImportance == null) {
+                    buildImportanceLocked();
+                }
+            }
+            Integer importance = mImportance.get(key);
+            if (importance == null) {
+                return Ranking.IMPORTANCE_DEFAULT;
+            }
+            return importance.intValue();
+        }
+
+        private String getImportanceExplanation(String key) {
+            synchronized (this) {
+                if (mImportanceExplanation == null) {
+                    buildImportanceExplanationLocked();
+                }
+            }
+            return mImportanceExplanation.get(key);
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1105,6 +1135,25 @@ public abstract class NotificationListenerService extends Service {
             mSuppressedVisualEffects = new ArrayMap<>(suppressedBundle.size());
             for (String key: suppressedBundle.keySet()) {
                 mSuppressedVisualEffects.put(key, suppressedBundle.getInt(key));
+            }
+        }
+        // Locked by 'this'
+        private void buildImportanceLocked() {
+            String[] orderedKeys = mRankingUpdate.getOrderedKeys();
+            int[] importance = mRankingUpdate.getImportance();
+            mImportance = new ArrayMap<>(orderedKeys.length);
+            for (int i = 0; i < orderedKeys.length; i++) {
+                String key = orderedKeys[i];
+                mImportance.put(key, importance[i]);
+            }
+        }
+
+        // Locked by 'this'
+        private void buildImportanceExplanationLocked() {
+            Bundle explanationBundle = mRankingUpdate.getImportanceExplanation();
+            mImportanceExplanation = new ArrayMap<>(explanationBundle.size());
+            for (String key: explanationBundle.keySet()) {
+                mImportanceExplanation.put(key, explanationBundle.getString(key));
             }
         }
 
