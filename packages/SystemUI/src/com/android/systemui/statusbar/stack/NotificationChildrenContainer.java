@@ -90,7 +90,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int childCount = mChildren.size();
+        int childCount = Math.min(mChildren.size(), NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
         for (int i = 0; i < childCount; i++) {
             View child = mChildren.get(i);
             if (child.getVisibility() == View.GONE) {
@@ -118,7 +118,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
         int dividerHeightSpec = MeasureSpec.makeMeasureSpec(mDividerHeight, MeasureSpec.EXACTLY);
         int height = mNotificationHeaderHeight + mNotificatonTopPadding;
-        int childCount = mChildren.size();
+        int childCount = Math.min(mChildren.size(), NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
         for (int i = 0; i < childCount; i++) {
             View child = mChildren.get(i);
             child.measure(widthMeasureSpec, newHeightSpec);

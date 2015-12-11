@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -44,6 +45,7 @@ public abstract class ExpandableView extends FrameLayout {
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
     private int mMinClipTopAmount = 0;
+    private boolean mMeasuredTooHigh;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -54,12 +56,13 @@ public abstract class ExpandableView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         boolean limitViewHeight = shouldLimitViewHeight();
+        final int givenSize = MeasureSpec.getSize(heightMeasureSpec);
         int ownMaxHeight = limitViewHeight ? mMaxViewHeight : Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         if (hasFixedHeight) {
             // We have a height set in our layout, so we want to be at most as big as given
-            ownMaxHeight = Math.min(MeasureSpec.getSize(heightMeasureSpec), ownMaxHeight);
+            ownMaxHeight = Math.min(givenSize, ownMaxHeight);
         }
         int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
         int maxChildHeight = 0;
@@ -97,6 +100,7 @@ public abstract class ExpandableView extends FrameLayout {
         mMatchParentViews.clear();
         int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, ownHeight);
+        mMeasuredTooHigh = heightMode != MeasureSpec.UNSPECIFIED && ownHeight > givenSize;
     }
 
     protected boolean shouldLimitViewHeight() {
@@ -382,6 +386,18 @@ public abstract class ExpandableView extends FrameLayout {
 
     public void setMinClipTopAmount(int minClipTopAmount) {
         mMinClipTopAmount = minClipTopAmount;
+    }
+
+    @Override
+    public void setLayerType(int layerType, Paint paint) {
+        if (hasOverlappingRendering()) {
+            super.setLayerType(layerType, paint);
+        }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return super.hasOverlappingRendering() && !mMeasuredTooHigh;
     }
 
     /**
