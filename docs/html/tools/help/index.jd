@@ -100,10 +100,6 @@ you can view the file in a profiling tool of your choice.</dd>
   <dt><a href="{@docRoot}tools/help/traceview.html">traceview</a></dt>
     <dd>Provides a graphical viewer for execution logs saved by your application.</dd>
 
-  <dt><a href="{@docRoot}tools/help/systrace.html">Systrace</a></dt>
-    <dd>Lets you analyze the execution of your application in the context of system processes,
-    to help diagnose display and performance issues.</dd>
-
 </dl>
 
 
