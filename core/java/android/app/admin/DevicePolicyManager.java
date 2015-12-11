@@ -166,7 +166,7 @@ public class DevicePolicyManager {
      * Activity action: Starts the provisioning flow which sets up a managed user.
      *
      * <p>This intent will typically be sent by a mobile device management application (MDM).
-     * Provisioning configures the current user as managed user and sets the MDM as the profile
+     * Provisioning configures the user as managed user and sets the MDM as the profile
      * owner who has full control over the user. Provisioning can only happen before user setup has
      * been completed. Use {@link #isProvisioningAllowed(String)} to check if provisioning is
      * allowed.
@@ -2397,7 +2397,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner or device owner to retrieve the certificate installer for the
-     * current user. null if none is set.
+     * user. null if none is set.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return The package name of the current delegated certificate installer, or {@code null}
@@ -2440,7 +2440,7 @@ public class DevicePolicyManager {
 
     /**
      * Determine whether or not the device's cameras have been disabled for this user,
-     * either by the current admin, if specified, or all admins.
+     * either by the calling admin, if specified, or all admins.
      * @param admin The name of the admin component to check, or {@code null} to check whether any admins
      * have disabled the camera
      */
@@ -2497,7 +2497,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not screen capture has been disabled by the current
+     * Determine whether or not screen capture has been disabled by the calling
      * admin, if specified, or all admins.
      * @param admin The name of the admin component to check, or {@code null} to check whether any admins
      * have disabled screen capture.
@@ -2595,7 +2595,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not features have been disabled in keyguard either by the current
+     * Determine whether or not features have been disabled in keyguard either by the calling
      * admin, if specified, or all admins.
      * @param admin The name of the admin component to check, or {@code null} to check whether any admins
      * have disabled features in keyguard.
@@ -3132,7 +3132,7 @@ public class DevicePolicyManager {
 
     /**
      * Used to determine if a particular package is registered as the profile owner for the
-     * current user. A profile owner is a special device admin that has additional privileges
+     * user. A profile owner is a special device admin that has additional privileges
      * within the profile.
      *
      * @param packageName The package name of the app to compare with the registered profile owner.
@@ -3429,7 +3429,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Start Quick Contact on the managed profile for the current user, if the policy allows.
+     * Start Quick Contact on the managed profile for the user, if the policy allows.
      * @hide
      */
     public void startManagedQuickContact(String actualLookupKey, long actualContactId,
@@ -3445,7 +3445,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Start Quick Contact on the managed profile for the current user, if the policy allows.
+     * Start Quick Contact on the managed profile for the user, if the policy allows.
      * @hide
      */
     public void startManagedQuickContact(String actualLookupKey, long actualContactId,
@@ -3692,7 +3692,7 @@ public class DevicePolicyManager {
 
     /**
      * Returns the list of input methods permitted by the device or profiles
-     * owners of the current user.
+     * owners of the current user.  (*Not* calling user, due to a limitation in InputMethodManager.)
      *
      * <p>Null means all input methods are allowed, if a non-null list is returned
      * it will contain the intersection of the permitted lists for any device or profile
@@ -3992,7 +3992,7 @@ public class DevicePolicyManager {
      * when the user was initialized.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param packageName The package to be re-enabled in the current profile.
+     * @param packageName The package to be re-enabled in the calling profile.
      */
     public void enableSystemApp(@NonNull ComponentName admin, String packageName) {
         if (mService != null) {
@@ -4010,7 +4010,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param intent An intent matching the app(s) to be installed. All apps that resolve for this
-     *               intent will be re-enabled in the current profile.
+     *               intent will be re-enabled in the calling profile.
      * @return int The number of activities that matched the intent and were installed.
      */
     public int enableSystemApp(@NonNull ComponentName admin, Intent intent) {
@@ -4290,7 +4290,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Check whether the current user has been blocked by device policy from uninstalling a package.
+     * Check whether the user has been blocked by device policy from uninstalling a package.
      * Requires the caller to be the profile owner if checking a specific admin's policy.
      * <p>
      * <strong>Note:</strong> Starting from {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}, the
@@ -4394,7 +4394,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to set the current user's photo.
+     * Called by profile or device owners to set the user's photo.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param icon the bitmap to set as the photo.
