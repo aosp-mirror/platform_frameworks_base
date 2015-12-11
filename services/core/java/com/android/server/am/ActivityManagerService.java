@@ -490,6 +490,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // Used to indicate that a task is removed it should also be removed from recents.
     private static final boolean REMOVE_FROM_RECENTS = true;
+    // Used to indicate that an app transition should be animated.
+    private static final boolean ANIMATE = true;
 
     private static native int nativeMigrateToBoost();
     private static native int nativeMigrateFromBoost();
@@ -4333,7 +4335,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (task.stack.mStackId != launchStackId) {
                     mStackSupervisor.moveTaskToStackLocked(
                             taskId, launchStackId, ON_TOP, FORCE_FOCUS, "startActivityFromRecents",
-                            true /* animate */);
+                            ANIMATE);
                 }
             }
 
@@ -9314,7 +9316,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
                         + " to stackId=" + stackId);
                 mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, !FORCE_FOCUS,
-                        "moveActivityToStack", true /* animate */);
+                        "moveActivityToStack", ANIMATE);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9335,7 +9337,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToStack: moving task=" + taskId
                         + " to stackId=" + stackId + " toTop=" + toTop);
                 mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop, !FORCE_FOCUS,
-                        "moveTaskToStack", true /* animate */);
+                        "moveTaskToStack", ANIMATE);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -17779,20 +17781,20 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void removeStack(int stackId) {
+    public void moveTasksToFullscreenStack(int fromStackId) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "detahStack()");
-        if (stackId == HOME_STACK_ID) {
-            throw new IllegalArgumentException("Removing home stack is not allowed.");
+                "moveTasksToFullscreenStack()");
+        if (fromStackId == HOME_STACK_ID) {
+            throw new IllegalArgumentException("You can't move tasks from the home stack.");
         }
         synchronized (this) {
-            long origId = Binder.clearCallingIdentity();
-            ActivityStack stack = mStackSupervisor.getStack(stackId);
+            final long origId = Binder.clearCallingIdentity();
+            final ActivityStack stack = mStackSupervisor.getStack(fromStackId);
             if (stack != null) {
-                ArrayList<TaskRecord> tasks = stack.getAllTasks();
+                final ArrayList<TaskRecord> tasks = stack.getAllTasks();
                 for (int i = tasks.size() - 1; i >= 0; i--) {
-                    removeTaskByIdLocked(tasks.get(i).taskId, false /* killProcess */,
-                            !REMOVE_FROM_RECENTS);
+                    mStackSupervisor.positionTaskInStackLocked(tasks.get(i).taskId,
+                            FULLSCREEN_WORKSPACE_STACK_ID, 0);
                 }
             }
             Binder.restoreCallingIdentity(origId);

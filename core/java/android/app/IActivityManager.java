@@ -541,7 +541,7 @@ public interface IActivityManager extends IInterface {
 
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException;
 
-    public void removeStack(int stackId) throws RemoteException;
+    public void moveTasksToFullscreenStack(int fromStackId) throws RemoteException;
 
     public int getAppStartMode(int uid, String packageName) throws RemoteException;
 
@@ -906,7 +906,7 @@ public interface IActivityManager extends IInterface {
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
     int MOVE_TASK_TO_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
     int SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
-    int REMOVE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 348;
+    int MOVE_TASKS_TO_FULLSCREEN_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 348;
     int MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 349;
     int GET_APP_START_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 350;
     int UNLOCK_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 351;

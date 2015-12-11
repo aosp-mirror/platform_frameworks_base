@@ -2718,10 +2718,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        case REMOVE_STACK_TRANSACTION: {
+        case MOVE_TASKS_TO_FULLSCREEN_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int stackId = data.readInt();
-            removeStack(stackId);
+            moveTasksToFullscreenStack(stackId);
             reply.writeNoException();
             return true;
         }
@@ -6358,12 +6358,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void removeStack(int stackId) throws RemoteException {
+    public void moveTasksToFullscreenStack(int fromStackId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(stackId);
-        mRemote.transact(REMOVE_STACK_TRANSACTION, data, reply, 0);
+        data.writeInt(fromStackId);
+        mRemote.transact(MOVE_TASKS_TO_FULLSCREEN_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

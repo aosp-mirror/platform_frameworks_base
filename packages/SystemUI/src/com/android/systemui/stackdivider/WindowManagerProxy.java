@@ -62,7 +62,7 @@ public class WindowManagerProxy {
         @Override
         public void run() {
             try {
-                ActivityManagerNative.getDefault().removeStack(DOCKED_STACK_ID);
+                ActivityManagerNative.getDefault().moveTasksToFullscreenStack(DOCKED_STACK_ID);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to remove stack: " + e);
             }
