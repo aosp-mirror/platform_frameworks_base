@@ -122,38 +122,6 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale,
     scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight);
 }
 
-static SkColorType correctPreferredColorType(SkColorType prefColorType,
-        SkColorType suggestedColorType, SkAlphaType suggestedAlphaType) {
-    switch (prefColorType) {
-        case kARGB_4444_SkColorType:
-        case kN32_SkColorType:
-            return kN32_SkColorType;
-        case kIndex_8_SkColorType:
-            if (kIndex_8_SkColorType == suggestedColorType) {
-                return kIndex_8_SkColorType;
-            }
-            break;
-        case kAlpha_8_SkColorType:
-            // Fall through to kGray_8.  Before kGray_8_SkColorType existed,
-            // we allowed clients to request kAlpha_8 when they wanted a
-            // grayscale decode.
-        case kGray_8_SkColorType:
-            if (kGray_8_SkColorType == suggestedColorType) {
-                return kGray_8_SkColorType;
-            }
-            break;
-        case kRGB_565_SkColorType:
-            if (kOpaque_SkAlphaType == suggestedAlphaType) {
-                return kRGB_565_SkColorType;
-            }
-            break;
-        default:
-            break;
-    }
-
-    return suggestedColorType;
-}
-
 static SkColorType colorTypeForScaledOutput(SkColorType colorType) {
     switch (colorType) {
         case kUnknown_SkColorType:
@@ -341,9 +309,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         decodeAllocator = &javaAllocator;
     }
 
-    // Set the decode colorType
-    SkColorType decodeColorType = correctPreferredColorType(prefColorType,
-            codec->getInfo().colorType(), codec->getInfo().alphaType());
+    // Set the decode colorType.  This is necessary because we can't always support
+    // the requested colorType.
+    SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
 
     // Construct a color table for the decode if necessary
     SkAutoTUnref<SkColorTable> colorTable(nullptr);
@@ -363,11 +331,8 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         colorCount = &maxColors;
     }
 
-    // Choose the alpha type for the decode.
-    SkAlphaType alphaType = codec->getInfo().alphaType();
-    if (kOpaque_SkAlphaType != alphaType) {
-        alphaType = requireUnpremultiplied ? kUnpremul_SkAlphaType : kPremul_SkAlphaType;
-    }
+    // Set the alpha type for the decode.
+    SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(), decodeColorType,
             alphaType);
