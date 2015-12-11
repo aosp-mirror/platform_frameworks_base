@@ -42,7 +42,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
         DocumentsContract.Document.COLUMN_LAST_MODIFIED,
         DocumentsContract.Document.COLUMN_ICON,
         DocumentsContract.Document.COLUMN_FLAGS,
-        DocumentsContract.Document.COLUMN_SIZE
+        DocumentsContract.Document.COLUMN_SIZE,
+        MtpDatabaseConstants.COLUMN_DOCUMENT_TYPE
     };
 
     private final TestResources resources = new TestResources();
@@ -83,6 +84,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals("icon", R.drawable.ic_root_mtp, cursor.getInt(8));
             assertEquals("flag", 0, cursor.getInt(9));
             assertEquals("size", 1000, cursor.getInt(10));
+            assertEquals(
+                    "documentType", MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE, cursor.getInt(11));
 
             cursor.moveToNext();
             assertEquals("documentId", 2, cursor.getInt(0));
@@ -178,6 +181,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE,
                 cursor.getInt(9));
         assertEquals("size", 1024, cursor.getInt(10));
+        assertEquals(
+                "documentType", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT, cursor.getInt(11));
 
         cursor.moveToNext();
         assertEquals("documentId", 2, cursor.getInt(0));
@@ -195,6 +200,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE,
                 cursor.getInt(9));
         assertEquals("size", 2 * 1024 * 1024, cursor.getInt(10));
+        assertEquals(
+                "documentType", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT, cursor.getInt(11));
 
         cursor.moveToNext();
         assertEquals("documentId", 3, cursor.getInt(0));
@@ -212,6 +219,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE,
                 cursor.getInt(9));
         assertEquals("size", 3 * 1024 * 1024, cursor.getInt(10));
+        assertEquals(
+                "documentType", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT, cursor.getInt(11));
 
         cursor.close();
     }
