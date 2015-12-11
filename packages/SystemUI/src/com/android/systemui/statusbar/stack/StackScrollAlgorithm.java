@@ -422,6 +422,7 @@ public class StackScrollAlgorithm {
             StackViewState childViewState = resultState.getViewStateForView(child);
             childViewState.location = StackViewState.LOCATION_UNKNOWN;
             int childHeight = getMaxAllowedChildHeight(child, ambientState);
+            int minHeight = child.getMinHeight();
             float yPositionInScrollViewAfterElement = yPositionInScrollView
                     + childHeight
                     + mPaddingBetweenElements;
@@ -450,17 +451,17 @@ public class StackScrollAlgorithm {
 
                 // check if we are overlapping with the bottom stack
                 if (childViewState.yTranslation + childHeight + mPaddingBetweenElements
-                        >= bottomStackStart && !mIsExpansionChanging && i != 0 && mIsSmallScreen) {
+                        >= bottomStackStart && !mIsExpansionChanging && i != 0) {
                     // we just collapse this element slightly
                     int newSize = (int) Math.max(bottomStackStart - mPaddingBetweenElements -
-                            childViewState.yTranslation, child.getMinHeight());
+                            childViewState.yTranslation, minHeight);
                     childViewState.height = newSize;
                     updateStateForChildTransitioningInBottom(algorithmState, bottomStackStart,
                             child, childViewState.yTranslation, childViewState,
                             childHeight);
                 }
                 clampPositionToBottomStackStart(childViewState, childViewState.height,
-                        ambientState);
+                        minHeight, ambientState);
             } else if (nextYPosition >= bottomStackStart) {
                 // Case 2:
                 // We are in the bottom stack.
@@ -468,7 +469,7 @@ public class StackScrollAlgorithm {
                     // According to the regular scroll view we are fully translated out of the
                     // bottom of the screen so we are fully in the bottom stack
                     updateStateForChildFullyInBottomStack(algorithmState,
-                            bottomStackStart, childViewState, childHeight, ambientState);
+                            bottomStackStart, childViewState, minHeight, ambientState);
                 } else {
                     // According to the regular scroll view we are currently translating out of /
                     // into the bottom of the screen
@@ -560,12 +561,13 @@ public class StackScrollAlgorithm {
      * Clamp the yTranslation both up and down to valid positions.
      *
      * @param childViewState the view state of the child
-     * @param childHeight the height of this child
+     * @param minHeight the minimum height of this child
      */
-    private void clampYTranslation(StackViewState childViewState, int childHeight,
+    private void clampYTranslation(StackViewState childViewState, int minHeight,
             AmbientState ambientState) {
-        clampPositionToBottomStackStart(childViewState, childHeight, ambientState);
-        clampPositionToTopStackEnd(childViewState, childHeight);
+        clampPositionToBottomStackStart(childViewState, childViewState.height, minHeight,
+                ambientState);
+        clampPositionToTopStackEnd(childViewState, childViewState.height);
     }
 
     /**
@@ -574,12 +576,22 @@ public class StackScrollAlgorithm {
      *
      * @param childViewState the view state of the child
      * @param childHeight the height of this child
+     * @param minHeight the minumum Height of the View
      */
     private void clampPositionToBottomStackStart(StackViewState childViewState,
-            int childHeight, AmbientState ambientState) {
-        childViewState.yTranslation = Math.min(childViewState.yTranslation,
-                ambientState.getInnerHeight() - mBottomStackPeekSize - mCollapseSecondCardPadding
-                        - childHeight);
+            int childHeight, int minHeight, AmbientState ambientState) {
+
+        int bottomStackStart = ambientState.getInnerHeight()
+                - mBottomStackPeekSize - mCollapseSecondCardPadding;
+        int childStart = bottomStackStart - childHeight;
+        if (childStart < childViewState.yTranslation) {
+            float newHeight = bottomStackStart - childViewState.yTranslation;
+            if (newHeight < minHeight) {
+                newHeight = minHeight;
+                childViewState.yTranslation = bottomStackStart - minHeight;
+            }
+            childViewState.height = (int) newHeight;
+        }
     }
 
     /**
@@ -624,7 +636,7 @@ public class StackScrollAlgorithm {
         float offset = mBottomStackIndentationFunctor.getValue(algorithmState.partialInBottom);
         algorithmState.itemsInBottomStack += algorithmState.partialInBottom;
         int newHeight = childHeight;
-        if (childHeight > child.getMinHeight() && mIsSmallScreen) {
+        if (childHeight > child.getMinHeight()) {
             newHeight = (int) Math.max(Math.min(transitioningPositionStart + offset -
                     mPaddingBetweenElements - currentYPosition, childHeight),
                     child.getMinHeight());
@@ -640,7 +652,7 @@ public class StackScrollAlgorithm {
 
     private void updateStateForChildFullyInBottomStack(StackScrollAlgorithmState algorithmState,
             float transitioningPositionStart, StackViewState childViewState,
-            int childHeight, AmbientState ambientState) {
+            int minHeight, AmbientState ambientState) {
         float currentYPosition;
         algorithmState.itemsInBottomStack += 1.0f;
         if (algorithmState.itemsInBottomStack < MAX_ITEMS_IN_BOTTOM_STACK) {
@@ -660,8 +672,9 @@ public class StackScrollAlgorithm {
             childViewState.location = StackViewState.LOCATION_BOTTOM_STACK_HIDDEN;
             currentYPosition = ambientState.getInnerHeight();
         }
-        childViewState.yTranslation = currentYPosition - childHeight;
-        clampPositionToTopStackEnd(childViewState, childHeight);
+        childViewState.height = minHeight;
+        childViewState.yTranslation = currentYPosition - minHeight;
+        clampPositionToTopStackEnd(childViewState, minHeight);
     }
 
     private void updateStateForTopStackChild(StackScrollAlgorithmState algorithmState,
@@ -833,19 +846,6 @@ public class StackScrollAlgorithm {
                 childViewState.zTranslation = mZBasicHeight;
             }
         }
-    }
-
-    /**
-     * Update whether the device is very small, i.e. Notifications can be in both the top and the
-     * bottom stack at the same time
-     *
-     * @param panelHeight The normal height of the panel when it's open
-     */
-    public void updateIsSmallScreen(int panelHeight) {
-        mIsSmallScreen = panelHeight <
-                mCollapsedSize  /* top stack */
-                + mBottomStackSlowDownLength + mBottomStackPeekSize /* bottom stack */
-                + mMaxNotificationHeight; /* max notification height */
     }
 
     public void onExpansionStarted(StackScrollState currentState) {
