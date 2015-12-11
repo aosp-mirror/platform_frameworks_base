@@ -114,7 +114,8 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("font")) {
-                int ttcIndex = Integer.parseInt(parser.getAttributeValue("0", "ttcIndex"));
+                String ttcIndexStr = parser.getAttributeValue(null, "ttcIndex");
+                int ttcIndex = ttcIndexStr == null ? 0 : Integer.parseInt(ttcIndexStr);
                 String weightStr = parser.getAttributeValue(null, "weight");
                 int weight = weightStr == null ? 400 : Integer.parseInt(weightStr);
                 boolean isItalic = "italic".equals(parser.getAttributeValue(null, "style"));
