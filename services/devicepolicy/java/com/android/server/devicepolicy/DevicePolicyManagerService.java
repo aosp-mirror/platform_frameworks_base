@@ -109,8 +109,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.PrintWriterPrinter;
-import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -1752,11 +1750,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         try {
             return new DeviceAdminInfo(mContext, ri);
-        } catch (XmlPullParserException e) {
-            Slog.w(LOG_TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName,
-                    e);
-            return null;
-        } catch (IOException e) {
+        } catch (XmlPullParserException | IOException e) {
             Slog.w(LOG_TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName,
                     e);
             return null;
@@ -1994,18 +1988,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
-        } catch (NullPointerException e) {
-            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
-        } catch (NumberFormatException e) {
-            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
-        } catch (XmlPullParserException e) {
-            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
         } catch (FileNotFoundException e) {
             // Don't be noisy, this is normal if we haven't defined any policies.
-        } catch (IOException e) {
-            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
-        } catch (IndexOutOfBoundsException e) {
-            Slog.w(LOG_TAG, "failed parsing " + file + " " + e);
+        } catch (NullPointerException | NumberFormatException | XmlPullParserException | IOException
+                | IndexOutOfBoundsException e) {
+            Slog.w(LOG_TAG, "failed parsing " + file, e);
         }
         try {
             if (stream != null) {
