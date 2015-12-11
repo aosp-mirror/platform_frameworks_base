@@ -30,7 +30,7 @@ public:
     GammaFontRenderer();
 
     void clear() {
-        mRenderer.release();
+        mRenderer.reset(nullptr);
     }
 
     void flush() {
