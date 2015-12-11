@@ -82,6 +82,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mMotionAborted;
     private boolean mUpwardsWhenTresholdReached;
     private boolean mAnimatingOnDown;
+    private int mLayoutHeight = 0;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -716,6 +717,10 @@ public abstract class PanelView extends FrameLayout {
     @Override
     protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        if (mLayoutHeight != getHeight()) {
+            mLayoutHeight = getHeight();
+            mStatusBar.onPanelHeightChanged();
+        }
         requestPanelHeightUpdate();
         mHasLayoutedSinceDown = true;
         if (mUpdateFlingOnLayout) {
@@ -889,7 +894,6 @@ public abstract class PanelView extends FrameLayout {
                         if (mStatusBar.getStatusBarWindow().getHeight()
                                 != mStatusBar.getStatusBarHeight()) {
                             getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            mStatusBar.onPanelExpandedAndLayouted();
                             if (animate) {
                                 mBar.startOpeningPanel(PanelView.this);
                                 notifyExpandingStarted();
