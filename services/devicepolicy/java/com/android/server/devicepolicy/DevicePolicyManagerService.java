@@ -3681,7 +3681,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void choosePrivateKeyAlias(final int uid, final Uri uri, final String alias,
             final IBinder response) {
         // Caller UID needs to be trusted, so we restrict this method to SYSTEM_UID callers.
-        if (UserHandle.getAppId(mInjector.binderGetCallingUid()) != Process.SYSTEM_UID) {
+        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
             return;
         }
 
@@ -4991,7 +4991,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
         if (hasUserSetupCompleted(userHandle)
-                && UserHandle.getAppId(callingUid) != Process.SYSTEM_UID) {
+                && !UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)) {
             throw new IllegalStateException("Cannot set the profile owner on a user which is "
                     + "already set-up");
         }
@@ -5051,7 +5051,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void enforceManageUsers() {
         final int callingUid = mInjector.binderGetCallingUid();
-        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID) || callingUid == 0)) {
+        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
+                || callingUid == Process.ROOT_UID)) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         }
     }
@@ -5062,7 +5063,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final int callingUid = mInjector.binderGetCallingUid();
         if (userHandle == UserHandle.getUserId(callingUid)) return;
-        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID) || callingUid == 0)) {
+        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
+                || callingUid == Process.ROOT_UID)) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, "Must be system or have"
                     + " INTERACT_ACROSS_USERS_FULL permission");
@@ -5292,7 +5294,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public ComponentName getRestrictionsProvider(int userHandle) {
         synchronized (this) {
-            if (mInjector.binderGetCallingUid() != Process.SYSTEM_UID) {
+            if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
                 throw new SecurityException("Only the system can query the permission provider");
             }
             DevicePolicyData userData = getUserData(userHandle);
@@ -6303,7 +6305,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userHandle) {
-        if (mInjector.binderGetCallingUid() != Process.SYSTEM_UID) {
+        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
             throw new SecurityException("notifyLockTaskModeChanged can only be called by system");
         }
         synchronized (this) {
