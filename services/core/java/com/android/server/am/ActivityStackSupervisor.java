@@ -34,7 +34,6 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -76,7 +75,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -107,7 +105,6 @@ import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
-import android.os.storage.StorageManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -123,13 +120,11 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputEvent;
 import android.view.Surface;
-import android.widget.Toast;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -374,6 +369,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
 
+    private final ActivityMetricsLogger mActivityMetricsLogger;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -410,6 +407,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mService = service;
         mRecentTasks = recentTasks;
         mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
     }
 
     /**
@@ -3465,7 +3463,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (!r.info.supportsPip) {
             Slog.w(TAG,
                     "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
-                    + " r=" + r);
+                            + " r=" + r);
             return false;
         }
 
@@ -4519,6 +4517,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     int getLockTaskModeState() {
         return mLockTaskModeState;
+    }
+
+    void logStackState() {
+        mActivityMetricsLogger.logWindowState();
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {
