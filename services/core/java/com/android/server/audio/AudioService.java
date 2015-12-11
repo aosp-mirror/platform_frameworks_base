@@ -630,7 +630,11 @@ public class AudioService extends IAudioService.Stub {
                 MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
         if (maxVolume != MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]) {
             MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = maxVolume;
-            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = (maxVolume * 3) / 4;
+            if (isPlatformTelevision()) {
+                AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = maxVolume / 4;
+            } else {
+                AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = (maxVolume * 3) / 4;
+            }
         }
 
         sSoundEffectVolumeDb = context.getResources().getInteger(
