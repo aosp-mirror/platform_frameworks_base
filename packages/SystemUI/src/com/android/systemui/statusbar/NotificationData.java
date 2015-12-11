@@ -289,7 +289,7 @@ public class NotificationData {
             mRankingMap.getRanking(key, mTmpRanking);
             return mTmpRanking.getVisibilityOverride();
         }
-        return NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
+        return Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
     public boolean shouldSuppressPeek(String key) {
@@ -299,6 +299,14 @@ public class NotificationData {
                     & NotificationListenerService.SUPPRESSED_EFFECT_PEEK) != 0;
         }
         return false;
+    }
+
+    public int getImportance(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getImportance();
+        }
+        return Ranking.IMPORTANCE_UNSPECIFIED;
     }
 
     public int getImportance(String key) {

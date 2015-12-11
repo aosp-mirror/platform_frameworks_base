@@ -3955,6 +3955,9 @@
     <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services, and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 
 
+    <!-- [CHAR LIMIT=100] Notification importance slider title -->
+    <string name="notification_importance_title">Importance</string>
+
     <!-- [CHAR LIMIT=100] Notification Importance slider: blocked importance level description -->
     <string name="notification_importance_blocked">Blocked: Never show these notifications</string>
 

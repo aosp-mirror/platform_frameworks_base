@@ -23,6 +23,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -37,7 +38,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -84,6 +84,7 @@ import android.widget.DateTimeView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -904,14 +905,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                        .findViewById(com.android.internal.R.id.media_actions) != null;
     }
 
-    // The gear button in the guts that links to the app's own notification settings
-    private void startAppOwnNotificationSettingsActivity(Intent intent,
-            final int notificationId, final String notificationTag, final int appUid) {
-        intent.putExtra("notification_id", notificationId);
-        intent.putExtra("notification_tag", notificationTag);
-        startNotificationGutsIntent(intent, appUid);
-    }
-
     // The (i) button in the guts that links to the system notification settings for that app
     private void startAppNotificationSettingsActivity(String packageName, final int appUid) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
@@ -970,12 +963,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             // app is gone, just show package name and generic icon
             pkgicon = pmUser.getDefaultActivityIcon();
         }
+
         ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
-        ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(sbn.getPostTime());
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
+
+        bindTopicImportance(sbn, row);
+
         final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
-        final View appSettingsButton
-                = guts.findViewById(R.id.notification_inspect_app_provided_settings);
         if (appUid >= 0) {
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -984,38 +978,72 @@ public abstract class BaseStatusBar extends SystemUI implements
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
-
-            final Intent appSettingsQueryIntent
-                    = new Intent(Intent.ACTION_MAIN)
-                    .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
-                    .setPackage(pkg);
-            List<ResolveInfo> infos = pmUser.queryIntentActivities(appSettingsQueryIntent, 0);
-            if (infos.size() > 0) {
-                appSettingsButton.setVisibility(View.VISIBLE);
-                appSettingsButton.setContentDescription(
-                        mContext.getResources().getString(
-                                R.string.status_bar_notification_app_settings_title,
-                                appname
-                        ));
-                final Intent appSettingsLaunchIntent = new Intent(appSettingsQueryIntent)
-                        .setClassName(pkg, infos.get(0).activityInfo.name);
-                appSettingsButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        MetricsLogger.action(mContext, MetricsLogger.ACTION_APP_NOTE_SETTINGS);
-                        startAppOwnNotificationSettingsActivity(appSettingsLaunchIntent,
-                                sbn.getId(),
-                                sbn.getTag(),
-                                appUidF);
-                    }
-                });
-            } else {
-                appSettingsButton.setVisibility(View.GONE);
-            }
         } else {
             settingsButton.setVisibility(View.GONE);
-            appSettingsButton.setVisibility(View.GONE);
         }
+    }
 
+    private void bindTopicImportance(final StatusBarNotification sbn,
+            ExpandableNotificationRow row) {
+        final INotificationManager sINM = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        final Notification.Topic topic = sbn.getNotification().getTopic() == null
+                ? new Notification.Topic(Notification.TOPIC_DEFAULT, mContext.getString(
+                        com.android.internal.R.string.default_notification_topic_label))
+                : sbn.getNotification().getTopic();
+
+        ((TextView) row.findViewById(R.id.topic_details)).setText(topic.getLabel());
+        final TextView topicSummary = ((TextView) row.findViewById(R.id.summary));
+        int importance = mNotificationData.getImportance(sbn.getKey());
+        SeekBar seekBar = (SeekBar) row.findViewById(R.id.seekbar);
+        seekBar.setMax(4);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                topicSummary.setText(getProgressSummary(progress));
+                if (fromUser) {
+                    try {
+                        sINM.setTopicImportance(sbn.getPackageName(), sbn.getUid(), topic,
+                                progress);
+                    } catch (RemoteException e) {
+                        // :(
+                    }
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // no-op
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // no-op
+            }
+
+            private String getProgressSummary(int progress) {
+                switch (progress) {
+                    case NotificationListenerService.Ranking.IMPORTANCE_NONE:
+                        return mContext.getString(
+                                com.android.internal.R.string.notification_importance_blocked);
+                    case NotificationListenerService.Ranking.IMPORTANCE_LOW:
+                        return mContext.getString(
+                                com.android.internal.R.string.notification_importance_low);
+                    case NotificationListenerService.Ranking.IMPORTANCE_DEFAULT:
+                        return mContext.getString(
+                                com.android.internal.R.string.notification_importance_default);
+                    case NotificationListenerService.Ranking.IMPORTANCE_HIGH:
+                        return mContext.getString(
+                                com.android.internal.R.string.notification_importance_high);
+                    case NotificationListenerService.Ranking.IMPORTANCE_MAX:
+                        return mContext.getString(
+                                com.android.internal.R.string.notification_importance_max);
+                    default:
+                        return "";
+                }
+            }
+        });
+        seekBar.setProgress(importance);
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
@@ -1050,6 +1078,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                 MetricsLogger.action(mContext, MetricsLogger.ACTION_NOTE_CONTROLS);
                 guts.setVisibility(View.VISIBLE);
+
                 final double horz = Math.max(guts.getWidth() - x, x);
                 final double vert = Math.max(guts.getActualHeight() - y, y);
                 final float r = (float) Math.hypot(horz, vert);
