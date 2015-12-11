@@ -77,7 +77,7 @@ trainingnavtop=true
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.gms.location.sample.basiclocationsample" &gt;
-  
+
   &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/&gt;
 &lt;/manifest&gt;
 </pre>
@@ -158,5 +158,6 @@ public class MainActivity extends ActionBarActivity implements
   when the location is not available.</p>
 
 <p>The next lesson,
-  <a href="receive-location-updates.html">Receiving Location Updates</a>, shows
-  you how to receive periodic location updates.</p>
+  <a href="change-location-settings.html">Changing Location Settings</a>, shows
+  you how to detect the current location settings, and prompt the user to
+  change settings as appropriate for your app's requirements.</p>

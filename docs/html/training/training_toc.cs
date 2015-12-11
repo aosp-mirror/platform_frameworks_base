@@ -780,6 +780,11 @@
             </a>
           </li>
           <li>
+            <a href="<?cs var:toroot ?>training/location/change-location-settings.html">
+            Changing Location Settings
+            </a>
+          </li>
+          <li>
             <a href="<?cs var:toroot ?>training/location/receive-location-updates.html">
             Receiving Location Updates
             </a>
