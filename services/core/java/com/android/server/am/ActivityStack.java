@@ -1359,6 +1359,13 @@ final class ActivityStack {
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
         final int focusedStackId = focusedStack.mStackId;
 
+        if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
+                && hasVisibleBehindActivity() && focusedStackId == HOME_STACK_ID) {
+            // The fullscreen stack should be visible if it has a visible behind activity behind
+            // the home stack that will be translucent.
+            return true;
+        }
+
         if (mStackId == DOCKED_STACK_ID) {
             // Docked stack is always visible, except in the case where the home activity
             // is the top running activity in the focused home stack.
