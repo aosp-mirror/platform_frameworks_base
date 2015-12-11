@@ -91,7 +91,7 @@ import android.widget.Toast;
  * </ol>
  */
 public class BugreportProgressService extends Service {
-    private static final String TAG = "Shell";
+    static final String TAG = "Shell";
     private static final boolean DEBUG = false;
 
     private static final String AUTHORITY = "com.android.shell";
