@@ -784,6 +784,12 @@ void OpReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
     deferOvalOp(*resolvedOp);
 }
 
+void OpReorderer::deferFunctorOp(const FunctorOp& op) {
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::None);
+}
+
 void OpReorderer::deferLinesOp(const LinesOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
     deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);

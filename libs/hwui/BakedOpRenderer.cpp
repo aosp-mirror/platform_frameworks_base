@@ -128,7 +128,7 @@ Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
     return texture;
 }
 
-void BakedOpRenderer::renderGlop(const Rect* dirtyBounds, const Rect* clip, const Glop& glop) {
+void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const Rect* clip) {
     mRenderState.scissor().setEnabled(clip != nullptr);
     if (clip) {
         mRenderState.scissor().set(clip->left, mRenderTarget.viewportHeight - clip->bottom,
@@ -140,8 +140,29 @@ void BakedOpRenderer::renderGlop(const Rect* dirtyBounds, const Rect* clip, cons
                 dirtyBounds->right, dirtyBounds->bottom);
         mRenderTarget.offscreenBuffer->region.orSelf(dirty);
     }
+}
+
+void BakedOpRenderer::renderGlop(const Rect* dirtyBounds, const Rect* clip, const Glop& glop) {
+    prepareRender(dirtyBounds, clip);
     mRenderState.render(glop, mRenderTarget.orthoMatrix);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
+}
+
+void BakedOpRenderer::renderFunctor(const FunctorOp& op, const BakedOpState& state) {
+    prepareRender(&state.computedState.clippedBounds, &state.computedState.clipRect);
+
+    DrawGlInfo info;
+    auto&& clip = state.computedState.clipRect;
+    info.clipLeft = clip.left;
+    info.clipTop = clip.top;
+    info.clipRight = clip.right;
+    info.clipBottom = clip.bottom;
+    info.isLayer = offscreenRenderTarget();
+    info.width = mRenderTarget.viewportWidth;
+    info.height = mRenderTarget.viewportHeight;
+    state.computedState.transform.copyTo(&info.transform[0]);
+
+    mRenderState.invokeFunctor(op.functor, DrawGlInfo::kModeDraw, &info);
 }
 
 void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {

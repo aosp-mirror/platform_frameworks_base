@@ -49,6 +49,7 @@ struct Vertex;
         U_OP_FN(BitmapMeshOp) \
         U_OP_FN(BitmapRectOp) \
         U_OP_FN(CirclePropsOp) \
+        U_OP_FN(FunctorOp) \
         U_OP_FN(LinesOp) \
         U_OP_FN(OvalOp) \
         M_OP_FN(PatchOp) \
@@ -193,6 +194,13 @@ struct CirclePropsOp : RecordedOp {
     const float* x;
     const float* y;
     const float* radius;
+};
+
+struct FunctorOp : RecordedOp {
+    FunctorOp(BASE_PARAMS_PAINTLESS, Functor* functor)
+            : SUPER_PAINTLESS(FunctorOp)
+            , functor(functor) {}
+    Functor* functor;
 };
 
 struct LinesOp : RecordedOp {
