@@ -79,6 +79,17 @@ final class UiBot {
     }
 
     /**
+     * Gets an object that might not yet be available in current UI.
+     *
+     * @param id Object's fully-qualified resource id (like {@code android:id/button1})
+     */
+    public UiObject getObjectById(String id) {
+        boolean gotIt = mDevice.wait(Until.hasObject(By.res(id)), mTimeout);
+        assertTrue("object with id '(" + id + "') not visible yet", gotIt);
+        return getVisibleObjectById(id);
+    }
+
+    /**
      * Gets an object which is guaranteed to be present in the current UI.
      *
      * @param text Object's text as displayed by the UI.
@@ -88,6 +99,18 @@ final class UiBot {
         assertTrue("could not find object with text '" + text + "'", uiObject.exists());
         return uiObject;
     }
+
+    /**
+     * Gets an object which is guaranteed to be present in the current UI.
+     *
+     * @param text Object's text as displayed by the UI.
+     */
+    public UiObject getVisibleObjectById(String id) {
+        UiObject uiObject = mDevice.findObject(new UiSelector().resourceId(id));
+        assertTrue("could not find object with id '" + id+ "'", uiObject.exists());
+        return uiObject;
+    }
+
 
     /**
      * Clicks on a UI element.
@@ -150,5 +173,9 @@ final class UiBot {
             // ... then select it.
             click(activity, name);
         }
+    }
+
+    public void pressBack() {
+        mDevice.pressBack();
     }
 }

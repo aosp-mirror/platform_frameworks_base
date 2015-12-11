@@ -94,7 +94,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final int PID = 42;
     private static final String PROGRESS_PROPERTY = "dumpstate.42.progress";
     private static final String MAX_PROPERTY = "dumpstate.42.max";
+    private static final String NAME_PROPERTY = "dumpstate.42.name";
     private static final String NAME = "BUG, Y U NO REPORT?";
+    private static final String NEW_NAME = "Bug_Forrest_Bug";
+    private static final String TITLE = "Wimbugdom Champion 2015";
+    private String mDescription;
 
     private String mPlainTextPath;
     private String mZipPath;
@@ -120,10 +124,17 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
         createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
 
+        // Creates a multi-line description.
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= 20; i++) {
+            sb.append("All work and no play makes Shell a dull app!\n");
+        }
+        mDescription = sb.toString();
+
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_HIDE);
     }
 
-    public void testFullWorkflow() throws Exception {
+    public void testProgress() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
 
@@ -141,6 +152,81 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
+
+        assertServiceNotRunning();
+    }
+
+    public void testProgress_changeDetails() throws Exception {
+        resetProperties();
+        sendBugreportStarted(1000);
+
+        DetailsUi detailsUi = new DetailsUi(mUiBot);
+
+        // Check initial name.
+        String actualName = detailsUi.nameField.getText().toString();
+        assertEquals("Wrong value on field 'name'", NAME, actualName);
+
+        // Change name - it should have changed system property once focus is changed.
+        detailsUi.nameField.setText(NEW_NAME);
+        detailsUi.focusAwayFromName();
+        assertPropertyValue(NAME_PROPERTY, NEW_NAME);
+
+        // Cancel the dialog to make sure property was restored.
+        detailsUi.clickCancel();
+        assertPropertyValue(NAME_PROPERTY, NAME);
+
+        // Now try to set an invalid name.
+        detailsUi.reOpen();
+        detailsUi.nameField.setText("/etc/passwd");
+        detailsUi.clickOk();
+        assertPropertyValue(NAME_PROPERTY, "_etc_passwd");
+
+        // Finally, make the real changes.
+        detailsUi.reOpen();
+        detailsUi.nameField.setText(NEW_NAME);
+        detailsUi.titleField.setText(TITLE);
+        detailsUi.descField.setText(mDescription);
+
+        detailsUi.clickOk();
+
+        assertPropertyValue(NAME_PROPERTY, NEW_NAME);
+        assertProgressNotification(NEW_NAME, "0.00%");
+
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
+                mScreenshotPath);
+        assertActionSendMultiple(extras, TITLE, mDescription, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
+
+        assertServiceNotRunning();
+    }
+
+    public void testProgress_bugreportFinishedWhileChangingDetails() throws Exception {
+        resetProperties();
+        sendBugreportStarted(1000);
+
+        DetailsUi detailsUi = new DetailsUi(mUiBot);
+
+        // Finish the bugreport while user's still typing the name.
+        detailsUi.nameField.setText(NEW_NAME);
+        sendBugreportFinished(PID, mPlainTextPath, mScreenshotPath);
+
+        // Wait until the share notifcation is received...
+        mUiBot.getNotification(mContext.getString(R.string.bugreport_finished_title));
+        // ...then close notification bar.
+        mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
+        // Make sure UI was updated properly.
+        assertFalse("didn't disable name on UI", detailsUi.nameField.isEnabled());
+        assertEquals("didn't revert name on UI", NAME, detailsUi.nameField.getText().toString());
+
+        // Finish changing other fields.
+        detailsUi.titleField.setText(TITLE);
+        detailsUi.descField.setText(mDescription);
+        detailsUi.clickOk();
+
+        // Finally, share bugreport.
+        Bundle extras = acceptBugreportAndGetSharedIntent();
+        assertActionSendMultiple(extras, TITLE, mDescription, BUGREPORT_CONTENT,
+                SCREENSHOT_CONTENT);
 
         assertServiceNotRunning();
     }
@@ -204,12 +290,16 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private void assertProgressNotification(String name, String percent) {
         // TODO: it current looks for 3 distinct objects, without taking advantage of their
         // relationship.
-        String title = mContext.getString(R.string.bugreport_in_progress_title);
-        Log.v(TAG, "Looking for progress notification title: '" + title+ "'");
-        mUiBot.getNotification(title);
+        openProgressNotification();
         Log.v(TAG, "Looking for progress notification details: '" + name + "-" + percent + "'");
         mUiBot.getObject(name);
         mUiBot.getObject(percent);
+    }
+
+    private void openProgressNotification() {
+        String title = mContext.getString(R.string.bugreport_in_progress_title);
+        Log.v(TAG, "Looking for progress notification title: '" + title + "'");
+        mUiBot.getNotification(title);
     }
 
     void resetProperties() {
@@ -270,7 +360,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     /**
      * Sends a "bugreport finished" intent.
-     *
      */
     private void sendBugreportFinished(Integer pid, String bugreportPath, String screenshotPath) {
         Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
@@ -292,13 +381,21 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent) throws IOException {
+        assertActionSendMultiple(extras, ZIP_FILE, null, bugreportContent, screenshotContent);
+    }
+
+    private void assertActionSendMultiple(Bundle extras, String subject, String description,
+            String bugreportContent, String screenshotContent) throws IOException {
         String body = extras.getString(Intent.EXTRA_TEXT);
         assertContainsRegex("missing build info",
                 SystemProperties.get("ro.build.description"), body);
         assertContainsRegex("missing serial number",
                 SystemProperties.get("ro.serialno"), body);
+        if (description != null) {
+            assertContainsRegex("missing description", description, body);
+        }
 
-        assertEquals("wrong subject", ZIP_FILE, extras.getString(Intent.EXTRA_SUBJECT));
+        assertEquals("wrong subject", subject, extras.getString(Intent.EXTRA_SUBJECT));
 
         List<Uri> attachments = extras.getParcelableArrayList(Intent.EXTRA_STREAM);
         int expectedSize = screenshotContent != null ? 2 : 1;
@@ -355,6 +452,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         fail("Did not find entry '" + entryName + "' on file '" + uri + "'");
     }
 
+    private void assertPropertyValue(String key, String expectedValue) {
+        String actualValue = SystemProperties.get(key);
+        assertEquals("Wrong value for property '" + key + "'", expectedValue, actualValue);
+    }
+
     private void assertServiceNotRunning() {
         String service = BugreportProgressService.class.getName();
         assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
@@ -401,5 +503,56 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         String path = new File(dir, file).getAbsolutePath();
         Log.v(TAG, "Path for '" + file + "': " + path);
         return path;
+    }
+
+    /**
+     * Helper class containing the UiObjects present in the bugreport info dialog.
+     */
+    private final class DetailsUi {
+
+        final UiObject detailsButton;
+        final UiObject nameField;
+        final UiObject titleField;
+        final UiObject descField;
+        final UiObject okButton;
+        final UiObject cancelButton;
+
+        /**
+         * Gets the UI objects by opening the progress notification and clicking DETAILS.
+         */
+        DetailsUi(UiBot uiBot) {
+            openProgressNotification();
+            detailsButton = mUiBot.getVisibleObject(
+                    mContext.getString(R.string.bugreport_info_action).toUpperCase());
+            mUiBot.click(detailsButton, "details_button");
+            // TODO: unhardcode resource ids
+            nameField = mUiBot.getVisibleObjectById("com.android.shell:id/name");
+            titleField = mUiBot.getVisibleObjectById("com.android.shell:id/title");
+            descField = mUiBot.getVisibleObjectById("com.android.shell:id/description");
+            okButton = mUiBot.getObjectById("android:id/button1");
+            cancelButton = mUiBot.getObjectById("android:id/button2");
+        }
+
+        /**
+         * Takes focus away from the name field so it can be validated.
+         */
+        void focusAwayFromName() {
+            mUiBot.click(titleField, "title_field"); // Change focus.
+            mUiBot.pressBack(); // Dismiss keyboard.
+        }
+
+        void reOpen() {
+            openProgressNotification();
+            mUiBot.click(detailsButton, "details_button");
+
+        }
+
+        void clickOk() {
+            mUiBot.click(okButton, "details_ok_button");
+        }
+
+        void clickCancel() {
+            mUiBot.click(cancelButton, "details_cancel_button");
+        }
     }
 }
