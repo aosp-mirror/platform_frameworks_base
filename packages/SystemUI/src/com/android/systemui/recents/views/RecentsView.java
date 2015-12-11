@@ -50,6 +50,7 @@ import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
+import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
@@ -597,6 +598,10 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(HideHistoryButtonEvent event) {
         hideHistoryButton(100);
+    }
+
+    public final void onBusEvent(TaskStackUpdatedEvent event) {
+        mStack.setTasks(event.stack.computeAllTasksList(), true /* notifyStackChanges */);
     }
 
     /**

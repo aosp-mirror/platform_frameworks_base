@@ -206,11 +206,20 @@ public class TaskStack {
 
     /** Task stack callbacks */
     public interface TaskStackCallbacks {
-        /* Notifies when a task has been removed from the stack */
+        /**
+         * Notifies when a new task has been added to the stack.
+         */
+        void onStackTaskAdded(TaskStack stack, Task newTask);
+
+        /**
+         * Notifies when a task has been removed from the stack.
+         */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
             Task newFrontMostTask);
 
-        /* Notifies when a task has been removed from the history */
+        /**
+         * Notifies when a task has been removed from the history.
+         */
         void onHistoryTaskRemoved(TaskStack stack, Task removedTask);
     }
 
@@ -315,6 +324,7 @@ public class TaskStack {
     // The task offset to apply to a task id as a group affiliation
     static final int IndividualTaskIdOffset = 1 << 16;
 
+    ArrayList<Task> mRawTaskList = new ArrayList<>();
     FilteredTaskList mStackTaskList = new FilteredTaskList();
     FilteredTaskList mHistoryTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
@@ -430,19 +440,72 @@ public class TaskStack {
 
     /**
      * Sets a few tasks in one go, without calling any callbacks.
+     *
+     * @param tasks the new set of tasks to replace the current set.
+     * @param notifyStackChanges whether or not to callback on specific changes to the list of tasks.
      */
-    public void setTasks(List<Task> tasks) {
+    public void setTasks(List<Task> tasks, boolean notifyStackChanges) {
+        // Compute a has set for each of the tasks
+        HashMap<Task.TaskKey, Task> currentTasksMap = createTaskKeyMapFromList(mRawTaskList);
+        HashMap<Task.TaskKey, Task> newTasksMap = createTaskKeyMapFromList(tasks);
+
+        ArrayList<Task> newTasks = new ArrayList<>();
+
+        // Disable notifications if there are no callbacks
+        if (mCb == null) {
+            notifyStackChanges = false;
+        }
+
+        // Remove any tasks that no longer exist
+        int taskCount = mRawTaskList.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = mRawTaskList.get(i);
+            if (!newTasksMap.containsKey(task.key)) {
+                if (notifyStackChanges) {
+                    mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null);
+                }
+            } else {
+                newTasks.add(task);
+            }
+        }
+
+        // Add any new tasks
+        taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (!currentTasksMap.containsKey(task.key)) {
+                if (notifyStackChanges) {
+                    mCb.onStackTaskAdded(this, task);
+                }
+                newTasks.add(task);
+            } else {
+                newTasks.add(currentTasksMap.get(task.key));
+            }
+        }
+
+        // Sort all the tasks to ensure they are ordered correctly
+        Collections.sort(newTasks, LAST_ACTIVE_TIME_COMPARATOR);
+
+        // TODO: Update screen pinning for the new front-most task post refactoring lockToTask out
+        // of the Task
+
+        // Filter out the historical tasks from this new list
         ArrayList<Task> stackTasks = new ArrayList<>();
         ArrayList<Task> historyTasks = new ArrayList<>();
-        for (Task task : tasks) {
+        int newTaskCount = newTasks.size();
+        for (int i = 0; i < newTaskCount; i++) {
+            Task task = newTasks.get(i);
             if (task.isHistorical) {
                 historyTasks.add(task);
             } else {
                 stackTasks.add(task);
             }
         }
+
         mStackTaskList.set(stackTasks);
         mHistoryTaskList.set(historyTasks);
+        mRawTaskList.clear();
+        mRawTaskList.addAll(newTasks);
     }
 
     /** Gets the front task */
@@ -713,5 +776,18 @@ public class TaskStack {
             str += "  " + t.toString() + "\n";
         }
         return str;
+    }
+
+    /**
+     * Given a list of tasks, returns a map of each task's key to the task.
+     */
+    private HashMap<Task.TaskKey, Task> createTaskKeyMapFromList(List<Task> tasks) {
+        HashMap<Task.TaskKey, Task> map = new HashMap<>();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            map.put(task.key, task);
+        }
+        return map;
     }
 }

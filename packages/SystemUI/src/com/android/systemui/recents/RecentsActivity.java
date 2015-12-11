@@ -51,6 +51,7 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
+import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -522,6 +523,22 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsTaskLoader loader = Recents.getTaskLoader();
         if (loader != null) {
             loader.onTrimMemory(level);
+        }
+    }
+
+    @Override
+    public void onMultiWindowModeChanged(boolean multiWindowMode) {
+        super.onMultiWindowModeChanged(multiWindowMode);
+        if (!multiWindowMode) {
+            RecentsTaskLoader loader = Recents.getTaskLoader();
+            RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+            launchOpts.loadIcons = false;
+            launchOpts.loadThumbnails = false;
+            launchOpts.onlyLoadForCache = true;
+            RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
+            loader.preloadTasks(loadPlan, false);
+            loader.loadTasks(this, loadPlan, launchOpts);
+            EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack()));
         }
     }
 
