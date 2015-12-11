@@ -1080,16 +1080,16 @@ public class Am extends BaseCommand {
 
     private void runBugReport() throws Exception {
         String opt;
-        boolean progress = false;
+        int bugreportType = ActivityManager.BUGREPORT_OPTION_FULL;
         while ((opt=nextOption()) != null) {
             if (opt.equals("--progress")) {
-                progress = true;
+                bugreportType = ActivityManager.BUGREPORT_OPTION_INTERACTIVE;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
             }
         }
-        mAm.requestBugReport(progress);
+        mAm.requestBugReport(bugreportType);
         System.out.println("Your lovely bug report is being created; please be patient.");
     }
 

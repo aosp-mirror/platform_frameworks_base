@@ -3638,6 +3638,9 @@ package android.app {
     method public void startActivity(android.content.Context, android.content.Intent, android.os.Bundle);
   }
 
+  public static abstract class ActivityManager.BugreportMode implements java.lang.annotation.Annotation {
+  }
+
   public static class ActivityManager.MemoryInfo implements android.os.Parcelable {
     ctor public ActivityManager.MemoryInfo();
     method public int describeContents();

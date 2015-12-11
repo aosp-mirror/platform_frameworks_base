@@ -11377,8 +11377,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public void requestBugReport(boolean progress) {
-        final String service = progress ? "bugreportplus" : "bugreport";
+    public void requestBugReport(int bugreportType) {
+        String service = null;
+        switch (bugreportType) {
+            case ActivityManager.BUGREPORT_OPTION_FULL:
+                service = "bugreport";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_INTERACTIVE:
+                service = "bugreportplus";
+                break;
+            case ActivityManager.BUGREPORT_OPTION_REMOTE:
+                service = "bugreportremote";
+                break;
+        }
+        if (service == null) {
+            throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
+                    + bugreportType);
+        }
         enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
         SystemProperties.set("ctl.start", service);
     }
