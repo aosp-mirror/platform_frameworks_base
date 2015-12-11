@@ -442,12 +442,11 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Notification.Info">
+        <item name="textColor">@color/tertiary_text_default_material_light</item>
         <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
-    <style name="TextAppearance.Material.Notification.Time">
-        <item name="textSize">@dimen/notification_subtext_size</item>
-    </style>
+    <style name="TextAppearance.Material.Notification.Time" parent="TextAppearance.Material.Notification.Info" />
 
     <style name="TextAppearance.Material.Notification.Emphasis">
         <item name="textColor">#66000000</item>
