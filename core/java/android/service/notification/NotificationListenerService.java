@@ -713,10 +713,10 @@ public abstract class NotificationListenerService extends Service {
                 createLegacyIconExtras(sbn.getNotification());
                 maybePopulateRemoteViews(sbn.getNotification());
             } catch (IllegalArgumentException e) {
-                // drop corrupt notification
-                sbn = null;
+                // warn and drop corrupt notification
                 Log.w(TAG, "onNotificationPosted: can't rebuild notification from " +
                         sbn.getPackageName());
+                sbn = null;
             }
 
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
