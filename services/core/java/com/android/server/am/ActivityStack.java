@@ -3992,6 +3992,20 @@ final class ActivityStack {
 
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task=" + taskId);
 
+        if (mStackId == HOME_STACK_ID && topTask().isHomeTask()) {
+            // For the case where we are moving the home task back and there is an activity visible
+            // behind it on the fullscreen stack, we want to move the focus to the visible behind
+            // activity to maintain order with what the user is seeing.
+            final ActivityStack fullscreenStack =
+                    mStackSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+            if (fullscreenStack != null && fullscreenStack.hasVisibleBehindActivity()) {
+                final ActivityRecord visibleBehind = fullscreenStack.getVisibleBehindActivity();
+                mService.setFocusedActivityLocked(visibleBehind, "moveTaskToBack");
+                mStackSupervisor.resumeTopActivitiesLocked(fullscreenStack, null, null);
+                return true;
+            }
+        }
+
         boolean prevIsHome = false;
 
         // If true, we should resume the home activity next if the task we are moving to the
