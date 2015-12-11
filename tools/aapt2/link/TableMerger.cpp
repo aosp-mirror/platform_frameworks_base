@@ -15,6 +15,7 @@
  */
 
 #include "ResourceTable.h"
+#include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
 
@@ -26,8 +27,9 @@
 
 namespace aapt {
 
-TableMerger::TableMerger(IAaptContext* context, ResourceTable* outTable) :
-        mContext(context), mMasterTable(outTable) {
+TableMerger::TableMerger(IAaptContext* context, ResourceTable* outTable,
+                         const TableMergerOptions& options) :
+        mContext(context), mMasterTable(outTable), mOptions(options) {
     // Create the desired package that all tables will be merged into.
     mMasterPackage = mMasterTable->createPackage(
             mContext->getCompilationPackage(), mContext->getPackageId());
@@ -37,7 +39,8 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* outTable) :
 /**
  * This will merge packages with the same package name (or no package name).
  */
-bool TableMerger::merge(const Source& src, ResourceTable* table, bool overrideExisting) {
+bool TableMerger::mergeImpl(const Source& src, ResourceTable* table,
+                            bool overlay, bool allowNew) {
     const uint8_t desiredPackageId = mContext->getPackageId();
 
     bool error = false;
@@ -55,19 +58,26 @@ bool TableMerger::merge(const Source& src, ResourceTable* table, bool overrideEx
             // mangled, then looked up at resolution time.
             // Also, when linking, we convert references with no package name to use
             // the compilation package name.
-            if (!doMerge(src, table, package.get(), false, overrideExisting)) {
-                error = true;
-            }
+            error |= !doMerge(src, table, package.get(),
+                              false /* mangle */, overlay, allowNew, {});
         }
     }
     return !error;
+}
+
+bool TableMerger::merge(const Source& src, ResourceTable* table) {
+    return mergeImpl(src, table, false /* overlay */, true /* allow new */);
+}
+
+bool TableMerger::mergeOverlay(const Source& src, ResourceTable* table) {
+    return mergeImpl(src, table, true /* overlay */, mOptions.autoAddOverlay);
 }
 
 /**
  * This will merge and mangle resources from a static library.
  */
 bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& packageName,
-                                 ResourceTable* table) {
+                                 ResourceTable* table, io::IFileCollection* collection) {
     bool error = false;
     for (auto& package : table->packages) {
         // Warn of packages with an unrelated ID.
@@ -79,16 +89,35 @@ bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& package
 
         bool mangle = packageName != mContext->getCompilationPackage();
         mMergedPackages.insert(package->name);
-        if (!doMerge(src, table, package.get(), mangle, false)) {
-            error = true;
-        }
+
+        auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
+                            FileReference* newFile, FileReference* oldFile) -> bool {
+            // The old file's path points inside the APK, so we can use it as is.
+            io::IFile* f = collection->findFile(util::utf16ToUtf8(*oldFile->path));
+            if (!f) {
+                mContext->getDiagnostics()->error(DiagMessage(src) << "file '" << *oldFile->path
+                                                  << "' not found");
+                return false;
+            }
+
+            mFilesToMerge[ResourceKeyRef{ name, config }] = FileToMerge{
+                    f, oldFile->getSource(), util::utf16ToUtf8(*newFile->path) };
+            return true;
+        };
+
+        error |= !doMerge(src, table, package.get(),
+                          mangle, false /* overlay */, true /* allow new */, callback);
     }
     return !error;
 }
 
-bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
-                          ResourceTablePackage* srcPackage, const bool manglePackage,
-                          const bool overrideExisting) {
+bool TableMerger::doMerge(const Source& src,
+                          ResourceTable* srcTable,
+                          ResourceTablePackage* srcPackage,
+                          const bool manglePackage,
+                          const bool overlay,
+                          const bool allowNewResources,
+                          FileMergeCallback callback) {
     bool error = false;
 
     for (auto& srcType : srcPackage->types) {
@@ -112,10 +141,33 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
         for (auto& srcEntry : srcType->entries) {
             ResourceEntry* dstEntry;
             if (manglePackage) {
-                dstEntry = dstType->findOrCreateEntry(NameMangler::mangleEntry(
-                        srcPackage->name, srcEntry->name));
+                std::u16string mangledName = NameMangler::mangleEntry(srcPackage->name,
+                                                                      srcEntry->name);
+                if (allowNewResources) {
+                    dstEntry = dstType->findOrCreateEntry(mangledName);
+                } else {
+                    dstEntry = dstType->findEntry(mangledName);
+                }
             } else {
-                dstEntry = dstType->findOrCreateEntry(srcEntry->name);
+                if (allowNewResources) {
+                    dstEntry = dstType->findOrCreateEntry(srcEntry->name);
+                } else {
+                    dstEntry = dstType->findEntry(srcEntry->name);
+                }
+            }
+
+            if (!dstEntry) {
+                mContext->getDiagnostics()->error(DiagMessage(src)
+                                                  << "resource "
+                                                  << ResourceNameRef(srcPackage->name,
+                                                                     srcType->type,
+                                                                     srcEntry->name)
+                                                  << " does not override an existing resource");
+                mContext->getDiagnostics()->note(DiagMessage(src)
+                                                 << "define an <add-resource> tag or use "
+                                                    "--auto-add-overlay");
+                error = true;
+                continue;
             }
 
             if (srcEntry->symbolStatus.state != SymbolState::kUndefined) {
@@ -143,6 +195,8 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                 }
             }
 
+            ResourceNameRef resName(mMasterPackage->name, dstType->type, dstEntry->name);
+
             for (ResourceConfigValue& srcValue : srcEntry->values) {
                 auto iter = std::lower_bound(dstEntry->values.begin(), dstEntry->values.end(),
                                              srcValue.config, cmp::lessThanConfig);
@@ -150,7 +204,7 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                 if (iter != dstEntry->values.end() && iter->config == srcValue.config) {
                     const int collisionResult = ResourceTable::resolveValueCollision(
                             iter->value.get(), srcValue.value.get());
-                    if (collisionResult == 0 && !overrideExisting) {
+                    if (collisionResult == 0 && !overlay) {
                         // Error!
                         ResourceNameRef resourceName(srcPackage->name,
                                                      srcType->type,
@@ -175,10 +229,26 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
                     iter = dstEntry->values.insert(iter, ResourceConfigValue{ srcValue.config });
                 }
 
-                if (manglePackage) {
-                    iter->value = cloneAndMangle(srcTable, srcPackage->name, srcValue.value.get());
+                if (FileReference* f = valueCast<FileReference>(srcValue.value.get())) {
+                    std::unique_ptr<FileReference> newFileRef;
+                    if (manglePackage) {
+                        newFileRef = cloneAndMangleFile(srcPackage->name, *f);
+                    } else {
+                        newFileRef = std::unique_ptr<FileReference>(f->clone(
+                                &mMasterTable->stringPool));
+                    }
+
+                    if (callback) {
+                        if (!callback(resName, iter->config, newFileRef.get(), f)) {
+                            error = true;
+                            continue;
+                        }
+                    }
+                    iter->value = std::move(newFileRef);
+
                 } else {
-                    iter->value = clone(srcValue.value.get());
+                    iter->value = std::unique_ptr<Value>(srcValue.value->clone(
+                            &mMasterTable->stringPool));
                 }
             }
         }
@@ -186,28 +256,52 @@ bool TableMerger::doMerge(const Source& src, ResourceTable* srcTable,
     return !error;
 }
 
-std::unique_ptr<Value> TableMerger::cloneAndMangle(ResourceTable* table,
-                                                   const std::u16string& package,
-                                                   Value* value) {
-    if (FileReference* f = valueCast<FileReference>(value)) {
-        // Mangle the path.
-        StringPiece16 prefix, entry, suffix;
-        if (util::extractResFilePathParts(*f->path, &prefix, &entry, &suffix)) {
-            std::u16string mangledEntry = NameMangler::mangleEntry(package, entry.toString());
-            std::u16string newPath = prefix.toString() + mangledEntry + suffix.toString();
-            mFilesToMerge.push(FileToMerge{ table, *f->path, newPath });
-            std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
-                    mMasterTable->stringPool.makeRef(newPath));
-            fileRef->setComment(f->getComment());
-            fileRef->setSource(f->getSource());
-            return std::move(fileRef);
-        }
+std::unique_ptr<FileReference> TableMerger::cloneAndMangleFile(const std::u16string& package,
+                                                               const FileReference& fileRef) {
+
+    StringPiece16 prefix, entry, suffix;
+    if (util::extractResFilePathParts(*fileRef.path, &prefix, &entry, &suffix)) {
+        std::u16string mangledEntry = NameMangler::mangleEntry(package, entry.toString());
+        std::u16string newPath = prefix.toString() + mangledEntry + suffix.toString();
+        std::unique_ptr<FileReference> newFileRef = util::make_unique<FileReference>(
+                mMasterTable->stringPool.makeRef(newPath));
+        newFileRef->setComment(fileRef.getComment());
+        newFileRef->setSource(fileRef.getSource());
+        return newFileRef;
     }
-    return clone(value);
+    return std::unique_ptr<FileReference>(fileRef.clone(&mMasterTable->stringPool));
 }
 
-std::unique_ptr<Value> TableMerger::clone(Value* value) {
-    return std::unique_ptr<Value>(value->clone(&mMasterTable->stringPool));
+bool TableMerger::mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, bool overlay) {
+    ResourceTable table;
+    std::u16string path = util::utf8ToUtf16(ResourceUtils::buildResourceFileName(fileDesc,
+                                                                                 nullptr));
+    std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
+            table.stringPool.makeRef(path));
+    fileRef->setSource(fileDesc.source);
+
+    ResourceTablePackage* pkg = table.createPackage(fileDesc.name.package, 0x0);
+    pkg->findOrCreateType(fileDesc.name.type)
+            ->findOrCreateEntry(fileDesc.name.entry)
+            ->values.push_back(ResourceConfigValue{ fileDesc.config, std::move(fileRef) });
+
+    auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
+                       FileReference* newFile, FileReference* oldFile) -> bool {
+        mFilesToMerge[ResourceKeyRef{ name, config }] = FileToMerge{
+                file, oldFile->getSource(), util::utf16ToUtf8(*newFile->path) };
+        return true;
+    };
+
+    return doMerge(file->getSource(), &table, pkg,
+                   false /* mangle */, overlay /* overlay */, true /* allow new */, callback);
+}
+
+bool TableMerger::mergeFile(const ResourceFile& fileDesc, io::IFile* file) {
+    return mergeFileImpl(fileDesc, file, false /* overlay */);
+}
+
+bool TableMerger::mergeFileOverlay(const ResourceFile& fileDesc, io::IFile* file) {
+    return mergeFileImpl(fileDesc, file, true /* overlay */);
 }
 
 } // namespace aapt

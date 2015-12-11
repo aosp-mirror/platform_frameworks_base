@@ -285,6 +285,8 @@ auto operator==(const Maybe<T>& a, const Maybe<U>& b)
 -> decltype(std::declval<T> == std::declval<U>) {
     if (a && b) {
         return a.value() == b.value();
+    } else if (!a && !b) {
+        return true;
     }
     return false;
 }

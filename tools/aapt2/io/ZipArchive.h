@@ -20,7 +20,7 @@
 #include "io/File.h"
 #include "util/StringPiece.h"
 
-#include <utils/FileMap.h>
+#include <map>
 #include <ziparchive/zip_archive.h>
 
 namespace aapt {
@@ -32,42 +32,28 @@ namespace io {
  */
 class ZipFile : public IFile {
 public:
-    ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source) :
-            mZipHandle(handle), mZipEntry(entry), mSource(source) {
-    }
+    ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source);
 
-    std::unique_ptr<IData> openAsData() override {
-        if (mZipEntry.method == kCompressStored) {
-            int fd = GetFileDescriptor(mZipHandle);
-
-            android::FileMap fileMap;
-            bool result = fileMap.create(nullptr, fd, mZipEntry.offset,
-                                         mZipEntry.uncompressed_length, true);
-            if (!result) {
-                return {};
-            }
-            return util::make_unique<MmappedData>(std::move(fileMap));
-
-        } else {
-            std::unique_ptr<uint8_t[]> data = std::unique_ptr<uint8_t[]>(
-                    new uint8_t[mZipEntry.uncompressed_length]);
-            int32_t result = ExtractToMemory(mZipHandle, &mZipEntry, data.get(),
-                                             static_cast<uint32_t>(mZipEntry.uncompressed_length));
-            if (result != 0) {
-                return {};
-            }
-            return util::make_unique<MallocData>(std::move(data), mZipEntry.uncompressed_length);
-        }
-    }
-
-    const Source& getSource() const override {
-        return mSource;
-    }
+    std::unique_ptr<IData> openAsData() override;
+    const Source& getSource() const override;
 
 private:
     ZipArchiveHandle mZipHandle;
     ZipEntry mZipEntry;
     Source mSource;
+};
+
+class ZipFileCollection;
+
+class ZipFileCollectionIterator : public IFileCollectionIterator {
+public:
+    ZipFileCollectionIterator(ZipFileCollection* collection);
+
+    bool hasNext() override;
+    io::IFile* next() override;
+
+private:
+    std::map<std::string, std::unique_ptr<IFile>>::const_iterator mCurrent, mEnd;
 };
 
 /**
@@ -76,65 +62,19 @@ private:
 class ZipFileCollection : public IFileCollection {
 public:
     static std::unique_ptr<ZipFileCollection> create(const StringPiece& path,
-                                                     std::string* outError) {
-        std::unique_ptr<ZipFileCollection> collection = std::unique_ptr<ZipFileCollection>(
-                new ZipFileCollection());
+                                                     std::string* outError);
 
-        int32_t result = OpenArchive(path.data(), &collection->mHandle);
-        if (result != 0) {
-            if (outError) *outError = ErrorCodeString(result);
-            return {};
-        }
+    io::IFile* findFile(const StringPiece& path) override;
+    std::unique_ptr<IFileCollectionIterator> iterator() override;
 
-        ZipString suffix(".flat");
-        void* cookie = nullptr;
-        result = StartIteration(collection->mHandle, &cookie, nullptr, &suffix);
-        if (result != 0) {
-            if (outError) *outError = ErrorCodeString(result);
-            return {};
-        }
-
-        using IterationEnder = std::unique_ptr<void, decltype(EndIteration)*>;
-        IterationEnder iterationEnder(cookie, EndIteration);
-
-        ZipString zipEntryName;
-        ZipEntry zipData;
-        while ((result = Next(cookie, &zipData, &zipEntryName)) == 0) {
-            std::string nestedPath = path.toString();
-            nestedPath += "@" + std::string(reinterpret_cast<const char*>(zipEntryName.name),
-                                            zipEntryName.name_length);
-            collection->mFiles.push_back(util::make_unique<ZipFile>(collection->mHandle,
-                                                                    zipData,
-                                                                    Source(nestedPath)));
-        }
-
-        if (result != -1) {
-            if (outError) *outError = ErrorCodeString(result);
-            return {};
-        }
-        return collection;
-    }
-
-    const_iterator begin() const override {
-        return mFiles.begin();
-    }
-
-    const_iterator end() const override {
-        return mFiles.end();
-    }
-
-    ~ZipFileCollection() override {
-        if (mHandle) {
-            CloseArchive(mHandle);
-        }
-    }
+    ~ZipFileCollection() override;
 
 private:
-    ZipFileCollection() : mHandle(nullptr) {
-    }
+    friend class ZipFileCollectionIterator;
+    ZipFileCollection();
 
     ZipArchiveHandle mHandle;
-    std::vector<std::unique_ptr<IFile>> mFiles;
+    std::map<std::string, std::unique_ptr<IFile>> mFiles;
 };
 
 } // namespace io

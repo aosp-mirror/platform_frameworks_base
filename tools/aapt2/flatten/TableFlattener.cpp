@@ -583,8 +583,8 @@ private:
                     publicEntry->state = Public_entry::kPublic;
                     break;
 
-                default:
-                    assert(false && "should not serialize any other state");
+                case SymbolState::kUndefined:
+                    publicEntry->state = Public_entry::kUndefined;
                     break;
                 }
 

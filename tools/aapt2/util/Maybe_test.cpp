@@ -124,9 +124,12 @@ TEST(MaybeTest, Equality) {
     Maybe<int> b = 1;
     Maybe<int> c;
 
+    Maybe<int> emptyA, emptyB;
+
     EXPECT_EQ(a, b);
     EXPECT_EQ(b, a);
     EXPECT_NE(a, c);
+    EXPECT_EQ(emptyA, emptyB);
 }
 
 } // namespace aapt

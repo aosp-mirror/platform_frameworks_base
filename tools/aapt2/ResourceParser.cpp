@@ -173,7 +173,7 @@ struct ParsedResource {
     ResourceName name;
     Source source;
     ResourceId id;
-    SymbolState symbolState = SymbolState::kUndefined;
+    Maybe<SymbolState> symbolState;
     std::u16string comment;
     std::unique_ptr<Value> value;
     std::list<ParsedResource> childResources;
@@ -182,9 +182,9 @@ struct ParsedResource {
 // Recursively adds resources to the ResourceTable.
 static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& config,
                                 IDiagnostics* diag, ParsedResource* res) {
-    if (res->symbolState != SymbolState::kUndefined) {
+    if (res->symbolState) {
         Symbol symbol;
-        symbol.state = res->symbolState;
+        symbol.state = res->symbolState.value();
         symbol.source = res->source;
         symbol.comment = res->comment;
         if (!table->setSymbolState(res->name, res->id, symbol, diag)) {
@@ -325,6 +325,8 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
             result = parseSymbol(parser, &parsedResource);
         } else if (elementName == u"public-group") {
             result = parsePublicGroup(parser, &parsedResource);
+        } else if (elementName == u"add-resource") {
+            result = parseAddResource(parser, &parsedResource);
         } else {
             // Try parsing the elementName (or type) as a resource. These shall only be
             // resources like 'layout' or 'xml' and they can only be references.
@@ -643,7 +645,7 @@ bool ResourceParser::parsePublicGroup(xml::XmlPullParser* parser, ParsedResource
     return !error;
 }
 
-bool ResourceParser::parseSymbol(xml::XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* outResource) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
     Maybe<StringPiece16> maybeType = xml::findNonEmptyAttribute(parser, u"type");
@@ -661,8 +663,23 @@ bool ResourceParser::parseSymbol(xml::XmlPullParser* parser, ParsedResource* out
     }
 
     outResource->name.type = *parsedType;
-    outResource->symbolState = SymbolState::kPrivate;
     return true;
+}
+
+bool ResourceParser::parseSymbol(xml::XmlPullParser* parser, ParsedResource* outResource) {
+    if (parseSymbolImpl(parser, outResource)) {
+        outResource->symbolState = SymbolState::kPrivate;
+        return true;
+    }
+    return false;
+}
+
+bool ResourceParser::parseAddResource(xml::XmlPullParser* parser, ParsedResource* outResource) {
+    if (parseSymbolImpl(parser, outResource)) {
+        outResource->symbolState = SymbolState::kUndefined;
+        return true;
+    }
+    return false;
 }
 
 static uint32_t parseFormatType(const StringPiece16& piece) {
@@ -870,7 +887,7 @@ Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(xml::XmlPullParser*
     }
 
     return Attribute::Symbol{
-            Reference(ResourceName({}, ResourceType::kId, maybeName.value().toString())),
+            Reference(ResourceNameRef({}, ResourceType::kId, maybeName.value())),
             val.data };
 }
 

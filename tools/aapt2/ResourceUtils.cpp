@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include "NameMangler.h"
 #include "ResourceUtils.h"
 #include "flatten/ResourceTypeExtensions.h"
+#include "util/Files.h"
 #include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
@@ -552,6 +554,23 @@ std::unique_ptr<Item> parseItemForAttribute(
         }
     }
     return {};
+}
+
+std::string buildResourceFileName(const ResourceFile& resFile, const NameMangler* mangler) {
+    std::stringstream out;
+    out << "res/" << resFile.name.type;
+    if (resFile.config != ConfigDescription{}) {
+        out << "-" << resFile.config;
+    }
+    out << "/";
+
+    if (mangler && mangler->shouldMangle(resFile.name.package)) {
+        out << NameMangler::mangleEntry(resFile.name.package, resFile.name.entry);
+    } else {
+        out << resFile.name.entry;
+    }
+    out << file::getExtension(resFile.source.path);
+    return out.str();
 }
 
 } // namespace ResourceUtils

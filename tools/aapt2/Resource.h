@@ -165,6 +165,36 @@ struct ResourceFile {
     std::vector<SourcedResourceName> exportedSymbols;
 };
 
+/**
+ * Useful struct used as a key to represent a unique resource in associative containers.
+ */
+struct ResourceKey {
+    ResourceName name;
+    ConfigDescription config;
+};
+
+bool operator<(const ResourceKey& a, const ResourceKey& b);
+
+/**
+ * Useful struct used as a key to represent a unique resource in associative containers.
+ * Holds a reference to the name, so that name better live longer than this key!
+ */
+struct ResourceKeyRef {
+    ResourceNameRef name;
+    ConfigDescription config;
+
+    ResourceKeyRef() = default;
+    ResourceKeyRef(const ResourceNameRef& n, const ConfigDescription& c) : name(n), config(c) {
+    }
+
+    /**
+     * Prevent taking a reference to a temporary. This is bad.
+     */
+    ResourceKeyRef(ResourceName&& n, const ConfigDescription& c) = delete;
+};
+
+bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);
+
 //
 // ResourceId implementation.
 //

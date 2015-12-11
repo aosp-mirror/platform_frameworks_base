@@ -22,7 +22,7 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
-
+#include "io/File.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/StringPiece.h"
 
@@ -86,6 +86,22 @@ template <typename T> T* getValueForConfig(ResourceTable* table, const StringPie
 template <typename T> T* getValue(ResourceTable* table, const StringPiece16& resName) {
     return getValueForConfig<T>(table, resName, {});
 }
+
+class TestFile : public io::IFile {
+private:
+    Source mSource;
+
+public:
+    TestFile(const StringPiece& path) : mSource(path) {}
+
+    std::unique_ptr<io::IData> openAsData() override {
+        return {};
+    }
+
+    const Source& getSource() const override {
+        return mSource;
+    }
+};
 
 } // namespace test
 } // namespace aapt

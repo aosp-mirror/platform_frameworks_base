@@ -31,6 +31,8 @@ sources := \
 	flatten/Archive.cpp \
 	flatten/TableFlattener.cpp \
 	flatten/XmlFlattener.cpp \
+	io/FileSystem.cpp \
+	io/ZipArchive.cpp \
 	link/AutoVersioner.cpp \
 	link/ManifestFixer.cpp \
 	link/PrivateAttributeMover.cpp \

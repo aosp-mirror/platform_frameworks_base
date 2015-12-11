@@ -83,7 +83,9 @@ private:
     bool parsePrimitive(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parsePublic(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parsePublicGroup(xml::XmlPullParser* parser, ParsedResource* outResource);
+    bool parseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseSymbol(xml::XmlPullParser* parser, ParsedResource* outResource);
+    bool parseAddResource(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttr(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* outResource, bool weak);
     Maybe<Attribute::Symbol> parseEnumOrFlagItem(xml::XmlPullParser* parser,
