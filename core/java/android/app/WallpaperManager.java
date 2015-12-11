@@ -52,6 +52,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
+import libcore.io.IoUtils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -309,11 +311,7 @@ public class WallpaperManager {
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode file", e);
                     } finally {
-                        try {
-                            fd.close();
-                        } catch (IOException e) {
-                            // Ignore
-                        }
+                        IoUtils.closeQuietly(fd);
                     }
                 }
             } catch (RemoteException e) {
@@ -321,7 +319,7 @@ public class WallpaperManager {
             }
             return null;
         }
-        
+
         private Bitmap getDefaultWallpaperLocked(Context context) {
             InputStream is = openDefaultWallpaper(context);
             if (is != null) {
@@ -331,11 +329,7 @@ public class WallpaperManager {
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "Can't decode stream", e);
                 } finally {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
+                    IoUtils.closeQuietly(is);
                 }
             }
             return null;
@@ -738,30 +732,65 @@ public class WallpaperManager {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
                     setWallpaper(resources.openRawResource(resid), fos);
                 } finally {
-                    if (fos != null) {
-                        fos.close();
-                    }
+                    IoUtils.closeQuietly(fos);
                 }
             }
         } catch (RemoteException e) {
             // Ignore
         }
     }
-    
+
     /**
      * Change the current system wallpaper to a bitmap.  The given bitmap is
      * converted to a PNG and stored as the wallpaper.  On success, the intent
      * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
+     *
+     * <p>This method is equivalent to calling
+     * {@link #setBitmap(Bitmap, Rect, boolean)} and passing {@code null} for the
+     * {@code visibleCrop} rectangle and {@code true} for the {@code allowBackup}
+     * parameter.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
      * @param bitmap The bitmap to save.
      *
-     * @throws IOException If an error occurs reverting to the built-in
-     * wallpaper.
+     * @throws IOException If an error occurs when attempting to set the wallpaper
+     *     to the provided image.
      */
     public void setBitmap(Bitmap bitmap) throws IOException {
+        setBitmap(bitmap, null, true);
+    }
+
+    /**
+     * Change the current system wallpaper to a bitmap, specifying a hint about
+     * which subrectangle of the full image is to be visible.  The OS will then
+     * try to best present the given portion of the full image as the static system
+     * wallpaper image.  On success, the intent
+     * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
+     *
+     * <p>Passing {@code null} as the {@code visibleHint} parameter is equivalent to
+     * passing (0, 0, {@code fullImage.getWidth()}, {@code fullImage.getHeight()}).
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
+     *
+     * @param fullImage A bitmap that will supply the wallpaper imagery. 
+     * @param visibleCropHint The rectangular subregion of {@code fullImage} that should be
+     *     displayed as wallpaper.  Passing {@code null} for this parameter means that
+     *     the full image should be displayed if possible given the image's and device's
+     *     aspect ratios, etc. 
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *     image for restore to a future device; {@code false} otherwise.
+     *
+     * @throws IOException If an error occurs when attempting to set the wallpaper
+     *     to the provided image.
+     * @throws IllegalArgumentException If the {@code visibleCropHint} rectangle is
+     *     empty or invalid.
+     */
+    public void setBitmap(Bitmap fullImage, Rect visibleCropHint, boolean allowBackup)
+            throws IOException {
+        validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return;
@@ -775,14 +804,18 @@ public class WallpaperManager {
             FileOutputStream fos = null;
             try {
                 fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos);
+                fullImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
             } finally {
-                if (fos != null) {
-                    fos.close();
-                }
+                IoUtils.closeQuietly(fos);
             }
         } catch (RemoteException e) {
             // Ignore
+        }
+    }
+
+    private final void validateRect(Rect rect) {
+        if (rect != null && rect.isEmpty()) {
+            throw new IllegalArgumentException("visibleCrop rectangle must be valid and non-empty");
         }
     }
 
@@ -793,15 +826,60 @@ public class WallpaperManager {
      * image.  On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
      * is broadcast.
      *
+     * <p>This method is equivalent to calling
+     * {@link #setStream(InputStream, Rect, boolean)} and passing {@code null} for the
+     * {@code visibleCrop} rectangle and {@code true} for the {@code allowBackup}
+     * parameter.
+     *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @param data A stream containing the raw data to install as a wallpaper.
+     * @param bitmapData A stream containing the raw data to install as a wallpaper.
      *
-     * @throws IOException If an error occurs reverting to the built-in
-     * wallpaper.
+     * @throws IOException If an error occurs when attempting to set the wallpaper
+     *     based on the provided image data.
      */
-    public void setStream(InputStream data) throws IOException {
+    public void setStream(InputStream bitmapData) throws IOException {
+        setStream(bitmapData, null, true);
+    }
+
+    private void setWallpaper(InputStream data, FileOutputStream fos)
+            throws IOException {
+        byte[] buffer = new byte[32768];
+        int amt;
+        while ((amt=data.read(buffer)) > 0) {
+            fos.write(buffer, 0, amt);
+        }
+    }
+
+    /**
+     * Change the current system wallpaper to a specific byte stream, specifying a
+     * hint about which subrectangle of the full image is to be visible.  The OS will
+     * then try to best present the given portion of the full image as the static system
+     * wallpaper image.  The data from the given InputStream is copied into persistent
+     * storage and will then be used as the system wallpaper.  Currently the data must
+     * be either a JPEG or PNG image.  On success, the intent
+     * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
+     *
+     * @param bitmapData A stream containing the raw data to install as a wallpaper.
+     * @param visibleCropHint The rectangular subregion of the streamed image that should be
+     *     displayed as wallpaper.  Passing {@code null} for this parameter means that
+     *     the full image should be displayed if possible given the image's and device's
+     *     aspect ratios, etc.
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *     image for restore to a future device; {@code false} otherwise.
+     *
+     * @throws IOException If an error occurs when attempting to set the wallpaper
+     *     based on the provided image data.
+     * @throws IllegalArgumentException If the {@code visibleCropHint} rectangle is
+     *     empty or invalid.
+     */
+    public void setStream(InputStream bitmapData, Rect visibleCropHint, boolean allowBackup)
+            throws IOException {
+        validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return;
@@ -815,23 +893,12 @@ public class WallpaperManager {
             FileOutputStream fos = null;
             try {
                 fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                setWallpaper(data, fos);
+                setWallpaper(bitmapData, fos);
             } finally {
-                if (fos != null) {
-                    fos.close();
-                }
+                IoUtils.closeQuietly(fos);
             }
         } catch (RemoteException e) {
             // Ignore
-        }
-    }
-
-    private void setWallpaper(InputStream data, FileOutputStream fos)
-            throws IOException {
-        byte[] buffer = new byte[32768];
-        int amt;
-        while ((amt=data.read(buffer)) > 0) {
-            fos.write(buffer, 0, amt);
         }
     }
 
@@ -915,8 +982,8 @@ public class WallpaperManager {
      * the size of their workspace.
      *
      * <p>Note developers, who don't seem to be reading this.  This is
-     * for <em>home screens</em> to tell what size wallpaper they would like.
-     * Nobody else should be calling this!  Certainly not other non-home-screen
+     * for <em>home apps</em> to tell what size wallpaper they would like.
+     * Nobody else should be calling this!  Certainly not other non-home
      * apps that change the wallpaper.  Those apps are supposed to
      * <b>retrieve</b> the suggested size so they can construct a wallpaper
      * that matches it.
@@ -1053,11 +1120,11 @@ public class WallpaperManager {
     }
 
     /**
-     * Set the position of the current wallpaper within any larger space, when
+     * Set the display position of the current wallpaper within any larger space, when
      * that wallpaper is visible behind the given window.  The X and Y offsets
      * are floating point numbers ranging from 0 to 1, representing where the
      * wallpaper should be positioned within the screen space.  These only
-     * make sense when the wallpaper is larger than the screen.
+     * make sense when the wallpaper is larger than the display.
      * 
      * @param windowToken The window who these offsets should be associated
      * with, as returned by {@link android.view.View#getWindowToken()
