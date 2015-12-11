@@ -209,11 +209,13 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * @return true if a restriction is settable by profile owner.
+     * @return true if a restriction is settable by profile owner.  Note it takes a user ID because
+     * some restrictions can be changed by PO only when it's running on the system user.
      */
-    public static boolean canProfileOwnerChange(String restriction) {
-        return !(IMMUTABLE_BY_OWNERS.contains(restriction)
-                || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction));
+    public static boolean canProfileOwnerChange(String restriction, int userId) {
+        return !IMMUTABLE_BY_OWNERS.contains(restriction)
+                && !(userId != UserHandle.USER_SYSTEM
+                    && DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction));
     }
 
     /**

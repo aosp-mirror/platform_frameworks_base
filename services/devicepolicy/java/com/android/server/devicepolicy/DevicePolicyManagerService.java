@@ -5794,7 +5794,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     throw new SecurityException("Device owner cannot set user restriction " + key);
                 }
             } else { // profile owner
-                if (!UserRestrictionsUtils.canProfileOwnerChange(key)) {
+                if (!UserRestrictionsUtils.canProfileOwnerChange(key, userHandle)) {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
             }
