@@ -42,6 +42,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -1966,6 +1967,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             res = WindowManagerGlobal.ADD_OKAY;
 
+            if (type == TYPE_STATUS_BAR || type == TYPE_NAVIGATION_BAR) {
+                displayContent.mTapExcludedWindows.add(win);
+            }
+
             origId = Binder.clearCallingIdentity();
 
             if (addToken) {
@@ -2309,6 +2314,11 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG_WM, "Removing window " + win, e);
         }
 
+        final int type = win.mAttrs.type;
+        if (type == TYPE_STATUS_BAR || type == TYPE_NAVIGATION_BAR) {
+            final DisplayContent displaycontent = win.getDisplayContent();
+            displaycontent.mTapExcludedWindows.remove(win);
+        }
         mPolicy.removeWindowLw(win);
         win.removeLocked();
 
@@ -2364,7 +2374,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (win.mAttrs.type == TYPE_WALLPAPER) {
+        if (type == TYPE_WALLPAPER) {
             mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
             getDefaultDisplayContentLocked().pendingLayoutChanges |=
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
