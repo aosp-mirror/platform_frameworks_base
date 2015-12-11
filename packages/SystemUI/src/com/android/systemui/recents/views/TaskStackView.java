@@ -51,6 +51,7 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
@@ -115,17 +116,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             };
 
-    /** The TaskView callbacks */
-    interface TaskStackViewCallbacks {
-        public void onTaskViewClicked(TaskStackView stackView, TaskView tv, TaskStack stack, Task t,
-                boolean lockToTask, Rect bounds, int destinationStack);
-    }
-
     TaskStack mStack;
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewScroller mStackScroller;
     TaskStackViewTouchHandler mTouchHandler;
-    TaskStackViewCallbacks mCb;
     GradientDrawable mFreeformWorkspaceBackground;
     ObjectAnimator mFreeformWorkspaceBackgroundAnimator;
     ViewPool<TaskView, Task> mViewPool;
@@ -221,11 +215,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (ssp.hasFreeformWorkspaceSupport()) {
             setBackgroundColor(getContext().getColor(R.color.recents_freeform_workspace_bg_color));
         }
-    }
-
-    /** Sets the callbacks */
-    void setCallbacks(TaskStackViewCallbacks cb) {
-        mCb = cb;
     }
 
     @Override
@@ -1205,7 +1194,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public boolean launchFreeformTasks() {
         Task frontTask = mStack.getStackFrontMostTask();
         if (frontTask != null && frontTask.isFreeformTask()) {
-            onTaskViewClicked(getChildViewForTask(frontTask), frontTask, false);
+            EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(frontTask),
+                    frontTask, null, INVALID_STACK_ID, false));
             return true;
         }
         return false;
@@ -1376,16 +1366,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** TaskViewCallbacks Implementation ****/
 
     @Override
-    public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask) {
-        // Cancel any doze triggers
-        mUIDozeTrigger.stopDozing();
-
-        if (mCb != null) {
-            mCb.onTaskViewClicked(this, tv, mStack, task, lockToTask, null, INVALID_STACK_ID);
-        }
-    }
-
-    @Override
     public void onTaskViewClipStateChanged(TaskView tv) {
         requestUpdateStackViewsClip();
     }
@@ -1435,6 +1415,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             }
         }
+    }
+
+    public final void onBusEvent(LaunchTaskEvent event) {
+        // Cancel any doze triggers once a task is launched
+        mUIDozeTrigger.stopDozing();
     }
 
     public final void onBusEvent(DismissTaskViewEvent event) {

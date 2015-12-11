@@ -56,7 +56,6 @@ import com.android.systemui.recents.events.component.RecentsVisibilityChangedEve
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
-import com.android.systemui.recents.events.ui.ResizeTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
@@ -102,9 +101,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private SystemBarScrimViews mScrimViews;
     private ViewStub mHistoryViewStub;
     private RecentsHistoryView mHistoryView;
-
-    // Resize task debug
-    private RecentsResizeTaskDialog mResizeTaskDebugDialog;
 
     // Search AppWidget
     private AppWidgetProviderInfo mSearchWidgetInfo;
@@ -587,15 +583,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new ToggleRecentsEvent());
     }
 
-    /**** RecentsResizeTaskDialog ****/
-
-    private RecentsResizeTaskDialog getResizeTaskDebugDialog() {
-        if (mResizeTaskDebugDialog == null) {
-            mResizeTaskDebugDialog = new RecentsResizeTaskDialog(getFragmentManager(), this);
-        }
-        return mResizeTaskDebugDialog;
-    }
-
     /**** EventBus events ****/
 
     public final void onBusEvent(ToggleRecentsEvent event) {
@@ -743,10 +730,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Keep track of all-deletions
         MetricsLogger.count(this, "overview_task_all_dismissed", 1);
-    }
-
-    public final void onBusEvent(ResizeTaskEvent event) {
-        getResizeTaskDebugDialog().showResizeTaskDialog(event.task, mRecentsView);
     }
 
     public final void onBusEvent(LaunchTaskSucceededEvent event) {

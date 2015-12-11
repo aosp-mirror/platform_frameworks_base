@@ -19,6 +19,6 @@ Copyright (C) 2014 The Android Open Source Project
         android:viewportWidth="48.0"
         android:viewportHeight="48.0">
     <path
-        android:fillColor="@color/recents_task_bar_dark_dismiss_color"
+        android:fillColor="@color/recents_task_bar_dark_icon_color"
         android:pathData="M38.000000,12.800000l-2.799999,-2.800000 -11.200001,11.200001 -11.200000,-11.200001 -2.800000,2.800000 11.200001,11.200000 -11.200001,11.200001 2.800000,2.799999 11.200000,-11.200001 11.200001,11.200001 2.799999,-2.799999 -11.200001,-11.200001z"/>
 </vector>

@@ -39,7 +39,6 @@ public class Task {
         public void onTaskDataLoaded();
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
-
         /* Notifies when a task's stack id has changed. */
         public void onTaskStackIdChanged();
     }
