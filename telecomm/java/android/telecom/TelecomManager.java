@@ -298,6 +298,16 @@ public class TelecomManager {
     public static final String METADATA_IN_CALL_SERVICE_UI = "android.telecom.IN_CALL_SERVICE_UI";
 
     /**
+     * A boolean meta-data value indicating whether an {@link InCallService} implements an
+     * in-call user interface to be used while the device is in car-mode (see
+     * {@link android.content.res.Configuration.UI_MODE_TYPE_CAR}).
+     *
+     * @hide
+     */
+    public static final String METADATA_IN_CALL_SERVICE_CAR_MODE_UI =
+            "android.telecom.IN_CALL_SERVICE_CAR_MODE_UI";
+
+    /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
      * pause for a predefined period.
      */
