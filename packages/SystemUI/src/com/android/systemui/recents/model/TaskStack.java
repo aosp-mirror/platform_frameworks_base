@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
+import android.util.SparseArray;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
@@ -50,7 +51,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
  */
 interface TaskFilter {
     /** Returns whether the filter accepts the specified task */
-    public boolean acceptTask(Task t, int index);
+    public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index);
 }
 
 /**
@@ -157,10 +158,17 @@ class FilteredTaskList {
     private void updateFilteredTasks() {
         mFilteredTasks.clear();
         if (mFilter != null) {
+            // Create a sparse array from task id to Task
+            SparseArray<Task> taskIdMap = new SparseArray<>();
             int taskCount = mTasks.size();
             for (int i = 0; i < taskCount; i++) {
                 Task t = mTasks.get(i);
-                if (mFilter.acceptTask(t, i)) {
+                taskIdMap.put(t.key.id, t);
+            }
+
+            for (int i = 0; i < taskCount; i++) {
+                Task t = mTasks.get(i);
+                if (mFilter.acceptTask(taskIdMap, t, i)) {
                     mFilteredTasks.add(t);
                 }
             }
@@ -318,13 +326,29 @@ public class TaskStack {
         // Ensure that we only show non-docked tasks
         mStackTaskList.setFilter(new TaskFilter() {
             @Override
-            public boolean acceptTask(Task t, int index) {
+            public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
+                if (t.isAffiliatedTask()) {
+                    // If this task is affiliated with another parent in the stack, then the historical state of this
+                    // task depends on the state of the parent task
+                    Task parentTask = taskIdMap.get(t.taskAffiliationId);
+                    if (parentTask != null) {
+                        t = parentTask;
+                    }
+                }
                 return !t.isHistorical && !SystemServicesProxy.isDockedStack(t.key.stackId);
             }
         });
         mHistoryTaskList.setFilter(new TaskFilter() {
             @Override
-            public boolean acceptTask(Task t, int index) {
+            public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
+                if (t.isAffiliatedTask()) {
+                    // If this task is affiliated with another parent in the stack, then the historical state of this
+                    // task depends on the state of the parent task
+                    Task parentTask = taskIdMap.get(t.taskAffiliationId);
+                    if (parentTask != null) {
+                        t = parentTask;
+                    }
+                }
                 return t.isHistorical && !SystemServicesProxy.isDockedStack(t.key.stackId);
             }
         });
@@ -585,8 +609,8 @@ public class TaskStack {
                             taskGrouping2.latestActiveTimeInGroup);
                 }
             });
-            // Sort group tasks by increasing firstActiveTime of the task, and also build a new list of
-            // tasks
+            // Sort group tasks by increasing firstActiveTime of the task, and also build a new list
+            // of tasks
             int taskIndex = 0;
             int groupCount = mGroups.size();
             for (int i = 0; i < groupCount; i++) {
@@ -607,13 +631,13 @@ public class TaskStack {
             mStackTaskList.set(tasks);
         } else {
             // Create the task groups
-            HashMap<Task.TaskKey, Task> tasksMap = new HashMap<Task.TaskKey, Task>();
+            HashMap<Task.TaskKey, Task> tasksMap = new HashMap<>();
             ArrayList<Task> tasks = mStackTaskList.getTasks();
             int taskCount = tasks.size();
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 TaskGrouping group;
-                int affiliation = t.taskAffiliation > 0 ? t.taskAffiliation :
+                int affiliation = t.taskAffiliationId > 0 ? t.taskAffiliationId :
                         IndividualTaskIdOffset + t.key.id;
                 if (mAffinitiesGroups.containsKey(affiliation)) {
                     group = getGroupWithAffiliation(affiliation);

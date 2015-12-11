@@ -93,7 +93,8 @@ public class Task {
 
     public TaskKey key;
     public TaskGrouping group;
-    public int taskAffiliation;
+    // The taskAffiliationId is the task id of the parent task or itself if it is not affiliated with any task
+    public int taskAffiliationId;
     public int taskAffiliationColor;
     public boolean isLaunchTarget;
     public Drawable applicationIcon;
@@ -123,7 +124,7 @@ public class Task {
         boolean isInAffiliationGroup = (taskAffiliation != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
         this.key = key;
-        this.taskAffiliation = taskAffiliation;
+        this.taskAffiliationId = taskAffiliation;
         this.taskAffiliationColor = taskAffiliationColor;
         this.activityLabel = activityTitle;
         this.contentDescription = contentDescription;
@@ -142,7 +143,7 @@ public class Task {
     /** Copies the other task. */
     public void copyFrom(Task o) {
         this.key = o.key;
-        this.taskAffiliation = o.taskAffiliation;
+        this.taskAffiliationId = o.taskAffiliationId;
         this.taskAffiliationColor = o.taskAffiliationColor;
         this.activityLabel = o.activityLabel;
         this.contentDescription = o.contentDescription;
@@ -204,6 +205,13 @@ public class Task {
         if (mCb != null) {
             mCb.onTaskDataUnloaded();
         }
+    }
+
+    /**
+     * Returns whether this task is affiliated with another task.
+     */
+    public boolean isAffiliatedTask() {
+        return key.id != taskAffiliationId;
     }
 
     @Override
