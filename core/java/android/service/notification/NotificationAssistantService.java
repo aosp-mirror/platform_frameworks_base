@@ -16,8 +16,12 @@
 
 package android.service.notification;
 
+import android.annotation.SdkConstant;
 import android.app.Notification;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * A service that helps the user manage notifications by modifying the
@@ -35,6 +39,13 @@ import android.net.Uri;
  * &lt;/service></pre>
  */
 public abstract class NotificationAssistantService extends NotificationListenerService {
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_INTERFACE
+            = "android.service.notification.NotificationAssistantService";
+
     /** Notification was canceled by the status bar reporting a click. */
     public static final int REASON_DELEGATE_CLICK = 1;
 
@@ -74,28 +85,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /** Notification was canceled because it was an invisible member of a group. */
     public static final int REASON_GROUP_OPTIMIZATION = 13;
 
-    public class Adjustment {
-        int mImportance;
-        CharSequence mExplanation;
-        Uri mReference;
-
-        /**
-         * Create a notification importance adjustment.
-         *
-         * @param importance The final importance of the notification.
-         * @param explanation A human-readable justification for the adjustment.
-         * @param reference A reference to an external object that augments the
-         *                  explanation, such as a
-         *                  {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI},
-         *                  or null.
-         */
-        public Adjustment(int importance, CharSequence explanation, Uri reference) {
-            mImportance = importance;
-            mExplanation = explanation;
-            mReference = reference;
-        }
-    }
-
     /**
      * A notification was posted by an app. Called before alert.
      *
@@ -104,7 +93,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param user true if the initial importance reflects an explicit user preference.
      * @return an adjustment or null to take no action, within 100ms.
      */
-    abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
+    abstract public NotificationAdjustment onNotificationEnqueued(StatusBarNotification sbn,
           int importance, boolean user);
 
     /**
@@ -161,7 +150,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param key the notification key
      * @param adjustment the new importance with an explanation
      */
-    public final void adjustImportance(String key, Adjustment adjustment)
+    public final void adjustImportance(String key, NotificationAdjustment adjustment)
     {
         // TODO: pack up the adjustment and send it to the NotificationManager.
     }

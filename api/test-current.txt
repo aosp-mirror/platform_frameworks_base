@@ -30928,6 +30928,7 @@ package android.provider {
     field public static final java.lang.String ACTION_LOCATION_SOURCE_SETTINGS = "android.settings.LOCATION_SOURCE_SETTINGS";
     field public static final java.lang.String ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS = "android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS";
     field public static final java.lang.String ACTION_MANAGE_APPLICATIONS_SETTINGS = "android.settings.MANAGE_APPLICATIONS_SETTINGS";
+    field public static final java.lang.String ACTION_MANAGE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
     field public static final java.lang.String ACTION_MANAGE_OVERLAY_PERMISSION = "android.settings.action.MANAGE_OVERLAY_PERMISSION";
     field public static final java.lang.String ACTION_MANAGE_WRITE_SETTINGS = "android.settings.action.MANAGE_WRITE_SETTINGS";
     field public static final java.lang.String ACTION_MEMORY_CARD_SETTINGS = "android.settings.MEMORY_CARD_SETTINGS";
@@ -33204,13 +33205,20 @@ package android.service.notification {
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.ConditionProviderService";
   }
 
+  public class NotificationAdjustment implements android.os.Parcelable {
+    ctor public NotificationAdjustment(int, java.lang.CharSequence, android.net.Uri);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.notification.NotificationAdjustment> CREATOR;
+  }
+
   public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {
     ctor public NotificationAssistantService();
-    method public final void adjustImportance(java.lang.String, android.service.notification.NotificationAssistantService.Adjustment);
+    method public final void adjustImportance(java.lang.String, android.service.notification.NotificationAdjustment);
     method public final void clearAnnotation(java.lang.String);
     method public void onNotificationActionClick(java.lang.String, long, int);
     method public void onNotificationClick(java.lang.String, long);
-    method public abstract android.service.notification.NotificationAssistantService.Adjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, int, boolean);
+    method public abstract android.service.notification.NotificationAdjustment onNotificationEnqueued(android.service.notification.StatusBarNotification, int, boolean);
     method public void onNotificationRemoved(java.lang.String, long, int);
     method public void onNotificationVisibilityChanged(java.lang.String, long, boolean);
     method public final void setAnnotation(java.lang.String, android.app.Notification);
@@ -33227,10 +33235,7 @@ package android.service.notification {
     field public static final int REASON_PACKAGE_BANNED = 7; // 0x7
     field public static final int REASON_PACKAGE_CHANGED = 5; // 0x5
     field public static final int REASON_USER_STOPPED = 6; // 0x6
-  }
-
-  public class NotificationAssistantService.Adjustment {
-    ctor public NotificationAssistantService.Adjustment(int, java.lang.CharSequence, android.net.Uri);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
   }
 
   public abstract class NotificationListenerService extends android.app.Service {
