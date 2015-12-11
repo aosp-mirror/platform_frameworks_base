@@ -3330,7 +3330,6 @@ public class Notification implements Parcelable
             if (mN.color != COLOR_DEFAULT) {
                 button.setTextColor(R.id.action0, mN.color);
             }
-            processLegacyAction(action, button);
             return button;
         }
 
@@ -3340,14 +3339,6 @@ public class Notification implements Parcelable
          */
         private boolean isLegacy() {
             return getColorUtil() != null;
-        }
-
-        private void processLegacyAction(Action action, RemoteViews button) {
-            if (!isLegacy() || getColorUtil().isGrayscaleIcon(mContext, action.getIcon())) {
-                button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
-                        mContext.getColor(R.color.notification_action_color_filter),
-                        PorterDuff.Mode.MULTIPLY);
-            }
         }
 
         private CharSequence processLegacyText(CharSequence charSequence) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2014 The Android Open Source Project
+  ~ Copyright (C) 2015 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,15 +15,7 @@
   ~ limitations under the License
   -->
 
-<Button xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@android:style/Widget.Material.Light.Button.Borderless.Small"
-    android:id="@+id/action0"
-    android:layout_width="wrap_content"
-    android:layout_height="48dp"
-    android:layout_gravity="center"
-    android:layout_marginStart="4dp"
-    android:textColor="@color/notification_default_color"
-    android:singleLine="true"
-    android:ellipsize="end"
-    android:background="@drawable/notification_material_action_background"
-    />
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="true" android:color="@android:color/white" />
+    <item android:color="#99ffffff" /> <!-- 60% white -->
+</selector>

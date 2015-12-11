@@ -36,7 +36,8 @@
             android:paddingEnd="12dp"
             android:gravity="start|center_vertical"
             android:textAppearance="?android:attr/textAppearance"
-            android:textColor="#deffffff"
+            android:textColor="@color/remote_input_text"
+            android:textColorHint="@color/remote_input_hint"
             android:textSize="16sp"
             android:background="@null"
             android:singleLine="true"
@@ -58,8 +59,8 @@
                 android:paddingBottom="12dp"
                 android:id="@+id/remote_input_send"
                 android:src="@drawable/ic_send"
-                android:tint="@android:color/white"
-                android:tintMode="src_atop"
+                android:tint="@color/remote_input_send"
+                android:tintMode="src_in"
                 android:background="@drawable/ripple_drawable" />
 
         <ProgressBar
