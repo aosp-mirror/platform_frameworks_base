@@ -309,14 +309,6 @@ public class NotificationData {
         return Ranking.IMPORTANCE_UNSPECIFIED;
     }
 
-    public int getImportance(String key) {
-        if (mRankingMap != null) {
-            mRankingMap.getRanking(key, mTmpRanking);
-            return mTmpRanking.getImportance();
-        }
-        return Ranking.IMPORTANCE_UNSPECIFIED;
-    }
-
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
