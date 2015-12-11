@@ -56,6 +56,7 @@ public class TaskViewThumbnail extends View {
             };
 
     // Drawing
+    Rect mTaskViewRect = new Rect();
     int mCornerRadius;
     float mDimAlpha;
     Matrix mScaleMatrix = new Matrix();
@@ -98,13 +99,22 @@ public class TaskViewThumbnail extends View {
                 com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
+    /**
+     * Called when the task view frame changes, allowing us to move the contents of the header
+     * to match the frame changes.
+     */
+    public void onTaskViewSizeChanged(int width, int height) {
+        mTaskViewRect.set(0, 0, width, height);
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if (mInvisible) {
             return;
         }
         // Draw the thumbnail with the rounded corners
-        canvas.drawRoundRect(0, 0, getWidth(), getHeight(),
+        canvas.drawRoundRect(0, 0, mTaskViewRect.width(), mTaskViewRect.height(),
                 mCornerRadius,
                 mCornerRadius, mDrawPaint);
     }

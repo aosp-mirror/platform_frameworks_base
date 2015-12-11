@@ -179,6 +179,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mHeaderView.onTaskViewSizeChanged(w, h);
+        mThumbnailView.onTaskViewSizeChanged(w, h);
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mDownTouchPos.set((int) (ev.getX() * getScaleX()), (int) (ev.getY() * getScaleY()));

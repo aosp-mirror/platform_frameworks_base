@@ -24,8 +24,8 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.IntProperty;
 import android.util.Log;
@@ -95,15 +95,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
     private static final float HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
-    public static final Property<ColorDrawable, Integer> COLOR_DRAWABLE_ALPHA =
-            new IntProperty<ColorDrawable>("colorDrawableAlpha") {
+    public static final Property<Drawable, Integer> DRAWABLE_ALPHA =
+            new IntProperty<Drawable>("drawableAlpha") {
                 @Override
-                public void setValue(ColorDrawable object, int alpha) {
+                public void setValue(Drawable object, int alpha) {
                     object.setAlpha(alpha);
                 }
 
                 @Override
-                public Integer get(ColorDrawable object) {
+                public Integer get(Drawable object) {
                     return object.getAlpha();
                 }
             };
@@ -119,7 +119,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskStackViewScroller mStackScroller;
     TaskStackViewTouchHandler mTouchHandler;
     TaskStackViewCallbacks mCb;
-    ColorDrawable mFreeformWorkspaceBackground;
+    GradientDrawable mFreeformWorkspaceBackground;
     ObjectAnimator mFreeformWorkspaceBackgroundAnimator;
     ViewPool<TaskView, Task> mViewPool;
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
@@ -176,6 +176,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
+        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = context.getResources();
 
         // Set the stack first
@@ -207,8 +208,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         });
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
 
-        mFreeformWorkspaceBackground = new ColorDrawable(0x33000000);
+        mFreeformWorkspaceBackground = (GradientDrawable) getContext().getDrawable(
+                R.drawable.recents_freeform_workspace_bg);
         mFreeformWorkspaceBackground.setCallback(this);
+        if (ssp.hasFreeformWorkspaceSupport()) {
+            setBackgroundColor(getContext().getColor(R.color.recents_freeform_workspace_bg_color));
+        }
     }
 
     /** Sets the callbacks */
@@ -1588,7 +1593,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         Utilities.cancelAnimationWithoutCallbacks(mFreeformWorkspaceBackgroundAnimator);
         mFreeformWorkspaceBackgroundAnimator = ObjectAnimator.ofInt(mFreeformWorkspaceBackground,
-                COLOR_DRAWABLE_ALPHA, mFreeformWorkspaceBackground.getAlpha(), targetAlpha);
+                DRAWABLE_ALPHA, mFreeformWorkspaceBackground.getAlpha(), targetAlpha);
         mFreeformWorkspaceBackgroundAnimator.setDuration(duration);
         mFreeformWorkspaceBackgroundAnimator.setInterpolator(interpolator);
         mFreeformWorkspaceBackgroundAnimator.start();
