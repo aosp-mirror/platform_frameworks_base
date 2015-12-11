@@ -46,19 +46,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
                 }
             };
 
-    public static final Property<AnimateableViewBounds, Integer> CLIP_RIGHT =
-            new IntProperty<AnimateableViewBounds>("clipRight") {
-                @Override
-                public void setValue(AnimateableViewBounds object, int clip) {
-                    object.setClipRight(clip, false /* force */);
-                }
-
-                @Override
-                public Integer get(AnimateableViewBounds object) {
-                    return object.getClipRight();
-                }
-            };
-
     public AnimateableViewBounds(View source, int cornerRadius) {
         mSourceView = source;
         mCornerRadius = cornerRadius;
@@ -100,19 +87,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     /** Returns the bottom clip. */
     public int getClipBottom() {
         return mClipRect.bottom;
-    }
-
-    /** Sets the right clip. */
-    public void setClipRight(int right, boolean force) {
-        if (right != mClipRect.right || force) {
-            mClipRect.right = right;
-            updateClipBounds();
-        }
-    }
-
-    /** Returns the right clip. */
-    public int getClipRight() {
-        return mClipRect.right;
     }
 
     private void updateClipBounds() {

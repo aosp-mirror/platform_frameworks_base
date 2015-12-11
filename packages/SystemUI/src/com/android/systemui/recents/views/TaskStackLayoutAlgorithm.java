@@ -507,6 +507,15 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Returns the task progress that would put the task just off the back of the stack.
+     */
+    public float getStackBackTaskProgress(float stackScroll) {
+        float min = mUnfocusedRange.relativeMin +
+                mFocusState * (mFocusedRange.relativeMin - mUnfocusedRange.relativeMin);
+        return stackScroll + min;
+    }
+
+    /**
      * Returns the task progress that would put the task just off the front of the stack.
      */
     public float getStackFrontTaskProgress(float stackScroll) {
@@ -647,6 +656,7 @@ public class TaskStackLayoutAlgorithm {
             return transformOut;
         }
 
+        int x = (mStackRect.width() - mTaskRect.width()) / 2;
         int y;
         float z;
         float relP;
@@ -671,16 +681,13 @@ public class TaskStackLayoutAlgorithm {
 
         // Fill out the transform
         transformOut.scale = 1f;
-        transformOut.translationX = (mStackRect.width() - mTaskRect.width()) / 2;
-        transformOut.translationY = y;
+        transformOut.alpha = 1f;
         transformOut.translationZ = z;
         transformOut.rect.set(mTaskRect);
-        transformOut.rect.offset(transformOut.translationX, transformOut.translationY);
+        transformOut.rect.offset(x, y);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
         transformOut.visible = (transformOut.rect.top < mStackRect.bottom) &&
                 (frontTransform == null || transformOut.rect.top != frontTransform.rect.top);
-        transformOut.clipBottom = 0;
-        transformOut.clipRight = 0;
         transformOut.thumbnailScale = 1f;
         transformOut.p = relP;
         return transformOut;

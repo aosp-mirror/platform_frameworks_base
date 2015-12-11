@@ -103,7 +103,7 @@ public class TaskViewHeader extends FrameLayout
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
-                outline.setRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                outline.setRect(0, 0, getWidth(), getHeight());
             }
         });
 

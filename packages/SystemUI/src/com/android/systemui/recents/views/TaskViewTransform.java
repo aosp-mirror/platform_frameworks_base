@@ -18,6 +18,9 @@ package com.android.systemui.recents.views;
 
 import android.animation.ValueAnimator;
 import android.graphics.RectF;
+import android.util.IntProperty;
+import android.util.Property;
+import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 
@@ -25,26 +28,70 @@ import android.view.animation.Interpolator;
 /* The transform state for a task view */
 public class TaskViewTransform {
 
+    public static final Property<View, Integer> LEFT =
+            new IntProperty<View>("left") {
+                @Override
+                public void setValue(View object, int v) {
+                    object.setLeft(v);
+                }
+
+                @Override
+                public Integer get(View object) {
+                    return object.getLeft();
+                }
+            };
+
+    public static final Property<View, Integer> TOP =
+            new IntProperty<View>("top") {
+                @Override
+                public void setValue(View object, int v) {
+                    object.setTop(v);
+                }
+
+                @Override
+                public Integer get(View object) {
+                    return object.getTop();
+                }
+            };
+
+    public static final Property<View, Integer> RIGHT =
+            new IntProperty<View>("right") {
+                @Override
+                public void setValue(View object, int v) {
+                    object.setRight(v);
+                }
+
+                @Override
+                public Integer get(View object) {
+                    return object.getRight();
+                }
+            };
+
+    public static final Property<View, Integer> BOTTOM =
+            new IntProperty<View>("bottom") {
+                @Override
+                public void setValue(View object, int v) {
+                    object.setBottom(v);
+                }
+
+                @Override
+                public Integer get(View object) {
+                    return object.getBottom();
+                }
+            };
+
     // TODO: Move this out of the transform
     public int startDelay = 0;
 
-    public int translationX = 0;
-    public int translationY = 0;
     public float translationZ = 0;
     public float scale = 1f;
     public float alpha = 1f;
-
-    // Clip and thumbnail scale are untransformed layout-space properties
-    // The bottom clip is only used for freeform workspace tasks
-    public int clipBottom = 0;
-    public int clipRight = 0;
     public float thumbnailScale = 1f;
 
     public boolean visible = false;
     float p = 0f;
 
-    // This is a window-space rect that is purely used for coordinating the animation of an app
-    // window into Recents.
+    // This is a window-space rect used for positioning the task in the stack and freeform workspace
     public RectF rect = new RectF();
 
     public TaskViewTransform() {
@@ -56,13 +103,9 @@ public class TaskViewTransform {
      */
     public void reset() {
         startDelay = 0;
-        translationX = 0;
-        translationY = 0;
         translationZ = 0;
         scale = 1f;
         alpha = 1f;
-        clipBottom = 0;
-        clipRight = 0;
         thumbnailScale = 1f;
         visible = false;
         rect.setEmpty();
@@ -75,12 +118,6 @@ public class TaskViewTransform {
     }
     public boolean hasScaleChangedFrom(float v) {
         return (Float.compare(scale, v) != 0);
-    }
-    public boolean hasTranslationXChangedFrom(float v) {
-        return (Float.compare(translationX, v) != 0);
-    }
-    public boolean hasTranslationYChangedFrom(float v) {
-        return (Float.compare(translationY, v) != 0);
     }
     public boolean hasTranslationZChangedFrom(float v) {
         return (Float.compare(translationZ, v) != 0);
@@ -95,12 +132,6 @@ public class TaskViewTransform {
             boolean requiresLayers = false;
 
             // Animate to the final state
-            if (hasTranslationXChangedFrom(v.getTranslationX())) {
-                anim.translationX(translationX);
-            }
-            if (hasTranslationYChangedFrom(v.getTranslationY())) {
-                anim.translationY(translationY);
-            }
             if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
                 anim.translationZ(translationZ);
             }
@@ -129,12 +160,6 @@ public class TaskViewTransform {
                     .start();
         } else {
             // Set the changed properties
-            if (hasTranslationXChangedFrom(v.getTranslationX())) {
-                v.setTranslationX(translationX);
-            }
-            if (hasTranslationYChangedFrom(v.getTranslationY())) {
-                v.setTranslationY(translationY);
-            }
             if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
                 v.setTranslationZ(translationZ);
             }
@@ -150,7 +175,8 @@ public class TaskViewTransform {
 
     /** Reset the transform on a view. */
     public static void reset(TaskView v) {
-        // Cancel any running animations
+        // Cancel any running animations and reset the translation in case something else (like a
+        // dismiss animation) changes it
         v.animate().cancel();
         v.setTranslationX(0f);
         v.setTranslationY(0f);
@@ -158,16 +184,15 @@ public class TaskViewTransform {
         v.setScaleX(1f);
         v.setScaleY(1f);
         v.setAlpha(1f);
-        v.getViewBounds().setClipRight(0, false /* forceUpdate */);
         v.getViewBounds().setClipBottom(0, false /* forceUpdate */);
+        v.setLeftTopRightBottom(0, 0, 0, 0);
         v.mThumbnailView.setBitmapScale(1f);
     }
 
     @Override
     public String toString() {
-        return "TaskViewTransform delay: " + startDelay +
-                " x: " + translationX + " y: " + translationY + " z: " + translationZ +
-                " scale: " + scale + " alpha: " + alpha + " visible: " + visible + " rect: " + rect +
-                " p: " + p;
+        return "TaskViewTransform delay: " + startDelay + " z: " + translationZ +
+                " scale: " + scale + " alpha: " + alpha + " visible: " + visible +
+                " rect: " + rect + " p: " + p;
     }
 }

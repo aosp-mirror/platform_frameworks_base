@@ -232,8 +232,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mClipAnimation.playTogether(
                     ObjectAnimator.ofInt(mViewBounds, AnimateableViewBounds.CLIP_BOTTOM,
                             mViewBounds.getClipBottom(), clipBottom),
-                    ObjectAnimator.ofInt(mViewBounds, AnimateableViewBounds.CLIP_RIGHT,
-                            mViewBounds.getClipRight(), toTransform.clipRight),
+                    ObjectAnimator.ofInt(this, TaskViewTransform.LEFT, getLeft(),
+                            (int) toTransform.rect.left),
+                    ObjectAnimator.ofInt(this, TaskViewTransform.TOP, getTop(),
+                            (int) toTransform.rect.top),
+                    ObjectAnimator.ofInt(this, TaskViewTransform.RIGHT, getRight(),
+                            (int) toTransform.rect.right),
+                    ObjectAnimator.ofInt(this, TaskViewTransform.BOTTOM, getBottom(),
+                            (int) toTransform.rect.bottom),
                     ObjectAnimator.ofFloat(mThumbnailView, TaskViewThumbnail.BITMAP_SCALE,
                             mThumbnailView.getBitmapScale(), toTransform.thumbnailScale));
             mClipAnimation.setStartDelay(toTransform.startDelay);
@@ -242,8 +248,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mClipAnimation.start();
         } else {
             mViewBounds.setClipBottom(clipBottom, false /* forceUpdate */);
-            mViewBounds.setClipRight(toTransform.clipRight, false /* forceUpdate */);
             mThumbnailView.setBitmapScale(toTransform.thumbnailScale);
+            setLeftTopRightBottom((int) toTransform.rect.left, (int) toTransform.rect.top,
+                    (int) toTransform.rect.right, (int) toTransform.rect.bottom);
         }
         if (!config.useHardwareLayers) {
             mThumbnailView.updateThumbnailVisibility(clipBottom - getPaddingBottom());
@@ -336,10 +343,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             } else {
                 // Animate the task up if it was occluding the launch target
                 if (ctx.currentTaskOccludesLaunchTarget) {
-                    setTranslationY(transform.translationY + taskViewAffiliateGroupEnterOffset);
+                    setTranslationY(taskViewAffiliateGroupEnterOffset);
                     setAlpha(0f);
                     animate().alpha(1f)
-                            .translationY(transform.translationY)
+                            .translationY(0)
                             .setUpdateListener(null)
                             .setListener(new AnimatorListenerAdapter() {
                                 private boolean hasEnded;
@@ -372,7 +379,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 animate().translationZ(transform.translationZ);
             }
             animate()
-                    .translationY(transform.translationY)
+                    .translationY(0)
                     .setStartDelay(delay)
                     .setUpdateListener(ctx.updateListener)
                     .setListener(new AnimatorListenerAdapter() {
