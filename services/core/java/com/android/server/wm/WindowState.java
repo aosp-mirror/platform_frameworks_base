@@ -521,7 +521,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         WindowState appWin = this;
-        while (appWin.mAttachedWindow != null) {
+        while (appWin.isChildWindow()) {
             appWin = appWin.mAttachedWindow;
         }
         WindowToken appToken = appWin.mToken;
@@ -854,7 +854,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public int getBaseType() {
         WindowState win = this;
-        while (win.mAttachedWindow != null) {
+        while (win.isChildWindow()) {
             win = win.mAttachedWindow;
         }
         return win.mAttrs.type;
@@ -1235,7 +1235,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     void removeLocked() {
         disposeInputChannel();
 
-        if (mAttachedWindow != null) {
+        if (isChildWindow()) {
             if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
@@ -1682,7 +1682,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // first frame very fast. Saving surfaces are mostly a waste of memory.
             // Don't save if the window is not the topmost window.
             mSurfaceSaved = false;
-        } else if (mAttachedWindow != null) {
+        } else if (isChildWindow()) {
             mSurfaceSaved = false;
         } else {
             mSurfaceSaved = mAppToken.shouldSaveSurface();
@@ -1733,7 +1733,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isHiddenFromUserLocked() {
         // Attached windows are evaluated based on the window that they are attached to.
         WindowState win = this;
-        while (win.mAttachedWindow != null) {
+        while (win.isChildWindow()) {
             win = win.mAttachedWindow;
         }
         if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
@@ -1997,7 +1997,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("LastRequested w="); pw.print(mLastRequestedWidth);
                     pw.print(" h="); pw.println(mLastRequestedHeight);
         }
-        if (mAttachedWindow != null || mLayoutAttached) {
+        if (isChildWindow() || mLayoutAttached) {
             pw.print(prefix); pw.print("mAttachedWindow="); pw.print(mAttachedWindow);
                     pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
         }
@@ -2254,5 +2254,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         // Now make sure the window fits in the overall display frame.
         Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
+    }
+
+    boolean isChildWindow() {
+        return mAttachedWindow != null;
     }
 }
