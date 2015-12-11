@@ -3462,7 +3462,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        if (!r.info.supportsPip) {
+        if (!mService.mForceResizableActivities && !r.info.supportsPip) {
             Slog.w(TAG,
                     "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
                     + " r=" + r);
