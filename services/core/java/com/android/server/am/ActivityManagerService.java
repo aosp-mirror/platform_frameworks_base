@@ -320,6 +320,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     // before we decide it must be hung.
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
 
+    // How long we will retain processes hosting content providers in the "last activity"
+    // state before allowing them to drop down to the regular cached LRU list.  This is
+    // to avoid thrashing of provider processes under low memory situations.
+    static final int CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
+
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
     // started with a wrapper for instrumentation (such as Valgrind) because it
@@ -9448,6 +9453,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (conn.stableCount == 0 && conn.unstableCount == 0) {
                 cpr.connections.remove(conn);
                 conn.client.conProviders.remove(conn);
+                if (conn.client.setProcState < ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                    // The client is more important than last activity -- note the time this
+                    // is happening, so we keep the old provider process around a bit as last
+                    // activity to avoid thrashing it.
+                    if (cpr.proc != null) {
+                        cpr.proc.lastProviderTime = SystemClock.uptimeMillis();
+                    }
+                }
                 stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid, cpr.name);
                 return true;
             }
@@ -18200,6 +18213,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
                     procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
                 }
+            }
+        }
+
+        if (app.lastProviderTime > 0 && (app.lastProviderTime+CONTENT_PROVIDER_RETAIN_TIME) > now) {
+            if (adj > ProcessList.PREVIOUS_APP_ADJ) {
+                adj = ProcessList.PREVIOUS_APP_ADJ;
+                schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+                app.cached = false;
+                app.adjType = "provider";
+            }
+            if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
             }
         }
 

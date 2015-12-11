@@ -136,6 +136,7 @@ final class ProcessRecord {
     long curCpuTime;            // How long proc has run CPU most recently
     long lastRequestedGc;       // When we last asked the app to do a gc
     long lastLowMemory;         // When we last told the app that memory is low
+    long lastProviderTime;      // The last time someone else was using a provider in this process.
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
     boolean cached;             // Is this a cached process?
@@ -316,6 +317,11 @@ final class ProcessRecord {
             pw.print(prefix); pw.print("hasClientActivities="); pw.print(hasClientActivities);
                     pw.print(" foregroundActivities="); pw.print(foregroundActivities);
                     pw.print(" (rep="); pw.print(repForegroundActivities); pw.println(")");
+        }
+        if (lastProviderTime > 0) {
+            pw.print(prefix); pw.print("lastProviderTime=");
+            TimeUtils.formatDuration(lastProviderTime, now, pw);
+            pw.println();
         }
         if (hasStartedServices) {
             pw.print(prefix); pw.print("hasStartedServices="); pw.println(hasStartedServices);
