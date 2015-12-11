@@ -88,6 +88,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_JOB_EXPIRED = 0;
     static final int MSG_CHECK_JOB = 1;
     static final int MSG_STOP_JOB = 2;
+    static final int MSG_CHECK_JOB_GREEDY = 3;
 
     // Policy constants
     /**
@@ -362,7 +363,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     void reportActive() {
-        boolean active = false;
+        // active is true if pending queue contains jobs OR some job is running.
+        boolean active = mPendingJobs.size() > 0;
         if (mPendingJobs.size() <= 0) {
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
@@ -372,9 +374,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
         }
-        if (mLocalDeviceIdleController != null) {
-            if (mReportedActive != active) {
-                mReportedActive = active;
+
+        if (mReportedActive != active) {
+            mReportedActive = active;
+            if (mLocalDeviceIdleController != null) {
                 mLocalDeviceIdleController.setJobsActive(active);
             }
         }
@@ -628,7 +631,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             JobStatus rescheduledPeriodic = getRescheduleJobForPeriodic(jobStatus);
             startTrackingJob(rescheduledPeriodic);
         }
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+        reportActive();
+        mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
     }
 
     // StateChangedListener implementations.
@@ -676,8 +680,18 @@ public class JobSchedulerService extends com.android.server.SystemService
                     break;
                 case MSG_CHECK_JOB:
                     synchronized (mJobs) {
-                        // Check the list of jobs and run some of them if we feel inclined.
-                        maybeQueueReadyJobsForExecutionLockedH();
+                        if (mReportedActive) {
+                            // if jobs are currently being run, queue all ready jobs for execution.
+                            queueReadyJobsForExecutionLockedH();
+                        } else {
+                            // Check the list of jobs and run some of them if we feel inclined.
+                            maybeQueueReadyJobsForExecutionLockedH();
+                        }
+                    }
+                    break;
+                case MSG_CHECK_JOB_GREEDY:
+                    synchronized (mJobs) {
+                        queueReadyJobsForExecutionLockedH();
                     }
                     break;
                 case MSG_STOP_JOB:
@@ -709,7 +723,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     stopJobOnServiceContextLocked(job);
                 }
             }
-            reportActive();
             if (DEBUG) {
                 final int queuedJobs = mPendingJobs.size();
                 if (queuedJobs == 0) {
@@ -786,7 +799,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Not running anything.");
                 }
             }
-            reportActive();
             if (DEBUG) {
                 Slog.d(TAG, "idle=" + idleCount + " connectivity=" +
                 connectivityCount + " charging=" + chargingCount + " tot=" +
