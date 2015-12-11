@@ -781,6 +781,7 @@ public class UserManager {
      * pattern or PIN), and credential-encrypted private app data storage is
      * available.
      */
+    @Deprecated
     public boolean isUserRunningAndLocked() {
         return isUserRunningAndLocked(Process.myUserHandle());
     }
@@ -793,6 +794,7 @@ public class UserManager {
      *
      * @param user to retrieve the unlocked state for.
      */
+    @Deprecated
     public boolean isUserRunningAndLocked(UserHandle user) {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(
@@ -808,6 +810,7 @@ public class UserManager {
      * pattern or PIN), and credential-encrypted private app data storage is
      * available.
      */
+    @Deprecated
     public boolean isUserRunningAndUnlocked() {
         return isUserRunningAndUnlocked(Process.myUserHandle());
     }
@@ -820,7 +823,35 @@ public class UserManager {
      *
      * @param user to retrieve the unlocked state for.
      */
+    @Deprecated
     public boolean isUserRunningAndUnlocked(UserHandle user) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(
+                    user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return whether the calling user is running in an "unlocked" state. A user
+     * is unlocked only after they've entered their credentials (such as a lock
+     * pattern or PIN), and credential-encrypted private app data storage is
+     * available.
+     */
+    public boolean isUserUnlocked() {
+        return isUserUnlocked(Process.myUserHandle());
+    }
+
+    /**
+     * Return whether the given user is running in an "unlocked" state. A user
+     * is unlocked only after they've entered their credentials (such as a lock
+     * pattern or PIN), and credential-encrypted private app data storage is
+     * available.
+     *
+     * @param user to retrieve the unlocked state for.
+     */
+    public boolean isUserUnlocked(UserHandle user) {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);

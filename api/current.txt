@@ -28100,11 +28100,13 @@ package android.os {
     method public boolean isSystemUser();
     method public boolean isUserAGoat();
     method public boolean isUserRunning(android.os.UserHandle);
-    method public boolean isUserRunningAndLocked();
-    method public boolean isUserRunningAndLocked(android.os.UserHandle);
-    method public boolean isUserRunningAndUnlocked();
-    method public boolean isUserRunningAndUnlocked(android.os.UserHandle);
+    method public deprecated boolean isUserRunningAndLocked();
+    method public deprecated boolean isUserRunningAndLocked(android.os.UserHandle);
+    method public deprecated boolean isUserRunningAndUnlocked();
+    method public deprecated boolean isUserRunningAndUnlocked(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
+    method public boolean isUserUnlocked();
+    method public boolean isUserUnlocked(android.os.UserHandle);
     method public deprecated boolean setRestrictionsChallenge(java.lang.String);
     method public deprecated void setUserRestriction(java.lang.String, boolean);
     method public deprecated void setUserRestrictions(android.os.Bundle);
