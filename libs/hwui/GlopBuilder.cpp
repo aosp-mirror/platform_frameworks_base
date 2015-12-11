@@ -101,7 +101,7 @@ GlopBuilder& GlopBuilder::setMeshUnitQuad() {
 GlopBuilder& GlopBuilder::setMeshTexturedUnitQuad(const UvMapper* uvMapper) {
     if (uvMapper) {
         // can't use unit quad VBO, so build UV vertices manually
-        return setMeshTexturedUvQuad(uvMapper, Rect(0, 0, 1, 1));
+        return setMeshTexturedUvQuad(uvMapper, Rect(1, 1));
     }
 
     TRIGGER_STAGE(kMeshStage);

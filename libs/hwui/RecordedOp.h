@@ -310,7 +310,7 @@ struct BeginLayerOp : RecordedOp {
  */
 struct EndLayerOp : RecordedOp {
     EndLayerOp()
-            : RecordedOp(RecordedOpId::EndLayerOp, Rect(0, 0), Matrix4::identity(), Rect(0, 0), nullptr) {}
+            : RecordedOp(RecordedOpId::EndLayerOp, Rect(), Matrix4::identity(), Rect(), nullptr) {}
 };
 
 /**

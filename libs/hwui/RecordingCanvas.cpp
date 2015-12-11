@@ -473,7 +473,7 @@ void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const Sk
 
 void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     addOp(new (alloc()) BitmapOp(
-            Rect(0, 0, bitmap->width(), bitmap->height()),
+            Rect(bitmap->width(), bitmap->height()),
             *(mState.currentSnapshot()->transform),
             mState.getRenderTargetClipBounds(),
             refPaint(paint), refBitmap(*bitmap)));

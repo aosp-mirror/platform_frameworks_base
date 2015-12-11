@@ -34,7 +34,7 @@ TEST(ResolvedRenderState, construct) {
         auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
         ResolvedRenderState state(*parentSnapshot, recordedOp, false);
         EXPECT_MATRIX_APPROX_EQ(state.transform, translate10x20);
-        EXPECT_EQ(Rect(0, 0, 100, 200), state.clipRect);
+        EXPECT_EQ(Rect(100, 200), state.clipRect);
         EXPECT_EQ(Rect(40, 60, 100, 200), state.clippedBounds); // translated and also clipped
         EXPECT_EQ(OpClipSideFlags::Right | OpClipSideFlags::Bottom, state.clipSideFlags);
     }
@@ -196,7 +196,7 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         SkPaint paint;
         paint.setStyle(SkPaint::kStrokeAndFill_Style);
         paint.setStrokeWidth(0.0f);
-        RectOp rejectOp(Rect(0, 0, 100, 200), Matrix4::identity(), Rect(100, 200), &paint);
+        RectOp rejectOp(Rect(100, 200), Matrix4::identity(), Rect(100, 200), &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect()); // Note: empty clip
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
                 BakedOpState::StrokeBehavior::StyleDefined);

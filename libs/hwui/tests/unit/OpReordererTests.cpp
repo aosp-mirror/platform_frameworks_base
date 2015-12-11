@@ -259,7 +259,7 @@ TEST(OpReorderer, renderNode) {
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             switch(mIndex++) {
             case 0:
-                EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clippedBounds);
+                EXPECT_EQ(Rect(200, 200), state.computedState.clippedBounds);
                 EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
                 break;
             case 1:
@@ -337,8 +337,8 @@ TEST(OpReorderer, saveLayerSimple) {
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             EXPECT_EQ(1, mIndex++);
             EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
-            EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clippedBounds);
-            EXPECT_EQ(Rect(0, 0, 180, 180), state.computedState.clipRect);
+            EXPECT_EQ(Rect(180, 180), state.computedState.clippedBounds);
+            EXPECT_EQ(Rect(180, 180), state.computedState.clipRect);
 
             Matrix4 expectedTransform;
             expectedTransform.loadTranslate(-10, -10, 0);
@@ -347,7 +347,7 @@ TEST(OpReorderer, saveLayerSimple) {
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(3, mIndex++);
             EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
-            EXPECT_EQ(Rect(0, 0, 200, 200), state.computedState.clipRect);
+            EXPECT_EQ(Rect(200, 200), state.computedState.clipRect);
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
     };
@@ -399,19 +399,19 @@ TEST(OpReorderer, saveLayerNested) {
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             const int index = mIndex++;
             if (index == 1) {
-                EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner rect
+                EXPECT_EQ(Rect(400, 400), op.unmappedBounds); // inner rect
             } else if (index == 4) {
-                EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer rect
+                EXPECT_EQ(Rect(800, 800), op.unmappedBounds); // outer rect
             } else { ADD_FAILURE(); }
         }
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             const int index = mIndex++;
             if (index == 5) {
                 EXPECT_EQ((OffscreenBuffer*)0x400, *op.layerHandle);
-                EXPECT_EQ(Rect(0, 0, 400, 400), op.unmappedBounds); // inner layer
+                EXPECT_EQ(Rect(400, 400), op.unmappedBounds); // inner layer
             } else if (index == 8) {
                 EXPECT_EQ((OffscreenBuffer*)0x800, *op.layerHandle);
-                EXPECT_EQ(Rect(0, 0, 800, 800), op.unmappedBounds); // outer layer
+                EXPECT_EQ(Rect(800, 800), op.unmappedBounds); // outer layer
             } else { ADD_FAILURE(); }
         }
     };
@@ -1091,7 +1091,7 @@ TEST(OpReorderer, renderPropSaveLayerAlphaClipBig) {
     });
     EXPECT_EQ(190u, observedData.layerWidth);
     EXPECT_EQ(200u, observedData.layerHeight);
-    EXPECT_EQ(Rect(0, 0, 190, 200), observedData.rectClippedBounds)
+    EXPECT_EQ(Rect(190, 200), observedData.rectClippedBounds)
             << "expect content to be clipped to screen area";
     Matrix4 expected;
     expected.loadTranslate(0, -2000, 0);
@@ -1114,7 +1114,7 @@ TEST(OpReorderer, renderPropSaveLayerAlphaRotate) {
     // ceil(sqrt(2) / 2 * 200) = 142
     EXPECT_EQ(142u, observedData.layerWidth);
     EXPECT_EQ(142u, observedData.layerHeight);
-    EXPECT_EQ(Rect(0, 0, 142, 142), observedData.rectClippedBounds);
+    EXPECT_EQ(Rect(142, 142), observedData.rectClippedBounds);
     EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), observedData.rectMatrix);
 }
 
@@ -1128,7 +1128,7 @@ TEST(OpReorderer, renderPropSaveLayerAlphaScale) {
     });
     EXPECT_EQ(100u, observedData.layerWidth);
     EXPECT_EQ(400u, observedData.layerHeight);
-    EXPECT_EQ(Rect(0, 0, 100, 400), observedData.rectClippedBounds);
+    EXPECT_EQ(Rect(100, 400), observedData.rectClippedBounds);
     EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), observedData.rectMatrix);
 }
 
