@@ -32,8 +32,8 @@ import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-
 import com.android.internal.logging.MetricsLogger;
+import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -81,7 +81,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private TaskStack mStack;
     private TaskStackView mTaskStackView;
     private RecentsAppWidgetHostView mSearchBar;
-    private View mHistoryButton;
+    private TextView mHistoryButton;
     private View mEmptyView;
     private boolean mAwaitingFirstLayout = true;
     private boolean mLastTaskLaunchedWasFreeform;
@@ -126,7 +126,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        mHistoryButton = inflater.inflate(R.layout.recents_history_button, this, false);
+        mHistoryButton = (TextView) inflater.inflate(R.layout.recents_history_button, this, false);
         mHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -609,6 +609,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         if (!debugFlags.isHistoryEnabled()) {
             hideHistoryButton(100);
+        } else {
+            showHistoryButton(100);
         }
     }
 
@@ -631,6 +633,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         mHistoryButton.setVisibility(View.VISIBLE);
         mHistoryButton.setAlpha(0f);
+        mHistoryButton.setText(getContext().getString(R.string.recents_history_label_format,
+                mStack.getHistoricalTasks().size()));
         postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
             @Override
             public void run() {

@@ -1065,8 +1065,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Update the history button visibility
-        if (mStackScroller.getStackScroll() < SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
+        if (shouldShowHistoryButton() &&
+                mStackScroller.getStackScroll() < SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
             EventBus.getDefault().send(new ShowHistoryButtonEvent());
+        } else {
+            EventBus.getDefault().send(new HideHistoryButtonEvent());
         }
 
         // Start dozing
@@ -1395,7 +1398,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         requestSynchronizeStackViewsWithModel();
         postInvalidateOnAnimation();
 
-        if (prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
+        if (shouldShowHistoryButton() &&
+                prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
                 curScroll <= SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
             EventBus.getDefault().send(new ShowHistoryButtonEvent());
         } else if (prevScroll < HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD &&
@@ -1665,5 +1669,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         return -1;
+    }
+
+    /**
+     * @return whether the history button should be visible
+     */
+    private boolean shouldShowHistoryButton() {
+        return !mStack.getHistoricalTasks().isEmpty();
     }
 }

@@ -101,7 +101,7 @@ public class RecentsHistoryView extends LinearLayout {
                         .start();
             }
         });
-        mAdapter.updateTasks(getContext(), stack.computeAllTasksList());
+        mAdapter.updateTasks(getContext(), stack.getHistoricalTasks());
         mIsVisible = true;
     }
 
