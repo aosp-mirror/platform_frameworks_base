@@ -2449,7 +2449,7 @@ public class AccountManagerService
             if (sessionBundle != null) {
                 String accountType = sessionBundle.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (TextUtils.isEmpty(accountType)
-                        && !mAccountType.equalsIgnoreCase(mAccountType)) {
+                        || !mAccountType.equalsIgnoreCase(accountType)) {
                     Log.w(TAG, "Account type in session bundle doesn't match request.");
                 }
                 // Add accountType info to session bundle. This will
