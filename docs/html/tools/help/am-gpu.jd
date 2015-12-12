@@ -1,0 +1,136 @@
+page.title=GPU Monitor
+parent.title=Android Monitor
+parent.link=android-monitor.html
+page.tags=monitor
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+<ol>
+  <li><a href="#running">Displaying a Running App in the GPU Monitor</a></li>
+</ol>
+
+ <h2>See also</h2>
+  <ol>
+    <li>
+        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
+      </li>
+    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
+      </li>
+
+      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
+      </li>
+
+      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
+      </li>
+
+      <li>
+        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
+      </li>
+  </ol>
+
+<h2>
+  Dependencies and Prerequisites
+</h2>
+
+<ul>
+  <li>Make sure your development computer detects your hardware device, which often happens
+  automatically when you connect it to a USB port.
+  </li>
+
+  <li>
+    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
+    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
+    <strong>Developer Options</strong> on the device or emulator.
+  </li>
+
+  <li>For Android 5.0 (API level 21) and Android 5.1 (API level 22), in <strong>Developer
+  Options</strong> on the device or emulator, set <strong>Profile GPU rendering</strong> to
+  <strong>In adb shell dumpsys gfxinfo</strong>.
+  </li>
+
+  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
+  <code>build.gradle</code> file (it’s initially set by default).
+  </li>
+
+
+  <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
+  <strong>Enable ADB Integration</strong>.
+  </li>
+
+   <li>
+    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
+  </li>
+</ul>
+
+</div>
+</div>
+
+<p>
+  The GPU Monitor gives you a quick visual representation of how much time it takes to render the
+  frames of a UI window. It profiles the amount of time it takes for the render thread to prepare,
+  process, and execute the draw commands. The GPU Monitor can help you to:
+</p>
+
+<ul>
+  <li>Quickly see how a UI window performs.
+  </li>
+
+  <li>Identify whether any part of the rendering pipeline stands out in using processing time.
+  </li>
+
+  <li>Look for spikes in frame rendering time associated with user or program actions.
+  </li>
+</ul>
+
+<p>
+  For example, if displaying a static photo continues to take Graphics Processor Unit
+  (GPU) resources long after it has finished
+  drawing on the screen, that’s a likely candidate for optimization.
+</p>
+
+
+<h2 id="running">
+  Displaying a Running App in the GPU Monitor
+</h2>
+
+<p>
+  Follow these steps:
+</p>
+
+<ol>
+  <li>Optionally connect a hardware device.
+  </li>
+
+  <li>
+    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+  </li>
+
+  <li>Click the <strong>GPU</strong> tab.
+  </li>
+
+  <li>Open an app project and <a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on a hardware device or
+  emulator.
+  </li>
+
+  <li>Enable the GPU Monitor by clicking Pause <img src="{@docRoot}images/tools/am-ipause.png" style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect
+  it.
+  </li>
+
+  <p>
+  Any GPU usage begins to appear in the GPU Monitor:
+</p>
+  <img src="{@docRoot}images/tools/am-gpumon.png" style="vertical-align:sub;margin:0;width:450px" />
+
+<p>
+  The y-axis is the amount of time it takes the GPU to execute, process, prepare, and draw frames,
+  in milliseconds. The x-axis records the time elapsed; it starts with seconds, and then minutes
+  and seconds, and so on.
+</p>
+
+  <li>To stop the GPU Monitor, click Pause <img src="{@docRoot}images/tools/am-ipause.png" style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> again to select
+  it.
+  </li>
+</ol>

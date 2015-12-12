@@ -65,6 +65,10 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
 <h3 id="tools-debugging">Debugging Tools</h3>
 <dl>
 
+  <dt><a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a></dt>
+    <dd>Android Monitor is integrated into Android Studio and provides logcat, memory, CPU, GPU, and
+      network monitors for app debugging and analysis.</dd>
+
   <dt><a href="{@docRoot}tools/help/adb.html">adb</a></dt>
     <dd>Android Debug Bridge (adb) is a versatile command line tool that lets you communicate with
         an emulator instance or connected Android-powered device. It also provides access to the
