@@ -78,7 +78,6 @@ import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMult
  */
 @LargeTest
 public class BugreportReceiverTest extends InstrumentationTestCase {
-
     private static final String TAG = "BugreportReceiverTest";
 
     // Timeout for UI operations, in milliseconds.
@@ -91,6 +90,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     private static final String BUGREPORT_CONTENT = "Dump, might as well dump!\n";
     private static final String SCREENSHOT_CONTENT = "A picture is worth a thousand words!\n";
+
+    private static final int PID = 42;
+    private static final String PROGRESS_PROPERTY = "dumpstate.42.progress";
+    private static final String MAX_PROPERTY = "dumpstate.42.max";
+    private static final String NAME = "BUG, Y U NO REPORT?";
 
     private String mPlainTextPath;
     private String mZipPath;
@@ -106,43 +110,39 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mContext = instrumentation.getTargetContext();
         mUiBot = new UiBot(UiDevice.getInstance(instrumentation), TIMEOUT);
         mListener = ActionSendMultipleConsumerActivity.getListener(mContext);
+
+        cancelExistingNotifications();
+
         mPlainTextPath = getPath(BUGREPORT_FILE);
         mZipPath = getPath(ZIP_FILE);
         mScreenshotPath = getPath(SCREENSHOT_FILE);
-        cancelExistingNotifications();
+        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
+        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
+        createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
+
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_HIDE);
     }
 
     public void testFullWorkflow() throws Exception {
-        final String name = "BUG, Y U NO REPORT?";
-        // TODO: call method to remove property instead
-        SystemProperties.set("dumpstate.42.progress", "0");
-        SystemProperties.set("dumpstate.42.max", "0");
+        resetProperties();
+        sendBugreportStarted(1000);
 
-        Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
-        intent.putExtra(EXTRA_PID, 42);
-        intent.putExtra(EXTRA_NAME, name);
-        intent.putExtra(EXTRA_MAX, 1000);
-        mContext.sendBroadcast(intent);
+        assertProgressNotification(NAME, "0.00%");
 
-        assertProgressNotification(name, "0.00%");
+        SystemProperties.set(PROGRESS_PROPERTY, "108");
+        assertProgressNotification(NAME, "10.80%");
 
-        SystemProperties.set("dumpstate.42.progress", "108");
-        assertProgressNotification(name, "10.80%");
+        SystemProperties.set(PROGRESS_PROPERTY, "500");
+        assertProgressNotification(NAME, "50.00%");
 
-        SystemProperties.set("dumpstate.42.progress", "500");
-        assertProgressNotification(name, "50.00%");
+        SystemProperties.set(MAX_PROPERTY, "2000");
+        assertProgressNotification(NAME, "25.00%");
 
-        SystemProperties.set("dumpstate.42.max", "2000");
-        assertProgressNotification(name, "25.00%");
-
-        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
-        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(42, mPlainTextPath, mScreenshotPath);
+        Bundle extras =
+                sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
 
-        String service = BugreportProgressService.class.getName();
-        assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
+        assertServiceNotRunning();
     }
 
     public void testBugreportFinished_withWarning() throws Exception {
@@ -150,11 +150,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_SHOW);
 
         // Send notification and click on share.
-        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
-        Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
-        intent.putExtra(EXTRA_BUGREPORT, mPlainTextPath);
-        mContext.sendBroadcast(intent);
-        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title));
+        sendBugreportFinished(null, mPlainTextPath, null);
+        acceptBugreport();
 
         // Handle the warning
         mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm));
@@ -176,28 +173,22 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
-        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
-        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(mPlainTextPath, mScreenshotPath);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
     }
 
     public void testBugreportFinished_zippedBugreportAndScreenshot() throws Exception {
-        createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
-        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(mZipPath, mScreenshotPath);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
     }
 
     public void testBugreportFinished_plainBugreportAndNoScreenshot() throws Exception {
-        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(mPlainTextPath, null);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, null);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
     }
 
     public void testBugreportFinished_zippedBugreportAndNoScreenshot() throws Exception {
-        createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
-        Bundle extras = sendBugreportFinishedIntent(mZipPath, null);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, null);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
     }
 
@@ -221,17 +212,67 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mUiBot.getObject(percent);
     }
 
+    void resetProperties() {
+        // TODO: call method to remove property instead
+        SystemProperties.set(PROGRESS_PROPERTY, "0");
+        SystemProperties.set(MAX_PROPERTY, "0");
+    }
+
+    /**
+     * Sends a "bugreport started" intent with the default values.
+     */
+    private void sendBugreportStarted(int max) {
+        Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
+        intent.putExtra(EXTRA_PID, PID);
+        intent.putExtra(EXTRA_NAME, NAME);
+        intent.putExtra(EXTRA_MAX, max);
+        mContext.sendBroadcast(intent);
+    }
+
     /**
      * Sends a "bugreport finished" intent and waits for the result.
      *
-     * @return extras sent to the bugreport finished consumer.
+     * @return extras sent in the shared intent.
      */
-    private Bundle sendBugreportFinishedIntent(String bugreportPath, String screenshotPath) {
-        return sendBugreportFinishedIntent(null, bugreportPath, screenshotPath);
+    private Bundle sendBugreportFinishedAndGetSharedIntent(String bugreportPath,
+            String screenshotPath) {
+        return sendBugreportFinishedAndGetSharedIntent(null, bugreportPath, screenshotPath);
     }
 
-    private Bundle sendBugreportFinishedIntent(Integer pid, String bugreportPath,
+    /**
+     * Sends a "bugreport finished" intent and waits for the result.
+     *
+     * @return extras sent in the shared intent.
+     */
+    private Bundle sendBugreportFinishedAndGetSharedIntent(Integer pid, String bugreportPath,
             String screenshotPath) {
+        sendBugreportFinished(pid, bugreportPath, screenshotPath);
+        return acceptBugreportAndGetSharedIntent();
+    }
+
+    /**
+     * Accepts the notification to share the finished bugreport and waits for the result.
+     *
+     * @return extras sent in the shared intent.
+     */
+    private Bundle acceptBugreportAndGetSharedIntent() {
+        acceptBugreport();
+        mUiBot.chooseActivity(UI_NAME);
+        return mListener.getExtras();
+    }
+
+    /**
+     * Accepts the notification to share the finished bugreport.
+     */
+    private void acceptBugreport() {
+        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title));
+    }
+
+    /**
+     * Sends a "bugreport finished" intent.
+     *
+     */
+    private void sendBugreportFinished(Integer pid, String bugreportPath, String screenshotPath) {
         Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
         if (pid != null) {
             intent.putExtra(EXTRA_PID, pid);
@@ -244,10 +285,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
 
         mContext.sendBroadcast(intent);
-
-        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title));
-        mUiBot.chooseActivity(UI_NAME);
-        return mListener.getExtras();
     }
 
     /**
@@ -316,6 +353,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             }
         }
         fail("Did not find entry '" + entryName + "' on file '" + uri + "'");
+    }
+
+    private void assertServiceNotRunning() {
+        String service = BugreportProgressService.class.getName();
+        assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
     }
 
     private boolean isServiceRunning(String name) {
