@@ -59,7 +59,6 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
 
     private final GestureDetector mTaskSwitcherDetector;
     private final int mScrollTouchSlop;
-    private final int mTouchSlop;
     private final int mMinFlingVelocity;
     private int mTouchDownX;
     private int mTouchDownY;
@@ -74,7 +73,6 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         ViewConfiguration configuration = ViewConfiguration.get(context);
         Resources r = context.getResources();
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mTaskSwitcherDetector = new GestureDetector(context, this);
         TunerService.get(context).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
@@ -168,8 +166,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         int yDiff = Math.abs(y - mTouchDownY);
         if (!mDockWindowTouchSlopExceeded) {
             boolean touchSlopExceeded = !mIsVertical
-                    ? yDiff > mTouchSlop && yDiff > xDiff
-                    : xDiff > mTouchSlop && xDiff > yDiff;
+                    ? yDiff > mScrollTouchSlop && yDiff > xDiff
+                    : xDiff > mScrollTouchSlop && xDiff > yDiff;
             if (touchSlopExceeded && mDivider.getView().getWindowManagerProxy().getDockSide()
                     == DOCKED_INVALID) {
                 mDragMode = calculateDragMode();
