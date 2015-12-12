@@ -156,6 +156,20 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_EMERGENCY_CALLS_ONLY = 0x80;
 
     /**
+     * Flag indicating that for this {@code PhoneAccount}, the ability to make a video call to a
+     * number relies on presence.  Should only be set if the {@code PhoneAccount} also has
+     * {@link #CAPABILITY_VIDEO_CALLING}.
+     * <p>
+     * When set, the {@link ConnectionService} is responsible for toggling the
+     * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE_VT_CAPABLE} bit on the
+     * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE} column to indicate whether
+     * a contact's phone number supports video calling.
+     * <p>
+     * See {@link #getCapabilities}
+     */
+    public static final int CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE = 0x100;
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
