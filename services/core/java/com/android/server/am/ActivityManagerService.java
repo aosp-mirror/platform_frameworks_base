@@ -11772,13 +11772,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean killed = false;
         synchronized (mPidsSelfLocked) {
-            int[] types = new int[pids.length];
             int worstType = 0;
             for (int i=0; i<pids.length; i++) {
                 ProcessRecord proc = mPidsSelfLocked.get(pids[i]);
                 if (proc != null) {
                     int type = proc.setAdj;
-                    types[i] = type;
                     if (type > worstType) {
                         worstType = type;
                     }
