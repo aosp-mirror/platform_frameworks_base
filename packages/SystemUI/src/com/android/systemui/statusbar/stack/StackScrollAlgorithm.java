@@ -544,7 +544,7 @@ public class StackScrollAlgorithm {
             if (row.isPinned()) {
                 childState.yTranslation = Math.max(childState.yTranslation,
                         mNotificationsTopPadding);
-                childState.height = row.getHeadsUpHeight();
+                childState.height = Math.max(row.getHeadsUpHeight(), childState.height);
                 if (!isTopEntry) {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
                     // the top most z-position
