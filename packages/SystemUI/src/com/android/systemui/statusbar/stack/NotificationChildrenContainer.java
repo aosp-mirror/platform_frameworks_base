@@ -56,6 +56,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private ExpandableNotificationRow mNotificationParent;
     private HybridNotificationView mGroupOverflowContainer;
     private ViewState mGroupOverFlowState;
+    private int mRealHeight;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -111,8 +112,8 @@ public class NotificationChildrenContainer extends ViewGroup {
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
+        int size = MeasureSpec.getSize(heightMeasureSpec);
         if (hasFixedHeight || isHeightLimited) {
-            int size = MeasureSpec.getSize(heightMeasureSpec);
             ownMaxHeight = Math.min(ownMaxHeight, size);
         }
         int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
@@ -133,7 +134,17 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (mGroupOverflowContainer != null) {
             mGroupOverflowContainer.measure(widthMeasureSpec, newHeightSpec);
         }
+        mRealHeight = height;
+        if (heightMode != MeasureSpec.UNSPECIFIED) {
+            height = Math.min(height, size);
+        }
         setMeasuredDimension(width, height);
+    }
+
+    @Override
+    public boolean pointInView(float localX, float localY, float slop) {
+        return localX >= -slop && localY >= -slop && localX < ((mRight - mLeft) + slop) &&
+                localY < (mRealHeight + slop);
     }
 
     /**

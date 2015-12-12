@@ -378,23 +378,22 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             return;
         }
         if (mHasPinnedNotification) {
-            int minX = Integer.MAX_VALUE;
+            int minX = 0;
             int maxX = 0;
-            int minY = Integer.MAX_VALUE;
             int maxY = 0;
             for (HeadsUpEntry entry : mSortedEntries) {
                 ExpandableNotificationRow row = entry.entry.row;
                 if (row.isPinned()) {
                     row.getLocationOnScreen(mTmpTwoArray);
-                    minX = Math.min(minX, mTmpTwoArray[0]);
-                    minY = Math.min(minY, 0);
-                    maxX = Math.max(maxX, mTmpTwoArray[0] + row.getWidth());
-                    maxY = Math.max(maxY, row.getHeadsUpHeight());
+                    minX = mTmpTwoArray[0];
+                    maxX = mTmpTwoArray[0] + row.getWidth();
+                    maxY = row.getHeadsUpHeight();
+                    break;
                 }
             }
 
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-            info.touchableRegion.set(minX, minY, maxX, maxY + mNotificationsTopPadding);
+            info.touchableRegion.set(minX, 0, maxX, maxY + mNotificationsTopPadding);
         } else if (mHeadsUpGoingAway || mWaitingOnCollapseWhenGoingAway) {
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);

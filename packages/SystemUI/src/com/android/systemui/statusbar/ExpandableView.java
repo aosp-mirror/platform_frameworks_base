@@ -45,7 +45,6 @@ public abstract class ExpandableView extends FrameLayout {
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
     private int mMinClipTopAmount = 0;
-    private boolean mMeasuredTooHigh;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,9 +58,7 @@ public abstract class ExpandableView extends FrameLayout {
         final int givenSize = MeasureSpec.getSize(heightMeasureSpec);
         int ownMaxHeight = limitViewHeight ? mMaxViewHeight : Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
-        if (hasFixedHeight) {
-            // We have a height set in our layout, so we want to be at most as big as given
+        if (heightMode != MeasureSpec.UNSPECIFIED && givenSize != 0) {
             ownMaxHeight = Math.min(givenSize, ownMaxHeight);
         }
         int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
@@ -77,7 +74,7 @@ public abstract class ExpandableView extends FrameLayout {
             if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
                 if (layoutParams.height >= 0) {
                     // An actual height is set
-                    childHeightSpec = layoutParams.height > ownMaxHeight && limitViewHeight
+                    childHeightSpec = layoutParams.height > ownMaxHeight
                         ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
                         : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
                 }
@@ -90,7 +87,8 @@ public abstract class ExpandableView extends FrameLayout {
                 mMatchParentViews.add(child);
             }
         }
-        int ownHeight = hasFixedHeight ? ownMaxHeight : Math.min(ownMaxHeight, maxChildHeight);
+        int ownHeight = heightMode == MeasureSpec.EXACTLY
+                ? givenSize : Math.min(ownMaxHeight, maxChildHeight);
         newHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
         for (View child : mMatchParentViews) {
             child.measure(getChildMeasureSpec(
@@ -100,7 +98,6 @@ public abstract class ExpandableView extends FrameLayout {
         mMatchParentViews.clear();
         int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, ownHeight);
-        mMeasuredTooHigh = heightMode != MeasureSpec.UNSPECIFIED && ownHeight > givenSize;
     }
 
     protected boolean shouldLimitViewHeight() {
@@ -133,26 +130,11 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     @Override
-    public boolean dispatchGenericMotionEvent(MotionEvent ev) {
-        if (filterMotionEvent(ev)) {
-            return super.dispatchGenericMotionEvent(ev);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (filterMotionEvent(ev)) {
-            return super.dispatchTouchEvent(ev);
-        }
-        return false;
-    }
-
-    protected boolean filterMotionEvent(MotionEvent event) {
-        return event.getActionMasked() != MotionEvent.ACTION_DOWN
-                && event.getActionMasked() != MotionEvent.ACTION_HOVER_ENTER
-                && event.getActionMasked() != MotionEvent.ACTION_HOVER_MOVE
-                || event.getY() > mClipTopAmount && event.getY() < mActualHeight;
+    public boolean pointInView(float localX, float localY, float slop) {
+        float top = mClipTopAmount;
+        float bottom = mActualHeight;
+        return localX >= -slop && localY >= top - slop && localX < ((mRight - mLeft) + slop) &&
+                localY < (bottom + slop);
     }
 
     /**
@@ -397,7 +379,8 @@ public abstract class ExpandableView extends FrameLayout {
 
     @Override
     public boolean hasOverlappingRendering() {
-        return super.hasOverlappingRendering() && !mMeasuredTooHigh;
+        // Otherwise it will be clipped
+        return super.hasOverlappingRendering() && getActualHeight() <= getHeight();
     }
 
     /**

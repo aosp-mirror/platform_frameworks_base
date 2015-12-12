@@ -518,11 +518,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
-    protected boolean filterMotionEvent(MotionEvent event) {
-        return mIsHeadsUp || super.filterMotionEvent(event);
-    }
-
-    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
