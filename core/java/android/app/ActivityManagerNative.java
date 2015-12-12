@@ -2842,6 +2842,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case IS_APP_FOREGROUND_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int userHandle = data.readInt();
+            final boolean isForeground = isAppForeground(userHandle);
+            reply.writeNoException();
+            reply.writeInt(isForeground ? 1 : 0);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6638,6 +6646,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
+
+    @Override
+    public boolean isAppForeground(int uid) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(uid);
+        mRemote.transact(IS_APP_FOREGROUND_TRANSACTION, data, reply, 0);
+        final boolean isForeground = reply.readInt() == 1 ? true : false;
+        data.recycle();
+        reply.recycle();
+        return isForeground;
+    };
 
     private IBinder mRemote;
 }

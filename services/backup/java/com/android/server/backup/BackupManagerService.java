@@ -239,6 +239,11 @@ public class BackupManagerService {
     // How long between attempts to perform a full-data backup of any given app
     static final long MIN_FULL_BACKUP_INTERVAL = 1000 * 60 * 60 * 24; // one day
 
+    // If an app is busy when we want to do a full-data backup, how long to defer the retry.
+    // This is fuzzed, so there are two parameters; backoff_min + Rand[0, backoff_fuzz)
+    static final long BUSY_BACKOFF_MIN_MILLIS = 1000 * 60 * 60;  // one hour
+    static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
+
     Context mContext;
     private PackageManager mPackageManager;
     IPackageManager mPackageManagerBinder;
@@ -4496,35 +4501,72 @@ public class BackupManagerService {
                 return false;
             }
 
-            // At this point we know that we have work to do, just not right now.  Any
-            // exit without actually running backups will also require that we
+            // At this point we know that we have work to do, but possibly not right now.
+            // Any exit without actually running backups will also require that we
             // reschedule the job.
             boolean runBackup = true;
+            boolean headBusy;
 
-            if (!fullBackupAllowable(getTransport(mCurrentTransport))) {
-                if (MORE_DEBUG) {
-                    Slog.i(TAG, "Preconditions not met; not running full backup");
-                }
-                runBackup = false;
-                // Typically this means we haven't run a key/value backup yet.  Back off
-                // full-backup operations by the key/value job's run interval so that
-                // next time we run, we are likely to be able to make progress.
-                latency = KeyValueBackupJob.BATCH_INTERVAL;
-            }
+            do {
+                headBusy = false;
 
-            if (runBackup) {
-                entry = mFullBackupQueue.get(0);
-                long timeSinceRun = now - entry.lastBackup;
-                runBackup = (timeSinceRun >= MIN_FULL_BACKUP_INTERVAL);
-                if (!runBackup) {
-                    // It's too early to back up the next thing in the queue, so bow out
+                if (!fullBackupAllowable(getTransport(mCurrentTransport))) {
                     if (MORE_DEBUG) {
-                        Slog.i(TAG, "Device ready but too early to back up next app");
+                        Slog.i(TAG, "Preconditions not met; not running full backup");
                     }
-                    // Wait until the next app in the queue falls due for a full data backup
-                    latency = MIN_FULL_BACKUP_INTERVAL - timeSinceRun;
+                    runBackup = false;
+                    // Typically this means we haven't run a key/value backup yet.  Back off
+                    // full-backup operations by the key/value job's run interval so that
+                    // next time we run, we are likely to be able to make progress.
+                    latency = KeyValueBackupJob.BATCH_INTERVAL;
                 }
-            }
+
+                if (runBackup) {
+                    entry = mFullBackupQueue.get(0);
+                    long timeSinceRun = now - entry.lastBackup;
+                    runBackup = (timeSinceRun >= MIN_FULL_BACKUP_INTERVAL);
+                    if (!runBackup) {
+                        // It's too early to back up the next thing in the queue, so bow out
+                        if (MORE_DEBUG) {
+                            Slog.i(TAG, "Device ready but too early to back up next app");
+                        }
+                        // Wait until the next app in the queue falls due for a full data backup
+                        latency = MIN_FULL_BACKUP_INTERVAL - timeSinceRun;
+                        break;  // we know we aren't doing work yet, so bail.
+                    }
+
+                    try {
+                        PackageInfo appInfo = mPackageManager.getPackageInfo(entry.packageName, 0);
+                        headBusy = mActivityManager.isAppForeground(appInfo.applicationInfo.uid);
+
+                        if (headBusy) {
+                            final long nextEligible = System.currentTimeMillis()
+                                    + BUSY_BACKOFF_MIN_MILLIS
+                                    + mTokenGenerator.nextInt(BUSY_BACKOFF_FUZZ);
+                            if (DEBUG_SCHEDULING) {
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                Slog.i(TAG, "Full backup time but " + entry.packageName
+                                        + " is busy; deferring to "
+                                        + sdf.format(new Date(nextEligible)));
+                            }
+                            // This relocates the app's entry from the head of the queue to
+                            // its order-appropriate position further down, so upon looping
+                            // a new candidate will be considered at the head.
+                            enqueueFullBackup(entry.packageName,
+                                    nextEligible - MIN_FULL_BACKUP_INTERVAL);
+                        }
+
+                    } catch (NameNotFoundException nnf) {
+                        // So, we think we want to back this up, but it turns out the package
+                        // in question is no longer installed.  We want to drop it from the
+                        // queue entirely and move on, but if there's nothing else in the queue
+                        // we should bail entirely.  headBusy cannot have been set to true yet.
+                        runBackup = (mFullBackupQueue.size() > 1);
+                    } catch (RemoteException e) {
+                        // Cannot happen; the Activity Manager is in the same process
+                    }
+                }
+            } while (headBusy);
 
             if (!runBackup) {
                 if (DEBUG_SCHEDULING) {
@@ -4539,7 +4581,7 @@ public class BackupManagerService {
                 return false;
             }
 
-            // Okay, the top thing is runnable now.  Pop it off and get going.
+            // Okay, the top thing is ready for backup now.  Do it.
             mFullBackupQueue.remove(0);
             CountDownLatch latch = new CountDownLatch(1);
             String[] pkg = new String[] {entry.packageName};
