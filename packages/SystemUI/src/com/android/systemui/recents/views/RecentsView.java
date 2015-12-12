@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -29,12 +27,13 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -513,6 +512,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             SystemServicesProxy ssp = Recents.getSystemServices();
             ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);
             launchTask(event.task, null, INVALID_STACK_ID);
+
+            MetricsLogger.action(mContext,
+                    MetricsLogger.ACTION_WINDOW_DOCK_DRAG_DROP);
         }
     }
 

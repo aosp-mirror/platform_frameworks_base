@@ -36,6 +36,24 @@ public class MetricsLogger implements MetricsConstants {
     public static final int NOTIFICATION_TOPIC_NOTIFICATION = 263;
     public static final int ACTION_DEFAULT_SMS_APP_CHANGED = 264;
 
+    /**
+     * Logged when the user docks a window from recents by longpressing a task and dragging it to
+     * the dock area.
+     */
+    public static final int ACTION_WINDOW_DOCK_DRAG_DROP = 265;
+
+    /**
+     * Logged when the user docks a fullscreen window by long pressing recents which also opens
+     * recents on the lower/right side.
+     */
+    public static final int ACTION_WINDOW_DOCK_LONGPRESS = 266;
+
+    /**
+     * Logged when the user docks a window by dragging from the navbar which also opens recents on
+     * the lower/right side.
+     */
+    public static final int ACTION_WINDOW_DOCK_SWIPE = 267;
+
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");

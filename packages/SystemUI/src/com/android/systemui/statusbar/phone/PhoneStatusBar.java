@@ -1136,6 +1136,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mRecents.dockTopTask(false /* draggingInRecents */,
                         ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
                         null /* initialBounds */);
+                MetricsLogger.action(mContext,
+                        MetricsLogger.ACTION_WINDOW_DOCK_LONGPRESS);
                 return true;
             }
             return false;
