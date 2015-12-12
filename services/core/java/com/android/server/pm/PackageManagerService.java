@@ -436,12 +436,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     final String[] mSeparateProcesses;
     final boolean mIsUpgrade;
 
-    // This is where all application persistent data goes.
-    final File mAppDataDir;
-
-    // This is where all application persistent data goes for secondary users.
-    final File mUserAppDataDir;
-
     /** The location for ASEC container files on internal storage. */
     final String mAsecInternalPath;
 
@@ -953,7 +947,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
-    class PostInstallData {
+    static class PostInstallData {
         public InstallArgs args;
         public PackageInstalledInfo res;
 
@@ -1070,7 +1064,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                         long timeInMillis;
                         try {
-                            timeInMillis = Long.parseLong(timeInMillisString.toString());
+                            timeInMillis = Long.parseLong(timeInMillisString);
                         } catch (NumberFormatException e) {
                             throw new IOException("Failed to parse " + timeInMillisString
                                                   + " as a long.", e);
@@ -1987,12 +1981,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             File dataDir = Environment.getDataDirectory();
-            mAppDataDir = new File(dataDir, "data");
             mAppInstallDir = new File(dataDir, "app");
             mAppLib32InstallDir = new File(dataDir, "app-lib");
             mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
-            mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
             sUserManager = new UserManagerService(context, this, mPackages);
@@ -3366,14 +3358,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             return mAvailableFeatures.containsKey(name);
         }
-    }
-
-    private void checkValidCaller(int uid, int userId) {
-        if (UserHandle.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0)
-            return;
-
-        throw new SecurityException("Caller uid=" + uid
-                + " is not privileged to communicate with user=" + userId);
     }
 
     @Override
@@ -10497,7 +10481,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             ArrayList<IntentFilter> result = new ArrayList<>();
             for (int n=0; n<count; n++) {
                 PackageParser.Activity activity = pkg.activities.get(n);
-                if (activity.intents != null || activity.intents.size() > 0) {
+                if (activity.intents != null && activity.intents.size() > 0) {
                     result.addAll(activity.intents);
                 }
             }
@@ -10916,7 +10900,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    class MoveInfo {
+    static class MoveInfo {
         final int moveId;
         final String fromUuid;
         final String toUuid;
@@ -12222,7 +12206,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    class PackageInstalledInfo {
+    static class PackageInstalledInfo {
         String name;
         int uid;
         // The set of users that originally had this package installed.
@@ -13163,10 +13147,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static boolean isMultiArch(PackageSetting ps) {
-        return (ps.pkgFlags & ApplicationInfo.FLAG_MULTIARCH) != 0;
-    }
-
     private static boolean isMultiArch(ApplicationInfo info) {
         return (info.flags & ApplicationInfo.FLAG_MULTIARCH) != 0;
     }
@@ -13177,10 +13157,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isExternal(PackageSetting ps) {
         return (ps.pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
-    }
-
-    private static boolean isExternal(ApplicationInfo info) {
-        return (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
     private static boolean isEphemeral(PackageParser.Package pkg) {
@@ -13866,7 +13842,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return ret;
     }
 
-    private final class ClearStorageConnection implements ServiceConnection {
+    private final static class ClearStorageConnection implements ServiceConnection {
         IMediaContainerService mContainerService;
 
         @Override
@@ -15116,7 +15092,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // First, verify that this is a valid class name.
                 PackageParser.Package pkg = pkgSetting.pkg;
                 if (pkg == null || !pkg.hasComponentClassName(className)) {
-                    if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                    if (pkg != null &&
+                            pkg.applicationInfo.targetSdkVersion >=
+                                    Build.VERSION_CODES.JELLY_BEAN) {
                         throw new IllegalArgumentException("Component class " + className
                                 + " does not exist in " + packageName);
                     } else {
@@ -17326,7 +17304,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private final class OnPermissionChangeListeners extends Handler {
+    private final static class OnPermissionChangeListeners extends Handler {
         private static final int MSG_ON_PERMISSIONS_CHANGED = 1;
 
         private final RemoteCallbackList<IOnPermissionsChangeListener> mPermissionListeners =
