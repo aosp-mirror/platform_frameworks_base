@@ -352,6 +352,10 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private String getPath(String file) {
         File rootDir = new ContextWrapper(mContext).getFilesDir();
         File dir = new File(rootDir, BUGREPORTS_DIR);
+        if (!dir.exists()) {
+            Log.i(TAG, "Creating directory " + dir);
+            assertTrue("Could not create directory " + dir, dir.mkdir());
+        }
         String path = new File(dir, file).getAbsolutePath();
         Log.v(TAG, "Path for '" + file + "': " + path);
         return path;
