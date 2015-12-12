@@ -162,8 +162,7 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Нечујно звоно."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <!-- no translation found for accessibility_work_mode (2478631941714607225) -->
-    <skip />
+    <string name="accessibility_work_mode" msgid="2478631941714607225">"Режим рада"</string>
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Одбаците <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Апликација <xliff:g id="APP">%s</xliff:g> је одбачена."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Све недавно коришћене апликације су одбачене."</string>
@@ -215,14 +214,10 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Мобилни хотспот је искључен."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мобилни хотспот је укључен."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Пребацивање екрана је заустављено."</string>
-    <!-- no translation found for accessibility_quick_settings_work_mode_off (7045417396436552890) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_work_mode_on (7650588553988014341) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_off (5605534876107300711) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_work_mode_changed_on (249840330756998612) -->
-    <skip />
+    <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"Режим рада је искључен."</string>
+    <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Режим рада је укључен."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Режим рада је искључен."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Режим рада је укључен."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Осветљеност екрана"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G подаци су паузирани"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G подаци су паузирани"</string>
@@ -300,8 +295,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Искористили сте <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ограничење од <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Упозорење за <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_work_mode_label (6244915274350490429) -->
-    <skip />
+    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Режим рада"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Недавни екрани се појављују овде"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Информације о апликацији"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"качење екрана"</string>
@@ -416,8 +410,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Одбиј"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> је дијалог за јачину звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Додирните да бисте вратили оригинал."</string>
-    <!-- no translation found for group_summary_concadenation (6846402378100148789) -->
-    <skip />
+    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Користите профил за Work"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Тјунер за кориснички интерфејс система"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Приказуј уграђени проценат батерије"</string>
