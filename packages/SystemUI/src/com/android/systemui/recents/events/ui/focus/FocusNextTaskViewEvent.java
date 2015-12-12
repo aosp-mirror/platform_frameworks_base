@@ -22,5 +22,10 @@ import com.android.systemui.recents.events.EventBus;
  * Focuses the next task view in the stack.
  */
 public class FocusNextTaskViewEvent extends EventBus.Event {
-    // Simple event
+
+    public final boolean showTimerIndicator;
+
+    public FocusNextTaskViewEvent(boolean showTimerIndicator) {
+        this.showTimerIndicator = showTimerIndicator;
+    }
 }
