@@ -42,7 +42,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * For a flag, set the flag attribute:
  * <pre><code>
  *  &#64;IntDef(
- *      flag = true
+ *      flag = true,
  *      value = {NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
  * </code></pre>
  *
