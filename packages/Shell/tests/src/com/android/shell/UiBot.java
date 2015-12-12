@@ -124,6 +124,16 @@ final class UiBot {
 
         if (gotIt) {
             Log.v(TAG, "Found activity " + name + ", it's the default action");
+            // Clicks the "Just Once" button.
+            gotIt = mDevice
+                    .wait(Until.hasObject(By.res("android", "button_once")), mTimeout);
+            assertTrue("'Just Once' button not visible yet", gotIt);
+
+            UiObject justOnce = mDevice
+                    .findObject(new UiSelector().resourceId("android:id/button_once"));
+            assertTrue("'Just Once' button not found", justOnce.exists());
+
+            click(justOnce, "Just Once");
         } else {
             // Since it's not, need to find it in the scrollable list...
             Log.v(TAG, "Activity " + name + " is not default action");
@@ -140,16 +150,5 @@ final class UiBot {
             // ... then select it.
             click(activity, name);
         }
-
-        // Then clicks the "Just Once" button.
-        gotIt = mDevice
-                .wait(Until.hasObject(By.res("android", "button_once")), mTimeout);
-        assertTrue("'Just Once' button not visible yet", gotIt);
-
-        UiObject justOnce = mDevice
-                .findObject(new UiSelector().resourceId("android:id/button_once"));
-        assertTrue("'Just Once' button not found", justOnce.exists());
-
-        click(justOnce, "Just Once");
     }
 }
