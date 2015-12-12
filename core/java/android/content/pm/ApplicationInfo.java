@@ -746,7 +746,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             pw.println(prefix + "splitPublicSourceDirs=" + Arrays.toString(splitPublicSourceDirs));
         }
         if (resourceDirs != null) {
-            pw.println(prefix + "resourceDirs=" + resourceDirs);
+            pw.println(prefix + "resourceDirs=" + Arrays.toString(resourceDirs));
         }
         if ((flags&DUMP_FLAG_DETAILS) != 0 && seinfo != null) {
             pw.println(prefix + "seinfo=" + seinfo);
