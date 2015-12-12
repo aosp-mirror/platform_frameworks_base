@@ -28,6 +28,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
+import com.android.systemui.qs.tiles.AmbientDisplayTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CaffeineTile;
@@ -84,6 +85,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<HeadsUpTile> mHeadsUpTileProvider;
     private final Provider<SyncTile> mSyncTileProvider;
     private final Provider<VolumeTile> mVolumeTileProvider;
+    private final Provider<AmbientDisplayTile> mAmbientDisplayTileProvider;
 
     private QSTileHost mHost;
 
@@ -107,6 +109,7 @@ public class QSFactoryImpl implements QSFactory {
             Provider<NfcTile> nfcTileProvider,
             Provider<GarbageMonitor.MemoryTile> memoryTileProvider,
             Provider<UiModeNightTile> uiModeNightTileProvider,
+            Provider<AmbientDisplayTile> ambientDisplayTileProvider,
             Provider<CaffeineTile> caffeineTileProvider,
             Provider<HeadsUpTile> headsUpTileProvider,
             Provider<SyncTile> syncTileProvider,
@@ -130,6 +133,7 @@ public class QSFactoryImpl implements QSFactory {
         mNfcTileProvider = nfcTileProvider;
         mMemoryTileProvider = memoryTileProvider;
         mUiModeNightTileProvider = uiModeNightTileProvider;
+        mAmbientDisplayTileProvider = ambientDisplayTileProvider;
         mCaffeineTileProvider = caffeineTileProvider;
         mHeadsUpTileProvider = headsUpTileProvider;
         mSyncTileProvider = syncTileProvider;
@@ -188,6 +192,8 @@ public class QSFactoryImpl implements QSFactory {
             case "dark":
                 return mUiModeNightTileProvider.get();
             // Custom tiles.
+            case "ambient_display":
+                return mAmbientDisplayTileProvider.get();
             case "caffeine":
                 return mCaffeineTileProvider.get();
             case "heads_up":
