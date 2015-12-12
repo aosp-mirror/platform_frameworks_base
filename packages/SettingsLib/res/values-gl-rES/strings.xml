@@ -138,7 +138,7 @@
     <string name="development_settings_title" msgid="215179176067683667">"Opcións de programador"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Activar opcións de programador"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Definir as opcións de desenvolvemento de aplicacións"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"As opcións do programador non están dispoñibles para este usuario"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"As opcións de programador non están dispoñibles para este usuario"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"A configuración da VPN non está dispoñible para este usuario"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"A configuración da ancoraxe non está dispoñible para este usuario"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"A configuración do nome do punto de acceso non está dispoñible para este usuario"</string>
