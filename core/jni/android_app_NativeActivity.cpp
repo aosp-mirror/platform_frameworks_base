@@ -270,7 +270,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
     bool needNativeBridge = false;
 
     void* handle = OpenNativeLibrary(env, sdkVersion, pathStr, classLoader,
-                                     libraryPath, isolationPath);
+                                     false, libraryPath, isolationPath);
     if (handle == NULL) {
         if (NativeBridgeIsSupported(pathStr)) {
             handle = NativeBridgeLoadLibrary(pathStr, RTLD_LAZY);
