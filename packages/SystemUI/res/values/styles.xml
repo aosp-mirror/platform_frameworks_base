@@ -315,4 +315,8 @@
         <item name="android:layout_height">48dp</item>
     </style>
 
+    <style name="TunerSettings" parent="@android:style/Theme.Material.Settings">
+        <item name="preferenceTheme">@android:style/Theme.Material.Settings</item>
+    </style>
+
 </resources>

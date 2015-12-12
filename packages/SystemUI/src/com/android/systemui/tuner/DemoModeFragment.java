@@ -22,12 +22,12 @@ import android.database.ContentObserver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
-import android.preference.SwitchPreference;
 import android.provider.Settings;
+import android.support.v14.preference.PreferenceFragment;
+import android.support.v14.preference.SwitchPreference;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.PreferenceScreen;
 import android.view.MenuItem;
 
 import com.android.internal.logging.MetricsLogger;
@@ -56,9 +56,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     private SwitchPreference mOnSwitch;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Context context = getContext();
         mEnabledSwitch = new SwitchPreference(context);
         mEnabledSwitch.setTitle(R.string.enable_demo_mode);

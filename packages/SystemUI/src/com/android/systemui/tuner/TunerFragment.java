@@ -24,20 +24,19 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceFragment;
-import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.support.v14.preference.PreferenceFragment;
+import android.support.v14.preference.SwitchPreference;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.Preference.OnPreferenceClickListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSPanel;
-import com.android.systemui.tuner.TunerService.Tunable;
 
 import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;
 
@@ -45,8 +44,6 @@ public class TunerFragment extends PreferenceFragment {
 
     private static final String TAG = "TunerFragment";
 
-    private static final String KEY_QS_TUNER = "qs_tuner";
-    private static final String KEY_DEMO_MODE = "demo_mode";
     private static final String KEY_BATTERY_PCT = "battery_pct";
 
     public static final String SETTING_SEEN_TUNER_WARNING = "seen_tuner_warning";
@@ -59,23 +56,18 @@ public class TunerFragment extends PreferenceFragment {
 
     private SwitchPreference mBatteryPct;
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        addPreferencesFromResource(R.xml.tuner_prefs);
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
+    }
 
-        findPreference(KEY_DEMO_MODE).setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(android.R.id.content, new DemoModeFragment(), "DemoMode");
-                ft.addToBackStack(null);
-                ft.commit();
-                return true;
-            }
-        });
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        addPreferencesFromResource(R.xml.tuner_prefs);
+
         mBatteryPct = (SwitchPreference) findPreference(KEY_BATTERY_PCT);
         if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,
                 0) == 0) {

@@ -18,8 +18,8 @@ package com.android.systemui.tuner;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.preference.SwitchPreference;
 import android.provider.Settings;
+import android.support.v14.preference.SwitchPreference;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
@@ -38,15 +38,15 @@ public class StatusBarSwitch extends SwitchPreference implements Tunable {
     }
 
     @Override
-    protected void onAttachedToActivity() {
-        super.onAttachedToActivity();
+    public void onAttached() {
+        super.onAttached();
         TunerService.get(getContext()).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
     @Override
-    protected void onDetachedFromActivity() {
+    public void onDetached() {
         TunerService.get(getContext()).removeTunable(this);
-        super.onDetachedFromActivity();
+        super.onDetached();
     }
 
     @Override

@@ -21,7 +21,8 @@ LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTOC_FLAGS := -I$(LOCAL_PATH)/..
 LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 
-LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.systemui:com.android.keyguard
+LOCAL_AAPT_FLAGS := --auto-add-overlay \
+    --extra-packages com.android.systemui:com.android.keyguard:android.support.v14.preference:android.support.v7.preference:android.support.v7.appcompat:android.support.v7.recyclerview
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     $(call all-Iaidl-files-under, src) \
@@ -30,6 +31,10 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     src/com/android/systemui/EventLogTags.logtags
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
+    frameworks/support/v7/preference/res \
+    frameworks/support/v14/preference/res \
+    frameworks/support/v7/appcompat/res \
+    frameworks/support/v7/recyclerview/res \
     frameworks/base/packages/SystemUI/res \
     frameworks/base/packages/Keyguard/res
 
@@ -40,7 +45,10 @@ LOCAL_PACKAGE_NAME := SystemUITests
 LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target \
     Keyguard \
-    android-support-v7-recyclerview
+    android-support-v7-recyclerview \
+    android-support-v7-preference \
+    android-support-v7-appcompat \
+    android-support-v14-preference
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken

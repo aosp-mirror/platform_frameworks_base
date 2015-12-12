@@ -24,6 +24,7 @@
         sysui:defValue="true" />
 
     <PreferenceScreen
+        android:key="status_bar"
         android:title="@string/status_bar" >
 
         <com.android.systemui.tuner.StatusBarSwitch
@@ -70,6 +71,7 @@
 
 
     <PreferenceScreen
+        android:key="overview"
         android:title="@string/overview" >
 
         <com.android.systemui.tuner.TunerSwitch
@@ -97,7 +99,8 @@
 
     <Preference
         android:key="demo_mode"
-        android:title="@string/demo_mode" />
+        android:title="@string/demo_mode"
+        android:fragment="com.android.systemui.tuner.DemoModeFragment" />
 
     <!-- Warning, this goes last. -->
     <Preference

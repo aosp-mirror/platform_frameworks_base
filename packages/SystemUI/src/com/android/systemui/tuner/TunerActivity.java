@@ -15,16 +15,64 @@
  */
 package com.android.systemui.tuner;
 
-import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v14.preference.PreferenceFragment;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceScreen;
+import android.util.Log;
 
-public class TunerActivity extends Activity {
+import com.android.settingslib.drawer.SettingsDrawerActivity;
+import com.android.systemui.R;
+
+public class TunerActivity extends SettingsDrawerActivity implements
+        PreferenceFragment.OnPreferenceStartFragmentCallback,
+        PreferenceFragment.OnPreferenceStartScreenCallback {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new TunerFragment())
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, new TunerFragment())
                 .commit();
+    }
+
+    @Override
+    public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
+        try {
+            Class<?> cls = Class.forName(pref.getFragment());
+            Fragment fragment = (Fragment) cls.newInstance();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.content_frame, fragment);
+            transaction.addToBackStack("PreferenceFragment");
+            transaction.commit();
+            return true;
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            Log.d("TunerActivity", "Problem launching fragment", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean onPreferenceStartScreen(PreferenceFragment caller, PreferenceScreen pref) {
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        SubSettingsFragment fragment = new SubSettingsFragment();
+        final Bundle b = new Bundle(1);
+        b.putString(PreferenceFragment.ARG_PREFERENCE_ROOT, pref.getKey());
+        fragment.setArguments(b);
+        fragment.setTargetFragment(caller, 0);
+        transaction.replace(R.id.content_frame, fragment);
+        transaction.addToBackStack("PreferenceFragment");
+        transaction.commit();
+        return true;
+    }
+
+    public static class SubSettingsFragment extends PreferenceFragment {
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferenceScreen((PreferenceScreen) ((PreferenceFragment) getTargetFragment())
+                    .getPreferenceScreen().findPreference(rootKey));
+        }
     }
 
 }
