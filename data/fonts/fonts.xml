@@ -330,16 +330,16 @@
         <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted.ttf</font>
     </family>
     <family lang="zh-Hans">
-        <font weight="400" style="normal" ttcIndex="2">NotoSansCJK-Regular.ttc</font>
+        <font weight="400" style="normal" index="2">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="zh-Hant">
-        <font weight="400" style="normal" ttcIndex="3">NotoSansCJK-Regular.ttc</font>
+        <font weight="400" style="normal" index="3">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal" ttcIndex="0">NotoSansCJK-Regular.ttc</font>
+        <font weight="400" style="normal" index="0">NotoSansCJK-Regular.ttc</font>
     </family>
     <family lang="ko">
-        <font weight="400" style="normal" ttcIndex="1">NotoSansCJK-Regular.ttc</font>
+        <font weight="400" style="normal" index="1">NotoSansCJK-Regular.ttc</font>
     </family>
     <family>
         <font weight="400" style="normal">NanumGothic.ttf</font>
