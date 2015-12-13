@@ -180,10 +180,17 @@ public class StatusBarManager {
      * Expand the settings panel.
      */
     public void expandSettingsPanel() {
+        expandSettingsPanel(null);
+    }
+
+    /**
+     * Expand the settings panel and open a subPanel, pass null to just open the settings panel.
+     */
+    public void expandSettingsPanel(String subPanel) {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.expandSettingsPanel();
+                svc.expandSettingsPanel(subPanel);
             }
         } catch (RemoteException ex) {
             // system process is dead anyway.

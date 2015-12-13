@@ -128,6 +128,14 @@ public class NotificationManager
             = "android.app.action.INTERRUPTION_FILTER_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL
+            = "android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL";
+
+    /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
      *     Normal interruption filter.
      */

@@ -28,7 +28,7 @@ oneway interface IStatusBar
     void removeIcon(int index);
     void disable(int state1, int state2);
     void animateExpandNotificationsPanel();
-    void animateExpandSettingsPanel();
+    void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
     void setSystemUiVisibility(int vis, int mask);
     void topAppWindowChanged(boolean menuVisible);
