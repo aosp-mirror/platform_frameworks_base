@@ -710,11 +710,13 @@ class WindowStateAnimator {
 
         // Something is wrong and SurfaceFlinger will not like this, try to revert to sane values.
         if (mTmpSize.width() < 1) {
-            Slog.w(TAG, "Width of " + w + " is not positive " + mTmpSize.width());
+            if (!mWin.mLayoutNeeded) Slog.w(TAG,
+                    "Width of " + w + " is not positive " + mTmpSize.width());
             mTmpSize.right = mTmpSize.left + 1;
         }
         if (mTmpSize.height() < 1) {
-            Slog.w(TAG, "Height of " + w + " is not positive " + mTmpSize.height());
+            if (!mWin.mLayoutNeeded) Slog.w(TAG,
+                    "Height of " + w + " is not positive " + mTmpSize.height());
             mTmpSize.bottom = mTmpSize.top + 1;
         }
 
