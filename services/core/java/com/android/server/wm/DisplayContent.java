@@ -110,6 +110,8 @@ class DisplayContent {
 
     final DimLayerController mDimLayerController;
 
+    final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
+
     /**
      * @param display May not be null.
      * @param service You know.
@@ -410,6 +412,11 @@ class DisplayContent {
             // events to be intercepted and used to change focus. This would likely cause a
             // disappearance of the input method.
             inputMethod.getTouchableRegion(mTmpRegion);
+            mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
+        }
+        for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
+            WindowState win = mTapExcludedWindows.get(i);
+            win.getTouchableRegion(mTmpRegion);
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
         if (mTapDetector != null) {
