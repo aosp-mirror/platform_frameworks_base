@@ -529,7 +529,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.getBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, false)) {
             ReferenceCountedTrigger postHideStackAnimationTrigger =
-                    Tnew ReferenceCountedTrigger(this);
+                    new ReferenceCountedTrigger(this);
             postHideStackAnimationTrigger.increment();
             EventBus.getDefault().send(new ShowHistoryEvent(postHideStackAnimationTrigger));
             postHideStackAnimationTrigger.decrement();
