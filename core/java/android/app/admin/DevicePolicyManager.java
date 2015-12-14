@@ -40,8 +40,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.provider.ContactsContract.Directory;
+import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
 import android.util.Log;
@@ -56,14 +56,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
-import java.security.NoSuchAlgorithmException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -4677,6 +4677,17 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             return null;
+        }
+    }
+
+    /**
+     * Called by device owner to reboot the device.
+     */
+    public void reboot(@NonNull ComponentName admin) {
+        try {
+            mService.reboot(admin);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
         }
     }
 }

@@ -238,4 +238,5 @@ interface IDevicePolicyManager {
     boolean isManagedProfile(in ComponentName admin);
     boolean isSystemOnlyUser(in ComponentName admin);
     String getWifiMacAddress();
+    void reboot(in ComponentName admin);
 }

@@ -16,8 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import com.google.android.collect.Sets;
-
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
@@ -27,6 +25,8 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.TEXT;
+
+import com.google.android.collect.Sets;
 
 import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -1160,6 +1160,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         void powerManagerGoToSleep(long time, int reason, int flags) {
             mContext.getSystemService(PowerManager.class).goToSleep(time, reason, flags);
+        }
+
+        void powerManagerReboot(String reason) {
+            mContext.getSystemService(PowerManager.class).reboot(reason);
         }
 
         boolean systemPropertiesGetBoolean(String key, boolean def) {
@@ -6971,6 +6975,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         return UserManager.isSplitSystemUser() && callingUserId == UserHandle.USER_SYSTEM;
+    }
+
+    @Override
+    public void reboot(ComponentName admin) {
+        Preconditions.checkNotNull(admin);
+        // Make sure caller has DO.
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            mInjector.powerManagerReboot(PowerManager.REBOOT_REQUESTED_BY_DEVICE_OWNER);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
 }
