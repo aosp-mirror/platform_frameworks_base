@@ -49,6 +49,7 @@ class MtpDatabaseConstants {
     static final String COLUMN_STORAGE_ID = "storage_id";
     static final String COLUMN_OBJECT_HANDLE = "object_handle";
     static final String COLUMN_PARENT_DOCUMENT_ID = "parent_document_id";
+    static final String COLUMN_DOCUMENT_TYPE = "document_type";
     static final String COLUMN_ROW_STATE = "row_state";
 
     /**
@@ -83,6 +84,23 @@ class MtpDatabaseConstants {
      */
     static final int MAP_BY_NAME = 1;
 
+    /**
+     * Document that represents a MTP device.
+     * Note we have "device" document only when the device has multiple storage volumes. Otherwise
+     * we regard the single "storage" document as root.
+     */
+    static final int DOCUMENT_TYPE_DEVICE = 0;
+
+    /**
+     * Document that represents a MTP storage.
+     */
+    static final int DOCUMENT_TYPE_STORAGE = 1;
+
+    /**
+     * Document that represents a MTP object.
+     */
+    static final int DOCUMENT_TYPE_OBJECT = 2;
+
     static final String SELECTION_DOCUMENT_ID = Document.COLUMN_DOCUMENT_ID + " = ?";
     static final String SELECTION_ROOT_ID = Root.COLUMN_ROOT_ID + " = ?";
     static final String SELECTION_ROOT_DOCUMENTS =
@@ -98,6 +116,7 @@ class MtpDatabaseConstants {
             COLUMN_OBJECT_HANDLE + " INTEGER," +
             COLUMN_PARENT_DOCUMENT_ID + " INTEGER," +
             COLUMN_ROW_STATE + " INTEGER NOT NULL," +
+            COLUMN_DOCUMENT_TYPE + " INTEGER NOT NULL," +
             Document.COLUMN_MIME_TYPE + " TEXT," +
             Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
             Document.COLUMN_SUMMARY + " TEXT," +

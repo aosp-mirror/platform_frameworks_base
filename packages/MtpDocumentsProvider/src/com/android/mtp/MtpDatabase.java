@@ -22,7 +22,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -35,9 +34,10 @@ import android.provider.DocumentsContract.Root;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Database for MTP objects.
@@ -397,6 +397,7 @@ class MtpDatabase {
         values.putNull(COLUMN_OBJECT_HANDLE);
         values.putNull(COLUMN_PARENT_DOCUMENT_ID);
         values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
+        values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_STORAGE);
         values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
         values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
         values.putNull(Document.COLUMN_SUMMARY);
@@ -436,6 +437,7 @@ class MtpDatabase {
         values.put(COLUMN_OBJECT_HANDLE, info.getObjectHandle());
         values.put(COLUMN_PARENT_DOCUMENT_ID, parentId);
         values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
+        values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_OBJECT);
         values.put(Document.COLUMN_MIME_TYPE, mimeType);
         values.put(Document.COLUMN_DISPLAY_NAME, info.getName());
         values.putNull(Document.COLUMN_SUMMARY);
