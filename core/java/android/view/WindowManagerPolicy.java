@@ -446,6 +446,13 @@ public interface WindowManagerPolicy {
          */
         public void switchKeyboardLayout(int deviceId, int direction);
 
+        /**
+         * Switch the input method, to be precise, input method subtype.
+         *
+         * @param forwardDirection {@code true} to rotate in a forward direction.
+         */
+        public void switchInputMethod(boolean forwardDirection);
+
         public void shutdown(boolean confirm);
         public void rebootSafeMode(boolean confirm);
 

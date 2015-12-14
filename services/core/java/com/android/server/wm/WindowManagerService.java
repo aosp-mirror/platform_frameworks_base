@@ -186,6 +186,7 @@ import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
+import android.view.inputmethod.InputMethodManagerInternal;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -5293,6 +5294,16 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void switchKeyboardLayout(int deviceId, int direction) {
         mInputManager.switchKeyboardLayout(deviceId, direction);
+    }
+
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void switchInputMethod(boolean forwardDirection) {
+        final InputMethodManagerInternal inputMethodManagerInternal =
+                LocalServices.getService(InputMethodManagerInternal.class);
+        if (inputMethodManagerInternal != null) {
+            inputMethodManagerInternal.switchInputMethod(forwardDirection);
+        }
     }
 
     // Called by window manager policy.  Not exposed externally.
