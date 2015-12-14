@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"ప్రాముఖ్యత"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"బ్లాక్ చేయబడింది: ఈ నోటిఫికేషన్‌లను ఎప్పుడూ చూపదు"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"తక్కువ: నోటిఫికేషన్‌ల జాబితా దిగువ భాగంలో శబ్దం లేకుండా చూపుతుంది"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"సాధారణం: ఈ నోటిఫికేషన్‌లను శబ్దం లేకుండా చూపుతుంది"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఎంచుకోబడింది</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"ఇతరాలు"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
 </resources>

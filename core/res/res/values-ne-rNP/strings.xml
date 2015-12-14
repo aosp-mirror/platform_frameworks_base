@@ -1446,8 +1446,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"रोकिएको: यी सूचनाहरू कहिल्यै नदेखाउनुहोस्"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"कम: चुपचाप सूचना सूचीको फेदमा देखाउनुहोस्"</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"महत्त्व"</string>
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"रोकिएका: यी सूचनाहरू कहिल्यै नदेखाउनुहोस्"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"न्यून: चुपचाप सूचना सूचीको फेदमा देखाउनुहोस्"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"सामान्य: चुपचाप यी सूचनाहरू देखाउनुहोस्"</string>
     <string name="notification_importance_high" msgid="3152238637737215654">"उच्च: सूचना सूचीको शीर्षमा देखाउनुहोस् र आवाज निकाल्नुहोस्"</string>
     <string name="notification_importance_max" msgid="1153693080467904474">"जरुरी: स्क्रिनमा झलक्क हेर्नुहोस् र आवाज निकाल्नुहोस्"</string>
@@ -1516,4 +1517,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> चयन गरियो</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"विविध"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"तपाईंले यी सूचनाहरू महत्त्व सेट गर्नुहुन्छ।"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
 </resources>

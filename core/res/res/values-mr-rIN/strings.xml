@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपल्या प्रशासकाद्वारे अद्यतनित केले"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपल्या प्रशासकाद्वारे हटविले आहे"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"महत्त्व"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"अवरोधित केले: या सूचना कधीही दर्शवू नका"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"कमी: शांतपणे सूचना सूचीच्या तळाशी दर्शवा"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"सामान्य: या सूचना शांतपणे दर्शवा"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडले</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"संकीर्ण"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"आपण या सूचनांचे महत्त्व सेट केले."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
 </resources>

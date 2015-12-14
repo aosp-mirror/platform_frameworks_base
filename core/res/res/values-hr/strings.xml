@@ -1310,7 +1310,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ukloni"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Želite li pojačati zvuk iznad preporučene razine?\n\nDugotrajno slušanje glasne glazbe može vam oštetiti sluh."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Nastavite držati s dva prsta kako biste omogućili pristupačnost."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Dostupnost je omogućena."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"Pristupačnost je omogućena."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pristupačnost otkazana."</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutačni korisnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prebacivanje na korisnika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1449,6 +1449,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurira vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokirano: nikad ne prikazuj te obavijesti"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Nisko: tiho prikaži na dnu popisa obavijesti"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Uobičajeno: prikazuj te obavijesti tiho"</string>
@@ -1528,4 +1530,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> odabranih</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Razno"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

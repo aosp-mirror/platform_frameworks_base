@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Deur jou administrateur uitgevee"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Om batterylewe te help verbeter, verminder batterybespaarder jou toestel se werkverrigting en beperk vibrasie, liggingdienste en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer tensy jy hulle oopmaak nie.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel besig is om te laai."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Geblokkeer: Moet nooit hierdie kennisgewings wys nie"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Laag: Wys sonder klank aan die onderkant van die kennisgewinglys"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normaal: Wys hierdie kennisgewings sonder klank"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> gekies</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

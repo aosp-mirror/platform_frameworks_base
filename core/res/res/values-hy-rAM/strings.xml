@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ադմինիստրատորը թարմացրել է այն"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ադմինիստրատորը ջնջել է այն"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Մարտկոցի աշխատանքի ժամկետը երկարացնելու նպատակով, մարտկոցի էներգիայի խնայման գործառույթը սահմանափակում է սարքի աշխատանքը, թրթռոցը, տեղադրության ծառայությունները և հետնաշերտում աշխատող շատ գործընթացներ: Էլփոստը, հաղորդագրությունների փոխանակումը և տվյալների համաժամեցումից կախված այլ հավելվածները կարող են չթարմացվել, եթե դուք դրանք չգործարկեք:\n\nԵրբ ձեր սարքը լիցքավորվում է, մարտկոցի էներգիայի խնայման գործառույթն ինքնաշխատորեն անջատվում է:"</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Արգելափակված է. Երբեք չցուցադրել այս ծանուցումները"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Ցածր. Ցուցադրել ծանուցումների ցանկի ներքևում առանց ձայնային ազդանշանի"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Նորմալ. Ցուցադրել այս ծանուցումներն առանց ձայնային ազդանշանի"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Զանազան"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

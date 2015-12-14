@@ -1458,6 +1458,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Svarba"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Užblokuota: niekada nerodyti šių pranešimų"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Maža: tyliai rodyti pranešimų sąrašo apačioje"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Įprasta: tyliai rodyti šiuos pranešimus"</string>
@@ -1546,4 +1547,6 @@
       <item quantity="other">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Įvairūs"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Galite nustatyti šių pranešimų svarbą."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
 </resources>

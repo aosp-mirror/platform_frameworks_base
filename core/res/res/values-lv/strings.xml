@@ -1449,6 +1449,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izdzēsa jūsu administrators"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek samazināta ierīces veiktspēja un tiek ierobežota vibrācija, atrašanās vietu pakalpojumi un lielākā daļa fona datu. E-pasta, ziņojumapmaiņas un cita veida lietotnes, kuru darbības pamatā ir datu sinhronizācija, var netikt atjauninātas, ja tās neatverat.\n\nTiklīdz tiek sākta ierīces uzlāde, akumulatora jaudas taupīšanas režīms automātiski tiek izslēgts."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloķēts: nekad nerādīt šos paziņojumus"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Zemu: rādīt paziņojumu saraksta apakšdaļā bez skaņas signāla"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normāli: rādīt šos paziņojumus bez skaņas signāla"</string>
@@ -1528,4 +1530,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> atlasīti</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Dažādi"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

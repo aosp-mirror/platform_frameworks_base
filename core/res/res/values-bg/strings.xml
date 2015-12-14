@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Изтрито от администратора ви"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"С цел удължаване на живота на батерията режимът за запазването й намалява ефективността на устройството ви и ограничава вибрирането, услугите за местоположение и повечето данни на заден план. Приложенията за електронна поща, съобщения и др., които разчитат на синхронизиране, може да не се актуализират, освен ако не ги отворите.\n\nРежимът за запазване на батерията се изключва автоматично, когато устройството ви се зарежда."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Важност"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Блокирано: Тези известия никога да не се показват"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Маловажно: Показване без звуков сигнал в долната част на списъка с известия"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Нормално: Тези известия да се показват без звуков сигнал"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one">Избрахте <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Други"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Зададохте важността на тези известия."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Това е важно заради участващите хора."</string>
 </resources>

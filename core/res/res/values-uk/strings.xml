@@ -1458,6 +1458,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Видалив адміністратор"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Щоб подовжити час роботи акумулятора, функція заощадження заряду акумулятора знижує продуктивність пристрою, а також обмежує вібрацію, функції служб локації та передавання більшості фонових даних. Електронна пошта, чати й інші додатки, які синхронізуються, можуть не оновлюватися, доки ви їх не відкриєте.\n\nФункція заощадження заряду акумулятора автоматично вимикається під час заряджання пристрою."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Пріоритет"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Заблоковано: не показувати ці сповіщення"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Низький пріоритет: показувати ці сповіщення внизу списку без звукового сигналу"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Стандартний пріоритет: показувати ці сповіщення без звукового сигналу"</string>
@@ -1546,4 +1547,6 @@
       <item quantity="other">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Інше"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Ви вказуєте пріоритет цих сповіщень."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Важливе з огляду на учасників."</string>
 </resources>

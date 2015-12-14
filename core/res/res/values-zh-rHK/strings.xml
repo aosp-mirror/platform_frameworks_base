@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"重要性"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"已封鎖：永不顯示這些通知"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"低：以靜音方式顯示在通知清單底部"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"一般：以靜音方式顯示這些通知"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"您可以為這些通知設定重要性。"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及使用者。"</string>
 </resources>

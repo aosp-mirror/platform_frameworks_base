@@ -1458,6 +1458,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"חשיבות"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"חסימה: לעולם אל תציג הודעות אלה"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"נמוכה: הצג בתחתית רשימת ההודעות בלי להשמיע צליל"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"רגילה: הצג הודעות אלה בלי להשמיע צליל"</string>
@@ -1546,4 +1547,6 @@
       <item quantity="one">בחרת <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"שונות"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"אתה מגדיר את חשיבותן של הודעות אלה."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
 </resources>

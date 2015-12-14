@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Na-update ng iyong administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Na-delete ng iyong administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Upang matulungang pagbutihin ang tagal ng baterya, binabawasan ng pangtipid ng baterya ang pagganap ng iyong device at nililimitahan ang pag-vibrate, mga serbisyo ng lokasyon at karamihan sa data ng background. Maaaring hindi mag-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung buksan mo ang mga iyon.\n\nAwtomatikong nag-o-off ang pangtipid ng baterya kapag nagcha-charge ang iyong device."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Naka-block: Huwag kailanman ipakita ang mga notification na ito"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Mababa: Tahimik na ipakita sa ibaba ng listahan ng mga notification"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Tahimik na ipakita ang mga notification na ito"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Iba Pa"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

@@ -1440,10 +1440,12 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloklangan: bildirishnomalar hech qachon ko‘rsatilmasin"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"Past: bildirishnomalar ro‘yxatining pastida ovozsiz ko‘rsatilsin"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"Oddiy: bildirishnomalar ovozsiz ko‘rsatilsin"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"Yuqori: bildirishnomalar ro‘yxatining yuqorisida ovoz bilan ko‘rsatilsin"</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
+    <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloklangan: bu bildirishnomalar boshqa ko‘rsatilmasin"</string>
+    <string name="notification_importance_low" msgid="6447640449918427187">"Past: bildirishnomalar ro‘yxatining oxirida ovozsiz ko‘rsatilsin"</string>
+    <string name="notification_importance_default" msgid="7991157697609575271">"Oddiy: bu bildirishnomalar ovozsiz ko‘rsatilsin"</string>
+    <string name="notification_importance_high" msgid="3152238637737215654">"Yuqori: bildirishnomalar ro‘yxatining boshida ovoz bilan ko‘rsatilsin"</string>
     <string name="notification_importance_max" msgid="1153693080467904474">"Shoshilinch: barcha oynalar ustida signal ovozi bilan ko‘rsatilsin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
@@ -1510,4 +1512,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Boshqa belgilar"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

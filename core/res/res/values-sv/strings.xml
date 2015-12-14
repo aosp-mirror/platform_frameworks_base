@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Uppdaterat av administratören"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Paketet har raderats av administratören"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Relevans"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blockerad: Visa aldrig dessa aviseringar"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Låg: Visa längst ned i aviseringslistan – utan ljud"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Visa aviseringarna – utan ljud"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> har valts</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Du anger hur viktiga aviseringarna är."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Detta är viktigt på grund av personerna som deltar."</string>
 </resources>

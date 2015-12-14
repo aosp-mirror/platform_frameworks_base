@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Được cập nhật bởi quản trị viên của bạn"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Đã bị xóa bởi quản trị viên của bạn"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Mức độ quan trọng"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Đã chặn: Không bao giờ hiển thị các thông báo này"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Thấp: Hiển thị im lặng ở cuối danh sách thông báo"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Bình thường: Hiển thị im lặng các thông báo này"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one">Đã chọn <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Khác"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Bạn đặt tầm quan trọng của các thông báo này."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Thông báo này quan trọng vì những người có liên quan."</string>
 </resources>

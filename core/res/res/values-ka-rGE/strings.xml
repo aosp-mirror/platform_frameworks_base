@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის შესრულებას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელ-ფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპლიკაციების განახლება არ მოხდება მათ გახსნეამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"დაბლოკილი: ეს შეტყობინებები აღარასოდეს გამოჩნდება"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"დაბალი: ეს შეტყობინებები სიის ბოლოში, უხმოდ გამოჩნდება"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"ნორმალური: ეს შეტყობინებები უხმოდ გამოჩნდება"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> შერჩეული</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"სხვადასხვა"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

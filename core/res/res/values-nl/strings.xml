@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Verwijderd door je beheerder"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Accubesparing beperkt de prestaties van je apparaat, de trilstand, locatieservices en de meeste achtergrondgegevens om de gebruiksduur van de accu te verlengen.\n\nAccubesparing wordt automatisch uitgeschakeld terwijl je apparaat wordt opgeladen."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Belang"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Geblokkeerd: deze meldingen nooit weergeven"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Laag: zonder geluid onder aan de lijst met meldingen weergeven"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normaal: deze meldingen zonder geluid weergeven"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> geselecteerd</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diversen"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Je stelt het belang van deze meldingen in."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Dit is belangrijk vanwege de betrokken mensen."</string>
 </resources>

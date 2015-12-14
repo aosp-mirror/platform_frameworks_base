@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado pelo administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a autonomia da bateria, a poupança de bateria reduz o desempenho do seu dispositivo e limita a vibração, os serviços de localização e a maioria dos dados em segundo plano. O email, as mensagens e outras aplicações que dependem da sincronização não podem ser atualizados exceto se os abrir.\n\nA poupança de bateria desliga-se automaticamente quando o dispositivo está a carregar."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Importância"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloqueado: nunca mostrar estas notificações"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Baixo: mostrar na parte inferior da lista de notificações sem som"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: mostrar estas notificações sem som"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selecionado</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diversos"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Definiu a importância destas notificações."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"É importante devido às pessoas envolvidas."</string>
 </resources>
