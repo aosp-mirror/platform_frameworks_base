@@ -564,6 +564,7 @@ public class ZenModeHelper {
 
     private boolean evaluateZenMode(String reason, boolean setRingerMode) {
         if (DEBUG) Log.d(TAG, "evaluateZenMode");
+        final int zenBefore = mZenMode;
         final int zen = computeZenMode();
         ZenLog.traceSetZenMode(zen, reason);
         mZenMode = zen;
@@ -573,7 +574,7 @@ public class ZenModeHelper {
             applyZenToRingerMode();
         }
         applyRestrictions();
-        if (zen != mZenMode) {
+        if (zen != zenBefore) {
             mHandler.postDispatchOnZenModeChanged();
         }
         return true;

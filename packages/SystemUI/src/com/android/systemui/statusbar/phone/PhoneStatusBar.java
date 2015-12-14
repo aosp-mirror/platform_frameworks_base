@@ -2162,7 +2162,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     animateExpandNotificationsPanel();
                     break;
                 case MSG_OPEN_SETTINGS_PANEL:
-                    animateExpandSettingsPanel();
+                    animateExpandSettingsPanel((String) m.obj);
                     break;
                 case MSG_CLOSE_PANELS:
                     animateCollapsePanels();
@@ -2305,7 +2305,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void animateExpandSettingsPanel() {
+    public void animateExpandSettingsPanel(String subPanel) {
         if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if (!panelsEnabled()) {
             return;
@@ -2314,6 +2314,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Settings are not available in setup
         if (!mUserSetup) return;
 
+
+        if (subPanel != null) {
+            mQSPanel.openDetails(subPanel);
+        }
         mNotificationPanel.expandWithQs();
 
         if (false) postStartTracing();

@@ -154,6 +154,20 @@ public class QSPanel extends FrameLayout implements Tunable {
         }
     }
 
+    public void openDetails(String subPanel) {
+        QSTile<?> tile = getTile(subPanel);
+        showDetailAdapter(true, tile.getDetailAdapter(), new int[] {getWidth() / 2, 0});
+    }
+
+    private QSTile<?> getTile(String subPanel) {
+        for (int i = 0; i < mRecords.size(); i++) {
+            if (subPanel.equals(mRecords.get(i).tile.getTileSpec())) {
+                return mRecords.get(i).tile;
+            }
+        }
+        return mHost.createTile(subPanel);
+    }
+
     protected void createCustomizePanel() {
         mCustomizePanel = (QSCustomizer) LayoutInflater.from(mContext)
                 .inflate(R.layout.qs_customize_panel, null);

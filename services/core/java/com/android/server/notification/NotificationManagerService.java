@@ -880,6 +880,9 @@ public class NotificationManagerService extends SystemService {
             @Override
             void onZenModeChanged() {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
+                getContext().sendBroadcastAsUser(
+                        new Intent(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL),
+                        UserHandle.ALL, android.Manifest.permission.MANAGE_NOTIFICATIONS);
                 synchronized(mNotificationList) {
                     updateInterruptionFilterLocked();
                 }

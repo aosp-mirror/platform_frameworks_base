@@ -135,7 +135,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandSettingsPanel() {
+    public void animateExpandSettingsPanel(String subPanel) {
     }
 
     @Override

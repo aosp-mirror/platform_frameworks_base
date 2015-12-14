@@ -39,7 +39,7 @@ interface IStatusBarService
     void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
-    void expandSettingsPanel();
+    void expandSettingsPanel(String subPanel);
     void setCurrentUser(int newUserId);
 
     // ---- Methods below are for use by the status bar policy services ----

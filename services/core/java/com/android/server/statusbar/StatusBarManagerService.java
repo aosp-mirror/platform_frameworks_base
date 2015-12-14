@@ -216,12 +216,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void expandSettingsPanel() {
+    public void expandSettingsPanel(String subPanel) {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateExpandSettingsPanel();
+                mBar.animateExpandSettingsPanel(subPanel);
             } catch (RemoteException ex) {
             }
         }
