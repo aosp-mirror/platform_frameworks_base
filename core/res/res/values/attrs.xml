@@ -2791,6 +2791,56 @@ i
             <flag name="end" value="0x20" />
         </attr>
 
+        <attr name="pointerShape">
+            <!-- Null icon, pointer becomes invisible. -->
+            <enum name="none" value="0" />
+            <!-- The default icon of arrow pointer. -->
+            <enum name="arrow" value="1000" />
+            <!-- Pointer icon indicating context-menu will appear. -->
+            <enum name="context_menu" value="1001" />
+            <!-- Pointer icon of a hand with the index finger. -->
+            <enum name="hand" value="1002" />
+            <!-- Pointer icon indicating help. -->
+            <enum name="help" value="1003" />
+            <!-- Pointer icon indicating something is going on and waiting. -->
+            <enum name="wait" value="1004" />
+            <!-- Pointer icon for cell and grid. -->
+            <enum name="cell" value="1006" />
+            <!-- Pointer icon of crosshair, indicating to spot a location. -->
+            <enum name="crosshair" value="1007" />
+            <!-- Pointer icon of I-beam, usually for text. -->
+            <enum name="text" value="1008" />
+            <!-- Pointer icon of I-beam with 90-degree rotated, for vertical text. -->
+            <enum name="vertical_text" value="1009" />
+            <!-- Pointer icon of 'alias', indicating an alias of/shortcut to something is to be
+                 created. -->
+            <enum name="alias" value="1010" />
+            <!-- Pointer icon of 'copy', used for drag/drop. -->
+            <enum name="copy" value="1011" />
+            <!-- Pointer icon of 'no-drop', indicating the drop will not be accepted at the
+                 current location. -->
+            <enum name="no_drop" value="1012" />
+            <!-- Pointer icon of four-way arrows, indicating scrolling all direction. -->
+            <enum name="all_scroll" value="1013" />
+            <!-- Pointer icon of horizontal double arrow, indicating horizontal resize. -->
+            <enum name="horizontal_double_arrow" value="1014" />
+            <!-- Pointer icon of vertical double arrow, indicating vertical resize. -->
+            <enum name="vertical_double_arrow" value="1015" />
+            <!-- Pointer icon of diagonal double arrow, starting from top-right to bottom-left.
+                 Indicating freeform resize. -->
+            <enum name="top_right_diagonal_double_arrow" value="1016" />
+            <!-- Pointer icon of diagonal double arrow, starting from top-left to bottom-right.
+                 Indicating freeform resize. -->
+            <enum name="top_left_diagonal_double_arrow" value="1017" />
+            <!-- Pointer icon indicating zoom-in. -->
+            <enum name="zoom_in" value="1018" />
+            <!-- Pointer icon indicating zoom-out. -->
+            <enum name="zoom_out" value="1019" />
+            <!-- Pointer icon of a hand sign to grab something. -->
+            <enum name="grab" value="1020" />
+            <!-- Pointer icon of a hand sign while grabbing something. -->
+            <enum name="grabbing" value="1021" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
