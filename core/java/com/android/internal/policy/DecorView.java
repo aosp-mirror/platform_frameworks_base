@@ -17,11 +17,13 @@
 package com.android.internal.policy;
 
 import com.android.internal.R;
+import com.android.internal.policy.PhoneWindow.PhoneWindowMenuCallback;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuHelper;
+import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorCaptionView;
@@ -684,9 +686,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
 
         // Reuse the context menu builder.
+        final PhoneWindowMenuCallback callback = mWindow.mContextMenuCallback;
         if (mWindow.mContextMenu == null) {
             mWindow.mContextMenu = new ContextMenuBuilder(getContext());
-            mWindow.mContextMenu.setCallback(mWindow.mContextMenuCallback);
+            mWindow.mContextMenu.setCallback(callback);
         } else {
             mWindow.mContextMenu.clearAll();
         }
@@ -698,9 +701,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             helper = mWindow.mContextMenu.showDialog(originalView, originalView.getWindowToken());
         }
 
-        if (helper != null) {
-            helper.setPresenterCallback(mWindow.mContextMenuCallback);
-        }
+        // If it's a dialog, the callback needs to handle showing sub-menus.
+        // Either way, the callback is required for propagating selection to
+        // Context.onContextMenuItemSelected().
+        callback.setShowDialogForSubmenu(!isPopup);
+        helper.setPresenterCallback(callback);
 
         mWindow.mContextMenuHelper = helper;
         return helper != null;
