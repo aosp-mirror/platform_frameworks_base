@@ -217,7 +217,7 @@
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"העברת המסך הופסקה."</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"מצב עבודה כבוי."</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"מצב עבודה מופעל."</string>
-    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"מצב עבודה כובה."</string>
+    <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"מצב עבודה הושבת."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"מצב עבודה הופעל."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"בהירות תצוגה"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"‏השימוש בנתוני 2G-3G מושהה"</string>
