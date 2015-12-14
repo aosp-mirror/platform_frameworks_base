@@ -129,6 +129,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
+import com.android.server.pm.UserManagerService;
 import com.android.server.pm.UserRestrictionsUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -426,6 +427,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_USER_RESTRICTIONS = "user-restrictions";
         private static final String TAG_SHORT_SUPPORT_MESSAGE = "short-support-message";
         private static final String TAG_LONG_SUPPORT_MESSAGE = "long-support-message";
+        private static final String TAG_PARENT_ADMIN = "parent-admin";
 
         final DeviceAdminInfo info;
 
@@ -478,6 +480,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
         boolean requireAutoTime = false; // Can only be set by a device owner.
 
+        ActiveAdmin parentAdmin;
+        final boolean isParent;
+
         static class TrustAgentInfo {
             public PersistableBundle options;
             TrustAgentInfo(PersistableBundle bundle) {
@@ -515,8 +520,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String shortSupportMessage = null;
         String longSupportMessage = null;
 
-        ActiveAdmin(DeviceAdminInfo _info) {
+        ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
+            isParent = parent;
+        }
+
+        ActiveAdmin getParentActiveAdmin() {
+            if (parentAdmin == null && !isParent) {
+                parentAdmin = new ActiveAdmin(info, /* parent */ true);
+            }
+            return parentAdmin;
         }
 
         int getUid() { return info.getActivityInfo().applicationInfo.uid; }
@@ -704,6 +717,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.text(longSupportMessage);
                 out.endTag(null, TAG_LONG_SUPPORT_MESSAGE);
             }
+            if (parentAdmin != null) {
+                out.startTag(null, TAG_PARENT_ADMIN);
+                parentAdmin.writeToXml(out);
+                out.endTag(null, TAG_PARENT_ADMIN);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -831,6 +849,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     } else {
                         Log.w(LOG_TAG, "Missing text when loading long support message");
                     }
+                } else if (TAG_PARENT_ADMIN.equals(tag)) {
+                    parentAdmin = new ActiveAdmin(info, /* parent */ true);
+                    parentAdmin.readFromXml(parser);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -2014,7 +2035,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                     + userHandle);
                         }
                         if (dai != null) {
-                            ActiveAdmin ap = new ActiveAdmin(dai);
+                            ActiveAdmin ap = new ActiveAdmin(dai, /* parent */ false);
                             ap.readFromXml(parser);
                             policy.mAdminMap.put(ap.info.getComponent(), ap);
                         }
@@ -2405,7 +2426,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         && getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null) {
                     throw new IllegalArgumentException("Admin is already added");
                 }
-                ActiveAdmin newAdmin = new ActiveAdmin(info);
+                ActiveAdmin newAdmin = new ActiveAdmin(info, /* parent */ false);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
                 final int N = policy.mAdminList.size();
@@ -2540,8 +2561,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private boolean isAdminApiLevelPreN(@NonNull ComponentName who, int userHandle) {
+        DeviceAdminInfo adminInfo = findAdmin(who, userHandle, false);
+        return adminInfo.getActivityInfo().applicationInfo.targetSdkVersion
+                < Build.VERSION_CODES.N;
+    }
+
     @Override
-    public void setPasswordQuality(ComponentName who, int quality) {
+    public void setPasswordQuality(ComponentName who, int quality, boolean parent) {
         if (!mHasFeature) {
             return;
         }
@@ -2552,6 +2579,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (parent) {
+                ap = ap.getParentActiveAdmin();
+            }
             if (ap.passwordQuality != quality) {
                 ap.passwordQuality = quality;
                 saveSettingsLocked(userHandle);
@@ -2560,7 +2590,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public int getPasswordQuality(ComponentName who, int userHandle) {
+    public int getPasswordQuality(ComponentName who, int userHandle, boolean parent) {
         if (!mHasFeature) {
             return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         }
@@ -2570,18 +2600,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+                if (parent && admin != null) {
+                    admin = admin.getParentActiveAdmin();
+                }
                 return admin != null ? admin.passwordQuality : mode;
             }
 
-            // Return strictest policy for this user and profiles that are visible from this user.
-            List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
-            for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
+            if (LockPatternUtils.isSeparateWorkChallengeEnabled() && !parent) {
+                // If a Work Challenge is in use, only return its restrictions.
+                DevicePolicyData policy = getUserDataUnchecked(userHandle);
                 final int N = policy.mAdminList.size();
-                for (int i=0; i<N; i++) {
+                for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
                     if (mode < admin.passwordQuality) {
                         mode = admin.passwordQuality;
+                    }
+                }
+            } else {
+                // Return strictest policy for this user and profiles that are visible from this
+                // user that do not use a separate work challenge.
+                // TODO: When there are separate parent restrictions the profile should just
+                // obey its own.
+                List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
+                for (UserInfo userInfo : profiles) {
+                    // Only aggregate data for the parent profile plus the non-work challenge
+                    // enabled profiles.
+                    if (!(userInfo.isManagedProfile()
+                            && LockPatternUtils.isSeparateWorkChallengeEnabled())) {
+                        DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
+                        final int N = policy.mAdminList.size();
+                        for (int i = 0; i < N; i++) {
+                            ActiveAdmin admin = policy.mAdminList.get(i);
+                            if (mode < admin.passwordQuality) {
+                                mode = admin.passwordQuality;
+                            }
+                        }
                     }
                 }
             }
@@ -3143,7 +3196,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isActivePasswordSufficient(int userHandle) {
+    public boolean isActivePasswordSufficient(int userHandle, boolean parent) {
         if (!mHasFeature) {
             return true;
         }
@@ -3155,8 +3208,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-            if (policy.mActivePasswordQuality < getPasswordQuality(null, userHandle)
+            ActiveAdmin admin =
+                    getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            ComponentName adminComponentName = admin.info.getComponent();
+            // TODO: Include the Admin sdk level check in LockPatternUtils check.
+            ComponentName who = !isAdminApiLevelPreN(adminComponentName, userHandle)
+                    && LockPatternUtils.isSeparateWorkChallengeEnabled()
+                        ? adminComponentName : null;
+            if (policy.mActivePasswordQuality < getPasswordQuality(who, userHandle, parent)
                     || policy.mActivePasswordLength < getPasswordMinimumLength(null, userHandle)) {
                 return false;
             }
@@ -3321,7 +3380,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             }
-            quality = getPasswordQuality(null, userHandle);
+            quality = getPasswordQuality(null, userHandle, false);
             if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 int realQuality = LockPatternUtils.computePasswordQuality(password);
                 if (realQuality < quality

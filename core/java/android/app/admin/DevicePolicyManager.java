@@ -88,13 +88,15 @@ public class DevicePolicyManager {
 
     private final Context mContext;
     private final IDevicePolicyManager mService;
+    private boolean mParentInstance;
 
     private static final String REMOTE_EXCEPTION_MESSAGE =
             "Failed to talk with device policy manager service";
 
-    private DevicePolicyManager(Context context) {
+    private DevicePolicyManager(Context context, boolean parentInstance) {
         this(context, IDevicePolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.DEVICE_POLICY_SERVICE)));
+        mParentInstance = parentInstance;
     }
 
     /** @hide */
@@ -106,7 +108,7 @@ public class DevicePolicyManager {
 
     /** @hide */
     public static DevicePolicyManager create(Context context) {
-        DevicePolicyManager me = new DevicePolicyManager(context);
+        DevicePolicyManager me = new DevicePolicyManager(context, false);
         return me.mService != null ? me : null;
     }
 
@@ -1031,7 +1033,7 @@ public class DevicePolicyManager {
     public void setPasswordQuality(@NonNull ComponentName admin, int quality) {
         if (mService != null) {
             try {
-                mService.setPasswordQuality(admin, quality);
+                mService.setPasswordQuality(admin, quality, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1052,7 +1054,7 @@ public class DevicePolicyManager {
     public int getPasswordQuality(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordQuality(admin, userHandle);
+                return mService.getPasswordQuality(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1622,7 +1624,7 @@ public class DevicePolicyManager {
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
             try {
-                return mService.isActivePasswordSufficient(myUserId());
+                return mService.isActivePasswordSufficient(myUserId(), mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1791,6 +1793,9 @@ public class DevicePolicyManager {
      * not acceptable for the current constraints or if the user has not been decrypted yet.
      */
     public boolean resetPassword(String password, int flags) {
+        if (mParentInstance) {
+            throw new SecurityException("Reset password does not work across profiles.");
+        }
         if (mService != null) {
             try {
                 return mService.resetPassword(password, flags);
@@ -4926,5 +4931,24 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Obtains a {@link DevicePolicyManager} whose calls act on the parent profile.
+     *
+     * <p> Note only some methods will work on the parent Manager.
+     *
+     * @return a new instance of {@link DevicePolicyManager} that acts on the parent profile.
+     */
+    public DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
+        try {
+            if (!mService.isManagedProfile(admin)) {
+                throw new SecurityException("The current user does not have a parent profile.");
+            }
+            return new DevicePolicyManager(mContext, true);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            return null;
+        }
     }
 }

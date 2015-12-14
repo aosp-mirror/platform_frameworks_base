@@ -35,8 +35,8 @@ import java.util.List;
  * {@hide}
  */
 interface IDevicePolicyManager {
-    void setPasswordQuality(in ComponentName who, int quality);
-    int getPasswordQuality(in ComponentName who, int userHandle);
+    void setPasswordQuality(in ComponentName who, int quality, boolean parent);
+    int getPasswordQuality(in ComponentName who, int userHandle, boolean parent);
 
     void setPasswordMinimumLength(in ComponentName who, int length);
     int getPasswordMinimumLength(in ComponentName who, int userHandle);
@@ -67,7 +67,7 @@ interface IDevicePolicyManager {
 
     long getPasswordExpiration(in ComponentName who, int userHandle);
 
-    boolean isActivePasswordSufficient(int userHandle);
+    boolean isActivePasswordSufficient(int userHandle, boolean parent);
     int getCurrentFailedPasswordAttempts(int userHandle);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle);
 

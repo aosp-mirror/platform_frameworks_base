@@ -5764,6 +5764,7 @@ package android.app.admin {
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
     method public boolean getPackageSuspended(android.content.ComponentName, java.lang.String);
+    method public android.app.admin.DevicePolicyManager getParentProfileInstance(android.content.ComponentName);
     method public long getPasswordExpiration(android.content.ComponentName);
     method public long getPasswordExpirationTimeout(android.content.ComponentName);
     method public int getPasswordHistoryLength(android.content.ComponentName);
