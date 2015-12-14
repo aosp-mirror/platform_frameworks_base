@@ -27,7 +27,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.IntProperty;
 import android.util.Log;
 import android.util.Property;
@@ -91,12 +90,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     private final static String TAG = "TaskStackView";
     private final static boolean DEBUG = false;
-
-    private final static String KEY_SAVED_STATE_SUPER = "saved_instance_state_super";
-    private final static String KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE =
-            "saved_instance_state_layout_focused_state";
-    private final static String KEY_SAVED_STATE_LAYOUT_STACK_SCROLL =
-            "saved_instance_state_layout_stack_scroll";
 
     // The thresholds at which to show/hide the history button.
     private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
@@ -832,24 +825,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
         }
-    }
-
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Bundle savedState = new Bundle();
-        savedState.putParcelable(KEY_SAVED_STATE_SUPER, super.onSaveInstanceState());
-        savedState.putFloat(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE, mLayoutAlgorithm.getFocusState());
-        savedState.putFloat(KEY_SAVED_STATE_LAYOUT_STACK_SCROLL, mStackScroller.getStackScroll());
-        return super.onSaveInstanceState();
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        Bundle savedState = (Bundle) state;
-        super.onRestoreInstanceState(savedState.getParcelable(KEY_SAVED_STATE_SUPER));
-
-        mLayoutAlgorithm.setFocusState(savedState.getFloat(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE));
-        mStackScroller.setStackScroll(savedState.getFloat(KEY_SAVED_STATE_LAYOUT_STACK_SCROLL));
     }
 
     @Override
