@@ -408,34 +408,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         MtpDocumentsProvider.AUTHORITY, "1")));
     }
 
-    @MediumTest
-    public void testPauseAndResume() throws Exception {
-        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
-        mMtpManager.addValidDevice(0);
-        mProvider.openDevice(0);
-        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")});
-
-        {
-            final Cursor cursor = mProvider.queryRoots(
-                    strings(DocumentsContract.Root.COLUMN_ROOT_ID));
-            cursor.moveToNext();
-            assertEquals(1, cursor.getInt(0));
-        }
-
-        mProvider.shutdown();
-        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
-
-        {
-            // We can still fetch roots after relaunching the provider.
-            final Cursor cursor = mProvider.queryRoots(
-                    strings(DocumentsContract.Root.COLUMN_ROOT_ID));
-            assertEquals(1, cursor.getCount());
-            cursor.moveToNext();
-            assertEquals(1, cursor.getInt(0));
-            assertEquals(1, mMtpManager.getOpenedDeviceIds().length);
-        }
-    }
-
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();

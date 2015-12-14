@@ -293,19 +293,11 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     /**
-     * Reopens MTP devices based on database state.
+     * Clears MTP identifier in the database.
      */
     private void resume() {
         synchronized (mDeviceListLock) {
             mDatabase.getMapper().clearMapping();
-            final int[] ids = mDatabase.getDeviceIds();
-            for (final int id : ids) {
-                try {
-                    openDevice(id);
-                } catch (IOException exception) {
-                    mDatabase.removeDeviceRows(id);
-                }
-            }
         }
     }
 
