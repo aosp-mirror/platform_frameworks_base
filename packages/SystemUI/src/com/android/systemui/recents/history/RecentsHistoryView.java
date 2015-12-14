@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.history;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -30,18 +29,9 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.views.TaskView;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * A list of the recent tasks that are not in the stack.
@@ -175,27 +165,8 @@ public class RecentsHistoryView extends LinearLayout {
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
-        super.onAttachedToWindow();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        EventBus.getDefault().unregister(this);
-    }
-
-    @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         setSystemInsets(insets.getSystemWindowInsets());
         return insets;
-    }
-
-    /**** EventBus Events ****/
-
-    public final void onBusEvent(PackagesChangedEvent event) {
-        mAdapter.removeTasks(event.packageName, event.userId);
     }
 }
