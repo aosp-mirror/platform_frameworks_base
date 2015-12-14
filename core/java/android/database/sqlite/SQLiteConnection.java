@@ -26,6 +26,7 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
+import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Printer;
@@ -1330,6 +1331,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     }
                 }
                 operation.mCookie = newOperationCookieLocked(index);
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_DATABASE)) {
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_DATABASE, operation.getTraceMethodName(),
+                            operation.mCookie);
+                }
                 mIndex = index;
                 return operation.mCookie;
             }
@@ -1367,6 +1372,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private boolean endOperationDeferLogLocked(int cookie) {
             final Operation operation = getOperationLocked(cookie);
             if (operation != null) {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_DATABASE)) {
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_DATABASE, operation.getTraceMethodName(),
+                            operation.mCookie);
+                }
                 operation.mEndTime = System.currentTimeMillis();
                 operation.mFinished = true;
                 return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
@@ -1439,6 +1448,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private static final class Operation {
+        // Trim all SQL statements to 256 characters inside the trace marker.
+        // This limit gives plenty of context while leaving space for other
+        // entries in the trace buffer (and ensures atrace doesn't truncate the
+        // marker for us, potentially losing metadata in the process).
+        private static final int MAX_TRACE_METHOD_NAME_LEN = 256;
+
         public long mStartTime;
         public long mEndTime;
         public String mKind;
@@ -1490,6 +1505,13 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 return "running";
             }
             return mException != null ? "failed" : "succeeded";
+        }
+
+        private String getTraceMethodName() {
+            String methodName = mKind + " " + mSql;
+            if (methodName.length() > MAX_TRACE_METHOD_NAME_LEN)
+                return methodName.substring(0, MAX_TRACE_METHOD_NAME_LEN);
+            return methodName;
         }
 
         private String getFormattedStartTime() {
