@@ -3124,6 +3124,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeStack_" + stackId);
         mWindowManager.deferSurfaceLayout();
         try {
+
+            if (bounds != null && mWindowManager.isFullscreenBounds(stackId, bounds)) {
+                // The bounds passed in corresponds to the fullscreen bounds which we normally
+                // represent with null. Go ahead and set it to null so that all tasks configuration
+                // can have the right fullscreen state.
+                bounds = null;
+            }
+
             ActivityRecord r = stack.topRunningActivityLocked();
 
             mTmpBounds.clear();

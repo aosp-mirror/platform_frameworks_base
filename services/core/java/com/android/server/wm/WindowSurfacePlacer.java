@@ -96,6 +96,7 @@ class WindowSurfacePlacer {
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     private final Rect mTmpStartRect = new Rect();
+    private final Rect mTmpContentRect = new Rect();
 
     // Set to true when the display contains content to show the user.
     // When false, the display manager may choose to mirror or blank the display.
@@ -862,8 +863,8 @@ class WindowSurfacePlacer {
             mService.mScreenRect.set(0, 0, dw, dh);
         }
 
-        mService.mPolicy.getContentRectLw(mService.mTmpContentRect);
-        displayContent.resize(mService.mTmpContentRect);
+        mService.mPolicy.getContentRectLw(mTmpContentRect);
+        displayContent.resize(mTmpContentRect);
 
         int seq = mService.mLayoutSeq+1;
         if (seq < 0) seq = 0;

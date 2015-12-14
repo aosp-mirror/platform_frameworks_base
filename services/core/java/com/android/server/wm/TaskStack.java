@@ -144,6 +144,14 @@ public class TaskStack implements DimLayer.DimLayerUser {
         return true;
     }
 
+    boolean isFullscreenBounds(Rect bounds) {
+        if (mDisplayContent == null || bounds == null) {
+            return true;
+        }
+        mDisplayContent.getLogicalDisplayRect(mTmpRect);
+        return mTmpRect.equals(bounds);
+    }
+
     private boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
         int rotation = Surface.ROTATION_0;

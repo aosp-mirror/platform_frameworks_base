@@ -458,7 +458,6 @@ public class WindowManagerService extends IWindowManager.Stub
     EmulatorDisplayOverlay mEmulatorDisplayOverlay;
 
     final float[] mTmpFloats = new float[9];
-    final Rect mTmpContentRect = new Rect();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -4826,6 +4825,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             bounds.setEmpty();
+        }
+    }
+
+    /** Returns true if the input bounds corresponds to the fullscreen bounds the stack is on. */
+    public boolean isFullscreenBounds(int stackId, Rect bounds) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null || bounds == null) {
+                return true;
+            }
+            return stack.isFullscreenBounds(bounds);
         }
     }
 
