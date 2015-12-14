@@ -2813,8 +2813,17 @@ class MountService extends IMountService.Stub
 
     @Override
     public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
-        // TODO: Invoke vold to mount app fuse.
-        throw new UnsupportedOperationException();
+        try {
+            final NativeDaemonEvent event =
+                    mConnector.execute("appfuse", "mount", Binder.getCallingUid(), name);
+            if (event.getFileDescriptors() == null) {
+                Log.e(TAG, "AppFuse FD from vold is null.");
+                return null;
+            }
+            return new ParcelFileDescriptor(event.getFileDescriptors()[0]);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
     }
 
     @Override
