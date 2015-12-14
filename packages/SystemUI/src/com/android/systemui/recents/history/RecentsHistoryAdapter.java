@@ -110,7 +110,9 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         }
     }
 
+    private Context mContext;
     private LayoutInflater mLayoutInflater;
+    private final List<Task> mTasks = new ArrayList<>();
     private final List<Row> mRows = new ArrayList<>();
 
     public RecentsHistoryAdapter(Context context) {
@@ -121,6 +123,10 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
      * Updates this adapter with the given tasks.
      */
     public void updateTasks(Context context, List<Task> tasks) {
+        mContext = context;
+        mTasks.clear();
+        mTasks.addAll(tasks);
+
         final Locale l = context.getResources().getConfiguration().locale;
         final String dateFormatStr = DateFormat.getBestDateTimePattern(l, "EEEEMMMMd");
         final List<Task> tasksMostRecent = new ArrayList<>(tasks);
@@ -142,6 +148,24 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             mRows.add(new TaskRow(task));
         }
         notifyDataSetChanged();
+    }
+
+    /**
+     * Removes historical tasks beloning to the specified package and user.
+     */
+    public void removeTasks(String packageName, int userId) {
+        boolean packagesRemoved = false;
+        for (int i = mTasks.size() - 1; i >= 0; i--) {
+            Task task = mTasks.get(i);
+            String taskPackage = task.key.getComponent().getPackageName();
+            if (task.key.userId == userId && taskPackage.equals(packageName)) {
+                mTasks.remove(i);
+                packagesRemoved = true;
+            }
+        }
+        if (packagesRemoved) {
+            updateTasks(mContext, new ArrayList<Task>(mTasks));
+        }
     }
 
     @Override
