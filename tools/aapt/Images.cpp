@@ -1095,13 +1095,6 @@ static void write_png(const char* imageName,
     analyze_image(imageName, imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
                   &paletteEntries, &hasTransparency, &color_type, outRows);
 
-    // If the image is a 9-patch, we need to preserve it as a ARGB file to make
-    // sure the pixels will not be pre-dithered/clamped until we decide they are
-    if (imageInfo.is9Patch && (color_type == PNG_COLOR_TYPE_RGB ||
-            color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)) {
-        color_type = PNG_COLOR_TYPE_RGB_ALPHA;
-    }
-
     if (kIsDebug) {
         switch (color_type) {
         case PNG_COLOR_TYPE_PALETTE:
@@ -1180,18 +1173,11 @@ static void write_png(const char* imageName,
         }
 
         for (int i = 0; i < chunk_count; i++) {
-            unknowns[i].location = PNG_HAVE_PLTE;
+            unknowns[i].location = PNG_HAVE_IHDR;
         }
         png_set_keep_unknown_chunks(write_ptr, PNG_HANDLE_CHUNK_ALWAYS,
                                     chunk_names, chunk_count);
         png_set_unknown_chunks(write_ptr, write_info, unknowns, chunk_count);
-#if PNG_LIBPNG_VER < 10600
-        /* Deal with unknown chunk location bug in 1.5.x and earlier */
-        png_set_unknown_chunk_location(write_ptr, write_info, 0, PNG_HAVE_PLTE);
-        if (imageInfo.haveLayoutBounds) {
-            png_set_unknown_chunk_location(write_ptr, write_info, 1, PNG_HAVE_PLTE);
-        }
-#endif
     }
 
 
