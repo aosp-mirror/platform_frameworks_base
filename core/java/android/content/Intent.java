@@ -4433,6 +4433,13 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 0x00002000;
 
     /**
+     * This flag is only used in the multi-window mode. The new activity will be displayed on
+     * the other side than the one that is launching it. This can only be used in conjunction with
+     * {@link #FLAG_ACTIVITY_NEW_TASK}.
+     */
+    public static final int FLAG_ACTIVITY_LAUNCH_TO_SIDE = 0x00001000;
+
+    /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
      */
