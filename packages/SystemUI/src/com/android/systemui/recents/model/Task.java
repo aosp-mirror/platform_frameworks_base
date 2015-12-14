@@ -26,6 +26,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -36,7 +37,7 @@ public class Task {
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
-        public void onTaskDataLoaded();
+        public void onTaskDataLoaded(Task task);
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
         /* Notifies when a task's stack id has changed. */
@@ -110,7 +111,7 @@ public class Task {
     public String iconFilename;
     public Rect bounds;
 
-    private TaskCallbacks mCb;
+    private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
     public Task() {
         // Do nothing
@@ -157,9 +158,20 @@ public class Task {
         this.bounds = o.bounds;
     }
 
-    /** Set the callbacks */
-    public void setCallbacks(TaskCallbacks cb) {
-        mCb = cb;
+    /**
+     * Add a callback.
+     */
+    public void addCallback(TaskCallbacks cb) {
+        if (!mCallbacks.contains(cb)) {
+            mCallbacks.add(cb);
+        }
+    }
+
+    /**
+     * Remove a callback.
+     */
+    public void removeCallback(TaskCallbacks cb) {
+        mCallbacks.remove(cb);
     }
 
     /** Set the grouping */
@@ -175,8 +187,9 @@ public class Task {
      */
     public void setStackId(int stackId) {
         key.stackId = stackId;
-        if (mCb != null) {
-            mCb.onTaskStackIdChanged();
+        int callbackCount = mCallbacks.size();
+        for (int i = 0; i < callbackCount; i++) {
+            mCallbacks.get(i).onTaskStackIdChanged();
         }
     }
 
@@ -192,8 +205,9 @@ public class Task {
     public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon) {
         this.applicationIcon = applicationIcon;
         this.thumbnail = thumbnail;
-        if (mCb != null) {
-            mCb.onTaskDataLoaded();
+        int callbackCount = mCallbacks.size();
+        for (int i = 0; i < callbackCount; i++) {
+            mCallbacks.get(i).onTaskDataLoaded(this);
         }
     }
 
@@ -201,8 +215,9 @@ public class Task {
     public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultApplicationIcon) {
         applicationIcon = defaultApplicationIcon;
         thumbnail = defaultThumbnail;
-        if (mCb != null) {
-            mCb.onTaskDataUnloaded();
+        int callbackCount = mCallbacks.size();
+        for (int i = 0; i < callbackCount; i++) {
+            mCallbacks.get(i).onTaskDataUnloaded();
         }
     }
 

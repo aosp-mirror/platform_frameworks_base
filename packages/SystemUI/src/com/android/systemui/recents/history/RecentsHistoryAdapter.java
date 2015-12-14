@@ -23,10 +23,12 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 
 import java.util.ArrayList;
@@ -49,14 +51,34 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     static final int TASK_ROW_VIEW_TYPE = 1;
 
     /**
-     * View holder implementation.
+     * View holder implementation.  The {@param TaskCallbacks} are only called for TaskRow view
+     * holders.
      */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public View mContent;
+    public static class ViewHolder extends RecyclerView.ViewHolder implements Task.TaskCallbacks {
+        public final View content;
 
         public ViewHolder(View v) {
             super(v);
-            mContent = v;
+            content = v;
+        }
+
+        @Override
+        public void onTaskDataLoaded(Task task) {
+            // This callback is only made for TaskRow view holders
+            ImageView iv = (ImageView) content.findViewById(R.id.icon);
+            iv.setImageDrawable(task.applicationIcon);
+        }
+
+        @Override
+        public void onTaskDataUnloaded() {
+            // This callback is only made for TaskRow view holders
+            ImageView iv = (ImageView) content.findViewById(R.id.icon);
+            iv.setImageBitmap(null);
+        }
+
+        @Override
+        public void onTaskStackIdChanged() {
+            // Do nothing, this callback is only made for TaskRow view holders
         }
     }
 
@@ -89,18 +111,16 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
      */
     private static class TaskRow implements Row, View.OnClickListener {
 
-        public final String description;
-        private final int mTaskId;
+        public final Task task;
 
         public TaskRow(Task task) {
-            mTaskId = task.key.id;
-            description = task.activityLabel;
+            this.task = task;
         }
 
         @Override
         public void onClick(View v) {
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.startActivityFromRecents(v.getContext(), mTaskId, description,
+            ssp.startActivityFromRecents(v.getContext(), task.key.id, task.activityLabel,
                     ActivityOptions.makeBasic());
         }
 
@@ -184,20 +204,40 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        RecentsTaskLoader loader = Recents.getTaskLoader();
+
         Row row = mRows.get(position);
-        int viewType = mRows.get(position).getViewType();
+        int viewType = row.getViewType();
         switch (viewType) {
             case DATE_ROW_VIEW_TYPE: {
-                TextView tv = (TextView) holder.mContent;
+                TextView tv = (TextView) holder.content;
                 tv.setText(((DateRow) row).date);
                 break;
             }
             case TASK_ROW_VIEW_TYPE: {
-                TextView tv = (TextView) holder.mContent;
                 TaskRow taskRow = (TaskRow) row;
-                tv.setText(taskRow.description);
-                tv.setOnClickListener(taskRow);
+                taskRow.task.addCallback(holder);
+                TextView tv = (TextView) holder.content.findViewById(R.id.description);
+                tv.setText(taskRow.task.activityLabel);
+                holder.content.setOnClickListener(taskRow);
+                loader.loadTaskData(taskRow.task);
                 break;
+            }
+        }
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        RecentsTaskLoader loader = Recents.getTaskLoader();
+
+        int position = holder.getAdapterPosition();
+        if (position != RecyclerView.NO_POSITION) {
+            Row row = mRows.get(position);
+            int viewType = row.getViewType();
+            if (viewType == TASK_ROW_VIEW_TYPE) {
+                TaskRow taskRow = (TaskRow) row;
+                taskRow.task.removeCallback(holder);
+                loader.unloadTaskData(taskRow.task);
             }
         }
     }

@@ -678,7 +678,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Binds this task view to the task */
     public void onTaskBound(Task t) {
         mTask = t;
-        mTask.setCallbacks(this);
+        mTask.addCallback(this);
 
         // Hide the action button if lock to app is disabled for this view
         int lockButtonVisibility = (!t.lockToTaskEnabled || !t.lockToThisTask) ? GONE : VISIBLE;
@@ -689,7 +689,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     @Override
-    public void onTaskDataLoaded() {
+    public void onTaskDataLoaded(Task task) {
         if (mThumbnailView != null && mHeaderView != null) {
             // Bind each of the views to the new task data
             mThumbnailView.rebindToTask(mTask);
@@ -706,7 +706,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     public void onTaskDataUnloaded() {
         if (mThumbnailView != null && mHeaderView != null) {
             // Unbind each of the views from the task data and remove the task callback
-            mTask.setCallbacks(null);
+            mTask.removeCallback(this);
             mThumbnailView.unbindFromTask();
             mHeaderView.unbindFromTask();
             // Unbind any listeners
