@@ -209,8 +209,8 @@ likely to be unpopular.</p>
 you're using the emulator, since the emulator uses your desktop computer's
 network connection. That's almost guaranteed to be much faster than a cell
 network, so you'll want to change the settings on the emulator that simulate
-slower network speeds. You can do this in Eclipse, in the "Emulator Settings"
-tab of your launch configuration or via a <a
+slower network speeds. You can do this in Android Studio via the AVD Manager, 
+or via a <a
 href="{@docRoot}tools/help/emulator.html#netspeed">command-line 
 option</a> when starting the emulator.</p>
 

@@ -26,17 +26,6 @@ Level 16) or higher.</p>
 
 <h2 id="running">Running Tracer</h2>
 
-<p>Tracer can be run as part of the Eclipse Android Development Tools (ADT) plugin or as part of the
-Device Monitor tool.</p>
-
-<p>To run Tracer in Eclipse:</p>
-
-<ol>
-  <li>Start Eclipse and open a workspace that contains an Android project.</li>
-  <li>Activate the perspective for Tracer by choosing <strong>Window > Open Perspective >
-Other...</strong></li>
-  <li>Select <strong>Tracer for OpenGL ES</strong> and click <strong>OK</strong>.</li>
-</ol>
 
 <p>To run Tracer in Device Monitor:</p>
 
@@ -64,7 +53,7 @@ analysis.</p>
 <ol>
   <li>Connect the Android device using a USB cable and make sure it is enabled for debugging. For
 more information, see <a href="{@docRoot}tools/device.html">Using Hardware Devices</a>.</li>
-  <li>In Eclipse or Device Monitor, activate the <strong>Tracer for OpenGL ES</strong>
+  <li>In the Device Monitor, activate the <strong>Tracer for OpenGL ES</strong>
 perspective.</li>
   <li>On the toolbar, click the trace capture button (<img
 src="{@docRoot}images/gltracer/icon-capture.png">).</li>
@@ -94,7 +83,7 @@ Be aware that using this option can result in large trace files.</p>
 <p>To review a captured trace:</p>
 
 <ol>
-  <li>In Eclipse or Device Monitor, activate the <strong>Tracer for OpenGL ES</strong>
+  <li>In Device Monitor, activate the <strong>Tracer for OpenGL ES</strong>
 perspective.</li>
   <li>On the toolbar, click the trace load button (<img
 src="{@docRoot}images/gltracer/icon-load-trace.png">).</li>
