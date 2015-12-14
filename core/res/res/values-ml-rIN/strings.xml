@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ അപ്‌ഡേറ്റുചെയ്‌തു"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"പ്രാധാന്യം"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"ബ്ലോക്കുചെയ്തു: ഈ അറിയിപ്പുകൾ ഒരിക്കലും കാണിക്കരുത്"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"താഴ്ന്നത്: അറിയിപ്പ് ലിസ്റ്റിന്റെ താഴെ ശബ്ദമുണ്ടാക്കാതെ കാണിക്കുക"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"സാധാരണം: ഈ അറിയിപ്പുകൾ നിശബ്ദമായി കാണിക്കുക"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"പലവക"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
 </resources>

@@ -998,11 +998,11 @@
     <string name="sms_control_no" msgid="625438561395534982">"Afvis"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vil sende en besked til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Dette "<b>"kan medføre gebyrer"</b>" på din mobilkonto."</string>
-    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Dette vil medføre gebyrer på din mobilkonto."</b></string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Dette kan koste mere end almindelig sms-takst."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Send"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Annuller"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Husk mit valg"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Du kan ændre dette senere i Indstillinger &gt; Apps"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Du kan altid ændre dette i Indstillinger &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Tillad altid"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Tillad aldrig"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort blev fjernet"</string>
@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opdateret af administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet af din administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen slukker automatisk, når enheden oplader."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokeret: Vis aldrig disse underretninger"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Lav: Vis lydløst nederst på listen over underretninger"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Vis disse underretninger lydløst"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valgt</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

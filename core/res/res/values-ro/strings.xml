@@ -1449,6 +1449,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blocate: aceste notificări nu se afișează niciodată"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Redusă: se afișează în partea de jos a listei cu notificări fără a se emite un sunet"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normală: aceste notificări se afișează fără a se emite un sunet"</string>
@@ -1528,4 +1530,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selectat</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

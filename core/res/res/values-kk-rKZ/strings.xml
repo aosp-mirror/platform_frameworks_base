@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Әкімші жаңартты"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Әкімші жойған"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареяның қызмет көрсету мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін төмендетеді және дірілді, орынды анықтау қызметтерін және фондық деректердің көпшілігін шектейді. Электрондық пошта, хабар алмасу және синхрондауға негізделген басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"Маңыздылық"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Бұғатталған: осы хабарландыруларды ешқашан көрсетпеу"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Төмен: хабарландырулар тізімнің төменгі жағында үнсіз көрсету"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Қалыпты: осы хабарландыруларды үнсіз көрсету"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Әр түрлі"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"Сіз осы хабарландырулардың маңыздылығын орнатасасыз."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Қатысты адамдарға байланысты бұл маңызды."</string>
 </resources>

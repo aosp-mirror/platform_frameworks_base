@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Von Ihrem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Von Ihrem Administrator gelöscht"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf Ihrem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn Ihr Gerät aufgeladen wird."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blockiert: Keine Benachrichtigungen anzeigen"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Niedrig: Benachrichtigungen ganz unten in der Benachrichtigungsliste und ohne Ton anzeigen"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Benachrichtigungen ohne Ton anzeigen"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ausgewählt</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Sonstige"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

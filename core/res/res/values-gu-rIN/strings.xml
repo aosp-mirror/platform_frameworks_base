@@ -1440,6 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ થયેલ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખેલ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય એપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"મહત્વ"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"અવરોધિત: આ સૂચનાઓ ક્યારેય બતાવશો નહીં"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"નિમ્ન: સૂચનાની સૂચિની નીચે ચુપચાપ બતાવો"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"સામાન્ય: આ સૂચનાઓ ચુપચાપ બતાવો"</string>
@@ -1510,4 +1511,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> પસંદ કરી</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"વિવિધ"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"તમે આ સૂચનાઓનું મહત્વ સેટ કર્યું છે."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"શામેલ થયેલ લોકોને કારણે આ મહત્વપૂર્ણ છે."</string>
 </resources>

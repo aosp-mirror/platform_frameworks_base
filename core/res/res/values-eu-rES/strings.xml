@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokeatuta: ez erakutsi jakinarazpen hauek"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Txikia: erakutsi jakinarazpen hauek zerrendaren behealdean"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normala: erakutsi jakinarazpen hauek, baina soinurik egin gabe"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> hautatuta</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Askotarikoak"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

@@ -1458,6 +1458,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Smazáno administrátorem"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokováno: Tato oznámení nikdy nezobrazovat"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Nízká: Tato oznámení zobrazovat na konci seznamu bez zvukového upozornění"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normální: Tato oznámení zobrazovat bez zvukového upozornění"</string>
@@ -1546,4 +1548,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> položka</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Různé"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

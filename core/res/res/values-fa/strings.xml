@@ -674,7 +674,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"‏سیم کارت شما به‌طور دائم غیر فعال شده است. \nبرای داشتن سیم کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"آهنگ قبلی"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"آهنگ بعدی"</string>
-    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"توقف موقت"</string>
+    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"مکث"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"پخش"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"توقف"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"عقب بردن"</string>
@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"مسدود: هرگز این اعلان‌ها نشان داده نشود"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"پایین: بدون صدا در پایین فهرست اعلان نشان داده شود"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"عادی: این اعلان‌ها بدون صدا نشان داده شود"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"متفرقه"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

@@ -1442,6 +1442,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"បានធ្វើបច្ចុប្បន្នភាពដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"បានលុបដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថាមពលថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ ការផ្ញើសារអ៊ីម៉ែល និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនធ្វើបច្ចុប្បន្នភាពទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
+    <string name="notification_importance_title" msgid="7493989722610008700">"សារៈសំខាន់"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"បានរារាំង៖ កុំបង្ហាញការជូនដំណឹងទាំងនេះ"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"កម្រិតទាប៖ បង្ហាញស្ងាត់ៗនៅផ្នែកខាងក្រោមបញ្ជីនៃការជូនដំណឹង"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"ធម្មតា៖ បង្ហាញការជូនដំណឹងទាំងនេះស្ងាត់ៗ"</string>
@@ -1512,4 +1513,6 @@
       <item quantity="one">បានជ្រើស <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"ផ្សេងៗ"</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"អ្នកបានកំណត់សារៈសំខាន់នៃការជូនដំណឹងទាំងនេះ"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"វាមានសារៈសំខាន់ដោយសារតែមនុស្សដែលពាក់ព័ន្ធ"</string>
 </resources>

@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ನವೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ನಿಮ್ಮ ಬ್ಯಾಟರಿಯ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್, ಸ್ಥಳ ಸೇವೆಗಳು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ತೆರೆಯದ ಹೊರತು ನವೀಕರಣಗೊಳ್ಳುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ: ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಎಂದಿಗೂ ತೋರಿಸಬೇಡ"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"ಕಡಿಮೆ: ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"ಸಾಮಾನ್ಯ: ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"ಇತರೆ"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

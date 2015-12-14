@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminato dall\'amministratore"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Per aumentare la durata della batteria, la funzione di risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione, servizi di localizzazione e la maggior parte dei dati in background. App di email, messaggi e altre app che si basano sulla sincronizzazione potrebbero essere aggiornate soltanto all\'apertura.\n\nLa funzione di risparmio energetico viene disattivata automaticamente quando il dispositivo è in carica."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloccato: non mostrare mai queste notifiche"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Bassa: mostra silenziosamente alla fine dell\'elenco di notifiche"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normale: mostra silenziosamente queste notifiche"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento selezionato</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Vari"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

@@ -1442,6 +1442,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Блокирано: никогаш не покажувај ги овие известувања"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Ниско: покажувај ги тивко на дното на списокот со известувања"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Нормално: покажувај ги овие известувања тивко"</string>
@@ -1512,4 +1514,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> се избрани</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Разно"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>

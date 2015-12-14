@@ -1440,6 +1440,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"L\'administrador l\'ha actualitzat"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"L\'administrador ho ha suprimit"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
+    <!-- no translation found for notification_importance_title (7493989722610008700) -->
+    <skip />
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloquejada: no mostra mai aquestes notificacions"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Baixa: mostra de manera silenciosa a la part inferior de la llista de notificacions"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: mostra aquestes notificacions de manera silenciosa"</string>
@@ -1510,4 +1512,8 @@
       <item quantity="one">Seleccionats: <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Altres"</string>
+    <!-- no translation found for importance_from_topic (3572280439880023233) -->
+    <skip />
+    <!-- no translation found for importance_from_person (9160133597262938296) -->
+    <skip />
 </resources>
