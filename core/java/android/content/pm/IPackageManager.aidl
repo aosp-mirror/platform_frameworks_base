@@ -521,4 +521,6 @@ interface IPackageManager {
     boolean setEphemeralApplicationCookie(String packageName, in byte[] cookie, int userId);
     Bitmap getEphemeralApplicationIcon(String packageName, int userId);
     boolean isEphemeralApplication(String packageName, int userId);
+
+    boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
 }

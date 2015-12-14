@@ -51,6 +51,11 @@ public class AppsQueryHelper {
      */
     public static int GET_IMES = 1 << 2;
 
+    /**
+     * Return all apps that are flagged as required for the system user.
+     */
+    public static int GET_REQUIRED_FOR_SYSTEM_USER = 1 << 3;
+
     private final IPackageManager mPackageManager;
     private List<ApplicationInfo> mAllApps;
 
@@ -73,6 +78,7 @@ public class AppsQueryHelper {
         boolean nonLaunchableApps = (flags & GET_NON_LAUNCHABLE_APPS) > 0;
         boolean interactAcrossUsers = (flags & GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM) > 0;
         boolean imes = (flags & GET_IMES) > 0;
+        boolean requiredForSystemUser = (flags & GET_REQUIRED_FOR_SYSTEM_USER) > 0;
         if (mAllApps == null) {
             mAllApps = getAllApps(user.getIdentifier());
         }
@@ -143,6 +149,18 @@ public class AppsQueryHelper {
             }
         }
 
+        if (requiredForSystemUser) {
+            final int allAppsSize = mAllApps.size();
+            for (int i = 0; i < allAppsSize; i++) {
+                final ApplicationInfo appInfo = mAllApps.get(i);
+                if (systemAppsOnly && !appInfo.isSystemApp()) {
+                    continue;
+                }
+                if (appInfo.isRequiredForSystemUser()) {
+                    result.add(appInfo.packageName);
+                }
+            }
+        }
         return result;
     }
 

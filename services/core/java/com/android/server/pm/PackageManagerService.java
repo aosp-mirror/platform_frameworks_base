@@ -1845,12 +1845,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             boolean factoryTest, boolean onlyCore) {
         PackageManagerService m = new PackageManagerService(context, installer,
                 factoryTest, onlyCore);
-        m.enableSystemUserApps();
+        m.enableSystemUserPackages();
         ServiceManager.addService("package", m);
         return m;
     }
 
-    private void enableSystemUserApps() {
+    private void enableSystemUserPackages() {
         if (!UserManager.isSplitSystemUser()) {
             return;
         }
@@ -1867,46 +1867,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
         ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
         enableApps.addAll(wlApps);
+        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
+                /* systemAppsOnly */ false, UserHandle.SYSTEM));
         ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
         enableApps.removeAll(blApps);
-
-        List<String> systemApps = queryHelper.queryApps(0, /* systemAppsOnly */ true,
+        Log.i(TAG, "Applications installed for system user: " + enableApps);
+        List<String> allAps = queryHelper.queryApps(0, /* systemAppsOnly */ false,
                 UserHandle.SYSTEM);
-        final int systemAppsSize = systemApps.size();
+        final int allAppsSize = allAps.size();
         synchronized (mPackages) {
-            for (int i = 0; i < systemAppsSize; i++) {
-                String pName = systemApps.get(i);
+            for (int i = 0; i < allAppsSize; i++) {
+                String pName = allAps.get(i);
                 PackageSetting pkgSetting = mSettings.mPackages.get(pName);
                 // Should not happen, but we shouldn't be failing if it does
                 if (pkgSetting == null) {
                     continue;
                 }
-                boolean installed = enableApps.contains(pName);
-                pkgSetting.setInstalled(installed, UserHandle.USER_SYSTEM);
+                boolean install = enableApps.contains(pName);
+                if (pkgSetting.getInstalled(UserHandle.USER_SYSTEM) != install) {
+                    Log.i(TAG, (install ? "Installing " : "Uninstalling ") + pName
+                            + " for system user");
+                    pkgSetting.setInstalled(install, UserHandle.USER_SYSTEM);
+                }
             }
         }
-    }
-
-    static String[] splitString(String str, char sep) {
-        int count = 1;
-        int i = 0;
-        while ((i=str.indexOf(sep, i)) >= 0) {
-            count++;
-            i++;
-        }
-
-        String[] res = new String[count];
-        i=0;
-        count = 0;
-        int lastI=0;
-        while ((i=str.indexOf(sep, i)) >= 0) {
-            res[count] = str.substring(lastI, i);
-            count++;
-            i++;
-            lastI = i;
-        }
-        res[count] = str.substring(lastI, str.length());
-        return res;
     }
 
     private static void getDefaultDisplayMetrics(Context context, DisplayMetrics metrics) {
@@ -13750,6 +13734,29 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return ps.getBlockUninstall(userId);
         }
+    }
+
+    @Override
+    public boolean setRequiredForSystemUser(String packageName, boolean systemUserApp) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
+            throw new SecurityException(
+                    "setRequiredForSystemUser can only be run by the system or root");
+        }
+        synchronized (mPackages) {
+            PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                Log.w(TAG, "Package doesn't exist: " + packageName);
+                return false;
+            }
+            if (systemUserApp) {
+                ps.pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
+            } else {
+                ps.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
+            }
+            mSettings.writeLPr();
+        }
+        return true;
     }
 
     /*
