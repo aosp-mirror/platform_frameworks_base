@@ -355,9 +355,7 @@ public class TaskStackLayoutAlgorithm {
                 / (taskStackBounds.height() - mSystemInsets.bottom);
         int width = mStackRect.width();
         int minHeight = mStackRect.height() - mFocusedPeekHeight - mStackBottomOffset;
-        int height = debugFlags.isFullscreenThumbnailsEnabled()
-                ? (int) Math.min(width / aspect, minHeight)
-                : width;
+        int height = (int) Math.min(width / aspect, minHeight);
         mTaskRect.set(mStackRect.left, mStackRect.top,
                 mStackRect.left + width, mStackRect.top + height);
 
@@ -499,8 +497,7 @@ public class TaskStackLayoutAlgorithm {
     public float getDefaultFocusState() {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (launchState.launchedWithAltTab ||
-                (debugFlags.isPageOnToggleEnabled() && debugFlags.isInitialStatePaging())) {
+        if (launchState.launchedWithAltTab || debugFlags.isInitialStatePaging()) {
             return 1f;
         }
         return 0f;

@@ -333,7 +333,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 RecentsDebugFlags flags = Recents.getDebugFlags();
-                if (flags.isPageOnToggleEnabled() && !launchState.launchedWithAltTab) {
+                if (!launchState.launchedWithAltTab) {
                     // Notify recents to move onto the next task
                     EventBus.getDefault().post(new IterateRecentsEvent());
                 } else {

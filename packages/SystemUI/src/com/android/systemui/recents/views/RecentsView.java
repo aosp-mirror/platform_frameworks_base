@@ -599,15 +599,6 @@ public class RecentsView extends FrameLayout {
         hideHistoryButton(100);
     }
 
-    public final void onBusEvent(DebugFlagsChangedEvent event) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (!debugFlags.isHistoryEnabled()) {
-            hideHistoryButton(100);
-        } else {
-            showHistoryButton(100);
-        }
-    }
-
     /**
      * Shows the history button.
      */
@@ -620,11 +611,6 @@ public class RecentsView extends FrameLayout {
 
     private void showHistoryButton(final int duration,
             final ReferenceCountedTrigger postHideHistoryAnimationTrigger) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (!debugFlags.isHistoryEnabled()) {
-            return;
-        }
-
         mHistoryButton.setVisibility(View.VISIBLE);
         mHistoryButton.setAlpha(0f);
         mHistoryButton.setText(getContext().getString(R.string.recents_history_label_format,

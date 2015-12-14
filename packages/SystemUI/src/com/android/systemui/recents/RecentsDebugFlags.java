@@ -26,10 +26,7 @@ import com.android.systemui.tuner.TunerService;
  */
 public class RecentsDebugFlags implements TunerService.Tunable {
 
-    private static final String KEY_FAST_TOGGLE = "overview_fast_toggle";
-    private static final String KEY_PAGE_ON_TOGGLE = "overview_page_on_toggle";
-    private static final String KEY_FULLSCREEN_THUMBNAILS = "overview_fullscreen_thumbnails";
-    private static final String KEY_SHOW_HISTORY = "overview_show_history";
+    private static final String KEY_FAST_TOGGLE = "overview_fast_toggle_via_button";
     private static final String KEY_INITIAL_STATE_PAGING = "overview_initial_state_paging";
 
     public static class Static {
@@ -52,9 +49,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     }
 
     private boolean mFastToggleRecents;
-    private boolean mPageOnToggle;
-    private boolean mUseFullscreenThumbnails;
-    private boolean mShowHistory;
     private boolean mInitialStatePaging;
 
     /**
@@ -64,36 +58,14 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public RecentsDebugFlags(Context context) {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
-        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_PAGE_ON_TOGGLE,
-                KEY_FULLSCREEN_THUMBNAILS, KEY_SHOW_HISTORY, KEY_INITIAL_STATE_PAGING);
+        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_INITIAL_STATE_PAGING);
     }
 
     /**
      * @return whether we are enabling fast toggling.
      */
     public boolean isFastToggleRecentsEnabled() {
-        return mPageOnToggle && mFastToggleRecents;
-    }
-
-    /**
-     * @return whether the recents button toggles pages.
-     */
-    public boolean isPageOnToggleEnabled() {
-        return mPageOnToggle;
-    }
-
-    /**
-     * @return whether we should show fullscreen thumbnails
-     */
-    public boolean isFullscreenThumbnailsEnabled() {
-        return mUseFullscreenThumbnails;
-    }
-
-    /**
-     * @return whether we should show the history
-     */
-    public boolean isHistoryEnabled() {
-        return mShowHistory;
+        return mFastToggleRecents;
     }
 
     /**
@@ -108,18 +80,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         switch (key) {
             case KEY_FAST_TOGGLE:
                 mFastToggleRecents = (newValue != null) &&
-                        (Integer.parseInt(newValue) != 0);
-                break;
-            case KEY_PAGE_ON_TOGGLE:
-                mPageOnToggle = (newValue != null) &&
-                        (Integer.parseInt(newValue) != 0);
-                break;
-            case KEY_FULLSCREEN_THUMBNAILS:
-                mUseFullscreenThumbnails = (newValue != null) &&
-                        (Integer.parseInt(newValue) != 0);
-                break;
-            case KEY_SHOW_HISTORY:
-                mShowHistory = (newValue != null) &&
                         (Integer.parseInt(newValue) != 0);
                 break;
             case KEY_INITIAL_STATE_PAGING:

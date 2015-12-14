@@ -1171,30 +1171,10 @@
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
-    <!-- Toggles paging recents via the recents button. DO NOT TRANSLATE -->
-    <string name="overview_page_on_toggle">Enable paging</string>
-    <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
-    <string name="overview_page_on_toggle_desc">Enable paging via the Overview button</string>
-
     <!-- Toggles fast-toggling recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_fast_toggle_via_button">Enable fast toggle</string>
     <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_fast_toggle_via_button_desc">Enable launch timeout while paging</string>
-
-    <!-- Toggles fullscreen screenshots. DO NOT TRANSLATE -->
-    <string name="overview_fullscreen_thumbnails">Enable fullscreen screenshots</string>
-    <!-- Description for the toggle for fullscreen screenshots. DO NOT TRANSLATE -->
-    <string name="overview_fullscreen_thumbnails_desc">Enable fullscreen screenshots in Overview. Restart required.</string>
-
-    <!-- Toggle to enable the Overview nav bar gesture. DO NOT TRANSLATE -->
-    <string name="overview_nav_bar_gesture">Enable navigation bar gesture</string>
-    <!-- Description for the toggle to enable the Overview nav bar gesture. DO NOT TRANSLATE -->
-    <string name="overview_nav_bar_gesture_desc">Enables the gesture to enter Overview by swiping up on the Nav bar</string>
-
-    <!-- Toggle to show the history view in Overview. DO NOT TRANSLATE -->
-    <string name="overview_show_history">Show History</string>
-    <!-- Description for the toggle to show the history view in Overview. DO NOT TRANSLATE -->
-    <string name="overview_show_history_desc">Enables the history view to see more recent tasks</string>
 
     <!-- Toggle to set the initial scroll state to be paging or stack. DO NOT TRANSLATE -->
     <string name="overview_initial_state_paging">Initialize to paging</string>

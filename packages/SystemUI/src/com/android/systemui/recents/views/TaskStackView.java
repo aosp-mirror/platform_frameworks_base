@@ -669,12 +669,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             if (scrollToTask) {
                 // TODO: Center the newly focused task view, only if not freeform
-                RecentsDebugFlags debugFlags = Recents.getDebugFlags();
                 float newScroll = mLayoutAlgorithm.getStackScrollForTask(newFocusedTask);
-                if (!debugFlags.isFullscreenThumbnailsEnabled()) {
-                    newScroll -= 0.5f;
-                }
-                newScroll = mStackScroller.getBoundedStackScroll(newScroll);
                 if (Float.compare(newScroll, mStackScroller.getStackScroll()) != 0) {
                     mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll,
                             focusTaskRunnable);
