@@ -44,9 +44,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StubProvider extends DocumentsProvider {
@@ -59,7 +61,7 @@ public class StubProvider extends DocumentsProvider {
     private static final String EXTRA_SIZE = "com.android.documentsui.stubprovider.SIZE";
     private static final String EXTRA_ROOT = "com.android.documentsui.stubprovider.ROOT";
     private static final String STORAGE_SIZE_KEY = "documentsui.stubprovider.size";
-    private static int DEFAULT_ROOT_SIZE = 1024 * 1024 * 100; // 100 MB.
+    private static int DEFAULT_ROOT_SIZE = 1024 * 1024 * 100;  // 100 MB.
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
@@ -105,7 +107,13 @@ public class StubProvider extends DocumentsProvider {
 
         mRoots.clear();
         for (String rootId : rootIds) {
-            final RootInfo rootInfo = new RootInfo(rootId, getSize(rootId));
+            // Make a subdir in the cache dir for each root.
+            final File file = new File(getContext().getCacheDir(), rootId);
+            if (file.mkdir()) {
+                Log.i(TAG, "Created new root directory @ " + file.getPath());
+            }
+            final RootInfo rootInfo = new RootInfo(file, getSize(rootId));
+            mStorage.put(rootInfo.document.documentId, rootInfo.document);
             mRoots.put(rootId, rootInfo);
         }
     }
@@ -188,7 +196,7 @@ public class StubProvider extends DocumentsProvider {
                 created = file.createNewFile();
             } catch (IOException e) {
                 // We'll throw an FNF exception later :)
-                Log.e(TAG, "createnewFile operation failed for file: " + file, e);
+                Log.e(TAG, "createNewFile operation failed for file: " + file, e);
             }
             if (!created) {
                 throw new FileNotFoundException(
@@ -197,7 +205,8 @@ public class StubProvider extends DocumentsProvider {
             Log.i(TAG, "Created new file: " + file);
         }
 
-        final StubDocument document = new StubDocument(file, mimeType, parent);
+        final StubDocument document = StubDocument.createRegularDocument(file, mimeType, parent);
+        mStorage.put(document.documentId, document);
         Log.d(TAG, "Created document " + document.documentId);
         notifyParentChanged(document.parentId);
         getContext().getContentResolver().notifyChange(
@@ -264,14 +273,18 @@ public class StubProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
         final StubDocument document = mStorage.get(docId);
-        if (document == null || !document.file.isFile())
+        if (document == null || !document.file.isFile()) {
             throw new FileNotFoundException();
+        }
+        if ((document.flags & Document.FLAG_VIRTUAL_DOCUMENT) != 0) {
+            throw new IllegalStateException("Tried to open a virtual file.");
+        }
 
         if ("r".equals(mode)) {
-            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(document.file,
-                    ParcelFileDescriptor.MODE_READ_ONLY);
+            final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(document.file,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
             if (docId.equals(mSimulateReadErrors)) {
-                pfd = new ParcelFileDescriptor(pfd) {
+                return new ParcelFileDescriptor(pfd) {
                     @Override
                     public void checkError() throws IOException {
                         throw new IOException("Test error");
@@ -296,6 +309,37 @@ public class StubProvider extends DocumentsProvider {
     public AssetFileDescriptor openDocumentThumbnail(
             String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
         throw new FileNotFoundException();
+    }
+
+    @Override
+    public AssetFileDescriptor openTypedDocument(
+            String documentId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
+            throws FileNotFoundException {
+        final StubDocument document = mStorage.get(documentId);
+        if (document == null || !document.file.isFile()) {
+            throw new FileNotFoundException();
+        }
+        if ((document.flags & Document.FLAG_SUPPORTS_TYPED_DOCUMENT) == 0) {
+            throw new IllegalStateException("Tried to open a non-typed document as typed.");
+        }
+        for (final String mimeType : document.streamTypes) {
+            // Strict compare won't accept wildcards, but that's OK for tests, as DocumentsUI
+            // doesn't use them for openTypedDocument.
+            if (mimeType.equals(mimeTypeFilter)) {
+                ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                            document.file, ParcelFileDescriptor.MODE_READ_ONLY);
+                if (!documentId.equals(mSimulateReadErrors)) {
+                    pfd = new ParcelFileDescriptor(pfd) {
+                        @Override
+                        public void checkError() throws IOException {
+                            throw new IOException("Test error");
+                        }
+                    };
+                }
+                return new AssetFileDescriptor(pfd, 0, document.file.length());
+            }
+        }
+        throw new IllegalArgumentException("Invalid MIME type filter for openTypedDocument().");
     }
 
     private ParcelFileDescriptor startWrite(final StubDocument document)
@@ -398,14 +442,7 @@ public class StubProvider extends DocumentsProvider {
         row.add(Document.COLUMN_DISPLAY_NAME, document.file.getName());
         row.add(Document.COLUMN_SIZE, document.file.length());
         row.add(Document.COLUMN_MIME_TYPE, document.mimeType);
-        int flags = Document.FLAG_SUPPORTS_DELETE;
-        // TODO: Add support for renaming.
-        if (document.file.isDirectory()) {
-            flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
-        } else {
-            flags |= Document.FLAG_SUPPORTS_WRITE;
-        }
-        row.add(Document.COLUMN_FLAGS, flags);
+        row.add(Document.COLUMN_FLAGS, document.flags);
         row.add(Document.COLUMN_LAST_MODIFIED, document.file.lastModified());
     }
 
@@ -469,7 +506,8 @@ public class StubProvider extends DocumentsProvider {
             fout.write(content);
             fout.close();
         }
-        final StubDocument document = new StubDocument(file, mimeType, parent);
+        final StubDocument document = StubDocument.createRegularDocument(file, mimeType, parent);
+        mStorage.put(document.documentId, document);
         return DocumentsContract.buildDocumentUri(mAuthority,  document.documentId);
     }
 
@@ -489,21 +527,16 @@ public class StubProvider extends DocumentsProvider {
         return found.file;
     }
 
-    final class RootInfo {
+    final static class RootInfo {
         public final String name;
         public final StubDocument document;
         public long capacity;
         public long size;
 
-        RootInfo(String name, long capacity) {
-            this.name = name;
+        RootInfo(File file, long capacity) {
+            this.name = file.getName();
             this.capacity = 1024 * 1024;
-            // Make a subdir in the cache dir for each root.
-            File file = new File(getContext().getCacheDir(), name);
-            if (file.mkdir()) {
-                Log.i(TAG, "Created new root directory @ " + file.getPath());
-            }
-            this.document = new StubDocument(file, Document.MIME_TYPE_DIR, this);
+            this.document = StubDocument.createRootDocument(file, this);
             this.capacity = capacity;
             this.size = 0;
         }
@@ -513,38 +546,72 @@ public class StubProvider extends DocumentsProvider {
         }
     }
 
-    final class StubDocument {
+    final static class StubDocument {
         public final File file;
-        public final String mimeType;
         public final String documentId;
+        public final String mimeType;
+        public final List<String> streamTypes;
+        public final int flags;
         public final String parentId;
         public final RootInfo rootInfo;
 
-        StubDocument(File file, String mimeType, StubDocument parent) {
+        private StubDocument(
+                 File file, String mimeType, List<String> streamTypes, int flags,
+                 StubDocument parent) {
             this.file = file;
-            this.mimeType = mimeType;
             this.documentId = getDocumentIdForFile(file);
+            this.mimeType = mimeType;
+            this.streamTypes = streamTypes;
+            this.flags = flags;
             this.parentId = parent.documentId;
             this.rootInfo = parent.rootInfo;
-            mStorage.put(this.documentId, this);
         }
 
-        StubDocument(File file, String mimeType, RootInfo rootInfo) {
+        private StubDocument(File file, RootInfo rootInfo) {
             this.file = file;
-            this.mimeType = mimeType;
             this.documentId = getDocumentIdForFile(file);
+            this.mimeType = Document.MIME_TYPE_DIR;
+            this.streamTypes = new ArrayList<String>();
+            this.flags = Document.FLAG_DIR_SUPPORTS_CREATE;
             this.parentId = null;
             this.rootInfo = rootInfo;
-            mStorage.put(this.documentId, this);
         }
+
+        public static StubDocument createRootDocument(File file, RootInfo rootInfo) {
+            return new StubDocument(file, rootInfo);
+        }
+
+        public static StubDocument createRegularDocument(
+                File file, String mimeType, StubDocument parent) {
+            int flags = Document.FLAG_SUPPORTS_DELETE;
+            if (file.isDirectory()) {
+                flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
+            } else {
+                flags |= Document.FLAG_SUPPORTS_WRITE;
+            }
+            return new StubDocument(file, mimeType, new ArrayList<String>(), flags, parent);
+        }
+
+        public static StubDocument createVirtualDocument(
+                File file, String mimeType, List<String> streamTypes, StubDocument parent) {
+            int flags = Document.FLAG_SUPPORTS_DELETE | Document.FLAG_SUPPORTS_WRITE
+                    | Document.FLAG_VIRTUAL_DOCUMENT;
+            if (streamTypes.size() > 0) {
+                flags |= Document.FLAG_SUPPORTS_TYPED_DOCUMENT;
+            }
+            return new StubDocument(file, mimeType, streamTypes, flags, parent);
+        }
+
         @Override
         public String toString() {
             return "StubDocument{"
                     + "path:" + file.getPath()
-                    + ", mimeType:" + mimeType
-                    + ", rootInfo:" + rootInfo
                     + ", documentId:" + documentId
+                    + ", mimeType:" + mimeType
+                    + ", streamTypes:" + streamTypes.toString()
+                    + ", flags:" + flags
                     + ", parentId:" + parentId
+                    + ", rootInfo:" + rootInfo
                     + "}";
         }
     }
