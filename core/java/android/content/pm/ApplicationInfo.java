@@ -486,18 +486,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_AUTOPLAY = 1 << 7;
 
     /**
-     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
-     * and for most purposes is considered as not installed.
-     * {@hide}
-     */
-    public static final int PRIVATE_FLAG_EPHEMERAL = 1<<8;
-
-    /**
      * When set, at least one component inside this application is encryption aware.
      *
      * @hide
      */
     public static final int PRIVATE_FLAG_PARTIALLY_ENCRYPTION_AWARE = 1 << 8;
+
+    /**
+     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
+     * and for most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_EPHEMERAL = 1 << 9;
 
     /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
