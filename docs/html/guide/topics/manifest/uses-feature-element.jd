@@ -486,10 +486,22 @@ determine the features that your application requires. </p>
 
 <ol>
 <li>First, build and export your application as an unsigned <code>.apk</code>.
-If you are developing in Eclipse with ADT, right-click the project and select
-<strong>Android Tools</strong> &gt; <strong>Export Unsigned Application
-Package</strong>. Select a destination filename and path and click
-<strong>OK</strong>. </li>
+If you are developing in Android Studio, build your application with Gradle:
+<ol TYPE=a>
+<li>Open the project and select <strong>Run > Edit Configurations</strong>.
+<li>Select the plus sign near the top-left corner of the <strong>Run/Debug
+Configurations</strong> window.
+<li>Select <strong>Gradle.</strong>
+<li>Enter <code>Unsigned APK</code> in <strong>Name</strong>.
+<li>Choose your module from the <strong>Gradle project</strong> section.
+<li>Enter <code>assemble</code> in <strong>Tasks</strong>.
+<li>Select <strong>OK</strong> to complete the new configuration.
+<li>Make sure the <strong>Unsigned APK</strong> run configuration is selected
+in the toolbar and select <strong>Run > Run 'Unsigned APK'</strong>.</li>
+</ol>
+You can find your unsigned <code>.apk</code> in the
+<code>&lt;<em>ProjectName</em>&gt;/app/build/outputs/apk/</code> directory.
+
 <li>Next, locate the <code>aapt</code> tool, if it is not already in your PATH.
 If you are using SDK Tools r8 or higher, you can find <code>aapt</code> in the
 <code>&lt;<em>SDK</em>&gt;/platform-tools/</code> directory.
@@ -563,9 +575,9 @@ is sensitive to delays or lag in sound input or output.</td>
        <td rowspan="6">Camera</td>
        <td><code>android.hardware.camera</code></td>
        <td>The application uses the device's back-facing (main) camera.</td>
-       <td>Devices with only a front-facing camera do not list this feature, so the 
-           <code>android.hardware.camera.any</code> feature should be
-           used instead if a camera facing any direction is acceptable for the
+       <td>Devices with only a front-facing camera do not list this feature, so
+           the <code>android.hardware.camera.any</code> feature should be used
+           instead if a camera facing any direction is acceptable for the
            application.</td>
     </tr>
 <tr>
