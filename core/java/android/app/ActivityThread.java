@@ -2015,7 +2015,7 @@ public final class ActivityThread {
     private static final String ONE_COUNT_COLUMN_HEADER = "%21s %8s";
 
     // Formatting for checkin service - update version if row format changes
-    private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 3;
+    private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 4;
 
     static void printRow(PrintWriter pw, String format, Object...objs) {
         pw.println(String.format(format, objs));
@@ -2091,6 +2091,25 @@ public final class ActivityThread {
             pw.print(memInfo.otherPrivateClean); pw.print(',');
             pw.print(memInfo.getTotalPrivateClean()); pw.print(',');
 
+            // Heap info - swapped out
+            pw.print(memInfo.nativeSwappedOut); pw.print(',');
+            pw.print(memInfo.dalvikSwappedOut); pw.print(',');
+            pw.print(memInfo.otherSwappedOut); pw.print(',');
+            pw.print(memInfo.getTotalSwappedOut()); pw.print(',');
+
+            // Heap info - swapped out pss
+            if (memInfo.hasSwappedOutPss) {
+                pw.print(memInfo.nativeSwappedOutPss); pw.print(',');
+                pw.print(memInfo.dalvikSwappedOutPss); pw.print(',');
+                pw.print(memInfo.otherSwappedOutPss); pw.print(',');
+                pw.print(memInfo.getTotalSwappedOutPss()); pw.print(',');
+            } else {
+                pw.print("N/A,");
+                pw.print("N/A,");
+                pw.print("N/A,");
+                pw.print("N/A,");
+            }
+
             // Heap info - other areas
             for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
                 pw.print(Debug.MemoryInfo.getOtherLabel(i)); pw.print(',');
@@ -2100,6 +2119,12 @@ public final class ActivityThread {
                 pw.print(memInfo.getOtherSharedClean(i)); pw.print(',');
                 pw.print(memInfo.getOtherPrivateDirty(i)); pw.print(',');
                 pw.print(memInfo.getOtherPrivateClean(i)); pw.print(',');
+                pw.print(memInfo.getOtherSwappedOut(i)); pw.print(',');
+                if (memInfo.hasSwappedOutPss) {
+                    pw.print(memInfo.getOtherSwappedOutPss(i)); pw.print(',');
+                } else {
+                    pw.print("N/A,");
+                }
             }
             return;
         }

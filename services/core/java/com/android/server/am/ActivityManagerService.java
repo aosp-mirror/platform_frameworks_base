@@ -15502,6 +15502,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean isCompact = false;
         boolean localOnly = false;
         boolean packages = false;
+        boolean isCheckinRequest = false;
 
         int opti = 0;
         while (opti < args.length) {
@@ -15527,6 +15528,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 localOnly = true;
             } else if ("--package".equals(opt)) {
                 packages = true;
+            } else if ("--checkin".equals(opt)) {
+                isCheckinRequest = true;
+
             } else if ("-h".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [-d] [-c] [-s] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
@@ -15537,6 +15541,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  --local: only collect details locally, don't call process.");
                 pw.println("  --package: interpret process arg as package, dumping all");
                 pw.println("             processes that have loaded that package.");
+                pw.println("  --checkin: dump data for a checkin");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
                 return;
@@ -15545,7 +15550,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        final boolean isCheckinRequest = scanArgs(args, "--checkin");
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
         final long[] tmpLong = new long[1];
