@@ -541,6 +541,22 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
+     * This method allows accessibility service turn itself off
+     * and the service will become disabled from the Settings.
+     */
+    public final void disableSelf() {
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                connection.disableSelf();
+            } catch (RemoteException re) {
+                throw new RuntimeException(re);
+            }
+        }
+    }
+
+    /**
      * Returns the magnification controller, which may be used to query and
      * modify the state of display magnification.
      * <p>

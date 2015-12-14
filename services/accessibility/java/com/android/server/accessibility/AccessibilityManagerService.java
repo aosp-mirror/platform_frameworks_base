@@ -2179,6 +2179,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return true;
         }
 
+        @Override
+        public void disableSelf() {
+            synchronized(mLock) {
+                UserState userState = getUserStateLocked(mUserId);
+                if (userState.mEnabledServices.remove(mComponentName)) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        persistComponentNamesToSettingLocked(
+                                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                userState.mEnabledServices, mUserId);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                    onUserStateChangedLocked(userState);
+                }
+            }
+        }
+
         public boolean canReceiveEventsLocked() {
             return (mEventTypes != 0 && mFeedbackType != 0 && mService != null);
         }
