@@ -1002,6 +1002,10 @@
     <!-- Light sensor event rate in milliseconds for automatic brightness control. -->
     <integer name="config_autoBrightnessLightSensorRate">250</integer>
 
+    <!-- The maximum range of gamma adjustment possible using the screen
+         auto-brightness adjustment setting. -->
+    <fraction name="config_autoBrightnessAdjustmentMaxGamma">300%</fraction>
+
     <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
          to reduce it to preserve the battery. Value of 100% means no scaling. -->
     <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
@@ -1018,6 +1022,9 @@
          brightening or dimming debounce thresholds.  As a result, it may take somewhat longer to
          adapt to the environment.  This mode may be better suited for watches. -->
     <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">true</bool>
+
+    <!-- Period of time in which to consider light samples in milliseconds. -->
+    <integer name="config_autoBrightnessAmbientLightHorizon">10000</integer>
 
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
