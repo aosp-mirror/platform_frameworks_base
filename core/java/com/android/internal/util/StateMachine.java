@@ -778,8 +778,11 @@ public class StateMachine {
          */
         @Override
         public final void handleMessage(Message msg) {
-            mSm.onPreHandleMessage(msg);
             if (!mHasQuit) {
+                if (mSm != null) {
+                    mSm.onPreHandleMessage(msg);
+                }
+
                 if (mDbg) mSm.log("handleMessage: E msg.what=" + msg.what);
 
                 /** Save the current message */
@@ -803,8 +806,11 @@ public class StateMachine {
 
                 // We need to check if mSm == null here as we could be quitting.
                 if (mDbg && mSm != null) mSm.log("handleMessage: X");
+
+                if (mSm != null) {
+                    mSm.onPostHandleMessage(msg);
+                }
             }
-            mSm.onPostHandleMessage(msg);
         }
 
         /**
