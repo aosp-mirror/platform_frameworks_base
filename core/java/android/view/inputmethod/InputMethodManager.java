@@ -54,6 +54,7 @@ import android.view.ViewRootImpl;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -2209,7 +2210,7 @@ public final class InputMethodManager {
             p.println("  mCurrentTextBoxAttribute: null");
         }
         p.println("  mServedInputConnection=" + mServedInputConnection);
-        p.println("  mCompletions=" + mCompletions);
+        p.println("  mCompletions=" + Arrays.toString(mCompletions));
         p.println("  mCursorRect=" + mCursorRect);
         p.println("  mCursorSelStart=" + mCursorSelStart
                 + " mCursorSelEnd=" + mCursorSelEnd

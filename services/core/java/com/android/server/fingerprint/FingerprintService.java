@@ -189,7 +189,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     protected void handleEnumerate(long deviceId, int[] fingerIds, int[] groupIds) {
         if (fingerIds.length != groupIds.length) {
             Slog.w(TAG, "fingerIds and groupIds differ in length: f[]="
-                    + fingerIds + ", g[]=" + groupIds);
+                    + Arrays.toString(fingerIds) + ", g[]=" + Arrays.toString(groupIds));
             return;
         }
         if (DEBUG) Slog.w(TAG, "Enumerate: f[]=" + fingerIds + ", g[]=" + groupIds);
