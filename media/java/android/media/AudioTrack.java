@@ -97,9 +97,10 @@ public class AudioTrack
     /** Maximum value for sample rate */
     private static final int SAMPLE_RATE_HZ_MAX = 192000;
 
-    // FCC_8
-    /** Maximum value for AudioTrack channel count */
-    private static final int CHANNEL_COUNT_MAX = 8;
+    /** Maximum value for AudioTrack channel count
+     * @hide public for MediaCode only, do not un-hide or change to a numeric literal
+     */
+    public static final int CHANNEL_COUNT_MAX = native_get_FCC_8();
 
     /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
@@ -2583,6 +2584,7 @@ public class AudioTrack
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
+    static private native int native_get_FCC_8();
 
     //---------------------------------------------------------
     // Utility methods
