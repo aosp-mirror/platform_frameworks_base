@@ -133,7 +133,13 @@ files after they have been signed.</dd>
 WYSIWYG editor. It also previews stretched versions of the image, and highlights the area in which
 content is allowed.</dd>
 
-  <dt><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></dt>
+<dt><a href="{@docRoot}tools/help/image-asset-studio.html">Image Asset Studio</a></dt>
+    <dd>Helps you to generate custom icons for your Android applications from existing images, cliparts, or text.
+     It generates a set of icons at the appropriate resolution for each generalized screen density that your app 
+     supports.</dd>
+
+<dt><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></dt>
+
     <dd>Helps you add material icons and import Scalable Vector Graphic (SVG) files into your
     Android Studio project as a drawable resource.</dd>
 
