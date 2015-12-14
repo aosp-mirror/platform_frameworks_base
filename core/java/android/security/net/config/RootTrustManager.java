@@ -71,6 +71,10 @@ public class RootTrustManager implements X509TrustManager {
      */
     public List<X509Certificate> checkServerTrusted(X509Certificate[] certs, String authType,
             String hostname) throws CertificateException {
+        if (hostname == null && mConfig.hasPerDomainConfigs()) {
+            throw new CertificateException(
+                    "Domain specific configurations require that the hostname be provided");
+        }
         NetworkSecurityConfig config = mConfig.getConfigForHostname(hostname);
         return config.getTrustManager().checkServerTrusted(certs, authType, hostname);
     }
