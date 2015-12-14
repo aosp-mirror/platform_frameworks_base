@@ -88,6 +88,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -1599,7 +1600,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         switch (status) {
             case GPS_REQUEST_AGPS_DATA_CONN:
                 if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
-                Log.v(TAG, "Received SUPL IP addr[]: " + ipaddr);
+                Log.v(TAG, "Received SUPL IP addr[]: " + Arrays.toString(ipaddr));
                 InetAddress connectionIpAddress = null;
                 if (ipaddr != null) {
                     try {

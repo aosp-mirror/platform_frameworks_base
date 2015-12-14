@@ -296,7 +296,7 @@ public class WifiP2pServiceResponse implements Parcelable {
         sbuf.append("serviceType:").append(mServiceType);
         sbuf.append(" status:").append(Status.toString(mStatus));
         sbuf.append(" srcAddr:").append(mDevice.deviceAddress);
-        sbuf.append(" data:").append(mData);
+        sbuf.append(" data:").append(Arrays.toString(mData));
         return sbuf.toString();
     }
 
