@@ -3686,7 +3686,7 @@ public class NotificationManagerService extends SystemService {
                     for (int i = 0; i < tokens.length; i++) {
                         String token = tokens[i];
                         if (token != null) {
-                            token.trim();
+                            token = token.trim();
                         }
                         if (TextUtils.isEmpty(token)) {
                             continue;
