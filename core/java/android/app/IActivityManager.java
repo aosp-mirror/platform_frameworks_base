@@ -259,6 +259,7 @@ public interface IActivityManager extends IInterface {
     public void killBackgroundProcesses(final String packageName, int userId)
             throws RemoteException;
     public void killAllBackgroundProcesses() throws RemoteException;
+    public void killPackageDependents(final String packageName, int userId) throws RemoteException;
     public void forceStopPackage(final String packageName, int userId) throws RemoteException;
 
     // Note: probably don't want to allow applications access to these.
@@ -912,4 +913,5 @@ public interface IActivityManager extends IInterface {
     int UNLOCK_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 351;
     int IN_MULTI_WINDOW_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 352;
     int IN_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 353;
+    int KILL_PACKAGE_DEPENDENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 354;
 }
