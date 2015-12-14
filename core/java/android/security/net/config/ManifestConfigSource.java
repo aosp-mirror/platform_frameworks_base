@@ -79,7 +79,9 @@ public class ManifestConfigSource implements ConfigSource {
                 if (DBG) {
                     Log.d(LOG_TAG, "No Network Security Config specified, using platform default");
                 }
-                source = new DefaultConfigSource();
+                boolean usesCleartextTraffic =
+                        (info.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
+                source = new DefaultConfigSource(usesCleartextTraffic);
             }
             mConfigSource = source;
             return mConfigSource;
@@ -87,9 +89,18 @@ public class ManifestConfigSource implements ConfigSource {
     }
 
     private static final class DefaultConfigSource implements ConfigSource {
+
+        private final NetworkSecurityConfig mDefaultConfig;
+
+        public DefaultConfigSource(boolean usesCleartextTraffic) {
+            mDefaultConfig = NetworkSecurityConfig.getDefaultBuilder()
+                    .setCleartextTrafficPermitted(usesCleartextTraffic)
+                    .build();
+       }
+
         @Override
         public NetworkSecurityConfig getDefaultConfig() {
-            return NetworkSecurityConfig.DEFAULT;
+            return mDefaultConfig;
         }
 
         @Override
