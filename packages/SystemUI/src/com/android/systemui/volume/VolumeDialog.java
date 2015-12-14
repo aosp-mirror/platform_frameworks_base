@@ -128,6 +128,7 @@ public class VolumeDialog {
     private boolean mPendingStateChanged;
     private boolean mPendingRecheckAll;
     private long mCollapseTime;
+    private int mLastActiveStream;
 
     public VolumeDialog(Context context, int windowType, VolumeDialogController controller,
             ZenModeController zenModeController, Callback callback) {
@@ -273,10 +274,14 @@ public class VolumeDialog {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                final boolean moved = oldLeft != left || oldTop != top;
+                final boolean moved = mLastActiveStream != mActiveStream ||
+                        oldLeft != left || oldTop != top;
                 if (D.BUG) Log.d(TAG, "onLayoutChange moved=" + moved
                         + " old=" + new Rect(oldLeft, oldTop, oldRight, oldBottom).toShortString()
-                        + " new=" + new Rect(left,top,right,bottom).toShortString());
+                        + "," + mLastActiveStream
+                        + " new=" + new Rect(left,top,right,bottom).toShortString()
+                        + "," + mActiveStream);
+                mLastActiveStream = mActiveStream;
                 if (moved) {
                     for (int i = 0; i < mDialogContentView.getChildCount(); i++) {
                         final View c = mDialogContentView.getChildAt(i);
