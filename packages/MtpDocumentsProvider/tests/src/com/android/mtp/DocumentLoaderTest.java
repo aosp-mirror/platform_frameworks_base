@@ -40,11 +40,11 @@ public class DocumentLoaderTest extends AndroidTestCase {
     @Override
     public void setUp() {
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        mDatabase.getMapper().startAddingDocuments("deviceDocId");
-        mDatabase.getMapper().putRootDocuments("deviceDocId", new TestResources(), new MtpRoot[] {
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putRootDocuments(0, new TestResources(), new MtpRoot[] {
                 new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "")
         });
-        mDatabase.getMapper().stopAddingDocuments("deviceDocId");
+        mDatabase.getMapper().stopAddingDocuments(null);
         mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
         mLoader = new DocumentLoader(mManager, mResolver, mDatabase);
