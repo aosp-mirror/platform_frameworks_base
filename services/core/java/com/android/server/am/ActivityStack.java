@@ -1334,7 +1334,7 @@ final class ActivityStack {
     }
 
     /** Returns true if the stack is considered visible. */
-    private boolean isStackVisibleLocked() {
+    boolean isStackVisibleLocked() {
         if (!isAttached()) {
             return false;
         }

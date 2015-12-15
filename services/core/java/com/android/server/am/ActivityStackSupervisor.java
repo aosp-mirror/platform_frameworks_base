@@ -126,7 +126,6 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -371,6 +370,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
 
+    private final ActivityMetricsLogger mActivityMetricsLogger;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -407,6 +408,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mService = service;
         mRecentTasks = recentTasks;
         mHandler = new ActivityStackSupervisorHandler(mService.mHandler.getLooper());
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
     }
 
     /**
@@ -3485,7 +3487,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (!r.info.supportsPip) {
             Slog.w(TAG,
                     "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
-                    + " r=" + r);
+                            + " r=" + r);
             return false;
         }
 
@@ -4539,6 +4541,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     int getLockTaskModeState() {
         return mLockTaskModeState;
+    }
+
+    void logStackState() {
+        mActivityMetricsLogger.logWindowState();
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {

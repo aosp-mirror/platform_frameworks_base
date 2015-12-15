@@ -1434,6 +1434,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 59;
     static final int IDLE_UIDS_MSG = 60;
     static final int SYSTEM_USER_UNLOCK_MSG = 61;
+    static final int LOG_STACK_STATE = 62;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2142,6 +2143,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case IDLE_UIDS_MSG: {
                 idleUids();
+            } break;
+            case LOG_STACK_STATE: {
+                synchronized (ActivityManagerService.this) {
+                    mStackSupervisor.logStackState();
+                }
             } break;
             }
         }
@@ -10902,6 +10908,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /** Notifies all listeners when the task stack has changed. */
     void notifyTaskStackChangedLocked() {
+        mHandler.sendEmptyMessage(LOG_STACK_STATE);
         mHandler.removeMessages(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         Message nmsg = mHandler.obtainMessage(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         mHandler.sendMessageDelayed(nmsg, NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY);
