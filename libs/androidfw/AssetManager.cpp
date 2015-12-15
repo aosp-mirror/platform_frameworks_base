@@ -252,7 +252,7 @@ bool AssetManager::addOverlayPath(const String8& packagePath, int32_t* cookie)
     String8 targetPath;
     String8 overlayPath;
     if (!ResTable::getIdmapInfo(idmap->getBuffer(false), idmap->getLength(),
-                NULL, NULL, NULL, &targetPath, &overlayPath)) {
+                NULL, NULL, NULL, NULL, &targetPath, &overlayPath)) {
         ALOGW("failed to read idmap file %s\n", idmapPath.string());
         delete idmap;
         return false;

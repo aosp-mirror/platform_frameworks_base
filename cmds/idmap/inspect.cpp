@@ -192,6 +192,12 @@ namespace {
         if (err != NO_ERROR) {
             return err;
         }
+        print("", "dangerous", i, "");
+
+        err = buf.nextUint32(&i);
+        if (err != NO_ERROR) {
+            return err;
+        }
         print("", "base crc", i, "");
 
         err = buf.nextUint32(&i);

@@ -800,6 +800,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 string_array16("string-array");
     const String16 integer_array16("integer-array");
     const String16 public16("public");
+    const String16 overlay16("overlay");
     const String16 public_padding16("public-padding");
     const String16 private_symbols16("private-symbols");
     const String16 java_symbol16("java-symbol");
@@ -997,6 +998,41 @@ status_t compileResourceFile(Bundle* bundle,
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
                         if (strcmp16(block.getElementName(&len), public16.string()) == 0) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+
+            } else if (strcmp16(block.getElementName(&len), overlay16.string()) == 0) {
+                SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
+
+                String16 type;
+                const ssize_t typeIdx = block.indexOfAttribute(NULL, "type");
+                if (typeIdx < 0) {
+                    srcPos.error("A 'type' attribute is required for <overlay>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                type = String16(block.getAttributeStringValue(typeIdx, &len));
+
+                String16 name;
+                const ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                if (nameIdx < 0) {
+                    srcPos.error("A 'name' attribute is required for <overlay>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                name = String16(block.getAttributeStringValue(nameIdx, &len));
+
+                if (!localHasErrors) {
+                    err = outTable->addOverlay(srcPos, myPackage, type, name);
+                    if (err < NO_ERROR) {
+                        hasErrors = localHasErrors = true;
+                    }
+                }
+
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        if (strcmp16(block.getElementName(&len), overlay16.string()) == 0) {
                             break;
                         }
                     }
@@ -1844,6 +1880,29 @@ status_t ResourceTable::addPublic(const SourcePos& sourcePos,
     return t->addPublic(sourcePos, name, ident);
 }
 
+status_t ResourceTable::addOverlay(const SourcePos& sourcePos,
+                                  const String16& package,
+                                  const String16& type,
+                                  const String16& name)
+{
+    uint32_t rid = mAssets->getIncludedResources()
+        .identifierForName(name.string(), name.size(),
+                           type.string(), type.size(),
+                           package.string(), package.size());
+    if (rid != 0) {
+        sourcePos.error("Error declaring overlay resource %s/%s for included package %s\n",
+                String8(type).string(), String8(name).string(),
+                String8(package).string());
+        return UNKNOWN_ERROR;
+    }
+
+    sp<Type> t = getType(package, type, sourcePos);
+    if (t == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    return t->addOverlay(sourcePos, name);
+}
+
 status_t ResourceTable::addEntry(const SourcePos& sourcePos,
                                  const String16& package,
                                  const String16& type,
@@ -2644,6 +2703,11 @@ status_t ResourceTable::assignResourceIds()
                 firstError = err;
             }
 
+            err = t->applyOverlay();
+            if (err != NO_ERROR && firstError == NO_ERROR) {
+                firstError = err;
+            }
+
             const size_t N = t->getOrderedConfigs().size();
             t->setIndex(ti + 1 + typeIdOffset);
 
@@ -3232,7 +3296,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                         index[ei] = htodl(data->getSize()-typeStart-typeSize);
 
                         // Create the entry.
-                        ssize_t amt = e->flatten(bundle, data, cl->getPublic());
+                        ssize_t amt = e->flatten(bundle, data, cl->getPublic(), cl->getOverlay());
                         if (amt < 0) {
                             return amt;
                         }
@@ -3737,7 +3801,8 @@ status_t ResourceTable::Entry::remapStringValue(StringPool* strings)
     return NO_ERROR;
 }
 
-ssize_t ResourceTable::Entry::flatten(Bundle* /* bundle */, const sp<AaptFile>& data, bool isPublic)
+ssize_t ResourceTable::Entry::flatten(Bundle* /* bundle */, const sp<AaptFile>& data, bool isPublic,
+        bool isOverlay)
 {
     size_t amt = 0;
     ResTable_entry header;
@@ -3749,6 +3814,9 @@ ssize_t ResourceTable::Entry::flatten(Bundle* /* bundle */, const sp<AaptFile>& 
     }
     if (isPublic) {
         header.flags |= htods(header.FLAG_PUBLIC);
+    }
+    if (isOverlay) {
+        header.flags |= htods(header.FLAG_OVERLAY);
     }
     header.key.index = htodl(mNameIndex);
     if (ty != TYPE_BAG) {
@@ -3890,6 +3958,13 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
     return NO_ERROR;
 }
 
+status_t ResourceTable::Type::addOverlay(const SourcePos& sourcePos,
+                                         const String16& name)
+{
+    mOverlay.add(name, Overlay(sourcePos, String16()));
+    return NO_ERROR;
+}
+
 void ResourceTable::Type::canAddEntry(const String16& name)
 {
     mCanAddEntries.add(name);
@@ -3992,6 +4067,7 @@ sp<ResourceTable::ConfigList> ResourceTable::Type::removeEntry(const String16& e
     }
 
     mPublic.removeItem(entry);
+    mOverlay.removeItem(entry);
     return removed;
 }
 
@@ -4091,6 +4167,22 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
     }
 
     return hasError ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
+}
+
+status_t ResourceTable::Type::applyOverlay() {
+    const size_t N = mOverlay.size();
+    const size_t M = mOrderedConfigs.size();
+    for (size_t i = 0; i < N; i++) {
+        const String16& name = mOverlay.keyAt(i);
+        for (size_t j = 0; j < M; j++) {
+            sp<ConfigList> e = mOrderedConfigs.itemAt(j);
+            if (e->getName() == name) {
+                e->setOverlay(true);
+                break;
+            }
+        }
+    }
+    return NO_ERROR;
 }
 
 ResourceTable::Package::Package(const String16& name, size_t packageId)

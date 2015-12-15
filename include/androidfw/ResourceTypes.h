@@ -1382,7 +1382,11 @@ struct ResTable_entry
         // If set, this is a weak resource and may be overriden by strong
         // resources of the same name/type. This is only useful during
         // linking with other resource tables.
-        FLAG_WEAK = 0x0004
+        FLAG_WEAK = 0x0004,
+        // If set, this resource has been declared OK to overlay, so overlay
+        // packages may be added to the resource table to provide alternative
+        // resource values.
+        FLAG_OVERLAY = 0x0008,
     };
     uint16_t flags;
     
@@ -1861,14 +1865,14 @@ public:
             const char* targetPath, const char* overlayPath,
             void** outData, size_t* outSize) const;
 
-    static const size_t IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256;
+    static const size_t IDMAP_HEADER_SIZE_BYTES = 5 * sizeof(uint32_t) + 2 * 256;
 
     // Retrieve idmap meta-data.
     //
     // This function only requires the idmap header (the first
     // IDMAP_HEADER_SIZE_BYTES) bytes of an idmap file.
     static bool getIdmapInfo(const void* idmap, size_t size,
-            uint32_t* pVersion,
+            uint32_t* pVersion, uint32_t* pDangerous,
             uint32_t* pTargetCrc, uint32_t* pOverlayCrc,
             String8* pTargetPath, String8* pOverlayPath);
 

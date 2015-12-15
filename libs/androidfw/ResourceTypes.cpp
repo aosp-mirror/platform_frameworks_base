@@ -59,7 +59,7 @@ namespace android {
 #endif
 
 #define IDMAP_MAGIC             0x504D4449
-#define IDMAP_CURRENT_VERSION   0x00000001
+#define IDMAP_CURRENT_VERSION   0x00000002
 
 #define APP_PACKAGE_ID      0x7f
 #define SYS_PACKAGE_ID      0x01
@@ -6595,6 +6595,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
         return UNKNOWN_ERROR;
     }
 
+    bool isDangerous = false;
     KeyedVector<uint8_t, IdmapTypeMap> map;
 
     // overlaid packages are assumed to contain only one package group
@@ -6669,6 +6670,13 @@ status_t ResTable::createIdmap(const ResTable& overlay,
                 }
             }
             typeMap.entryMap.add(Res_GETENTRY(overlayResID));
+
+            Entry entry;
+            if (getEntry(pg, typeIndex, entryIndex, NULL, &entry)) {
+                return UNKNOWN_ERROR;
+            }
+            isDangerous = isDangerous ||
+                ((dtohs(entry.entry->flags) & ResTable_entry::FLAG_OVERLAY) == 0);
         }
 
         if (!typeMap.entryMap.isEmpty()) {
@@ -6691,6 +6699,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
     uint32_t* data = (uint32_t*)*outData;
     *data++ = htodl(IDMAP_MAGIC);
     *data++ = htodl(IDMAP_CURRENT_VERSION);
+    *data++ = htodl(isDangerous ? 1 : 0);
     *data++ = htodl(targetCrc);
     *data++ = htodl(overlayCrc);
     const char* paths[] = { targetPath, overlayPath };
@@ -6731,7 +6740,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
 }
 
 bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
-                            uint32_t* pVersion,
+                            uint32_t* pVersion, uint32_t* pDangerous,
                             uint32_t* pTargetCrc, uint32_t* pOverlayCrc,
                             String8* pTargetPath, String8* pOverlayPath)
 {
@@ -6742,17 +6751,20 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
     if (pVersion) {
         *pVersion = dtohl(map[1]);
     }
+    if (pDangerous) {
+        *pDangerous = dtohl(map[2]);
+    }
     if (pTargetCrc) {
-        *pTargetCrc = dtohl(map[2]);
+        *pTargetCrc = dtohl(map[3]);
     }
     if (pOverlayCrc) {
-        *pOverlayCrc = dtohl(map[3]);
+        *pOverlayCrc = dtohl(map[4]);
     }
     if (pTargetPath) {
-        pTargetPath->setTo(reinterpret_cast<const char*>(map + 4));
+        pTargetPath->setTo(reinterpret_cast<const char*>(map + 5));
     }
     if (pOverlayPath) {
-        pOverlayPath->setTo(reinterpret_cast<const char*>(map + 4 + 256 / sizeof(uint32_t)));
+        pOverlayPath->setTo(reinterpret_cast<const char*>(map + 5 + 256 / sizeof(uint32_t)));
     }
     return true;
 }
@@ -7079,6 +7091,9 @@ void ResTable::print(bool inclValues) const
 
                     if ((dtohs(ent->flags)&ResTable_entry::FLAG_PUBLIC) != 0) {
                         printf(" (PUBLIC)");
+                    }
+                    if ((dtohs(ent->flags)&ResTable_entry::FLAG_OVERLAY) != 0) {
+                        printf(" (OVERLAY)");
                     }
                     printf("\n");
 

@@ -106,7 +106,7 @@ fail:
 
         uint32_t cached_target_crc, cached_overlay_crc;
         String8 cached_target_path, cached_overlay_path;
-        if (!ResTable::getIdmapInfo(buf, N, NULL, &cached_target_crc, &cached_overlay_crc,
+        if (!ResTable::getIdmapInfo(buf, N, NULL, NULL, &cached_target_crc, &cached_overlay_crc,
                     &cached_target_path, &cached_overlay_path)) {
             return true;
         }
