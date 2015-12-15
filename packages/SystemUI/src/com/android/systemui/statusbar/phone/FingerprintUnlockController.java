@@ -173,7 +173,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fp wakelock: Authenticated, waking up...");
             }
-            mPowerManager.wakeUp(SystemClock.uptimeMillis());
+            mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.policy:FINGERPRINT");
         }
         releaseFingerprintWakeLock();
         switch (mMode) {
