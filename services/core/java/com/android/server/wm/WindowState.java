@@ -309,6 +309,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // possible to draw.
     final Rect mOutsetFrame = new Rect();
 
+    /**
+     * Usually empty. Set to the task's tempInsetFrame. See
+     *{@link android.app.IActivityManager#resizeDockedStack}.
+     */
+    final Rect mInsetFrame = new Rect();
+
     boolean mContentChanged;
 
     // If a window showing a wallpaper: the requested offset for the
@@ -614,8 +620,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mContainingFrame.set(pf);
             mDisplayFrame.set(df);
+            mInsetFrame.setEmpty();
         } else {
             task.getBounds(mContainingFrame);
+            task.getTempInsetBounds(mInsetFrame);
             final WindowState imeWin = mService.mInputMethodWindow;
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
                     && mContainingFrame.bottom > cf.bottom) {
@@ -674,6 +682,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mOutsets.set(0, 0, 0, 0);
         }
 
+        // Denotes the actual frame used to calculate the insets. When resizing in docked mode,
+        // we'd like to freeze the layout, so we also need to freeze the insets temporarily. By the
+        // notion of a task having a different inset frame, we can achieve that while still moving
+        // the task around.
+        final Rect frame = !mInsetFrame.isEmpty() ? mInsetFrame : mFrame;
+
         // Make sure the content and visible frames are inside of the
         // final window frame.
         if (freeformWorkspace && !mFrame.isEmpty()) {
@@ -709,42 +723,59 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mContentFrame.set(mFrame);
             }
         } else {
-            mContentFrame.set(Math.max(mContentFrame.left, mFrame.left),
-                    Math.max(mContentFrame.top, mFrame.top),
-                    Math.min(mContentFrame.right, mFrame.right),
-                    Math.min(mContentFrame.bottom, mFrame.bottom));
+            mContentFrame.set(Math.max(mContentFrame.left, frame.left),
+                    Math.max(mContentFrame.top, frame.top),
+                    Math.min(mContentFrame.right, frame.right),
+                    Math.min(mContentFrame.bottom, frame.bottom));
 
-            mVisibleFrame.set(Math.max(mVisibleFrame.left, mFrame.left),
-                    Math.max(mVisibleFrame.top, mFrame.top),
-                    Math.min(mVisibleFrame.right, mFrame.right),
-                    Math.min(mVisibleFrame.bottom, mFrame.bottom));
+            mVisibleFrame.set(Math.max(mVisibleFrame.left, frame.left),
+                    Math.max(mVisibleFrame.top, frame.top),
+                    Math.min(mVisibleFrame.right, frame.right),
+                    Math.min(mVisibleFrame.bottom, frame.bottom));
 
-            mStableFrame.set(Math.max(mStableFrame.left, mFrame.left),
-                    Math.max(mStableFrame.top, mFrame.top),
-                    Math.min(mStableFrame.right, mFrame.right),
-                    Math.min(mStableFrame.bottom, mFrame.bottom));
+            mStableFrame.set(Math.max(mStableFrame.left, frame.left),
+                    Math.max(mStableFrame.top, frame.top),
+                    Math.min(mStableFrame.right, frame.right),
+                    Math.min(mStableFrame.bottom, frame.bottom));
         }
 
-        mOverscanInsets.set(Math.max(mOverscanFrame.left - mFrame.left, 0),
-                Math.max(mOverscanFrame.top - mFrame.top, 0),
-                Math.max(mFrame.right - mOverscanFrame.right, 0),
-                Math.max(mFrame.bottom - mOverscanFrame.bottom, 0));
+        mOverscanInsets.set(Math.max(mOverscanFrame.left - frame.left, 0),
+                Math.max(mOverscanFrame.top - frame.top, 0),
+                Math.max(frame.right - mOverscanFrame.right, 0),
+                Math.max(frame.bottom - mOverscanFrame.bottom, 0));
 
-        mContentInsets.set(mContentFrame.left - mFrame.left,
-                mContentFrame.top - mFrame.top,
-                mFrame.right - mContentFrame.right,
-                mFrame.bottom - mContentFrame.bottom);
+        mContentInsets.set(mContentFrame.left - frame.left,
+                mContentFrame.top - frame.top,
+                frame.right - mContentFrame.right,
+                frame.bottom - mContentFrame.bottom);
 
-        mVisibleInsets.set(mVisibleFrame.left - mFrame.left,
-                mVisibleFrame.top - mFrame.top,
-                mFrame.right - mVisibleFrame.right,
-                mFrame.bottom - mVisibleFrame.bottom);
+        mVisibleInsets.set(mVisibleFrame.left - frame.left,
+                mVisibleFrame.top - frame.top,
+                frame.right - mVisibleFrame.right,
+                frame.bottom - mVisibleFrame.bottom);
 
-        mStableInsets.set(Math.max(mStableFrame.left - mFrame.left, 0),
-                Math.max(mStableFrame.top - mFrame.top, 0),
-                Math.max(mFrame.right - mStableFrame.right, 0),
-                Math.max(mFrame.bottom - mStableFrame.bottom, 0));
+        mStableInsets.set(Math.max(mStableFrame.left - frame.left, 0),
+                Math.max(mStableFrame.top - frame.top, 0),
+                Math.max(frame.right - mStableFrame.right, 0),
+                Math.max(frame.bottom - mStableFrame.bottom, 0));
 
+        if (!mInsetFrame.isEmpty()) {
+            mContentFrame.set(mFrame);
+            mContentFrame.top += mContentInsets.top;
+            mContentFrame.bottom += mContentInsets.bottom;
+            mContentFrame.left += mContentInsets.left;
+            mContentFrame.right += mContentInsets.right;
+            mVisibleFrame.set(mFrame);
+            mVisibleFrame.top += mVisibleInsets.top;
+            mVisibleFrame.bottom += mVisibleInsets.bottom;
+            mVisibleFrame.left += mVisibleInsets.left;
+            mVisibleFrame.right += mVisibleInsets.right;
+            mStableFrame.set(mFrame);
+            mStableFrame.top += mStableInsets.top;
+            mStableFrame.bottom += mStableInsets.bottom;
+            mStableFrame.left += mStableInsets.left;
+            mStableFrame.right += mStableInsets.right;
+        }
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
             // If there is a size compatibility scale being applied to the
@@ -1950,8 +1981,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // isDragResizing() or isDragResizeChanged() is true.
         boolean resizing = isDragResizing() || isDragResizeChanged();
         final Rect backDropFrame = (inFreeformWorkspace() || !resizing) ? frame : mTmpRect;
-        mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                outsets, reportDraw, newConfig, backDropFrame);
+        mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
+                reportDraw, newConfig, backDropFrame);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {

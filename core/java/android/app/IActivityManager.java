@@ -145,7 +145,31 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) throws RemoteException;
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) throws RemoteException;
-    public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode) throws RemoteException;
+    public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode)
+            throws RemoteException;
+
+    /**
+     * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.
+     *
+     * @param dockedBounds The bounds for the docked stack.
+     * @param tempDockedTaskBounds The temporary bounds for the tasks in the docked stack, which
+     *                             might be different from the stack bounds to allow more
+     *                             flexibility while resizing, or {@code null} if they should be the
+     *                             same as the stack bounds.
+     * @param tempDockedTaskInsetBounds The temporary bounds for the tasks to calculate the insets.
+     *                                  When resizing, we usually "freeze" the layout of a task. To
+     *                                  achieve that, we also need to "freeze" the insets, which
+     *                                  gets achieved by changing task bounds but not bounds used
+     *                                  to calculate the insets in this transient state
+     * @param tempOtherTaskBounds The temporary bounds for the tasks in all other stacks, or
+     *                            {@code null} if they should be the same as the stack bounds.
+     * @param tempOtherTaskInsetBounds Like {@code tempDockedTaskInsetBounds}, but for the other
+     *                                 stacks.
+     * @throws RemoteException
+     */
+    public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
+            Rect tempDockedTaskInsetBounds,
+            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) throws RemoteException;
     public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException;
     public List<StackInfo> getAllStackInfos() throws RemoteException;
     public StackInfo getStackInfo(int stackId) throws RemoteException;
@@ -922,4 +946,5 @@ public interface IActivityManager extends IInterface {
     int ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 355;
     int SET_VR_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 356;
     int GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 357;
+    int RESIZE_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 358;
 }

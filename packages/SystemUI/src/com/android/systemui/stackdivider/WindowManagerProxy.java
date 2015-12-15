@@ -40,18 +40,36 @@ public class WindowManagerProxy {
     private static final WindowManagerProxy sInstance = new WindowManagerProxy();
 
     @GuardedBy("mResizeRect")
-    private final Rect mResizeRect = new Rect();
-    private final Rect mTmpRect = new Rect();
+    private final Rect mDockedRect = new Rect();
+    private final Rect mTempDockedTaskRect = new Rect();
+    private final Rect mTempDockedInsetRect = new Rect();
+    private final Rect mTempOtherTaskRect = new Rect();
+    private final Rect mTempOtherInsetRect = new Rect();
+
+    private final Rect mTmpRect1 = new Rect();
+    private final Rect mTmpRect2 = new Rect();
+    private final Rect mTmpRect3 = new Rect();
+    private final Rect mTmpRect4 = new Rect();
+    private final Rect mTmpRect5 = new Rect();
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     private final Runnable mResizeRunnable = new Runnable() {
         @Override
         public void run() {
-            synchronized (mResizeRect) {
-                mTmpRect.set(mResizeRect);
+            synchronized (mDockedRect) {
+                mTmpRect1.set(mDockedRect);
+                mTmpRect2.set(mTempDockedTaskRect);
+                mTmpRect3.set(mTempDockedInsetRect);
+                mTmpRect4.set(mTempOtherTaskRect);
+                mTmpRect5.set(mTempOtherInsetRect);
             }
             try {
-                ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, mTmpRect, true);
+                ActivityManagerNative.getDefault()
+                        .resizeDockedStack(mTmpRect1,
+                                mTmpRect2.isEmpty() ? null : mTmpRect2,
+                                mTmpRect3.isEmpty() ? null : mTmpRect3,
+                                mTmpRect4.isEmpty() ? null : mTmpRect4,
+                                mTmpRect5.isEmpty() ? null : mTmpRect5);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }
@@ -87,9 +105,30 @@ public class WindowManagerProxy {
         return sInstance;
     }
 
-    public void resizeDockedStack(Rect rect) {
-        synchronized (mResizeRect) {
-            mResizeRect.set(rect);
+    public void resizeDockedStack(Rect docked, Rect tempDockedTaskRect, Rect tempDockedInsetRect,
+            Rect tempOtherTaskRect, Rect tempOtherInsetRect) {
+        synchronized (mDockedRect) {
+            mDockedRect.set(docked);
+            if (tempDockedTaskRect != null) {
+                mTempDockedTaskRect.set(tempDockedTaskRect);
+            } else {
+                mTempDockedTaskRect.setEmpty();
+            }
+            if (tempDockedInsetRect != null) {
+                mTempDockedInsetRect.set(tempDockedInsetRect);
+            } else {
+                mTempDockedInsetRect.setEmpty();
+            }
+            if (tempOtherTaskRect != null) {
+                mTempOtherTaskRect.set(tempOtherTaskRect);
+            } else {
+                mTempOtherTaskRect.setEmpty();
+            }
+            if (tempOtherInsetRect != null) {
+                mTempOtherInsetRect.set(tempOtherInsetRect);
+            } else {
+                mTempOtherInsetRect.setEmpty();
+            }
         }
         mExecutor.execute(mResizeRunnable);
     }

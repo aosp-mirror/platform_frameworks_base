@@ -114,7 +114,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
      * @return True if the stack bounds was changed.
      * */
     boolean setBounds(
-            Rect stackBounds, SparseArray<Configuration> configs, SparseArray<Rect> taskBounds) {
+            Rect stackBounds, SparseArray<Configuration> configs, SparseArray<Rect> taskBounds,
+            SparseArray<Rect> taskTempInsetBounds) {
         if (!setBounds(stackBounds)) {
             return false;
         }
@@ -136,6 +137,9 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     task.scrollLocked(mTmpRect);
                 } else {
                     task.setBounds(bounds, config);
+                    task.setTempInsetBounds(
+                            taskTempInsetBounds != null ? taskTempInsetBounds.get(task.mTaskId)
+                                    : null);
                 }
             } else {
                 Slog.wtf(TAG_WM, "No config for task: " + task + ", is there a mismatch with AM?");

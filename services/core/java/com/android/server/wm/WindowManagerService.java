@@ -4824,14 +4824,16 @@ public class WindowManagerService extends IWindowManager.Stub
      * @return True if the stack is now fullscreen.
      * */
     public boolean resizeStack(int stackId, Rect bounds,
-            SparseArray<Configuration> configs, SparseArray<Rect> taskBounds) {
+            SparseArray<Configuration> configs, SparseArray<Rect> taskBounds,
+            SparseArray<Rect> taskTempInsetBounds) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack == null) {
                 throw new IllegalArgumentException("resizeStack: stackId " + stackId
                         + " not found.");
             }
-            if (stack.setBounds(bounds, configs, taskBounds) && stack.isVisibleLocked()) {
+            if (stack.setBounds(bounds, configs, taskBounds, taskTempInsetBounds)
+                    && stack.isVisibleLocked()) {
                 stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();

@@ -29,6 +29,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.DividerView;
 import com.android.systemui.tuner.TunerService;
 
 import static android.view.WindowManager.*;
@@ -198,8 +199,10 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             }
         } else {
             if (mDragMode == DRAG_MODE_DIVIDER) {
+                int position = !mIsVertical ? (int) event.getRawY() : (int) event.getRawX();
                 mDivider.getView().resizeStack(
-                        !mIsVertical ? (int) event.getRawY() : (int) event.getRawX());
+                        position, mDivider.getView().getSnapAlgorithm()
+                                .calculateSnapTarget(position, 0f /* velocity */).position);
             } else if (mDragMode == DRAG_MODE_RECENTS) {
                 mRecentsComponent.onDraggingInRecents(event.getRawY());
             }

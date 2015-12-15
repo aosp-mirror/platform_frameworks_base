@@ -37,6 +37,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.localLOGV;
+import static com.android.server.wm.WindowState.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowState.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
@@ -1063,7 +1064,16 @@ class WindowStateAnimator {
         final int top = w.mYOffset + w.mFrame.top;
 
         // Initialize the decor rect to the entire frame.
-        mSystemDecorRect.set(0, 0, width, height);
+        if (w.isDragResizing() && w.getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER) {
+
+            // If we are resizing with the divider, the task bounds might be smaller than the
+            // stack bounds. The system decor is used to clip to the task bounds, which we don't
+            // want in this case in order to avoid holes.
+            final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
+            mSystemDecorRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        } else {
+            mSystemDecorRect.set(0, 0, width, height);
+        }
 
         // If a freeform window is animating from a position where it would be cutoff, it would be
         // cutoff during the animation. We don't want that, so for the duration of the animation

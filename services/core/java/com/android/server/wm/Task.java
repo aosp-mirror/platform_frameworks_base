@@ -62,6 +62,9 @@ class Task implements DimLayer.DimLayerUser {
     // Content limits relative to the DisplayContent this sits in.
     private Rect mBounds = new Rect();
 
+    // Bounds used to calculate the insets.
+    private final Rect mTempInsetBounds = new Rect();
+
     // Device rotation as of the last time {@link #mBounds} was set.
     int mRotation;
 
@@ -267,6 +270,26 @@ class Task implements DimLayer.DimLayerUser {
         return boundsChange;
     }
 
+    /**
+     * Sets the bounds used to calculate the insets. See
+     * {@link android.app.IActivityManager#resizeDockedStack} why this is needed.
+     */
+    void setTempInsetBounds(Rect tempInsetBounds) {
+        if (tempInsetBounds != null) {
+            mTempInsetBounds.set(tempInsetBounds);
+        } else {
+            mTempInsetBounds.setEmpty();
+        }
+    }
+
+    /**
+     * Gets the bounds used to calculate the insets. See
+     * {@link android.app.IActivityManager#resizeDockedStack} why this is needed.
+     */
+    void getTempInsetBounds(Rect out) {
+        out.set(mTempInsetBounds);
+    }
+
     void setResizeable(boolean resizeable) {
         mResizeable = resizeable;
     }
@@ -356,7 +379,6 @@ class Task implements DimLayer.DimLayerUser {
         // system.
         mStack.getDisplayContent().getLogicalDisplayRect(out);
     }
-
 
     /**
      * Calculate the maximum visible area of this task. If the task has only one app,

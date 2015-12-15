@@ -9559,7 +9559,26 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             synchronized (this) {
                 mStackSupervisor.resizeStackLocked(
-                        stackId, bounds, !PRESERVE_WINDOWS, allowResizeInDockedMode);
+                        stackId, bounds, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        !PRESERVE_WINDOWS, allowResizeInDockedMode);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
+            Rect tempDockedTaskInsetBounds,
+            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "resizeDockedStack()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                mStackSupervisor.resizeDockedStackLocked(dockedBounds, tempDockedTaskBounds,
+                        tempDockedTaskInsetBounds, tempOtherTaskBounds, tempOtherTaskInsetBounds,
+                        PRESERVE_WINDOWS);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

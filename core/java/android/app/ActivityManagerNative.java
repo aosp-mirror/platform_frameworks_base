@@ -785,6 +785,39 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case RESIZE_DOCKED_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final boolean hasBounds = data.readInt() != 0;
+            Rect bounds = null;
+            if (hasBounds) {
+                bounds = Rect.CREATOR.createFromParcel(data);
+            }
+            final boolean hasTempDockedTaskBounds = data.readInt() != 0;
+            Rect tempDockedTaskBounds = null;
+            if (hasTempDockedTaskBounds) {
+                tempDockedTaskBounds = Rect.CREATOR.createFromParcel(data);
+            }
+            final boolean hasTempDockedTaskInsetBounds = data.readInt() != 0;
+            Rect tempDockedTaskInsetBounds = null;
+            if (hasTempDockedTaskInsetBounds) {
+                tempDockedTaskInsetBounds = Rect.CREATOR.createFromParcel(data);
+            }
+            final boolean hasTempOtherTaskBounds = data.readInt() != 0;
+            Rect tempOtherTaskBounds = null;
+            if (hasTempOtherTaskBounds) {
+                tempOtherTaskBounds = Rect.CREATOR.createFromParcel(data);
+            }
+            final boolean hasTempOtherTaskInsetBounds = data.readInt() != 0;
+            Rect tempOtherTaskInsetBounds = null;
+            if (hasTempOtherTaskInsetBounds) {
+                tempOtherTaskInsetBounds = Rect.CREATOR.createFromParcel(data);
+            }
+            resizeDockedStack(bounds, tempDockedTaskBounds, tempDockedTaskInsetBounds,
+                    tempOtherTaskBounds, tempOtherTaskInsetBounds);
+            reply.writeNoException();
+            return true;
+        }
+
         case POSITION_TASK_IN_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int taskId = data.readInt();
@@ -3685,6 +3718,50 @@ class ActivityManagerProxy implements IActivityManager
         }
         data.writeInt(allowResizeInDockedMode ? 1 : 0);
         mRemote.transact(RESIZE_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    @Override
+    public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
+            Rect tempDockedTaskInsetBounds,
+            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds)
+            throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        if (dockedBounds != null) {
+            data.writeInt(1);
+            dockedBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        if (tempDockedTaskBounds != null) {
+            data.writeInt(1);
+            tempDockedTaskBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        if (tempDockedTaskInsetBounds != null) {
+            data.writeInt(1);
+            tempDockedTaskInsetBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        if (tempOtherTaskBounds != null) {
+            data.writeInt(1);
+            tempOtherTaskBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        if (tempOtherTaskInsetBounds != null) {
+            data.writeInt(1);
+            tempOtherTaskInsetBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        mRemote.transact(RESIZE_DOCKED_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
