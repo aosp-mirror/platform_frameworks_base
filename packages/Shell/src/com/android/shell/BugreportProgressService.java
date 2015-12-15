@@ -116,6 +116,10 @@ public class BugreportProgressService extends Service {
     // External intents sent by dumpstate.
     static final String INTENT_BUGREPORT_STARTED = "android.intent.action.BUGREPORT_STARTED";
     static final String INTENT_BUGREPORT_FINISHED = "android.intent.action.BUGREPORT_FINISHED";
+    static final String INTENT_REMOTE_BUGREPORT_FINISHED =
+            "android.intent.action.REMOTE_BUGREPORT_FINISHED";
+    static final String INTENT_REMOTE_BUGREPORT_DISPATCH =
+            "android.intent.action.REMOTE_BUGREPORT_DISPATCH";
 
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
@@ -1005,7 +1009,7 @@ public class BugreportProgressService extends Service {
         return foundAccount;
     }
 
-    private static Uri getUri(Context context, File file) {
+    static Uri getUri(Context context, File file) {
         return file != null ? FileProvider.getUriForFile(context, AUTHORITY, file) : null;
     }
 

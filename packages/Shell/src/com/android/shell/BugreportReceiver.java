@@ -52,7 +52,7 @@ public class BugreportReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // Clean up older bugreports in background
-        cleanupOldFiles(intent);
+        cleanupOldFiles(this, intent, INTENT_BUGREPORT_FINISHED, MIN_KEEP_COUNT, MIN_KEEP_AGE);
 
         // Delegate intent handling to service.
         Intent serviceIntent = new Intent(context, BugreportProgressService.class);
@@ -60,8 +60,9 @@ public class BugreportReceiver extends BroadcastReceiver {
         context.startService(serviceIntent);
     }
 
-    private void cleanupOldFiles(Intent intent) {
-        if (!INTENT_BUGREPORT_FINISHED.equals(intent.getAction())) {
+    static void cleanupOldFiles(BroadcastReceiver br, Intent intent, String expectedAction,
+            final int minCount, final long minAge) {
+        if (!expectedAction.equals(intent.getAction())) {
             return;
         }
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
@@ -69,12 +70,11 @@ public class BugreportReceiver extends BroadcastReceiver {
             Log.e(TAG, "Not deleting old files because file " + bugreportFile + " doesn't exist");
             return;
         }
-        final PendingResult result = goAsync();
+        final PendingResult result = br.goAsync();
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                FileUtils.deleteOlderFiles(
-                        bugreportFile.getParentFile(), MIN_KEEP_COUNT, MIN_KEEP_AGE);
+                FileUtils.deleteOlderFiles(bugreportFile.getParentFile(), minCount, minAge);
                 result.finish();
                 return null;
             }
