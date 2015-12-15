@@ -3,6 +3,7 @@ package com.android.internal.view.menu;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import android.annotation.AttrRes;
@@ -36,6 +37,7 @@ import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
+import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
 /**
@@ -45,6 +47,7 @@ import com.android.internal.util.Preconditions;
  */
 final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKeyListener,
         PopupWindow.OnDismissListener {
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HORIZ_POSITION_LEFT, HORIZ_POSITION_RIGHT})
     public @interface HorizPosition {}
@@ -58,6 +61,9 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     private static final int SUBMENU_TIMEOUT_MS = 200;
 
+    /** List of menus that were added before this popup was shown. */
+    private final LinkedList<MenuBuilder> mPendingMenus = new LinkedList<MenuBuilder>;
+
     private final Context mContext;
     private final int mMenuMaxWidth;
     private final int mPopupStyleAttr;
@@ -69,7 +75,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      * List of open menus. The first item is the root menu and each
      * subsequent item is a direct submenu of the previous item.
      */
-    private final List<CascadingMenuInfo> mAddedMenus = new ArrayList<>();
+    private final List<CascadingMenuInfo> mShowingMenus = new ArrayList<>();
 
     private final OnGlobalLayoutListener mGlobalLayoutListener = new OnGlobalLayoutListener() {
         @Override
@@ -80,7 +86,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
                     dismiss();
                 } else if (isShowing()) {
                     // Recompute window sizes and positions.
-                    for (CascadingMenuInfo info : mAddedMenus) {
+                    for (CascadingMenuInfo info : mShowingMenus) {
                         info.window.show();
                     }
                 }
@@ -123,8 +129,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
             // Find the position of the hovered menu within the added menus.
             int menuIndex = -1;
-            for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
-                if (menu == mAddedMenus.get(i).menu) {
+            for (int i = 0, count = mShowingMenus.size(); i < count; i++) {
+                if (menu == mShowingMenus.get(i).menu) {
                     menuIndex = i;
                     break;
                 }
@@ -136,8 +142,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
             final CascadingMenuInfo nextInfo;
             final int nextIndex = menuIndex + 1;
-            if (nextIndex < mAddedMenus.size()) {
-                nextInfo = mAddedMenus.get(nextIndex);
+            if (nextIndex < mShowingMenus.size()) {
+                nextInfo = mShowingMenus.get(nextIndex);
             } else {
                 nextInfo = null;
             }
@@ -228,35 +234,14 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             return;
         }
 
-        // Show any menus that have been added via #addMenu(MenuBuilder) but
-        // which have not yet been shown. In a typical use case,
-        // #addMenu(MenuBuilder) would be called once, followed by a call to
-        // this #show() method -- which would actually show the popup on the
-        // screen.
-        for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
-            final CascadingMenuInfo info = mAddedMenus.get(i);
-            final MenuPopupWindow popupWindow = info.window;
-            popupWindow.show();
-
-            final MenuBuilder menu = info.menu;
-            if (i == 0 && mShowTitle && menu.getHeaderTitle() != null) {
-                FrameLayout titleItemView =
-                        (FrameLayout) LayoutInflater.from(mContext).inflate(
-                                com.android.internal.R.layout.popup_menu_header_item_layout,
-                                info.getListView(),
-                                false);
-                TextView titleView = (TextView) titleItemView.findViewById(
-                        com.android.internal.R.id.title);
-                titleView.setText(menu.getHeaderTitle());
-                titleItemView.setEnabled(false);
-                info.getListView().addHeaderView(titleItemView, null, false);
-
-                // Update to show the title.
-                popupWindow.show();
-            }
+        // Display all pending menus.
+        for (MenuBuilder menu : mPendingMenus) {
+            showMenu(menu);
         }
+        mPendingMenus.clear();
 
         mShownAnchorView = mAnchorView;
+
         if (mShownAnchorView != null) {
             final boolean addGlobalListener = mTreeObserver == null;
             mTreeObserver = mShownAnchorView.getViewTreeObserver(); // Refresh to latest
@@ -273,10 +258,10 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         // exception, as #onDismiss may clear mPopupWindows while we are
         // iterating. Remove from the last added menu so that the callbacks
         // are received in order from foreground to background.
-        final int length = mAddedMenus.size();
+        final int length = mShowingMenus.size();
         if (length > 0) {
             final CascadingMenuInfo[] addedMenus =
-                    mAddedMenus.toArray(new CascadingMenuInfo[length]);
+                    mShowingMenus.toArray(new CascadingMenuInfo[length]);
             for (int i = length - 1; i >= 0; i--) {
                 final CascadingMenuInfo info = addedMenus[i];
                 if (info.window.isShowing()) {
@@ -315,7 +300,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     @HorizPosition
     private int getNextMenuPosition(int nextMenuWidth) {
-        ListView lastListView = mAddedMenus.get(mAddedMenus.size() - 1).getListView();
+        ListView lastListView = mShowingMenus.get(mShowingMenus.size() - 1).getListView();
 
         final int[] screenLocation = new int[2];
         lastListView.getLocationOnScreen(screenLocation);
@@ -342,6 +327,19 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     public void addMenu(MenuBuilder menu) {
         menu.addMenuPresenter(this, mContext);
 
+        if (isShowing()) {
+            showMenu(menu);
+        } else {
+            mPendingMenus.add(menu);
+        }
+    }
+
+    /**
+     * Prepares and shows the specified menu immediately.
+     *
+     * @param menu the menu to show
+     */
+    private void showMenu(@NonNull MenuBuilder menu) {
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly);
         adapter.setForceShowIcon(mForceShowIcon);
@@ -354,8 +352,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
         final CascadingMenuInfo parentInfo;
         final View parentView;
-        if (mAddedMenus.size() > 0) {
-            parentInfo = mAddedMenus.get(mAddedMenus.size() - 1);
+        if (mShowingMenus.size() > 0) {
+            parentInfo = mShowingMenus.get(mShowingMenus.size() - 1);
             parentView = findParentViewForSubmenu(parentInfo, menu);
         } else {
             parentInfo = null;
@@ -407,12 +405,21 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         popupWindow.setVerticalOffset(y);
 
         final CascadingMenuInfo menuInfo = new CascadingMenuInfo(popupWindow, menu, mLastPosition);
-        mAddedMenus.add(menuInfo);
+        mShowingMenus.add(menuInfo);
 
-        // NOTE: This case handles showing submenus once the CascadingMenuPopup has already
-        // been shown via a call to its #show() method. If it hasn't yet been show()n, then
-        // we deliberately do not yet show the popupWindow, as #show() will do that later.
-        if (isShowing()) {
+        popupWindow.show();
+
+        // If this is the root menu, show the title if requested.
+        if (parentInfo == null && mShowTitle && menu.getHeaderTitle() != null) {
+            final ListView listView = popupWindow.getListView();
+            final FrameLayout titleItemView = (FrameLayout) inflater.inflate(
+                    R.layout.popup_menu_header_item_layout, listView, false);
+            final TextView titleView = (TextView) titleItemView.findViewById(R.id.title);
+            titleItemView.setEnabled(false);
+            titleView.setText(menu.getHeaderTitle());
+            listView.addHeaderView(titleItemView, null, false);
+
+            // Show again to update the title.
             popupWindow.show();
         }
     }
@@ -500,7 +507,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     @Override
     public boolean isShowing() {
-        return mAddedMenus.size() > 0 && mAddedMenus.get(0).window.isShowing();
+        return mShowingMenus.size() > 0 && mShowingMenus.get(0).window.isShowing();
     }
 
     /**
@@ -511,8 +518,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         // The dismiss listener doesn't pass the calling window, so walk
         // through the stack to figure out which one was just dismissed.
         CascadingMenuInfo dismissedInfo = null;
-        for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
-            final CascadingMenuInfo info = mAddedMenus.get(i);
+        for (int i = 0, count = mShowingMenus.size(); i < count; i++) {
+            final CascadingMenuInfo info = mShowingMenus.get(i);
             if (!info.window.isShowing()) {
                 dismissedInfo = info;
                 break;
@@ -528,7 +535,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public void updateMenuView(boolean cleared) {
-        for (CascadingMenuInfo info : mAddedMenus) {
+        for (CascadingMenuInfo info : mShowingMenus) {
             toMenuAdapter(info.getListView().getAdapter()).notifyDataSetChanged();
         }
     }
@@ -541,7 +548,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     @Override
     public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
         // Don't allow double-opening of the same submenu.
-        for (CascadingMenuInfo info : mAddedMenus) {
+        for (CascadingMenuInfo info : mShowingMenus) {
             if (subMenu == info.menu) {
                 // Just re-focus that one.
                 info.getListView().requestFocus();
@@ -567,8 +574,8 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      * @return the index of the menu, or {@code -1} if not present
      */
     private int findIndexOfAddedMenu(@NonNull MenuBuilder menu) {
-        for (int i = 0, count = mAddedMenus.size(); i < count; i++) {
-            final CascadingMenuInfo info  = mAddedMenus.get(i);
+        for (int i = 0, count = mShowingMenus.size(); i < count; i++) {
+            final CascadingMenuInfo info  = mShowingMenus.get(i);
             if (menu == info.menu) {
                 return i;
             }
@@ -586,13 +593,13 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
         // Recursively close descendant menus.
         final int nextMenuIndex = menuIndex + 1;
-        if (nextMenuIndex < mAddedMenus.size()) {
-            final CascadingMenuInfo childInfo = mAddedMenus.get(nextMenuIndex);
+        if (nextMenuIndex < mShowingMenus.size()) {
+            final CascadingMenuInfo childInfo = mShowingMenus.get(nextMenuIndex);
             childInfo.menu.close(false /* closeAllMenus */);
         }
 
         // Close the target menu.
-        final CascadingMenuInfo info = mAddedMenus.remove(menuIndex);
+        final CascadingMenuInfo info = mShowingMenus.remove(menuIndex);
         info.menu.removeMenuPresenter(this);
         if (mShouldCloseImmediately) {
             // Disable all exit animations.
@@ -601,9 +608,9 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         }
         info.window.dismiss();
 
-        final int count = mAddedMenus.size();
+        final int count = mShowingMenus.size();
         if (count > 0) {
-            mLastPosition = mAddedMenus.get(count - 1).position;
+            mLastPosition = mShowingMenus.get(count - 1).position;
         } else {
             mLastPosition = getInitialMenuPosition();
         }
@@ -631,7 +638,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             // Close all menus starting from the root. This will recursively
             // close any remaining menus, so we don't need to propagate the
             // "closeAllMenus" flag. The last window will clean up.
-            final CascadingMenuInfo rootInfo = mAddedMenus.get(0);
+            final CascadingMenuInfo rootInfo = mShowingMenus.get(0);
             rootInfo.menu.close(false /* closeAllMenus */);
         }
     }
@@ -677,7 +684,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
     @Override
     public ListView getListView() {
-        return mAddedMenus.isEmpty() ? null : mAddedMenus.get(mAddedMenus.size() - 1).getListView();
+        return mShowingMenus.isEmpty() ? null : mShowingMenus.get(mShowingMenus.size() - 1).getListView();
     }
 
     @Override
