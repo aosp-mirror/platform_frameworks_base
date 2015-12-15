@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import android.app.backup.IBackupManager;
+import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.content.Context;
@@ -322,6 +323,12 @@ public class Trampoline extends IBackupManager.Stub {
     public long getAvailableRestoreToken(String packageName) {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.getAvailableRestoreToken(packageName) : 0;
+    }
+
+    @Override
+    public int requestBackup(String[] packages, IBackupObserver observer) throws RemoteException {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.requestBackup(packages, observer) : null;
     }
 
     @Override

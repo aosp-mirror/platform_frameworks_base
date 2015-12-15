@@ -58,7 +58,6 @@ public class RestoreSet implements Parcelable {
         token = _token;
     }
 
-
     // Parcelable implementation
     public int describeContents() {
         return 0;

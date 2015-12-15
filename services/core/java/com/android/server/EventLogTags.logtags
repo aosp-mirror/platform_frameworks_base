@@ -107,6 +107,7 @@ option java_package com.android.server
 2825 backup_success (Packages|1|1),(Time|1|3)
 2826 backup_reset (Transport|3)
 2827 backup_initialize
+2828 backup_requested (Total|1|1),(Key-Value|1|1),(Full|1|1)
 2830 restore_start (Transport|3),(Source|2|5)
 2831 restore_transport_failure
 2832 restore_agent_failure (Package|3),(Message|3)
