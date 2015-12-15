@@ -28,14 +28,18 @@
 #include <EGL/eglext.h>
 #include <EGL/egl_cache.h>
 
+#include <utils/Looper.h>
+#include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
 #include "android_view_GraphicBuffer.h"
+#include "android_os_MessageQueue.h"
 
 #include <Animator.h>
 #include <AnimationContext.h>
+#include <FrameInfo.h>
 #include <IContextFactory.h>
 #include <JankTracker.h>
 #include <RenderNode.h>
@@ -49,6 +53,12 @@ namespace android {
 
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
+
+struct {
+    jfieldID buffer;
+    jfieldID messageQueue;
+    jmethodID notifyData;
+} gFrameStatsObserverClassInfo;
 
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
@@ -206,6 +216,99 @@ public:
 private:
     RootRenderNode* mRootNode;
 };
+
+class ObserverProxy;
+
+class NotifyHandler : public MessageHandler {
+public:
+    NotifyHandler(JavaVM* vm) : mVm(vm) {}
+
+    void setObserver(ObserverProxy* observer) {
+        mObserver = observer;
+    }
+
+    void setBuffer(BufferPool::Buffer* buffer) {
+        mBuffer = buffer;
+    }
+
+    virtual void handleMessage(const Message& message);
+
+private:
+    JavaVM* mVm;
+
+    sp<ObserverProxy> mObserver;
+    BufferPool::Buffer* mBuffer;
+};
+
+class ObserverProxy : public FrameStatsObserver {
+public:
+    ObserverProxy(JavaVM *vm, jobject fso) : mVm(vm) {
+        JNIEnv* env = getenv(mVm);
+
+        jlongArray longArrayLocal = env->NewLongArray(kBufferSize);
+        LOG_ALWAYS_FATAL_IF(longArrayLocal == nullptr,
+                "OOM: can't allocate frame stats buffer");
+        env->SetObjectField(fso, gFrameStatsObserverClassInfo.buffer, longArrayLocal);
+
+        mFsoWeak = env->NewWeakGlobalRef(fso);
+        LOG_ALWAYS_FATAL_IF(mFsoWeak == nullptr,
+                "unable to create frame stats observer reference");
+
+        jobject messageQueueLocal =
+                env->GetObjectField(fso, gFrameStatsObserverClassInfo.messageQueue);
+        mMessageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueLocal);
+        LOG_ALWAYS_FATAL_IF(mMessageQueue == nullptr, "message queue not available");
+
+        mMessageHandler = new NotifyHandler(mVm);
+        LOG_ALWAYS_FATAL_IF(mMessageHandler == nullptr,
+                "OOM: unable to allocate NotifyHandler");
+    }
+
+    ~ObserverProxy() {
+        JNIEnv* env = getenv(mVm);
+        env->DeleteWeakGlobalRef(mFsoWeak);
+    }
+
+    jweak getJavaObjectRef() {
+        return mFsoWeak;
+    }
+
+    virtual void notify(BufferPool::Buffer* buffer) {
+        buffer->incRef();
+        mMessageHandler->setBuffer(buffer);
+        mMessageHandler->setObserver(this);
+        mMessageQueue->getLooper()->sendMessage(mMessageHandler, mMessage);
+    }
+
+private:
+    static const int kBufferSize = static_cast<int>(FrameInfoIndex::NumIndexes);
+
+    JavaVM* mVm;
+    jweak mFsoWeak;
+
+    sp<MessageQueue> mMessageQueue;
+    sp<NotifyHandler> mMessageHandler;
+    Message mMessage;
+};
+
+void NotifyHandler::handleMessage(const Message& message) {
+    JNIEnv* env = getenv(mVm);
+
+    jobject target = env->NewLocalRef(mObserver->getJavaObjectRef());
+
+    if (target != nullptr) {
+        jobject javaBuffer = env->GetObjectField(target, gFrameStatsObserverClassInfo.buffer);
+        if (javaBuffer != nullptr) {
+            env->SetLongArrayRegion(reinterpret_cast<jlongArray>(javaBuffer),
+                    0, mBuffer->getSize(), mBuffer->getBuffer());
+            env->CallVoidMethod(target, gFrameStatsObserverClassInfo.notifyData);
+            env->DeleteLocalRef(target);
+        }
+    }
+
+    mBuffer->release();
+    mObserver.clear();
+}
 
 static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject graphicBuffer, jlongArray atlasMapArray) {
@@ -468,6 +571,42 @@ static void android_view_ThreadedRenderer_setContentDrawBounds(JNIEnv* env,
 }
 
 // ----------------------------------------------------------------------------
+// FrameStatsObserver
+// ----------------------------------------------------------------------------
+
+static jlong android_view_ThreadedRenderer_addFrameStatsObserver(JNIEnv* env,
+        jclass clazz, jlong proxyPtr, jobject fso) {
+    JavaVM* vm = nullptr;
+    if (env->GetJavaVM(&vm) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Unable to get Java VM");
+        return 0;
+    }
+
+    renderthread::RenderProxy* renderProxy =
+            reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
+
+    FrameStatsObserver* observer = new ObserverProxy(vm, fso);
+    renderProxy->addFrameStatsObserver(observer);
+    return reinterpret_cast<jlong>(observer);
+}
+
+static void android_view_ThreadedRenderer_removeFrameStatsObserver(JNIEnv* env, jclass clazz,
+        jlong proxyPtr, jlong observerPtr) {
+    FrameStatsObserver* observer = reinterpret_cast<FrameStatsObserver*>(observerPtr);
+    renderthread::RenderProxy* renderProxy =
+            reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
+
+    renderProxy->removeFrameStatsObserver(observer);
+}
+
+static jint android_view_ThreadedRenderer_getDroppedFrameReportCount(JNIEnv* env, jclass clazz,
+        jlong proxyPtr) {
+    renderthread::RenderProxy* renderProxy =
+            reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
+    return renderProxy->getDroppedFrameReportCount();
+}
+
+// ----------------------------------------------------------------------------
 // Shaders
 // ----------------------------------------------------------------------------
 
@@ -523,9 +662,26 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
     { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
+    { "nAddFrameStatsObserver",
+            "(JLandroid/view/FrameStatsObserver;)J",
+            (void*)android_view_ThreadedRenderer_addFrameStatsObserver },
+    { "nRemoveFrameStatsObserver",
+            "(JJ)V",
+            (void*)android_view_ThreadedRenderer_removeFrameStatsObserver },
+    { "nGetDroppedFrameReportCount",
+            "(J)J",
+            (void*)android_view_ThreadedRenderer_getDroppedFrameReportCount },
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
+    jclass clazz = FindClassOrDie(env, "android/view/FrameStatsObserver");
+    gFrameStatsObserverClassInfo.messageQueue  =
+            GetFieldIDOrDie(env, clazz, "mMessageQueue", "Landroid/os/MessageQueue;");
+    gFrameStatsObserverClassInfo.buffer =
+            GetFieldIDOrDie(env, clazz, "mBuffer", "[J");
+    gFrameStatsObserverClassInfo.notifyData =
+            GetMethodIDOrDie(env, clazz, "notifyDataAvailable", "()V");
+
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

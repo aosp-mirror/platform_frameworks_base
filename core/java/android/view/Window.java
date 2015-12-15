@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -792,6 +793,40 @@ public abstract class Window {
      */
     public final Callback getCallback() {
         return mCallback;
+    }
+
+    /**
+     * Set an observer to collect frame stats for each frame rendererd in this window.
+     *
+     * Must be in hardware rendering mode.
+     * @hide
+     */
+    public final void addFrameStatsObserver(@NonNull FrameStatsObserver fso) {
+        final View decorView = getDecorView();
+        if (decorView == null) {
+            throw new IllegalStateException("can't observe a Window without an attached view");
+        }
+
+        if (fso == null) {
+            throw new NullPointerException("FrameStatsObserver cannot be null");
+        }
+
+        if (fso.isRegistered()) {
+            throw new IllegalStateException("FrameStatsObserver already registered on a Window.");
+        }
+
+        decorView.addFrameStatsObserver(fso);
+    }
+
+    /**
+     * Remove observer and stop listening to frame stats for this window.
+     * @hide
+     */
+    public final void removeFrameStatsObserver(FrameStatsObserver fso) {
+        final View decorView = getDecorView();
+        if (decorView != null) {
+            getDecorView().removeFrameStatsObserver(fso);
+        }
     }
 
     /** @hide */

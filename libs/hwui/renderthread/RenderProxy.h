@@ -29,6 +29,7 @@
 #include <utils/StrongPointer.h>
 
 #include "../Caches.h"
+#include "../FrameStatsObserver.h"
 #include "../IContextFactory.h"
 #include "CanvasContext.h"
 #include "DrawFrameTask.h"
@@ -111,6 +112,10 @@ public:
     ANDROID_API void removeRenderNode(RenderNode* node);
     ANDROID_API void drawRenderNode(RenderNode* node);
     ANDROID_API void setContentDrawBounds(int left, int top, int right, int bottom);
+
+    ANDROID_API void addFrameStatsObserver(FrameStatsObserver* observer);
+    ANDROID_API void removeFrameStatsObserver(FrameStatsObserver* observer);
+    ANDROID_API long getDroppedFrameReportCount();
 
 private:
     RenderThread& mRenderThread;

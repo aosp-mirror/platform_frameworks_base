@@ -109,6 +109,7 @@ import com.android.internal.view.menu.MenuBuilder;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
+import java.lang.NullPointerException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -5377,6 +5378,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             setLongClickable(true);
         }
         getListenerInfo().mOnCreateContextMenuListener = l;
+    }
+
+    /**
+     * Set an observer to collect stats for each frame rendered for this view.
+     *
+     * @hide
+     */
+    public void addFrameStatsObserver(FrameStatsObserver fso) {
+        if (mAttachInfo != null) {
+            if (mAttachInfo.mHardwareRenderer != null) {
+                mAttachInfo.mHardwareRenderer.addFrameStatsObserver(fso);
+            } else {
+                throw new IllegalStateException("View must be hardware-accelerated");
+            }
+        } else {
+            // TODO: store as pending registration and merge when we are attached to a surface
+            throw new IllegalStateException("View not yet attached");
+        }
+    }
+
+    /**
+     * Remove observer configured to collect frame stats for this view.
+     *
+     * @hide
+     */
+    public void removeFrameStatsObserver(FrameStatsObserver fso) {
+        ThreadedRenderer renderer = getHardwareRenderer();
+        if (renderer != null) {
+            renderer.removeFrameStatsObserver(fso);
+        }
     }
 
     /**

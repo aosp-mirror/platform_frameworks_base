@@ -568,6 +568,54 @@ void RenderProxy::serializeDisplayListTree() {
     post(task);
 }
 
+CREATE_BRIDGE2(addFrameStatsObserver, CanvasContext* context,
+        FrameStatsObserver* frameStatsObserver) {
+   args->context->addFrameStatsObserver(args->frameStatsObserver);
+   if (args->frameStatsObserver != nullptr) {
+       args->frameStatsObserver->decStrong(args->context);
+   }
+   return nullptr;
+}
+
+void RenderProxy::addFrameStatsObserver(FrameStatsObserver* observer) {
+    SETUP_TASK(addFrameStatsObserver);
+    args->context = mContext;
+    args->frameStatsObserver = observer;
+    if (observer != nullptr) {
+        observer->incStrong(mContext);
+    }
+    post(task);
+}
+
+CREATE_BRIDGE2(removeFrameStatsObserver, CanvasContext* context,
+        FrameStatsObserver* frameStatsObserver) {
+   args->context->removeFrameStatsObserver(args->frameStatsObserver);
+   if (args->frameStatsObserver != nullptr) {
+       args->frameStatsObserver->decStrong(args->context);
+   }
+   return nullptr;
+}
+
+void RenderProxy::removeFrameStatsObserver(FrameStatsObserver* observer) {
+    SETUP_TASK(removeFrameStatsObserver);
+    args->context = mContext;
+    args->frameStatsObserver = observer;
+    if (observer != nullptr) {
+        observer->incStrong(mContext);
+    }
+    post(task);
+}
+
+CREATE_BRIDGE1(getDroppedFrameReportCount, CanvasContext* context) {
+    return (void*) args->context->getDroppedFrameReportCount();
+}
+
+long RenderProxy::getDroppedFrameReportCount() {
+    SETUP_TASK(getDroppedFrameReportCount);
+    args->context = mContext;
+    return (long) postAndWait(task);
+}
+
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
 }
