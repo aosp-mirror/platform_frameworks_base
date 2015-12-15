@@ -28,6 +28,7 @@ import android.app.PendingIntent;
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
@@ -592,9 +593,26 @@ public class CopyService extends IntentService {
 
         IOException copyError = null;
         try {
-            srcFile = mSrcClient.openFile(srcInfo.derivedUri, "r", canceller);
+            // If the file is virtual, but can be converted to another format, then try to copy it
+            // as such format.
+            if (srcInfo.isVirtualDocument() && srcInfo.isTypedDocument()) {
+                final String[] streamTypes = mSrcClient.getStreamTypes(srcInfo.derivedUri, "*/*");
+                if (streamTypes.length > 0) {
+                    // Pick the first streamable format.
+                    final AssetFileDescriptor srcFileAsAsset =
+                            mSrcClient.openTypedAssetFileDescriptor(
+                                    srcInfo.derivedUri, streamTypes[0], null, canceller);
+                    srcFile = srcFileAsAsset.getParcelFileDescriptor();
+                    src = new AssetFileDescriptor.AutoCloseInputStream(srcFileAsAsset);
+                } else {
+                    // TODO: Log failures. b/26192412
+                    mFailedFiles.add(srcInfo);
+                }
+            } else {
+                srcFile = mSrcClient.openFile(srcInfo.derivedUri, "r", canceller);
+                src = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
+            }
             dstFile = mDstClient.openFile(dstInfo.derivedUri, "w", canceller);
-            src = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
             dst = new ParcelFileDescriptor.AutoCloseOutputStream(dstFile);
 
             byte[] buffer = new byte[8192];
