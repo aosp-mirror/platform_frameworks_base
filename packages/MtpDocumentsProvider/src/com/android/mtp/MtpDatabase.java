@@ -22,7 +22,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -36,9 +35,9 @@ import android.provider.DocumentsContract.Root;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Database for MTP objects.
@@ -108,14 +107,11 @@ class MtpDatabase {
      * @return Database cursor.
      */
     Cursor queryRoots(String[] columnNames) {
-        final SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
-        builder.setTables(JOIN_ROOTS);
-        builder.setProjectionMap(COLUMN_MAP_ROOTS);
-        return builder.query(
-                mDatabase,
+        return mDatabase.query(
+                VIEW_ROOTS,
                 columnNames,
-                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + " = ?",
-                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED, DOCUMENT_TYPE_STORAGE),
+                COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED),
                 null,
                 null,
                 null);
@@ -132,8 +128,8 @@ class MtpDatabase {
         return mDatabase.query(
                 TABLE_DOCUMENTS,
                 columnNames,
-                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + "=?",
-                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED, DOCUMENT_TYPE_STORAGE),
+                COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED),
                 null,
                 null,
                 null);
@@ -220,7 +216,7 @@ class MtpDatabase {
      */
     String putNewDocument(int deviceId, String parentDocumentId, MtpObjectInfo info) {
         final ContentValues values = new ContentValues();
-        getObjectDocumentValues(values, deviceId, parentDocumentId, info);
+        getChildDocumentValues(values, deviceId, parentDocumentId, info);
         mDatabase.beginTransaction();
         try {
             final long id = mDatabase.insert(TABLE_DOCUMENTS, null, values);
@@ -348,6 +344,7 @@ class MtpDatabase {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(QUERY_CREATE_DOCUMENTS);
             db.execSQL(QUERY_CREATE_ROOT_EXTRA);
+            db.execSQL(QUERY_CREATE_VIEW_ROOTS);
         }
 
         @Override
@@ -361,41 +358,18 @@ class MtpDatabase {
         context.deleteDatabase(DATABASE_NAME);
     }
 
-    static void getDeviceDocumentValues(
-            ContentValues values, int deviceId, String name, MtpRoot[] roots) {
-        values.clear();
-        values.put(COLUMN_DEVICE_ID, deviceId);
-        values.putNull(COLUMN_STORAGE_ID);
-        values.putNull(COLUMN_OBJECT_HANDLE);
-        values.putNull(COLUMN_PARENT_DOCUMENT_ID);
-        values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
-        values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_DEVICE);
-        values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
-        values.put(Document.COLUMN_DISPLAY_NAME, name);
-        values.putNull(Document.COLUMN_SUMMARY);
-        values.putNull(Document.COLUMN_LAST_MODIFIED);
-        values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
-        values.put(Document.COLUMN_FLAGS, 0);
-        long size = 0;
-        for (final MtpRoot root : roots) {
-            size += root.mMaxCapacity - root.mFreeSpace;
-        }
-        values.put(Document.COLUMN_SIZE, size);
-    }
-
     /**
      * Gets {@link ContentValues} for the given root.
      * @param values {@link ContentValues} that receives values.
      * @param resources Resources used to get localized root name.
      * @param root Root to be converted {@link ContentValues}.
      */
-    static void getStorageDocumentValues(
-            ContentValues values, Resources resources, String parentDocumentId, MtpRoot root) {
+    static void getRootDocumentValues(ContentValues values, Resources resources, MtpRoot root) {
         values.clear();
         values.put(COLUMN_DEVICE_ID, root.mDeviceId);
         values.put(COLUMN_STORAGE_ID, root.mStorageId);
         values.putNull(COLUMN_OBJECT_HANDLE);
-        values.put(COLUMN_PARENT_DOCUMENT_ID, parentDocumentId);
+        values.putNull(COLUMN_PARENT_DOCUMENT_ID);
         values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
         values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_STORAGE);
         values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
@@ -415,7 +389,7 @@ class MtpDatabase {
      * @param parentId Parent document ID of the object.
      * @param info MTP object info.
      */
-    static void getObjectDocumentValues(
+    static void getChildDocumentValues(
             ContentValues values, int deviceId, String parentId, MtpObjectInfo info) {
         values.clear();
         final String mimeType = info.getFormat() == MtpConstants.FORMAT_ASSOCIATION ?
