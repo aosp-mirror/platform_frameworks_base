@@ -116,7 +116,8 @@ public class NetworkStatsRecorder {
     }
 
     public NetworkStats.Entry getTotalSinceBootLocked(NetworkTemplate template) {
-        return mSinceBoot.getSummary(template, Long.MIN_VALUE, Long.MAX_VALUE).getTotal(null);
+        return mSinceBoot.getSummary(template, Long.MIN_VALUE, Long.MAX_VALUE,
+                NetworkStatsAccess.Level.DEVICE).getTotal(null);
     }
 
     /**

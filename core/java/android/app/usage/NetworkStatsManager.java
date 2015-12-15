@@ -21,6 +21,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkIdentity;
 import android.net.NetworkTemplate;
+import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -29,10 +30,9 @@ import android.util.Log;
  * discrete bins of time called 'Buckets'. See {@link NetworkStats.Bucket} for details.
  * <p />
  * Queries can define a time interval in the form of start and end timestamps (Long.MIN_VALUE and
- * Long.MAX_VALUE can be used to simulate open ended intervals). All queries (except
- * {@link #querySummaryForDevice}) collect only network usage of apps belonging to the same user
- * as the client. In addition tethering usage, usage by removed users and apps, and usage by system
- * is also included in the results.
+ * Long.MAX_VALUE can be used to simulate open ended intervals). By default, apps can only obtain
+ * data about themselves. See the below note for special cases in which apps can obtain data about
+ * other applications.
  * <h3>
  * Summary queries
  * </h3>
@@ -51,13 +51,20 @@ import android.util.Log;
  * multiple buckets for a particular key but all Bucket's state is going to be
  * {@link NetworkStats.Bucket#STATE_ALL}.
  * <p />
- * <b>NOTE:</b> This API requires the permission
+ * <b>NOTE:</b> Accessing stats for apps other than the calling app requires the permission
  * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}, which is a system-level permission and
  * will not be granted to third-party apps. However, declaring the permission implies intention to
  * use the API and the user of the device can grant permission through the Settings application.
  * Profile owner apps are automatically granted permission to query data on the profile they manage
- * (that is, for any query except {@link #querySummaryForDevice}). Device owner apps likewise get
- * access to usage data of the primary user.
+ * (that is, for any query except {@link #querySummaryForDevice}). Device owner apps and carrier-
+ * privileged apps likewise get access to usage data for all users on the device.
+ * <p />
+ * In addition to tethering usage, usage by removed users and apps, and usage by the system
+ * is also included in the results for callers with one of these higher levels of access.
+ * <p />
+ * <b>NOTE:</b> Prior to API level {@value Build.VERSION_CODES#N}, all calls to these APIs required
+ * the above permission, even to access an app's own data usage, and carrier-privileged apps were
+ * not included.
  */
 public class NetworkStatsManager {
     private final static String TAG = "NetworkStatsManager";

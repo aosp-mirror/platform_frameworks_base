@@ -62,13 +62,9 @@ import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
 import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
 
-import android.Manifest;
 import android.app.AlarmManager;
-import android.app.AppOpsManager;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
-import android.app.admin.DeviceAdminInfo;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -97,9 +93,7 @@ import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -122,7 +116,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
-import com.android.server.LocalServices;
 import com.android.server.connectivity.Tethering;
 
 import java.io.File;
@@ -484,18 +477,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             @Override
             public int[] getRelevantUids() {
-                enforcePermissionForManagedAdmin(mCallingPackage);
-                return getUidComplete().getRelevantUids();
+                return getUidComplete().getRelevantUids(checkAccessLevel(mCallingPackage));
             }
 
             @Override
             public NetworkStats getDeviceSummaryForNetwork(NetworkTemplate template, long start,
                     long end) {
-                enforcePermission(mCallingPackage);
+                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
+                if (accessLevel < NetworkStatsAccess.Level.DEVICE) {
+                    throw new SecurityException("Calling package " + mCallingPackage
+                            + " cannot access device-level network stats");
+                }
                 NetworkStats result = new NetworkStats(end - start, 1);
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    result.combineAllValues(internalGetSummaryForNetwork(template, start, end));
+                    result.combineAllValues(
+                            internalGetSummaryForNetwork(template, start, end, accessLevel));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -505,23 +502,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                enforcePermission(mCallingPackage);
-                return internalGetSummaryForNetwork(template, start, end);
+                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
+                return internalGetSummaryForNetwork(template, start, end, accessLevel);
             }
 
             @Override
             public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
-                return internalGetHistoryForNetwork(template, fields);
+                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
+                return internalGetHistoryForNetwork(template, fields, accessLevel);
             }
 
             @Override
             public NetworkStats getSummaryForAllUid(
                     NetworkTemplate template, long start, long end, boolean includeTags) {
-                enforcePermissionForManagedAdmin(mCallingPackage);
-                final NetworkStats stats = getUidComplete().getSummary(template, start, end);
+                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
+                final NetworkStats stats =
+                        getUidComplete().getSummary(template, start, end, accessLevel);
                 if (includeTags) {
                     final NetworkStats tagStats = getUidTagComplete()
-                            .getSummary(template, start, end);
+                            .getSummary(template, start, end, accessLevel);
                     stats.combineAllValues(tagStats);
                 }
                 return stats;
@@ -530,11 +529,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStatsHistory getHistoryForUid(
                     NetworkTemplate template, int uid, int set, int tag, int fields) {
-                enforcePermissionForManagedAdmin(mCallingPackage);
+                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
                 if (tag == TAG_NONE) {
-                    return getUidComplete().getHistory(template, uid, set, tag, fields);
+                    return getUidComplete().getHistory(template, uid, set, tag, fields,
+                            accessLevel);
                 } else {
-                    return getUidTagComplete().getHistory(template, uid, set, tag, fields);
+                    return getUidTagComplete().getHistory(template, uid, set, tag, fields,
+                            accessLevel);
                 }
             }
 
@@ -542,12 +543,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             public NetworkStatsHistory getHistoryIntervalForUid(
                     NetworkTemplate template, int uid, int set, int tag, int fields,
                     long start, long end) {
-                enforcePermissionForManagedAdmin(mCallingPackage);
+                @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
                 if (tag == TAG_NONE) {
-                    return getUidComplete().getHistory(template, uid, set, tag, fields, start, end);
+                    return getUidComplete().getHistory(template, uid, set, tag, fields, start, end,
+                            accessLevel);
                 } else {
                     return getUidTagComplete().getHistory(template, uid, set, tag, fields,
-                            start, end);
+                            start, end, accessLevel);
                 }
             }
 
@@ -559,80 +561,42 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         };
     }
 
-    private boolean hasAppOpsPermission(String callingPackage) {
-        final int callingUid = Binder.getCallingUid();
-        boolean appOpsAllow = false;
-        if (callingPackage != null) {
-            AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(
-                    Context.APP_OPS_SERVICE);
-
-            final int mode = appOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
-                    callingUid, callingPackage);
-            if (mode == AppOpsManager.MODE_DEFAULT) {
-                // The default behavior here is to check if PackageManager has given the app
-                // permission.
-                final int permissionCheck = mContext.checkCallingPermission(
-                        Manifest.permission.PACKAGE_USAGE_STATS);
-                appOpsAllow = permissionCheck == PackageManager.PERMISSION_GRANTED;
-            }
-            appOpsAllow = (mode == AppOpsManager.MODE_ALLOWED);
-        }
-        return appOpsAllow;
+    private @NetworkStatsAccess.Level int checkAccessLevel(String callingPackage) {
+        return NetworkStatsAccess.checkAccessLevel(
+                mContext, Binder.getCallingUid(), callingPackage);
     }
-
-    private void enforcePermissionForManagedAdmin(String callingPackage) {
-        boolean hasPermission = hasAppOpsPermission(callingPackage);
-        if (!hasPermission) {
-            // Profile and device owners are exempt from permission checking.
-            final int callingUid = Binder.getCallingUid();
-            final DevicePolicyManagerInternal dpmi = LocalServices.getService(
-                    DevicePolicyManagerInternal.class);
-
-            // Device owners are also profile owners so it is enough to check for that.
-            if (dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)) {
-                return;
-            }
-        }
-        if (!hasPermission) {
-            mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
-        }
-    }
-
-    private void enforcePermission(String callingPackage) {
-        boolean appOpsAllow = hasAppOpsPermission(callingPackage);
-        if (!appOpsAllow) {
-            mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
-        }
-    }
-
 
     /**
      * Return network summary, splicing between DEV and XT stats when
      * appropriate.
      */
     private NetworkStats internalGetSummaryForNetwork(
-            NetworkTemplate template, long start, long end) {
+            NetworkTemplate template, long start, long end,
+            @NetworkStatsAccess.Level int accessLevel) {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
-        return mXtStatsCached.getSummary(template, start, end);
+        return mXtStatsCached.getSummary(template, start, end, accessLevel);
     }
 
     /**
      * Return network history, splicing between DEV and XT stats when
      * appropriate.
      */
-    private NetworkStatsHistory internalGetHistoryForNetwork(NetworkTemplate template, int fields) {
+    private NetworkStatsHistory internalGetHistoryForNetwork(NetworkTemplate template, int fields,
+            @NetworkStatsAccess.Level int accessLevel) {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
-        return mXtStatsCached.getHistory(template, UID_ALL, SET_ALL, TAG_NONE, fields);
+        return mXtStatsCached.getHistory(template, UID_ALL, SET_ALL, TAG_NONE, fields, accessLevel);
     }
 
     @Override
     public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
+        // Special case - since this is for internal use only, don't worry about a full access level
+        // check and just require the signature/privileged permission.
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
         assertBandwidthControlEnabled();
-        return internalGetSummaryForNetwork(template, start, end).getTotalBytes();
+        return internalGetSummaryForNetwork(template, start, end, NetworkStatsAccess.Level.DEVICE)
+                .getTotalBytes();
     }
 
     @Override
