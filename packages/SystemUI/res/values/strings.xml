@@ -713,8 +713,8 @@
     <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
     <!-- Recents: Show history string. [CHAR LIMIT=NONE] -->
     <string name="recents_show_history_button_label">More</string>
-    <!-- Recents: The history of recents. [CHAR LIMIT=NONE] -->
-    <string name="recents_history_label">History</string>
+    <!-- Recents: A format string to set the number of availabe historical tasks in recents. [CHAR LIMIT=NONE] -->
+    <string name="recents_history_label_format"><xliff:g id="number">%d</xliff:g> More</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>
