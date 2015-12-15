@@ -65,7 +65,7 @@ public:
     void endLayer();
 
     Texture* getTexture(const SkBitmap* bitmap);
-    const LightInfo& getLightInfo() { return mLightInfo; }
+    const LightInfo& getLightInfo() const { return mLightInfo; }
 
     void renderGlop(const BakedOpState& state, const Glop& glop) {
         bool useScissor = state.computedState.clipSideFlags != OpClipSideFlags::None;
@@ -73,14 +73,16 @@ public:
                 useScissor ? &state.computedState.clipRect : nullptr,
                 glop);
     }
+    void renderFunctor(const FunctorOp& op, const BakedOpState& state);
 
     void renderGlop(const Rect* dirtyBounds, const Rect* clip, const Glop& glop);
     bool offscreenRenderTarget() { return mRenderTarget.offscreenBuffer != nullptr; }
     void dirtyRenderTarget(const Rect& dirtyRect);
-    bool didDraw() { return mHasDrawn; }
+    bool didDraw() const { return mHasDrawn; }
 private:
     void setViewport(uint32_t width, uint32_t height);
     void clearColorBuffer(const Rect& clearRect);
+    void prepareRender(const Rect* dirtyBounds, const Rect* clip);
 
     RenderState& mRenderState;
     Caches& mCaches;

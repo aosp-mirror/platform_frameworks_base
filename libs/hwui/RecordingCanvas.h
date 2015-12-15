@@ -61,6 +61,9 @@ public:
     }
     void drawRenderNode(RenderNode* renderNode);
 
+    // TODO: rename for consistency
+    void callDrawGLFunction(Functor* functor);
+
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface
 // ----------------------------------------------------------------------------

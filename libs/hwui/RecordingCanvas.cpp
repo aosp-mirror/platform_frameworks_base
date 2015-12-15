@@ -197,8 +197,7 @@ void RecordingCanvas::translate(float dx, float dy) {
 
 // Clip
 bool RecordingCanvas::getClipBounds(SkRect* outRect) const {
-    Rect bounds = mState.getLocalClipBounds();
-    *outRect = SkRect::MakeLTRB(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    *outRect = mState.getLocalClipBounds().toSkRect();
     return !(outRect->isEmpty());
 }
 bool RecordingCanvas::quickRejectRect(float left, float top, float right, float bottom) const {
@@ -516,6 +515,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
             mState.getRenderTargetClipBounds(),
             refPaint(paint), refBitmap(*bitmap)));
 }
+
 void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
     auto&& stagingProps = renderNode->stagingProperties();
     RenderNodeOp* op = new (alloc()) RenderNodeOp(
@@ -534,6 +534,15 @@ void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
         // use staging property, since recording on UI thread
         mDisplayList->projectionReceiveIndex = opIndex;
     }
+}
+
+void RecordingCanvas::callDrawGLFunction(Functor* functor) {
+    mDisplayList->functors.push_back(functor);
+    addOp(new (alloc()) FunctorOp(
+            mState.getRenderTargetClipBounds(), // TODO: explicitly define bounds
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            functor));
 }
 
 size_t RecordingCanvas::addOp(RecordedOp* op) {

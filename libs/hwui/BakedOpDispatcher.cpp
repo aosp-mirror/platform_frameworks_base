@@ -518,6 +518,10 @@ void BakedOpDispatcher::onBitmapRectOp(BakedOpRenderer& renderer, const BitmapRe
     renderer.renderGlop(state, glop);
 }
 
+void BakedOpDispatcher::onFunctorOp(BakedOpRenderer& renderer, const FunctorOp& op, const BakedOpState& state) {
+    renderer.renderFunctor(op, state);
+}
+
 void BakedOpDispatcher::onLinesOp(BakedOpRenderer& renderer, const LinesOp& op, const BakedOpState& state) {
     VertexBuffer buffer;
     PathTessellator::tessellateLines(op.points, op.floatCount, op.paint,
