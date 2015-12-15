@@ -78,9 +78,11 @@ private:
                                    const bool allowRawValue);
 
     bool parseResources(xml::XmlPullParser* parser);
+    bool parseResource(xml::XmlPullParser* parser, ParsedResource* outResource);
+
+    bool parseItem(xml::XmlPullParser* parser, ParsedResource* outResource, uint32_t format);
     bool parseString(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseColor(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parsePrimitive(xml::XmlPullParser* parser, ParsedResource* outResource);
+
     bool parsePublic(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parsePublicGroup(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* outResource);
@@ -93,7 +95,10 @@ private:
     bool parseStyle(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseStyleItem(xml::XmlPullParser* parser, Style* style);
     bool parseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* outResource);
-    bool parseArray(xml::XmlPullParser* parser, ParsedResource* outResource, uint32_t typeMask);
+    bool parseArray(xml::XmlPullParser* parser, ParsedResource* outResource);
+    bool parseIntegerArray(xml::XmlPullParser* parser, ParsedResource* outResource);
+    bool parseStringArray(xml::XmlPullParser* parser, ParsedResource* outResource);
+    bool parseArrayImpl(xml::XmlPullParser* parser, ParsedResource* outResource, uint32_t typeMask);
     bool parsePlural(xml::XmlPullParser* parser, ParsedResource* outResource);
 
     IDiagnostics* mDiag;
