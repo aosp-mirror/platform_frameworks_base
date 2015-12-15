@@ -78,6 +78,8 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
+    void setImportanceFromAssistant(in INotificationListener token, String key, int importance, CharSequence explanation);
+
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
     boolean isSystemConditionProviderEnabled(String path);

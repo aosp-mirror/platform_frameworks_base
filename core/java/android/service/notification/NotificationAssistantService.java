@@ -20,8 +20,11 @@ import android.annotation.SdkConstant;
 import android.app.Notification;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * A service that helps the user manage notifications by modifying the
@@ -39,6 +42,8 @@ import android.os.Parcelable;
  * &lt;/service></pre>
  */
 public abstract class NotificationAssistantService extends NotificationListenerService {
+    private static final String TAG = "NotificationAssistant";
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
@@ -85,6 +90,36 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /** Notification was canceled because it was an invisible member of a group. */
     public static final int REASON_GROUP_OPTIMIZATION = 13;
 
+    public class Adjustment {
+        int mImportance;
+        CharSequence mExplanation;
+        Uri mReference;
+
+        /**
+         * Create a notification importance adjustment.
+         *
+         * @param importance The final importance of the notification.
+         * @param explanation A human-readable justification for the adjustment.
+         * @param reference A reference to an external object that augments the
+         *                  explanation, such as a
+         *                  {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI},
+         *                  or null.
+         */
+        public Adjustment(int importance, CharSequence explanation, Uri reference) {
+            mImportance = importance;
+            mExplanation = explanation;
+            mReference = reference;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        if (mWrapper == null) {
+            mWrapper = new NotificationAssistantWrapper();
+        }
+        return mWrapper;
+    }
+
     /**
      * A notification was posted by an app. Called before alert.
      *
@@ -93,7 +128,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param user true if the initial importance reflects an explicit user preference.
      * @return an adjustment or null to take no action, within 100ms.
      */
-    abstract public NotificationAdjustment onNotificationEnqueued(StatusBarNotification sbn,
+    abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
           int importance, boolean user);
 
     /**
@@ -150,9 +185,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param key the notification key
      * @param adjustment the new importance with an explanation
      */
-    public final void adjustImportance(String key, NotificationAdjustment adjustment)
+    public final void adjustImportance(String key, Adjustment adjustment)
     {
-        // TODO: pack up the adjustment and send it to the NotificationManager.
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().setImportanceFromAssistant(mWrapper, key,
+                    adjustment.mImportance, adjustment.mExplanation);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
     }
 
     /**
@@ -160,7 +201,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * be fired when the host notification is deleted, or when this annotation
      * is removed or replaced.
      *
-     * @param key the notification key
+     * @param key the key of the notification to be annotated
      * @param annotation the new annotation object
      */
     public final void setAnnotation(String key, Notification annotation)
@@ -171,10 +212,74 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /**
      * Remove the annotation from a notification.
      *
-     * @param key the notification key
+     * @param key the key of the notification to be cleansed of annotatons
      */
     public final void clearAnnotation(String key)
     {
         // TODO: ask the NotificationManager to clear the annotation.
+    }
+
+    private class NotificationAssistantWrapper extends NotificationListenerWrapper {
+        @Override
+        public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder,
+                                           int importance, boolean user) throws RemoteException {
+            StatusBarNotification sbn;
+            try {
+                sbn = sbnHolder.get();
+            } catch (RemoteException e) {
+                Log.w(TAG, "onNotificationEnqueued: Error receiving StatusBarNotification", e);
+                return;
+            }
+
+            try {
+                Adjustment adjustment =
+                    NotificationAssistantService.this.onNotificationEnqueued(sbn, importance, user);
+                if (adjustment != null) {
+                    adjustImportance(sbn.getKey(), adjustment);
+                }
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationEnqueued", t);
+            }
+        }
+
+        @Override
+        public void onNotificationVisibilityChanged(String key, long time, boolean visible)
+                throws RemoteException {
+            try {
+                NotificationAssistantService.this.onNotificationVisibilityChanged(key, time,
+                        visible);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationVisibilityChanged", t);
+            }
+        }
+
+        @Override
+        public void onNotificationClick(String key, long time) throws RemoteException {
+            try {
+                NotificationAssistantService.this.onNotificationClick(key, time);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationClick", t);
+            }
+        }
+
+        @Override
+        public void onNotificationActionClick(String key, long time, int actionIndex)
+                throws RemoteException {
+            try {
+                NotificationAssistantService.this.onNotificationActionClick(key, time, actionIndex);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationActionClick", t);
+            }
+        }
+
+        @Override
+        public void onNotificationRemovedReason(String key, long time, int reason)
+                throws RemoteException {
+            try {
+                NotificationAssistantService.this.onNotificationRemoved(key, time, reason);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationRemoved", t);
+            }
+        }
     }
 }

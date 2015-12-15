@@ -141,6 +141,8 @@ abstract public class ManagedServices {
 
     abstract protected IInterface asInterface(IBinder binder);
 
+    abstract protected boolean checkType(IInterface service);
+
     abstract protected void onServiceAdded(ManagedServiceInfo info);
 
     protected void onServiceRemovedLocked(ManagedServiceInfo removed) { }
@@ -169,7 +171,8 @@ abstract public class ManagedServices {
             if (filter != null && !filter.matches(info.component)) continue;
             pw.println("      " + info.component
                     + " (user " + info.userid + "): " + info.service
-                    + (info.isSystem?" SYSTEM":""));
+                    + (info.isSystem?" SYSTEM":"")
+                    + (info.isGuest(this)?" GUEST":""));
         }
     }
 
@@ -263,6 +266,18 @@ abstract public class ManagedServices {
         ManagedServiceInfo info = registerServiceImpl(service, component, userid);
         if (info != null) {
             onServiceAdded(info);
+        }
+    }
+
+    /**
+     * Add a service to our callbacks. The lifecycle of this service is managed externally,
+     * but unlike a system service, it should not be considered privledged.
+     * */
+    public void registerGuestService(ManagedServiceInfo guest) {
+        checkNotNull(guest.service);
+        checkType(guest.service);
+        if (registerServiceImpl(guest) != null) {
+            onServiceAdded(guest);
         }
     }
 
@@ -484,7 +499,7 @@ abstract public class ManagedServices {
         synchronized (mMutex) {
             // Unbind automatically bound services, retain system services.
             for (ManagedServiceInfo service : mServices) {
-                if (!service.isSystem) {
+                if (!service.isSystem && !service.isGuest(this)) {
                     toRemove.add(service);
                 }
             }
@@ -709,11 +724,15 @@ abstract public class ManagedServices {
 
     private ManagedServiceInfo registerServiceImpl(final IInterface service,
             final ComponentName component, final int userid) {
+        ManagedServiceInfo info = newServiceInfo(service, component, userid,
+                true /*isSystem*/, null /*connection*/, Build.VERSION_CODES.LOLLIPOP);
+        return registerServiceImpl(info);
+    }
+
+    private ManagedServiceInfo registerServiceImpl(ManagedServiceInfo info) {
         synchronized (mMutex) {
             try {
-                ManagedServiceInfo info = newServiceInfo(service, component, userid,
-                        true /*isSystem*/, null, Build.VERSION_CODES.LOLLIPOP);
-                service.asBinder().linkToDeath(info, 0);
+                info.service.asBinder().linkToDeath(info, 0);
                 mServices.add(info);
                 return info;
             } catch (RemoteException e) {
@@ -728,7 +747,7 @@ abstract public class ManagedServices {
      */
     private void unregisterServiceImpl(IInterface service, int userid) {
         ManagedServiceInfo info = removeServiceImpl(service, userid);
-        if (info != null && info.connection != null) {
+        if (info != null && info.connection != null && !info.isGuest(this)) {
             mContext.unbindService(info.connection);
         }
     }
@@ -778,6 +797,10 @@ abstract public class ManagedServices {
             this.isSystem = isSystem;
             this.connection = connection;
             this.targetSdkVersion = targetSdkVersion;
+        }
+
+        public boolean isGuest(ManagedServices host) {
+            return ManagedServices.this != host;
         }
 
         @Override

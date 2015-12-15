@@ -39,6 +39,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -96,6 +97,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
+import android.service.notification.NotificationAssistantService;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.StatusBarNotification;
@@ -154,6 +156,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -167,11 +170,13 @@ public class NotificationManagerService extends SystemService {
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
     static final int MESSAGE_SAVE_POLICY_FILE = 3;
-    static final int MESSAGE_RECONSIDER_RANKING = 4;
-    static final int MESSAGE_RANKING_CONFIG_CHANGE = 5;
-    static final int MESSAGE_SEND_RANKING_UPDATE = 6;
-    static final int MESSAGE_LISTENER_HINTS_CHANGED = 7;
-    static final int MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED = 8;
+    static final int MESSAGE_SEND_RANKING_UPDATE = 4;
+    static final int MESSAGE_LISTENER_HINTS_CHANGED = 5;
+    static final int MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED = 6;
+
+    // ranking thread messages
+    private static final int MESSAGE_RECONSIDER_RANKING = 1000;
+    private static final int MESSAGE_RANKING_SORT = 1001;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -281,11 +286,13 @@ public class NotificationManagerService extends SystemService {
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
+    private NotificationAssistant mAssistant;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
+    private RankingHandler mRankingHandler;
 
     private static class Archive {
         final int mBufferSize;
@@ -738,6 +745,7 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
                 mListeners.onPackagesChanged(queryReplace, pkgList);
+                mAssistant.onPackagesChanged(queryReplace, pkgList);
                 mConditionProviders.onPackagesChanged(queryReplace, pkgList);
                 mRankingHelper.onPackagesChanged(queryReplace, pkgList);
             }
@@ -779,6 +787,7 @@ public class NotificationManagerService extends SystemService {
                 // Refresh managed services
                 mConditionProviders.onUserSwitched(user);
                 mListeners.onUserSwitched(user);
+                mAssistant.onUserSwitched(user);
                 mZenModeHelper.onUserSwitched(user);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 mUserProfiles.updateCache(context);
@@ -874,8 +883,9 @@ public class NotificationManagerService extends SystemService {
             extractorNames = new String[0];
         }
         mUsageStats = new NotificationUsageStats(getContext());
+        mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mRankingHelper = new RankingHelper(getContext(),
-                new RankingWorkerHandler(mRankingThread.getLooper()),
+                mRankingHandler,
                 mUsageStats,
                 extractorNames);
         mConditionProviders = new ConditionProviders(getContext(), mHandler, mUserProfiles);
@@ -909,6 +919,7 @@ public class NotificationManagerService extends SystemService {
         importOldBlockDb();
 
         mListeners = new NotificationListeners();
+        mAssistant = new NotificationAssistant();
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         mStatusBar.setNotificationDelegate(mNotificationDelegate);
 
@@ -1025,6 +1036,7 @@ public class NotificationManagerService extends SystemService {
             // bind to listener services.
             mSettingsObserver.observe();
             mListeners.onBootPhaseAppsCanStart();
+            mAssistant.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
         }
     }
@@ -1896,6 +1908,22 @@ public class NotificationManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+
+        @Override
+        public void setImportanceFromAssistant(INotificationListener token, String key,
+                int importance, CharSequence explanation) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    mAssistant.checkServiceTokenLocked(token);
+                    NotificationRecord n = mNotificationsByKey.get(key);
+                    n.setImportance(importance, explanation);
+                    mRankingHandler.requestSort();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
     };
 
     private String disableNotificationEffects(NotificationRecord record) {
@@ -2037,6 +2065,8 @@ public class NotificationManagerService extends SystemService {
                     pw.print(listener.component);
                 }
                 pw.println(')');
+                pw.println("\n  Notification assistant:");
+                mAssistant.dump(pw, filter);
             }
             pw.println("\n  Policy access:");
             pw.print("    mPolicyAccess: "); pw.println(mPolicyAccess);
@@ -2686,7 +2716,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void handleRankingConfigChange() {
+    private void handleRankingSort() {
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             ArrayList<String> orderBefore = new ArrayList<String>(N);
@@ -2788,9 +2818,9 @@ public class NotificationManagerService extends SystemService {
 
     }
 
-    private final class RankingWorkerHandler extends Handler
+    private final class RankingHandlerWorker extends Handler implements RankingHandler
     {
-        public RankingWorkerHandler(Looper looper) {
+        public RankingHandlerWorker(Looper looper) {
             super(looper);
         }
 
@@ -2800,10 +2830,22 @@ public class NotificationManagerService extends SystemService {
                 case MESSAGE_RECONSIDER_RANKING:
                     handleRankingReconsideration(msg);
                     break;
-                case MESSAGE_RANKING_CONFIG_CHANGE:
-                    handleRankingConfigChange();
+                case MESSAGE_RANKING_SORT:
+                    handleRankingSort();
                     break;
             }
+        }
+
+        public void requestSort() {
+            removeMessages(MESSAGE_RANKING_SORT);
+            sendEmptyMessage(MESSAGE_RANKING_SORT);
+        }
+
+        public void requestReconsideration(RankingReconsideration recon) {
+            Message m = Message.obtain(this,
+                    NotificationManagerService.MESSAGE_RECONSIDER_RANKING, recon);
+            long delay = recon.getDelay(TimeUnit.MILLISECONDS);
+            sendMessageDelayed(m, delay);
         }
     }
 
@@ -3305,6 +3347,45 @@ public class NotificationManagerService extends SystemService {
         return true;
     }
 
+    public class NotificationAssistant extends ManagedServices {
+
+        public NotificationAssistant() {
+            super(getContext(), mHandler, mNotificationList, mUserProfiles);
+        }
+
+        @Override
+        protected Config getConfig() {
+            Config c = new Config();
+            c.caption = "notification assistant";
+            c.serviceInterface = NotificationAssistantService.SERVICE_INTERFACE;
+            c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT;
+            c.bindPermission = Manifest.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE;
+            c.settingsAction = Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS;
+            c.clientLabel = R.string.notification_assistant_binding_label;
+            return c;
+        }
+
+        @Override
+        protected IInterface asInterface(IBinder binder) {
+            return INotificationListener.Stub.asInterface(binder);
+        }
+
+        @Override
+        protected boolean checkType(IInterface service) {
+            return service instanceof INotificationListener;
+        }
+
+        @Override
+        protected void onServiceAdded(ManagedServiceInfo info) {
+            mListeners.registerGuestService(info);
+        }
+
+        @Override
+        protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
+            mListeners.unregisterService(removed.service, removed.userid);
+        }
+    }
+
     public class NotificationListeners extends ManagedServices {
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
@@ -3329,6 +3410,11 @@ public class NotificationManagerService extends SystemService {
         @Override
         protected IInterface asInterface(IBinder binder) {
             return INotificationListener.Stub.asInterface(binder);
+        }
+
+        @Override
+        protected boolean checkType(IInterface service) {
+            return service instanceof INotificationListener;
         }
 
         @Override
@@ -3366,7 +3452,6 @@ public class NotificationManagerService extends SystemService {
 
         public int getOnNotificationPostedTrim(ManagedServiceInfo info) {
             return mLightTrimListeners.contains(info) ? TRIM_LIGHT : TRIM_FULL;
-
         }
 
         /**

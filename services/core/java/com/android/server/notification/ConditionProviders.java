@@ -121,6 +121,11 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
+    protected boolean checkType(IInterface service) {
+        return service instanceof IConditionProvider;
+    }
+
+    @Override
     public void onBootPhaseAppsCanStart() {
         super.onBootPhaseAppsCanStart();
         for (int i = 0; i < mSystemConditionProviders.size(); i++) {

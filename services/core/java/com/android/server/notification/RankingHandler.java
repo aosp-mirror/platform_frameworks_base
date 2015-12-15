@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.server.notification;
 
-package android.service.notification;
-
-parcelable NotificationAdjustment;
+public interface RankingHandler {
+    public void requestSort();
+    public void requestReconsideration(RankingReconsideration recon);
+}
