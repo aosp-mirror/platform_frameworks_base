@@ -190,9 +190,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             getDocumentLoader(parentIdentifier).clearTask(parentIdentifier);
             notifyChildDocumentsChange(parentIdentifier.mDocumentId);
         } catch (IOException error) {
-            for (final StackTraceElement element : error.getStackTrace()) {
-                Log.e("hirono", element.toString());
-            }
             throw new FileNotFoundException(error.getMessage());
         }
     }
