@@ -16,21 +16,8 @@
 
 package com.android.server.power;
 
-import android.app.ActivityManager;
-import android.util.SparseIntArray;
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BackgroundThread;
-import com.android.server.EventLogTags;
-import com.android.server.ServiceThread;
-import com.android.server.SystemService;
-import com.android.server.am.BatteryStatsService;
-import com.android.server.lights.Light;
-import com.android.server.lights.LightsManager;
-import com.android.server.Watchdog;
-
 import android.Manifest;
-import android.app.AppOpsManager;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -65,22 +52,32 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.view.Display;
 import android.view.WindowManagerPolicy;
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BackgroundThread;
+import com.android.server.EventLogTags;
+import com.android.server.ServiceThread;
+import com.android.server.SystemService;
+import com.android.server.Watchdog;
+import com.android.server.am.BatteryStatsService;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+import libcore.util.Objects;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import libcore.util.Objects;
-
 import static android.os.PowerManagerInternal.POWER_HINT_INTERACTION;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
-import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 
 /**
  * The power manager service is responsible for coordinating power management
@@ -771,6 +768,10 @@ public final class PowerManagerService extends SystemService
                     intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcast(intent);
+                    // Send internal version that requires signature permission.
+                    mContext.sendBroadcastAsUser(new Intent(
+                            PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL), UserHandle.ALL,
+                            Manifest.permission.DEVICE_POWER);
                 }
             });
         }
