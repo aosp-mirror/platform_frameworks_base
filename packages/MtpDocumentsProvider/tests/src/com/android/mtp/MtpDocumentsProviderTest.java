@@ -138,11 +138,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("1", cursor.getString(0));
+            assertEquals("2", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device A Storage A", cursor.getString(3));
-            assertEquals("1", cursor.getString(4));
+            assertEquals("2", cursor.getString(4));
             assertEquals(1024, cursor.getInt(5));
         }
 
@@ -153,11 +153,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
             cursor.moveToNext();
-            assertEquals("2", cursor.getString(0));
+            assertEquals("4", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
-            assertEquals("2", cursor.getString(4));
+            assertEquals("4", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
     }
@@ -185,11 +185,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("1", cursor.getString(0));
+            assertEquals("2", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
-            assertEquals("1", cursor.getString(4));
+            assertEquals("2", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
     }
@@ -216,12 +216,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                                 .build()
                 });
 
-        final Cursor cursor = mProvider.queryDocument("2", null);
+        final Cursor cursor = mProvider.queryDocument("3", null);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToNext();
 
-        assertEquals("2", cursor.getString(0));
+        assertEquals("3", cursor.getString(0));
         assertEquals("image/jpeg", cursor.getString(1));
         assertEquals("image.jpg", cursor.getString(2));
         assertEquals(1422716400000L, cursor.getLong(3));
@@ -255,11 +255,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                                 .build()
                 });
 
-        final Cursor cursor = mProvider.queryDocument("2", null);
+        final Cursor cursor = mProvider.queryDocument("3", null);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToNext();
-        assertEquals("2", cursor.getString(0));
+        assertEquals("3", cursor.getString(0));
         assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
         assertEquals("directory", cursor.getString(2));
         assertEquals(1422716400000L, cursor.getLong(3));
@@ -287,11 +287,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         4096 /* total space */,
                         "" /* no volume identifier */)
         });
-        final Cursor cursor = mProvider.queryDocument("1", null);
+        final Cursor cursor = mProvider.queryDocument("2", null);
         assertEquals(1, cursor.getCount());
 
         cursor.moveToNext();
-        assertEquals("1", cursor.getString(0));
+        assertEquals("2", cursor.getString(0));
         assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
         assertEquals("Device A Storage A", cursor.getString(2));
         assertTrue(cursor.isNull(3));
@@ -325,7 +325,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals(1, cursor.getCount());
 
         assertTrue(cursor.moveToNext());
-        assertEquals("2", cursor.getString(0));
+        assertEquals("3", cursor.getString(0));
         assertEquals("image/jpeg", cursor.getString(1));
         assertEquals("image.jpg", cursor.getString(2));
         assertEquals(0, cursor.getLong(3));
@@ -376,7 +376,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                     .build()
         });
 
-        mProvider.deleteDocument("2");
+        mProvider.deleteDocument("3");
         assertEquals(1, mResolver.getChangeCount(
                 DocumentsContract.buildChildDocumentsUri(
                         MtpDocumentsProvider.AUTHORITY, "1")));
@@ -398,7 +398,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                     .build()
         });
         try {
-            mProvider.deleteDocument("3");
+            mProvider.deleteDocument("4");
             fail();
         } catch (Throwable e) {
             assertTrue(e instanceof IOException);

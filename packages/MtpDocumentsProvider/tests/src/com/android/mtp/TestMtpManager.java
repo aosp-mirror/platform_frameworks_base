@@ -196,4 +196,9 @@ public class TestMtpManager extends MtpManager {
         }
         return result;
     }
+
+    @Override
+    String getDeviceName(int deviceId) throws IOException {
+        return "Device";
+    }
 }
