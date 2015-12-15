@@ -862,7 +862,7 @@ final class ActivityStack {
             // When this flag is set, we currently take the fullscreen screenshot of the activity
             // but scaled to half the size.  This gives us a "good-enough" fullscreen thumbnail to
             // use within SystemUI while keeping memory usage low.
-            if (mService.mTakeFullscreenScreenshots) {
+            if (ActivityManagerService.TAKE_FULLSCREEN_SCREENSHOTS) {
                 w = h = -1;
                 scale = 0.5f;
             }

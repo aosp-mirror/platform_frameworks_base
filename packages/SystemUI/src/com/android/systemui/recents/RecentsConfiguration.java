@@ -143,16 +143,13 @@ public class RecentsConfiguration {
             int rightInset, Rect searchBarBounds, Rect taskStackBounds) {
         if (hasTransposedNavBar) {
             // In landscape phones, the search bar appears on the left, but we overlay it on top
-            int swInset = getInsetToSmallestWidth(windowBounds.right - rightInset -
-                    windowBounds.left);
-            taskStackBounds.set(windowBounds.left + swInset, windowBounds.top + topInset,
-                    windowBounds.right - swInset - rightInset, windowBounds.bottom);
+            taskStackBounds.set(windowBounds.left, windowBounds.top + topInset,
+                    windowBounds.right - rightInset, windowBounds.bottom);
         } else {
             // In portrait, the search bar appears on the top (which already has the inset)
-            int swInset = getInsetToSmallestWidth(windowBounds.right - windowBounds.left);
             int top = searchBarBounds.isEmpty() ? topInset : 0;
-            taskStackBounds.set(windowBounds.left + swInset, searchBarBounds.bottom + top,
-                    windowBounds.right - swInset - rightInset, windowBounds.bottom);
+            taskStackBounds.set(windowBounds.left, searchBarBounds.bottom + top,
+                    windowBounds.right - rightInset, windowBounds.bottom);
         }
     }
 
@@ -172,16 +169,5 @@ public class RecentsConfiguration {
             searchBarSpaceBounds.set(windowBounds.left, windowBounds.top + topInset,
                     windowBounds.right, windowBounds.top + topInset + searchBarSize);
         }
-    }
-
-    /**
-     * Constrain the width of the landscape stack to the smallest width of the device.
-     */
-    private int getInsetToSmallestWidth(int availableWidth) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (!debugFlags.isFullscreenThumbnailsEnabled() && (availableWidth > smallestWidth)) {
-            return (availableWidth - smallestWidth) / 2;
-        }
-        return 0;
     }
 }

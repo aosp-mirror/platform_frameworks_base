@@ -493,6 +493,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Used to indicate that an app transition should be animated.
     private static final boolean ANIMATE = true;
 
+    // Determines whether to take full screen screenshots
+    static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
+
     private static native int nativeMigrateToBoost();
     private static native int nativeMigrateFromBoost();
     private boolean mIsBoosted = false;
@@ -1276,7 +1279,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mAlwaysFinishActivities = false;
     boolean mForceResizableActivities;
     boolean mSupportsFreeformWindowManagement;
-    boolean mTakeFullscreenScreenshots;
     IActivityController mController = null;
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
@@ -12013,13 +12015,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT);
 
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
-        final String fsScreenshots = Settings.Secure.getString(resolver,
-                "overview_fullscreen_thumbnails");
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
-        final boolean takeFullscreenScreenshots = fsScreenshots != null &&
-                Integer.parseInt(fsScreenshots) != 0;
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final int defaultForceResizable = Build.IS_DEBUGGABLE ? 1 : 0;
         final boolean forceResizable = Settings.Global.getInt(
@@ -12040,7 +12038,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             mAlwaysFinishActivities = alwaysFinishActivities;
             mForceResizableActivities = forceResizable;
             mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
-            mTakeFullscreenScreenshots = takeFullscreenScreenshots;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
             updateConfigurationLocked(configuration, null, true);

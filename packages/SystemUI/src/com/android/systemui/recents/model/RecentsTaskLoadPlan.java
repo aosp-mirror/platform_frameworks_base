@@ -152,14 +152,12 @@ public class RecentsTaskLoadPlan {
             // This task is only shown in the stack if it statisfies the historical time or min
             // number of tasks constraints. Freeform tasks are also always shown.
             boolean isStackTask = true;
-            if (debugFlags.isHistoryEnabled()) {
-                boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
-                isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
-                        (t.lastActiveTime >= lastStackActiveTime &&
-                                i >= (taskCount - MIN_NUM_TASKS)));
-                if (isStackTask && newLastStackActiveTime < 0) {
-                    newLastStackActiveTime = t.lastActiveTime;
-                }
+            boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
+            isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
+                    (t.lastActiveTime >= lastStackActiveTime &&
+                            i >= (taskCount - MIN_NUM_TASKS)));
+            if (isStackTask && newLastStackActiveTime < 0) {
+                newLastStackActiveTime = t.lastActiveTime;
             }
 
             // Load the label, icon, and color
@@ -192,7 +190,7 @@ public class RecentsTaskLoadPlan {
                 stackTasks.add(task);
             }
         }
-        if (debugFlags.isHistoryEnabled() && newLastStackActiveTime != -1) {
+        if (newLastStackActiveTime != -1) {
             Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
                     newLastStackActiveTime);
         }
