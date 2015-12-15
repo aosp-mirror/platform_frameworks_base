@@ -359,6 +359,7 @@ public class AlertController {
 
         if (mIconView != null) {
             if (resId != 0) {
+                mIconView.setVisibility(View.VISIBLE);
                 mIconView.setImageResource(mIconId);
             } else {
                 mIconView.setVisibility(View.GONE);
