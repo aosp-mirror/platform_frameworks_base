@@ -68,10 +68,6 @@ parent.link=index.html
   <h2>See also</h2>
       <ol>
         <li>
-          <a href="{@docRoot}tools/testing/testing_eclipse.html">
-          Testing from Eclipse with ADT</a>
-        </li>
-        <li>
           <a href="{@docRoot}tools/testing/testing_otheride.html">
           Testing from Other IDEs</a>
         </li>
@@ -110,7 +106,7 @@ parent.link=index.html
         you don't need to learn a new set of tools or techniques for designing and building tests.
     </li>
     <li>
-        The SDK tools for building and tests are available in Eclipse with ADT, and also in
+        The SDK tools for building and tests are available in Android Studio, and also in
         command-line form for use with other IDEs. These tools get information from the project of
         the application under test and use this information to automatically create the build files,
         manifest file, and directory structure for the test package.
@@ -162,11 +158,10 @@ parent.link=index.html
     Tests, like Android applications, are organized into projects.
 </p>
 <p>
-    A test project is a directory or Eclipse project in which you create the source code, manifest
-    file, and other files for a test package. The Android SDK contains tools for Eclipse with ADT
+    A test project is a directory in which you create the source code, manifest
+    file, and other files for a test package. The Android SDK contains tools for Android Studio
     and for the command line that create and update test projects for you. The tools create the
     directories you use for source code and resources and the manifest file for the test package.
-    The command-line tools also create the Ant build files you need.
 </p>
 <p>
     You should always use Android tools to create a test project. Among other benefits,
@@ -488,7 +483,7 @@ parent.link=index.html
     in the shared library <code>android.test.runner</code>,  which is not normally linked to
     Android code. To include it, you must specify it in a
 <code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
-    element. You do not have to set up these elements yourself. Both Eclipse with ADT and the
+    element. You do not have to set up these elements yourself. Both Android Studio and the
     <code>android</code> command-line tool construct them automatically and add them to your
     test package's manifest file.
 </p>
@@ -499,7 +494,7 @@ parent.link=index.html
 </p>
 <p>
     To run {@link android.test.InstrumentationTestRunner}, you use internal system classes called by
-    Android tools. When you run a test in Eclipse with ADT, the classes are called automatically.
+    Android tools. When you run a test in Android Studio the classes are called automatically.
     When you run a test from the command line, you run these classes with
     <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (adb)</a>.
 </p>
@@ -509,7 +504,7 @@ parent.link=index.html
     application under test. They then pass control to
     {@link android.test.InstrumentationTestRunner}, which runs
     each test case class in the test package. You can also control which test cases and
-    methods are run using settings in Eclipse with ADT, or using flags with the command-line tools.
+    methods are run using settings in Android Studio or using flags with the command-line tools.
 </p>
 <p>
     Neither the system classes nor {@link android.test.InstrumentationTestRunner} run
@@ -521,16 +516,14 @@ parent.link=index.html
     Activity that displays a Spinner widget.
 </p>
 <p>
-    To learn more about running tests, please read the topics
-    <a href="{@docRoot}tools/testing/testing_eclipse.html">
-    Testing from Eclipse with ADT</a> or
+    To learn more about running tests, please read 
     <a href="{@docRoot}tools/testing/testing_otheride.html">
     Testing from Other IDEs</a>.
 </p>
 <h2 id="TestResults">Seeing Test Results</h2>
 <p>
     The Android testing framework returns test results back to the tool that started the test.
-    If you run a test in Eclipse with ADT, the results are displayed in a new JUnit view pane. If
+    If you run a test in Android Studio, the results are displayed in a new JUnit view pane. If
     you run a test from the command line, the results are displayed in <code>STDOUT</code>. In
     both cases, you see a test summary that displays the name of each test case and method that
     was run. You also see all the assertion failures that occurred. These include pointers to the
@@ -538,10 +531,8 @@ parent.link=index.html
     value and actual value.
 </p>
 <p>
-    The test results have a format that is specific to the IDE that you are using. The test
-    results format for Eclipse with ADT is described in
-    <a href="{@docRoot}tools/testing/testing_eclipse.html#RunTestEclipse">
-    Testing from Eclipse with ADT</a>. The test results format for tests run from the
+    The test results have a format that is specific to the IDE that you are using. The test 
+results format for tests run from the
     command line is described in
     <a href="{@docRoot}tools/testing/testing_otheride.html#RunTestsCommand">
     Testing from Other IDEs</a>.
@@ -628,12 +619,7 @@ The <a href="{@docRoot}tools/help/monkey.html">UI/Application Exerciser Monkey</
     Android Virtual Devices configured for the hardware, screens, and versions you want to test.
 </p>
 <h2 id="NextSteps">Next Steps</h2>
-<p>
-    To learn how to set up and run tests in Eclipse, please refer to 
-<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
-    If you're not working in Eclipse, refer to 
-<a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
-</p>
+
 <p>
     If you want a step-by-step introduction to Android testing, try the
     <a href="{@docRoot}tools/testing/activity_test.html">Activity Testing Tutorial</a>.

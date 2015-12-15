@@ -402,20 +402,23 @@ dynamic set of data is updated each time the user location updates.</p>
 user location works. This is most easily done using a real Android-powered device. If, however, you
 don't have a device, you can still test your location-based features by mocking location data in
 the Android emulator. There are three different ways to send your application mock location
-data: using Eclipse, DDMS, or the "geo" command in the emulator console.</p>
+data: using Android Studio, DDMS, or the "geo" command in the emulator console.</p>
 
 <p class="note"><strong>Note:</strong> Providing mock location data is injected as GPS location
 data, so you must request location updates from <code>GPS_PROVIDER</code> in order for mock location
 data to work.</p>
 
-<h3 id="MockEclipse">Using Eclipse</h3>
+<h3 id="MockAVD">Using Android Studio</h3>
 
-<p>Select <b>Window</b> &gt; <b>Show View</b> &gt; <b>Other</b> &gt; <b>Emulator Control</b>.</p>
+<p>Select <b>Tools</b> &gt; <b>Android</b> &gt; <b>AVD Manager</b>. In the Android Virtual
+Device Manager window, choose your AVD and launch it in the emulator by selecting the green 
+play arrow in the Actions column.</p>
 
-<p>In the Emulator Control panel, enter GPS coordinates under Location Controls as individual
-lat/long coordinates, with a GPX file for route playback, or a KML file for multiple place marks.
-(Be sure that you have a device selected in the Devices panel&mdash;available from <b>Window</b>
-&gt; <b>Show View</b> &gt; <b>Other</b> &gt; <b>Devices</b>.)</p>
+<p>Then, select <b>Tools</b> &gt; <b>Android</b> &gt; <b>Android Device Monitor</b>.
+Select the Emulator Control tab in the Android Device Monitor window, and enter GPS coordinates 
+under Location Controls as individual lat/long coordinates, with a GPX file for route playback, 
+or a KML file for multiple place marks.
+</p>
 
 
 <h3 id="MockDdms">Using DDMS</h3>

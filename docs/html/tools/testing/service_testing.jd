@@ -36,10 +36,6 @@ parent.link=index.html
   <h2>See Also</h2>
       <ol>
         <li>
-          <a href="{@docRoot}tools/testing/testing_eclipse.html">
-          Testing From Eclipse with ADT</a>
-        </li>
-        <li>
           <a href="{@docRoot}tools/testing/testing_otheride.html">
           Testing From Other IDEs</a>
         </li>

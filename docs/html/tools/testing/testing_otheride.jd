@@ -25,7 +25,7 @@ parent.link=index.html
                     <a href="#RunTestsCommand">Running Tests</a>
                     <ol>
                         <li>
-                            <a href="#RunTestsAnt">Quick build and run with Ant</a>
+                            <a href="#RunTestsAnt">Quick build and run with Gradle</a>
                         </li>
                         <li>
                             <a href="#RunTestsDevice">Running tests on a device or emulator</a>
@@ -58,7 +58,7 @@ parent.link=index.html
 </div>
 <p>
     This document describes how to create and run tests directly from the command line.
-    You can use the techniques described here if you are developing in an IDE other than Eclipse
+    You can use the techniques described here if you are developing in an IDE other than Android Studio
     or if you prefer to work from the command line. This document assumes that you already know how
     to create a Android application in your programming environment. Before you start this
     document, you should read the topic
@@ -66,19 +66,17 @@ parent.link=index.html
     which provides an overview of Android testing.
 </p>
 <p>
-    If you are developing in Eclipse with ADT, you can set up and run your tests
-    directly in Eclipse. For more information, please read
-    <a href="{@docRoot}tools/testing/testing_eclipse.html">
-    Testing from Eclipse with ADT</a>.
+    If you are developing in Android Studio, you can set up and run your tests
+    directly in Android Studio. 
 </p>
 <h2 id="CreateTestProjectCommand">Working with Test Projects</h2>
 <p>
     You use the <code>android</code> tool to create test projects.
     You also use <code>android</code> to convert existing test code into an Android test project,
-    or to add the <code>test</code> Ant target to an existing Android test project.
+    or to add the <code>test</code> Gradle target to an existing Android test project.
     These operations are described in more detail in the section <a href="#UpdateTestProject">
     Updating a test project</a>. The <code>test</code> target is described in
-    <a href="#RunTestsAnt">Quick build and run with Ant</a>.
+    <a href="#RunTestsAnt">Quick build and run with Gradle</a>.
 </p>
 <h3 id="CreateTestProject">Creating a test project</h3>
 <p>
@@ -193,7 +191,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 <p>
     You use the <code>android</code> tool when you need to change the path to the
     project of the application under test. If you are changing an existing test project created in
-    Eclipse with ADT so that you can also build and run it from the command line, you must use the
+    Android Studio so that you can also build and run it from the command line, you must use the
     "create" operation. See the section <a href="#CreateTestProject">Creating a test project</a>.
 </p>
 <p class="note">
@@ -293,13 +291,13 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 </p>
 <h2 id="RunTestsCommand">Running Tests</h2>
 <p>
-    You run tests from the command line, either with Ant or with an
+    You run tests from the command line, either with Gradle or with an
     <a href="{@docRoot}tools/help/adb.html">
     Android Debug Bridge (adb)</a> shell.
 </p>
-<h3 id="RunTestsAnt">Quick build and run with Ant</h3>
+<h3 id="RunTestsAnt">Quick build and run with Gradle</h3>
 <p>
-    You can use Ant to run all the tests in your test project, using the target
+    You can use Gradle to run all the tests in your test project, using the target
     <code>test</code>, which is created automatically when you create a test project with
     the <code>android</code> tool.
 </p>
