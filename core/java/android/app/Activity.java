@@ -816,6 +816,7 @@ public class Activity extends ContextThemeWrapper
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
 
     private boolean mHasCurrentPermissionsRequest;
+    private boolean mEatKeyUpEvent;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -2816,9 +2817,25 @@ public class Activity extends ContextThemeWrapper
 
         // Let action bars open menus in response to the menu key prioritized over
         // the window handling it
-        if (event.getKeyCode() == KeyEvent.KEYCODE_MENU &&
+        final int keyCode = event.getKeyCode();
+        if (keyCode == KeyEvent.KEYCODE_MENU &&
                 mActionBar != null && mActionBar.onMenuKeyEvent(event)) {
             return true;
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+            // Capture the Alt-up and send focus to the ActionBar
+            final int action = event.getAction();
+            if (action == KeyEvent.ACTION_DOWN) {
+                if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
+                    final ActionBar actionBar = getActionBar();
+                    if (actionBar != null && actionBar.isShowing() && actionBar.requestFocus()) {
+                        mEatKeyUpEvent = true;
+                        return true;
+                    }
+                }
+            } else if (action == KeyEvent.ACTION_UP && mEatKeyUpEvent) {
+                mEatKeyUpEvent = false;
+                return true;
+            }
         }
 
         Window win = getWindow();
