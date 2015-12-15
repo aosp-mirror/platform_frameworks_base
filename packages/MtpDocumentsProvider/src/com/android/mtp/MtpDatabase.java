@@ -307,32 +307,6 @@ class MtpDatabase {
         }
     }
 
-    /**
-     * Returns the set of device ID stored in the database.
-     */
-    int[] getDeviceIds() {
-        final Cursor cursor = mDatabase.query(
-                true,
-                TABLE_DOCUMENTS,
-                strings(COLUMN_DEVICE_ID),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        try {
-            final int[] ids = new int[cursor.getCount()];
-            for (int i = 0; i < ids.length; i++) {
-                cursor.moveToNext();
-                ids[i] = cursor.getInt(0);
-            }
-            return ids;
-        } finally {
-            cursor.close();
-        }
-    }
-
     private boolean deleteDocumentsAndRoots(String selection, String[] args) {
         mDatabase.beginTransaction();
         try {
