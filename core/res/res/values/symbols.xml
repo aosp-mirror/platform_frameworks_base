@@ -1243,6 +1243,7 @@
   <java-symbol type="drawable" name="cling_arrow_up" />
   <java-symbol type="drawable" name="cling_bg" />
   <java-symbol type="drawable" name="ic_corp_badge" />
+  <java-symbol type="drawable" name="ic_corp_badge_off" />
   <java-symbol type="drawable" name="ic_corp_icon_badge" />
   <java-symbol type="drawable" name="ic_corp_icon" />
   <java-symbol type="drawable" name="ic_corp_statusbar_icon" />
@@ -2384,4 +2385,8 @@
   <java-symbol type="dimen" name="notification_content_margin_top" />
   <java-symbol type="string" name="importance_from_topic" />
   <java-symbol type="string" name="importance_from_person" />
+
+  <java-symbol type="layout" name="work_widget_mask_view" />
+  <java-symbol type="id" name="work_widget_app_icon" />
+  <java-symbol type="drawable" name="work_widget_mask_view_background" />
 </resources>
