@@ -69,7 +69,7 @@ import java.util.Arrays;
  * href="{@docRoot}guide/topics/resources/color-list-resource.html">Color State
  * List Resource</a>.</p>
  */
-public class ColorStateList implements Parcelable {
+public class ColorStateList extends ComplexColor implements Parcelable {
     private static final String TAG = "ColorStateList";
 
     private static final int DEFAULT_COLOR = Color.RED;
@@ -209,7 +209,7 @@ public class ColorStateList implements Parcelable {
      * @return A new color state list for the current tag.
      */
     @NonNull
-    private static ColorStateList createFromXmlInner(@NonNull Resources r,
+    static ColorStateList createFromXmlInner(@NonNull Resources r,
             @NonNull XmlPullParser parser, @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final String name = parser.getName();
@@ -340,6 +340,7 @@ public class ColorStateList implements Parcelable {
      * @return whether a theme can be applied to this color state list
      * @hide only for resource preloading
      */
+    @Override
     public boolean canApplyTheme() {
         return mThemeAttrs != null;
     }
@@ -419,6 +420,7 @@ public class ColorStateList implements Parcelable {
      *         attributes
      * @hide only for resource preloading
      */
+    @Override
     public ColorStateList obtainForTheme(Theme t) {
         if (t == null || !canApplyTheme()) {
             return this;
@@ -460,6 +462,7 @@ public class ColorStateList implements Parcelable {
      *         otherwise.
      * @see #getColorForState(int[], int)
      */
+    @Override
     public boolean isStateful() {
         return mStateSpecs.length > 1;
     }
@@ -602,14 +605,14 @@ public class ColorStateList implements Parcelable {
      * @return a factory that can create new instances of this ColorStateList
      * @hide only for resource preloading
      */
-    public ConstantState<ColorStateList> getConstantState() {
+    public ConstantState<ComplexColor> getConstantState() {
         if (mFactory == null) {
             mFactory = new ColorStateListFactory(this);
         }
         return mFactory;
     }
 
-    private static class ColorStateListFactory extends ConstantState<ColorStateList> {
+    private static class ColorStateListFactory extends ConstantState<ComplexColor> {
         private final ColorStateList mSrc;
 
         public ColorStateListFactory(ColorStateList src) {
@@ -628,7 +631,7 @@ public class ColorStateList implements Parcelable {
 
         @Override
         public ColorStateList newInstance(Resources res, Theme theme) {
-            return mSrc.obtainForTheme(theme);
+            return (ColorStateList) mSrc.obtainForTheme(theme);
         }
     }
 

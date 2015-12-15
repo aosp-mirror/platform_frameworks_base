@@ -3727,7 +3727,7 @@ i
         <!-- Controls how the image should be resized or moved to match the size
              of this ImageView.  See {@link android.widget.ImageView.ScaleType} -->
         <attr name="scaleType">
-            <!-- Scale using the image matrix when drawing. See  
+            <!-- Scale using the image matrix when drawing. See
                  {@link android.widget.ImageView#setImageMatrix(Matrix)}. -->
             <enum name="matrix" value="0" />
             <!-- Scale the image using {@link android.graphics.Matrix.ScaleToFit#FILL}. -->
@@ -3740,7 +3740,7 @@ i
             <enum name="fitEnd" value="4" />
             <!-- Center the image in the view, but perform no scaling. -->
             <enum name="center" value="5" />
-            <!-- Scale the image uniformly (maintain the image's aspect ratio) so both dimensions 
+            <!-- Scale the image uniformly (maintain the image's aspect ratio) so both dimensions
                  (width and height) of the image will be equal to or larger than the corresponding
                  dimension of the view (minus padding). The image is then centered in the view. -->
             <enum name="centerCrop" value="6" />
@@ -8134,5 +8134,53 @@ i
         <attr name="defaultValue" />
         <attr name="entries" />
         <attr name="entryValues" />
+    </declare-styleable>
+
+    <!-- Used to describe the gradient for fill or stroke in a path of VectorDrawable. -->
+    <declare-styleable name="GradientColor">
+        <!-- Start color of the gradient. -->
+        <attr name="startColor" />
+        <!-- Optional center color. -->
+        <attr name="centerColor" />
+        <!-- End color of the gradient. -->
+        <attr name="endColor" />
+        <!-- Type of gradient. The default type is linear. -->
+        <attr name="type" />
+
+        <!-- Only applied to RadialGradient-->
+        <!-- Radius of the gradient, used only with radial gradient. -->
+        <attr name="gradientRadius" />
+
+        <!-- Only applied to SweepGradient / RadialGradient-->
+        <!-- X coordinate of the center of the gradient within the path. -->
+        <attr name="centerX" />
+        <!-- Y coordinate of the center of the gradient within the path. -->
+        <attr name="centerY" />
+
+        <!-- LinearGradient specific -->
+        <!-- X coordinate of the start point origin of the gradient.
+             Defined in same coordinates as the path itself -->
+        <attr name="startX" format="float" />
+        <!-- Y coordinate of the start point of the gradient within the shape.
+             Defined in same coordinates as the path itself -->
+        <attr name="startY" format="float" />
+        <!-- X coordinate of the end point origin of the gradient.
+             Defined in same coordinates as the path itself -->
+        <attr name="endX" format="float" />
+        <!-- Y coordinate of the end point of the gradient within the shape.
+             Defined in same coordinates as the path itself -->
+        <attr name="endY" format="float" />
+
+    </declare-styleable>
+
+    <!-- Describes an item of a GradientColor. Minimally need 2 items to define the gradient
+         Colors defined in <item> override the simple color attributes such as
+         "startColor / centerColor / endColor" are ignored -->
+    <declare-styleable name="GradientColorItem">
+        <!-- The offset (or ratio) of this current color item inside the gradient.
+             The value is only meaningful when it is between 0 and 1. -->
+        <attr name="offset" format="float" />
+        <!-- The current color for the offset inside the gradient. -->
+        <attr name="color" />
     </declare-styleable>
 </resources>

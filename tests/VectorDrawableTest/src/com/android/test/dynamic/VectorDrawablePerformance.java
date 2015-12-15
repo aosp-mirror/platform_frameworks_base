@@ -35,6 +35,10 @@ import java.text.DecimalFormat;
 public class VectorDrawablePerformance extends Activity {
     private static final String LOGCAT = "VectorDrawable1";
     protected int[] icon = {
+            R.drawable.vector_icon_gradient_1,
+            R.drawable.vector_icon_gradient_2,
+            R.drawable.vector_icon_gradient_3,
+            R.drawable.vector_icon_state_list,
             R.drawable.vector_drawable01,
             R.drawable.vector_drawable02,
             R.drawable.vector_drawable03,
@@ -102,7 +106,7 @@ public class VectorDrawablePerformance extends Activity {
         ScrollView scrollView = new ScrollView(this);
         GridLayout container = new GridLayout(this);
         scrollView.addView(container);
-        container.setColumnCount(5);
+        container.setColumnCount(4);
         Resources res = this.getResources();
         container.setBackgroundColor(0xFF888888);
         VectorDrawable []d = new VectorDrawable[icon.length];

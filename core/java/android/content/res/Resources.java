@@ -56,6 +56,7 @@ import android.util.LongSparseArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.util.Xml;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 
@@ -115,8 +116,8 @@ public class Resources {
     private static final LongSparseArray<ConstantState>[] sPreloadedDrawables;
     private static final LongSparseArray<ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<>();
-    private static final LongSparseArray<android.content.res.ConstantState<ColorStateList>>
-            sPreloadedColorStateLists = new LongSparseArray<>();
+    private static final LongSparseArray<android.content.res.ConstantState<ComplexColor>>
+            sPreloadedComplexColors = new LongSparseArray<>();
 
     // Pool of TypedArrays targeted to this Resources object.
     final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
@@ -133,7 +134,7 @@ public class Resources {
     private final Configuration mTmpConfig = new Configuration();
     private final DrawableCache mDrawableCache = new DrawableCache(this);
     private final DrawableCache mColorDrawableCache = new DrawableCache(this);
-    private final ConfigurationBoundResourceCache<ColorStateList> mColorStateListCache =
+    private final ConfigurationBoundResourceCache<ComplexColor> mComplexColorCache =
             new ConfigurationBoundResourceCache<>(this);
     private final ConfigurationBoundResourceCache<Animator> mAnimatorCache =
             new ConfigurationBoundResourceCache<>(this);
@@ -1987,7 +1988,7 @@ public class Resources {
 
             mDrawableCache.onConfigurationChange(configChanges);
             mColorDrawableCache.onConfigurationChange(configChanges);
-            mColorStateListCache.onConfigurationChange(configChanges);
+            mComplexColorCache.onConfigurationChange(configChanges);
             mAnimatorCache.onConfigurationChange(configChanges);
             mStateListAnimatorCache.onConfigurationChange(configChanges);
 
@@ -2613,6 +2614,82 @@ public class Resources {
         return dr;
     }
 
+    /**
+     * Given the value and id, we can get the XML filename as in value.data, based on that, we
+     * first try to load CSL from the cache. If not found, try to get from the constant state.
+     * Last, parse the XML and generate the CSL.
+     */
+    private ComplexColor loadComplexColorFromName(Theme theme, TypedValue value, int id) {
+        final long key = (((long) value.assetCookie) << 32) | value.data;
+        final ConfigurationBoundResourceCache<ComplexColor> cache = mComplexColorCache;
+        ComplexColor complexColor = cache.getInstance(key, theme);
+        if (complexColor != null) {
+            return complexColor;
+        }
+
+        final android.content.res.ConstantState<ComplexColor> factory =
+                sPreloadedComplexColors.get(key);
+
+        if (factory != null) {
+            complexColor = factory.newInstance(this, theme);
+        }
+        if (complexColor == null) {
+            complexColor = loadComplexColorForCookie(value, id, theme);
+        }
+
+        if (complexColor != null) {
+            if (mPreloading) {
+                if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
+                        "color")) {
+                    sPreloadedComplexColors.put(key, complexColor.getConstantState());
+                }
+            } else {
+                cache.put(key, theme, complexColor.getConstantState());
+            }
+        }
+        return complexColor;
+    }
+
+    @Nullable
+    public ComplexColor loadComplexColor(@NonNull TypedValue value, int id, Theme theme) {
+        if (TRACE_FOR_PRELOAD) {
+            // Log only framework resources
+            if ((id >>> 24) == 0x1) {
+                final String name = getResourceName(id);
+                if (name != null) android.util.Log.d("loadComplexColor", name);
+            }
+        }
+
+        final long key = (((long) value.assetCookie) << 32) | value.data;
+
+        // Handle inline color definitions.
+        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
+                && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            return getColorStateListFromInt(value, key);
+        }
+
+        final String file = value.string.toString();
+
+        ComplexColor complexColor;
+        if (file.endsWith(".xml")) {
+            try {
+                complexColor = loadComplexColorFromName(theme, value, id);
+            } catch (Exception e) {
+                final NotFoundException rnf = new NotFoundException(
+                        "File " + file + " from complex color resource ID #0x"
+                                + Integer.toHexString(id));
+                rnf.initCause(e);
+                throw rnf;
+            }
+        } else {
+            throw new NotFoundException(
+                    "File " + file + " from drawable resource ID #0x"
+                            + Integer.toHexString(id) + ": .xml extension required");
+        }
+
+        return complexColor;
+    }
+
     @Nullable
     ColorStateList loadColorStateList(TypedValue value, int id, Theme theme)
             throws NotFoundException {
@@ -2626,63 +2703,57 @@ public class Resources {
 
         final long key = (((long) value.assetCookie) << 32) | value.data;
 
-        ColorStateList csl;
-
         // Handle inline color definitions.
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            final android.content.res.ConstantState<ColorStateList> factory =
-                    sPreloadedColorStateLists.get(key);
-            if (factory != null) {
-                return factory.newInstance();
-            }
-
-            csl = ColorStateList.valueOf(value.data);
-
-            if (mPreloading) {
-                if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
-                        "color")) {
-                    sPreloadedColorStateLists.put(key, csl.getConstantState());
-                }
-            }
-
-            return csl;
+            return getColorStateListFromInt(value, key);
         }
 
-        final ConfigurationBoundResourceCache<ColorStateList> cache = mColorStateListCache;
-        csl = cache.getInstance(key, theme);
-        if (csl != null) {
-            return csl;
+        ComplexColor complexColor = loadComplexColorFromName(theme, value, id);
+        if (complexColor != null && complexColor instanceof ColorStateList) {
+            return (ColorStateList) complexColor;
         }
 
-        final android.content.res.ConstantState<ColorStateList> factory =
-                sPreloadedColorStateLists.get(key);
+        throw new NotFoundException(
+                "Can't find ColorStateList from drawable resource ID #0x"
+                        + Integer.toHexString(id));
+    }
+
+    @NonNull
+    private ColorStateList getColorStateListFromInt(@NonNull  TypedValue value, long key) {
+        ColorStateList csl;
+        final android.content.res.ConstantState<ComplexColor> factory =
+                sPreloadedComplexColors.get(key);
         if (factory != null) {
-            csl = factory.newInstance(this, theme);
+            return (ColorStateList) factory.newInstance();
         }
 
-        if (csl == null) {
-            csl = loadColorStateListForCookie(value, id, theme);
-        }
+        csl = ColorStateList.valueOf(value.data);
 
-        if (csl != null) {
-            if (mPreloading) {
-                if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
-                        "color")) {
-                    sPreloadedColorStateLists.put(key, csl.getConstantState());
-                }
-            } else {
-                cache.put(key, theme, csl.getConstantState());
+        if (mPreloading) {
+            if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
+                    "color")) {
+                sPreloadedComplexColors.put(key, csl.getConstantState());
             }
         }
 
         return csl;
     }
 
-    private ColorStateList loadColorStateListForCookie(TypedValue value, int id, Theme theme) {
+    /**
+     * Load a ComplexColor based on the XML file content. The result can be a GradientColor or
+     * ColorStateList. Note that pure color will be wrapped into a ColorStateList.
+     *
+     * We deferred the parser creation to this function b/c we need to differentiate b/t gradient
+     * and selector tag.
+     *
+     * @return a ComplexColor (GradientColor or ColorStateList) based on the XML file content.
+     */
+    @Nullable
+    private ComplexColor loadComplexColorForCookie(TypedValue value, int id, Theme theme) {
         if (value.string == null) {
             throw new UnsupportedOperationException(
-                    "Can't convert to color state list: type=0x" + value.type);
+                    "Can't convert to ComplexColor: type=0x" + value.type);
         }
 
         final String file = value.string.toString();
@@ -2692,29 +2763,45 @@ public class Resources {
             if ((id >>> 24) == 0x1) {
                 final String name = getResourceName(id);
                 if (name != null) {
-                    Log.d(TAG, "Loading framework color state list #" + Integer.toHexString(id)
+                    Log.d(TAG, "Loading framework ComplexColor #" + Integer.toHexString(id)
                             + ": " + name + " at " + file);
                 }
             }
         }
 
         if (DEBUG_LOAD) {
-            Log.v(TAG, "Loading color state list for cookie " + value.assetCookie + ": " + file);
+            Log.v(TAG, "Loading ComplexColor for cookie " + value.assetCookie + ": " + file);
         }
 
-        final ColorStateList csl;
+        ComplexColor complexColor = null;
 
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
         if (file.endsWith(".xml")) {
             try {
-                final XmlResourceParser rp = loadXmlResourceParser(
-                        file, id, value.assetCookie, "colorstatelist");
-                csl = ColorStateList.createFromXml(this, rp, theme);
-                rp.close();
+                final XmlResourceParser parser = loadXmlResourceParser(
+                        file, id, value.assetCookie, "ComplexColor");
+
+                final AttributeSet attrs = Xml.asAttributeSet(parser);
+                int type;
+                while ((type = parser.next()) != XmlPullParser.START_TAG
+                        && type != XmlPullParser.END_DOCUMENT) {
+                    // Seek parser to start tag.
+                }
+                if (type != XmlPullParser.START_TAG) {
+                    throw new XmlPullParserException("No start tag found");
+                }
+
+                final String name = parser.getName();
+                if (name.equals("gradient")) {
+                    complexColor = GradientColor.createFromXmlInner(this, parser, attrs, theme);
+                } else if (name.equals("selector")) {
+                    complexColor = ColorStateList.createFromXmlInner(this, parser, attrs, theme);
+                }
+                parser.close();
             } catch (Exception e) {
                 Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
                 final NotFoundException rnf = new NotFoundException(
-                        "File " + file + " from color state list resource ID #0x"
+                        "File " + file + " from ComplexColor resource ID #0x"
                                 + Integer.toHexString(id));
                 rnf.initCause(e);
                 throw rnf;
@@ -2727,7 +2814,7 @@ public class Resources {
         }
         Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
 
-        return csl;
+        return complexColor;
     }
 
     /**

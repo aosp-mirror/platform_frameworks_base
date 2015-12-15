@@ -17,6 +17,8 @@ package android.graphics.drawable;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
+import android.content.res.ComplexColor;
+import android.content.res.GradientColor;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -27,6 +29,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.Shader;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -121,9 +124,9 @@ import java.util.Stack;
  * <dd>Defines path data using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
  * <dt><code>android:fillColor</code></dt>
- * <dd>Specifies the color used to fill the path. May be a color or (SDK 24+ only) a color state
- * list. If this property is animated, any value set by the animation will override the original
- * value. No path fill is drawn if this property is not specified.</dd>
+ * <dd>Specifies the color used to fill the path. May be a color, also may be a color state list or
+ * a gradient color for SDK 24+. If this property is animated, any value set by the animation will
+ * override the original value. No path fill is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeColor</code></dt>
  * <dd>Specifies the color used to draw the path outline. May be a color or (SDK 24+ only) a color
  * state list. If this property is animated, any value set by the animation will override the
@@ -1276,8 +1279,9 @@ public class VectorDrawable extends Drawable {
         /////////////////////////////////////////////////////
         // Variables below need to be copied (deep copy if applicable) for mutation.
         private int[] mThemeAttrs;
-        ColorStateList mStrokeColors = null;
-        ColorStateList mFillColors = null;
+
+        ComplexColor mStrokeColors = null;
+        ComplexColor mFillColors = null;
         private long mNativePtr = 0;
 
         public VFullPath() {
@@ -1297,23 +1301,25 @@ public class VectorDrawable extends Drawable {
         public boolean onStateChange(int[] stateSet) {
             boolean changed = false;
 
-            if (mStrokeColors != null) {
+            if (mStrokeColors != null && mStrokeColors instanceof ColorStateList) {
                 final int oldStrokeColor = getStrokeColor();
-                final int newStrokeColor = mStrokeColors.getColorForState(stateSet, oldStrokeColor);
+                final int newStrokeColor =
+                        ((ColorStateList) mStrokeColors).getColorForState(stateSet, oldStrokeColor);
                 changed |= oldStrokeColor != newStrokeColor;
                 if (oldStrokeColor != newStrokeColor) {
                     nSetStrokeColor(mNativePtr, newStrokeColor);
                 }
             }
 
-            if (mFillColors != null) {
+            if (mFillColors != null && mFillColors instanceof ColorStateList) {
                 final int oldFillColor = getFillColor();
-                final int newFillColor = mFillColors.getColorForState(stateSet, oldFillColor);
+                final int newFillColor = ((ColorStateList) mFillColors).getColorForState(stateSet, oldFillColor);
                 changed |= oldFillColor != newFillColor;
                 if (oldFillColor != newFillColor) {
                     nSetFillColor(mNativePtr, newFillColor);
                 }
             }
+
             return changed;
         }
 
@@ -1372,7 +1378,8 @@ public class VectorDrawable extends Drawable {
             int strokeLineCap =  properties.getInt(STROKE_LINE_CAP_INDEX * 4);
             int strokeLineJoin = properties.getInt(STROKE_LINE_JOIN_INDEX * 4);
             float strokeMiterLimit = properties.getFloat(STROKE_MITER_LIMIT_INDEX * 4);
-
+            Shader fillGradient = null;
+            Shader strokeGradient = null;
             // Account for any configuration changes.
             mChangingConfigurations |= a.getChangingConfigurations();
 
@@ -1391,23 +1398,43 @@ public class VectorDrawable extends Drawable {
                 nSetPathString(mNativePtr, pathString, pathString.length());
             }
 
-            final ColorStateList fillColors = a.getColorStateList(
+            final ComplexColor fillColors = a.getComplexColor(
                     R.styleable.VectorDrawablePath_fillColor);
             if (fillColors != null) {
-                // If the color state list isn't stateful, discard the state
-                // list and keep the default (e.g. the only) color.
-                mFillColors = fillColors.isStateful() ? fillColors : null;
+                // If the colors is a gradient color, or the color state list is stateful, keep the
+                // colors information. Otherwise, discard the colors and keep the default color.
+                if (fillColors instanceof  GradientColor) {
+                    mFillColors = fillColors;
+                    fillGradient = ((GradientColor) fillColors).getShader();
+                } else if (fillColors.isStateful()) {
+                    mFillColors = fillColors;
+                } else {
+                    mFillColors = null;
+                }
                 fillColor = fillColors.getDefaultColor();
             }
 
-            final ColorStateList strokeColors = a.getColorStateList(
+            final ComplexColor strokeColors = a.getComplexColor(
                     R.styleable.VectorDrawablePath_strokeColor);
             if (strokeColors != null) {
-                // If the color state list isn't stateful, discard the state
-                // list and keep the default (e.g. the only) color.
-                mStrokeColors = strokeColors.isStateful() ? strokeColors : null;
+                // If the colors is a gradient color, or the color state list is stateful, keep the
+                // colors information. Otherwise, discard the colors and keep the default color.
+                if (strokeColors instanceof GradientColor) {
+                    mStrokeColors = strokeColors;
+                    strokeGradient = ((GradientColor) strokeColors).getShader();
+                } else if (strokeColors.isStateful()) {
+                    mStrokeColors = strokeColors;
+                } else {
+                    mStrokeColors = null;
+                }
                 strokeColor = strokeColors.getDefaultColor();
             }
+            // Update the gradient info, even if the gradiet is null.
+            nUpdateFullPathFillGradient(mNativePtr,
+                    fillGradient != null ? fillGradient.getNativeInstance() : 0);
+            nUpdateFullPathStrokeGradient(mNativePtr,
+                    strokeGradient != null ? strokeGradient.getNativeInstance() : 0);
+
             fillAlpha = a.getFloat(R.styleable.VectorDrawablePath_fillAlpha, fillAlpha);
 
             strokeLineCap = a.getInt(
@@ -1434,18 +1461,44 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            if (mThemeAttrs != null) {
+                return true;
+            }
+            boolean fillCanApplyTheme = canGradientApplyTheme(mFillColors);
+            boolean strokeCanApplyTheme = canGradientApplyTheme(mStrokeColors);
+            if (fillCanApplyTheme || strokeCanApplyTheme) {
+                return true;
+            }
+            return false;
+
         }
 
         @Override
         public void applyTheme(Theme t) {
-            if (mThemeAttrs == null) {
-                return;
+            if (mThemeAttrs != null) {
+                final TypedArray a = t.resolveAttributes(mThemeAttrs, R.styleable.VectorDrawablePath);
+                updateStateFromTypedArray(a);
+                a.recycle();
             }
 
-            final TypedArray a = t.resolveAttributes(mThemeAttrs, R.styleable.VectorDrawablePath);
-            updateStateFromTypedArray(a);
-            a.recycle();
+            boolean fillCanApplyTheme = canGradientApplyTheme(mFillColors);
+            boolean strokeCanApplyTheme = canGradientApplyTheme(mStrokeColors);
+            if (fillCanApplyTheme) {
+                mFillColors = mFillColors.obtainForTheme(t);
+                nUpdateFullPathFillGradient(mNativePtr,
+                        ((GradientColor)mFillColors).getShader().getNativeInstance());
+            }
+
+            if (strokeCanApplyTheme) {
+                mStrokeColors = mStrokeColors.obtainForTheme(t);
+                nUpdateFullPathStrokeGradient(mNativePtr,
+                        ((GradientColor)mStrokeColors).getShader().getNativeInstance());
+            }
+        }
+
+        private boolean canGradientApplyTheme(ComplexColor complexColor) {
+            return complexColor != null && complexColor.canApplyTheme()
+                    && complexColor instanceof GradientColor;
         }
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
@@ -1560,6 +1613,8 @@ public class VectorDrawable extends Drawable {
             int strokeColor, float strokeAlpha, int fillColor, float fillAlpha, float trimPathStart,
             float trimPathEnd, float trimPathOffset, float strokeMiterLimit, int strokeLineCap,
             int strokeLineJoin);
+    private static native void nUpdateFullPathFillGradient(long pathPtr, long fillGradientPtr);
+    private static native void nUpdateFullPathStrokeGradient(long pathPtr, long strokeGradientPtr);
 
     private static native long nCreateClipPath();
     private static native long nCreateClipPath(long clipPathPtr);
