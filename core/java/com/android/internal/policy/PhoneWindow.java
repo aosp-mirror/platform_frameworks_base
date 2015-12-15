@@ -127,7 +127,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
      */
-    final DialogMenuCallback mContextMenuCallback = new DialogMenuCallback(FEATURE_CONTEXT_MENU);
+    final PhoneWindowMenuCallback mContextMenuCallback = new PhoneWindowMenuCallback(this);
 
     final TypedValue mMinWidthMajor = new TypedValue();
     final TypedValue mMinWidthMinor = new TypedValue();
@@ -3592,27 +3592,34 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * <li> Calls back to the callback's onMenuItemSelected when an item is
      * selected.
      */
-    private final class DialogMenuCallback implements MenuBuilder.Callback, MenuPresenter.Callback {
-        private int mFeatureId;
+    public static final class PhoneWindowMenuCallback
+            implements MenuBuilder.Callback, MenuPresenter.Callback {
+        private static final int FEATURE_ID = FEATURE_CONTEXT_MENU;
+
+        private final PhoneWindow mWindow;
+
         private MenuDialogHelper mSubMenuHelper;
 
-        public DialogMenuCallback(int featureId) {
-            mFeatureId = featureId;
+        private boolean mShowDialogForSubmenu;
+
+        public PhoneWindowMenuCallback(PhoneWindow window) {
+            mWindow = window;
         }
 
+        @Override
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
             if (menu.getRootMenu() != menu) {
                 onCloseSubMenu(menu);
             }
 
             if (allMenusAreClosing) {
-                Callback callback = getCallback();
-                if (callback != null && !isDestroyed()) {
-                    callback.onPanelClosed(mFeatureId, menu);
+                final Callback callback = mWindow.getCallback();
+                if (callback != null && !mWindow.isDestroyed()) {
+                    callback.onPanelClosed(FEATURE_ID, menu);
                 }
 
-                if (menu == mContextMenu) {
-                    dismissContextMenu();
+                if (menu == mWindow.mContextMenu) {
+                    mWindow.dismissContextMenu();
                 }
 
                 // Dismiss the submenu, if it is showing
@@ -3623,33 +3630,45 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        public void onCloseSubMenu(MenuBuilder menu) {
-            Callback callback = getCallback();
-            if (callback != null && !isDestroyed()) {
-                callback.onPanelClosed(mFeatureId, menu.getRootMenu());
+        private void onCloseSubMenu(MenuBuilder menu) {
+            final Callback callback = mWindow.getCallback();
+            if (callback != null && !mWindow.isDestroyed()) {
+                callback.onPanelClosed(FEATURE_ID, menu.getRootMenu());
             }
         }
 
+        @Override
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
-            Callback callback = getCallback();
-            return (callback != null && !isDestroyed())
-                    && callback.onMenuItemSelected(mFeatureId, item);
+            final Callback callback = mWindow.getCallback();
+            return callback != null && !mWindow.isDestroyed()
+                    && callback.onMenuItemSelected(FEATURE_ID, item);
         }
 
+        @Override
         public void onMenuModeChange(MenuBuilder menu) {
         }
 
+        @Override
         public boolean onOpenSubMenu(MenuBuilder subMenu) {
-            if (subMenu == null) return false;
+            if (subMenu == null) {
+                return false;
+            }
 
             // Set a simple callback for the submenu
             subMenu.setCallback(this);
 
-            // The window manager will give us a valid window token
-            mSubMenuHelper = new MenuDialogHelper(subMenu);
-            mSubMenuHelper.show(null);
+            if (mShowDialogForSubmenu) {
+                // The window manager will give us a valid window token
+                mSubMenuHelper = new MenuDialogHelper(subMenu);
+                mSubMenuHelper.show(null);
+                return true;
+            }
 
-            return true;
+            return false;
+        }
+
+        public void setShowDialogForSubmenu(boolean enabled) {
+            mShowDialogForSubmenu = enabled;
         }
     }
 
