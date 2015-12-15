@@ -136,6 +136,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/ISyncContext.aidl \
 	core/java/android/content/ISyncServiceAdapter.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
+	core/java/android/content/om/IOverlayManager.aidl \
 	core/java/android/content/pm/ILauncherApps.aidl \
 	core/java/android/content/pm/IOnAppsChangedListener.aidl \
 	core/java/android/content/pm/IOtaDexopt.aidl \
