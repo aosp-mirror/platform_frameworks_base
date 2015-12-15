@@ -18,7 +18,6 @@ package com.android.server;
 
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
@@ -49,6 +48,7 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 
 import android.app.AlarmManager;
+import android.app.IAlarmListener;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -70,6 +70,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.TrustedTime;
 
+import com.android.internal.net.VpnInfo;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
@@ -83,6 +84,9 @@ import java.io.File;
 
 /**
  * Tests for {@link NetworkStatsService}.
+ *
+ * TODO: This test is really brittle, largely due to overly-strict use of Easymock.
+ * Rewrite w/ Mockito.
  */
 @LargeTest
 public class NetworkStatsServiceTest extends AndroidTestCase {
@@ -143,7 +147,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         expectCurrentTime();
         expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectSystemReady();
 
@@ -190,9 +193,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -244,9 +248,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -295,7 +300,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         // boot through serviceReady() again
         expectCurrentTime();
         expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectSystemReady();
 
@@ -335,9 +339,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // modify some number on wifi, and trigger poll event
@@ -387,9 +392,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // create some traffic on first network
@@ -429,9 +435,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         verifyAndReset();
 
@@ -475,9 +482,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // create some traffic
@@ -544,9 +552,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // create some traffic
@@ -578,9 +587,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         verifyAndReset();
 
@@ -615,9 +625,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // create some traffic for two apps
@@ -681,9 +692,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // create some initial traffic
@@ -746,9 +758,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        mService.forceUpdateIfaces();
         verifyAndReset();
 
         // create some tethering traffic
@@ -776,65 +789,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         assertUidTotal(sTemplateImsi1, UID_TETHERING, 1920L, 14L, 384L, 2L, 0);
         verifyAndReset();
 
-    }
-
-    public void testReportXtOverDev() throws Exception {
-        // bring mobile network online
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkState(buildMobile3gState(IMSI_1));
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
-        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
-        verifyAndReset();
-
-        // create some traffic, but only for DEV, and across 1.5 buckets
-        incrementCurrentTime(90 * MINUTE_IN_MILLIS);
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkStatsSummaryDev(new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 6000L, 60L, 3000L, 30L));
-        expectNetworkStatsSummaryXt(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
-
-        // verify service recorded history:
-        // 4000(dev) + 2000(dev)
-        assertNetworkTotal(sTemplateImsi1, 6000L, 60L, 3000L, 30L, 0);
-        verifyAndReset();
-
-        // create traffic on both DEV and XT, across two buckets
-        incrementCurrentTime(2 * HOUR_IN_MILLIS);
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkStatsSummaryDev(new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 6004L, 64L, 3004L, 34L));
-        expectNetworkStatsSummaryXt(new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 10240L, 0L, 0L, 0L));
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
-
-        // verify that we switching reporting at the first atomic XT bucket,
-        // which should give us:
-        // 4000(dev) + 2000(dev) + 1(dev) + 5120(xt) + 2560(xt)
-        assertNetworkTotal(sTemplateImsi1, 13681L, 61L, 3001L, 31L, 0);
-
-        // also test pure-DEV and pure-XT ranges
-        assertNetworkTotal(sTemplateImsi1, startTimeMillis(),
-                startTimeMillis() + 2 * HOUR_IN_MILLIS, 6001L, 61L, 3001L, 31L, 0);
-        assertNetworkTotal(sTemplateImsi1, startTimeMillis() + 2 * HOUR_IN_MILLIS,
-                startTimeMillis() + 4 * HOUR_IN_MILLIS, 7680L, 0L, 0L, 0L, 0);
-
-        verifyAndReset();
     }
 
     private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long rxPackets,
@@ -876,19 +830,21 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectSystemReady() throws Exception {
-        mAlarmManager.remove(isA(PendingIntent.class), null);
+        mAlarmManager.remove(isA(PendingIntent.class), EasyMock.<IAlarmListener>isNull());
         expectLastCall().anyTimes();
 
-        mAlarmManager.set(getContext().getPackageName(),
+        mAlarmManager.set(eq(getContext().getPackageName()),
                 eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), anyLong(),
-                anyInt(), isA(PendingIntent.class), null, null, isA(WorkSource.class),
-                isA(AlarmManager.AlarmClockInfo.class));
-        expectLastCall().atLeastOnce();
+                anyInt(), isA(PendingIntent.class), EasyMock.<IAlarmListener>isNull(),
+                EasyMock.<String>isNull(), EasyMock.<WorkSource>isNull(),
+                EasyMock.<AlarmManager.AlarmClockInfo>isNull());
+        expectLastCall().anyTimes();
 
         mNetManager.setGlobalAlert(anyLong());
         expectLastCall().atLeastOnce();
 
-        expect(mNetManager.isBandwidthControlEnabled()).andReturn(true).atLeastOnce();
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectBandwidthControlCheck();
     }
 
     private void expectNetworkState(NetworkState... state) throws Exception {
@@ -899,6 +855,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
+        expect(mConnManager.getAllVpnInfo()).andReturn(new VpnInfo[0]).atLeastOnce();
+
         expectNetworkStatsSummaryDev(summary);
         expectNetworkStatsSummaryXt(summary);
     }
@@ -959,6 +917,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private void expectNetworkStatsPoll() throws Exception {
         mNetManager.setGlobalAlert(anyLong());
         expectLastCall().anyTimes();
+    }
+
+    private void expectBandwidthControlCheck() throws Exception {
+        expect(mNetManager.isBandwidthControlEnabled()).andReturn(true).atLeastOnce();
     }
 
     private void assertStatsFilesExist(boolean exist) {
