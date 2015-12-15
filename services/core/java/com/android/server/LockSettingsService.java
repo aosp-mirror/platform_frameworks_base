@@ -356,6 +356,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
+        if (LockPatternUtils.LEGACY_LOCK_PATTERN_ENABLED.equals(key)) {
+            key = Settings.Secure.LOCK_PATTERN_ENABLED;
+        }
+
         return mStorage.readKeyValue(key, defaultValue, userId);
     }
 
