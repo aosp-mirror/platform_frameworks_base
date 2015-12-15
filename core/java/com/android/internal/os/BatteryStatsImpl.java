@@ -105,7 +105,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 132 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 133 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -1968,8 +1968,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private int buildBatteryLevelInt(HistoryItem h) {
         return ((((int)h.batteryLevel)<<25)&0xfe000000)
-                | ((((int)h.batteryTemperature)<<14)&0x01ff8000)
-                | ((((int)h.batteryVoltage)<<1)&0x00007fff);
+                | ((((int)h.batteryTemperature)<<15)&0x01ff8000)
+                | ((((int)h.batteryVoltage)<<1)&0x00007ffe);
+    }
+
+    private void readBatteryLevelInt(int batteryLevelInt, HistoryItem out) {
+        out.batteryLevel = (byte)((batteryLevelInt & 0xfe000000) >>> 25);
+        out.batteryTemperature = (short)((batteryLevelInt & 0x01ff8000) >>> 15);
+        out.batteryVoltage = (char)((batteryLevelInt & 0x00007ffe) >>> 1);
     }
 
     private int buildStateInt(HistoryItem h) {
@@ -2110,9 +2116,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         final int batteryLevelInt;
         if ((firstToken&DELTA_BATTERY_LEVEL_FLAG) != 0) {
             batteryLevelInt = src.readInt();
-            cur.batteryLevel = (byte)((batteryLevelInt>>25)&0x7f);
-            cur.batteryTemperature = (short)((batteryLevelInt<<7)>>21);
-            cur.batteryVoltage = (char)(batteryLevelInt&0x3fff);
+            readBatteryLevelInt(batteryLevelInt, cur);
             cur.numReadInts += 1;
             if (DEBUG) Slog.i(TAG, "READ DELTA: batteryToken=0x"
                     + Integer.toHexString(batteryLevelInt)
