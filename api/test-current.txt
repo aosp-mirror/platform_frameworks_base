@@ -5739,6 +5739,9 @@ package android.app.admin {
     ctor public DeviceAdminReceiver();
     method public android.app.admin.DevicePolicyManager getManager(android.content.Context);
     method public android.content.ComponentName getWho(android.content.Context);
+    method public void onBugreportFailed(android.content.Context, android.content.Intent, int);
+    method public void onBugreportShared(android.content.Context, android.content.Intent, java.lang.String);
+    method public void onBugreportSharingDeclined(android.content.Context, android.content.Intent);
     method public java.lang.String onChoosePrivateKeyAlias(android.content.Context, android.content.Intent, int, android.net.Uri, java.lang.String);
     method public java.lang.CharSequence onDisableRequested(android.content.Context, android.content.Intent);
     method public void onDisabled(android.content.Context, android.content.Intent);
@@ -5763,9 +5766,14 @@ package android.app.admin {
     field public static final java.lang.String ACTION_PASSWORD_FAILED = "android.app.action.ACTION_PASSWORD_FAILED";
     field public static final java.lang.String ACTION_PASSWORD_SUCCEEDED = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
     field public static final java.lang.String ACTION_PROFILE_PROVISIONING_COMPLETE = "android.app.action.PROFILE_PROVISIONING_COMPLETE";
+    field public static final int BUGREPORT_FAILURE_FAILED_COMPLETING = 0; // 0x0
+    field public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1; // 0x1
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
     field public static final java.lang.String EXTRA_LOCK_TASK_PACKAGE = "android.app.extra.LOCK_TASK_PACKAGE";
+  }
+
+  public static abstract class DeviceAdminReceiver.BugreportFailureCode implements java.lang.annotation.Annotation {
   }
 
   public class DevicePolicyManager {
@@ -5845,6 +5853,7 @@ package android.app.admin {
     method public boolean removeCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
     method public boolean removeKeyPair(android.content.ComponentName, java.lang.String);
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
+    method public boolean requestBugreport(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);

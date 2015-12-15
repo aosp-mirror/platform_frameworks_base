@@ -2497,6 +2497,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to request a bugreport.
+     *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return {@code true} if the bugreport collection started successfully, or {@code false}
+     * if it wasn't triggered because a previous bugreport operation is still active
+     * (either the bugreport is still running or waiting for the user to share or decline)
+     */
+    public boolean requestBugreport(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.requestBugreport(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Determine whether or not creating a guest user has been disabled for the device
      *
      * @hide

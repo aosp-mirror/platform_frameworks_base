@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.accounts.AccountManager;
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -28,6 +29,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.security.KeyChain;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base class for implementing a device administration component.  This
@@ -226,6 +230,75 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
+
+    /**
+     * Action sent to a device administrator to notify that the device user
+     * has declined sharing a bugreport.
+     *
+     * <p>The calling device admin must be the device owner to receive this broadcast.
+     * @see DevicePolicyManager#requestBugreport
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BUGREPORT_SHARING_DECLINED =
+            "android.app.action.BUGREPORT_SHARING_DECLINED";
+
+    /**
+     * Action sent to a device administrator to notify that the collection of a bugreport
+     * has failed.
+     *
+     * <p>The calling device admin must be the device owner to receive this broadcast.
+     * @see DevicePolicyManager#requestBugreport
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BUGREPORT_FAILED = "android.app.action.BUGREPORT_FAILED";
+
+    /**
+     * Action sent to a device administrator to share the bugreport.
+     *
+     * <p>The calling device admin must be the device owner to receive this broadcast.
+     * @see DevicePolicyManager#requestBugreport
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BUGREPORT_SHARE =
+            "android.app.action.BUGREPORT_SHARE";
+
+    /**
+     * A string containing the SHA-256 hash of the bugreport file.
+     *
+     * @see #ACTION_BUGREPORT_SHARE
+     * @hide
+     */
+    public static final String EXTRA_BUGREPORT_HASH = "android.app.extra.BUGREPORT_HASH";
+
+    /**
+     * An {@code int} failure code representing the reason of the bugreport failure.
+     *
+     * @see #ACTION_BUGREPORT_FAILED
+     * @see #BUGREPORT_FAILURE_FAILED_COMPLETING, #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
+     * @hide
+     */
+    public static final String EXTRA_BUGREPORT_FAILURE_REASON =
+            "android.app.extra.BUGREPORT_FAILURE_REASON";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        BUGREPORT_FAILURE_FAILED_COMPLETING,
+        BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
+    })
+    /**
+     * An interface representing reason of bugreport failure.
+     *
+     * @see #EXTRA_BUGREPORT_FAILURE_REASON
+     * @hide
+     */
+    public @interface BugreportFailureCode {}
+    /** Bugreport completion process failed. */
+    public static final int BUGREPORT_FAILURE_FAILED_COMPLETING = 0;
+    /** Bugreport is no longer available for collection. */
+    public static final int BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE = 1;
 
     /** @hide */
     public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
@@ -482,6 +555,48 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called when sharing a bugreport has been cancelled by the user of the device.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @see DevicePolicyManager#requestBugreport
+     */
+    public void onBugreportSharingDeclined(Context context, Intent intent) {
+    }
+
+    /**
+     * Called when the bugreport has been shared with the device administrator app.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}. Contains the URI of
+     * the bugreport file (with MIME type "application/vnd.android.bugreport"), that can be accessed
+     * by calling {@link Intent#getData()}
+     * @param bugreportHash SHA-256 hash of the bugreport file.
+     * @see DevicePolicyManager#requestBugreport
+     */
+    public void onBugreportShared(Context context, Intent intent, String bugreportHash) {
+    }
+
+    /**
+     * Called when the bugreport collection flow has failed.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param failureCode int containing failure code. One of
+     * #BUGREPORT_FAILURE_FAILED_COMPLETING or #BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
+     * @see DevicePolicyManager#requestBugreport
+     */
+    public void onBugreportFailed(Context context, Intent intent,
+            @BugreportFailureCode int failureCode) {
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -524,6 +639,15 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_NOTIFY_PENDING_SYSTEM_UPDATE.equals(action)) {
             long receivedTime = intent.getLongExtra(EXTRA_SYSTEM_UPDATE_RECEIVED_TIME, -1);
             onSystemUpdatePending(context, intent, receivedTime);
+        } else if (ACTION_BUGREPORT_SHARING_DECLINED.equals(action)) {
+            onBugreportSharingDeclined(context, intent);
+        } else if (ACTION_BUGREPORT_SHARE.equals(action)) {
+            String bugreportFileHash = intent.getStringExtra(EXTRA_BUGREPORT_HASH);
+            onBugreportShared(context, intent, bugreportFileHash);
+        } else if (ACTION_BUGREPORT_FAILED.equals(action)) {
+            int failureCode = intent.getIntExtra(EXTRA_BUGREPORT_FAILURE_REASON,
+                    BUGREPORT_FAILURE_FAILED_COMPLETING);
+            onBugreportFailed(context, intent, failureCode);
         }
     }
 }
