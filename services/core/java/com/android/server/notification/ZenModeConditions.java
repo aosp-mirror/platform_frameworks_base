@@ -109,7 +109,6 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (DEBUG) Log.d(TAG, "onConditionChanged " + id + " " + condition);
         ZenModeConfig config = mHelper.getConfig();
         if (config == null) return;
-        config = config.copy();
         boolean updated = updateCondition(id, condition, config.manualRule);
         for (ZenRule automaticRule : config.automaticRules.values()) {
             updated |= updateCondition(id, condition, automaticRule);
