@@ -255,7 +255,7 @@ class DocumentLoader {
                 return;
             }
             if (mNumLoaded == 0) {
-                mDatabase.getMapper().startAddingChildDocuments(mIdentifier.mDocumentId);
+                mDatabase.getMapper().startAddingDocuments(mIdentifier.mDocumentId);
             }
             try {
                 mDatabase.getMapper().putChildDocuments(
@@ -266,7 +266,7 @@ class DocumentLoader {
                 mNumLoaded = 0;
             }
             if (getState() != STATE_LOADING) {
-                mDatabase.getMapper().stopAddingChildDocuments(mIdentifier.mDocumentId);
+                mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
             }
         }
 
@@ -275,7 +275,7 @@ class DocumentLoader {
             mError = message;
             mNumLoaded = 0;
             if (lastState == STATE_LOADING) {
-                mDatabase.getMapper().stopAddingChildDocuments(mIdentifier.mDocumentId);
+                mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
             }
         }
 

@@ -53,13 +53,13 @@ import java.util.Set;
  * by comparing the directory structure and object name.
  *
  * To start putting documents into the database, the client needs to call
- * {@link Mapper#startAddingChildDocuments(String)} with the parent document ID. Also it
- * needs to call {@link Mapper#stopAddingChildDocuments(String)} after putting all child
+ * {@link Mapper#startAddingDocuments(String)} with the parent document ID. Also it
+ * needs to call {@link Mapper#stopAddingDocuments(String)} after putting all child
  * documents to the database. (All explanations are same for root documents)
  *
- * database.getMapper().startAddingChildDocuments();
+ * database.getMapper().startAddingDocuments();
  * database.getMapper().putChildDocuments();
- * database.getMapper().stopAddingChildDocuments();
+ * database.getMapper().stopAddingDocuments();
  *
  * To update the existing documents, the client code can repeat to call the three methods again.
  * The newly added rows update corresponding existing rows that have same MTP identifier like

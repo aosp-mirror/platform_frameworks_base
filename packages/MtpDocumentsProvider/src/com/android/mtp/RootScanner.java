@@ -110,25 +110,21 @@ final class RootScanner {
                     return;
                 }
                 boolean changed = false;
+                mDatabase.getMapper().startAddingDocuments(null /* parentDocumentId */);
                 for (int deviceId : deviceIds) {
                     try {
                         final MtpRoot[] roots = mManager.getRoots(deviceId);
-                        mDatabase.getMapper().startAddingRootDocuments(deviceId);
-                        try {
-                            if (mDatabase.getMapper().putRootDocuments(
-                                    deviceId, mResources, roots)) {
-                                changed = true;
-                            }
-                        } finally {
-                            if (mDatabase.getMapper().stopAddingRootDocuments(deviceId)) {
-                                changed = true;
-                            }
+                        if (mDatabase.getMapper().putRootDocuments(deviceId, mResources, roots)) {
+                            changed = true;
                         }
                     } catch (IOException | SQLiteException exception) {
                         // The error may happen on the device. We would like to continue getting
                         // roots for other devices.
                         Log.e(MtpDocumentsProvider.TAG, exception.getMessage());
                     }
+                }
+                if (mDatabase.getMapper().stopAddingDocuments(null /* parentDocumentId */)) {
+                    changed = true;
                 }
                 if (changed) {
                     notifyChange();

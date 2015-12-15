@@ -103,9 +103,6 @@ class MtpDatabaseConstants {
 
     static final String SELECTION_DOCUMENT_ID = Document.COLUMN_DOCUMENT_ID + " = ?";
     static final String SELECTION_ROOT_ID = Root.COLUMN_ROOT_ID + " = ?";
-    static final String SELECTION_ROOT_DOCUMENTS =
-            COLUMN_DEVICE_ID + " = ? AND " + COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
-    static final String SELECTION_CHILD_DOCUMENTS = COLUMN_PARENT_DOCUMENT_ID + " = ?";
 
     static final String QUERY_CREATE_DOCUMENTS =
             "CREATE TABLE " + TABLE_DOCUMENTS + " (" +
