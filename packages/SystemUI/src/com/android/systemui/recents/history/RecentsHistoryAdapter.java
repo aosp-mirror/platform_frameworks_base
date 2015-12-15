@@ -20,6 +20,7 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +28,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
+import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,7 +57,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     static final int TASK_ROW_VIEW_TYPE = 1;
 
     /**
-     * View holder implementation.  The {@param TaskCallbacks} are only called for TaskRow view
+     * View holder implementation. The {@param TaskCallbacks} are only called for TaskRow view
      * holders.
      */
     public static class ViewHolder extends RecyclerView.ViewHolder implements Task.TaskCallbacks {
@@ -85,14 +91,14 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     /**
      * A single row of content.
      */
-    private interface Row {
+    interface Row {
         int getViewType();
     }
 
     /**
      * A date row.
      */
-    private static class DateRow implements Row {
+    static class DateRow implements Row {
 
         public final String date;
 
@@ -109,12 +115,14 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     /**
      * A task row.
      */
-    private static class TaskRow implements Row, View.OnClickListener {
+    static class TaskRow implements Row, View.OnClickListener {
 
         public final Task task;
+        public final int dateKey;
 
-        public TaskRow(Task task) {
+        public TaskRow(Task task, int dateKey) {
             this.task = task;
+            this.dateKey = dateKey;
         }
 
         @Override
@@ -134,6 +142,8 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     private LayoutInflater mLayoutInflater;
     private final List<Task> mTasks = new ArrayList<>();
     private final List<Row> mRows = new ArrayList<>();
+    private final SparseIntArray mTaskRowCount = new SparseIntArray();
+    private TaskStack mStack;
 
     public RecentsHistoryAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
@@ -142,17 +152,17 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     /**
      * Updates this adapter with the given tasks.
      */
-    public void updateTasks(Context context, List<Task> tasks) {
+    public void updateTasks(Context context, TaskStack stack) {
         mContext = context;
-        mTasks.clear();
-        mTasks.addAll(tasks);
+        mStack = stack;
 
         final Locale l = context.getResources().getConfiguration().locale;
         final String dateFormatStr = DateFormat.getBestDateTimePattern(l, "EEEEMMMMd");
-        final List<Task> tasksMostRecent = new ArrayList<>(tasks);
+        final List<Task> tasksMostRecent = new ArrayList<>(stack.getHistoricalTasks());
         Collections.reverse(tasksMostRecent);
-        int prevDayKey = -1;
+        int prevDateKey = -1;
         mRows.clear();
+        mTaskRowCount.clear();
         for (Task task : tasksMostRecent) {
             if (task.isFreeformTask()) {
                 continue;
@@ -160,32 +170,44 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
 
             Calendar cal = Calendar.getInstance(l);
             cal.setTimeInMillis(task.key.lastActiveTime);
-            int dayKey = Objects.hash(cal.get(Calendar.YEAR), cal.get(Calendar.DAY_OF_YEAR));
-            if (dayKey != prevDayKey) {
-                prevDayKey = dayKey;
+            int dateKey = Objects.hash(cal.get(Calendar.YEAR), cal.get(Calendar.DAY_OF_YEAR));
+            if (dateKey != prevDateKey) {
+                prevDateKey = dateKey;
                 mRows.add(new DateRow(DateFormat.format(dateFormatStr, cal).toString()));
             }
-            mRows.add(new TaskRow(task));
+            mRows.add(new TaskRow(task, dateKey));
+            mTaskRowCount.put(dateKey, mTaskRowCount.get(dateKey, 0) + 1);
         }
         notifyDataSetChanged();
     }
 
     /**
-     * Removes historical tasks beloning to the specified package and user.
+     * Removes historical tasks belonging to the specified package and user. We do not need to
+     * remove the task from the TaskStack since the TaskStackView will also receive this event.
      */
     public void removeTasks(String packageName, int userId) {
         boolean packagesRemoved = false;
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            Task task = mTasks.get(i);
-            String taskPackage = task.key.getComponent().getPackageName();
-            if (task.key.userId == userId && taskPackage.equals(packageName)) {
-                mTasks.remove(i);
-                packagesRemoved = true;
+        for (int i = mRows.size() - 1; i >= 0; i--) {
+            Row row = mRows.get(i);
+            if (row.getViewType() == TASK_ROW_VIEW_TYPE) {
+                TaskRow taskRow = (TaskRow) row;
+                Task task = taskRow.task;
+                String taskPackage = task.key.getComponent().getPackageName();
+                if (task.key.userId == userId && taskPackage.equals(packageName)) {
+                    i = removeTaskRow(i);
+                }
             }
         }
-        if (packagesRemoved) {
-            updateTasks(mContext, new ArrayList<Task>(mTasks));
+        if (mRows.isEmpty()) {
+            dismissHistory();
         }
+    }
+
+    /**
+     * Returns the row at the given {@param position}.
+     */
+    public Row getRow(int position) {
+        return mRows.get(position);
     }
 
     @Override
@@ -242,6 +264,16 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         }
     }
 
+    public void onTaskRemoved(Task task, int position) {
+        // Since this is removed from the history, we need to update the stack as well to ensure
+        // that the model is correct
+        mStack.removeTask(task);
+        removeTaskRow(position);
+        if (mRows.isEmpty()) {
+            dismissHistory();
+        }
+    }
+
     @Override
     public int getItemCount() {
         return mRows.size();
@@ -250,5 +282,41 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     @Override
     public int getItemViewType(int position) {
         return mRows.get(position).getViewType();
+    }
+
+    /**
+     * Removes a task row, also removing the associated {@link DateRow} if there are no more tasks
+     * in that date group.
+     *
+     * @param position an adapter position of a task row such that 0 < position < num rows.
+     * @return the index of the last removed row
+     */
+    private int removeTaskRow(int position) {
+        // Remove the task at that row
+        TaskRow taskRow = (TaskRow) mRows.remove(position);
+        int numTasks = mTaskRowCount.get(taskRow.dateKey) - 1;
+        mTaskRowCount.put(taskRow.dateKey, numTasks);
+        notifyItemRemoved(position);
+
+        if (numTasks == 0) {
+            // If that was the last task row in the group, then remove the date as well
+            mRows.remove(position - 1);
+            mTaskRowCount.removeAt(mTaskRowCount.indexOfKey(taskRow.dateKey));
+            notifyItemRemoved(position - 1);
+            return position - 1;
+        } else {
+            return position;
+        }
+    }
+
+    /**
+     * Dismisses history back to the stack view.
+     */
+    private void dismissHistory() {
+        ReferenceCountedTrigger t = new ReferenceCountedTrigger(mContext);
+        t.increment();
+        EventBus.getDefault().send(new HideHistoryEvent(true /* animate */, t));
+        t.decrement();
+        EventBus.getDefault().send(new HideHistoryButtonEvent());
     }
 }

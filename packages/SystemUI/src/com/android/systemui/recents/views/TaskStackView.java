@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
@@ -1430,6 +1431,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DismissTaskViewEvent event) {
         removeTaskViewFromStack(event.taskView);
+        EventBus.getDefault().send(new DismissTaskEvent(event.task));
     }
 
     public final void onBusEvent(FocusNextTaskViewEvent event) {

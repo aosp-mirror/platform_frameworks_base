@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.events.ui;
+
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.views.TaskView;
 
 /**
- * Constants
+ * This is sent when a {@link Task} has been dismissed.
  */
-public class Constants {
+public class DismissTaskEvent extends EventBus.Event {
 
-    // TODO: Move into RecentsMetrics
-    public static class Metrics {
-        // DO NOT MODIFY THE ORDER OF THESE METRICS
-        public static final int DismissSourceKeyboard = 0;
-        public static final int DismissSourceSwipeGesture = 1;
-        public static final int DismissSourceHeaderButton = 2;
-        public static final int DismissSourceHistorySwipeGesture = 3;
+    public final Task task;
+
+    public DismissTaskEvent(Task task) {
+        this.task = task;
     }
-
 }

@@ -56,6 +56,7 @@ import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
@@ -726,7 +727,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.count(this, "overview_app_info", 1);
     }
 
-    public final void onBusEvent(DismissTaskViewEvent event) {
+    public final void onBusEvent(DismissTaskEvent event) {
         // Remove any stored data from the loader
         RecentsTaskLoader loader = Recents.getTaskLoader();
         loader.deleteTaskData(event.task, false);
