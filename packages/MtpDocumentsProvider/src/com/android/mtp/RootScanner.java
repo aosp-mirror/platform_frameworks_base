@@ -7,8 +7,11 @@ import android.net.Uri;
 import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -106,26 +109,42 @@ final class RootScanner {
             int pollingCount = 0;
             while (!Thread.interrupted()) {
                 final int[] deviceIds = mManager.getOpenedDeviceIds();
-                if (deviceIds.length == 0) {
-                    return;
-                }
+                final Map<String, MtpRoot[]> rootsMap = new HashMap<>();
                 boolean changed = false;
+
+                // Update devices.
                 mDatabase.getMapper().startAddingDocuments(null /* parentDocumentId */);
-                for (int deviceId : deviceIds) {
+                for (final int deviceId : deviceIds) {
                     try {
                         final MtpRoot[] roots = mManager.getRoots(deviceId);
-                        if (mDatabase.getMapper().putRootDocuments(deviceId, mResources, roots)) {
+                        final String id = mDatabase.getMapper().putDeviceDocument(
+                                deviceId,
+                                mManager.getDeviceName(deviceId),
+                                roots);
+                        if (id != null) {
                             changed = true;
+                            rootsMap.put(id, roots);
                         }
-                    } catch (IOException | SQLiteException exception) {
+                    } catch (IOException exception) {
                         // The error may happen on the device. We would like to continue getting
                         // roots for other devices.
                         Log.e(MtpDocumentsProvider.TAG, exception.getMessage());
                     }
                 }
-                if (mDatabase.getMapper().stopAddingDocuments(null /* parentDocumentId */)) {
-                    changed = true;
+                mDatabase.getMapper().stopAddingDocuments(null /* parentDocumentId */);
+
+                // Update roots.
+                for (final String documentId : rootsMap.keySet()) {
+                    mDatabase.getMapper().startAddingDocuments(documentId);
+                    if (mDatabase.getMapper().putRootDocuments(
+                            documentId, mResources, rootsMap.get(documentId))) {
+                        changed = true;
+                    }
+                    if (mDatabase.getMapper().stopAddingDocuments(documentId)) {
+                        changed = true;
+                    }
                 }
+
                 if (changed) {
                     notifyChange();
                 }

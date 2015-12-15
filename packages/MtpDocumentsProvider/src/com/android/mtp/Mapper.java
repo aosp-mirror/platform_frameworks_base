@@ -42,6 +42,7 @@ import static com.android.mtp.MtpDatabase.strings;
  * Also see the comments of {@link MtpDatabase}.
  */
 class Mapper {
+    private static final String[] EMPTY_ARGS = new String[0];
     private final MtpDatabase mDatabase;
 
     /**
@@ -55,21 +56,43 @@ class Mapper {
         mDatabase = database;
     }
 
+    synchronized String putDeviceDocument(int deviceId, String name, MtpRoot[] roots) {
+        final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
+        Preconditions.checkState(mMappingMode.containsKey(/* no parent for root */ null));
+        database.beginTransaction();
+        try {
+            final ContentValues[] valuesList = new ContentValues[1];
+            valuesList[0] = new ContentValues();
+            MtpDatabase.getDeviceDocumentValues(valuesList[0], deviceId, name, roots);
+            putDocuments(
+                    valuesList,
+                    COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
+                    EMPTY_ARGS,
+                    /* heuristic */ false,
+                    COLUMN_DEVICE_ID);
+            database.setTransactionSuccessful();
+            return valuesList[0].getAsString(Document.COLUMN_DOCUMENT_ID);
+        } finally {
+            database.endTransaction();
+        }
+    }
+
     /**
      * Puts root information to database.
-     * @param deviceId Device ID
+     * @param parentDocumentId Document ID of device document.
      * @param resources Resources required to localize root name.
      * @param roots List of root information.
      * @return If roots are added or removed from the database.
      */
-    synchronized boolean putRootDocuments(int deviceId, Resources resources, MtpRoot[] roots) {
+    synchronized boolean putRootDocuments(
+            String parentDocumentId, Resources resources, MtpRoot[] roots) {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
             final boolean heuristic;
             final String mapColumn;
-            Preconditions.checkState(mMappingMode.containsKey(/* no parent for root */ null));
-            switch (mMappingMode.get(/* no parent for root */ null)) {
+            Preconditions.checkState(mMappingMode.containsKey(parentDocumentId));
+            switch (mMappingMode.get(parentDocumentId)) {
                 case MAP_BY_MTP_IDENTIFIER:
                     heuristic = false;
                     mapColumn = COLUMN_STORAGE_ID;
@@ -83,16 +106,14 @@ class Mapper {
             }
             final ContentValues[] valuesList = new ContentValues[roots.length];
             for (int i = 0; i < roots.length; i++) {
-                if (roots[i].mDeviceId != deviceId) {
-                    throw new IllegalArgumentException();
-                }
                 valuesList[i] = new ContentValues();
-                MtpDatabase.getRootDocumentValues(valuesList[i], resources, roots[i]);
+                MtpDatabase.getStorageDocumentValues(
+                        valuesList[i], resources, parentDocumentId, roots[i]);
             }
             final boolean changed = putDocuments(
                     valuesList,
-                    COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
-                    new String[0],
+                    COLUMN_PARENT_DOCUMENT_ID + "=?",
+                    strings(parentDocumentId),
                     heuristic,
                     mapColumn);
             final ContentValues values = new ContentValues();
@@ -146,7 +167,7 @@ class Mapper {
         final ContentValues[] valuesList = new ContentValues[documents.length];
         for (int i = 0; i < documents.length; i++) {
             valuesList[i] = new ContentValues();
-            MtpDatabase.getChildDocumentValues(
+            MtpDatabase.getObjectDocumentValues(
                     valuesList[i], deviceId, parentId, documents[i]);
         }
         putDocuments(
@@ -193,7 +214,7 @@ class Mapper {
             args = strings(parentDocumentId);
         } else {
             selection = COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
-            args = new String[0];
+            args = EMPTY_ARGS;
         }
 
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
@@ -312,7 +333,7 @@ class Mapper {
             args = strings(parentId);
         } else {
             selection = COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
-            args = new String[0];
+            args = EMPTY_ARGS;
         }
         final String groupKey;
         switch (mMappingMode.get(parentId)) {

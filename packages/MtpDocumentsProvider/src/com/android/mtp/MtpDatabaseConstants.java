@@ -16,8 +16,12 @@
 
 package com.android.mtp;
 
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class containing MtpDatabase constants.
@@ -41,9 +45,13 @@ class MtpDatabaseConstants {
     static final String TABLE_ROOT_EXTRA = "RootExtra";
 
     /**
-     * View to join Documents and RootExtra tables to provide roots information.
+     * 'FROM' closure of joining TABLE_DOCUMENTS and TABLE_ROOT_EXTRA.
      */
-    static final String VIEW_ROOTS = "Roots";
+    static final String JOIN_ROOTS = createJoinFromClosure(
+            TABLE_DOCUMENTS,
+            TABLE_ROOT_EXTRA,
+            Document.COLUMN_DOCUMENT_ID,
+            Root.COLUMN_ROOT_ID);
 
     static final String COLUMN_DEVICE_ID = "device_id";
     static final String COLUMN_STORAGE_ID = "storage_id";
@@ -86,8 +94,6 @@ class MtpDatabaseConstants {
 
     /**
      * Document that represents a MTP device.
-     * Note we have "device" document only when the device has multiple storage volumes. Otherwise
-     * we regard the single "storage" document as root.
      */
     static final int DOCUMENT_TYPE_DEVICE = 0;
 
@@ -131,30 +137,31 @@ class MtpDatabaseConstants {
             Root.COLUMN_MIME_TYPES + " TEXT NOT NULL);";
 
     /**
-     * Creates a view to join Documents table and RootExtra table on their primary keys to
-     * provide DocumentContract.Root equivalent information.
+     * Map for columns names to provide DocumentContract.Root compatible columns.
+     * @see SQLiteQueryBuilder#setProjectionMap(Map)
      */
-    static final String QUERY_CREATE_VIEW_ROOTS =
-            "CREATE VIEW " + VIEW_ROOTS + " AS SELECT " +
-                    TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID + " AS " +
-                            Root.COLUMN_ROOT_ID + "," +
-                    TABLE_ROOT_EXTRA + "." + Root.COLUMN_FLAGS + "," +
-                    TABLE_DOCUMENTS + "." + Document.COLUMN_ICON + " AS " +
-                            Root.COLUMN_ICON + "," +
-                    TABLE_DOCUMENTS + "." + Document.COLUMN_DISPLAY_NAME + " AS " +
-                            Root.COLUMN_TITLE + "," +
-                    TABLE_DOCUMENTS + "." + Document.COLUMN_SUMMARY + " AS " +
-                            Root.COLUMN_SUMMARY + "," +
-                    TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID + " AS " +
-                    Root.COLUMN_DOCUMENT_ID + "," +
-                    TABLE_ROOT_EXTRA + "." + Root.COLUMN_AVAILABLE_BYTES + "," +
-                    TABLE_ROOT_EXTRA + "." + Root.COLUMN_CAPACITY_BYTES + "," +
-                    TABLE_ROOT_EXTRA + "." + Root.COLUMN_MIME_TYPES + "," +
-                    TABLE_DOCUMENTS + "." + COLUMN_ROW_STATE +
-            " FROM " + TABLE_DOCUMENTS + " INNER JOIN " + TABLE_ROOT_EXTRA +
-            " ON " +
-                    COLUMN_PARENT_DOCUMENT_ID + " IS NULL AND " +
-                    TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID +
-                    "=" +
-                    TABLE_ROOT_EXTRA + "." + Root.COLUMN_ROOT_ID;
+    static final Map<String, String> COLUMN_MAP_ROOTS;
+    static {
+        COLUMN_MAP_ROOTS = new HashMap<>();
+        COLUMN_MAP_ROOTS.put(Root.COLUMN_ROOT_ID, TABLE_ROOT_EXTRA + "." + Root.COLUMN_ROOT_ID);
+        COLUMN_MAP_ROOTS.put(Root.COLUMN_FLAGS, TABLE_ROOT_EXTRA + "." + Root.COLUMN_FLAGS);
+        COLUMN_MAP_ROOTS.put(Root.COLUMN_ICON, TABLE_DOCUMENTS + "." + Document.COLUMN_ICON);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_TITLE, TABLE_DOCUMENTS + "." + Document.COLUMN_DISPLAY_NAME);
+        COLUMN_MAP_ROOTS.put(Root.COLUMN_SUMMARY, TABLE_DOCUMENTS + "." + Document.COLUMN_SUMMARY);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_DOCUMENT_ID, TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_AVAILABLE_BYTES, TABLE_ROOT_EXTRA + "." + Root.COLUMN_AVAILABLE_BYTES);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_CAPACITY_BYTES, TABLE_ROOT_EXTRA + "." + Root.COLUMN_CAPACITY_BYTES);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_MIME_TYPES, TABLE_ROOT_EXTRA + "." + Root.COLUMN_MIME_TYPES);
+    }
+
+    private static String createJoinFromClosure(
+            String table1, String table2, String column1, String column2) {
+        return table1 + " INNER JOIN " + table2 +
+                " ON " + table1 + "." + column1 + " = " + table2 + "." + column2;
+    }
 }
