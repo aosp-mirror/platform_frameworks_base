@@ -110,6 +110,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -988,9 +989,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         return new SwipeHelper.LongPressListener() {
             @Override
-            public boolean onLongPress(View v, int x, int y) {
-                dismissPopups();
-
+            public boolean onLongPress(View v, final int x, final int y) {
                 if (!(v instanceof ExpandableNotificationRow)) {
                     return false;
                 }
@@ -1011,41 +1010,57 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                 // Already showing?
                 if (guts.getVisibility() == View.VISIBLE) {
-                    Log.e(TAG, "Trying to show notification guts, but already visible");
+                    dismissPopups(x, y);
                     return false;
                 }
 
                 MetricsLogger.action(mContext, MetricsLogger.ACTION_NOTE_CONTROLS);
-                guts.setVisibility(View.VISIBLE);
 
-                final double horz = Math.max(guts.getWidth() - x, x);
-                final double vert = Math.max(guts.getActualHeight() - y, y);
-                final float r = (float) Math.hypot(horz, vert);
-                final Animator a
-                        = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
-                a.setDuration(400);
-                a.setInterpolator(mLinearOutSlowIn);
-                a.start();
-
-                mNotificationGutsExposed = guts;
-
+                // ensure that it's layouted but not visible until actually laid out
+                guts.setVisibility(View.INVISIBLE);
+                // Post to ensure the the guts are properly layed out.
+                guts.post(new Runnable() {
+                    public void run() {
+                        dismissPopups();
+                        guts.setVisibility(View.VISIBLE);
+                        final double horz = Math.max(guts.getWidth() - x, x);
+                        final double vert = Math.max(guts.getHeight() - y, y);
+                        final float r = (float) Math.hypot(horz, vert);
+                        final Animator a
+                                = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
+                        a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                        a.setInterpolator(mLinearOutSlowIn);
+                        a.start();
+                        guts.setExposed(true);
+                        mStackScroller.onHeightChanged(null, true /* needsAnimation */);
+                        mNotificationGutsExposed = guts;
+                    }
+                });
                 return true;
             }
         };
     }
 
     public void dismissPopups() {
+        dismissPopups(-1, -1);
+    }
+
+    private void dismissPopups(int x, int y) {
         if (mNotificationGutsExposed != null) {
             final NotificationGuts v = mNotificationGutsExposed;
             mNotificationGutsExposed = null;
 
             if (v.getWindowToken() == null) return;
-
-            final int x = (v.getLeft() + v.getRight()) / 2;
-            final int y = (v.getTop() + v.getActualHeight() / 2);
+            if (x == -1 || y == -1) {
+                x = (v.getLeft() + v.getRight()) / 2;
+                y = (v.getTop() + v.getHeight() / 2);
+            }
+            final double horz = Math.max(v.getWidth() - x, x);
+            final double vert = Math.max(v.getHeight() - y, y);
+            final float r = (float) Math.hypot(horz, vert);
             final Animator a = ViewAnimationUtils.createCircularReveal(v,
-                    x, y, x, 0);
-            a.setDuration(200);
+                    x, y, r, 0);
+            a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
             a.setInterpolator(mFastOutLinearIn);
             a.addListener(new AnimatorListenerAdapter() {
                 @Override
@@ -1055,6 +1070,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             });
             a.start();
+            v.setExposed(false);
+            mStackScroller.onHeightChanged(null, true /* needsAnimation */);
         }
     }
 

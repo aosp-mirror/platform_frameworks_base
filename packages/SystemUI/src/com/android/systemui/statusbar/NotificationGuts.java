@@ -45,6 +45,7 @@ public class NotificationGuts extends LinearLayout {
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
+    private boolean mExposed;
 
     public NotificationGuts(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -223,5 +224,13 @@ public class NotificationGuts extends LinearLayout {
 
         // Prevents this view from creating a layer when alpha is animating.
         return false;
+    }
+
+    public void setExposed(boolean exposed) {
+        mExposed = exposed;
+    }
+
+    public boolean areGutsExposed() {
+        return mExposed;
     }
 }

@@ -65,7 +65,7 @@
         android:id="@+id/notification_guts_stub"
         android:inflatedId="@+id/notification_guts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         />
 
 </com.android.systemui.statusbar.ExpandableNotificationRow>

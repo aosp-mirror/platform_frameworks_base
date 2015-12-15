@@ -25,7 +25,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewStub;
@@ -49,7 +48,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
-    private final LinearInterpolator mLinearInterpolator = new LinearInterpolator();
     private final int mNotificationMinHeightLegacy;
     private final int mMaxHeadsUpHeightLegacy;
     private final int mMaxHeadsUpHeight;
@@ -230,8 +228,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 : mMaxHeadsUpHeight;
         mRowMinHeight = minHeight;
         mMaxViewHeight = mNotificationMaxHeight;
-        mPrivateLayout.setHeights(mRowMinHeight, headsUpheight);
-        mPublicLayout.setHeights(mRowMinHeight, headsUpheight);
+        mPrivateLayout.setHeights(mRowMinHeight, headsUpheight, mNotificationMaxHeight);
+        mPublicLayout.setHeights(mRowMinHeight, headsUpheight, mNotificationMaxHeight);
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -555,12 +553,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void updateChildrenVisibility() {
+        mPrivateLayout.setVisibility(!mShowingPublic && !mIsSummaryWithChildren ? VISIBLE
+                : INVISIBLE);
         if (mChildrenContainer == null) {
             return;
         }
-        mChildrenContainer.setVisibility(mIsSummaryWithChildren ? VISIBLE : INVISIBLE);
-        mNotificationHeader.setVisibility(mIsSummaryWithChildren ? VISIBLE : INVISIBLE);
-        mPrivateLayout.setVisibility(!mIsSummaryWithChildren ? VISIBLE : INVISIBLE);
+        mChildrenContainer.setVisibility(!mShowingPublic && mIsSummaryWithChildren ? VISIBLE
+                : INVISIBLE);
+        mNotificationHeader.setVisibility(!mShowingPublic && mIsSummaryWithChildren ? VISIBLE
+                : INVISIBLE);
         // The limits might have changed if the view suddenly became a group or vice versa
         updateLimits();
     }
@@ -722,20 +723,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return getActualHeight();
         }
         boolean inExpansionState = isExpanded();
-        if (mSensitive && mHideSensitiveForIntrinsicHeight) {
-            return mRowMinHeight;
+        if (mGuts != null && mGuts.areGutsExposed()) {
+            return mGuts.getHeight();
+        } else if ((isChildInGroup() && !isGroupExpanded())) {
+            return mPrivateLayout.getMinHeight();
+        } else if (mSensitive && mHideSensitiveForIntrinsicHeight) {
+            return getMinHeight();
         } else if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getIntrinsicHeight();
         } else if (mIsHeadsUp) {
             if (inExpansionState) {
-                return Math.max(mMaxExpandHeight, mHeadsUpHeight);
+                return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
             } else {
-                return Math.max(mRowMinHeight, mHeadsUpHeight);
+                return Math.max(getMinHeight(), mHeadsUpHeight);
             }
-        } else if (!inExpansionState || (isChildInGroup() && !isGroupExpanded())) {
-            return getMinHeight();
-        } else {
+        } else if (inExpansionState) {
             return getMaxExpandHeight();
+        } else {
+            return getMinHeight();
         }
     }
 
@@ -842,8 +847,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mPublicLayout.setAlpha(1f);
             mPrivateLayout.setAlpha(1f);
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
-            mPrivateLayout.setVisibility(!mShowingPublic && !mIsSummaryWithChildren ? View.VISIBLE
-                    : View.INVISIBLE);
+            updateChildrenVisibility();
         } else {
             animateShowingPublic(delay, duration);
         }
@@ -854,27 +858,35 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void animateShowingPublic(long delay, long duration) {
-        final View source = mShowingPublic ? mPrivateLayout : mPublicLayout;
-        View target = mShowingPublic ? mPublicLayout : mPrivateLayout;
-        source.setVisibility(View.VISIBLE);
-        target.setVisibility(View.VISIBLE);
-        target.setAlpha(0f);
-        source.animate().cancel();
-        target.animate().cancel();
-        source.animate()
-                .alpha(0f)
-                .setStartDelay(delay)
-                .setDuration(duration)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        source.setVisibility(View.INVISIBLE);
-                    }
-                });
-        target.animate()
-                .alpha(1f)
-                .setStartDelay(delay)
-                .setDuration(duration);
+        View[] privateViews = mIsSummaryWithChildren ?
+                new View[] {mChildrenContainer, mNotificationHeader}
+                : new View[] {mPrivateLayout};
+        View[] publicViews = new View[] {mPublicLayout};
+        View[] hiddenChildren = mShowingPublic ? privateViews : publicViews;
+        View[] shownChildren = mShowingPublic ? publicViews : privateViews;
+        for (final View hiddenView : hiddenChildren) {
+            hiddenView.setVisibility(View.VISIBLE);
+            hiddenView.animate().cancel();
+            hiddenView.animate()
+                    .alpha(0f)
+                    .setStartDelay(delay)
+                    .setDuration(duration)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            hiddenView.setVisibility(View.INVISIBLE);
+                        }
+                    });
+        }
+        for (View showView : shownChildren) {
+            showView.setVisibility(View.VISIBLE);
+            showView.setAlpha(0f);
+            showView.animate().cancel();
+            showView.animate()
+                    .alpha(1f)
+                    .setStartDelay(delay)
+                    .setDuration(duration);
+        }
     }
 
     private void updateVetoButton() {
@@ -963,11 +975,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return mChildrenContainer.getMinHeight();
         }
         return getMinHeight();
-    }
-
-    @Override
-    protected boolean shouldLimitViewHeight() {
-        return !mIsSummaryWithChildren;
     }
 
     @Override

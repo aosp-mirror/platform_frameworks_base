@@ -20,10 +20,10 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
@@ -54,9 +54,8 @@ public abstract class ExpandableView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        boolean limitViewHeight = shouldLimitViewHeight();
         final int givenSize = MeasureSpec.getSize(heightMeasureSpec);
-        int ownMaxHeight = limitViewHeight ? mMaxViewHeight : Integer.MAX_VALUE;
+        int ownMaxHeight = Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightMode != MeasureSpec.UNSPECIFIED && givenSize != 0) {
             ownMaxHeight = Math.min(givenSize, ownMaxHeight);
@@ -98,10 +97,6 @@ public abstract class ExpandableView extends FrameLayout {
         mMatchParentViews.clear();
         int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, ownHeight);
-    }
-
-    protected boolean shouldLimitViewHeight() {
-        return true;
     }
 
     @Override

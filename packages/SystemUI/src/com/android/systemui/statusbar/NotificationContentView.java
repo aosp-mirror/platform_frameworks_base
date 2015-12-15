@@ -80,6 +80,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mIsChildInGroup;
     private int mSmallHeight;
     private int mHeadsUpHeight;
+    private int mNotificationMaxHeight;
     private StatusBarNotification mStatusBarNotification;
     private NotificationGroupManager mGroupManager;
     private RemoteInputController mRemoteInputController;
@@ -115,9 +116,10 @@ public class NotificationContentView extends FrameLayout {
         setOutlineProvider(mOutlineProvider);
     }
 
-    public void setHeights(int smallHeight, int headsUpMaxHeight) {
+    public void setHeights(int smallHeight, int headsUpMaxHeight, int maxHeight) {
         mSmallHeight = smallHeight;
         mHeadsUpHeight = headsUpMaxHeight;
+        mNotificationMaxHeight = maxHeight;
     }
 
     @Override
@@ -137,7 +139,7 @@ public class NotificationContentView extends FrameLayout {
             maxChildHeight = Math.max(maxChildHeight, mContractedChild.getMeasuredHeight());
         }
         if (mExpandedChild != null) {
-            int size = maxSize;
+            int size = Math.min(maxSize, mNotificationMaxHeight);
             ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
             if (layoutParams.height >= 0) {
                 // An actual height is set
@@ -435,6 +437,9 @@ public class NotificationContentView extends FrameLayout {
         if (!noExpandedChild && mContentHeight == mExpandedChild.getHeight()) {
             return VISIBLE_TYPE_EXPANDED;
         }
+        if (mIsChildInGroup && !isGroupExpanded()) {
+            return VISIBLE_TYPE_SINGLELINE;
+        }
 
         if (mIsHeadsUp && mHeadsUpChild != null) {
             if (mContentHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
@@ -443,9 +448,7 @@ public class NotificationContentView extends FrameLayout {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
-            if (mIsChildInGroup && !isGroupExpanded()) {
-                return VISIBLE_TYPE_SINGLELINE;
-            } else if (mContentHeight <= mSmallHeight || noExpandedChild) {
+            if (mContentHeight <= mSmallHeight || noExpandedChild) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
