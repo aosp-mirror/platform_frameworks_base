@@ -3349,9 +3349,10 @@ final class ActivityStack {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
                     int res = mStackSupervisor.startActivityLocked(srec.app.thread, destIntent,
-                            null, aInfo, null, null, parent.appToken, null,
-                            0, -1, parent.launchedFromUid, parent.launchedFromPackage,
-                            -1, parent.launchedFromUid, 0, null, false, true, null, null, null);
+                            null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null, null,
+                            parent.appToken, null, 0, -1, parent.launchedFromUid,
+                            parent.launchedFromPackage, -1, parent.launchedFromUid, 0, null,
+                            false, true, null, null, null);
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;

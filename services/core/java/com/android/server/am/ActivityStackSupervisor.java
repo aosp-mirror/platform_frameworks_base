@@ -920,21 +920,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
-            ProfilerInfo profilerInfo, int userId) {
-        // Collect information about the target of the Intent.
-        ActivityInfo aInfo;
-        try {
-            ResolveInfo rInfo =
-                AppGlobals.getPackageManager().resolveIntent(
-                        intent, resolvedType,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                                    | ActivityManagerService.STOCK_PM_FLAGS, userId);
-            aInfo = rInfo != null ? rInfo.activityInfo : null;
-        } catch (RemoteException e) {
-            aInfo = null;
-        }
-
+    ActivityInfo resolveActivity(Intent intent, ResolveInfo rInfo, int startFlags,
+            ProfilerInfo profilerInfo) {
+        final ActivityInfo aInfo = rInfo != null ? rInfo.activityInfo : null;
         if (aInfo != null) {
             // Store the found target back into the intent, because now that
             // we have it we never want to do this again.  For example, if the
@@ -961,15 +949,31 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return aInfo;
     }
 
+    ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId) {
+        try {
+            return AppGlobals.getPackageManager().resolveIntent(intent, resolvedType,
+                            PackageManager.MATCH_DEFAULT_ONLY
+                            | ActivityManagerService.STOCK_PM_FLAGS, userId);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
+            ProfilerInfo profilerInfo, int userId) {
+        final ResolveInfo rInfo = resolveIntent(intent, resolvedType, userId);
+        return resolveActivity(intent, rInfo, startFlags, profilerInfo);
+    }
+
     void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason) {
         moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE, reason);
-        startActivityLocked(null /* caller */, intent, null /* resolvedType */, aInfo,
-                null /* voiceSession */, null /* voiceInteractor */, null /* resultTo */,
-                null /* resultWho */, 0 /* requestCode */, 0 /* callingPid */, 0 /* callingUid */,
-                null /* callingPackage */, 0 /* realCallingPid */, 0 /* realCallingUid */,
-                0 /* startFlags */, null /* options */, false /* ignoreTargetSecurity */,
-                false /* componentSpecified */,
-                null /* outActivity */, null /* container */,  null /* inTask */);
+        startActivityLocked(null /*caller*/, intent, null /*ephemeralIntent*/,
+                null /*resolvedType*/, aInfo, null /*rInfo*/, null /*voiceSession*/,
+                null /*voiceInteractor*/, null /*resultTo*/, null /*resultWho*/,
+                0 /*requestCode*/, 0 /*callingPid*/, 0 /*callingUid*/, null /*callingPackage*/,
+                0 /*realCallingPid*/, 0 /*realCallingUid*/, 0 /*startFlags*/, null /*options*/,
+                false /*ignoreTargetSecurity*/, false /*componentSpecified*/,  null /*outActivity*/,
+                null /*container*/, null /*inTask*/);
         if (inResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
             // resumed (to avoid recursive resume) and will stay that way until something pokes it
@@ -991,12 +995,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         boolean componentSpecified = intent.getComponent() != null;
 
+        // Save a copy in case ephemeral needs it
+        final Intent ephemeralIntent = new Intent(intent);
         // Don't modify the client's object!
         intent = new Intent(intent);
 
+        ResolveInfo rInfo = resolveIntent(intent, resolvedType, userId);
         // Collect information about the target of the Intent.
-        ActivityInfo aInfo =
-                resolveActivity(intent, resolvedType, startFlags, profilerInfo, userId);
+        ActivityInfo aInfo = resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
         ActivityOptions options = ActivityOptions.fromBundle(bOptions);
         ActivityContainer container = (ActivityContainer)iContainer;
@@ -1084,26 +1090,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         callingUid = Binder.getCallingUid();
                         callingPid = Binder.getCallingPid();
                         componentSpecified = true;
-                        try {
-                            ResolveInfo rInfo =
-                                AppGlobals.getPackageManager().resolveIntent(
-                                        intent, null,
-                                        PackageManager.MATCH_DEFAULT_ONLY
-                                        | ActivityManagerService.STOCK_PM_FLAGS, userId);
-                            aInfo = rInfo != null ? rInfo.activityInfo : null;
+                        rInfo = resolveIntent(intent, null /*resolvedType*/, userId);
+                        aInfo = rInfo != null ? rInfo.activityInfo : null;
+                        if (aInfo != null) {
                             aInfo = mService.getActivityInfoForUser(aInfo, userId);
-                        } catch (RemoteException e) {
-                            aInfo = null;
                         }
                     }
                 }
             }
 
-            int res = startActivityLocked(caller, intent, resolvedType, aInfo,
-                    voiceSession, voiceInteractor, resultTo, resultWho,
-                    requestCode, callingPid, callingUid, callingPackage,
-                    realCallingPid, realCallingUid, startFlags, options, ignoreTargetSecurity,
-                    componentSpecified, null, container, inTask);
+            int res = startActivityLocked(caller, intent, ephemeralIntent, resolvedType,
+                    aInfo, rInfo, voiceSession, voiceInteractor,
+                    resultTo, resultWho, requestCode, callingPid,
+                    callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
+                    options, ignoreTargetSecurity, componentSpecified, null, container, inTask);
 
             Binder.restoreCallingIdentity(origId);
 
@@ -1211,10 +1211,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
                     ActivityOptions options = ActivityOptions.fromBundle(
                             i == intents.length - 1 ? bOptions : null);
-                    int res = startActivityLocked(caller, intent, resolvedTypes[i],
-                            aInfo, null, null, resultTo, null, -1, callingPid, callingUid,
-                            callingPackage, callingPid, callingUid,
-                            0, options, false, componentSpecified, outActivity, null, null);
+                    int res = startActivityLocked(caller, intent, null /*ephemeralIntent*/,
+                            resolvedTypes[i], aInfo, null /*rInfo*/, null, null, resultTo, null, -1,
+                            callingPid, callingUid, callingPackage, callingPid, callingUid, 0,
+                            options, false, componentSpecified, outActivity, null, null);
                     if (res < 0) {
                         return res;
                     }
@@ -1448,14 +1448,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 "activity", r.intent.getComponent(), false, false, true);
     }
 
-    final int startActivityLocked(IApplicationThread caller,
-            Intent intent, String resolvedType, ActivityInfo aInfo,
+    final int startActivityLocked(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
+            String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            IBinder resultTo, String resultWho, int requestCode,
-            int callingPid, int callingUid, String callingPackage,
-            int realCallingPid, int realCallingUid, int startFlags, ActivityOptions options,
-            boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
-            ActivityContainer container, TaskRecord inTask) {
+            IBinder resultTo, String resultWho, int requestCode, int callingPid, int callingUid,
+            String callingPackage, int realCallingPid, int realCallingUid, int startFlags,
+            ActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
+            ActivityRecord[] outActivity, ActivityContainer container, TaskRecord inTask) {
         int err = ActivityManager.START_SUCCESS;
 
         ProcessRecord callerApp = null;
@@ -1625,23 +1624,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     new String[]{ resolvedType },
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                             | PendingIntent.FLAG_IMMUTABLE, null);
-            int flags = intent.getFlags();
-            Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, user.id);
+            final int flags = intent.getFlags();
+            final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, user.id);
             if (newIntent != null) {
                 intent = newIntent;
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                intent.setFlags(flags
+                        | Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 intent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
                 intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
-                intent.setFlags(flags);
 
                 resolvedType = null;
                 callingUid = realCallingUid;
                 callingPid = realCallingPid;
 
                 UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
-                aInfo = resolveActivity(intent, null, PackageManager.MATCH_DEFAULT_ONLY
-                        | ActivityManagerService.STOCK_PM_FLAGS, null, parent.id);
+                rInfo = resolveIntent(intent, resolvedType, parent.id);
+                aInfo = resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
             }
         }
 
@@ -1668,22 +1667,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         new String[]{resolvedType}, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT, null);
 
+                final int flags = intent.getFlags();
                 Intent newIntent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
-                newIntent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                newIntent.setFlags(flags
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 newIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
                 newIntent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
                 if (resultRecord != null) {
                     newIntent.putExtra(Intent.EXTRA_RESULT_NEEDED, true);
                 }
-                newIntent.setFlags(intent.getFlags());
                 intent = newIntent;
 
                 resolvedType = null;
                 callingUid = realCallingUid;
                 callingPid = realCallingPid;
 
-                aInfo = resolveActivity(intent, null, PackageManager.MATCH_DEFAULT_ONLY
-                        | ActivityManagerService.STOCK_PM_FLAGS, null, userId);
+                rInfo = resolveIntent(intent, resolvedType, userId);
+                aInfo = resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
 
                 if (DEBUG_PERMISSIONS_REVIEW) {
                     Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
@@ -1694,6 +1694,47 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                     container.mActivityDisplay.mDisplayId)));
                 }
             }
+        }
+
+        // If we have an ephemeral app, abort the process of launching the resolved intent.
+        // Instead, launch the ephemeral installer. Once the installer is finished, it
+        // starts either the intent we resolved here [on install error] or the ephemeral
+        // app [on install success].
+        if (rInfo != null && rInfo.ephemeralResolveInfo != null) {
+            // Create a pending intent to start the intent resolved here.
+            final IIntentSender failureTarget = mService.getIntentSenderLocked(
+                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                    Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
+                    new String[]{ resolvedType },
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                            | PendingIntent.FLAG_IMMUTABLE, null);
+
+            // Create a pending intent to start the ephemeral application; force it to be
+            // directed to the ephemeral package.
+            ephemeralIntent.setPackage(rInfo.ephemeralResolveInfo.getPackageName());
+            final IIntentSender ephemeralTarget = mService.getIntentSenderLocked(
+                    ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                    Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ ephemeralIntent },
+                    new String[]{ resolvedType },
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                    | PendingIntent.FLAG_IMMUTABLE, null);
+
+            int flags = intent.getFlags();
+            intent = new Intent();
+            intent.setFlags(flags
+                    | Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME,
+                    rInfo.ephemeralResolveInfo.getPackageName());
+            intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, new IntentSender(failureTarget));
+            intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, new IntentSender(ephemeralTarget));
+
+            resolvedType = null;
+            callingUid = realCallingUid;
+            callingPid = realCallingPid;
+
+            rInfo = rInfo.ephemeralInstaller;
+            aInfo = resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,

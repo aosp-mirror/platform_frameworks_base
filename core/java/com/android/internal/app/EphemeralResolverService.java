@@ -16,9 +16,11 @@
 
 package com.android.internal.app;
 
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.EphemeralResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -33,6 +35,7 @@ import java.util.List;
  * Base class for implementing the resolver service.
  * @hide
  */
+@SystemApi
 public abstract class EphemeralResolverService extends Service {
     public static final String EXTRA_RESOLVE_INFO = "com.android.internal.app.RESOLVE_INFO";
     public static final String EXTRA_SEQUENCE = "com.android.internal.app.SEQUENCE";

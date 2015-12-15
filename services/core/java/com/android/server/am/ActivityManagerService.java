@@ -3676,9 +3676,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
-                    mStackSupervisor.startActivityLocked(null, intent, null, ri.activityInfo,
-                            null, null, null, null, 0, 0, 0, null, 0, 0, 0, null, false, false,
-                            null, null, null);
+                    mStackSupervisor.startActivityLocked(null, intent, null /*ephemeralIntent*/,
+                            null, ri.activityInfo, null /*rInfo*/, null, null, null, null, 0, 0, 0,
+                            null, 0, 0, 0, null, false, false, null, null, null);
                 }
             }
         }
@@ -4287,9 +4287,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             final long origId = Binder.clearCallingIdentity();
             int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
-                    r.resolvedType, aInfo, null, null, resultTo != null ? resultTo.appToken : null,
-                    resultWho, requestCode, -1, r.launchedFromUid, r.launchedFromPackage,
-                    -1, r.launchedFromUid, 0, options, false, false, null, null, null);
+                    null /*ephemeralIntent*/, r.resolvedType, aInfo, null /*rInfo*/, null,
+                    null, resultTo != null ? resultTo.appToken : null, resultWho, requestCode, -1,
+                    r.launchedFromUid, r.launchedFromPackage, -1, r.launchedFromUid, 0, options,
+                    false, false, null, null, null);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;

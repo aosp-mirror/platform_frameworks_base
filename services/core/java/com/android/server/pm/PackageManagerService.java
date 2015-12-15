@@ -105,6 +105,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
+import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
@@ -144,6 +145,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
+import android.content.pm.EphemeralResolveInfo.EphemeralResolveIntentInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
@@ -210,7 +212,7 @@ import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
 import com.android.internal.R;
-import com.android.internal.app.EphemeralResolveInfo;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
@@ -4418,7 +4420,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         flags = augmentFlagsForUser(flags, userId);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "resolve intent");
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
-        return chooseBestActivity(intent, resolvedType, flags, query, userId);
+        final ResolveInfo bestChoice =
+                chooseBestActivity(intent, resolvedType, flags, query, userId);
+
+        if (isEphemeralAllowed(intent, query, userId)) {
+            final EphemeralResolveInfo ai =
+                    getEphemeralResolveInfo(intent, resolvedType, userId);
+            if (ai != null) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.v(TAG, "Returning an EphemeralResolveInfo");
+                }
+                bestChoice.ephemeralInstaller = mEphemeralInstallerInfo;
+                bestChoice.ephemeralResolveInfo = ai;
+            }
+        }
+        return bestChoice;
     }
 
     @Override
@@ -4453,13 +4469,61 @@ public class PackageManagerService extends IPackageManager.Stub {
                 false, false, false, userId);
     }
 
-    private boolean isEphemeralAvailable(Intent intent, String resolvedType, int userId) {
+
+    private boolean isEphemeralAllowed(
+            Intent intent, List<ResolveInfo> resolvedActivites, int userId) {
+        // Short circuit and return early if possible.
+        final int callingUser = UserHandle.getCallingUserId();
+        if (callingUser != UserHandle.USER_SYSTEM) {
+            return false;
+        }
+        if (mEphemeralResolverConnection == null) {
+            return false;
+        }
+        if (intent.getComponent() != null) {
+            return false;
+        }
+        if (intent.getPackage() != null) {
+            return false;
+        }
+        final boolean isWebUri = hasWebURI(intent);
+        if (!isWebUri) {
+            return false;
+        }
+        // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
+        synchronized (mPackages) {
+            final int count = resolvedActivites.size();
+            for (int n = 0; n < count; n++) {
+                ResolveInfo info = resolvedActivites.get(n);
+                String packageName = info.activityInfo.packageName;
+                PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    // Try to get the status from User settings first
+                    long packedStatus = getDomainVerificationStatusLPr(ps, userId);
+                    int status = (int) (packedStatus >> 32);
+                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
+                            || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                        if (DEBUG_EPHEMERAL) {
+                            Slog.v(TAG, "DENY ephemeral apps;"
+                                + " pkg: " + packageName + ", status: " + status);
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        // We've exhausted all ways to deny ephemeral application; let the system look for them.
+        return true;
+    }
+
+    private EphemeralResolveInfo getEphemeralResolveInfo(Intent intent, String resolvedType,
+            int userId) {
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance(EphemeralResolveInfo.SHA_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             // If we can't create a digest, ignore ephemeral apps.
-            return false;
+            return null;
         }
 
         final byte[] hostBytes = intent.getData().getHost().getBytes();
@@ -4473,7 +4537,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mEphemeralResolverConnection.getEphemeralResolveInfoList(shaPrefix);
         if (ephemeralResolveInfoList == null || ephemeralResolveInfoList.size() == 0) {
             // No hash prefix match; there are no ephemeral apps for this domain.
-            return false;
+            return null;
         }
         for (int i = ephemeralResolveInfoList.size() - 1; i >= 0; --i) {
             EphemeralResolveInfo ephemeralApplication = ephemeralResolveInfoList.get(i);
@@ -4488,62 +4552,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             // We have a domain match; resolve the filters to see if anything matches.
             final EphemeralIntentResolver ephemeralResolver = new EphemeralIntentResolver();
             for (int j = filters.size() - 1; j >= 0; --j) {
-                ephemeralResolver.addFilter(filters.get(j));
+                final EphemeralResolveIntentInfo intentInfo =
+                        new EphemeralResolveIntentInfo(filters.get(j), ephemeralApplication);
+                ephemeralResolver.addFilter(intentInfo);
             }
-            List<ResolveInfo> ephemeralResolveList = ephemeralResolver.queryIntent(
+            List<EphemeralResolveInfo> matchedResolveInfoList = ephemeralResolver.queryIntent(
                     intent, resolvedType, false /*defaultOnly*/, userId);
-            return !ephemeralResolveList.isEmpty();
+            if (!matchedResolveInfoList.isEmpty()) {
+                return matchedResolveInfoList.get(0);
+            }
         }
         // Hash or filter mis-match; no ephemeral apps for this domain.
-        return false;
+        return null;
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, int userId) {
-        final boolean isWebUri = hasWebURI(intent);
-        // Check whether or not an ephemeral app exists to handle the URI.
-        if (isWebUri && mEphemeralResolverConnection != null) {
-            // Deny ephemeral apps if the user choose _ALWAYS or _ALWAYS_ASK for intent resolution.
-            boolean hasAlwaysHandler = false;
-            synchronized (mPackages) {
-                final int count = query.size();
-                for (int n=0; n<count; n++) {
-                    ResolveInfo info = query.get(n);
-                    String packageName = info.activityInfo.packageName;
-                    PackageSetting ps = mSettings.mPackages.get(packageName);
-                    if (ps != null) {
-                        // Try to get the status from User settings first
-                        long packedStatus = getDomainVerificationStatusLPr(ps, userId);
-                        int status = (int) (packedStatus >> 32);
-                        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
-                                || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                            hasAlwaysHandler = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Only consider installing an ephemeral app if there isn't already a verified handler.
-            // We've determined that there's an ephemeral app available for the URI, ignore any
-            // ResolveInfo's and just return the ephemeral installer
-            if (!hasAlwaysHandler && isEphemeralAvailable(intent, resolvedType, userId)) {
-                if (DEBUG_EPHEMERAL) {
-                    Slog.v(TAG, "Resolving to the ephemeral installer");
-                }
-                // ditch the result and return a ResolveInfo to launch the ephemeral installer
-                ResolveInfo ri = new ResolveInfo(mEphemeralInstallerInfo);
-                ri.activityInfo = new ActivityInfo(ri.activityInfo);
-                // make a deep copy of the applicationInfo
-                ri.activityInfo.applicationInfo = new ApplicationInfo(
-                        ri.activityInfo.applicationInfo);
-                if (userId != 0) {
-                    ri.activityInfo.applicationInfo.uid = UserHandle.getUid(userId,
-                            UserHandle.getAppId(ri.activityInfo.applicationInfo.uid));
-                }
-                return ri;
-            }
-        }
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -4559,7 +4583,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + r1.activityInfo.name + "=" + r1.priority);
                 }
                 // If the first activity has a higher priority, or a different
-                // default, then it is always desireable to pick it.
+                // default, then it is always desirable to pick it.
                 if (r0.priority != r1.priority
                         || r0.preferredOrder != r1.preferredOrder
                         || r0.isDefault != r1.isDefault) {
@@ -9737,23 +9761,24 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static final class EphemeralIntentResolver
-            extends IntentResolver<IntentFilter, ResolveInfo> {
+            extends IntentResolver<EphemeralResolveIntentInfo, EphemeralResolveInfo> {
         @Override
-        protected IntentFilter[] newArray(int size) {
-            return new IntentFilter[size];
+        protected EphemeralResolveIntentInfo[] newArray(int size) {
+            return new EphemeralResolveIntentInfo[size];
         }
 
         @Override
-        protected boolean isPackageForFilter(String packageName, IntentFilter info) {
+        protected boolean isPackageForFilter(String packageName, EphemeralResolveIntentInfo info) {
             return true;
         }
 
         @Override
-        protected ResolveInfo newResult(IntentFilter info, int match, int userId) {
-            if (!sUserManager.exists(userId)) return null;
-            final ResolveInfo res = new ResolveInfo();
-            res.filter = info;
-            return res;
+        protected EphemeralResolveInfo newResult(EphemeralResolveIntentInfo info, int match,
+                int userId) {
+            if (!sUserManager.exists(userId)) {
+                return null;
+            }
+            return info.getEphemeralResolveInfo();
         }
     }
 
