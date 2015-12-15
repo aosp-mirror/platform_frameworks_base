@@ -87,6 +87,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private final static String TAG = "RecentsActivity";
     private final static boolean DEBUG = false;
 
+    private final static String KEY_SAVED_STATE_HISTORY_VISIBLE =
+            "saved_instance_state_history_visible";
+
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
 
     private RecentsPackageMonitor mPackageMonitor;
@@ -497,6 +500,25 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         EventBus.getDefault().unregister(mScrimViews);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE,
+                (mHistoryView != null) && mHistoryView.isVisible());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.getBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, false)) {
+            ReferenceCountedTrigger postHideStackAnimationTrigger =
+                    new ReferenceCountedTrigger(this);
+            postHideStackAnimationTrigger.increment();
+            EventBus.getDefault().send(new ShowHistoryEvent(postHideStackAnimationTrigger));
+            postHideStackAnimationTrigger.decrement();
+        }
     }
 
     @Override
