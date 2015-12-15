@@ -170,8 +170,27 @@ public class CopyService extends IntentService {
 
             setupCopyJob(srcs, stack, transferMode);
 
+            final String opDesc = transferMode == TRANSFER_MODE_COPY ? "copy" : "move";
+            DocumentInfo srcInfo;
+            DocumentInfo dstInfo;
             for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
-                copy(srcs.get(i), stack.peek(), transferMode);
+                srcInfo = srcs.get(i);
+                dstInfo = stack.peek();
+
+                // Guard unsupported recursive operation.
+                if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
+                    if (DEBUG) Log.d(TAG,
+                            "Skipping recursive " + opDesc + " of directory " + dstInfo.derivedUri);
+                    mFailedFiles.add(srcInfo);
+                    continue;
+                }
+
+                if (DEBUG) Log.d(TAG,
+                        "Performing " + opDesc + " of " + srcInfo.displayName
+                        + " (" + srcInfo.derivedUri + ")" + " to " + dstInfo.displayName
+                        + " (" + dstInfo.derivedUri + ")");
+
+                copy(srcInfo, dstInfo, transferMode);
             }
         } catch (Exception e) {
             // Catch-all to prevent any copy errors from wedging the app.
@@ -447,22 +466,6 @@ public class CopyService extends IntentService {
      */
     private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo, int mode)
             throws RemoteException {
-
-        String opDesc = mode == TRANSFER_MODE_COPY ? "copy" : "move";
-
-        // Guard unsupported recursive operation.
-        if (dstDirInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstDirInfo)) {
-            if (DEBUG) Log.d(TAG,
-                    "Skipping recursive " + opDesc + " of directory " + dstDirInfo.derivedUri);
-            mFailedFiles.add(srcInfo);
-            return;
-        }
-
-        if (DEBUG) Log.d(TAG,
-                "Performing " + opDesc + " of " + srcInfo.displayName
-                + " (" + srcInfo.derivedUri + ")" + " to " + dstDirInfo.displayName
-                + " (" + dstDirInfo.derivedUri + ")");
-
         // When copying within the same provider, try to use optimized copying and moving.
         // If not supported, then fallback to byte-by-byte copy/move.
         if (srcInfo.authority.equals(dstDirInfo.authority)) {
@@ -490,6 +493,8 @@ public class CopyService extends IntentService {
             }
         }
 
+        // Create the target document (either a file or a directory), then copy recursively the
+        // contents (bytes or children).
         final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirInfo.derivedUri,
                 srcInfo.mimeType, srcInfo.displayName);
         if (dstUri == null) {
@@ -498,10 +503,30 @@ public class CopyService extends IntentService {
             return;
         }
 
-        if (srcInfo.isDirectory()) {
-            copyDirectoryHelper(srcInfo.derivedUri, dstUri, mode);
+        DocumentInfo dstInfo = null;
+        try {
+            final DocumentInfo dstDocInfo = DocumentInfo.fromUri(getContentResolver(), dstUri);
+        } catch (FileNotFoundException e) {
+            mFailedFiles.add(srcInfo);
+            return;
+        }
+
+        if (Document.MIME_TYPE_DIR.equals(srcInfo.mimeType)) {
+            copyDirectoryHelper(srcInfo, dstInfo, mode);
         } else {
-            copyFileHelper(srcInfo.derivedUri, dstUri, mode);
+            copyFileHelper(srcInfo, dstInfo, mode);
+        }
+
+        if (mode == TRANSFER_MODE_MOVE) {
+            try {
+                DocumentsContract.deleteDocument(mSrcClient, srcInfo.derivedUri);
+            } catch (RemoteException e) {
+                // RemoteExceptions usually signal that the connection is dead, so there's no
+                // point attempting to continue. Propagate the exception up so the copy job is
+                // cancelled.
+                Log.w(TAG, "Failed to clean up after move: " + srcInfo.derivedUri, e);
+                throw e;
+            }
         }
     }
 
@@ -520,48 +545,29 @@ public class CopyService extends IntentService {
      * Handles recursion into a directory and copying its contents. Note that in linux terms, this
      * does the equivalent of "cp src/* dst", not "cp -r src dst".
      *
-     * @param srcDirUri URI of the directory to copy from. The routine will copy the directory's
+     * @param srcDirInfo Info of the directory to copy from. The routine will copy the directory's
      *            contents, not the directory itself.
-     * @param dstDirUri URI of the directory to copy to. Must be created beforehand.
+     * @param dstDirInfo Info of the directory to copy to. Must be created beforehand.
      * @throws RemoteException
      */
-    private void copyDirectoryHelper(Uri srcDirUri, Uri dstDirUri, int mode)
+    private void copyDirectoryHelper(DocumentInfo srcDirInfo, DocumentInfo dstDirInfo, int mode)
             throws RemoteException {
         // Recurse into directories. Copy children into the new subdirectory.
         final String queryColumns[] = new String[] {
                 Document.COLUMN_DISPLAY_NAME,
                 Document.COLUMN_DOCUMENT_ID,
                 Document.COLUMN_MIME_TYPE,
-                Document.COLUMN_SIZE
+                Document.COLUMN_SIZE,
+                Document.COLUMN_FLAGS
         };
-        final Uri queryUri = DocumentsContract.buildChildDocumentsUri(srcDirUri.getAuthority(),
-                DocumentsContract.getDocumentId(srcDirUri));
         Cursor cursor = null;
         try {
             // Iterate over srcs in the directory; copy to the destination directory.
-            cursor = mSrcClient.query(queryUri, queryColumns, null, null, null);
+            DocumentInfo srcInfo;
+            cursor = mSrcClient.query(srcDirInfo.derivedUri, queryColumns, null, null, null);
             while (cursor.moveToNext()) {
-                final String childMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-                final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirUri,
-                        childMimeType, getCursorString(cursor, Document.COLUMN_DISPLAY_NAME));
-                final Uri childUri = DocumentsContract.buildDocumentUri(srcDirUri.getAuthority(),
-                        getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
-                if (Document.MIME_TYPE_DIR.equals(childMimeType)) {
-                    copyDirectoryHelper(childUri, dstUri, mode);
-                } else {
-                    copyFileHelper(childUri, dstUri, mode);
-                }
-            }
-            if (mode == TRANSFER_MODE_MOVE) {
-                try {
-                    DocumentsContract.deleteDocument(mSrcClient, srcDirUri);
-                } catch (RemoteException e) {
-                    // RemoteExceptions usually signal that the connection is dead, so there's no
-                    // point attempting to continue. Propagate the exception up so the copy job is
-                    // cancelled.
-                    Log.w(TAG, "Failed to clean up after move: " + srcDirUri, e);
-                    throw e;
-                }
+                srcInfo = DocumentInfo.fromCursor(cursor, srcDirInfo.authority);
+                copy(srcInfo, dstDirInfo, mode);
             }
         } finally {
             IoUtils.closeQuietly(cursor);
@@ -571,11 +577,11 @@ public class CopyService extends IntentService {
     /**
      * Handles copying a single file.
      *
-     * @param srcUri URI of the file to copy from.
-     * @param dstUri URI of the *file* to copy to. Must be created beforehand.
+     * @param srcUriInfo Info of the file to copy from.
+     * @param dstUriInfo Info of the *file* to copy to. Must be created beforehand.
      * @throws RemoteException
      */
-    private void copyFileHelper(Uri srcUri, Uri dstUri, int mode)
+    private void copyFileHelper(DocumentInfo srcInfo, DocumentInfo dstInfo, int mode)
             throws RemoteException {
         // Copy an individual file.
         CancellationSignal canceller = new CancellationSignal();
@@ -586,8 +592,8 @@ public class CopyService extends IntentService {
 
         IOException copyError = null;
         try {
-            srcFile = mSrcClient.openFile(srcUri, "r", canceller);
-            dstFile = mDstClient.openFile(dstUri, "w", canceller);
+            srcFile = mSrcClient.openFile(srcInfo.derivedUri, "r", canceller);
+            dstFile = mDstClient.openFile(dstInfo.derivedUri, "w", canceller);
             src = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
             dst = new ParcelFileDescriptor.AutoCloseOutputStream(dstFile);
 
@@ -601,18 +607,7 @@ public class CopyService extends IntentService {
             srcFile.checkError();
         } catch (IOException e) {
             copyError = e;
-
-            try {
-                DocumentInfo info = DocumentInfo.fromUri(getContentResolver(), srcUri);
-                mFailedFiles.add(info);
-            } catch (FileNotFoundException ignore) {
-                // Generate a dummy DocumentInfo so an error still gets reflected in the UI for this
-                // file.
-                DocumentInfo info = new DocumentInfo();
-                info.derivedUri = srcUri;
-                info.displayName = "Unknown [" + srcUri + "]";
-                mFailedFiles.add(info);
-            }
+            mFailedFiles.add(srcInfo);
 
             if (dstFile != null) {
                 try {
@@ -627,24 +622,15 @@ public class CopyService extends IntentService {
             IoUtils.closeQuietly(dst);
         }
 
-
         if (copyError != null || mIsCancelled) {
             // Clean up half-copied files.
             canceller.cancel();
             try {
-                DocumentsContract.deleteDocument(mDstClient, dstUri);
+                DocumentsContract.deleteDocument(mDstClient, dstInfo.derivedUri);
             } catch (RemoteException e) {
-                Log.w(TAG, "Failed to clean up after copy error: " + dstUri, e);
+                Log.w(TAG, "Failed to clean up after copy error: " + dstInfo.derivedUri, e);
                 // RemoteExceptions usually signal that the connection is dead, so there's no point
                 // attempting to continue. Propagate the exception up so the copy job is cancelled.
-                throw e;
-            }
-        } else if (mode == TRANSFER_MODE_MOVE) {
-            // Clean up src files after a successful move.
-            try {
-                DocumentsContract.deleteDocument(mSrcClient, srcUri);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to clean up after move: " + srcUri, e);
                 throw e;
             }
         }
