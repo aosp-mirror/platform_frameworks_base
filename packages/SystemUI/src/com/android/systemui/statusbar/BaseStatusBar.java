@@ -165,6 +165,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected NotificationGroupManager mGroupManager = new NotificationGroupManager();
 
+    protected RemoteInputController mRemoteInputController;
+
     // for heads up notifications
     protected HeadsUpManager mHeadsUpManager;
 
@@ -1417,6 +1419,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     parent, false);
             row.setExpansionLogger(this, entry.notification.getKey());
             row.setGroupManager(mGroupManager);
+            row.setRemoteInputController(mRemoteInputController);
             row.setOnExpandClickListener(this);
         }
 
@@ -1587,7 +1590,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         row.setUserLocked(userLocked);
         row.onNotificationUpdated(entry);
-        applyRemoteInput(entry);
         return true;
     }
 
@@ -1628,78 +1630,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 rebuilder.build(); // will rewrite n
             }
         }
-    }
-
-    private void applyRemoteInput(final Entry entry) {
-        if (!ENABLE_REMOTE_INPUT) return;
-
-        boolean hasRemoteInput = false;
-
-        Notification.Action[] actions = entry.notification.getNotification().actions;
-        if (actions != null) {
-            for (Notification.Action a : actions) {
-                if (a.getRemoteInputs() != null) {
-                    for (RemoteInput ri : a.getRemoteInputs()) {
-                        if (ri.getAllowFreeFormInput()) {
-                            hasRemoteInput = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        View bigContentView = entry.getExpandedContentView();
-        if (bigContentView != null) {
-            applyRemoteInput(bigContentView, entry, hasRemoteInput);
-        }
-        View headsUpContentView = entry.getHeadsUpContentView();
-        if (headsUpContentView != null) {
-            applyRemoteInput(headsUpContentView, entry, hasRemoteInput);
-        }
-
-    }
-
-    private RemoteInputView applyRemoteInput(View view, Entry entry, boolean hasRemoteInput) {
-        View actionContainerCandidate = view.findViewById(
-                com.android.internal.R.id.actions_container);
-        if (actionContainerCandidate instanceof FrameLayout) {
-            RemoteInputView existing = (RemoteInputView)
-                    view.findViewWithTag(RemoteInputView.VIEW_TAG);
-
-            if (hasRemoteInput) {
-                if (existing != null) {
-                    existing.onNotificationUpdate();
-                    return existing;
-                }
-
-                ViewGroup actionContainer = (FrameLayout) actionContainerCandidate;
-                RemoteInputView riv = inflateRemoteInputView(actionContainer, entry);
-                if (riv != null) {
-                    riv.setVisibility(View.INVISIBLE);
-                    actionContainer.addView(riv, new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT)
-                    );
-                    int color = entry.notification.getNotification().color;
-                    if (color == Notification.COLOR_DEFAULT) {
-                        color = mContext.getColor(R.color.default_remote_input_background);
-                    }
-                    riv.setBackgroundColor(color);
-                    return riv;
-                }
-            } else {
-                if (existing != null) {
-                    existing.onNotificationUpdate();
-                    return null;
-                }
-            }
-        }
-        return null;
-    }
-
-    protected RemoteInputView inflateRemoteInputView(ViewGroup root, Entry entry) {
-        return null;
     }
 
     public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
@@ -2230,8 +2160,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         entry.row.onNotificationUpdated(entry);
         entry.row.resetHeight();
-
-        applyRemoteInput(entry);
     }
 
     protected void notifyHeadsUpScreenOff() {
