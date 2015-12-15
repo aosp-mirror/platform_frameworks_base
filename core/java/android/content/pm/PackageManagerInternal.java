@@ -267,4 +267,33 @@ public abstract class PackageManagerInternal {
     }
 
     public abstract void setExternalSourcesPolicy(ExternalSourcesPolicy policy);
+
+    /**
+     * Get all overlay packages for a user.
+     * @param userId The user for which to get the overlays.
+     * @return A list of overlay packages. An empty list is returned if the
+     *         user has no installed overlay packages.
+     */
+    public abstract List<PackageInfo> getOverlayPackages(int userId);
+
+    /**
+     * Get the names of all target packages for a user.
+     * @param userId The user for which to get the package names.
+     * @return A list of target package names. This list includes the "android" package.
+     */
+    public abstract List<String> getTargetPackageNames(int userId);
+
+    /**
+     * Set which overlay to use for a package.
+     * @param userId The user for which to update the overlays.
+     * @param targetPackageName The package name of the package for which to update the overlays.
+     * @param overlayPackageNames The complete list of overlay packages that should be enabled for
+     *                            the target. Previously enabled overlays not specified in the list
+     *                            will be disabled. Pass in null or an empty list to disable
+     *                            all overlays. The order of the items is significant if several
+     *                            overlays modify the same resource.
+     * @return true if all packages names were known by the package manager, false otherwise
+     */
+    public abstract boolean setEnabledOverlayPackages(int userId, String targetPackageName,
+            List<String> overlayPackageNames);
 }
