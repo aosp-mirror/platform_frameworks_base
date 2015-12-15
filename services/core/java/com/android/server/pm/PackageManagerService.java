@@ -4102,10 +4102,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             if (mProtectedBroadcasts.contains(actionName)) {
                 return true;
-            } else if (actionName != null
-                    && actionName.startsWith("android.net.netmon.lingerExpired")) {
-                // TODO: remove this terrible hack
-                return true;
+            } else if (actionName != null) {
+                // TODO: remove these terrible hacks
+                if (actionName.startsWith("android.net.netmon.lingerExpired")
+                        || actionName.startsWith("com.android.server.sip.SipWakeupTimer")) {
+                    return true;
+                }
             }
         }
         return false;
