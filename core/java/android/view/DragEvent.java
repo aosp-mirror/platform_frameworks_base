@@ -21,6 +21,8 @@ import android.content.ClipDescription;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.view.IDropPermissions;
+
 //TODO: Improve Javadoc
 /**
  * Represents an event that is sent out by the system at various times during a drag and drop
@@ -128,7 +130,7 @@ public class DragEvent implements Parcelable {
     float mX, mY;
     ClipDescription mClipDescription;
     ClipData mClipData;
-    DropPermissionHolder mDropPermissionHolder;
+    IDropPermissions mDropPermissions;
 
     Object mLocalState;
     boolean mDragResult;
@@ -146,7 +148,7 @@ public class DragEvent implements Parcelable {
      * Action constant returned by {@link #getAction()}: Signals the start of a
      * drag and drop operation. The View should return {@code true} from its
      * {@link View#onDragEvent(DragEvent) onDragEvent()} handler method or
-     * {@link View.View.OnDragListener#onDrag(View,DragEvent) OnDragListener.onDrag()} listener
+     * {@link View.OnDragListener#onDrag(View,DragEvent) OnDragListener.onDrag()} listener
      * if it can accept a drop. The onDragEvent() or onDrag() methods usually inspect the metadata
      * from {@link #getClipDescription()} to determine if they can accept the data contained in
      * this drag. For an operation that doesn't represent data transfer, these methods may
@@ -190,7 +192,7 @@ public class DragEvent implements Parcelable {
      * within the View object's bounding box.
      * <p>
      * The View should return {@code true} from its {@link View#onDragEvent(DragEvent)}
-     * handler or {@link View.View.OnDragListener#onDrag(View,DragEvent) OnDragListener.onDrag()}
+     * handler or {@link View.OnDragListener#onDrag(View,DragEvent) OnDragListener.onDrag()}
      * listener if it accepted the drop, and {@code false} if it ignored the drop.
      * </p>
      * <p>
@@ -255,13 +257,13 @@ public class DragEvent implements Parcelable {
     }
 
     private void init(int action, float x, float y, ClipDescription description, ClipData data,
-            DropPermissionHolder dropPermissionHolder, Object localState, boolean result) {
+            IDropPermissions dropPermissions, Object localState, boolean result) {
         mAction = action;
         mX = x;
         mY = y;
         mClipDescription = description;
         mClipData = data;
-        mDropPermissionHolder = dropPermissionHolder;
+        mDropPermissions = dropPermissions;
         mLocalState = localState;
         mDragResult = result;
     }
@@ -272,13 +274,13 @@ public class DragEvent implements Parcelable {
 
     /** @hide */
     public static DragEvent obtain(int action, float x, float y, Object localState,
-            ClipDescription description, ClipData data, DropPermissionHolder dropPermissionHolder,
+            ClipDescription description, ClipData data, IDropPermissions dropPermissions,
             boolean result) {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 ev = new DragEvent();
-                ev.init(action, x, y, description, data, dropPermissionHolder, localState, result);
+                ev.init(action, x, y, description, data, dropPermissions, localState, result);
                 return ev;
             }
             ev = gRecyclerTop;
@@ -289,7 +291,7 @@ public class DragEvent implements Parcelable {
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.init(action, x, y, description, data, dropPermissionHolder, localState, result);
+        ev.init(action, x, y, description, data, dropPermissions, localState, result);
 
         return ev;
     }
@@ -297,7 +299,7 @@ public class DragEvent implements Parcelable {
     /** @hide */
     public static DragEvent obtain(DragEvent source) {
         return obtain(source.mAction, source.mX, source.mY, source.mLocalState,
-                source.mClipDescription, source.mClipData, source.mDropPermissionHolder,
+                source.mClipDescription, source.mClipData, source.mDropPermissions,
                 source.mDragResult);
     }
 
@@ -363,14 +365,19 @@ public class DragEvent implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.view.DropPermissionHolder} object that can be used by the drag
-     * listener to request and release the permissions for the content URIs contained in the
-     * {@link android.content.ClipData} object associated with this event.
+     * Requests the permissions for the content URIs contained in {@link android.content.ClipData}
+     * object associated with this event. Which permissions will be granted is defined by the set of
+     * flags passed to {@link View#startDragAndDrop(ClipData, View.DragShadowBuilder, Object, int)}.
+     * Returns the {@link DropPermissions} object that can be used by the receiving app to release
+     * the permissions for the content URIs when they are no longer needed.
      * This method only returns valid data if the event action is {@link #ACTION_DROP}.
-     * @return The DropPermissionHolder object used to handle content URI permissions.
+     * @return The DropPermissions object used to control access to the content URIs.
      */
-    public DropPermissionHolder getDropPermissionHolder() {
-        return mDropPermissionHolder;
+    public DropPermissions requestDropPermissions() {
+        if (mDropPermissions == null) {
+            return null;
+        }
+        return new DropPermissions(mDropPermissions);
     }
 
     /**
@@ -493,11 +500,11 @@ public class DragEvent implements Parcelable {
             dest.writeInt(1);
             mClipDescription.writeToParcel(dest, flags);
         }
-        if (mDropPermissionHolder == null) {
+        if (mDropPermissions == null) {
             dest.writeInt(0);
         } else {
             dest.writeInt(1);
-            mDropPermissionHolder.writeToParcel(dest, flags);
+            dest.writeStrongBinder(mDropPermissions.asBinder());
         }
     }
 
@@ -519,7 +526,7 @@ public class DragEvent implements Parcelable {
                 event.mClipDescription = ClipDescription.CREATOR.createFromParcel(in);
             }
             if (in.readInt() != 0) {
-                event.mDropPermissionHolder = DropPermissionHolder.CREATOR.createFromParcel(in);
+                event.mDropPermissions = IDropPermissions.Stub.asInterface(in.readStrongBinder());;
             }
             return event;
         }

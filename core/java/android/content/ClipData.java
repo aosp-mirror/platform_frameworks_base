@@ -36,6 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Representation of a clipped data on the clipboard.
@@ -910,6 +911,27 @@ public class ClipData implements Parcelable {
             mItems.get(0).toShortString(b);
             if (mItems.size() > 1) {
                 b.append(" ...");
+            }
+        }
+    }
+
+    /** @hide */
+    public void collectUris(List<Uri> out) {
+        for (int i = 0; i < mItems.size(); ++i) {
+            ClipData.Item item = getItemAt(i);
+
+            if (item.getUri() != null) {
+                out.add(item.getUri());
+            }
+
+            Intent intent = item.getIntent();
+            if (intent != null) {
+                if (intent.getData() != null) {
+                    out.add(intent.getData());
+                }
+                if (intent.getClipData() != null) {
+                    intent.getClipData().collectUris(out);
+                }
             }
         }
     }
