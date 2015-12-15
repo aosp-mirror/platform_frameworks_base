@@ -189,7 +189,7 @@ public class RecentsViewTouchHandler {
             case MotionEvent.ACTION_CANCEL: {
                 if (mDragging) {
                     ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(
-                            mRv.getContext(), null, null, null);
+                            mRv.getContext());
                     postAnimationTrigger.increment();
                     EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView,
                             mLastDropTarget, postAnimationTrigger));

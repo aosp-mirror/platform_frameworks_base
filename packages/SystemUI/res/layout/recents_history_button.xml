@@ -26,5 +26,4 @@
     android:shadowDx="0"
     android:shadowDy="2"
     android:shadowRadius="5"
-    android:fontFamily="sans-serif-medium"
-    android:visibility="invisible" />
+    android:fontFamily="sans-serif-medium" />

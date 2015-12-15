@@ -1537,32 +1537,47 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(ShowHistoryEvent event) {
+        // The history view's animation will be deferred until all the stack task views are animated
+        // away
+        int historyTransitionDuration =
+                getResources().getInteger(R.integer.recents_history_transition_duration);
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             tv.animate()
                     .alpha(0f)
-                    .setDuration(200)
+                    .setDuration(historyTransitionDuration)
                     .setUpdateListener(null)
                     .setListener(null)
                     .withLayer()
+                    .withEndAction(event.postHideStackAnimationTrigger.decrementAsRunnable())
                     .start();
+            event.postHideStackAnimationTrigger.increment();
         }
     }
 
     public final void onBusEvent(HideHistoryEvent event) {
+        // The stack task view animations will be deferred until the history view has been animated
+        // away
+        final int historyTransitionDuration =
+                getResources().getInteger(R.integer.recents_history_transition_duration);
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
-            TaskView tv = taskViews.get(i);
-            tv.animate()
-                    .alpha(1f)
-                    .setDuration(200)
-                    .setUpdateListener(null)
-                    .setListener(null)
-                    .withLayer()
-                    .start();
+            final TaskView tv = taskViews.get(i);
+            event.postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    tv.animate()
+                            .alpha(1f)
+                            .setDuration(historyTransitionDuration)
+                            .setUpdateListener(null)
+                            .setListener(null)
+                            .withLayer()
+                            .start();
+                }
+            });
         }
     }
 

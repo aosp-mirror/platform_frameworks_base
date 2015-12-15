@@ -62,13 +62,14 @@ public class SystemBarScrimViews {
      * Prepares the scrim views for animating when entering Recents. This will be called before
      * the first draw.
      */
-    public void prepareEnterRecentsAnimation() {
+    public void prepareEnterRecentsAnimation(boolean hasStatusBarScrim, boolean animateStatusBarScrim,
+            boolean hasNavBarScrim, boolean animateNavBarScrim) {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        mHasNavBarScrim = launchState.hasNavBarScrim();
-        mShouldAnimateNavBarScrim = launchState.shouldAnimateNavBarScrim();
-        mHasStatusBarScrim = launchState.hasStatusBarScrim();
-        mShouldAnimateStatusBarScrim = launchState.shouldAnimateStatusBarScrim();
+        mHasNavBarScrim = hasStatusBarScrim;
+        mShouldAnimateStatusBarScrim = animateStatusBarScrim;
+        mHasStatusBarScrim = hasNavBarScrim;
+        mShouldAnimateNavBarScrim = animateNavBarScrim;
 
         mNavBarScrimView.setVisibility(mHasNavBarScrim && !mShouldAnimateNavBarScrim ?
                 View.VISIBLE : View.INVISIBLE);

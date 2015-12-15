@@ -77,16 +77,20 @@ public class RecentsHistoryView extends LinearLayout {
     /**
      * Updates this history view with the recent tasks, and then shows it.
      */
-    public void show(TaskStack stack) {
+    public void show(TaskStack stack, ReferenceCountedTrigger postHideAnimationTrigger) {
         setVisibility(View.VISIBLE);
         setAlpha(0f);
-        animate()
-                .alpha(1f)
-                .setDuration(mHistoryTransitionDuration)
-                .setInterpolator(mFastOutSlowInInterpolator)
-                .withLayer()
-                .start();
-
+        postHideAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                animate()
+                        .alpha(1f)
+                        .setDuration(mHistoryTransitionDuration)
+                        .setInterpolator(mFastOutSlowInInterpolator)
+                        .withLayer()
+                        .start();
+            }
+        });
         mAdapter.updateTasks(getContext(), stack.computeAllTasksList());
         mIsVisible = true;
     }

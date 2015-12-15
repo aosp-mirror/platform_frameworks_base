@@ -33,12 +33,6 @@
         android:layout_height="match_parent">
     </com.android.systemui.recents.views.RecentsView>
 
-    <!-- Empty View -->
-    <ViewStub android:id="@+id/empty_view_stub"
-           android:layout="@layout/recents_empty"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent" />
-
     <!-- History View -->
     <ViewStub android:id="@+id/history_view_stub"
            android:layout="@layout/recents_history"

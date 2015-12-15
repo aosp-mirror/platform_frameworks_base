@@ -25,14 +25,14 @@ import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 public class HideHistoryEvent extends EventBus.Event {
 
     public final boolean animate;
-    public final ReferenceCountedTrigger postAnimationTrigger;
+    public final ReferenceCountedTrigger postHideHistoryAnimationTrigger;
 
-    public HideHistoryEvent(boolean animate) {
-        this(animate, null);
-    }
-
-    public HideHistoryEvent(boolean animate, ReferenceCountedTrigger postAnimationTrigger) {
+    /**
+     * @param postHideHistoryAnimationTrigger the trigger that gets called when all the history animations are finished
+     *                                        when transitioning from the history view
+     */
+    public HideHistoryEvent(boolean animate, ReferenceCountedTrigger postHideHistoryAnimationTrigger) {
         this.animate = animate;
-        this.postAnimationTrigger = postAnimationTrigger;
+        this.postHideHistoryAnimationTrigger = postHideHistoryAnimationTrigger;
     }
 }

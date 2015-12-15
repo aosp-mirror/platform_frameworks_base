@@ -51,6 +51,10 @@ public class ReferenceCountedTrigger {
         }
     };
 
+    public ReferenceCountedTrigger(Context context) {
+        this(context, null, null, null);
+    }
+
     public ReferenceCountedTrigger(Context context, Runnable firstIncRunnable,
                                    Runnable lastDecRunnable, Runnable errorRunanable) {
         mContext = context;
@@ -97,7 +101,7 @@ public class ReferenceCountedTrigger {
             if (mErrorRunnable != null) {
                 mErrorRunnable.run();
             } else {
-                Log.e(TAG, "Invalid ref count");
+                throw new RuntimeException("Invalid ref count");
             }
         }
     }

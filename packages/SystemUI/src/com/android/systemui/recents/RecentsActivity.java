@@ -97,8 +97,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     // Top level views
     private RecentsView mRecentsView;
     private SystemBarScrimViews mScrimViews;
-    private ViewStub mEmptyViewStub;
-    private View mEmptyView;
     private ViewStub mHistoryViewStub;
     private RecentsHistoryView mHistoryView;
 
@@ -197,7 +195,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loader.loadTasks(this, plan, loadOpts);
 
         TaskStack stack = plan.getTaskStack();
-        launchState.launchedWithNoRecentTasks = !plan.hasTasks();
         mRecentsView.setTaskStack(stack);
 
         // Mark the task that is the launch target
@@ -215,30 +212,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         }
 
-        // Update the top level view's visibilities
-        if (launchState.launchedWithNoRecentTasks) {
-            if (mEmptyView == null) {
-                mEmptyView = mEmptyViewStub.inflate();
-            }
-            mEmptyView.setVisibility(View.VISIBLE);
-            if (!RecentsDebugFlags.Static.DisableSearchBar) {
-                mRecentsView.setSearchBarVisibility(View.GONE);
-            }
-        } else {
-            if (mEmptyView != null) {
-                mEmptyView.setVisibility(View.GONE);
-            }
-            if (!RecentsDebugFlags.Static.DisableSearchBar) {
-                if (mRecentsView.hasValidSearchBar()) {
-                    mRecentsView.setSearchBarVisibility(View.VISIBLE);
-                } else {
-                    refreshSearchWidgetView();
-                }
-            }
-        }
-
         // Animate the SystemUI scrims into view
-        mScrimViews.prepareEnterRecentsAnimation();
+        boolean hasStatusBarScrim = stack.getStackTaskCount() > 0;
+        boolean animateStatusBarScrim = launchState.launchedFromHome;
+        boolean hasNavBarScrim = (stack.getStackTaskCount() > 0) && !config.hasTransposedNavBar;
+        boolean animateNavBarScrim = true;
+        mScrimViews.prepareEnterRecentsAnimation(hasStatusBarScrim, animateStatusBarScrim, hasNavBarScrim,
+                animateNavBarScrim);
 
         // Keep track of whether we launched from the nav bar button or via alt-tab
         if (launchState.launchedWithAltTab) {
@@ -265,7 +245,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     boolean dismissHistory() {
         // Try and hide the history view first
         if (mHistoryView != null && mHistoryView.isVisible()) {
-            EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
+            ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
+            t.increment();
+            EventBus.getDefault().send(new HideHistoryEvent(true /* animate */, t));
+            t.decrement();
             return true;
         }
         return false;
@@ -374,7 +357,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mHistoryViewStub = (ViewStub) findViewById(R.id.history_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
@@ -456,7 +438,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Reset some states
         mIgnoreAltTabRelease = false;
         if (mHistoryView != null) {
-            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
+            ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
+            t.increment();
+            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */, t));
+            t.decrement();
         }
 
         // Notify that recents is now hidden
@@ -603,16 +588,18 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
-        // Focus the next task
-        EventBus.getDefault().send(new FocusNextTaskViewEvent());
+        if (!dismissHistory()) {
+            // Focus the next task
+            EventBus.getDefault().send(new FocusNextTaskViewEvent());
 
-        // Start dozing after the recents button is clicked
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (debugFlags.isFastToggleRecentsEnabled()) {
-            if (!mIterateTrigger.isDozing()) {
-                mIterateTrigger.startDozing();
-            } else {
-                mIterateTrigger.poke();
+            // Start dozing after the recents button is clicked
+            RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+            if (debugFlags.isFastToggleRecentsEnabled()) {
+                if (!mIterateTrigger.isDozing()) {
+                    mIterateTrigger.startDozing();
+                } else {
+                    mIterateTrigger.poke();
+                }
             }
         }
     }
@@ -630,7 +617,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
             if (mHistoryView != null && mHistoryView.isVisible()) {
-                ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
+                ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
                 t.increment();
                 t.addLastDecrementRunnable(new Runnable() {
                     @Override
@@ -651,7 +638,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         // Try and start the enter animation (or restart it on configuration changed)
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
+        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         ctx.postAnimationTrigger.increment();
         if (mSearchWidgetInfo != null) {
@@ -724,8 +711,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
-        // Just go straight home (no animation necessary because there are no more task views)
-        dismissRecentsToHome(false /* animated */);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.hasDockedTask()) {
+            mRecentsView.showEmptyView();
+        } else {
+            // Just go straight home (no animation necessary because there are no more task views)
+            dismissRecentsToHome(false /* animated */);
+        }
 
         // Keep track of all-deletions
         MetricsLogger.count(this, "overview_task_all_dismissed", 1);
@@ -769,13 +761,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // provided.
             mHistoryView.setSystemInsets(mRecentsView.getSystemInsets());
         }
-        mHistoryView.show(mRecentsView.getTaskStack());
+        mHistoryView.show(mRecentsView.getTaskStack(), event.postHideStackAnimationTrigger);
     }
 
     public final void onBusEvent(HideHistoryEvent event) {
-        if (mHistoryView != null) {
-            mHistoryView.hide(event.animate, event.postAnimationTrigger);
-        }
+        mHistoryView.hide(event.animate, event.postHideHistoryAnimationTrigger);
     }
 
     private void refreshSearchWidgetView() {

@@ -55,6 +55,7 @@ import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -75,31 +76,29 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     private static final String TAG = "RecentsView";
     private static final boolean DEBUG = false;
 
-    Handler mHandler;
+    private final Handler mHandler;
 
-    TaskStack mStack;
-    TaskStackView mTaskStackView;
-    RecentsAppWidgetHostView mSearchBar;
-    View mHistoryButton;
-    boolean mAwaitingFirstLayout = true;
-    boolean mLastTaskLaunchedWasFreeform;
+    private TaskStack mStack;
+    private TaskStackView mTaskStackView;
+    private RecentsAppWidgetHostView mSearchBar;
+    private View mHistoryButton;
+    private View mEmptyView;
+    private boolean mAwaitingFirstLayout = true;
+    private boolean mLastTaskLaunchedWasFreeform;
+    private Rect mSystemInsets = new Rect();
 
-    RecentsTransitionHelper mTransitionHelper;
-    RecentsViewTouchHandler mTouchHandler;
-    TaskStack.DockState[] mVisibleDockStates = {
+    private RecentsTransitionHelper mTransitionHelper;
+    private RecentsViewTouchHandler mTouchHandler;
+    private TaskStack.DockState[] mVisibleDockStates = {
             TaskStack.DockState.LEFT,
             TaskStack.DockState.TOP,
             TaskStack.DockState.RIGHT,
             TaskStack.DockState.BOTTOM,
     };
 
-    private Interpolator mFastOutSlowInInterpolator;
-    private Interpolator mFastOutLinearInInterpolator;
-    private int mHistoryTransitionDuration;
-
-    Rect mSystemInsets = new Rect();
-
-    final FlingAnimationUtils mFlingAnimationUtils;
+    private final Interpolator mFastOutSlowInInterpolator;
+    private final Interpolator mFastOutLinearInInterpolator;
+    private final FlingAnimationUtils mFlingAnimationUtils;
 
     public RecentsView(Context context) {
         this(context, null);
@@ -123,7 +122,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_linear_in);
-        mHistoryTransitionDuration = res.getInteger(R.integer.recents_history_transition_duration);
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
 
@@ -132,17 +130,24 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         mHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventBus.getDefault().send(new ShowHistoryEvent());
+                ReferenceCountedTrigger postHideStackAnimationTrigger = new ReferenceCountedTrigger(v.getContext());
+                postHideStackAnimationTrigger.increment();
+                EventBus.getDefault().send(new ShowHistoryEvent(postHideStackAnimationTrigger));
+                postHideStackAnimationTrigger.decrement();
             }
         });
+        addView(mHistoryButton);
+        mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
+        addView(mEmptyView);
     }
 
     /** Set/get the bsp root node */
     public void setTaskStack(TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
         mStack = stack;
         // Disable reusing task stack views until the visibility bug is fixed. b/25998134
-        if (false && config.getLaunchState().launchedReuseTaskStackViews) {
+        if (false && launchState.launchedReuseTaskStackViews) {
             if (mTaskStackView != null) {
                 // If onRecentsHidden is not triggered, we need to the stack view again here
                 mTaskStackView.reset();
@@ -162,10 +167,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.setCallbacks(this);
             addView(mTaskStackView);
         }
-        if (indexOfChild(mHistoryButton) == -1) {
-            addView(mHistoryButton);
+
+        // Update the top level view's visibilities
+        if (stack.getStackTaskCount() > 0) {
+            hideEmptyView();
         } else {
-            mHistoryButton.bringToFront();
+            showEmptyView();
         }
 
         // Trigger a new layout
@@ -309,13 +316,33 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return mSearchBar != null && !mSearchBar.isReinflateRequired();
     }
 
-    /** Sets the visibility of the search bar */
-    public void setSearchBarVisibility(int visibility) {
+    /**
+     * Hides the task stack and shows the empty view.
+     */
+    public void showEmptyView() {
+        if (!RecentsDebugFlags.Static.DisableSearchBar && (mSearchBar != null)) {
+            mSearchBar.setVisibility(View.INVISIBLE);
+        }
+        mTaskStackView.setVisibility(View.INVISIBLE);
+        mEmptyView.setVisibility(View.VISIBLE);
+        mEmptyView.bringToFront();
+        mHistoryButton.bringToFront();
+    }
+
+    /**
+     * Shows the task stack and hides the empty view.
+     */
+    public void hideEmptyView() {
+        mEmptyView.setVisibility(View.INVISIBLE);
+        mTaskStackView.setVisibility(View.VISIBLE);
+        if (!RecentsDebugFlags.Static.DisableSearchBar && (mSearchBar != null)) {
+            mSearchBar.setVisibility(View.VISIBLE);
+        }
+        mTaskStackView.bringToFront();
         if (mSearchBar != null) {
-            mSearchBar.setVisibility(visibility);
-            // Always bring the search bar to the top
             mSearchBar.bringToFront();
         }
+        mHistoryButton.bringToFront();
     }
 
     /**
@@ -366,6 +393,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
         }
 
+        // Measure the empty view
+        measureChild(mEmptyView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+
         // Measure the history button with the full space above the stack, but width-constrained
         // to the stack
         Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
@@ -373,6 +404,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(historyButtonRect.height(),
                         MeasureSpec.EXACTLY));
+
         setMeasuredDimension(width, height);
     }
 
@@ -396,6 +428,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (mTaskStackView != null && mTaskStackView.getVisibility() != GONE) {
             mTaskStackView.layout(left, top, left + getMeasuredWidth(), top + getMeasuredHeight());
         }
+
+        // Layout the empty view
+        mEmptyView.layout(left, top, right, bottom);
 
         // Layout the history button left-aligned with the stack, but offset from the top of the
         // view
@@ -545,12 +580,21 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public final void onBusEvent(ShowHistoryEvent event) {
         // Hide the history button when the history view is shown
-        hideHistoryButton(mHistoryTransitionDuration);
+        hideHistoryButton(getResources().getInteger(R.integer.recents_history_transition_duration),
+                event.postHideStackAnimationTrigger);
+        event.postHideStackAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                setAlpha(0f);
+            }
+        });
     }
 
     public final void onBusEvent(HideHistoryEvent event) {
         // Show the history button when the history view is hidden
-        showHistoryButton(mHistoryTransitionDuration);
+        setAlpha(1f);
+        showHistoryButton(getResources().getInteger(R.integer.recents_history_transition_duration),
+                event.postHideHistoryAnimationTrigger);
     }
 
     public final void onBusEvent(ShowHistoryButtonEvent event) {
@@ -571,25 +615,47 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /**
      * Shows the history button.
      */
-    private void showHistoryButton(int duration) {
+    private void showHistoryButton(final int duration) {
+        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(getContext());
+        postAnimationTrigger.increment();
+        showHistoryButton(duration, postAnimationTrigger);
+        postAnimationTrigger.decrement();
+    }
+
+    private void showHistoryButton(final int duration,
+            final ReferenceCountedTrigger postHideHistoryAnimationTrigger) {
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         if (!debugFlags.isHistoryEnabled()) {
             return;
         }
 
         mHistoryButton.setVisibility(View.VISIBLE);
-        mHistoryButton.animate()
-                .alpha(1f)
-                .setDuration(duration)
-                .setInterpolator(mFastOutSlowInInterpolator)
-                .withLayer()
-                .start();
+        mHistoryButton.setAlpha(0f);
+        postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                mHistoryButton.animate()
+                        .alpha(1f)
+                        .setDuration(duration)
+                        .setInterpolator(mFastOutSlowInInterpolator)
+                        .withLayer()
+                        .start();
+            }
+        });
     }
 
     /**
      * Hides the history button.
      */
     private void hideHistoryButton(int duration) {
+        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(getContext());
+        postAnimationTrigger.increment();
+        hideHistoryButton(duration, postAnimationTrigger);
+        postAnimationTrigger.decrement();
+    }
+
+    private void hideHistoryButton(int duration,
+            final ReferenceCountedTrigger postHideStackAnimationTrigger) {
         mHistoryButton.animate()
                 .alpha(0f)
                 .setDuration(duration)
@@ -598,10 +664,12 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     @Override
                     public void run() {
                         mHistoryButton.setVisibility(View.INVISIBLE);
+                        postHideStackAnimationTrigger.decrement();
                     }
                 })
                 .withLayer()
                 .start();
+        postHideStackAnimationTrigger.increment();
     }
 
     /**
