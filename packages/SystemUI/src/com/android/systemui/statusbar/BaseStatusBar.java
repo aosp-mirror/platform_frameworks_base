@@ -1382,6 +1382,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         View contentViewLocal = null;
         View bigContentViewLocal = null;
         View headsUpContentViewLocal = null;
+        View publicViewLocal = null;
         try {
             contentViewLocal = contentView.apply(
                     sbn.getPackageContext(mContext),
@@ -1398,6 +1399,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                         sbn.getPackageContext(mContext),
                         contentContainer,
                         mOnClickHandler);
+            }
+            if (publicContentView != null) {
+                publicViewLocal = publicContentView.apply(
+                        sbn.getPackageContext(mContext),
+                        contentContainerPublic, mOnClickHandler);
             }
         }
         catch (RuntimeException e) {
@@ -1418,25 +1424,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             headsUpContentViewLocal.setIsRootNamespace(true);
             contentContainer.setHeadsUpChild(headsUpContentViewLocal);
         }
-
-        // now the public version
-        View publicViewLocal = null;
-        if (publicContentView != null) {
-            try {
-                publicViewLocal = publicContentView.apply(
-                        sbn.getPackageContext(mContext),
-                        contentContainerPublic, mOnClickHandler);
-
-                if (publicViewLocal != null) {
-                    publicViewLocal.setIsRootNamespace(true);
-                    contentContainerPublic.setContractedChild(publicViewLocal);
-                }
-            }
-            catch (RuntimeException e) {
-                final String ident = sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId());
-                Log.e(TAG, "couldn't inflate public view for notification " + ident, e);
-                publicViewLocal = null;
-            }
+        if (publicViewLocal != null) {
+            publicViewLocal.setIsRootNamespace(true);
+            contentContainerPublic.setContractedChild(publicViewLocal);
         }
 
         // Extract target SDK version.
@@ -1446,65 +1436,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (NameNotFoundException ex) {
             Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
         }
-
-        if (publicViewLocal == null) {
-            // Add a basic notification template
-            publicViewLocal = LayoutInflater.from(mContext).inflate(
-                    R.layout.notification_public_default,
-                    contentContainerPublic, false);
-            publicViewLocal.setIsRootNamespace(true);
-
-            final TextView title = (TextView) publicViewLocal.findViewById(R.id.title);
-            try {
-                title.setText(pmUser.getApplicationLabel(
-                        pmUser.getApplicationInfo(entry.notification.getPackageName(), 0)));
-            } catch (NameNotFoundException e) {
-                title.setText(entry.notification.getPackageName());
-            }
-
-            final ImageView icon = (ImageView) publicViewLocal.findViewById(R.id.icon);
-            final ImageView profileBadge = (ImageView) publicViewLocal.findViewById(
-                    R.id.profile_badge_line3);
-
-            final StatusBarIcon ic = new StatusBarIcon(
-                    entry.notification.getUser(),
-                    entry.notification.getPackageName(),
-                    entry.notification.getNotification().getSmallIcon(),
-                    entry.notification.getNotification().iconLevel,
-                    entry.notification.getNotification().number,
-                    entry.notification.getNotification().tickerText);
-
-            Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
-            icon.setImageDrawable(iconDrawable);
-
-            if (profileBadge != null) {
-                Drawable profileDrawable = mContext.getPackageManager().getUserBadgeForDensity(
-                        entry.notification.getUser(), 0);
-                if (profileDrawable != null) {
-                    profileBadge.setImageDrawable(profileDrawable);
-                    profileBadge.setVisibility(View.VISIBLE);
-                } else {
-                    profileBadge.setVisibility(View.GONE);
-                }
-            }
-
-            final View privateTime = contentViewLocal.findViewById(com.android.internal.R.id.time);
-            final DateTimeView time = (DateTimeView) publicViewLocal.findViewById(R.id.time);
-            if (privateTime != null && privateTime.getVisibility() == View.VISIBLE) {
-                time.setVisibility(View.VISIBLE);
-                time.setTime(entry.notification.getNotification().when);
-            }
-
-            final TextView text = (TextView) publicViewLocal.findViewById(R.id.text);
-            if (text != null) {
-                text.setText(R.string.notification_hidden_text);
-                text.setTextAppearance(mContext,
-                        R.style.TextAppearance_Material_Notification_Parenthetical);
-            }
-
-            contentContainerPublic.setContractedChild(publicViewLocal);
-            entry.autoRedacted = true;
-        }
+        entry.autoRedacted = entry.notification.getNotification().publicVersion == null;
 
         if (MULTIUSER_DEBUG) {
             TextView debug = (TextView) row.findViewById(R.id.debug_info);

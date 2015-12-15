@@ -117,7 +117,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private OnClickListener mExpandClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
+            if (!mShowingPublic && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
                 mGroupManager.toggleGroupExpansion(mStatusBarNotification);
                 mOnExpandClickListener.onExpandClicked(ExpandableNotificationRow.this,
                         mGroupManager.isGroupExpanded(mStatusBarNotification));
@@ -212,6 +212,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mNotificationParent.updateChildrenHeaderAppearance();
         }
         onChildrenCountChanged();
+        // The public layouts expand button is always visible
+        mPublicLayout.updateExpandButtons(true);
         updateLimits();
     }
 

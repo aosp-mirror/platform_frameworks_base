@@ -906,9 +906,6 @@
     <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
     <string name="battery_saver_notification_action_text">Turn off battery saver</string>
 
-    <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
-    <string name="notification_hidden_text">Contents hidden</string>
-
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will start capturing everything that\'s displayed on your screen.</string>
 

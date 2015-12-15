@@ -115,17 +115,14 @@ public class NotificationData {
                         updatedNotificationBuilder.makeBigContentView();
                 final RemoteViews newHeadsUpContentView =
                         updatedNotificationBuilder.makeHeadsUpContentView();
-                final Notification updatedPublicNotification = updatedNotification.publicVersion;
-                final RemoteViews newPubContentView = (updatedPublicNotification != null)
-                        ? Notification.Builder.recoverBuilder(
-                                ctx, updatedPublicNotification).makeContentView()
-                        : null;
+                final RemoteViews newPublicNotification
+                        = updatedNotificationBuilder.makePublicContentView();
 
                 applyInPlace = compareRemoteViews(cachedContentView, newContentView)
                         && compareRemoteViews(cachedBigContentView, newBigContentView)
                         && compareRemoteViews(cachedHeadsUpContentView, newHeadsUpContentView)
-                        && compareRemoteViews(cachedPublicContentView, newPubContentView);
-                cachedPublicContentView = newPubContentView;
+                        && compareRemoteViews(cachedPublicContentView, newPublicNotification);
+                cachedPublicContentView = newPublicNotification;
                 cachedHeadsUpContentView = newHeadsUpContentView;
                 cachedBigContentView = newBigContentView;
                 cachedContentView = newContentView;
@@ -136,14 +133,8 @@ public class NotificationData {
                 cachedContentView = builder.makeContentView();
                 cachedBigContentView = builder.makeBigContentView();
                 cachedHeadsUpContentView = builder.makeHeadsUpContentView();
+                cachedPublicContentView = builder.makePublicContentView();
 
-                final Notification publicNotification =
-                        notification.getNotification().publicVersion;
-                if (publicNotification != null) {
-                    final Notification.Builder publicBuilder
-                            = Notification.Builder.recoverBuilder(ctx, publicNotification);
-                    cachedPublicContentView = publicBuilder.makeContentView();
-                }
                 applyInPlace = false;
             }
             return applyInPlace;

@@ -3312,6 +3312,37 @@ public class Notification implements Parcelable
             return applyStandardTemplateWithActions(getBigBaseLayoutResource());
         }
 
+        /**
+         * Construct a RemoteViews for the display in public contexts like on the lockscreen.
+         *
+         * @hide
+         */
+        public RemoteViews makePublicContentView() {
+            if (mN.publicVersion != null) {
+                final Builder builder = recoverBuilder(mContext, mN.publicVersion);
+                return builder.makeContentView();
+            }
+            Bundle savedBundle = mN.extras;
+            Style style = mStyle;
+            mStyle = null;
+            Icon largeIcon = mN.mLargeIcon;
+            mN.mLargeIcon = null;
+            Bundle publicExtras = new Bundle();
+            publicExtras.putBoolean(EXTRA_SHOW_WHEN,
+                    savedBundle.getBoolean(EXTRA_SHOW_WHEN));
+            publicExtras.putBoolean(EXTRA_SHOW_CHRONOMETER,
+                    savedBundle.getBoolean(EXTRA_SHOW_CHRONOMETER));
+            publicExtras.putCharSequence(EXTRA_TITLE,
+                    mContext.getString(R.string.notification_hidden_text));
+            mN.extras = publicExtras;
+            final RemoteViews publicView = applyStandardTemplate(getBaseLayoutResource());
+            mN.extras = savedBundle;
+            mN.mLargeIcon = largeIcon;
+            mStyle = style;
+            return publicView;
+        }
+
+
 
         private RemoteViews generateActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
