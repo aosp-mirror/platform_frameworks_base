@@ -160,6 +160,7 @@ public class Resources {
     final DisplayMetrics mMetrics = new DisplayMetrics();
 
     private final Configuration mConfiguration = new Configuration();
+    private Locale mResolvedLocale = null;
     private PluralRules mPluralRule;
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
@@ -315,6 +316,16 @@ public class Resources {
     }
 
     /**
+     * Return the Locale resulting from locale negotiation between the Resources and the
+     * Configuration objects used to construct the Resources. The locale is used for retrieving
+     * resources as well as for determining plural rules.
+     */
+    @NonNull
+    public Locale getResolvedLocale() {
+        return mResolvedLocale;
+    }
+
+    /**
      * Return the string value associated with a particular resource ID.  The
      * returned object will be a String if this is a plain string; it will be
      * some other type of CharSequence if it is styled.
@@ -378,7 +389,7 @@ public class Resources {
     private PluralRules getPluralRule() {
         synchronized (sSync) {
             if (mPluralRule == null) {
-                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
+                mPluralRule = PluralRules.forLocale(mResolvedLocale);
             }
             return mPluralRule;
         }
@@ -441,7 +452,7 @@ public class Resources {
     @NonNull
     public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
         final String raw = getString(id);
-        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
+        return String.format(mResolvedLocale, raw, formatArgs);
     }
 
     /**
@@ -472,7 +483,7 @@ public class Resources {
     public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
-        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
+        return String.format(mResolvedLocale, raw, formatArgs);
     }
 
     /**
@@ -1931,8 +1942,10 @@ public class Resources {
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
             final int configChanges = calcConfigChanges(config);
+
             LocaleList locales = mConfiguration.getLocales();
-            if (locales.isEmpty()) {
+            final boolean setLocalesToDefault = locales.isEmpty();
+            if (setLocalesToDefault) {
                 locales = LocaleList.getDefault();
                 mConfiguration.setLocales(locales);
             }
@@ -1961,9 +1974,12 @@ public class Resources {
                 keyboardHidden = mConfiguration.keyboardHidden;
             }
 
-            // TODO: Pass the whole locale list to setConfiguration()
+            if (setLocalesToDefault || mResolvedLocale == null
+                    || (configChanges & Configuration.NATIVE_CONFIG_LOCALE) != 0) {
+                mResolvedLocale = locales.getFirstMatch(mAssets.getLocales());
+            }
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                    adjustLanguageTag(locales.getPrimary().toLanguageTag()),
+                    adjustLanguageTag(mResolvedLocale.toLanguageTag()),
                     mConfiguration.orientation,
                     mConfiguration.touchscreen,
                     mConfiguration.densityDpi, mConfiguration.keyboard,
@@ -1988,7 +2004,7 @@ public class Resources {
         }
         synchronized (sSync) {
             if (mPluralRule != null) {
-                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
+                mPluralRule = PluralRules.forLocale(mResolvedLocale);
             }
         }
     }

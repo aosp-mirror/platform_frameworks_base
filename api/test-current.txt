@@ -9966,6 +9966,7 @@ package android.content.res {
     method public java.lang.String getQuantityString(int, int, java.lang.Object...) throws android.content.res.Resources.NotFoundException;
     method public java.lang.String getQuantityString(int, int) throws android.content.res.Resources.NotFoundException;
     method public java.lang.CharSequence getQuantityText(int, int) throws android.content.res.Resources.NotFoundException;
+    method public java.util.Locale getResolvedLocale();
     method public java.lang.String getResourceEntryName(int) throws android.content.res.Resources.NotFoundException;
     method public java.lang.String getResourceName(int) throws android.content.res.Resources.NotFoundException;
     method public java.lang.String getResourcePackageName(int) throws android.content.res.Resources.NotFoundException;
