@@ -255,11 +255,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_APPLY_GLOBAL_HTTP_PROXY = 9;
 
     /**
-     * used internally to send a sticky broadcast delayed.
-     */
-    private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 11;
-
-    /**
      * PAC manager has received new port.
      */
     private static final int EVENT_PROXY_HAS_CHANGED = 16;
@@ -2513,11 +2508,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_APPLY_GLOBAL_HTTP_PROXY: {
                     handleDeprecatedGlobalHttpProxy();
-                    break;
-                }
-                case EVENT_SEND_STICKY_BROADCAST_INTENT: {
-                    Intent intent = (Intent)msg.obj;
-                    sendStickyBroadcast(intent);
                     break;
                 }
                 case EVENT_PROXY_HAS_CHANGED: {
