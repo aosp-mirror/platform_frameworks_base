@@ -45,6 +45,7 @@ import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
@@ -53,6 +54,8 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 /* A task view */
 public class TaskView extends FrameLayout implements Task.TaskCallbacks,
@@ -63,8 +66,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
-        public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask);
-        public void onTaskViewClipStateChanged(TaskView tv);
+        void onTaskViewClipStateChanged(TaskView tv);
     }
 
     float mTaskProgress;
@@ -278,7 +280,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Resets this view's properties */
     void resetViewProperties() {
         setDim(0);
-        setLayerType(View.LAYER_TYPE_NONE, null);
         setVisibility(View.VISIBLE);
         getViewBounds().reset();
         TaskViewTransform.reset(this);
@@ -723,13 +724,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
      public void onClick(final View v) {
+        boolean screenPinningRequested = false;
         if (v == mActionButtonView) {
             // Reset the translation of the action button before we animate it out
             mActionButtonView.setTranslationZ(0f);
+            screenPinningRequested = true;
         }
-        if (mCb != null) {
-            mCb.onTaskViewClicked(this, mTask, (v == mActionButtonView));
-        }
+        EventBus.getDefault().send(new LaunchTaskEvent(this, mTask, null, INVALID_STACK_ID,
+                screenPinningRequested));
     }
 
     /**** View.OnLongClickListener Implementation ****/

@@ -19,6 +19,15 @@ Copyright (C) 2015 The Android Open Source Project
         android:viewportWidth="24.0"
         android:viewportHeight="24.0">
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M24.0,0.0L0.0,0.0l0.0,24.0l24.0,0.0L24.0,0.0zM14.0,4.0l0.0,16.0L4.0,20.0L4.0,4.0L14.0,4.0z"/>
+        android:fillColor="@color/recents_task_bar_dark_icon_color"
+        android:pathData="M0.0,8.0l4.0,0.0 0.0,-4.0 4.0,0.0 0.0,-4.0 -8.0,0.0z"/>
+    <path
+        android:fillColor="@color/recents_task_bar_dark_icon_color"
+        android:pathData="M4.0,16.0l-4.0,0.0 0.0,8.0 8.0,0.0 0.0,-4.0 -4.0,0.0z"/>
+    <path
+        android:fillColor="@color/recents_task_bar_dark_icon_color"
+        android:pathData="M16.0,0.0l0.0,4.0 4.0,0.0 0.0,4.0 4.0,0.0 0.0,-8.0z"/>
+    <path
+        android:fillColor="@color/recents_task_bar_dark_icon_color"
+        android:pathData="M20.0,20.0l-4.0,0.0 0.0,4.0 8.0,0.0 0.0,-8.0 -4.0,0.0z"/>
 </vector>

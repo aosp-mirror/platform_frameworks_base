@@ -47,6 +47,7 @@ import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
@@ -71,7 +72,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks {
+public class RecentsView extends FrameLayout {
 
     private static final String TAG = "RecentsView";
     private static final boolean DEBUG = false;
@@ -156,7 +157,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 addView(mTaskStackView);
             } else {
                 mTaskStackView = new TaskStackView(getContext(), stack);
-                mTaskStackView.setCallbacks(this);
                 addView(mTaskStackView);
             }
         } else {
@@ -164,7 +164,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 removeView(mTaskStackView);
             }
             mTaskStackView = new TaskStackView(getContext(), stack);
-            mTaskStackView.setCallbacks(this);
             addView(mTaskStackView);
         }
 
@@ -223,8 +222,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             Task task = mTaskStackView.getFocusedTask();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
-                onTaskViewClicked(mTaskStackView, taskView, stack, task, false, null,
-                        INVALID_STACK_ID);
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
+                        INVALID_STACK_ID, false));
                 return true;
             }
         }
@@ -238,8 +237,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             Task task = stack.getLaunchTarget();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
-                onTaskViewClicked(mTaskStackView, taskView, stack, task, false, null,
-                        INVALID_STACK_ID);
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
+                        INVALID_STACK_ID, false));
                 return true;
             }
         }
@@ -256,8 +255,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             for (int j = 0; j < taskViewCount; j++) {
                 TaskView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
-                    onTaskViewClicked(mTaskStackView, tv, stack, task, false,
-                            taskBounds, destinationStack);
+                    EventBus.getDefault().send(new LaunchTaskEvent(tv, task, taskBounds,
+                            destinationStack, false));
                     return true;
                 }
             }
@@ -491,18 +490,13 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return super.verifyDrawable(who);
     }
 
-    /**** TaskStackView.TaskStackCallbacks Implementation ****/
-
-    @Override
-    public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
-            final TaskStack stack, final Task task, final boolean lockToTask,
-            final Rect bounds, int destinationStack) {
-        mLastTaskLaunchedWasFreeform = task.isFreeformTask();
-        mTransitionHelper.launchTaskFromRecents(stack, task, stackView, tv, lockToTask, bounds,
-                destinationStack);
-    }
-
     /**** EventBus Events ****/
+
+    public final void onBusEvent(LaunchTaskEvent event) {
+        mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
+        mTransitionHelper.launchTaskFromRecents(mStack, event.task, mTaskStackView, event.taskView,
+                event.screenPinningRequested, event.targetTaskBounds, event.targetTaskStack);
+    }
 
     public final void onBusEvent(DragStartEvent event) {
         updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),

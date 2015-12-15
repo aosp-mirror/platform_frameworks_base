@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.ui;
+package com.android.systemui.recents.events.activity;
 
+import android.graphics.Rect;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.views.TaskView;
 
 /**
- * This is sent when a {@link Task} is resized.
+ * This is sent to launch a task from Recents.
  */
-public class ResizeTaskEvent extends EventBus.Event {
+public class LaunchTaskEvent extends EventBus.Event {
 
+    public final TaskView taskView;
     public final Task task;
+    public final Rect targetTaskBounds;
+    public final int targetTaskStack;
+    public final boolean screenPinningRequested;
 
-    public ResizeTaskEvent(Task task) {
+    public LaunchTaskEvent(TaskView taskView, Task task, Rect targetTaskBounds, int targetTaskStack,
+            boolean screenPinningRequested) {
+        this.taskView = taskView;
         this.task = task;
+        this.targetTaskBounds = targetTaskBounds;
+        this.targetTaskStack = targetTaskStack;
+        this.screenPinningRequested = screenPinningRequested;
     }
+
 }

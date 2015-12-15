@@ -16,25 +16,20 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -45,11 +40,15 @@ import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.ui.ResizeTaskEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
+
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 
 /* The task bar view */
@@ -63,6 +62,7 @@ public class TaskViewHeader extends FrameLayout
     ImageView mDismissButton;
     ImageView mApplicationIcon;
     TextView mActivityDescription;
+    int mMoveTaskTargetStackId = INVALID_STACK_ID;
 
     // Header drawables
     Rect mTaskViewRect = new Rect();
@@ -157,21 +157,52 @@ public class TaskViewHeader extends FrameLayout
      */
     public void onTaskViewSizeChanged(int width, int height) {
         mTaskViewRect.set(0, 0, width, height);
-        if (mDismissButton.getMeasuredWidth() > (width - mApplicationIcon.getMeasuredWidth())) {
-            mDismissButton.setAlpha(0f);
-        } else {
-            mDismissButton.setAlpha(1f);
-            if (mDismissButton != null) {
-                mDismissButton.setTranslationX(width - getMeasuredWidth());
+        boolean updateMoveTaskButton = mMoveTaskButton.getVisibility() != View.GONE;
+        int appIconWidth = mApplicationIcon.getMeasuredWidth();
+        int activityDescWidth = mActivityDescription.getMeasuredWidth();
+        int dismissIconWidth = mDismissButton.getMeasuredWidth();
+        int moveTaskIconWidth = mMoveTaskButton.getVisibility() == View.VISIBLE
+                ? mMoveTaskButton.getMeasuredWidth()
+                : 0;
+
+        // Priority-wise, we show the activity icon first, the dismiss icon if there is room, the
+        // move-task icon if there is room, and then finally, the activity label if there is room
+        if (width < (appIconWidth + dismissIconWidth)) {
+            mActivityDescription.setVisibility(View.INVISIBLE);
+            if (updateMoveTaskButton) {
+                mMoveTaskButton.setVisibility(View.INVISIBLE);
             }
-        }
-        if (mActivityDescription.getMeasuredWidth() > (width -
-                (mApplicationIcon.getMeasuredWidth() + mDismissButton.getMeasuredWidth()))) {
-            mActivityDescription.setAlpha(0f);
+            mDismissButton.setVisibility(View.INVISIBLE);
+        } else if (width < (appIconWidth + dismissIconWidth + moveTaskIconWidth)) {
+            mActivityDescription.setVisibility(View.INVISIBLE);
+            if (updateMoveTaskButton) {
+                mMoveTaskButton.setVisibility(View.INVISIBLE);
+            }
+            mDismissButton.setVisibility(View.VISIBLE);
+        } else if (width < (appIconWidth + dismissIconWidth + moveTaskIconWidth +
+                activityDescWidth)) {
+            mActivityDescription.setVisibility(View.INVISIBLE);
+            if (updateMoveTaskButton) {
+                mMoveTaskButton.setVisibility(View.VISIBLE);
+            }
+            mDismissButton.setVisibility(View.VISIBLE);
         } else {
-            mActivityDescription.setAlpha(1f);
+            mActivityDescription.setVisibility(View.VISIBLE);
+            if (updateMoveTaskButton) {
+                mMoveTaskButton.setVisibility(View.VISIBLE);
+            }
+            mDismissButton.setVisibility(View.VISIBLE);
         }
+        if (updateMoveTaskButton) {
+            mMoveTaskButton.setTranslationX(width - getMeasuredWidth());
+        }
+        mDismissButton.setTranslationX(width - getMeasuredWidth());
         invalidate();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        onTaskViewSizeChanged(mTaskViewRect.width(), mTaskViewRect.height());
     }
 
     @Override
@@ -197,6 +228,7 @@ public class TaskViewHeader extends FrameLayout
 
     /** Binds the bar view to the task */
     public void rebindToTask(Task t) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         mTask = t;
 
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
@@ -228,12 +260,26 @@ public class TaskViewHeader extends FrameLayout
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
                 t.contentDescription));
-        updateResizeTaskBarIcon(t);
-        mMoveTaskButton.setVisibility(View.VISIBLE);
-        mMoveTaskButton.setOnClickListener(this);
+
+        // When freeform workspaces are enabled, then update the move-task button depending on the
+        // current task
+        if (ssp.hasFreeformWorkspaceSupport()) {
+            if (t.isFreeformTask()) {
+                mMoveTaskTargetStackId = FULLSCREEN_WORKSPACE_STACK_ID;
+                mMoveTaskButton.setImageResource(t.useLightOnPrimaryColor
+                        ? R.drawable.recents_move_task_fullscreen_light
+                        : R.drawable.recents_move_task_fullscreen_dark);
+            } else {
+                mMoveTaskTargetStackId = FREEFORM_WORKSPACE_STACK_ID;
+                mMoveTaskButton.setImageResource(t.useLightOnPrimaryColor
+                        ? R.drawable.recents_move_task_freeform_light
+                        : R.drawable.recents_move_task_freeform_dark);
+            }
+            mMoveTaskButton.setVisibility(View.VISIBLE);
+            mMoveTaskButton.setOnClickListener(this);
+        }
 
         // In accessibility, a single click on the focused app info button will show it
-        SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isTouchExplorationEnabled()) {
             mApplicationIcon.setOnClickListener(this);
         }
@@ -245,40 +291,6 @@ public class TaskViewHeader extends FrameLayout
         mApplicationIcon.setImageDrawable(null);
         mApplicationIcon.setOnClickListener(null);
         mMoveTaskButton.setOnClickListener(null);
-    }
-
-    /** Updates the resize task bar button. */
-    void updateResizeTaskBarIcon(Task t) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        Rect display = ssp.getWindowRect();
-        Rect taskRect = ssp.getTaskBounds(t.key.id);
-        int resId = R.drawable.star;
-        if (display.equals(taskRect) || taskRect.isEmpty()) {
-            resId = R.drawable.vector_drawable_place_fullscreen;
-        } else {
-            boolean top = display.top == taskRect.top;
-            boolean bottom = display.bottom == taskRect.bottom;
-            boolean left = display.left == taskRect.left;
-            boolean right = display.right == taskRect.right;
-            if (top && bottom && left) {
-                resId = R.drawable.vector_drawable_place_left;
-            } else if (top && bottom && right) {
-                resId = R.drawable.vector_drawable_place_right;
-            } else if (top && left && right) {
-                resId = R.drawable.vector_drawable_place_top;
-            } else if (bottom && left && right) {
-                resId = R.drawable.vector_drawable_place_bottom;
-            } else if (top && right) {
-                resId = R.drawable.vector_drawable_place_top_right;
-            } else if (top && left) {
-                resId = R.drawable.vector_drawable_place_top_left;
-            } else if (bottom && right) {
-                resId = R.drawable.vector_drawable_place_bottom_right;
-            } else if (bottom && left) {
-                resId = R.drawable.vector_drawable_place_bottom_left;
-            }
-        }
-        mMoveTaskButton.setImageResource(resId);
     }
 
     /** Animates this task bar dismiss button when launching a task. */
@@ -356,7 +368,12 @@ public class TaskViewHeader extends FrameLayout
             MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
                     Constants.Metrics.DismissSourceHeaderButton);
         } else if (v == mMoveTaskButton) {
-            EventBus.getDefault().send(new ResizeTaskEvent(mTask));
+            TaskView tv = Utilities.findParent(this, TaskView.class);
+            Rect bounds = mMoveTaskTargetStackId == FREEFORM_WORKSPACE_STACK_ID
+                    ? new Rect(mTaskViewRect)
+                    : new Rect();
+            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, bounds,
+                    mMoveTaskTargetStackId, false));
         }
     }
 

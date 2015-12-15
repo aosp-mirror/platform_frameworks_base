@@ -65,7 +65,6 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
 
@@ -127,7 +126,7 @@ public class SystemServicesProxy {
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
-        mHasFreeformWorkspaceSupport = false &&
+        mHasFreeformWorkspaceSupport =
                 mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
 
         // Get the dummy thumbnail width/heights
