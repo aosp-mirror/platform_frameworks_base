@@ -75,6 +75,7 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -403,6 +404,18 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // used to start an entering animation earlier.
     public boolean mSurfaceSaved = false;
 
+    // This window will be replaced due to relaunch. This allows window manager
+    // to differentiate between simple removal of a window and replacement. In the latter case it
+    // will preserve the old window until the new one is drawn.
+    boolean mWillReplaceWindow = false;
+    // If true, the replaced window was already requested to be removed.
+    boolean mReplacingRemoveRequested = false;
+    // Whether the replacement of the window should trigger app transition animation.
+    boolean mAnimateReplacingWindow = false;
+    // If not null, the window that will be used to replace the old one. This is being set when
+    // the window is added and unset when this window reports its first draw.
+    WindowState mReplacingWindow = null;
+
     /**
      * Wake lock for drawing.
      * Even though it's slightly more expensive to do so, we will use a separate wake lock
@@ -580,8 +593,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf,
             Rect osf) {
-        if (mAppToken != null && mAppToken.mWillReplaceWindow
-                && (mExiting || !mAppToken.mReplacingRemoveRequested)) {
+        if (mWillReplaceWindow && (mExiting || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
             // want to apply any more changes to it, so it remains in this state until new window
@@ -1343,17 +1355,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void maybeRemoveReplacedWindow() {
-        AppWindowToken token = mAppToken;
-        if (token != null && token.mWillReplaceWindow && token.mReplacingWindow == this
-                && token.mHasReplacedWindow) {
-            if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replacing window: " + this);
-            token.mWillReplaceWindow = false;
-            token.mAnimateReplacingWindow = false;
-            token.mReplacingRemoveRequested = false;
-            token.mReplacingWindow = null;
-            token.mHasReplacedWindow = false;
-            for (int i = token.allAppWindows.size() - 1; i >= 0; i--) {
-                final WindowState win = token.allAppWindows.get(i);
+        if (mAppToken == null) {
+            return;
+        }
+        for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = mAppToken.allAppWindows.get(i);
+            if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
+            if (win.mWillReplaceWindow && win.mReplacingWindow == this) {
+                win.mWillReplaceWindow = false;
+                win.mAnimateReplacingWindow = false;
+                win.mReplacingRemoveRequested = false;
+                win.mReplacingWindow = null;
                 if (win.mExiting) {
                     mService.removeWindowInnerLocked(win);
                 }
@@ -2161,7 +2173,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             + " " + getWindowTag();
     }
 
-    private CharSequence getWindowTag() {
+    CharSequence getWindowTag() {
         CharSequence tag = mAttrs.getTitle();
         if (tag == null || tag.length() <= 0) {
             tag = mAttrs.packageName;
@@ -2258,5 +2270,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean isChildWindow() {
         return mAttachedWindow != null;
+    }
+
+    void setReplacing(boolean animate) {
+        if ((mAttrs.privateFlags & PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH) == 0) {
+            mWillReplaceWindow = true;
+            mReplacingWindow = null;
+            mAnimateReplacingWindow = animate;
+        }
     }
 }

@@ -1192,7 +1192,7 @@ class WindowStateAnimator {
         // different stack. If we suddenly crop it to the new stack bounds, it might get cut off.
         // We don't want it to happen, so we let it ignore the stack bounds until it gets removed.
         // The window that will replace it will abide them.
-        if (isAnimating() && (appToken.mWillReplaceWindow || w.inDockedWorkspace()
+        if (isAnimating() && (w.mWillReplaceWindow || w.inDockedWorkspace()
                 || w.inFreeformWorkspace())) {
             return;
         }

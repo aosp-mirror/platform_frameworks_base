@@ -1171,6 +1171,16 @@ public interface WindowManager extends ViewManager {
          */
         public static final int PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY = 0x00004000;
 
+        /**
+         * Flag to indicate that this window is not expected to be replaced across
+         * configuration change triggered activity relaunches. In general the WindowManager
+         * expects Windows to be replaced after relaunch, and thus it will preserve their surfaces
+         * until the replacement is ready to show in order to prevent visual glitch. However
+         * some windows, such as PopupWindows expect to be cleared across configuration change,
+         * and thus should hint to the WindowManager that it should not wait for a replacement.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH = 0x00008000;
 
         /**
          * Control flags that are private to the platform.

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -121,21 +122,6 @@ class AppWindowToken extends WindowToken {
 
     // True if the windows associated with this token should be cropped to their stack bounds.
     boolean mCropWindowsToStack;
-
-    // This application will have its window replaced due to relaunch. This allows window manager
-    // to differentiate between simple removal of a window and replacement. In the latter case it
-    // will preserve the old window until the new one is drawn.
-    boolean mWillReplaceWindow;
-    // If true, the replaced window was already requested to be removed.
-    boolean mReplacingRemoveRequested;
-    // Whether the replacement of the window should trigger app transition animation.
-    boolean mAnimateReplacingWindow;
-    // If not null, the window that will be used to replace the old one. This is being set when
-    // the window is added and unset when this window reports its first draw.
-    WindowState mReplacingWindow;
-    // Whether the new window has replaced the old one, so the old one can be removed without
-    // blinking.
-    boolean mHasReplacedWindow;
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {
@@ -389,6 +375,62 @@ class AppWindowToken extends WindowToken {
                 win.mDestroying = true;
                 service.removeWindowLocked(win);
             }
+        }
+    }
+
+    void setReplacingWindows(boolean animate) {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
+                + " with replacing windows.");
+
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            w.setReplacing(animate);
+        }
+        if (animate) {
+            // Set-up dummy animation so we can start treating windows associated with this
+            // token like they are in transition before the new app window is ready for us to
+            // run the real transition animation.
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
+                    "setReplacingWindow() Setting dummy animation on: " + this);
+            mAppAnimator.setDummyAnimation();
+        }
+    }
+
+    void addWindow(WindowState w) {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            WindowState candidate = allAppWindows.get(i);
+            if (candidate.mWillReplaceWindow && candidate.mReplacingWindow == null &&
+                    candidate.getWindowTag().equals(w.getWindowTag().toString())) {
+                candidate.mReplacingWindow = w;
+            }
+        }
+        allAppWindows.add(w);
+    }
+
+    boolean waitingForReplacement() {
+        for (int i = allAppWindows.size() -1; i >= 0; i--) {
+            WindowState candidate = allAppWindows.get(i);
+            if (candidate.mWillReplaceWindow) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void clearTimedoutReplaceesLocked() {
+        for (int i = allAppWindows.size() - 1; i >= 0;
+             // removeWindowLocked at bottom of loop may remove multiple entries from
+             // allAppWindows if the window to be removed has child windows. It also may
+             // not remove any windows from allAppWindows at all if win is exiting and
+             // currently animating away. This ensures that winNdx is monotonically decreasing
+             // and never beyond allAppWindows bounds.
+             i = Math.min(i - 1, allAppWindows.size() - 1)) {
+            WindowState candidate = allAppWindows.get(i);
+            if (candidate.mWillReplaceWindow == false) {
+                continue;
+            }
+            candidate.mWillReplaceWindow = false;
+            service.removeWindowLocked(candidate);
         }
     }
 
