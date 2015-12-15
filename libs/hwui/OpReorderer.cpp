@@ -90,7 +90,9 @@ public:
     }
 
     MergingOpBatch(batchid_t batchId, BakedOpState* op)
-            : BatchBase(batchId, op, true) {
+            : BatchBase(batchId, op, true)
+            , mClipSideFlags(op->computedState.clipSideFlags)
+            , mClipRect(op->computedState.clipRect) {
     }
 
     /*
@@ -202,11 +204,11 @@ public:
         if (newClipSideFlags & OpClipSideFlags::Bottom) mClipRect.bottom = opClip.bottom;
     }
 
-    bool getClipSideFlags() const { return mClipSideFlags; }
+    int getClipSideFlags() const { return mClipSideFlags; }
     const Rect& getClipRect() const { return mClipRect; }
 
 private:
-    int mClipSideFlags = 0;
+    int mClipSideFlags;
     Rect mClipRect;
 };
 
@@ -308,12 +310,6 @@ void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg,
                     mergingBatch->getClipSideFlags(),
                     mergingBatch->getClipRect()
             };
-            if (data.clipSideFlags) {
-                // if right or bottom sides aren't used to clip, init them to viewport bounds
-                // in the clip rect, so it can be used to scissor
-                if (!(data.clipSideFlags & OpClipSideFlags::Right)) data.clip.right = width;
-                if (!(data.clipSideFlags & OpClipSideFlags::Bottom)) data.clip.bottom = height;
-            }
             mergedReceivers[opId](arg, data);
         } else {
             for (const BakedOpState* op : batch->getOps()) {
@@ -850,14 +846,16 @@ void OpReorderer::deferSimpleRectsOp(const SimpleRectsOp& op) {
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
+static batchid_t textBatchId(const SkPaint& paint) {
+    // TODO: better handling of shader (since we won't care about color then)
+    return paint.getColor() == SK_ColorBLACK ? OpBatchType::Text : OpBatchType::ColorText;
+}
+
 void OpReorderer::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
-    // TODO: better handling of shader (since we won't care about color then)
-    batchid_t batchId = op.paint->getColor() == SK_ColorBLACK
-            ? OpBatchType::Text : OpBatchType::ColorText;
-
+    batchid_t batchId = textBatchId(*(op.paint));
     if (bakedState->computedState.transform.isPureTranslate()
             && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
@@ -865,6 +863,12 @@ void OpReorderer::deferTextOp(const TextOp& op) {
     } else {
         currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
     }
+}
+
+void OpReorderer::deferTextOnPathOp(const TextOnPathOp& op) {
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
 }
 
 void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,

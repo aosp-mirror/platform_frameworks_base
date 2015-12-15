@@ -189,10 +189,10 @@ public:
             const SkPaint* paint) override;
 
     // Text
-    virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
+    virtual void drawText(const uint16_t* glyphs, const float* positions, int glyphCount,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) override;
-    virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+    virtual void drawTextOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
     virtual bool drawTextAbsolutePos() const override { return false; }
 

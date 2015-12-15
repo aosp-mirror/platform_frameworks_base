@@ -41,11 +41,8 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
     // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
     LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
             "must use glyph encoding");
-
-    SkMatrix identity;
-    identity.setIdentity();
     SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
-    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &identity);
+    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
 
     float totalAdvance = 0;
     std::vector<glyph_t> glyphs;
@@ -87,6 +84,22 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
     alignPaintCopy.setTextAlign(SkPaint::kLeft_Align);
     canvas->drawText(glyphs.data(), positions.data(), glyphs.size(), alignPaintCopy, x, y,
                 bounds.left, bounds.top, bounds.right, bounds.bottom, totalAdvance);
+}
+
+void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
+        const SkPaint& paint, const SkPath& path) {
+    // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
+    LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
+            "must use glyph encoding");
+    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
+    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
+
+    std::vector<glyph_t> glyphs;
+    while (*text != '\0') {
+        SkUnichar unichar = SkUTF8_NextUnichar(&text);
+        glyphs.push_back(autoCache.getCache()->unicharToGlyph(unichar));
+    }
+    canvas->drawTextOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
 }
 
 } /* namespace uirenderer */

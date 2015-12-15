@@ -62,6 +62,7 @@ struct Vertex;
         U_OP_FN(ShadowOp) \
         U_OP_FN(SimpleRectsOp) \
         M_OP_FN(TextOp) \
+        U_OP_FN(TextOnPathOp) \
         U_OP_FN(BeginLayerOp) \
         U_OP_FN(EndLayerOp) \
         U_OP_FN(LayerOp)
@@ -325,6 +326,23 @@ struct TextOp : RecordedOp {
     const int glyphCount;
     const float x;
     const float y;
+};
+
+struct TextOnPathOp : RecordedOp {
+    TextOnPathOp(BASE_PARAMS, const glyph_t* glyphs, int glyphCount,
+            const SkPath* path, float hOffset, float vOffset)
+            : SUPER(TextOnPathOp)
+            , glyphs(glyphs)
+            , glyphCount(glyphCount)
+            , path(path)
+            , hOffset(hOffset)
+            , vOffset(vOffset) {}
+    const glyph_t* glyphs;
+    const int glyphCount;
+
+    const SkPath* path;
+    const float hOffset;
+    const float vOffset;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
