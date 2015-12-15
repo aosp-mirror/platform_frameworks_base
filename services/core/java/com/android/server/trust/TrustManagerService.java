@@ -53,7 +53,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.util.ArraySet;
@@ -681,7 +680,9 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceSecure(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
-            userId = resolveProfileParent(userId);
+            if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+                userId = resolveProfileParent(userId);
+            }
 
             long token = Binder.clearCallingIdentity();
             try {

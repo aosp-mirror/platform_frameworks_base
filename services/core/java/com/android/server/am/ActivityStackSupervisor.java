@@ -1624,21 +1624,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                             | PendingIntent.FLAG_IMMUTABLE, null);
             int flags = intent.getFlags();
-            intent = km.createConfirmDeviceCredentialIntent(null, null);
-            intent.addFlags(FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
-            intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
-            intent.putExtra(Intent.EXTRA_USER_ID, userId);
-            intent.setFlags(flags);
+            Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, user.id);
+            if (newIntent != null) {
+                intent = newIntent;
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, aInfo.packageName);
+                intent.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
+                intent.setFlags(flags);
 
-            resolvedType = null;
-            callingUid = realCallingUid;
-            callingPid = realCallingPid;
+                resolvedType = null;
+                callingUid = realCallingUid;
+                callingPid = realCallingPid;
 
-            UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
-            aInfo = resolveActivity(intent, null, PackageManager.MATCH_DEFAULT_ONLY
-                    | ActivityManagerService.STOCK_PM_FLAGS, null, parent.id);
+                UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
+                aInfo = resolveActivity(intent, null, PackageManager.MATCH_DEFAULT_ONLY
+                        | ActivityManagerService.STOCK_PM_FLAGS, null, parent.id);
+            }
         }
 
         if (abort) {
