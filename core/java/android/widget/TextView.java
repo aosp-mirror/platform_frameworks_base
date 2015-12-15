@@ -5955,15 +5955,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mLayout != null ? mLayout.getHeight() : 0;
     }
 
-    /**
-     * @hide
-     */
     @Override
-    public int getPointerShape(MotionEvent event, float x, float y) {
+    public PointerIcon getPointerIcon(MotionEvent event, float x, float y) {
         if (isTextSelectable() || isTextEditable()) {
-            return PointerIcon.STYLE_TEXT;
+            return PointerIcon.getSystemIcon(mContext, PointerIcon.STYLE_TEXT);
         }
-        return super.getPointerShape(event, x, y);
+        return super.getPointerIcon(event, x, y);
     }
 
     @Override

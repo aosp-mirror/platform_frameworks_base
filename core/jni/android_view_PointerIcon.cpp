@@ -65,33 +65,34 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
         return OK;
     }
 
-    jobject loadedPointerIconObj = env->CallObjectMethod(pointerIconObj,
-            gPointerIconClassInfo.load, contextObj);
-    if (env->ExceptionCheck() || !loadedPointerIconObj) {
+    ScopedLocalRef<jobject> loadedPointerIconObj(env, env->CallObjectMethod(pointerIconObj,
+            gPointerIconClassInfo.load, contextObj));
+    if (env->ExceptionCheck() || !loadedPointerIconObj.get()) {
         ALOGW("An exception occurred while loading a pointer icon.");
         LOGW_EX(env);
         env->ExceptionClear();
         return UNKNOWN_ERROR;
     }
+    return android_view_PointerIcon_getLoadedIcon(env, loadedPointerIconObj.get(), outPointerIcon);
+}
 
-    outPointerIcon->style = env->GetIntField(loadedPointerIconObj,
-            gPointerIconClassInfo.mStyle);
-    outPointerIcon->hotSpotX = env->GetFloatField(loadedPointerIconObj,
-            gPointerIconClassInfo.mHotSpotX);
-    outPointerIcon->hotSpotY = env->GetFloatField(loadedPointerIconObj,
-            gPointerIconClassInfo.mHotSpotY);
+status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIconObj,
+        PointerIcon* outPointerIcon) {
+    outPointerIcon->style = env->GetIntField(pointerIconObj, gPointerIconClassInfo.mStyle);
+    outPointerIcon->hotSpotX = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotX);
+    outPointerIcon->hotSpotY = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotY);
 
-    jobject bitmapObj = env->GetObjectField(loadedPointerIconObj, gPointerIconClassInfo.mBitmap);
-    if (bitmapObj) {
-        GraphicsJNI::getSkBitmap(env, bitmapObj, &(outPointerIcon->bitmap));
-        env->DeleteLocalRef(bitmapObj);
+    ScopedLocalRef<jobject> bitmapObj(
+            env, env->GetObjectField(pointerIconObj, gPointerIconClassInfo.mBitmap));
+    if (bitmapObj.get()) {
+        GraphicsJNI::getSkBitmap(env, bitmapObj.get(), &(outPointerIcon->bitmap));
     }
 
     ScopedLocalRef<jobjectArray> bitmapFramesObj(env, reinterpret_cast<jobjectArray>(
-            env->GetObjectField(loadedPointerIconObj, gPointerIconClassInfo.mBitmapFrames)));
+            env->GetObjectField(pointerIconObj, gPointerIconClassInfo.mBitmapFrames)));
     if (bitmapFramesObj.get()) {
         outPointerIcon->durationPerFrame = env->GetIntField(
-                loadedPointerIconObj, gPointerIconClassInfo.mDurationPerFrame);
+                pointerIconObj, gPointerIconClassInfo.mDurationPerFrame);
         jsize size = env->GetArrayLength(bitmapFramesObj.get());
         outPointerIcon->bitmapFrames.resize(size);
         for (jsize i = 0; i < size; ++i) {
@@ -100,7 +101,6 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
         }
     }
 
-    env->DeleteLocalRef(loadedPointerIconObj);
     return OK;
 }
 

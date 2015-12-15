@@ -16,8 +16,10 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.SparseArray;
 import com.android.internal.util.XmlUtils;
 
 import android.annotation.XmlRes;
@@ -39,13 +41,11 @@ import android.util.Log;
  * Pointer icons can be provided either by the system using system styles,
  * or by applications using bitmaps or application resources.
  * </p>
- *
- * @hide
  */
 public final class PointerIcon implements Parcelable {
     private static final String TAG = "PointerIcon";
 
-    /** Style constant: Custom icon with a user-supplied bitmap. */
+    /** {@hide} Style constant: Custom icon with a user-supplied bitmap. */
     public static final int STYLE_CUSTOM = -1;
 
     /** Style constant: Null icon.  It has no bitmap. */
@@ -54,6 +54,7 @@ public final class PointerIcon implements Parcelable {
     /** Style constant: no icons are specified. If all views uses this, then falls back
      * to the default style, but this is helpful to distinguish a view explicitly want
      * to have the default icon.
+     * @hide
      */
     public static final int STYLE_NOT_SPECIFIED = 1;
 
@@ -135,10 +136,11 @@ public final class PointerIcon implements Parcelable {
     // conflicts with any system styles that may be defined in the future.
     private static final int STYLE_OEM_FIRST = 10000;
 
-    /** {@hide} The default pointer icon. */
+    /** The default pointer icon. */
     public static final int STYLE_DEFAULT = STYLE_ARROW;
 
     private static final PointerIcon gNullIcon = new PointerIcon(STYLE_NULL);
+    private static final SparseArray<PointerIcon> gSystemIcons = new SparseArray<PointerIcon>();
 
     private final int mStyle;
     private int mSystemIconResourceId;
@@ -160,6 +162,7 @@ public final class PointerIcon implements Parcelable {
      * @return The null pointer icon.
      *
      * @see #STYLE_NULL
+     * @hide
      */
     public static PointerIcon getNullIcon() {
         return gNullIcon;
@@ -172,8 +175,9 @@ public final class PointerIcon implements Parcelable {
      * @return The default pointer icon.
      *
      * @throws IllegalArgumentException if context is null.
+     * @hide
      */
-    public static PointerIcon getDefaultIcon(Context context) {
+    public static PointerIcon getDefaultIcon(@NonNull Context context) {
         return getSystemIcon(context, STYLE_DEFAULT);
     }
 
@@ -187,13 +191,18 @@ public final class PointerIcon implements Parcelable {
      *
      * @throws IllegalArgumentException if context is null.
      */
-    public static PointerIcon getSystemIcon(Context context, int style) {
+    public static PointerIcon getSystemIcon(@NonNull Context context, int style) {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");
         }
 
         if (style == STYLE_NULL) {
             return gNullIcon;
+        }
+
+        PointerIcon icon = gSystemIcons.get(style);
+        if (icon != null) {
+            return icon;
         }
 
         int styleIndex = getSystemIconStyleIndex(style);
@@ -217,12 +226,13 @@ public final class PointerIcon implements Parcelable {
             return style == STYLE_DEFAULT ? gNullIcon : getSystemIcon(context, STYLE_DEFAULT);
         }
 
-        PointerIcon icon = new PointerIcon(style);
+        icon = new PointerIcon(style);
         if ((resourceId & 0xff000000) == 0x01000000) {
             icon.mSystemIconResourceId = resourceId;
         } else {
             icon.loadResource(context, context.getResources(), resourceId);
         }
+        gSystemIcons.append(style, icon);
         return icon;
     }
 
@@ -239,7 +249,8 @@ public final class PointerIcon implements Parcelable {
      * @throws IllegalArgumentException if bitmap is null, or if the x/y hotspot
      *         parameters are invalid.
      */
-    public static PointerIcon createCustomIcon(Bitmap bitmap, float hotSpotX, float hotSpotY) {
+    public static PointerIcon createCustomIcon(
+            @NonNull Bitmap bitmap, float hotSpotX, float hotSpotY) {
         if (bitmap == null) {
             throw new IllegalArgumentException("bitmap must not be null");
         }
@@ -273,7 +284,7 @@ public final class PointerIcon implements Parcelable {
      * @throws Resources.NotFoundException if the resource was not found or the drawable
      * linked in the resource was not found.
      */
-    public static PointerIcon loadCustomIcon(Resources resources, @XmlRes int resourceId) {
+    public static PointerIcon loadCustomIcon(@NonNull Resources resources, @XmlRes int resourceId) {
         if (resources == null) {
             throw new IllegalArgumentException("resources must not be null");
         }
@@ -291,10 +302,9 @@ public final class PointerIcon implements Parcelable {
      * @return The loaded pointer icon.
      *
      * @throws IllegalArgumentException if context is null.
-     * @see #isLoaded()
      * @hide
      */
-    public PointerIcon load(Context context) {
+    public PointerIcon load(@NonNull Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");
         }
@@ -309,81 +319,9 @@ public final class PointerIcon implements Parcelable {
         return result;
     }
 
-    /**
-     * Returns true if the pointer icon style is {@link #STYLE_NULL}.
-     *
-     * @return True if the pointer icon style is {@link #STYLE_NULL}.
-     */
-    public boolean isNullIcon() {
-        return mStyle == STYLE_NULL;
-    }
-
-    /**
-     * Returns true if the pointer icon has been loaded and its bitmap and hotspot
-     * information are available.
-     *
-     * @return True if the pointer icon is loaded.
-     * @see #load(Context)
-     */
-    public boolean isLoaded() {
-        return mBitmap != null || mStyle == STYLE_NULL;
-    }
-
-    /**
-     * Gets the style of the pointer icon.
-     *
-     * @return The pointer icon style.
-     */
+    /** @hide */
     public int getStyle() {
         return mStyle;
-    }
-
-    /**
-     * Gets the bitmap of the pointer icon.
-     *
-     * @return The pointer icon bitmap, or null if the style is {@link #STYLE_NULL}.
-     *
-     * @throws IllegalStateException if the bitmap is not loaded.
-     * @see #isLoaded()
-     * @see #load(Context)
-     */
-    public Bitmap getBitmap() {
-        throwIfIconIsNotLoaded();
-        return mBitmap;
-    }
-
-    /**
-     * Gets the X offset of the pointer icon hotspot.
-     *
-     * @return The hotspot X offset.
-     *
-     * @throws IllegalStateException if the bitmap is not loaded.
-     * @see #isLoaded()
-     * @see #load(Context)
-     */
-    public float getHotSpotX() {
-        throwIfIconIsNotLoaded();
-        return mHotSpotX;
-    }
-
-    /**
-     * Gets the Y offset of the pointer icon hotspot.
-     *
-     * @return The hotspot Y offset.
-     *
-     * @throws IllegalStateException if the bitmap is not loaded.
-     * @see #isLoaded()
-     * @see #load(Context)
-     */
-    public float getHotSpotY() {
-        throwIfIconIsNotLoaded();
-        return mHotSpotY;
-    }
-
-    private void throwIfIconIsNotLoaded() {
-        if (!isLoaded()) {
-            throw new IllegalStateException("The icon is not loaded.");
-        }
     }
 
     public static final Parcelable.Creator<PointerIcon> CREATOR

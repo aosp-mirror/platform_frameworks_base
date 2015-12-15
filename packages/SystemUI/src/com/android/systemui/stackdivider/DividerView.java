@@ -30,6 +30,7 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -118,8 +119,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         updateDisplayInfo();
         boolean landscape = getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
-        mHandle.setPointerShape(
-                landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW);
+        mHandle.setPointerIcon(PointerIcon.getSystemIcon(getContext(),
+                landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
