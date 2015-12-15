@@ -16,31 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="DocumentsBaseTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar" />
     <style name="ActionBarTheme" parent="@*android:style/ThemeOverlay.Material.Dark.ActionBar" />
     <style name="ActionBarPopupTheme" parent="@*android:style/ThemeOverlay.Material.Light" />
 
-    <style name="DocumentsTheme" parent="@style/DocumentsBaseTheme">
-        <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/ActionBarTheme</item>
-        <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
-
-        <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:colorPrimaryDark">@color/primary_dark</item>
-        <item name="android:colorPrimary">@color/primary</item>
-        <item name="android:colorAccent">@color/accent</item>
-        <item name="colorActionMode">@color/action_mode</item>
-
-        <item name="android:listDivider">@*android:drawable/list_divider_material</item>
-
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowActionModeOverlay">true</item>
-        <item name="android:windowNoTitle">true</item>
-
-        <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
-    </style>
-
-    <style name="DocumentsFullScreenTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="DocumentsTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ActionBarTheme</item>
         <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>

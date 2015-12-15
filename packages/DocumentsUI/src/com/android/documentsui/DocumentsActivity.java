@@ -19,8 +19,8 @@ package com.android.documentsui;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
-import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 
 import android.app.Activity;
@@ -31,11 +31,9 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,7 +44,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.Toolbar;
@@ -65,8 +62,6 @@ public class DocumentsActivity extends BaseActivity {
     private static final int CODE_FORWARD = 42;
     private static final String TAG = "DocumentsActivity";
 
-    private boolean mShowAsDialog;
-
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
 
@@ -84,29 +79,8 @@ public class DocumentsActivity extends BaseActivity {
         super.onCreate(icicle);
 
         final Resources res = getResources();
-        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog);
 
-        if (!mShowAsDialog) {
-            setTheme(R.style.DocumentsFullScreenTheme);
-        }
-
-        if (mShowAsDialog) {
-            mDrawer = DrawerController.createDummy();
-
-            // Strongly define our horizontal dimension; we leave vertical as
-            // WRAP_CONTENT so that system resizes us when IME is showing.
-            final WindowManager.LayoutParams a = getWindow().getAttributes();
-
-            final Point size = new Point();
-            getWindowManager().getDefaultDisplay().getSize(size);
-            a.width = (int) res.getFraction(R.dimen.dialog_width, size.x, size.x);
-
-            getWindow().setAttributes(a);
-
-        } else {
-            mDrawer = DrawerController.create(this);
-        }
-
+        mDrawer = DrawerController.create(this);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         mStackAdapter = new StackAdapter();
@@ -268,15 +242,16 @@ public class DocumentsActivity extends BaseActivity {
             }
         }
 
-        if (!mShowAsDialog && mDrawer.isUnlocked()) {
+        if (mDrawer.isUnlocked()) {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setRootsDrawerOpen(true);
-                }
-            });
+            mToolbar.setNavigationOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            setRootsDrawerOpen(true);
+                        }
+                    });
         } else {
             mToolbar.setNavigationIcon(null);
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
@@ -307,10 +282,7 @@ public class DocumentsActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
-        // Most actions are visible when showing as dialog
-        if (mShowAsDialog) {
-            expandMenus(menu);
-        }
+        expandMenus(menu);
         return showMenu;
     }
 

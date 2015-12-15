@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <resources>
-    <declare-styleable name="DocumentsBaseTheme">
+    <declare-styleable name="DocumentsTheme">
         <attr name="colorActionMode" format="color"/>
     </declare-styleable>
 </resources>

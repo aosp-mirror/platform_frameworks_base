@@ -35,7 +35,6 @@
     <dimen name="list_divider_inset">72dp</dimen>
     <bool name="list_divider_inset_left">true</bool>
 
-    <bool name="show_as_dialog">false</bool>
     <bool name="always_show_summary">false</bool>
 
     <dimen name="dir_elevation">8dp</dimen>
