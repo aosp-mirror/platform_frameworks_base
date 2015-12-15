@@ -120,9 +120,19 @@ final class TestUtil {
     private static void waitForStorages(
             TestResultInstrumentation instrumentation,
             MtpManager manager,
-            int deviceId) throws IOException, InterruptedException {
+            int deviceId) throws InterruptedException, IOException {
         while (true) {
-            if (manager.getRoots(deviceId).length == 0) {
+            MtpDeviceRecord device = null;
+            for (final MtpDeviceRecord deviceCandidate : manager.getDevices()) {
+                if (deviceCandidate.deviceId == deviceId) {
+                    device = deviceCandidate;
+                    break;
+                }
+            }
+            if (device == null) {
+                throw new IOException("Device was detached.");
+            }
+            if (device.roots.length == 0) {
                 instrumentation.show("Wait for storages.");
                 Thread.sleep(1000);
                 continue;

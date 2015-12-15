@@ -247,7 +247,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             closeDeviceInternal(deviceId);
             mDatabase.removeDeviceRows(deviceId);
         }
-        mRootScanner.notifyChange();
+        mRootScanner.resume();
     }
 
     int[] getOpenedDeviceIds() {
@@ -258,7 +258,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     String getDeviceName(int deviceId) throws IOException {
         synchronized (mDeviceListLock) {
-            return mMtpManager.getDeviceName(deviceId);
+            for (final MtpDeviceRecord device : mMtpManager.getDevices()) {
+                if (device.deviceId == deviceId) {
+                    return device.name;
+                }
+            }
+            throw new IOException("Not found the device: " + Integer.toString(deviceId));
         }
     }
 

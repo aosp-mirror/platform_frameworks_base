@@ -2,12 +2,10 @@ package com.android.mtp;
 
 import android.content.ContentResolver;
 import android.content.res.Resources;
-import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
-import android.util.SparseArray;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -108,36 +106,29 @@ final class RootScanner {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             int pollingCount = 0;
             while (!Thread.interrupted()) {
-                final int[] deviceIds = mManager.getOpenedDeviceIds();
-                final Map<String, MtpRoot[]> rootsMap = new HashMap<>();
                 boolean changed = false;
 
                 // Update devices.
+                final MtpDeviceRecord[] devices = mManager.getDevices();
                 mDatabase.getMapper().startAddingDocuments(null /* parentDocumentId */);
-                for (final int deviceId : deviceIds) {
-                    try {
-                        final MtpRoot[] roots = mManager.getRoots(deviceId);
-                        final String id = mDatabase.getMapper().putDeviceDocument(
-                                deviceId,
-                                mManager.getDeviceName(deviceId),
-                                roots);
-                        if (id != null) {
-                            changed = true;
-                            rootsMap.put(id, roots);
-                        }
-                    } catch (IOException exception) {
-                        // The error may happen on the device. We would like to continue getting
-                        // roots for other devices.
-                        Log.e(MtpDocumentsProvider.TAG, exception.getMessage());
+                for (final MtpDeviceRecord device : devices) {
+                    if (mDatabase.getMapper().putDeviceDocument(device)) {
+                        changed = true;
                     }
                 }
-                mDatabase.getMapper().stopAddingDocuments(null /* parentDocumentId */);
+                if (mDatabase.getMapper().stopAddingDocuments(null /* parentDocumentId */)) {
+                    changed = true;
+                }
 
                 // Update roots.
-                for (final String documentId : rootsMap.keySet()) {
+                for (final MtpDeviceRecord device : devices) {
+                    final String documentId = mDatabase.getDocumentIdForDevice(device.deviceId);
+                    if (documentId == null) {
+                        continue;
+                    }
                     mDatabase.getMapper().startAddingDocuments(documentId);
                     if (mDatabase.getMapper().putRootDocuments(
-                            documentId, mResources, rootsMap.get(documentId))) {
+                            documentId, mResources, device.roots)) {
                         changed = true;
                     }
                     if (mDatabase.getMapper().stopAddingDocuments(documentId)) {

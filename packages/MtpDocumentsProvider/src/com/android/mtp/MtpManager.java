@@ -17,8 +17,10 @@
 package com.android.mtp;
 
 import android.content.Context;
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.mtp.MtpConstants;
 import android.mtp.MtpDevice;
@@ -26,18 +28,41 @@ import android.mtp.MtpEvent;
 import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The model wrapping android.mtp API.
  */
 class MtpManager {
     final static int OBJECT_HANDLE_ROOT_CHILDREN = -1;
+
+    /**
+     * Subclass for PTP.
+     */
+    private static final int SUBCLASS_STILL_IMAGE_CAPTURE = 1;
+
+    /**
+     * Subclass for Android style MTP.
+     */
+    private static final int SUBCLASS_MTP = 0xff;
+
+    /**
+     * Protocol for Picture Transfer Protocol (PIMA 15470).
+     */
+    private static final int PROTOCOL_PICTURE_TRANSFER = 1;
+
+    /**
+     * Protocol for Android style MTP.
+     */
+    private static final int PROTOCOL_MTP = 0;
+
 
     private final UsbManager mManager;
     // TODO: Save and restore the set of opened device.
@@ -92,34 +117,39 @@ class MtpManager {
         mDevices.remove(deviceId);
     }
 
+    synchronized MtpDeviceRecord[] getDevices() {
+        final ArrayList<MtpDeviceRecord> devices = new ArrayList<>();
+        for (UsbDevice device : mManager.getDeviceList().values()) {
+            if (!isMtpDevice(device)) {
+                continue;
+            }
+            final boolean opened = mDevices.get(device.getDeviceId()) != null;
+            final String name = device.getProductName();
+            MtpRoot[] roots;
+            if (opened) {
+                try {
+                    roots = getRoots(device.getDeviceId());
+                } catch (IOException exp) {
+                    Log.e(MtpDocumentsProvider.TAG, exp.getMessage());
+                    // If we failed to fetch roots for the device, we still returns device model
+                    // with an empty set of roots so that the device is shown DocumentsUI as long as
+                    // the device is physically connected.
+                    roots = new MtpRoot[0];
+                }
+            } else {
+                roots = new MtpRoot[0];
+            }
+            devices.add(new MtpDeviceRecord(device.getDeviceId(), name, opened, roots));
+        }
+        return devices.toArray(new MtpDeviceRecord[devices.size()]);
+    }
+
     synchronized int[] getOpenedDeviceIds() {
         final int[] result = new int[mDevices.size()];
         for (int i = 0; i < result.length; i++) {
             result[i] = mDevices.keyAt(i);
         }
         return result;
-    }
-
-    String getDeviceName(int deviceId) throws IOException {
-        return getDevice(deviceId).getDeviceInfo().getModel();
-    }
-
-    MtpRoot[] getRoots(int deviceId) throws IOException {
-        final MtpDevice device = getDevice(deviceId);
-        synchronized (device) {
-            final int[] storageIds = device.getStorageIds();
-            if (storageIds == null) {
-                throw new IOException("Failed to obtain storage IDs.");
-            }
-            final MtpRoot[] results = new MtpRoot[storageIds.length];
-            for (int i = 0; i < storageIds.length; i++) {
-                results[i] = new MtpRoot(
-                        device.getDeviceId(),
-                        device.getDeviceInfo().getModel(),
-                        device.getStorageInfo(storageIds[i]));
-            }
-            return results;
-        }
     }
 
     MtpObjectInfo getObjectInfo(int deviceId, int objectHandle)
@@ -211,5 +241,41 @@ class MtpManager {
             throw new IOException("USB device " + deviceId + " is not opened.");
         }
         return device;
+    }
+
+    private MtpRoot[] getRoots(int deviceId) throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        synchronized (device) {
+            final int[] storageIds = device.getStorageIds();
+            if (storageIds == null) {
+                throw new IOException("Failed to obtain storage IDs.");
+            }
+            final MtpRoot[] results = new MtpRoot[storageIds.length];
+            for (int i = 0; i < storageIds.length; i++) {
+                results[i] = new MtpRoot(
+                        device.getDeviceId(),
+                        device.getDeviceInfo().getModel(),
+                        device.getStorageInfo(storageIds[i]));
+            }
+            return results;
+        }
+    }
+
+    static boolean isMtpDevice(UsbDevice device) {
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
+            final UsbInterface usbInterface = device.getInterface(i);
+            if ((usbInterface.getInterfaceClass() == UsbConstants.USB_CLASS_STILL_IMAGE &&
+                    usbInterface.getInterfaceSubclass() == SUBCLASS_STILL_IMAGE_CAPTURE &&
+                    usbInterface.getInterfaceProtocol() == PROTOCOL_PICTURE_TRANSFER)) {
+                return true;
+            }
+            if (usbInterface.getInterfaceClass() == UsbConstants.USB_SUBCLASS_VENDOR_SPEC &&
+                    usbInterface.getInterfaceSubclass() == SUBCLASS_MTP &&
+                    usbInterface.getInterfaceProtocol() == PROTOCOL_MTP &&
+                    usbInterface.getName().equals("MTP")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

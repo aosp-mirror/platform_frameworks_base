@@ -56,22 +56,26 @@ class Mapper {
         mDatabase = database;
     }
 
-    synchronized String putDeviceDocument(int deviceId, String name, MtpRoot[] roots) {
+    /**
+     * Puts device information to database.
+     * @return If device is added to the database.
+     */
+    synchronized boolean putDeviceDocument(MtpDeviceRecord device) {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         Preconditions.checkState(mMappingMode.containsKey(/* no parent for root */ null));
         database.beginTransaction();
         try {
             final ContentValues[] valuesList = new ContentValues[1];
             valuesList[0] = new ContentValues();
-            MtpDatabase.getDeviceDocumentValues(valuesList[0], deviceId, name, roots);
-            putDocuments(
+            MtpDatabase.getDeviceDocumentValues(valuesList[0], device);
+            final boolean changed = putDocuments(
                     valuesList,
                     COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
                     EMPTY_ARGS,
                     /* heuristic */ false,
                     COLUMN_DEVICE_ID);
             database.setTransactionSuccessful();
-            return valuesList[0].getAsString(Document.COLUMN_DOCUMENT_ID);
+            return changed;
         } finally {
             database.endTransaction();
         }
@@ -249,7 +253,7 @@ class Mapper {
      * If the mapping mode is not heuristic, it just adds the rows to the database or updates the
      * existing rows with the new values. If the mapping mode is heuristic, it adds some new rows as
      * 'pending' state when that rows may be corresponding to existing 'invalidated' rows. Then
-     * {@link #stopAddingDocuments(String, String[], String)} turns the pending rows into 'valid'
+     * {@link #stopAddingDocuments(String)} turns the pending rows into 'valid'
      * rows. If the methods adds rows to database, it updates valueList with correct document ID.
      *
      * @param valuesList Values for documents to be stored in the database.
@@ -452,12 +456,15 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         values.clear();
         final Cursor cursor = database.query(table, null, selection, args, null, null, null, "1");
-        if (cursor.getCount() == 0) {
-            return;
+        try {
+            if (cursor.getCount() == 0) {
+                return;
+            }
+            cursor.moveToNext();
+            DatabaseUtils.cursorRowToContentValues(cursor, values);
+        } finally {
+            cursor.close();
         }
-        cursor.moveToNext();
-        DatabaseUtils.cursorRowToContentValues(cursor, values);
-        cursor.close();
     }
 
     /**

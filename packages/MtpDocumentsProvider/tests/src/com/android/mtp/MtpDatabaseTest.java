@@ -871,4 +871,12 @@ public class MtpDatabaseTest extends AndroidTestCase {
             cursor.close();
         }
     }
+
+    public void testGetDocumentIdForDevice() {
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(
+                new MtpDeviceRecord(100, "Device", true, new MtpRoot[0]));
+        mDatabase.getMapper().stopAddingDocuments(null);
+        assertEquals("1", mDatabase.getDocumentIdForDevice(100));
+    }
 }

@@ -19,14 +19,12 @@ package com.android.mtp;
 import android.content.Context;
 import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
+import android.util.SparseArray;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class TestMtpManager extends MtpManager {
     public static final int CREATED_DOCUMENT_HANDLE = 1000;
@@ -35,9 +33,7 @@ public class TestMtpManager extends MtpManager {
         return Arrays.toString(args);
     }
 
-    private final Set<Integer> mValidDevices = new HashSet<>();
-    private final Set<Integer> mOpenedDevices = new TreeSet<>();
-    private final Map<Integer, MtpRoot[]> mRoots = new HashMap<>();
+    private final SparseArray<MtpDeviceRecord> mDevices = new SparseArray<>();
     private final Map<String, MtpObjectInfo> mObjectInfos = new HashMap<>();
     private final Map<String, int[]> mObjectHandles = new HashMap<>();
     private final Map<String, byte[]> mThumbnailBytes = new HashMap<>();
@@ -47,16 +43,12 @@ public class TestMtpManager extends MtpManager {
         super(context);
     }
 
-    void addValidDevice(int deviceId) {
-        mValidDevices.add(deviceId);
+    void addValidDevice(MtpDeviceRecord device) {
+        mDevices.put(device.deviceId, device);
     }
 
     void setObjectHandles(int deviceId, int storageId, int parentHandle, int[] objectHandles) {
         mObjectHandles.put(pack(deviceId, storageId, parentHandle), objectHandles);
-    }
-
-    void setRoots(int deviceId, MtpRoot[] roots) {
-        mRoots.put(deviceId, roots);
     }
 
     void setObjectInfo(int deviceId, MtpObjectInfo objectInfo) {
@@ -76,28 +68,40 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
+    MtpDeviceRecord[] getDevices() {
+        final MtpDeviceRecord[] result = new MtpDeviceRecord[mDevices.size()];
+        for (int i = 0; i < mDevices.size(); i++) {
+            final MtpDeviceRecord device = mDevices.valueAt(i);
+            if (device.opened) {
+                result[i] = device;
+            } else {
+                result[i] = new MtpDeviceRecord(
+                        device.deviceId, device.name, device.opened, new MtpRoot[0]);
+            }
+        }
+        return result;
+    }
+
+    @Override
     void openDevice(int deviceId) throws IOException {
-        if (!mValidDevices.contains(deviceId) || mOpenedDevices.contains(deviceId)) {
+        final MtpDeviceRecord device = mDevices.get(deviceId);
+        if (device == null || device.opened) {
             throw new IOException();
         }
-        mOpenedDevices.add(deviceId);
+        mDevices.put(
+                deviceId,
+                new MtpDeviceRecord(device.deviceId, device.name, true, device.roots));
     }
 
     @Override
     void closeDevice(int deviceId) throws IOException {
-        if (!mValidDevices.contains(deviceId) || !mOpenedDevices.contains(deviceId)) {
+        final MtpDeviceRecord device = mDevices.get(deviceId);
+        if (device == null || !device.opened) {
             throw new IOException();
         }
-        mOpenedDevices.remove(deviceId);
-    }
-
-    @Override
-    MtpRoot[] getRoots(int deviceId) throws IOException {
-        if (mRoots.containsKey(deviceId)) {
-            return mRoots.get(deviceId);
-        } else {
-            throw new IOException("getRoots error: " + Integer.toString(deviceId));
-        }
+        mDevices.put(
+                deviceId,
+                new MtpDeviceRecord(device.deviceId, device.name, false, device.roots));
     }
 
     @Override
@@ -189,16 +193,14 @@ public class TestMtpManager extends MtpManager {
 
     @Override
     int[] getOpenedDeviceIds() {
-        int i = 0;
-        final int[] result = new int[mOpenedDevices.size()];
-        for (int deviceId : mOpenedDevices) {
-            result[i++] = deviceId;
+        final int[] result = new int[mDevices.size()];
+        int count = 0;
+        for (int i = 0; i < mDevices.size(); i++) {
+            final MtpDeviceRecord device = mDevices.valueAt(i);
+            if (device.opened) {
+                result[count++] = device.deviceId;
+            }
         }
-        return result;
-    }
-
-    @Override
-    String getDeviceName(int deviceId) throws IOException {
-        return "Device";
+        return Arrays.copyOf(result, count);
     }
 }

@@ -18,11 +18,11 @@ package com.android.mtp;
 
 import static com.android.mtp.MtpDatabaseConstants.*;
 
+import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -36,8 +36,6 @@ import android.provider.DocumentsContract.Root;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -181,6 +179,27 @@ class MtpDatabase {
     void removeDeviceRows(int deviceId) {
         // Call non-recursive version because it anyway deletes all rows in the devices.
         deleteDocumentsAndRoots(COLUMN_DEVICE_ID + "=?", strings(deviceId));
+    }
+
+    @Nullable String getDocumentIdForDevice(int deviceId) {
+        final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(Document.COLUMN_DOCUMENT_ID),
+                COLUMN_DOCUMENT_TYPE + " = ? AND " + COLUMN_DEVICE_ID + " = ?",
+                strings(DOCUMENT_TYPE_DEVICE, deviceId),
+                null,
+                null,
+                null,
+                "1");
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getString(0);
+            } else {
+                return null;
+            }
+        } finally {
+            cursor.close();
+        }
     }
 
     /**
@@ -361,23 +380,22 @@ class MtpDatabase {
         context.deleteDatabase(DATABASE_NAME);
     }
 
-    static void getDeviceDocumentValues(
-            ContentValues values, int deviceId, String name, MtpRoot[] roots) {
+    static void getDeviceDocumentValues(ContentValues values, MtpDeviceRecord device) {
         values.clear();
-        values.put(COLUMN_DEVICE_ID, deviceId);
+        values.put(COLUMN_DEVICE_ID, device.deviceId);
         values.putNull(COLUMN_STORAGE_ID);
         values.putNull(COLUMN_OBJECT_HANDLE);
         values.putNull(COLUMN_PARENT_DOCUMENT_ID);
         values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
         values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_DEVICE);
         values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
-        values.put(Document.COLUMN_DISPLAY_NAME, name);
+        values.put(Document.COLUMN_DISPLAY_NAME, device.name);
         values.putNull(Document.COLUMN_SUMMARY);
         values.putNull(Document.COLUMN_LAST_MODIFIED);
         values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
         values.put(Document.COLUMN_FLAGS, 0);
         long size = 0;
-        for (final MtpRoot root : roots) {
+        for (final MtpRoot root : device.roots) {
             size += root.mMaxCapacity - root.mFreeSpace;
         }
         values.put(Document.COLUMN_SIZE, size);
