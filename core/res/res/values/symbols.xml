@@ -1771,14 +1771,11 @@
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
   <java-symbol type="string" name="share_remote_bugreport_notification_title" />
-  <java-symbol type="string" name="share_remote_bugreport_notification_ticker" />
   <java-symbol type="string" name="share_remote_bugreport_notification_message" />
-  <java-symbol type="string" name="remote_bugreport_progress_notification_title" />
-  <java-symbol type="string" name="remote_bugreport_progress_notification_ticker" />
-  <java-symbol type="string" name="remote_bugreport_progress_notification_message_can_cancel" />
-  <java-symbol type="string" name="remote_bugreport_progress_notification_message_cannot_cancel" />
   <java-symbol type="string" name="share_remote_bugreport_notification_accept" />
   <java-symbol type="string" name="share_remote_bugreport_notification_decline" />
+  <java-symbol type="string" name="remote_bugreport_progress_notification_title" />
+  <java-symbol type="string" name="remote_bugreport_progress_notification_message_can_cancel" />
   <java-symbol type="string" name="aerr_application" />
   <java-symbol type="string" name="aerr_process" />
   <java-symbol type="string" name="aerr_process_silence" />

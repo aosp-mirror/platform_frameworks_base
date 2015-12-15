@@ -61,7 +61,7 @@ class RemoteBugreportUtils {
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setContentTitle(context.getString(
                         R.string.share_remote_bugreport_notification_title))
-                .setTicker(context.getString(R.string.share_remote_bugreport_notification_ticker))
+                .setTicker(context.getString(R.string.share_remote_bugreport_notification_title))
                 .setContentText(context.getString(
                         R.string.share_remote_bugreport_notification_message))
                 .setStyle(new Notification.BigTextStyle().bigText(context.getString(
@@ -88,29 +88,25 @@ class RemoteBugreportUtils {
                 .setContentTitle(context.getString(
                         R.string.remote_bugreport_progress_notification_title))
                 .setTicker(context.getString(
-                        R.string.remote_bugreport_progress_notification_ticker))
+                        R.string.remote_bugreport_progress_notification_title))
                 .setOngoing(true)
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
                 .setPriority(Notification.PRIORITY_HIGH);
 
-        String message = null;
         if (canCancelBugreport) {
             PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context,
                     REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID,
                     new Intent(ACTION_REMOTE_BUGREPORT_SHARING_DECLINED),
                     PendingIntent.FLAG_CANCEL_CURRENT);
-            message = context.getString(
+            String message = context.getString(
                     R.string.remote_bugreport_progress_notification_message_can_cancel);
-            builder.setContentIntent(pendingIntentCancel);
-        } else {
-            message = context.getString(
-                    R.string.remote_bugreport_progress_notification_message_cannot_cancel);
+            builder.setContentText(message)
+                    .setContentIntent(pendingIntentCancel)
+                    .setStyle(new Notification.BigTextStyle().bigText(message));
         }
-        return builder.setContentText(message)
-                .setStyle(new Notification.BigTextStyle().bigText(message))
-                .build();
+        return builder.build();
     }
 }
 
