@@ -61,15 +61,15 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     private static final int SUBMENU_TIMEOUT_MS = 200;
 
-    /** List of menus that were added before this popup was shown. */
-    private final LinkedList<MenuBuilder> mPendingMenus = new LinkedList<MenuBuilder>;
-
     private final Context mContext;
     private final int mMenuMaxWidth;
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
     private final boolean mOverflowOnly;
     private final Handler mSubMenuHoverHandler;
+
+    /** List of menus that were added before this popup was shown. */
+    private final List<MenuBuilder> mPendingMenus = new LinkedList<>();
 
     /**
      * List of open menus. The first item is the root menu and each
