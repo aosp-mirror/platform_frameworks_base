@@ -83,7 +83,7 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
             .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, renderer->currentSnapshot()->alpha)
             .setTransform(*(renderer->currentSnapshot()), transformFlags)
-            .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+            .setModelViewOffsetRect(0, 0, Rect())
             .build();
     renderer->renderGlop(glop);
 #endif

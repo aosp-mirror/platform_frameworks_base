@@ -1474,7 +1474,7 @@ void OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entr
             .setMeshTexturedMesh(vertices, bitmapCount * 6)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(), transformFlags)
-            .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(0, 0, bounds.getWidth(), bounds.getHeight()))
+            .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(bounds.getWidth(), bounds.getHeight()))
             .build();
     renderGlop(glop, GlopRenderType::Multi);
 }
@@ -1497,7 +1497,7 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(),  TransformFlags::None)
-            .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
+            .setModelViewMapUnitToRectSnap(Rect(texture->width, texture->height))
             .build();
     renderGlop(glop);
 }
@@ -1642,7 +1642,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
             .setMeshPatchQuads(*mesh)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(),  TransformFlags::None)
-            .setModelViewOffsetRectSnap(left, top, Rect(0, 0, right - left, bottom - top)) // TODO: get minimal bounds from patch
+            .setModelViewOffsetRectSnap(left, top, Rect(right - left, bottom - top)) // TODO: get minimal bounds from patch
             .build();
     renderGlop(glop);
 }
@@ -1672,7 +1672,7 @@ void OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entr
             .setMeshTexturedIndexedQuads(vertices, elementCount)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(), transformFlags)
-            .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+            .setModelViewOffsetRect(0, 0, Rect())
             .build();
     renderGlop(glop, GlopRenderType::Multi);
 }
@@ -2268,7 +2268,7 @@ void OpenGLRenderer::drawLayer(Layer* layer) {
                     .setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
                     .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
                     .setTransform(*currentSnapshot(),  TransformFlags::None)
-                    .setModelViewOffsetRectSnap(0, 0, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
+                    .setModelViewOffsetRectSnap(0, 0, Rect(layer->layer.getWidth(), layer->layer.getHeight()))
                     .build();
             DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
 #if DEBUG_LAYERS_AS_REGIONS

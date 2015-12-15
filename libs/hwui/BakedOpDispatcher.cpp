@@ -414,7 +414,7 @@ void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
+            .setModelViewMapUnitToRectSnap(Rect(texture->width, texture->height))
             .build();
     renderer.renderGlop(state, glop);
 }

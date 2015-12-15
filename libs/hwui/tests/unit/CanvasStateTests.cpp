@@ -57,7 +57,7 @@ TEST(CanvasState, gettersAndSetters) {
     simpleTranslate.loadTranslate(10, 20, 0);
     state.setMatrix(simpleTranslate);
 
-    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 200, 200));
+    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(200, 200));
     ASSERT_EQ(state.getLocalClipBounds(), Rect(-10, -20, 190, 180));
     EXPECT_TRUE(approxEqual(*state.currentTransform(), simpleTranslate));
     EXPECT_TRUE(state.clipIsSimple());
@@ -69,7 +69,7 @@ TEST(CanvasState, simpleClipping) {
             0, 0, 200, 200, Vector3());
 
     state.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
-    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 100, 100));
+    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(100, 100));
 
     state.clipRect(10, 10, 200, 200, SkRegion::kIntersect_Op);
     ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10, 100, 100));
@@ -122,10 +122,10 @@ TEST(CanvasState, saveAndRestore) {
     state.save(SkCanvas::kClip_SaveFlag);
     {
         state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
-        ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 10, 10));
+        ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
     }
     state.restore();
-    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 200, 200)); // verify restore
+    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(200, 200)); // verify restore
 
     Matrix4 simpleTranslate;
     simpleTranslate.loadTranslate(10, 10, 0);
@@ -146,10 +146,10 @@ TEST(CanvasState, saveAndRestoreButNotTooMuch) {
     state.save(SkCanvas::kMatrix_SaveFlag); // NOTE: clip not saved
     {
         state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
-        ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 10, 10));
+        ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
     }
     state.restore();
-    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(0, 0, 10, 10)); // verify not restored
+    ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10)); // verify not restored
 
     Matrix4 simpleTranslate;
     simpleTranslate.loadTranslate(10, 10, 0);
