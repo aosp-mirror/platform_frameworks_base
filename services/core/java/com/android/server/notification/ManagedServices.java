@@ -454,7 +454,7 @@ abstract public class ManagedServices {
                 newEnabled.addAll(userComponents);
 
                 for (int j = 0; j < userComponents.size(); j++) {
-                    final ComponentName component = userComponents.valueAt(i);
+                    final ComponentName component = userComponents.valueAt(j);
                     newPackages.add(component.getPackageName());
                 }
             }
