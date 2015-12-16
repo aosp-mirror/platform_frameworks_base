@@ -28,6 +28,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.MutableBoolean;
 
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -220,12 +222,71 @@ public class EventBus extends BroadcastReceiver {
         // Only accessible from derived events
         protected Event() {}
 
+        /**
+         * Called by the EventBus prior to dispatching this event to any subscriber of this event.
+         */
+        void onPreDispatch() {
+            // Do nothing
+        }
+
+        /**
+         * Called by the EventBus after dispatching this event to every subscriber of this event.
+         */
+        void onPostDispatch() {
+            // Do nothing
+        }
+
         @Override
         protected Object clone() throws CloneNotSupportedException {
             Event evt = (Event) super.clone();
             // When cloning an event, reset the cancelled-dispatch state
             evt.cancelled = false;
             return evt;
+        }
+    }
+
+    /**
+     * An event that represents an animated state change, which allows subscribers to coordinate
+     * callbacks which happen after the animation has taken place.
+     *
+     * Internally, it is guaranteed that increment() and decrement() will be called before and the
+     * after the event is dispatched.
+     */
+    public static class AnimatedEvent extends Event {
+
+        private final ReferenceCountedTrigger mTrigger = new ReferenceCountedTrigger();
+
+        // Only accessible from derived events
+        protected AnimatedEvent() {}
+
+        /**
+         * Returns the reference counted trigger that coordinates the animations for this event.
+         */
+        public ReferenceCountedTrigger getAnimationTrigger() {
+            return mTrigger;
+        }
+
+        /**
+         * Adds a callback that is guaranteed to be called after the state has changed regardless of
+         * whether an actual animation took place.
+         */
+        public void addPostAnimationCallback(Runnable r) {
+            mTrigger.addLastDecrementRunnable(r);
+        }
+
+        @Override
+        void onPreDispatch() {
+            mTrigger.increment();
+        }
+
+        @Override
+        void onPostDispatch() {
+            mTrigger.decrement();
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            throw new CloneNotSupportedException();
         }
     }
 
@@ -706,6 +767,11 @@ public class EventBus extends BroadcastReceiver {
         if (eventHandlers == null) {
             return;
         }
+
+        // Prepare this event
+        boolean hasPostedEvent = false;
+        event.onPreDispatch();
+
         // We need to clone the list in case a subscriber unregisters itself during traversal
         eventHandlers = (ArrayList<EventHandler>) eventHandlers.clone();
         for (final EventHandler eventHandler : eventHandlers) {
@@ -717,10 +783,23 @@ public class EventBus extends BroadcastReceiver {
                             processEvent(eventHandler, event);
                         }
                     });
+                    hasPostedEvent = true;
                 } else {
                     processEvent(eventHandler, event);
                 }
             }
+        }
+
+        // Clean up after this event, deferring until all subscribers have been called
+        if (hasPostedEvent) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    event.onPostDispatch();
+                }
+            });
+        } else {
+            event.onPostDispatch();
         }
     }
 

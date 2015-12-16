@@ -132,10 +132,7 @@ public class RecentsView extends FrameLayout {
         mHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ReferenceCountedTrigger postHideStackAnimationTrigger = new ReferenceCountedTrigger(v.getContext());
-                postHideStackAnimationTrigger.increment();
-                EventBus.getDefault().send(new ShowHistoryEvent(postHideStackAnimationTrigger));
-                postHideStackAnimationTrigger.decrement();
+                EventBus.getDefault().send(new ShowHistoryEvent());
             }
         });
         addView(mHistoryButton);
@@ -576,8 +573,8 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(ShowHistoryEvent event) {
         // Hide the history button when the history view is shown
         hideHistoryButton(getResources().getInteger(R.integer.recents_history_transition_duration),
-                event.postHideStackAnimationTrigger);
-        event.postHideStackAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                event.getAnimationTrigger());
+        event.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
                 setAlpha(0f);
@@ -589,7 +586,7 @@ public class RecentsView extends FrameLayout {
         // Show the history button when the history view is hidden
         setAlpha(1f);
         showHistoryButton(getResources().getInteger(R.integer.recents_history_transition_duration),
-                event.postHideHistoryAnimationTrigger);
+                event.getAnimationTrigger());
     }
 
     public final void onBusEvent(ShowHistoryButtonEvent event) {
@@ -609,10 +606,9 @@ public class RecentsView extends FrameLayout {
      * Shows the history button.
      */
     private void showHistoryButton(final int duration) {
-        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(getContext());
-        postAnimationTrigger.increment();
+        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         showHistoryButton(duration, postAnimationTrigger);
-        postAnimationTrigger.decrement();
+        postAnimationTrigger.flushLastDecrementRunnables();
     }
 
     private void showHistoryButton(final int duration,
@@ -638,10 +634,9 @@ public class RecentsView extends FrameLayout {
      * Hides the history button.
      */
     private void hideHistoryButton(int duration) {
-        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger(getContext());
-        postAnimationTrigger.increment();
+        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         hideHistoryButton(duration, postAnimationTrigger);
-        postAnimationTrigger.decrement();
+        postAnimationTrigger.flushLastDecrementRunnables();
     }
 
     private void hideHistoryButton(int duration,

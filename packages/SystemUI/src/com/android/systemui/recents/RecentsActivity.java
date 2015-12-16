@@ -246,10 +246,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     boolean dismissHistory() {
         // Try and hide the history view first
         if (mHistoryView != null && mHistoryView.isVisible()) {
-            ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
-            t.increment();
-            EventBus.getDefault().send(new HideHistoryEvent(true /* animate */, t));
-            t.decrement();
+            EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
             return true;
         }
         return false;
@@ -301,8 +298,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      */
     void dismissRecentsToHome(boolean animated) {
         if (animated) {
-            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(this,
-                    null, mFinishLaunchHomeRunnable, null);
+            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(null,
+                    mFinishLaunchHomeRunnable, null);
             mRecentsView.startExitToHomeAnimation(
                     new ViewAnimation.TaskViewExitContext(exitTrigger));
         } else {
@@ -439,10 +436,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Reset some states
         mIgnoreAltTabRelease = false;
         if (mHistoryView != null) {
-            ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
-            t.increment();
-            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */, t));
-            t.decrement();
+            EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
         }
 
         // Notify that recents is now hidden
@@ -511,11 +505,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.getBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, false)) {
-            ReferenceCountedTrigger postHideStackAnimationTrigger =
-                    new ReferenceCountedTrigger(this);
-            postHideStackAnimationTrigger.increment();
-            EventBus.getDefault().send(new ShowHistoryEvent(postHideStackAnimationTrigger));
-            postHideStackAnimationTrigger.decrement();
+            EventBus.getDefault().send(new ShowHistoryEvent());
         }
     }
 
@@ -644,16 +634,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
             if (mHistoryView != null && mHistoryView.isVisible()) {
-                ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
-                t.increment();
-                t.addLastDecrementRunnable(new Runnable() {
+                HideHistoryEvent hideEvent = new HideHistoryEvent(true /* animate */);
+                hideEvent.addPostAnimationCallback(new Runnable() {
                     @Override
                     public void run() {
                         dismissRecentsToHome(true /* animated */);
                     }
                 });
-                EventBus.getDefault().send(new HideHistoryEvent(true, t));
-                t.decrement();
+                EventBus.getDefault().send(hideEvent);
 
             } else {
                 dismissRecentsToHome(true /* animated */);
@@ -665,7 +653,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         // Try and start the enter animation (or restart it on configuration changed)
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this);
+        ReferenceCountedTrigger t = new ReferenceCountedTrigger();
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         ctx.postAnimationTrigger.increment();
         if (mSearchWidgetInfo != null) {
@@ -784,11 +772,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // provided.
             mHistoryView.setSystemInsets(mRecentsView.getSystemInsets());
         }
-        mHistoryView.show(mRecentsView.getTaskStack(), event.postHideStackAnimationTrigger);
+        mHistoryView.show(mRecentsView.getTaskStack(), event.getAnimationTrigger());
     }
 
     public final void onBusEvent(HideHistoryEvent event) {
-        mHistoryView.hide(event.animate, event.postHideHistoryAnimationTrigger);
+        mHistoryView.hide(event.animate, event.getAnimationTrigger());
     }
 
     private void refreshSearchWidgetView() {

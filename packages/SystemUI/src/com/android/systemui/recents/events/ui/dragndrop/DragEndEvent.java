@@ -25,18 +25,15 @@ import com.android.systemui.recents.views.TaskView;
 /**
  * This event is sent whenever a drag ends.
  */
-public class DragEndEvent extends EventBus.Event {
+public class DragEndEvent extends EventBus.AnimatedEvent {
 
     public final Task task;
     public final TaskView taskView;
     public final DropTarget dropTarget;
-    public final ReferenceCountedTrigger postAnimationTrigger;
 
-    public DragEndEvent(Task task, TaskView taskView, DropTarget dropTarget,
-            ReferenceCountedTrigger postAnimationTrigger) {
+    public DragEndEvent(Task task, TaskView taskView, DropTarget dropTarget) {
         this.task = task;
         this.taskView = taskView;
         this.dropTarget = dropTarget;
-        this.postAnimationTrigger = postAnimationTrigger;
     }
 }

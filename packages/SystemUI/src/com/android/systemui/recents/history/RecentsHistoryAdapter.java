@@ -313,10 +313,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
      * Dismisses history back to the stack view.
      */
     private void dismissHistory() {
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger(mContext);
-        t.increment();
-        EventBus.getDefault().send(new HideHistoryEvent(true /* animate */, t));
-        t.decrement();
+        EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
         EventBus.getDefault().send(new HideHistoryButtonEvent());
     }
 }
