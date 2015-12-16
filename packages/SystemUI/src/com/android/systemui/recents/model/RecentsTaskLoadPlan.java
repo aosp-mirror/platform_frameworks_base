@@ -128,12 +128,10 @@ public class RecentsTaskLoadPlan {
     public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
         if (DEBUG) Log.d(TAG, "preloadPlan");
 
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
-        ArrayList<Task> freeformTasks = new ArrayList<>();
-        ArrayList<Task> stackTasks = new ArrayList<>();
+        ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
             preloadRawTasks(isTopTaskHome);
         }
@@ -184,11 +182,7 @@ public class RecentsTaskLoadPlan {
                 Log.d(TAG, activityLabel + " bounds: " + t.bounds);
             }
 
-            if (task.isFreeformTask()) {
-                freeformTasks.add(task);
-            } else {
-                stackTasks.add(task);
-            }
+            allTasks.add(task);
         }
         if (newLastStackActiveTime != -1) {
             Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
@@ -196,9 +190,6 @@ public class RecentsTaskLoadPlan {
         }
 
         // Initialize the stacks
-        ArrayList<Task> allTasks = new ArrayList<>();
-        allTasks.addAll(stackTasks);
-        allTasks.addAll(freeformTasks);
         mStack = new TaskStack();
         mStack.setTasks(allTasks, false /* notifyStackChanges */);
         mStack.createAffiliatedGroupings(mContext);

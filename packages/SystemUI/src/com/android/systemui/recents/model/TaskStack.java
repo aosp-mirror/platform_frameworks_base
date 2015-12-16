@@ -321,6 +321,20 @@ public class TaskStack {
         }
     };
 
+    // A comparator that sorts tasks by their last active time and freeform state
+    private Comparator<Task> FREEFORM_LAST_ACTIVE_TIME_COMPARATOR = new Comparator<Task>() {
+        @Override
+        public int compare(Task o1, Task o2) {
+            if (o1.isFreeformTask() && !o2.isFreeformTask()) {
+                return 1;
+            } else if (o2.isFreeformTask() && !o1.isFreeformTask()) {
+                return -1;
+            }
+            return Long.compare(o1.key.lastActiveTime, o2.key.lastActiveTime);
+        }
+    };
+
+
     // The task offset to apply to a task id as a group affiliation
     static final int IndividualTaskIdOffset = 1 << 16;
 
@@ -484,7 +498,7 @@ public class TaskStack {
         }
 
         // Sort all the tasks to ensure they are ordered correctly
-        Collections.sort(newTasks, LAST_ACTIVE_TIME_COMPARATOR);
+        Collections.sort(newTasks, FREEFORM_LAST_ACTIVE_TIME_COMPARATOR);
 
         // TODO: Update screen pinning for the new front-most task post refactoring lockToTask out
         // of the Task
@@ -670,7 +684,7 @@ public class TaskStack {
             Collections.sort(mGroups, new Comparator<TaskGrouping>() {
                 @Override
                 public int compare(TaskGrouping taskGrouping, TaskGrouping taskGrouping2) {
-                    return (int) (taskGrouping.latestActiveTimeInGroup -
+                    return Long.compare(taskGrouping.latestActiveTimeInGroup,
                             taskGrouping2.latestActiveTimeInGroup);
                 }
             });
@@ -683,7 +697,7 @@ public class TaskStack {
                 Collections.sort(group.mTaskKeys, new Comparator<Task.TaskKey>() {
                     @Override
                     public int compare(Task.TaskKey taskKey, Task.TaskKey taskKey2) {
-                        return (int) (taskKey.firstActiveTime - taskKey2.firstActiveTime);
+                        return Long.compare(taskKey.firstActiveTime, taskKey2.firstActiveTime);
                     }
                 });
                 ArrayList<Task.TaskKey> groupTasks = group.mTaskKeys;

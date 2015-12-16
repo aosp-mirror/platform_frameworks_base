@@ -311,7 +311,7 @@ public class RecentsTransitionHelper {
         Bitmap b = null;
         if (addHeaderBitmap) {
             float scale = transform.scale;
-            int fromHeaderWidth = (int) (taskView.mHeaderView.getMeasuredWidth() * scale);
+            int fromHeaderWidth = (int) (transform.rect.width());
             int fromHeaderHeight = (int) (taskView.mHeaderView.getMeasuredHeight() * scale);
             b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
                     Bitmap.Config.ARGB_8888);
