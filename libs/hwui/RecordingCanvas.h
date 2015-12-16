@@ -39,7 +39,7 @@ namespace uirenderer {
 class DeferredLayerUpdater;
 struct RecordedOp;
 
-class RecordingCanvas: public Canvas, public CanvasStateClient {
+class ANDROID_API RecordingCanvas: public Canvas, public CanvasStateClient {
     enum class DeferredBarrierType {
         None,
         InOrder,
