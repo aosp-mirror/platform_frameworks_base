@@ -25,7 +25,6 @@
 #include "SkBitmapRegionDecoder.h"
 #include "SkCodec.h"
 #include "SkData.h"
-#include "SkEncodedFormat.h"
 #include "SkUtils.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
@@ -41,43 +40,6 @@
 #include <sys/stat.h>
 
 using namespace android;
-
-// This is very similar to, and based on, getMimeTypeString() in BitmapFactory.
-jstring encodedFormatToString(JNIEnv* env, SkEncodedFormat format) {
-    const char* mimeType;
-    switch (format) {
-        case SkEncodedFormat::kBMP_SkEncodedFormat:
-            mimeType = "image/bmp";
-            break;
-        case SkEncodedFormat::kGIF_SkEncodedFormat:
-            mimeType = "image/gif";
-            break;
-        case SkEncodedFormat::kICO_SkEncodedFormat:
-            mimeType = "image/x-ico";
-            break;
-        case SkEncodedFormat::kJPEG_SkEncodedFormat:
-            mimeType = "image/jpeg";
-            break;
-        case SkEncodedFormat::kPNG_SkEncodedFormat:
-            mimeType = "image/png";
-            break;
-        case SkEncodedFormat::kWEBP_SkEncodedFormat:
-            mimeType = "image/webp";
-            break;
-        case SkEncodedFormat::kWBMP_SkEncodedFormat:
-            mimeType = "image/vnd.wap.wbmp";
-            break;
-        default:
-            mimeType = nullptr;
-            break;
-    }
-
-    jstring jstr = nullptr;
-    if (mimeType != nullptr) {
-        jstr = env->NewStringUTF(mimeType);
-    }
-    return jstr;
-}
 
 // Takes ownership of the SkStreamRewindable. For consistency, deletes stream even
 // when returning null.
