@@ -283,7 +283,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Meldingen"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Zaklamp"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiele gegevens"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Gegevensgebruik"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datagebruik"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Resterende gegevens"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limiet overschreden"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> gebruikt"</string>
