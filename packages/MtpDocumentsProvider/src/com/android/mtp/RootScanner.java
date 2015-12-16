@@ -127,7 +127,7 @@ final class RootScanner {
                         continue;
                     }
                     mDatabase.getMapper().startAddingDocuments(documentId);
-                    if (mDatabase.getMapper().putRootDocuments(
+                    if (mDatabase.getMapper().putStorageDocuments(
                             documentId, mResources, device.roots)) {
                         changed = true;
                     }

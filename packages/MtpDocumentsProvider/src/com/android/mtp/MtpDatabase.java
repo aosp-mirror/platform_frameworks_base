@@ -23,6 +23,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.MatrixCursor;
+import android.database.MatrixCursor.RowBuilder;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -106,17 +109,93 @@ class MtpDatabase {
      * @return Database cursor.
      */
     Cursor queryRoots(String[] columnNames) {
-        final SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
-        builder.setTables(JOIN_ROOTS);
-        builder.setProjectionMap(COLUMN_MAP_ROOTS);
-        return builder.query(
-                mDatabase,
-                columnNames,
-                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + " = ?",
-                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED, DOCUMENT_TYPE_STORAGE),
+        final String selection =
+                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + " = ?";
+        final Cursor deviceCursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(COLUMN_DEVICE_ID),
+                selection,
+                strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED, DOCUMENT_TYPE_DEVICE),
+                COLUMN_DEVICE_ID,
                 null,
                 null,
                 null);
+
+        try {
+            final SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+            builder.setTables(JOIN_ROOTS);
+            builder.setProjectionMap(COLUMN_MAP_ROOTS);
+            final MatrixCursor result = new MatrixCursor(columnNames);
+            final ContentValues values = new ContentValues();
+
+            while (deviceCursor.moveToNext()) {
+                final int deviceId = deviceCursor.getInt(0);
+                final Cursor storageCursor = builder.query(
+                        mDatabase,
+                        columnNames,
+                        selection + " AND " + COLUMN_DEVICE_ID + " = ?",
+                        strings(ROW_STATE_VALID,
+                                ROW_STATE_INVALIDATED,
+                                DOCUMENT_TYPE_STORAGE,
+                                deviceId),
+                        null,
+                        null,
+                        null);
+                try {
+                    values.clear();
+                    if (storageCursor.getCount() == 1) {
+                        storageCursor.moveToNext();
+                        DatabaseUtils.cursorRowToContentValues(storageCursor, values);
+                    } else {
+                        final Cursor cursor = builder.query(
+                                mDatabase,
+                                columnNames,
+                                selection + " AND " + COLUMN_DEVICE_ID + " = ?",
+                                strings(ROW_STATE_VALID,
+                                        ROW_STATE_INVALIDATED,
+                                        DOCUMENT_TYPE_DEVICE,
+                                        deviceId),
+                                null,
+                                null,
+                                null);
+                        try {
+                            cursor.moveToNext();
+                            DatabaseUtils.cursorRowToContentValues(cursor, values);
+                        } finally {
+                            cursor.close();
+                        }
+
+                        long capacityBytes = 0;
+                        long availableBytes = 0;
+                        int capacityIndex = cursor.getColumnIndex(Root.COLUMN_CAPACITY_BYTES);
+                        int availableIndex = cursor.getColumnIndex(Root.COLUMN_AVAILABLE_BYTES);
+                        while (storageCursor.moveToNext()) {
+                            // If requested columnNames does not include COLUMN_XXX_BYTES, we don't
+                            // calculate corresponding values.
+                            if (capacityIndex != -1) {
+                                capacityBytes += cursor.getLong(capacityIndex);
+                            }
+                            if (availableIndex != -1) {
+                                availableBytes += cursor.getLong(availableIndex);
+                            }
+                        }
+                        values.put(Root.COLUMN_CAPACITY_BYTES, capacityBytes);
+                        values.put(Root.COLUMN_AVAILABLE_BYTES, availableBytes);
+                    }
+                } finally {
+                    storageCursor.close();
+                }
+
+                final RowBuilder row = result.newRow();
+                for (final String key : values.keySet()) {
+                    row.add(key, values.get(key));
+                }
+            }
+
+            return result;
+        } finally {
+            deviceCursor.close();
+        }
     }
 
     /**
@@ -380,7 +459,10 @@ class MtpDatabase {
         context.deleteDatabase(DATABASE_NAME);
     }
 
-    static void getDeviceDocumentValues(ContentValues values, MtpDeviceRecord device) {
+    static void getDeviceDocumentValues(
+            ContentValues values,
+            ContentValues extraValues,
+            MtpDeviceRecord device) {
         values.clear();
         values.put(COLUMN_DEVICE_ID, device.deviceId);
         values.putNull(COLUMN_STORAGE_ID);
@@ -394,11 +476,15 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_LAST_MODIFIED);
         values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
         values.put(Document.COLUMN_FLAGS, 0);
-        long size = 0;
-        for (final MtpRoot root : device.roots) {
-            size += root.mMaxCapacity - root.mFreeSpace;
-        }
-        values.put(Document.COLUMN_SIZE, size);
+        values.putNull(Document.COLUMN_SIZE);
+
+        extraValues.clear();
+        extraValues.put(
+                Root.COLUMN_FLAGS,
+                Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
+        extraValues.putNull(Root.COLUMN_AVAILABLE_BYTES);
+        extraValues.putNull(Root.COLUMN_CAPACITY_BYTES);
+        extraValues.put(Root.COLUMN_MIME_TYPES, "");
     }
 
     /**
@@ -408,7 +494,11 @@ class MtpDatabase {
      * @param root Root to be converted {@link ContentValues}.
      */
     static void getStorageDocumentValues(
-            ContentValues values, Resources resources, String parentDocumentId, MtpRoot root) {
+            ContentValues values,
+            ContentValues extraValues,
+            Resources resources,
+            String parentDocumentId,
+            MtpRoot root) {
         values.clear();
         values.put(COLUMN_DEVICE_ID, root.mDeviceId);
         values.put(COLUMN_STORAGE_ID, root.mStorageId);
@@ -424,6 +514,13 @@ class MtpDatabase {
         values.put(Document.COLUMN_FLAGS, 0);
         values.put(Document.COLUMN_SIZE,
                 (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE));
+
+        extraValues.put(
+                Root.COLUMN_FLAGS,
+                Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
+        extraValues.put(Root.COLUMN_AVAILABLE_BYTES, root.mFreeSpace);
+        extraValues.put(Root.COLUMN_CAPACITY_BYTES, root.mMaxCapacity);
+        extraValues.put(Root.COLUMN_MIME_TYPES, "");
     }
 
     /**
