@@ -1526,6 +1526,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
+        if (!mEnterAnimationComplete) {
+            // Cancel the previous task's window transition before animating the focused state
+            EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
+        }
         mLayoutAlgorithm.animateFocusState(mLayoutAlgorithm.getDefaultFocusState());
     }
 

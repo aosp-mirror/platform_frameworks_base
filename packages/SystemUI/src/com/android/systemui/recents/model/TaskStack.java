@@ -572,7 +572,7 @@ public class TaskStack {
             Collections.sort(tasks, new Comparator<Task>() {
                 @Override
                 public int compare(Task task, Task task2) {
-                    return (int) (task.key.firstActiveTime - task2.key.firstActiveTime);
+                    return Long.compare(task.key.firstActiveTime, task2.key.firstActiveTime);
                 }
             });
             // Create groups when sequential packages are the same
