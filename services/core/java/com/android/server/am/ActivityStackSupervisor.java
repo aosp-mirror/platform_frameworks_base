@@ -17,7 +17,11 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
-import static android.app.ActivityManager.*;
+import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
+import static android.app.ActivityManager.RESIZE_MODE_FORCED;
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
@@ -29,18 +33,61 @@ import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
-import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKSCREEN;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RESULTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USER_LEAVING;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RESULTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAVING;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
+import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityStack.ActivityState.*;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -50,6 +97,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
@@ -58,12 +106,11 @@ import android.app.AppOpsManager;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
+import android.app.IActivityManager.WaitResult;
 import android.app.IApplicationThread;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
-import android.app.ActivityManager.RunningTaskInfo;
-import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
 import android.app.StatusBarManager;
 import android.app.admin.IDevicePolicyManager;
@@ -115,7 +162,6 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
-
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -1927,14 +1973,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return ACTIVITY_RESTRICTION_NONE;
     }
 
-    private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds) {
+    private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds,
+            int launchFlags) {
         final TaskRecord task = r.task;
-
         if (!(r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
             return mHomeStack;
         }
 
-        ActivityStack stack;
+        ActivityStack stack = getLaunchToSideStack(r, launchFlags, task);
+        if (stack != null) {
+            return stack;
+        }
 
         if (task != null && task.stack != null) {
             stack = task.stack;
@@ -1942,10 +1991,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (mFocusedStack != stack) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                             "computeStackFocus: Setting " + "focused stack to r=" + r
-                            + " task=" + task);
+                                    + " task=" + task);
                 } else {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                        "computeStackFocus: Focused stack already=" + mFocusedStack);
+                            "computeStackFocus: Focused stack already=" + mFocusedStack);
                 }
             }
             return stack;
@@ -1960,11 +2009,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // The fullscreen stack can contain any task regardless of if the task is resizeable
         // or not. So, we let the task go in the fullscreen task if it is the focus stack.
-        // If the freeform stack has focus, and the activity to be launched is resizeable,
+        // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
         // we can also put it in the focused stack.
+        final int focusedStackId = mFocusedStack.mStackId;
         final boolean canUseFocusedStack =
-                mFocusedStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                || mFocusedStack.mStackId == FREEFORM_WORKSPACE_STACK_ID && r.info.resizeable;
+                focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
+                || focusedStackId == DOCKED_STACK_ID
+                || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.info.resizeable);
         if (canUseFocusedStack
                 && (!newTask || mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
@@ -1991,6 +2042,33 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                 + r + " stackId=" + stack.mStackId);
         return stack;
+    }
+
+    private ActivityStack getLaunchToSideStack(ActivityRecord r, int launchFlags, TaskRecord task) {
+        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_TO_SIDE) == 0) {
+            return null;
+        }
+        // The parent activity doesn't want to launch the activity on top of itself, but
+        // instead tries to put it onto other side in side-by-side mode.
+        final ActivityStack parentStack = task != null ? task.stack
+                : r.mInitialActivityContainer != null ? r.mInitialActivityContainer.mStack
+                : mFocusedStack;
+        if (parentStack != null && parentStack.mStackId == DOCKED_STACK_ID) {
+            // If parent was in docked stack, the natural place to launch another activity
+            // will be fullscreen, so it can appear alongside the docked window.
+            return getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        } else {
+            // If the parent is not in the docked stack, we check if there is docked window
+            // and if yes, we will launch into that stack. If not, we just put the new
+            // activity into parent's stack, because we can't find a better place.
+            final ActivityStack stack = getStack(DOCKED_STACK_ID);
+            if (stack != null && !stack.isStackVisibleLocked()) {
+                // There is a docked stack, but it isn't visible, so we can't launch into that.
+                return null;
+            } else {
+                return stack;
+            }
+        }
     }
 
     boolean setFocusedStack(ActivityRecord r, String reason) {
@@ -2261,6 +2339,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // Now that we are actually launching it, we can assign the base intent.
                 intentActivity.task.setIntent(r);
             }
+
             targetStack = intentActivity.task.stack;
             targetStack.mLastPausedActivity = null;
             // If the target task is not in the front, then we need
@@ -2283,9 +2362,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         intentActivity.setTaskToAffiliateWith(sourceRecord.task);
                     }
                     movedHome = true;
-                    targetStack.moveTaskToFrontLocked(intentActivity.task, noAnimation,
-                            options, r.appTimeTracker, "bringingFoundTaskToFront");
-                    movedToFront = true;
+                    final ActivityStack sideStack = getLaunchToSideStack(r, launchFlags, r.task);
+                    if (sideStack == null || sideStack == targetStack) {
+                        // We only want to move to the front, if we aren't going to launch on a
+                        // different stack. If we launch on a different stack, we will put the
+                        // task on top there.
+                        targetStack.moveTaskToFrontLocked(intentActivity.task, noAnimation,
+                        options, r.appTimeTracker, "bringingFoundTaskToFront");
+                        movedToFront = true;
+                    }
                     if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                             == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                         // Caller wants to appear on home activity.
@@ -2362,7 +2447,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // Target stack got cleared when we all activities were removed
                         // above. Go ahead and reset it.
                         targetStack = computeStackFocus(
-                                sourceRecord, false /* newTask */, null /* bounds */);
+                                sourceRecord, false /* newTask */, null /* bounds */, launchFlags);
                         targetStack.addTask(task,
                                 !launchTaskBehind /* toTop */, "startActivityUnchecked");
                     }
@@ -2486,7 +2571,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (r.resultTo == null && inTask == null && !addingToTask
                 && (launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            targetStack = computeStackFocus(r, newTask, newBounds);
+            targetStack = computeStackFocus(r, newTask, newBounds, launchFlags);
             if (doResume) {
                 targetStack.moveToFront("startingNewTask");
             }
@@ -2524,7 +2609,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            targetStack = sourceTask.stack;
+            targetStack = null;
+            if (sourceTask.stack.topTask() != sourceTask) {
+                // We only want to allow changing stack if the target task is not the top one,
+                // otherwise we would move the launching task to the other side, rather than show
+                // two side by side.
+                targetStack = getLaunchToSideStack(r, launchFlags, r.task);
+            }
+            if (targetStack == null) {
+                targetStack = sourceTask.stack;
+            } else if (targetStack != sourceTask.stack) {
+                moveTaskToStackLocked(sourceTask.taskId, targetStack.mStackId, ON_TOP,
+                        FORCE_FOCUS, "launchToSide", !ANIMATE);
+            }
             if (doResume) {
                 targetStack.moveToFront("sourceStackToFront");
             }
@@ -2629,7 +2726,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            targetStack = computeStackFocus(r, newTask, null /* bounds */);
+            targetStack = computeStackFocus(r, newTask, null /* bounds */, launchFlags);
             if (doResume) {
                 targetStack.moveToFront("addingToTopTask");
             }

@@ -492,7 +492,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Used to indicate that a task is removed it should also be removed from recents.
     private static final boolean REMOVE_FROM_RECENTS = true;
     // Used to indicate that an app transition should be animated.
-    private static final boolean ANIMATE = true;
+    static final boolean ANIMATE = true;
 
     // Determines whether to take full screen screenshots
     static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
