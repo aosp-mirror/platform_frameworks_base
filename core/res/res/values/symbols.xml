@@ -2389,4 +2389,22 @@
   <java-symbol type="layout" name="work_widget_mask_view" />
   <java-symbol type="id" name="work_widget_app_icon" />
   <java-symbol type="drawable" name="work_widget_mask_view_background" />
+
+  <!-- Framework-private Material.DayNight styles. -->
+  <java-symbol type="style" name="Theme.Material.DayNight" />
+  <java-symbol type="style" name="Theme.Material.DayNight.DarkActionBar" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Dialog" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.Alert" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
+  <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
+  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar" />
+  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
+  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
+  <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
+  <java-symbol type="style" name="Theme.Material.DayNight.Panel" />
+  <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 </resources>

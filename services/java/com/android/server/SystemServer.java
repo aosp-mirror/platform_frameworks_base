@@ -141,6 +141,14 @@ public final class SystemServer {
             "com.android.server.MountService$Lifecycle";
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
+    /**
+     * Default theme used by the system context. This is used to style
+     * system-provided dialogs, such as the Power Off dialog, and other
+     * visual content.
+     */
+    private static final int DEFAULT_SYSTEM_THEME =
+            com.android.internal.R.style.Theme_Material_DayNight_DarkActionBar;
+
     private final int mFactoryTestMode;
     private Timer mProfilerSnapshotTimer;
 
@@ -320,7 +328,7 @@ public final class SystemServer {
     private void createSystemContext() {
         ActivityThread activityThread = ActivityThread.systemMain();
         mSystemContext = activityThread.getSystemContext();
-        mSystemContext.setTheme(android.R.style.Theme_Material_DayNight_DarkActionBar);
+        mSystemContext.setTheme(DEFAULT_SYSTEM_THEME);
     }
 
     /**

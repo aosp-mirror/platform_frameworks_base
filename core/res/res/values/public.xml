@@ -2686,23 +2686,7 @@
     <public type="attr" name="languageTag" />
     <public type="attr" name="pointerShape" />
 
-    <public type="style" name="Theme.Material.DayNight" />
-    <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
-    <public type="style" name="Theme.Material.DayNight.Dialog" />
-    <public type="style" name="Theme.Material.DayNight.Dialog.Alert" />
-    <public type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
-    <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
-    <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
-    <public type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
-    <public type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
-    <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
-    <public type="style" name="Theme.Material.DayNight.NoActionBar" />
-    <public type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
-    <public type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
-    <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
-    <public type="style" name="Theme.Material.DayNight.Panel" />
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
-    <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 
     <public type="id" name="accessibilityActionSetProgress" />
     <public type="id" name="icon_frame" />
