@@ -10596,6 +10596,7 @@ package android.database.sqlite {
     method public void setVersion(int);
     method public int update(java.lang.String, android.content.ContentValues, java.lang.String, java.lang.String[]);
     method public int updateWithOnConflict(java.lang.String, android.content.ContentValues, java.lang.String, java.lang.String[], int);
+    method public void validateSql(java.lang.String, android.os.CancellationSignal);
     method public deprecated boolean yieldIfContended();
     method public boolean yieldIfContendedSafely();
     method public boolean yieldIfContendedSafely(long);

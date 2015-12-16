@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
@@ -1680,6 +1682,21 @@ public final class SQLiteDatabase extends SQLiteClosable {
         } finally {
             releaseReference();
         }
+    }
+
+    /**
+     * Verifies that a SQL SELECT statement is valid by compiling it.
+     * If the SQL statement is not valid, this method will throw a {@link SQLiteException}.
+     *
+     * @param sql SQL to be validated
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
+     * If the operation is canceled, then {@link OperationCanceledException} will be thrown
+     * when the query is executed.
+     * @throws SQLiteException if {@code sql} is invalid
+     */
+    public void validateSql(@NonNull String sql, @Nullable CancellationSignal cancellationSignal) {
+        getThreadSession().prepare(sql,
+                getThreadDefaultConnectionFlags(/* readOnly =*/ true), cancellationSignal, null);
     }
 
     /**
