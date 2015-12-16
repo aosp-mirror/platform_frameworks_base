@@ -29,16 +29,18 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.google.android.collect.Lists;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
@@ -46,6 +48,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -59,10 +62,17 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.SparseArray;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.View.OnFocusChangeListener;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 /**
@@ -103,19 +113,23 @@ public class BugreportProgressService extends Service {
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
     static final String INTENT_BUGREPORT_SHARE = "android.intent.action.BUGREPORT_SHARE";
+    static final String INTENT_BUGREPORT_INFO_LAUNCH =
+            "android.intent.action.BUGREPORT_INFO_LAUNCH";
 
     static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
     static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
     static final String EXTRA_PID = "android.intent.extra.PID";
     static final String EXTRA_MAX = "android.intent.extra.MAX";
     static final String EXTRA_NAME = "android.intent.extra.NAME";
+    static final String EXTRA_TITLE = "android.intent.extra.TITLE";
+    static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_ORIGINAL_INTENT = "android.intent.extra.ORIGINAL_INTENT";
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_POLL = 2;
 
     /** Polling frequency, in milliseconds. */
-    static final long POLLING_FREQUENCY = 2000;
+    static final long POLLING_FREQUENCY = 2 * DateUtils.SECOND_IN_MILLIS;
 
     /** How long (in ms) a dumpstate process will be monitored if it didn't show progress. */
     private static final long INACTIVITY_TIMEOUT = 3 * DateUtils.MINUTE_IN_MILLIS;
@@ -124,8 +138,9 @@ public class BugreportProgressService extends Service {
     private static final String DUMPSTATE_PREFIX = "dumpstate.";
     private static final String PROGRESS_SUFFIX = ".progress";
     private static final String MAX_SUFFIX = ".max";
+    private static final String NAME_SUFFIX = ".name";
 
-    /** System property (and value) used for stop dumpstate. */
+    /** System property (and value) used to stop dumpstate. */
     private static final String CTL_STOP = "ctl.stop";
     private static final String BUGREPORT_SERVICE = "bugreportplus";
 
@@ -134,6 +149,8 @@ public class BugreportProgressService extends Service {
 
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
+
+    private final BugreportInfoDialog mInfoDialog = new BugreportInfoDialog();
 
     @Override
     public void onCreate() {
@@ -242,6 +259,9 @@ public class BugreportProgressService extends Service {
                     }
                     onBugreportFinished(pid, intent);
                     break;
+                case INTENT_BUGREPORT_INFO_LAUNCH:
+                    launchBugreportInfoDialog(pid);
+                    break;
                 case INTENT_BUGREPORT_SHARE:
                     shareBugreport(pid);
                     break;
@@ -312,6 +332,13 @@ public class BugreportProgressService extends Service {
         final String percentText = nf.format((double) info.progress / info.max);
         final Action cancelAction = new Action.Builder(null, context.getString(
                 com.android.internal.R.string.cancel), newCancelIntent(context, info)).build();
+        final Intent infoIntent = new Intent(context, BugreportProgressService.class);
+        infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
+        infoIntent.putExtra(EXTRA_PID, info.pid);
+        final Action infoAction = new Action.Builder(null,
+                context.getString(R.string.bugreport_info_action),
+                PendingIntent.getService(context, info.pid, infoIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT)).build();
 
         final String title = context.getString(R.string.bugreport_in_progress_title);
         final String name =
@@ -328,6 +355,7 @@ public class BugreportProgressService extends Service {
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
+                .addAction(infoAction)
                 .addAction(cancelAction)
                 .build();
 
@@ -341,7 +369,8 @@ public class BugreportProgressService extends Service {
         final Intent intent = new Intent(INTENT_BUGREPORT_CANCEL);
         intent.setClass(context, BugreportProgressService.class);
         intent.putExtra(EXTRA_PID, info.pid);
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return PendingIntent.getService(context, info.pid, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
@@ -356,7 +385,7 @@ public class BugreportProgressService extends Service {
             }
             stopSelfWhenDone();
         }
-        if (DEBUG) Log.v(TAG, "stopProgress(" + pid + "): cancel notification");
+        Log.v(TAG, "stopProgress(" + pid + "): cancel notification");
         NotificationManager.from(getApplicationContext()).cancel(TAG, pid);
     }
 
@@ -364,8 +393,14 @@ public class BugreportProgressService extends Service {
      * Cancels a bugreport upon user's request.
      */
     private void cancel(int pid) {
-        Log.i(TAG, "Cancelling PID " + pid + " on user's request");
-        SystemProperties.set(CTL_STOP, BUGREPORT_SERVICE);
+        Log.v(TAG, "cancel: pid=" + pid);
+        synchronized (mProcesses) {
+            BugreportInfo info = mProcesses.get(pid);
+            if (info != null && !info.finished) {
+                Log.i(TAG, "Cancelling bugreport service (pid=" + pid + ") on user's request");
+                setSystemProperty(CTL_STOP, BUGREPORT_SERVICE);
+            }
+        }
         stopProgress(pid);
     }
 
@@ -393,7 +428,6 @@ public class BugreportProgressService extends Service {
                 final int progress = SystemProperties.getInt(progressKey, 0);
                 if (progress == 0) {
                     Log.v(TAG, "System property " + progressKey + " is not set yet");
-                    continue;
                 }
                 final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
                 final boolean maxChanged = max > 0 && max != info.max;
@@ -427,6 +461,30 @@ public class BugreportProgressService extends Service {
     }
 
     /**
+     * Fetches a {@link BugreportInfo} for a given process and launches a dialog where the user can
+     * change its values.
+     */
+    private void launchBugreportInfoDialog(int pid) {
+        // Copy values so it doesn't lock mProcesses while UI is being updated
+        final String name, title, description;
+        synchronized (mProcesses) {
+            final BugreportInfo info = mProcesses.get(pid);
+            if (info == null) {
+                Log.w(TAG, "No bugreport info for PID " + pid);
+                return;
+            }
+            name = info.name;
+            title = info.title;
+            description = info.description;
+        }
+
+        // Closes the notification bar first.
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
+        mInfoDialog.initialize(getApplicationContext(), pid, name, title, description);
+    }
+
+    /**
      * Finishes the service when it's not monitoring any more processes.
      */
     private void stopSelfWhenDone() {
@@ -440,7 +498,11 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    /**
+     * Handles the BUGREPORT_FINISHED intent sent by {@code dumpstate}.
+     */
     private void onBugreportFinished(int pid, Intent intent) {
+        mInfoDialog.onBugreportFinished(pid);
         final Context context = getApplicationContext();
         BugreportInfo info;
         synchronized (mProcesses) {
@@ -453,6 +515,7 @@ public class BugreportProgressService extends Service {
             }
             info.bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
             info.screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
+            info.finished = true;
         }
 
         final Configuration conf = context.getResources().getConfiguration();
@@ -494,21 +557,32 @@ public class BugreportProgressService extends Service {
     /**
      * Build {@link Intent} that can be used to share the given bugreport.
      */
-    private static Intent buildSendIntent(Context context, Uri bugreportUri, Uri screenshotUri) {
+    private static Intent buildSendIntent(Context context, BugreportInfo info) {
+        // Files are kept on private storage, so turn into Uris that we can
+        // grant temporary permissions for.
+        final Uri bugreportUri = getUri(context, info.bugreportFile);
+        final Uri screenshotUri = getUri(context, info.screenshotFile);
+
         final Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         final String mimeType = "application/vnd.android.bugreport";
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setType(mimeType);
 
-        intent.putExtra(Intent.EXTRA_SUBJECT, bugreportUri.getLastPathSegment());
+        final String subject = info.title != null ? info.title : bugreportUri.getLastPathSegment();
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         // EXTRA_TEXT should be an ArrayList, but some clients are expecting a single String.
         // So, to avoid an exception on Intent.migrateExtraStreamToClipData(), we need to manually
         // create the ClipData object with the attachments URIs.
-        String messageBody = String.format("Build info: %s\nSerial number:%s",
-                SystemProperties.get("ro.build.description"), SystemProperties.get("ro.serialno"));
-        intent.putExtra(Intent.EXTRA_TEXT, messageBody);
+        StringBuilder messageBody = new StringBuilder("Build info: ")
+            .append(SystemProperties.get("ro.build.description"))
+            .append("\nSerial number: ")
+            .append(SystemProperties.get("ro.serialno"));
+        if (!TextUtils.isEmpty(info.description)) {
+            messageBody.append("\nDescription: ").append(info.description);
+        }
+        intent.putExtra(Intent.EXTRA_TEXT, messageBody.toString());
         final ClipData clipData = new ClipData(null, new String[] { mimeType },
                 new ClipData.Item(null, null, null, bugreportUri));
         final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri);
@@ -542,12 +616,7 @@ public class BugreportProgressService extends Service {
                 return;
             }
         }
-        // Files are kept on private storage, so turn into Uris that we can
-        // grant temporary permissions for.
-        final Uri bugreportUri = getUri(context, info.bugreportFile);
-        final Uri screenshotUri = getUri(context, info.screenshotFile);
-
-        final Intent sendIntent = buildSendIntent(context, bugreportUri, screenshotUri);
+        final Intent sendIntent = buildSendIntent(context, info);
         final Intent notifIntent;
 
         // Send through warning dialog by default
@@ -580,12 +649,16 @@ public class BugreportProgressService extends Service {
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(context.getString(R.string.bugreport_finished_text))
-                .setContentIntent(PendingIntent.getService(context, 0, shareIntent,
-                        PendingIntent.FLAG_CANCEL_CURRENT))
+                .setContentIntent(PendingIntent.getService(context, info.pid, shareIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT))
                 .setDeleteIntent(newCancelIntent(context, info))
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
+
+        if (!TextUtils.isEmpty(info.name)) {
+            builder.setContentInfo(info.name);
+        }
 
         NotificationManager.from(context).notify(TAG, info.pid, builder.build());
     }
@@ -684,6 +757,231 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    private static boolean setSystemProperty(String key, String value) {
+        try {
+            if (DEBUG) Log.v(TAG, "Setting system property" + key + " to " + value);
+            SystemProperties.set(key, value);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Could not set property " + key + " to " + value, e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Updates the system property used by {@code dumpstate} to rename the final bugreport files.
+     */
+    private boolean setBugreportNameProperty(int pid, String name) {
+        Log.d(TAG, "Updating bugreport name to " + name);
+        final String key = DUMPSTATE_PREFIX + pid + NAME_SUFFIX;
+        return setSystemProperty(key, name);
+    }
+
+    /**
+     * Updates the user-provided details of a bugreport.
+     */
+    private void updateBugreportInfo(int pid, String name, String title, String description) {
+        synchronized (mProcesses) {
+            final BugreportInfo info = mProcesses.get(pid);
+            if (info == null) {
+                Log.w(TAG, "No bugreport info for PID " + pid);
+                return;
+            }
+            info.title = title;
+            info.description = description;
+            if (name != null && !info.name.equals(name)) {
+                info.name = name;
+                updateProgress(info);
+            }
+        }
+    }
+
+    /**
+     * Checks whether a character is valid on bugreport names.
+     */
+    @VisibleForTesting
+    static boolean isValid(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+                || c == '_' || c == '-';
+    }
+
+    /**
+     * Helper class encapsulating the UI elements and logic used to display a dialog where user
+     * can change the details of a bugreport.
+     */
+    private final class BugreportInfoDialog {
+        private EditText mInfoName;
+        private EditText mInfoTitle;
+        private EditText mInfoDescription;
+        private AlertDialog mDialog;
+        private Button mOkButton;
+        private int mPid;
+
+        /**
+         * Last "committed" value of the bugreport name.
+         * <p>
+         * Once initially set, it's only updated when user clicks the OK button.
+         */
+        private String mSavedName;
+
+        /**
+         * Last value of the bugreport name as entered by the user.
+         * <p>
+         * Every time it's changed the equivalent system property is changed as well, but if the
+         * user clicks CANCEL, the old value (stored on {@code mSavedName} is restored.
+         * <p>
+         * This logic handles the corner-case scenario where {@code dumpstate} finishes after the
+         * user changed the name but didn't clicked OK yet (for example, because the user is typing
+         * the description). The only drawback is that if the user changes the name while
+         * {@code dumpstate} is running but clicks CANCEL after it finishes, then the final name
+         * will be the one that has been canceled. But when {@code dumpstate} finishes the {code
+         * name} UI is disabled and the old name restored anyways, so the user will be "alerted" of
+         * such drawback.
+         */
+        private String mTempName;
+
+        /**
+         * Sets its internal state and displays the dialog.
+         */
+        private synchronized void initialize(Context context, int pid, String name, String title,
+                String description) {
+            // First initializes singleton.
+            if (mDialog == null) {
+                @SuppressLint("InflateParams")
+                // It's ok pass null ViewRoot on AlertDialogs.
+                final View view = View.inflate(context, R.layout.dialog_bugreport_info, null);
+
+                mInfoName = (EditText) view.findViewById(R.id.name);
+                mInfoTitle = (EditText) view.findViewById(R.id.title);
+                mInfoDescription = (EditText) view.findViewById(R.id.description);
+
+                mInfoName.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+                    @Override
+                    public void onFocusChange(View v, boolean hasFocus) {
+                        if (hasFocus) {
+                            return;
+                        }
+                        sanitizeName();
+                    }
+                });
+
+                mDialog = new AlertDialog.Builder(context)
+                        .setView(view)
+                        .setTitle(context.getString(R.string.bugreport_info_dialog_title))
+                        .setCancelable(false)
+                        .setPositiveButton(context.getString(com.android.internal.R.string.ok),
+                                null)
+                        .setNegativeButton(context.getString(com.android.internal.R.string.cancel),
+                                new DialogInterface.OnClickListener()
+                                {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id)
+                                    {
+                                        if (!mTempName.equals(mSavedName)) {
+                                            // Must restore dumpstate's name since it was changed
+                                            // before user clicked OK.
+                                            setBugreportNameProperty(mPid, mSavedName);
+                                        }
+                                    }
+                                })
+                        .create();
+
+                mDialog.getWindow().setAttributes(
+                        new WindowManager.LayoutParams(
+                                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG));
+
+            }
+
+            // Then set fields.
+            mSavedName = mTempName = name;
+            mPid = pid;
+            if (!TextUtils.isEmpty(name)) {
+                mInfoName.setText(name);
+            }
+            if (!TextUtils.isEmpty(title)) {
+                mInfoTitle.setText(title);
+            }
+            if (!TextUtils.isEmpty(description)) {
+                mInfoDescription.setText(description);
+            }
+
+            // And finally display it.
+            mDialog.show();
+
+            // TODO: in a traditional AlertDialog, when the positive button is clicked the
+            // dialog is always closed, but we need to validate the name first, so we need to
+            // get a reference to it, which is only available after it's displayed.
+            // It would be cleaner to use a regular dialog instead, but let's keep this
+            // workaround for now and change it later, when we add another button to take
+            // extra screenshots.
+            if (mOkButton == null) {
+                mOkButton = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                mOkButton.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        sanitizeName();
+                        final String name = mInfoName.getText().toString();
+                        final String title = mInfoTitle.getText().toString();
+                        final String description = mInfoDescription.getText().toString();
+
+                        updateBugreportInfo(mPid, name, title, description);
+                        mDialog.dismiss();
+                    }
+                });
+            }
+        }
+
+        /**
+         * Sanitizes the user-provided value for the {@code name} field, automatically replacing
+         * invalid characters if necessary.
+         */
+        private synchronized void sanitizeName() {
+            String name = mInfoName.getText().toString();
+            if (name.equals(mTempName)) {
+                if (DEBUG) Log.v(TAG, "name didn't change, no need to sanitize: " + name);
+                return;
+            }
+            final StringBuilder safeName = new StringBuilder(name.length());
+            boolean changed = false;
+            for (int i = 0; i < name.length(); i++) {
+                final char c = name.charAt(i);
+                if (isValid(c)) {
+                    safeName.append(c);
+                } else {
+                    changed = true;
+                    safeName.append('_');
+                }
+            }
+            if (changed) {
+                Log.v(TAG, "changed invalid name '" + name + "' to '" + safeName + "'");
+                name = safeName.toString();
+                mInfoName.setText(name);
+            }
+            mTempName = name;
+
+            // Must update system property for the cases where dumpstate finishes
+            // while the user is still entering other fields (like title or
+            // description)
+            setBugreportNameProperty(mPid, name);
+        }
+
+       /**
+         * Notifies the dialog that the bugreport has finished so it disables the {@code name}
+         * field.
+         * <p>Once the bugreport is finished dumpstate has already generated the final files, so
+         * changing the name would have no effect.
+         */
+        private synchronized void onBugreportFinished(int pid) {
+            if (mInfoName != null) {
+                mInfoName.setEnabled(false);
+                mInfoName.setText(mSavedName);
+            }
+        }
+
+    }
+
     /**
      * Information about a bugreport process while its in progress.
      */
@@ -702,6 +1000,18 @@ public class BugreportProgressService extends Service {
          * change it later to a more meaningful name.
          */
         String name;
+
+        /**
+         * User-provided, one-line summary of the bug; when set, will be used as the subject
+         * of the {@link Intent#ACTION_SEND_MULTIPLE} intent.
+         */
+        String title;
+
+        /**
+         * User-provided, detailed description of the bugreport; when set, will be added to the body
+         * of the {@link Intent#ACTION_SEND_MULTIPLE} intent.
+         */
+        String description;
 
         /**
          * Maximum progress of the bugreport generation.
@@ -761,6 +1071,7 @@ public class BugreportProgressService extends Service {
         public String toString() {
             final float percent = ((float) progress * 100 / max);
             return "pid: " + pid + ", name: " + name + ", finished: " + finished
+                    + "\n\ttitle: " + title + "\n\tdescription: " + description
                     + "\n\tfile: " + bugreportFile + "\n\tscreenshot: " + screenshotFile
                     + "\n\tprogress: " + progress + "/" + max + "(" + percent + ")"
                     + "\n\tlast_update: " + getFormattedLastUpdate();
