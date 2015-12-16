@@ -735,6 +735,20 @@ void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPa
     }
 }
 
+void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const TextureLayerOp& op, const BakedOpState& state) {
+    const bool tryToSnap = !op.layer->getForceFilter();
+    float alpha = (op.layer->getAlpha() / 255.0f) * state.alpha;
+    Glop glop;
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+            .setRoundRectClipState(state.roundRectClipState)
+            .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
+            .setFillTextureLayer(*(op.layer), alpha)
+            .setTransform(state.computedState.transform, TransformFlags::None)
+            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, Rect(op.layer->getWidth(), op.layer->getHeight()))
+            .build();
+    renderer.renderGlop(state, glop);
+}
+
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
     OffscreenBuffer* buffer = *op.layerHandle;
 

@@ -43,7 +43,6 @@ typedef const void* mergeid_t;
 
 namespace OpBatchType {
     enum {
-        None = 0, // Don't batch
         Bitmap,
         MergedPatch,
         AlphaVertices,
@@ -52,6 +51,8 @@ namespace OpBatchType {
         Text,
         ColorText,
         Shadow,
+        TextureLayer,
+        Functor,
 
         Count // must be last
     };

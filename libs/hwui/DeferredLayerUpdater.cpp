@@ -53,8 +53,7 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
-bool DeferredLayerUpdater::apply() {
-    bool success = true;
+void DeferredLayerUpdater::apply() {
     // These properties are applied the same to both layer types
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
@@ -73,7 +72,6 @@ bool DeferredLayerUpdater::apply() {
             setTransform(nullptr);
         }
     }
-    return success;
 }
 
 void DeferredLayerUpdater::doUpdateTexImage() {

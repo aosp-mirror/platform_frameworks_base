@@ -77,13 +77,13 @@ public:
 
     ANDROID_API void setPaint(const SkPaint* paint);
 
-    ANDROID_API bool apply();
+    void apply();
 
     Layer* backingLayer() {
         return mLayer;
     }
 
-    ANDROID_API void detachSurfaceTexture();
+    void detachSurfaceTexture();
 
 private:
     // Generic properties

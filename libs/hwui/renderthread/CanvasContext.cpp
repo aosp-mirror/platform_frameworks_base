@@ -182,16 +182,6 @@ void CanvasContext::makeCurrent() {
     }
 }
 
-void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
-#if !HWUI_NEW_OPS
-    bool success = layerUpdater->apply();
-    LOG_ALWAYS_FATAL_IF(!success, "Failed to update layer!");
-    if (layerUpdater->backingLayer()->deferredUpdateScheduled) {
-        mCanvas->pushLayerUpdate(layerUpdater->backingLayer());
-    }
-#endif
-}
-
 static bool wasSkipped(FrameInfo* info) {
     return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
 }

@@ -783,7 +783,7 @@ void OpReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
 void OpReorderer::deferFunctorOp(const FunctorOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
-    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::None);
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Functor);
 }
 
 void OpReorderer::deferLinesOp(const LinesOp& op) {
@@ -869,6 +869,12 @@ void OpReorderer::deferTextOnPathOp(const TextOnPathOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
+}
+
+void OpReorderer::deferTextureLayerOp(const TextureLayerOp& op) {
+    BakedOpState* bakedState = tryBakeOpState(op);
+    if (!bakedState) return; // quick rejected
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::TextureLayer);
 }
 
 void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,

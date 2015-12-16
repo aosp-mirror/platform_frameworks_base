@@ -16,6 +16,7 @@
 
 #include "RecordingCanvas.h"
 
+#include "DeferredLayerUpdater.h"
 #include "RecordedOp.h"
 #include "RenderNode.h"
 
@@ -540,6 +541,21 @@ void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
         // use staging property, since recording on UI thread
         mDisplayList->projectionReceiveIndex = opIndex;
     }
+}
+
+void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
+    // We ref the DeferredLayerUpdater due to its thread-safe ref-counting semantics.
+    mDisplayList->ref(layerHandle);
+
+    Layer* layer = layerHandle->backingLayer();
+    Matrix4 totalTransform(*(mState.currentSnapshot()->transform));
+    totalTransform.multiply(layer->getTransform());
+
+    addOp(new (alloc()) TextureLayerOp(
+            Rect(layer->getWidth(), layer->getHeight()),
+            totalTransform,
+            mState.getRenderTargetClipBounds(),
+            layer));
 }
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor) {

@@ -113,6 +113,10 @@ public:
         return bitmap;
     }
 
+    static sp<DeferredLayerUpdater> createTextureLayerUpdater(
+            renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
+            std::function<void(Matrix4*)> transformSetupCallback);
+
     template<class CanvasType>
     static std::unique_ptr<DisplayList> createDisplayList(int width, int height,
             std::function<void(CanvasType& canvas)> canvasCallback) {
