@@ -7171,24 +7171,64 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean inMultiWindowMode(IBinder token) {
-        synchronized(this) {
-            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return false;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    return false;
+                }
+                // An activity is consider to be in multi-window mode if its task isn't fullscreen.
+                return !r.task.mFullscreen;
             }
-            // An activity is consider to be in multi-window mode if its task isn't fullscreen.
-            return !r.task.mFullscreen;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
     @Override
     public boolean inPictureInPictureMode(IBinder token) {
-        synchronized(this) {
-            final ActivityStack stack = ActivityRecord.getStackLocked(token);
-            if (stack == null) {
-                return false;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                final ActivityStack stack = ActivityRecord.getStackLocked(token);
+                if (stack == null) {
+                    return false;
+                }
+                return stack.mStackId == PINNED_STACK_ID;
             }
-            return stack.mStackId == PINNED_STACK_ID;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void enterPictureInPictureMode(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                if (!mSupportsPictureInPicture) {
+                    throw new IllegalStateException("enterPictureInPictureMode: "
+                            + "Device doesn't support picture-in-picture mode.");
+                }
+
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+
+                if (r == null) {
+                    throw new IllegalStateException("enterPictureInPictureMode: "
+                            + "Can't find activity for token=" + token);
+                }
+
+                if (!r.info.supportsPip) {
+                    throw new IllegalArgumentException("enterPictureInPictureMode: "
+                            + "Picture-In-Picture not supported for r=" + r);
+                }
+
+                mStackSupervisor.moveActivityToStackLocked(
+                        r, PINNED_STACK_ID, "enterPictureInPictureMode", null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 

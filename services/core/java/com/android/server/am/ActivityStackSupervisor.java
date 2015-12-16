@@ -3623,24 +3623,30 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
+        moveActivityToStackLocked(r, PINNED_STACK_ID, "moveTopActivityToPinnedStack", bounds);
+        return true;
+    }
+
+    void moveActivityToStackLocked(ActivityRecord r, int stackId, String reason, Rect bounds) {
         final TaskRecord task = r.task;
         if (task.mActivities.size() == 1) {
             // There is only one activity in the task. So, we can just move the task over to the
-            // pinned stack without re-parenting the activity in a different task.
-            moveTaskToStackLocked(task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS,
-                    "moveTopActivityToPinnedStack", true /* animate */);
+            // stack without re-parenting the activity in a different task.
+            moveTaskToStackLocked(
+                    task.taskId, stackId, ON_TOP, FORCE_FOCUS, reason, true /* animate */);
         } else {
             final ActivityStack pinnedStack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
             pinnedStack.moveActivityToStack(r);
         }
 
-        resizeStackLocked(PINNED_STACK_ID, bounds, !PRESERVE_WINDOWS, true);
+        if (bounds != null) {
+            resizeStackLocked(PINNED_STACK_ID, bounds, !PRESERVE_WINDOWS, true);
+        }
 
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeTopActivitiesLocked();
-        return true;
     }
 
     void positionTaskInStackLocked(int taskId, int stackId, int position) {
