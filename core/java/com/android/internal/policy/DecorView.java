@@ -702,11 +702,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             helper = mWindow.mContextMenu.showDialog(originalView, originalView.getWindowToken());
         }
 
-        // If it's a dialog, the callback needs to handle showing sub-menus.
-        // Either way, the callback is required for propagating selection to
-        // Context.onContextMenuItemSelected().
-        callback.setShowDialogForSubmenu(!isPopup);
-        helper.setPresenterCallback(callback);
+        if (helper != null) {
+            // If it's a dialog, the callback needs to handle showing
+            // sub-menus. Either way, the callback is required for propagating
+            // selection to Context.onContextMenuItemSelected().
+            callback.setShowDialogForSubmenu(!isPopup);
+            helper.setPresenterCallback(callback);
+        }
 
         mWindow.mContextMenuHelper = helper;
         return helper != null;
