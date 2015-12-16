@@ -513,9 +513,11 @@ void CanvasContext::draw() {
 
 // Called by choreographer to do an RT-driven animation
 void CanvasContext::doFrame() {
-    if (CC_UNLIKELY(!mCanvas || mEglSurface == EGL_NO_SURFACE)) {
-        return;
-    }
+#if HWUI_NEW_OPS
+    if (CC_UNLIKELY(mEglSurface == EGL_NO_SURFACE)) return;
+#else
+    if (CC_UNLIKELY(!mCanvas || mEglSurface == EGL_NO_SURFACE)) return;
+#endif
     prepareAndDraw(nullptr);
 }
 
