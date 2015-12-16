@@ -1281,6 +1281,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mForceResizableActivities;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
+    Rect mDefaultPinnedStackBounds;
     IActivityController mController = null;
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
@@ -7224,8 +7225,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + "Picture-In-Picture not supported for r=" + r);
                 }
 
+                // Use the default launch bounds for pinned stack if it doesn't exist yet.
+                final Rect bounds = (mStackSupervisor.getStack(PINNED_STACK_ID) == null)
+                        ? mDefaultPinnedStackBounds : null;
+
                 mStackSupervisor.moveActivityToStackLocked(
-                        r, PINNED_STACK_ID, "enterPictureInPictureMode", null);
+                        r, PINNED_STACK_ID, "enterPictureInPictureMode", bounds);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -12102,6 +12107,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
+            mDefaultPinnedStackBounds = Rect.unflattenFromString(res.getString(
+                    com.android.internal.R.string.config_defaultPictureInPictureBounds));
         }
     }
 

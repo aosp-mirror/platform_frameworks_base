@@ -3635,8 +3635,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             moveTaskToStackLocked(
                     task.taskId, stackId, ON_TOP, FORCE_FOCUS, reason, true /* animate */);
         } else {
-            final ActivityStack pinnedStack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
-            pinnedStack.moveActivityToStack(r);
+            final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
+            stack.moveActivityToStack(r);
         }
 
         if (bounds != null) {

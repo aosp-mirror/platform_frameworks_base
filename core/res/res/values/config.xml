@@ -2407,4 +2407,7 @@
          that have not requested doing so (via the WindowManager.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
          flag). -->
     <bool name="config_forceWindowDrawsStatusBarBackground">true</bool>
+
+    <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
+    <string translatable="false" name="config_defaultPictureInPictureBounds">"0 0 100 100"</string>
 </resources>
