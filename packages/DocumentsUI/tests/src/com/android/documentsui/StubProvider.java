@@ -324,11 +324,11 @@ public class StubProvider extends DocumentsProvider {
         }
         for (final String mimeType : document.streamTypes) {
             // Strict compare won't accept wildcards, but that's OK for tests, as DocumentsUI
-            // doesn't use them for openTypedDocument.
+            // doesn't use them for getStreamTypes nor openTypedDocument.
             if (mimeType.equals(mimeTypeFilter)) {
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                             document.file, ParcelFileDescriptor.MODE_READ_ONLY);
-                if (!documentId.equals(mSimulateReadErrors)) {
+                if (documentId.equals(mSimulateReadErrors)) {
                     pfd = new ParcelFileDescriptor(pfd) {
                         @Override
                         public void checkError() throws IOException {
@@ -340,6 +340,23 @@ public class StubProvider extends DocumentsProvider {
             }
         }
         throw new IllegalArgumentException("Invalid MIME type filter for openTypedDocument().");
+    }
+
+    @Override
+    public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+        final StubDocument document = mStorage.get(DocumentsContract.getDocumentId(uri));
+        if (document == null) {
+            throw new IllegalArgumentException(
+                    "The provided Uri is incorrect, or the file is gone.");
+        }
+        if ((document.flags & Document.FLAG_SUPPORTS_TYPED_DOCUMENT) == 0) {
+            return null;
+        }
+        if (!"*/*".equals(mimeTypeFilter)) {
+            // Not used by DocumentsUI, so don't bother implementing it.
+            throw new UnsupportedOperationException();
+        }
+        return document.streamTypes.toArray(new String[document.streamTypes.size()]);
     }
 
     private ParcelFileDescriptor startWrite(final StubDocument document)
@@ -476,23 +493,14 @@ public class StubProvider extends DocumentsProvider {
     }
 
     @VisibleForTesting
-    public Uri createFile(String rootId, String path, String mimeType, byte[] content)
+    public File createFile(String rootId, String path, String mimeType, byte[] content)
             throws FileNotFoundException, IOException {
         Log.d(TAG, "Creating test file " + rootId + ":" + path);
         StubDocument root = mRoots.get(rootId).document;
         if (root == null) {
             throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
         }
-        File file = new File(root.file, path.substring(1));
-        StubDocument parent = mStorage.get(getDocumentIdForFile(file.getParentFile()));
-        if (parent == null) {
-            parent = mStorage.get(createFile(rootId, file.getParentFile().getPath(),
-                    DocumentsContract.Document.MIME_TYPE_DIR, null));
-            Log.d(TAG, "Created parent " + parent.documentId);
-        } else {
-            Log.d(TAG, "Found parent " + parent.documentId);
-        }
-
+        final File file = new File(root.file, path.substring(1));
         if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)) {
             if (!file.mkdirs()) {
                 throw new FileNotFoundException("Couldn't create directory " + file.getPath());
@@ -501,12 +509,37 @@ public class StubProvider extends DocumentsProvider {
             if (!file.createNewFile()) {
                 throw new FileNotFoundException("Couldn't create file " + file.getPath());
             }
-            // Add content to the file.
-            FileOutputStream fout = new FileOutputStream(file);
-            fout.write(content);
-            fout.close();
+            try (final FileOutputStream fout = new FileOutputStream(file)) {
+                fout.write(content);
+            }
+        }
+        return file;
+    }
+
+    @VisibleForTesting
+    public Uri createRegularFile(String rootId, String path, String mimeType, byte[] content)
+            throws FileNotFoundException, IOException {
+        final File file = createFile(rootId, path, mimeType, content);
+        final StubDocument parent = mStorage.get(getDocumentIdForFile(file.getParentFile()));
+        if (parent == null) {
+            throw new FileNotFoundException("Parent not found.");
         }
         final StubDocument document = StubDocument.createRegularDocument(file, mimeType, parent);
+        mStorage.put(document.documentId, document);
+        return DocumentsContract.buildDocumentUri(mAuthority,  document.documentId);
+    }
+
+    @VisibleForTesting
+    public Uri createVirtualFile(
+            String rootId, String path, String mimeType, List<String> streamTypes, byte[] content)
+            throws FileNotFoundException, IOException {
+        final File file = createFile(rootId, path, mimeType, content);
+        final StubDocument parent = mStorage.get(getDocumentIdForFile(file.getParentFile()));
+        if (parent == null) {
+            throw new FileNotFoundException("Parent not found.");
+        }
+        final StubDocument document = StubDocument.createVirtualDocument(
+                file, mimeType, streamTypes, parent);
         mStorage.put(document.documentId, document);
         return DocumentsContract.buildDocumentUri(mAuthority,  document.documentId);
     }

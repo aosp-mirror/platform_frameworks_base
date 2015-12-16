@@ -97,7 +97,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
     public void testCopyFile() throws Exception {
         String srcPath = "/test0.txt";
-        Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
+        Uri testFile = mStorage.createRegularFile(SRC_ROOT, srcPath, "text/plain",
                 "The five boxing wizards jump quickly".getBytes());
 
         startService(createCopyIntent(Lists.newArrayList(testFile)));
@@ -110,10 +110,33 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         assertCopied(srcPath);
     }
 
+    public void testCopyVirtualTypedFile() throws Exception {
+        String srcPath = "/virtual.sth";
+        String expectedDstPath = "/virtual.sth.pdf";
+        ArrayList<String> streamTypes = new ArrayList<>();
+        streamTypes.add("application/pdf");
+        streamTypes.add("text/html");
+        String testContent = "I love fruit cakes!";
+        Uri testFile = mStorage.createVirtualFile(SRC_ROOT, srcPath, "virtual/mime-type",
+                streamTypes, testContent.getBytes());
+
+        startService(createCopyIntent(Lists.newArrayList(testFile)));
+
+        // 2 operations: file creation, then writing data.
+        mResolver.waitForChanges(2);
+
+        // Verify that one file was copied.
+        assertDestFileCount(1);
+
+        byte[] dstContent = readFile(DST_ROOT, expectedDstPath);
+        MoreAsserts.assertEquals("Moved file contents differ", testContent.getBytes(), dstContent);
+    }
+
     public void testMoveFile() throws Exception {
         String srcPath = "/test0.txt";
         String testContent = "The five boxing wizards jump quickly";
-        Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain", testContent.getBytes());
+        Uri testFile = mStorage.createRegularFile(SRC_ROOT, srcPath, "text/plain",
+                testContent.getBytes());
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testFile));
         moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
@@ -142,9 +165,12 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
                 "/test2.txt"
         };
         List<Uri> testFiles = Lists.newArrayList(
-                mStorage.createFile(SRC_ROOT, srcPaths[0], "text/plain", testContent[0].getBytes()),
-                mStorage.createFile(SRC_ROOT, srcPaths[1], "text/plain", testContent[1].getBytes()),
-                mStorage.createFile(SRC_ROOT, srcPaths[2], "text/plain", testContent[2].getBytes()));
+                mStorage.createRegularFile(SRC_ROOT, srcPaths[0], "text/plain",
+                        testContent[0].getBytes()),
+                mStorage.createRegularFile(SRC_ROOT, srcPaths[1], "text/plain",
+                        testContent[1].getBytes()),
+                mStorage.createRegularFile(SRC_ROOT, srcPaths[2], "text/plain",
+                        testContent[2].getBytes()));
 
         // Copy all the test files.
         startService(createCopyIntent(testFiles));
@@ -195,7 +221,6 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
         Intent intent = createCopyIntent(Lists.newArrayList(testDir), descDir);
         startService(intent);
-
         getService().addFinishedListener(mListener);
 
         mListener.waitForFinished();
@@ -240,9 +265,9 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         };
         // Create test dir; put some files in it.
         Uri testDir = createTestDirectory(srcDir);
-        mStorage.createFile(SRC_ROOT, srcFiles[0], "text/plain", testContent[0].getBytes());
-        mStorage.createFile(SRC_ROOT, srcFiles[1], "text/plain", testContent[1].getBytes());
-        mStorage.createFile(SRC_ROOT, srcFiles[2], "text/plain", testContent[2].getBytes());
+        mStorage.createRegularFile(SRC_ROOT, srcFiles[0], "text/plain", testContent[0].getBytes());
+        mStorage.createRegularFile(SRC_ROOT, srcFiles[1], "text/plain", testContent[1].getBytes());
+        mStorage.createRegularFile(SRC_ROOT, srcFiles[2], "text/plain", testContent[2].getBytes());
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testDir));
         moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
@@ -270,7 +295,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
     public void testCopyFileWithReadErrors() throws Exception {
         String srcPath = "/test0.txt";
-        Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
+        Uri testFile = mStorage.createRegularFile(SRC_ROOT, srcPath, "text/plain",
                 "The five boxing wizards jump quickly".getBytes());
 
         mStorage.simulateReadErrorsForFile(testFile);
@@ -284,9 +309,26 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         assertDestFileCount(0);
     }
 
+    public void testCopyVirtualNonTypedFile() throws Exception {
+        String srcPath = "/non-typed.sth";
+        // Empty stream types causes the FLAG_SUPPORTS_TYPED_DOCUMENT to be not set.
+        ArrayList<String> streamTypes = new ArrayList<>();
+        Uri testFile = mStorage.createVirtualFile(SRC_ROOT, srcPath, "virtual/mime-type",
+                streamTypes, "I love Tokyo!".getBytes());
+
+        Intent intent = createCopyIntent(Lists.newArrayList(testFile));
+        startService(intent);
+        getService().addFinishedListener(mListener);
+
+        mListener.waitForFinished();
+        mListener.assertFailedCount(1);
+        mListener.assertFileFailed("non-typed.sth");
+        assertDestFileCount(0);
+    }
+
     public void testMoveFileWithReadErrors() throws Exception {
         String srcPath = "/test0.txt";
-        Uri testFile = mStorage.createFile(SRC_ROOT, srcPath, "text/plain",
+        Uri testFile = mStorage.createRegularFile(SRC_ROOT, srcPath, "text/plain",
                 "The five boxing wizards jump quickly".getBytes());
 
         mStorage.simulateReadErrorsForFile(testFile);
@@ -326,10 +368,10 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         };
         // Create test dir; put some files in it.
         Uri testDir = createTestDirectory(srcDir);
-        mStorage.createFile(SRC_ROOT, srcFiles[0], "text/plain", testContent[0].getBytes());
+        mStorage.createRegularFile(SRC_ROOT, srcFiles[0], "text/plain", testContent[0].getBytes());
         Uri errFile = mStorage
-                .createFile(SRC_ROOT, srcFiles[1], "text/plain", testContent[1].getBytes());
-        mStorage.createFile(SRC_ROOT, srcFiles[2], "text/plain", testContent[2].getBytes());
+                .createRegularFile(SRC_ROOT, srcFiles[1], "text/plain", testContent[1].getBytes());
+        mStorage.createRegularFile(SRC_ROOT, srcFiles[2], "text/plain", testContent[2].getBytes());
 
         mStorage.simulateReadErrorsForFile(errFile);
 
@@ -363,7 +405,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
     }
 
     private Uri createTestDirectory(String dir) throws IOException {
-        return mStorage.createFile(
+        return mStorage.createRegularFile(
                 SRC_ROOT, dir, DocumentsContract.Document.MIME_TYPE_DIR, null);
     }
 
@@ -473,6 +515,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final List<DocumentInfo> failedDocs = new ArrayList<>();
+
         @Override
         public void onFinished(List<DocumentInfo> failed) {
             failedDocs.addAll(failed);
