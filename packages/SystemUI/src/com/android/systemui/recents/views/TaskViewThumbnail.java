@@ -129,6 +129,7 @@ public class TaskViewThumbnail extends View {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
         }
+        invalidate();
     }
 
     /** Updates the paint to draw the thumbnail. */
