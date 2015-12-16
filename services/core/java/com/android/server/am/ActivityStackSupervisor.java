@@ -2288,7 +2288,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityInfo newTaskInfo = null;
         Intent newTaskIntent = null;
-        ActivityStack sourceStack;
+        final ActivityStack sourceStack;
         if (sourceRecord != null) {
             if (sourceRecord.finishing) {
                 // If the source is finishing, we can't further count it as our source.  This
@@ -2525,33 +2525,27 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // once.
             ActivityStack topStack = mFocusedStack;
             ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(notTop);
-            if (top != null && r.resultTo == null) {
-                if (top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
-                    if (top.app != null && top.app.thread != null) {
-                        if ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
-                            || launchSingleTop || launchSingleTask) {
-                            ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top,
-                                    top.task);
-                            // For paranoia, make sure we have correctly
-                            // resumed the top activity.
-                            topStack.mLastPausedActivity = null;
-                            if (doResume) {
-                                resumeTopActivitiesLocked();
-                            }
-                            ActivityOptions.abort(options);
-                            if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
-                                // We don't need to start a new activity, and
-                                // the client said not to do anything if that
-                                // is the case, so this is it!
-                                return ActivityManager.START_RETURN_INTENT_TO_CALLER;
-                            }
-                            top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
-                            return ActivityManager.START_DELIVERED_TO_TOP;
-                        }
-                    }
+            final boolean dontStart = top != null && r.resultTo == null
+                    && top.realActivity.equals(r.realActivity) && top.userId == r.userId
+                    && top.app != null && top.app.thread != null
+                    && ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
+                            || launchSingleTop || launchSingleTask);
+            if (dontStart) {
+                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
+                // For paranoia, make sure we have correctly resumed the top activity.
+                topStack.mLastPausedActivity = null;
+                if (doResume) {
+                    resumeTopActivitiesLocked();
                 }
+                ActivityOptions.abort(options);
+                if ((startFlags & ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
+                    // We don't need to start a new activity, and the client said not to do
+                    // anything if that is the case, so this is it!
+                    return ActivityManager.START_RETURN_INTENT_TO_CALLER;
+                }
+                top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
+                return ActivityManager.START_DELIVERED_TO_TOP;
             }
-
         } else {
             if (r.resultTo != null && r.resultTo.task.stack != null) {
                 r.resultTo.task.stack.sendActivityResultLocked(-1, r.resultTo, r.resultWho,
