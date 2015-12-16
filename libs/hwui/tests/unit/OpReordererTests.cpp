@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <BakedOpState.h>
+#include <DeferredLayerUpdater.h>
 #include <LayerUpdateQueue.h>
 #include <OpReorderer.h>
 #include <RecordedOp.h>
@@ -281,6 +282,39 @@ TEST(OpReorderer, textStrikethrough) {
             << "Expect number of ops = 2 * loop count";
 }
 
+RENDERTHREAD_TEST(OpReorderer, textureLayer) {
+    class TextureLayerTestRenderer : public TestRendererBase {
+    public:
+        void onTextureLayerOp(const TextureLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clipRect);
+            EXPECT_EQ(Rect(50, 50, 105, 105), state.computedState.clippedBounds);
+
+            Matrix4 expected;
+            expected.loadTranslate(5, 5, 0);
+            EXPECT_MATRIX_APPROX_EQ(expected, state.computedState.transform);
+        }
+    };
+
+    auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
+            [](Matrix4* transform) {
+        transform->loadTranslate(5, 5, 0);
+    });
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.clipRect(50, 50, 150, 150, SkRegion::kIntersect_Op);
+        canvas.drawLayer(layerUpdater.get());
+        canvas.restore();
+    });
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
+    TextureLayerTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(1, renderer.getIndex());
+}
+
 TEST(OpReorderer, renderNode) {
     class RenderNodeTestRenderer : public TestRendererBase {
     public:
@@ -307,16 +341,15 @@ TEST(OpReorderer, renderNode) {
         canvas.drawRect(0, 0, 100, 100, paint);
     });
 
-    RenderNode* childPtr = child.get();
     auto parent = TestUtils::createNode(0, 0, 200, 200,
-            [childPtr](RenderProperties& props, RecordingCanvas& canvas) {
+            [&child](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
 
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.translate(40, 40);
-        canvas.drawRenderNode(childPtr);
+        canvas.drawRenderNode(child.get());
         canvas.restore();
     });
 

@@ -83,7 +83,6 @@ public:
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
     void makeCurrent();
-    void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
     void draw();

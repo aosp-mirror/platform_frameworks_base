@@ -139,9 +139,11 @@ public:
     }
 
     void multiply(const Matrix4& v) {
-        Matrix4 u;
-        u.loadMultiply(*this, v);
-        *this = u;
+        if (!v.isIdentity()) {
+            Matrix4 u;
+            u.loadMultiply(*this, v);
+            *this = u;
+        }
     }
 
     void multiply(float v);

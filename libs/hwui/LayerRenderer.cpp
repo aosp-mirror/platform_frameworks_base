@@ -287,7 +287,7 @@ Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
 }
 
 void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-        bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform) {
+        bool isOpaque, bool forceFilter, GLenum renderTarget, const float* textureTransform) {
     if (layer) {
         layer->setBlend(!isOpaque);
         layer->setForceFilter(forceFilter);

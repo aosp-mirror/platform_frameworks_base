@@ -63,6 +63,7 @@ struct Vertex;
         U_OP_FN(SimpleRectsOp) \
         M_OP_FN(TextOp) \
         U_OP_FN(TextOnPathOp) \
+        U_OP_FN(TextureLayerOp) \
         U_OP_FN(BeginLayerOp) \
         U_OP_FN(EndLayerOp) \
         U_OP_FN(LayerOp)
@@ -345,10 +346,16 @@ struct TextOnPathOp : RecordedOp {
     const float vOffset;
 };
 
+struct TextureLayerOp : RecordedOp {
+    TextureLayerOp(BASE_PARAMS_PAINTLESS, Layer* layer)
+            : SUPER_PAINTLESS(TextureLayerOp)
+            , layer(layer) {}
+    Layer* layer;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Layers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 /**
  * Stateful operation! denotes the creation of an off-screen layer,

@@ -36,7 +36,7 @@
 namespace android {
 namespace uirenderer {
 
-class OpReceiver;
+class DeferredLayerUpdater;
 struct RecordedOp;
 
 class RecordingCanvas: public Canvas, public CanvasStateClient {
@@ -59,6 +59,8 @@ public:
         mDeferredBarrierType = enableReorder
                 ? DeferredBarrierType::OutOfOrder : DeferredBarrierType::InOrder;
     }
+
+    void drawLayer(DeferredLayerUpdater* layerHandle);
     void drawRenderNode(RenderNode* renderNode);
 
     // TODO: rename for consistency

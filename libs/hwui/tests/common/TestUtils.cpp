@@ -16,6 +16,9 @@
 
 #include "TestUtils.h"
 
+#include "DeferredLayerUpdater.h"
+#include "LayerRenderer.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -34,6 +37,22 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
             | (int)((startR + (int)(fraction * (endR - startR))) << 16)
             | (int)((startG + (int)(fraction * (endG - startG))) << 8)
             | (int)((startB + (int)(fraction * (endB - startB))));
+}
+
+sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
+        renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
+        std::function<void(Matrix4*)> transformSetupCallback) {
+    bool isOpaque = true;
+    bool forceFilter = true;
+    GLenum renderTarget = GL_TEXTURE_EXTERNAL_OES;
+
+    Layer* layer = LayerRenderer::createTextureLayer(renderThread.renderState());
+    LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, forceFilter,
+            renderTarget, Matrix4::identity().data);
+    transformSetupCallback(&(layer->getTransform()));
+
+    sp<DeferredLayerUpdater> layerUpdater = new DeferredLayerUpdater(layer);
+    return layerUpdater;
 }
 
 void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
