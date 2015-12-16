@@ -485,12 +485,9 @@ public class ActivityManager {
             return stackId == FREEFORM_WORKSPACE_STACK_ID;
         }
 
-        /**
-         * Returns true if the task bounds should persist across power cycles.
-         */
+        /** Returns true if the task bounds should persist across power cycles. */
         public static boolean persistTaskBounds(int stackId) {
-            return isStaticStack(stackId) &&
-                    stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+            return stackId == FREEFORM_WORKSPACE_STACK_ID;
         }
 
         /**
