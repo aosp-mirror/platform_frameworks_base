@@ -157,6 +157,11 @@ TEST(ResourceUtilsTest, ParseStyleParentReference) {
     ref = ResourceUtils::parseStyleParentReference(u"foo", &errStr);
     AAPT_ASSERT_TRUE(ref);
     EXPECT_EQ(ref.value().name.value(), kStyleFooName);
+
+    ref = ResourceUtils::parseStyleParentReference(u"*android:style/foo", &errStr);
+    AAPT_ASSERT_TRUE(ref);
+    EXPECT_EQ(ref.value().name.value(), kAndroidStyleFooName);
+    EXPECT_TRUE(ref.value().privateReference);
 }
 
 } // namespace aapt

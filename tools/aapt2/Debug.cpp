@@ -52,13 +52,17 @@ struct PrintVisitor : public ValueVisitor {
     void visit(Style* style) override {
         std::cout << "(style)";
         if (style->parent) {
+            const Reference& parentRef = style->parent.value();
             std::cout << " parent=";
-            if (style->parent.value().name) {
-                std::cout << style->parent.value().name.value() << " ";
+            if (parentRef.name) {
+                if (parentRef.privateReference) {
+                    std::cout << "*";
+                }
+                std::cout << parentRef.name.value() << " ";
             }
 
-            if (style->parent.value().id) {
-                std::cout << style->parent.value().id.value();
+            if (parentRef.id) {
+                std::cout << parentRef.id.value();
             }
         }
 

@@ -113,8 +113,7 @@ struct MapFlattenVisitor : public RawValueVisitor {
     bool mUseExtendedChunks;
 
     size_t mEntryCount = 0;
-    Maybe<uint32_t> mParentIdent;
-    Maybe<ResourceNameRef> mParentName;
+    const Reference* mParent = nullptr;
 
     MapFlattenVisitor(SymbolWriter* symbols, FlatEntry* entry, BigBuffer* buffer,
                       StringPool* sourcePool, StringPool* commentPool,
@@ -227,13 +226,8 @@ struct MapFlattenVisitor : public RawValueVisitor {
 
     void visit(Style* style) override {
         if (style->parent) {
-            bool privateRef = style->parent.value().privateReference && mUseExtendedChunks;
-            if (!style->parent.value().id || privateRef) {
-                assert(style->parent.value().name && "reference must have a name");
-                mParentName = style->parent.value().name;
-            } else {
-                mParentIdent = style->parent.value().id.value().id;
-            }
+            // Parents are treated a bit differently, so record the existence and move on.
+            mParent = &style->parent.value();
         }
 
         // Sort the style.
@@ -427,11 +421,16 @@ private:
                                       mOptions.useExtendedChunks);
             entry->value->accept(&visitor);
             outEntry->count = util::hostToDevice32(visitor.mEntryCount);
-            if (visitor.mParentName) {
-                mSymbols->addSymbol(visitor.mParentName.value(),
-                                    beforeEntry + offsetof(ResTable_entry_ext, parent));
-            } else if (visitor.mParentIdent) {
-                outEntry->parent.ident = util::hostToDevice32(visitor.mParentIdent.value());
+            if (visitor.mParent) {
+                const bool forceSymbol = visitor.mParent->privateReference &&
+                        mOptions.useExtendedChunks;
+                if (!visitor.mParent->id || forceSymbol) {
+                    assert(visitor.mParent->name && "reference must have a name");
+                    mSymbols->addSymbol(*visitor.mParent,
+                                        beforeEntry + offsetof(ResTable_entry_ext, parent));
+                } else {
+                    outEntry->parent.ident = util::hostToDevice32(visitor.mParent->id.value().id);
+                }
             }
         }
         return true;
