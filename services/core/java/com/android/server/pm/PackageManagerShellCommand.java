@@ -46,7 +46,6 @@ import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.text.TextUtils;
-
 import android.util.PrintWriterPrinter;
 import com.android.internal.util.SizedInputStream;
 
@@ -127,19 +126,30 @@ class PackageManagerShellCommand extends ShellCommand {
         final InstallParams params = makeInstallParams();
         final int sessionId = doCreateSession(params.sessionParams,
                 params.installerPackageName, params.userId);
-
-        final String inPath = getNextArg();
-        if (inPath == null && params.sessionParams.sizeBytes == 0) {
-            pw.println("Error: must either specify a package size or an APK file");
-            return 1;
+        boolean abandonSession = true;
+        try {
+            final String inPath = getNextArg();
+            if (inPath == null && params.sessionParams.sizeBytes == 0) {
+                pw.println("Error: must either specify a package size or an APK file");
+                return 1;
+            }
+            if (doWriteSession(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
+                    false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            if (doCommitSession(sessionId, false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            abandonSession = false;
+            return 0;
+        } finally {
+            if (abandonSession) {
+                try {
+                    doAbandonSession(sessionId, false /*logSuccess*/);
+                } catch (Exception ignore) {
+                }
+            }
         }
-        if (doWriteSession(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk") != 0) {
-            return 1;
-        }
-        if (doCommitSession(sessionId) != 0) {
-            return 1;
-        }
-        return 0;
     }
 
     private int runSuspend(boolean suspendedState) {
@@ -179,12 +189,12 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runInstallAbandon() throws RemoteException {
         final int sessionId = Integer.parseInt(getNextArg());
-        return doAbandonSession(sessionId);
+        return doAbandonSession(sessionId, true /*logSuccess*/);
     }
 
     private int runInstallCommit() throws RemoteException {
         final int sessionId = Integer.parseInt(getNextArg());
-        return doCommitSession(sessionId);
+        return doCommitSession(sessionId, true /*logSuccess*/);
     }
 
     private int runInstallCreate() throws RemoteException {
@@ -213,7 +223,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final int sessionId = Integer.parseInt(getNextArg());
         final String splitName = getNextArg();
         final String path = getNextArg();
-        return doWriteSession(sessionId, path, sizeBytes, splitName);
+        return doWriteSession(sessionId, path, sizeBytes, splitName, true /*logSuccess*/);
     }
 
     private int runList() throws RemoteException {
@@ -559,7 +569,7 @@ class PackageManagerShellCommand extends ShellCommand {
         } else {
             final PackageInfo info = mInterface.getPackageInfo(packageName, 0, userId);
             if (info == null) {
-                pw.println("Failure - not installed for " + userId);
+                pw.println("Failure [not installed for " + userId + "]");
                 return 1;
             }
             final boolean isSystem =
@@ -828,8 +838,8 @@ class PackageManagerShellCommand extends ShellCommand {
         return sessionId;
     }
 
-    private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName)
-            throws RemoteException {
+    private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName,
+            boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         if ("-".equals(inPath)) {
             inPath = null;
@@ -870,7 +880,9 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             session.fsync(out);
 
-            pw.println("Success: streamed " + total + " bytes");
+            if (logSuccess) {
+                pw.println("Success: streamed " + total + " bytes");
+            }
             return 0;
         } catch (IOException e) {
             pw.println("Error: failed to write; " + e.getMessage());
@@ -882,7 +894,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int doCommitSession(int sessionId) throws RemoteException {
+    private int doCommitSession(int sessionId, boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         PackageInstaller.Session session = null;
         try {
@@ -896,11 +908,12 @@ class PackageManagerShellCommand extends ShellCommand {
             final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_FAILURE);
             if (status == PackageInstaller.STATUS_SUCCESS) {
-                pw.println("Success");
+                if (logSuccess) {
+                    System.out.println("Success");
+                }
             } else {
                 pw.println("Failure ["
                         + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
-                pw.println("Failure details: " + result.getExtras());
             }
             return status;
         } finally {
@@ -908,14 +921,16 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int doAbandonSession(int sessionId) throws RemoteException {
+    private int doAbandonSession(int sessionId, boolean logSuccess) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         PackageInstaller.Session session = null;
         try {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
             session.abandon();
-            pw.println("Success");
+            if (logSuccess) {
+                pw.println("Success");
+            }
             return 0;
         } finally {
             IoUtils.closeQuietly(session);
