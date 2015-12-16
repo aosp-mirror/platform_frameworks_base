@@ -1978,7 +1978,7 @@ public class Resources {
                     || (configChanges & Configuration.NATIVE_CONFIG_LOCALE) != 0) {
                 if (locales.size() == 1) {
                     // This is an optimization to avoid the JNI call(s) when the result of
-                    // getFirstMatch() does not depend on the supported locales.
+                    // getFirstMatchWithEnglishSupported() does not depend on the supported locales.
                     mResolvedLocale = locales.getPrimary();
                 } else {
                     String[] supportedLocales = mAssets.getNonSystemLocales();
@@ -1989,7 +1989,7 @@ public class Resources {
                         // their own.
                         supportedLocales = mAssets.getLocales();
                     }
-                    mResolvedLocale = locales.getFirstMatch(supportedLocales);
+                    mResolvedLocale = locales.getFirstMatchWithEnglishSupported(supportedLocales);
                 }
             }
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,

@@ -246,14 +246,9 @@ public final class LocaleList implements Parcelable {
         return supportedScr.equals(desiredScr) ? 1 : 0;
     }
 
-    /**
-     * Returns the first match in the locale list given an unordered array of supported locales
-     * in BCP47 format.
-     *
-     * If the locale list is empty, null would be returned.
-     */
-    @Nullable
-    public Locale getFirstMatch(String[] supportedLocales) {
+    private static final Locale EN_LATN = Locale.forLanguageTag("en-Latn");
+
+    private Locale computeFirstMatch(String[] supportedLocales, boolean assumeEnglishIsSupported) {
         if (mList.length == 1) {  // just one locale, perhaps the most common scenario
             return mList[0];
         }
@@ -261,8 +256,16 @@ public final class LocaleList implements Parcelable {
             return null;
         }
         int bestIndex = Integer.MAX_VALUE;
-        for (String tag : supportedLocales) {
-            final Locale supportedLocale = Locale.forLanguageTag(tag);
+        final int numSupportedLocales =
+                supportedLocales.length + (assumeEnglishIsSupported ? 1 : 0);
+        for (int i = 0; i < numSupportedLocales; i++) {
+            final Locale supportedLocale;
+            if (assumeEnglishIsSupported) {
+                // Try English first, so we can return early if it's in the LocaleList
+                supportedLocale = (i == 0) ? EN_LATN : Locale.forLanguageTag(supportedLocales[i-1]);
+            } else {
+                supportedLocale = Locale.forLanguageTag(supportedLocales[i]);
+            }
             // We expect the average length of locale lists used for locale resolution to be
             // smaller than three, so it's OK to do this as an O(mn) algorithm.
             for (int idx = 0; idx < mList.length; idx++) {
@@ -281,6 +284,26 @@ public final class LocaleList implements Parcelable {
         } else {
             return mList[bestIndex];
         }
+    }
+
+    /**
+     * Returns the first match in the locale list given an unordered array of supported locales
+     * in BCP47 format.
+     *
+     * If the locale list is empty, null would be returned.
+     */
+    @Nullable
+    public Locale getFirstMatch(String[] supportedLocales) {
+        return computeFirstMatch(supportedLocales, false /* assume English is not supported */);
+    }
+
+    /**
+     * Same as getFirstMatch(), but with English assumed to be supported, even if it's not.
+     * {@hide}
+     */
+    @Nullable
+    public Locale getFirstMatchWithEnglishSupported(String[] supportedLocales) {
+        return computeFirstMatch(supportedLocales, true /* assume English is supported */);
     }
 
     /**
