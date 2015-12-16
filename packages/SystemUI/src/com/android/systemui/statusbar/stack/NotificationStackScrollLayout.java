@@ -118,7 +118,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * The algorithm which calculates the properties for our children
      */
-    private StackScrollAlgorithm mStackScrollAlgorithm;
+    private final StackScrollAlgorithm mStackScrollAlgorithm;
 
     /**
      * The current State this Layout is in
@@ -258,6 +258,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, getContext());
         mSwipeHelper.setLongPressListener(mLongPressListener);
+        mStackScrollAlgorithm = new StackScrollAlgorithm(context);
         initView(context);
         if (DEBUG) {
             setWillNotDraw(false);
@@ -303,8 +304,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 .getDimensionPixelSize(R.dimen.notification_min_height);
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
-        mStackScrollAlgorithm = new StackScrollAlgorithm(context);
-        mStackScrollAlgorithm.setDimmed(mAmbientState.isDimmed());
+        mStackScrollAlgorithm.initView(context);
         mPaddingBetweenElementsDimmed = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
         mPaddingBetweenElementsNormal = context.getResources()
@@ -367,6 +367,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mRequestViewResizeAnimationOnLayout = false;
         }
         requestChildrenUpdate();
+        mStackScrollAlgorithm.notifyChildrenSizesChanged(this);
     }
 
     private void requestAnimationOnViewResize() {
@@ -1639,7 +1640,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void onViewRemovedInternal(View child) {
-        mStackScrollAlgorithm.notifyChildrenChanged(this);
+        mStackScrollAlgorithm.notifyChildrenSizesChanged(this);
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
             return;
@@ -1793,7 +1794,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void onViewAddedInternal(View child) {
         updateHideSensitiveForChild(child);
-        mStackScrollAlgorithm.notifyChildrenChanged(this);
+        mStackScrollAlgorithm.notifyChildrenSizesChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);

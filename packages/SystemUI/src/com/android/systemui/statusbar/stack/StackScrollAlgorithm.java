@@ -73,14 +73,19 @@ public class StackScrollAlgorithm {
     private boolean mScaleDimmed;
     private HeadsUpManager mHeadsUpManager;
     private int mFirstChildMinHeight;
+    private boolean mDimmed;
 
     public StackScrollAlgorithm(Context context) {
-        initConstants(context);
-        updatePadding(false);
+        initView(context);
     }
 
-    private void updatePadding(boolean dimmed) {
-        mPaddingBetweenElements = dimmed && mScaleDimmed
+    public void initView(Context context) {
+        initConstants(context);
+        updatePadding();
+    }
+
+    private void updatePadding() {
+        mPaddingBetweenElements = mDimmed && mScaleDimmed
                 ? mPaddingBetweenElementsDimmed
                 : mPaddingBetweenElementsNormal;
         mTopStackTotalSize = mTopStackSlowDownLength + mPaddingBetweenElements
@@ -932,7 +937,7 @@ public class StackScrollAlgorithm {
         this.mIsExpanded = isExpanded;
     }
 
-    public void notifyChildrenChanged(final NotificationStackScrollLayout hostView) {
+    public void notifyChildrenSizesChanged(final NotificationStackScrollLayout hostView) {
         int firstItemMinHeight = hostView.getFirstItemMinHeight();
         if (firstItemMinHeight != mFirstChildMinHeight) {
             mFirstChildMinHeight = firstItemMinHeight;
@@ -948,7 +953,8 @@ public class StackScrollAlgorithm {
     }
 
     public void setDimmed(boolean dimmed) {
-        updatePadding(dimmed);
+        mDimmed = dimmed;
+        updatePadding();
     }
 
     public void onReset(ExpandableView view) {
