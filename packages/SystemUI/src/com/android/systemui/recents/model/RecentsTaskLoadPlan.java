@@ -200,7 +200,7 @@ public class RecentsTaskLoadPlan {
         allTasks.addAll(stackTasks);
         allTasks.addAll(freeformTasks);
         mStack = new TaskStack();
-        mStack.setTasks(allTasks);
+        mStack.setTasks(allTasks, false /* notifyStackChanges */);
         mStack.createAffiliatedGroupings(mContext);
     }
 

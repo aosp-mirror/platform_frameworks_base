@@ -16,12 +16,12 @@
 
 package com.android.systemui.recents.history;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
@@ -36,12 +36,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.views.TaskView;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * A list of the recent tasks that are not in the stack.
@@ -53,6 +48,7 @@ public class RecentsHistoryView extends LinearLayout {
 
     private RecyclerView mRecyclerView;
     private RecentsHistoryAdapter mAdapter;
+    private RecentsHistoryItemTouchCallbacks mItemTouchHandler;
     private boolean mIsVisible;
     private Rect mSystemInsets = new Rect();
 
@@ -77,6 +73,7 @@ public class RecentsHistoryView extends LinearLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = context.getResources();
         mAdapter = new RecentsHistoryAdapter(context);
+        mItemTouchHandler = new RecentsHistoryItemTouchCallbacks(context, mAdapter);
         mHistoryTransitionDuration = res.getInteger(R.integer.recents_history_transition_duration);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
@@ -101,7 +98,7 @@ public class RecentsHistoryView extends LinearLayout {
                         .start();
             }
         });
-        mAdapter.updateTasks(getContext(), stack.getHistoricalTasks());
+        mAdapter.updateTasks(getContext(), stack);
         mIsVisible = true;
     }
 
@@ -156,6 +153,8 @@ public class RecentsHistoryView extends LinearLayout {
         mRecyclerView = (RecyclerView) findViewById(R.id.list);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        ItemTouchHelper touchHelper = new ItemTouchHelper(mItemTouchHandler);
+        touchHelper.attachToRecyclerView(mRecyclerView);
     }
 
     @Override
@@ -180,7 +179,6 @@ public class RecentsHistoryView extends LinearLayout {
 
     @Override
     protected void onAttachedToWindow() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
         super.onAttachedToWindow();
     }

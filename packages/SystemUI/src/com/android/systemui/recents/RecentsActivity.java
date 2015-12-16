@@ -51,10 +51,12 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
+import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
@@ -526,6 +528,22 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
+    public void onMultiWindowModeChanged(boolean multiWindowMode) {
+        super.onMultiWindowModeChanged(multiWindowMode);
+        if (!multiWindowMode) {
+            RecentsTaskLoader loader = Recents.getTaskLoader();
+            RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+            launchOpts.loadIcons = false;
+            launchOpts.loadThumbnails = false;
+            launchOpts.onlyLoadForCache = true;
+            RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
+            loader.preloadTasks(loadPlan, false);
+            loader.loadTasks(this, loadPlan, launchOpts);
+            EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack()));
+        }
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_TAB: {
@@ -709,7 +727,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.count(this, "overview_app_info", 1);
     }
 
-    public final void onBusEvent(DismissTaskViewEvent event) {
+    public final void onBusEvent(DismissTaskEvent event) {
         // Remove any stored data from the loader
         RecentsTaskLoader loader = Recents.getTaskLoader();
         loader.deleteTaskData(event.task, false);

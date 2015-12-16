@@ -13,15 +13,30 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:theme="@android:style/Theme.Material"
     android:layout_width="match_parent"
     android:layout_height="48dp"
-    android:paddingLeft="32dp"
-    android:gravity="start|center_vertical"
-    android:textSize="14sp"
-    android:textColor="#FFFFFF"
-    android:fontFamily="sans-serif-medium"
-    android:background="?android:selectableItemBackground"
-    android:alpha="1" />
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:selectableItemBackground">
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="16dp" />
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_gravity="end"
+        android:paddingStart="16dp"
+        android:gravity="start|center_vertical"
+        android:textSize="14sp"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-medium" />
+</LinearLayout>

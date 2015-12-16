@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
+import com.android.systemui.recents.events.ui.DismissTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
@@ -102,6 +103,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // The thresholds at which to show/hide the history button.
     private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
     private static final float HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
+
+    private static final int DEFAULT_SYNC_STACK_DURATION = 200;
 
     public static final Property<Drawable, Integer> DRAWABLE_ALPHA =
             new IntProperty<Drawable>("drawableAlpha") {
@@ -1199,6 +1202,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** TaskStackCallbacks Implementation ****/
 
     @Override
+    public void onStackTaskAdded(TaskStack stack, Task newTask) {
+        // Update the min/max scroll and animate other task views into their new positions
+        updateLayout(true);
+
+        // Animate all the tasks into place
+        requestSynchronizeStackViewsWithModel(DEFAULT_SYNC_STACK_DURATION);
+    }
+
+    @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
             Task newFrontMostTask) {
         if (mFocusedTask == removedTask) {
@@ -1244,7 +1256,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
 
             // Animate all the tasks into place
-            requestSynchronizeStackViewsWithModel(200);
+            requestSynchronizeStackViewsWithModel(DEFAULT_SYNC_STACK_DURATION);
         } else {
             // Remove the view associated with this task, we can't rely on updateTransforms
             // to work here because the task is no longer in the list
@@ -1257,7 +1269,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             updateLayout(true);
 
             // Animate all the tasks into place
-            requestSynchronizeStackViewsWithModel(200);
+            requestSynchronizeStackViewsWithModel(DEFAULT_SYNC_STACK_DURATION);
         }
 
         // Update the new front most task
@@ -1419,6 +1431,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DismissTaskViewEvent event) {
         removeTaskViewFromStack(event.taskView);
+        EventBus.getDefault().send(new DismissTaskEvent(event.task));
     }
 
     public final void onBusEvent(FocusNextTaskViewEvent event) {
