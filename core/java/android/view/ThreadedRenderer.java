@@ -422,9 +422,10 @@ public final class ThreadedRenderer {
      * @return True if the initialization was successful, false otherwise.
      */
     boolean initialize(Surface surface) throws OutOfResourcesException {
+        boolean status = !mInitialized;
         mInitialized = true;
         updateEnabledState(surface);
-        boolean status = nInitialize(mNativeProxy, surface);
+        nInitialize(mNativeProxy, surface);
         return status;
     }
 
@@ -958,7 +959,7 @@ public final class ThreadedRenderer {
     private static native boolean nLoadSystemProperties(long nativeProxy);
     private static native void nSetName(long nativeProxy, String name);
 
-    private static native boolean nInitialize(long nativeProxy, Surface window);
+    private static native void nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
