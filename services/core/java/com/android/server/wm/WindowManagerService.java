@@ -66,7 +66,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
@@ -92,7 +91,6 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -566,7 +564,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** If true hold off on modifying the animation layer of mInputMethodTarget */
     boolean mInputMethodTargetWaitingAnim;
-    int mInputMethodAnimLayerAdjustment;
 
     WindowState mInputMethodWindow = null;
     final ArrayList<WindowState> mInputMethodDialogs = new ArrayList<>();
@@ -607,6 +604,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     WallpaperController mWallpaperControllerLocked;
+
+    final WindowLayersController mLayersController;
 
     boolean mAnimateWallpaperWithTarget;
 
@@ -880,6 +879,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWallpaperControllerLocked = new WallpaperController(this);
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
+        mLayersController = new WindowLayersController(this);
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
@@ -1509,9 +1509,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputMethodTarget = w;
                 mInputMethodTargetWaitingAnim = false;
                 if (w.mAppToken != null) {
-                    setInputMethodAnimLayerAdjustment(w.mAppToken.mAppAnimator.animLayerAdjustment);
+                    mLayersController.setInputMethodAnimLayerAdjustment(
+                            w.mAppToken.mAppAnimator.animLayerAdjustment);
                 } else {
-                    setInputMethodAnimLayerAdjustment(0);
+                    mLayersController.setInputMethodAnimLayerAdjustment(0);
                 }
             }
             return i+1;
@@ -1520,7 +1521,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to null."
                     + (HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4)));
             mInputMethodTarget = null;
-            setInputMethodAnimLayerAdjustment(0);
+            mLayersController.setInputMethodAnimLayerAdjustment(0);
         }
         return -1;
     }
@@ -1540,33 +1541,6 @@ public class WindowManagerService extends IWindowManager.Stub
         win.mTargetAppToken = null;
         addWindowToListInOrderLocked(win, true);
         moveInputMethodDialogsLocked(pos);
-    }
-
-    void setInputMethodAnimLayerAdjustment(int adj) {
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Setting im layer adj to " + adj);
-        mInputMethodAnimLayerAdjustment = adj;
-        WindowState imw = mInputMethodWindow;
-        if (imw != null) {
-            imw.mWinAnimator.mAnimLayer = imw.mLayer + adj;
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
-                    + " anim layer: " + imw.mWinAnimator.mAnimLayer);
-            int wi = imw.mChildWindows.size();
-            while (wi > 0) {
-                wi--;
-                WindowState cw = imw.mChildWindows.get(wi);
-                cw.mWinAnimator.mAnimLayer = cw.mLayer + adj;
-                if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + cw
-                        + " anim layer: " + cw.mWinAnimator.mAnimLayer);
-            }
-        }
-        int di = mInputMethodDialogs.size();
-        while (di > 0) {
-            di --;
-            imw = mInputMethodDialogs.get(di);
-            imw.mWinAnimator.mAnimLayer = imw.mLayer + adj;
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
-                    + " anim layer: " + imw.mWinAnimator.mAnimLayer);
-        }
     }
 
     private int tmpRemoveWindowLocked(int interestingPos, WindowState win) {
@@ -1767,7 +1741,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (needAssignLayers) {
-            assignLayersLocked(windows);
+            mLayersController.assignLayersLocked(windows);
         }
 
         return true;
@@ -2059,7 +2033,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 moveInputMethodWindowsIfNeededLocked(false);
             }
 
-            assignLayersLocked(displayContent.getWindowList());
+            mLayersController.assignLayersLocked(displayContent.getWindowList());
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
 
@@ -2386,7 +2360,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (windows != null) {
             windows.remove(win);
             if (!mWindowPlacerLocked.isInLayout()) {
-                assignLayersLocked(windows);
+                mLayersController.assignLayersLocked(windows);
                 win.setDisplayLayoutNeeded();
                 mWindowPlacerLocked.performSurfacePlacement();
                 if (win.mAppToken != null) {
@@ -2741,7 +2715,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // its layer recomputed.  However, if the IME was hidden
                 // and isn't actually moved in the list, its layer may be
                 // out of data so we make sure to recompute it.
-                assignLayersLocked(win.getWindowList());
+                mLayersController.assignLayersLocked(win.getWindowList());
             }
 
             if (wallpaperMayMove) {
@@ -4584,7 +4558,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                 false /*updateInputWindows*/)) {
-            assignLayersLocked(displayContent.getWindowList());
+            mLayersController.assignLayersLocked(displayContent.getWindowList());
         }
 
         mInputMonitor.setUpdateInputWindowsNeededLw();
@@ -8660,102 +8634,6 @@ public class WindowManagerService extends IWindowManager.Stub
         Arrays.fill(mRebuildTmp, null);
     }
 
-    final void assignLayersLocked(WindowList windows) {
-        int N = windows.size();
-        int curBaseLayer = 0;
-        int curLayer = 0;
-        int i;
-
-        if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based on windows=" + windows,
-                new RuntimeException("here").fillInStackTrace());
-
-        boolean anyLayerChanged = false;
-
-        for (i=0; i<N; i++) {
-            final WindowState w = windows.get(i);
-            final WindowStateAnimator winAnimator = w.mWinAnimator;
-            boolean layerChanged = false;
-            int oldLayer = w.mLayer;
-            if (w.mBaseLayer == curBaseLayer || w.mIsImWindow || (i > 0 && w.mIsWallpaper)) {
-                curLayer += WINDOW_LAYER_MULTIPLIER;
-                w.mLayer = curLayer;
-            } else {
-                curBaseLayer = curLayer = w.mBaseLayer;
-                w.mLayer = curLayer;
-            }
-            if (w.mLayer != oldLayer) {
-                layerChanged = true;
-                anyLayerChanged = true;
-            }
-            final AppWindowToken wtoken = w.mAppToken;
-            oldLayer = winAnimator.mAnimLayer;
-            if (w.mTargetAppToken != null) {
-                winAnimator.mAnimLayer =
-                        w.mLayer + w.mTargetAppToken.mAppAnimator.animLayerAdjustment;
-            } else if (wtoken != null) {
-                winAnimator.mAnimLayer =
-                        w.mLayer + wtoken.mAppAnimator.animLayerAdjustment;
-                forceHigherLayerIfNeeded(w, winAnimator, wtoken);
-            } else {
-                winAnimator.mAnimLayer = w.mLayer;
-            }
-            if (w.mIsImWindow) {
-                winAnimator.mAnimLayer += mInputMethodAnimLayerAdjustment;
-            } else if (w.mIsWallpaper) {
-                winAnimator.mAnimLayer += mWallpaperControllerLocked.getAnimLayerAdjustment();
-            }
-            if (winAnimator.mAnimLayer != oldLayer) {
-                layerChanged = true;
-                anyLayerChanged = true;
-            }
-            final DimLayer.DimLayerUser dimLayerUser = w.getDimLayerUser();
-            final DisplayContent displayContent = w.getDisplayContent();
-            if (layerChanged && dimLayerUser != null && displayContent != null &&
-                    displayContent.mDimLayerController.isDimming(dimLayerUser, winAnimator)) {
-                // Force an animation pass just to update the mDimLayer layer.
-                scheduleAnimationLocked();
-            }
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assign layer " + w + ": "
-                    + "mBase=" + w.mBaseLayer
-                    + " mLayer=" + w.mLayer
-                    + (wtoken == null ?
-                            "" : " mAppLayer=" + wtoken.mAppAnimator.animLayerAdjustment)
-                    + " =mAnimLayer=" + winAnimator.mAnimLayer);
-            //System.out.println(
-            //    "Assigned layer " + curLayer + " to " + w.mClient.asBinder());
-        }
-
-        //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mAccessibilityController != null && anyLayerChanged
-                && windows.get(windows.size() - 1).getDisplayId() == Display.DEFAULT_DISPLAY) {
-            mAccessibilityController.onWindowLayersChangedLocked();
-        }
-    }
-
-    private void forceHigherLayerIfNeeded(WindowState w, WindowStateAnimator winAnimator,
-            AppWindowToken wtoken) {
-        boolean force = false;
-
-        if (w.mWillReplaceWindow) {
-            // We know that we will be animating a relaunching window in the near future,
-            // which will receive a z-order increase. We want the replaced window to
-            // immediately receive the same treatment, e.g. to be above the dock divider.
-            force = true;
-        }
-        if (!force) {
-            final TaskStack stack = w.getStack();
-            if (stack != null && (StackId.shouldIncreaseApplicationWindowLayer(stack.mStackId))) {
-                // For pinned and docked stack window, we want to make them above other windows
-                // also when these windows are animating.
-                force = true;
-            }
-        }
-        if (force) {
-            w.mLayer += TYPE_LAYER_OFFSET;
-            winAnimator.mAnimLayer += TYPE_LAYER_OFFSET;
-        }
-    }
-
     void makeWindowFreezingScreenIfNeededLocked(WindowState w) {
         // If the screen is currently frozen or off, then keep
         // it frozen/off until this window draws at its new
@@ -9126,7 +9004,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                     // Client will do the layout, but we need to assign layers
                     // for handleNewWindowLocked() below.
-                    assignLayersLocked(displayContent.getWindowList());
+                    mLayersController.assignLayersLocked(displayContent.getWindowList());
                 }
             }
 
@@ -9814,13 +9692,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mWindowPlacerLocked.dump(pw, "  ");
             mWallpaperControllerLocked.dump(pw, "  ");
-            if (mInputMethodAnimLayerAdjustment != 0 ||
-                    mWallpaperControllerLocked.getAnimLayerAdjustment() != 0) {
-                pw.print("  mInputMethodAnimLayerAdjustment=");
-                        pw.print(mInputMethodAnimLayerAdjustment);
-                        pw.print("  mWallpaperAnimLayerAdjustment=");
-                        pw.println(mWallpaperControllerLocked.getAnimLayerAdjustment());
-            }
+            mLayersController.dump(pw, "  ");
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
             if (needsLayout()) {

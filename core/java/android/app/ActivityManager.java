@@ -556,14 +556,6 @@ public class ActivityManager {
         public static boolean isAlwaysOnTop(int stackId) {
             return stackId == PINNED_STACK_ID;
         }
-
-        /**
-         * Returns true if the application windows in this stack should be displayed above all
-         * other application windows, including during the animation.
-         */
-        public static boolean shouldIncreaseApplicationWindowLayer(int stackId) {
-            return stackId == PINNED_STACK_ID || stackId == DOCKED_STACK_ID;
-        }
     }
 
     /**

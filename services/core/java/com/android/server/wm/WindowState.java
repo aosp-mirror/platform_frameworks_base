@@ -1273,6 +1273,29 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHasSurface = hasSurface;
     }
 
+    int getAnimLayerAdjustment() {
+        if (mTargetAppToken != null) {
+            return mTargetAppToken.mAppAnimator.animLayerAdjustment;
+        } else if (mAppToken != null) {
+            return mAppToken.mAppAnimator.animLayerAdjustment;
+        } else {
+            // Nothing is animating, so there is no animation adjustment.
+            return 0;
+        }
+    }
+
+    void scheduleAnimationIfDimming() {
+        if (mDisplayContent == null) {
+            return;
+        }
+        final DimLayer.DimLayerUser dimLayerUser = getDimLayerUser();
+        if (dimLayerUser != null && mDisplayContent.mDimLayerController.isDimming(
+                dimLayerUser, mWinAnimator)) {
+            // Force an animation pass just to update the mDimLayer layer.
+            mService.scheduleAnimationLocked();
+        }
+    }
+
     private final class DeadWindowEventReceiver extends InputEventReceiver {
         DeadWindowEventReceiver(InputChannel inputChannel) {
             super(inputChannel, mService.mH.getLooper());

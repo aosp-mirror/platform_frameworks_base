@@ -223,7 +223,7 @@ public class AppWindowAnimator {
             }
             if (DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": " + winAnimator.mAnimLayer);
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
-                mService.setInputMethodAnimLayerAdjustment(adj);
+                mService.mLayersController.setInputMethodAnimLayerAdjustment(adj);
             }
             wallpaperController.setAnimLayerAdjustment(w, adj);
         }

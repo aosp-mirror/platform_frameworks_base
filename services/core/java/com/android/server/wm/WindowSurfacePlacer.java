@@ -524,7 +524,7 @@ class WindowSurfacePlacer {
             }
 
             for (DisplayContent displayContent : displayList) {
-                mService.assignLayersLocked(displayContent.getWindowList());
+                mService.mLayersController.assignLayersLocked(displayContent.getWindowList());
                 displayContent.layoutNeeded = true;
             }
         }
@@ -599,7 +599,7 @@ class WindowSurfacePlacer {
 
                 if ((displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
                         mWallpaperControllerLocked.adjustWallpaperWindows()) {
-                    mService.assignLayersLocked(windows);
+                    mService.mLayersController.assignLayersLocked(windows);
                     displayContent.layoutNeeded = true;
                 }
 
@@ -1134,7 +1134,7 @@ class WindowSurfacePlacer {
         // TODO(multidisplay): IMEs are only supported on the default display.
         if (windows == mService.getDefaultWindowListLocked()
                 && !mService.moveInputMethodWindowsIfNeededLocked(true)) {
-            mService.assignLayersLocked(windows);
+            mService.mLayersController.assignLayersLocked(windows);
         }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                 true /*updateInputWindows*/);
