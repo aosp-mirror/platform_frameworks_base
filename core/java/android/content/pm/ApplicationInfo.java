@@ -506,6 +506,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_EPHEMERAL = 1 << 9;
 
     /**
+     * When set, signals that the application is required for the system user and should not be
+     * uninstalled.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER = 1 << 10;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */
@@ -1112,6 +1120,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isEphemeralApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_EPHEMERAL) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isRequiredForSystemUser() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER) != 0;
     }
 
     /**

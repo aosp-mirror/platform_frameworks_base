@@ -90,6 +90,18 @@ public class AppsQueryHelperTests extends AndroidTestCase {
         assertEqualsIgnoreOrder(Arrays.asList("sys_app1", "app4"), apps);
     }
 
+    public void testQueryAppsRequiredForSystemUser() {
+        // Test query only system apps required for system user
+        List<String> apps = mAppsQueryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
+                true, UserHandle.SYSTEM);
+        assertEqualsIgnoreOrder(Arrays.asList("sys_app3"), apps);
+
+        // Test query all apps required for system user
+        apps = mAppsQueryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER, false,
+                UserHandle.SYSTEM);
+        assertEqualsIgnoreOrder(Arrays.asList("sys_app3", "app4"), apps);
+    }
+
     private class AppsQueryHelperTestable extends AppsQueryHelper {
 
         @Override
@@ -104,7 +116,9 @@ public class AppsQueryHelperTests extends AndroidTestCase {
             final ApplicationInfo ai3 = new ApplicationInfo();
             ai3.packageName = "sys_app3";
             ai3.flags |= ApplicationInfo.FLAG_SYSTEM;
+            ai3.privateFlags |= ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
             final ApplicationInfo ai4 = new ApplicationInfo();
+            ai4.privateFlags |= ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
             ai4.packageName = "app4";
             return Arrays.asList(ai1, ai2, ai3, ai4);
         }
