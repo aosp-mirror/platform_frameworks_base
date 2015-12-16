@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"管理者によって更新されています"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"管理者によって削除されました"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"重要度"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"ブロック: 今後はこの通知を表示しない"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"低: 通知リストの下にマナーモードで表示する"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"標準: この通知をマナーモードで表示する"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件選択済み</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"その他"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"このような通知の重要度を設定します。"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"関係するユーザーのため、この設定は重要です。"</string>
 </resources>

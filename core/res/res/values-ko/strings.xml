@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"배터리 수명 개선을 위해, 배터리 세이버는 기기의 성능을 줄이고 진동, 위치 서비스 및 대부분의 백그라운드 데이터를 제한합니다. 이메일, 메시지 및 동기화에 의존하는 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n배터리 세이버는 기기를 충전 중일 때는 자동으로 사용 중지됩니다."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"중요도"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"차단: 알림 다시 표시 안함"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"낮음: 알림 목록 하단에 무음으로 표시"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"일반: 무음으로 알림 표시"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"기타"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"이러한 알림의 중요도를 설정했습니다."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
 </resources>

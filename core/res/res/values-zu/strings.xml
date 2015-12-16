@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ibuyekezwe ngumqondisi wakho"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Isuswe ngumlawuli wakho"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Ukusiza ukuthuthukisa impilo yebhethri, isilondoloze sebhethri sehlisa ukusebenza kwedivayisi yakho futhi sikhawulele ukudlidliza, amasevisi wendawo, nedatha eningi yangasemuva. I-imeyili, imilayezo, nezinye izinhlelo zokusebenza ezincike ekuvumelaniseni zingahle zingabuyekezwa ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri siyavaleka ngokuzenzakalelayo uma idivayisi yakho ishaja."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Ukubaluleka"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Okuvinjiwe: Ungalokothi ubonise lezi zaziso"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Okuphansi: Bonisa ngokuthulile ngaphansi kohlu lwesaziso"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Okujwayelekile: Bonisa ngokuthulile lezi zaziso"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> okukhethiwe</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Okwahlukahlukene"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Usethe ukubaluleka kwalezi zaziso."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Lokhu kubalulekile ngenxa yabantu ababandakanyekayo."</string>
 </resources>

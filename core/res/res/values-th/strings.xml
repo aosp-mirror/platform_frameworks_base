@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ลบโดยผู้ดูแลระบบของคุณ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"เพื่อช่วยปรับปรุงอายุการใช้งานแบตเตอรี่ โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์และจำกัดการสั่น บริการตำแหน่ง และข้อมูลแบ็กกราวด์ส่วนใหญ่ สำหรับอีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์จะไม่อัปเดตหากคุณไม่เปิดขึ้นมา\n\nโหมดประหยัดแบตเตอรี่จะปิดโดยอัตโนมัติขณะชาร์จอุปกรณ์"</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"ความสำคัญ"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"บล็อก: อย่าแสดงการแจ้งเตือนเหล่านี้"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"ต่ำ: แสดงที่ด้านล่างของรายการแจ้งเตือนโดยไม่ส่งเสียง"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"ปกติ: แสดงการแจ้งเตือนเหล่านี้โดยไม่ส่งเสียง"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one">เลือกไว้ <xliff:g id="COUNT_0">%1$d</xliff:g> รายการ</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"เบ็ดเตล็ด"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"คุณตั้งค่าความสำคัญของการแจ้งเตือนเหล่านี้"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"ข้อความนี้สำคัญเนื่องจากบุคคลที่เกี่ยวข้อง"</string>
 </resources>

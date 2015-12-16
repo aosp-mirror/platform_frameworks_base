@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"آپ کے منتظم نے اپ ڈيٹ کر دیا"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"آپ کے منتظم کی جانب سے حذف کر دیا گیا"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر منحصر دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"اہمیت"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"مسدود کردہ: یہ اطلاعات کبھی مت دکھائیں"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"پست: اطلاعات کی فہرست کے نیچے خاموشی سے دکھائیں"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"عام: خاموشی سے یہ اطلاعات دکھائیں"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> منتخب کردہ</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"متفرقات"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"ان اطلاعات کی اہمیت آپ مقرر کرتے ہیں۔"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"اس میں موجود لوگوں کی وجہ سے یہ اہم ہے۔"</string>
 </resources>

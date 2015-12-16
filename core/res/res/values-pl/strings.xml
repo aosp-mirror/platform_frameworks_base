@@ -1458,8 +1458,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Zaktualizowane przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Usunięty przez administratora"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje, usługi lokalizacyjne i przetwarzanie większości danych w tle. Poczta, czat i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Ważność"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Zablokowana: nigdy nie pokazuj tych powiadomień"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Niska: pokazuj na dole listy powiadomień bez sygnału dźwiękowego"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normalna: pokazuj te powiadomienia bez sygnału dźwiękowego"</string>
@@ -1548,8 +1547,6 @@
       <item quantity="one">Wybrano <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Inne"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Ustawiłeś ważność tych powiadomień."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Ta wiadomość jest ważna ze względu na osoby uczestniczące w wątku."</string>
 </resources>

@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Yöneticiniz tarafından silindi"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pil tasarrufu özelliği, pil ömrünü iyileştirmeye yardımcı olmak için cihazın performansını düşürür, titreşimi, konum hizmetlerini ve arka plan verilerinin çoğunu sınırlar. Senkronizasyona dayalı olarak çalışan e-posta, mesajlaşma uygulamaları ve diğer uygulamalar, bunları açmadığınız sürece güncellenmeyebilir.\n\nCihazınız şarj olurken pil tasarrufu otomatik olarak kapatılır."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Önem"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Engellendi: Bu bildirimleri hiçbir zaman gösterme"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Düşük: Bildirim listesinin altında sessizce göster"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Bu bildirimleri sessizce göster"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> öğe seçildi</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Çeşitli"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Bu bildirimlerin önem derecesini ayarladınız."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Bu, dahil olan kişiler nedeniyle önemlidir."</string>
 </resources>

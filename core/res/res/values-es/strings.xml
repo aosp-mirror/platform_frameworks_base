@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por tu administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado por tu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Importancia"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloqueada: no mostrar estas notificaciones"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Baja: mostrar en la parte inferior de la lista de notificaciones de forma silenciosa"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Normal: mostrar estas notificaciones de forma silenciosa"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> seleccionado</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Varios"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Tú determinas la importancia de estas notificaciones."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Esto es importante por los usuarios implicados."</string>
 </resources>

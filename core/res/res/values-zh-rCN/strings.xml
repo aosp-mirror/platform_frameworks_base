@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"重要性"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"屏蔽：一律不显示这些通知"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"低：在通知列表底部显示，不发出提示音"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"一般：显示这些通知，但不发出提示音"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"这些通知的重要性由您来设置。"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定人士，因此被归为重要通知。"</string>
 </resources>
