@@ -67,7 +67,7 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    bool initialize(ANativeWindow* window);
+    void initialize(ANativeWindow* window);
     void updateSurface(ANativeWindow* window);
     bool pauseSurface(ANativeWindow* window);
     bool hasSurface() { return mNativeWindow.get(); }
