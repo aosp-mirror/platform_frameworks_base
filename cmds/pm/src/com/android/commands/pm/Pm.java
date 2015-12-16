@@ -376,6 +376,7 @@ public final class Pm {
                     != PackageInstaller.STATUS_SUCCESS) {
                 return 1;
             }
+            System.out.println("Success");
             return 0;
         } finally {
             try {
@@ -591,7 +592,6 @@ public final class Pm {
             } else {
                 System.err.println("Failure ["
                         + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
-                System.err.println("Failure details: " + result.getExtras());
             }
             return status;
         } finally {
