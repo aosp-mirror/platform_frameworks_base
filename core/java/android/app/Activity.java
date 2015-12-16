@@ -5300,8 +5300,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean isTaskRoot() {
         try {
-            return ActivityManagerNative.getDefault()
-                .getTaskForActivity(mToken, true) >= 0;
+            return ActivityManagerNative.getDefault().getTaskForActivity(mToken, true) >= 0;
         } catch (RemoteException e) {
             return false;
         }
