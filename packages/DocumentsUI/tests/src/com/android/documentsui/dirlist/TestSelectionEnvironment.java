@@ -18,12 +18,22 @@ package com.android.documentsui.dirlist;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.View;
 
 import com.android.documentsui.dirlist.MultiSelectManager.SelectionEnvironment;
 
+import java.util.List;
+import java.util.Set;
+
 public class TestSelectionEnvironment implements SelectionEnvironment {
+
+    private List<String> mItems;
+
+    public TestSelectionEnvironment(List<String> items) {
+        mItems = items;
+    }
 
     @Override
     public void showBand(Rect rect) {
@@ -104,5 +114,28 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
 
     @Override
     public void focusItem(int position) {
+    }
+
+    @Override
+    public String getModelIdFromAdapterPosition(int position) {
+        return mItems.get(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mItems.size();
+    }
+
+    @Override
+    public List<String> getModelIds() {
+        return null;
+    }
+
+    @Override
+    public void notifyItemChanged(String id, String selectionChangedMarker) {
+    }
+
+    @Override
+    public void registerDataObserver(AdapterDataObserver observer) {
     }
 }

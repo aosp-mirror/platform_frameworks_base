@@ -20,13 +20,10 @@ import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.SparseBooleanArray;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.android.documentsui.TestInputEvent;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
-
-import org.mockito.Mockito;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,30 +36,25 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     private static final List<String> items;
     static {
         items = new ArrayList<String>();
-        items.add("aaa");
-        items.add("bbb");
-        items.add("ccc");
-        items.add("111");
-        items.add("222");
-        items.add("333");
+        for (int i = 0; i < 100; ++i) {
+            items.add(Integer.toString(i));
+        }
     }
 
     private MultiSelectManager mManager;
-    private TestAdapter mAdapter;
     private TestCallback mCallback;
     private TestSelectionEnvironment mEnv;
 
     public void setUp() throws Exception {
-        mAdapter = new TestAdapter(items);
         mCallback = new TestCallback();
-        mEnv = new TestSelectionEnvironment();
-        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_MULTIPLE);
+        mEnv = new TestSelectionEnvironment(items);
+        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_MULTIPLE);
         mManager.addCallback(mCallback);
     }
 
     public void testMouseClick_StartsSelectionMode() {
         click(7);
-        assertSelection(7);
+        assertSelection(items.get(7));
     }
 
     public void testMouseClick_NotifiesSelectionChanged() {
@@ -84,21 +76,21 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSetSelectionFocusBegin() {
-        mManager.setItemSelected(7, true);
-        mManager.setSelectionFocusBegin(7);
+        mManager.setItemsSelected(Lists.newArrayList(items.get(7)), true);
+        mManager.setSelectionRangeBegin(7);
         shiftClick(11);
         assertRangeSelection(7, 11);
     }
 
     public void testLongPress_StartsSelectionMode() {
         longPress(7);
-        assertSelection(7);
+        assertSelection(items.get(7));
     }
 
     public void testLongPress_SecondPressExtendsSelection() {
         longPress(7);
         longPress(99);
-        assertSelection(7, 99);
+        assertSelection(items.get(7), items.get(99));
     }
 
     public void testSingleTapUp_UnselectsSelectedItem() {
@@ -118,8 +110,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         longPress(99);
         tap(7);
         tap(13);
-        tap(129899);
-        assertSelection(7, 99, 13, 129899);
+        assertSelection(items.get(7), items.get(99), items.get(13));
     }
 
     public void testSingleTapUp_ShiftCreatesRangeSelection() {
@@ -173,27 +164,27 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode() {
-        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         tap(13);
-        assertSelection(13);
+        assertSelection(items.get(13));
     }
 
     public void testSingleSelectMode_ShiftTap() {
-        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(13);
         shiftTap(20);
-        assertSelection(20);
+        assertSelection(items.get(20));
     }
 
     public void testSingleSelectMode_ShiftDoesNotExtendSelection() {
-        mManager = new MultiSelectManager(mAdapter, mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         keyToPosition(22, true);
-        assertSelection(22);
+        assertSelection(items.get(22));
     }
 
     public void testProvisionalSelection() {
@@ -203,26 +194,37 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         SparseBooleanArray provisional = new SparseBooleanArray();
         provisional.append(1, true);
         provisional.append(2, true);
-        s.setProvisionalSelection(provisional);
-        assertSelection(1, 2);
+        s.setProvisionalSelection(getItemIds(provisional));
+        assertSelection(items.get(1), items.get(2));
 
         provisional.delete(1);
         provisional.append(3, true);
-        s.setProvisionalSelection(provisional);
-        assertSelection(2, 3);
+        s.setProvisionalSelection(getItemIds(provisional));
+        assertSelection(items.get(2), items.get(3));
 
         s.applyProvisionalSelection();
-        assertSelection(2, 3);
+        assertSelection(items.get(2), items.get(3));
 
         provisional.clear();
         provisional.append(3, true);
         provisional.append(4, true);
-        s.setProvisionalSelection(provisional);
-        assertSelection(2, 3, 4);
+        s.setProvisionalSelection(getItemIds(provisional));
+        assertSelection(items.get(2), items.get(3), items.get(4));
 
         provisional.delete(3);
-        s.setProvisionalSelection(provisional);
-        assertSelection(2, 3, 4);
+        s.setProvisionalSelection(getItemIds(provisional));
+        assertSelection(items.get(2), items.get(3), items.get(4));
+    }
+
+    private static Set<String> getItemIds(SparseBooleanArray selection) {
+        Set<String> ids = new HashSet<>();
+
+        int count = selection.size();
+        for (int i = 0; i < count; ++i) {
+            ids.add(items.get(selection.keyAt(i)));
+        }
+
+        return ids;
     }
 
     private void longPress(int position) {
@@ -246,26 +248,26 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     private void keyToPosition(int position, boolean shift) {
-        mManager.attemptChangePosition(position, shift);
+        mManager.attemptChangeFocus(position, shift);
     }
 
-    private void assertSelected(int... expected) {
+    private void assertSelected(String... expected) {
         for (int i = 0; i < expected.length; i++) {
             Selection selection = mManager.getSelection();
             String err = String.format(
-                    "Selection %s does not contain %d", selection, expected[i]);
+                    "Selection %s does not contain %s", selection, expected[i]);
             assertTrue(err, selection.contains(expected[i]));
         }
     }
 
-    private void assertSelection(int... expected) {
+    private void assertSelection(String... expected) {
         assertSelectionSize(expected.length);
         assertSelected(expected);
     }
 
     private void assertRangeSelected(int begin, int end) {
         for (int i = begin; i <= end; i++) {
-            assertSelected(i);
+            assertSelected(items.get(i));
         }
     }
 
@@ -281,15 +283,15 @@ public class MultiSelectManagerTest extends AndroidTestCase {
 
     private static final class TestCallback implements MultiSelectManager.Callback {
 
-        Set<Integer> ignored = new HashSet<>();
+        Set<String> ignored = new HashSet<>();
         private boolean mSelectionChanged = false;
 
         @Override
-        public void onItemStateChanged(int position, boolean selected) {}
+        public void onItemStateChanged(String modelId, boolean selected) {}
 
         @Override
-        public boolean onBeforeItemStateChange(int position, boolean selected) {
-            return !ignored.contains(position);
+        public boolean onBeforeItemStateChange(String modelId, boolean selected) {
+            return !ignored.contains(modelId);
         }
 
         @Override
@@ -299,35 +301,6 @@ public class MultiSelectManagerTest extends AndroidTestCase {
 
         void assertSelectionChanged() {
             assertTrue(mSelectionChanged);
-        }
-    }
-
-    private static final class TestHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        public TestHolder(View view) {
-            super(view);
-        }
-    }
-
-    private static final class TestAdapter extends RecyclerView.Adapter<TestHolder> {
-
-        private List<String> mItems;
-
-        public TestAdapter(List<String> items) {
-            mItems = items;
-        }
-
-        @Override
-        public TestHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new TestHolder(Mockito.mock(ViewGroup.class));
-        }
-
-        @Override
-        public void onBindViewHolder(TestHolder holder, int position) {}
-
-        @Override
-        public int getItemCount() {
-            return mItems.size();
         }
     }
 }

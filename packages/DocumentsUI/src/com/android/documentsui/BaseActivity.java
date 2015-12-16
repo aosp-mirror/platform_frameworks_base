@@ -85,7 +85,7 @@ public abstract class BaseActivity extends Activity {
     private int mLayoutId;
     private DirectoryContainerView mDirectoryContainer;
 
-    public abstract void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings);
+    public abstract void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
 
     abstract void onTaskFinished(Uri... uris);
@@ -826,7 +826,7 @@ public abstract class BaseActivity extends Activity {
      * Interface providing access to current view of documents
      * even when all documents are not homed to the same parent.
      */
-    public interface DocumentContext {
+    public interface SiblingProvider {
         /**
          * Returns the cursor for the selected document. The cursor can be used to retrieve
          * details about a document and its siblings.

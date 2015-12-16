@@ -16,15 +16,20 @@
 
 package com.android.documentsui.dirlist;
 
+import static com.android.documentsui.dirlist.MultiSelectManager.GridModel.NOT_SET;
+
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.SparseBooleanArray;
 import android.view.View;
 
 import com.android.documentsui.dirlist.MultiSelectManager.GridModel;
+
+import java.util.List;
+import java.util.Set;
 
 @SmallTest
 public class MultiSelectManager_GridModelTest extends AndroidTestCase {
@@ -35,7 +40,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
     private static GridModel model;
     private static TestEnvironment env;
-    private static SparseBooleanArray lastSelection;
+    private static Set<String> lastSelection;
     private static int viewWidth;
 
     private static void setUp(int numChildren, int numColumns) {
@@ -45,7 +50,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         model.addOnSelectionChangedListener(
                 new GridModel.OnSelectionChangedListener() {
                     @Override
-                    public void onSelectionChanged(SparseBooleanArray updatedSelection) {
+                    public void onSelectionChanged(Set<String> updatedSelection) {
                         lastSelection = updatedSelection;
                     }
                 });
@@ -62,91 +67,91 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         setUp(20, 5);
         model.startSelection(new Point(0, 10));
         model.resizeSelection(new Point(1, 11));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testSelectionRightOfItems() {
         setUp(20, 4);
         model.startSelection(new Point(viewWidth - 1, 10));
         model.resizeSelection(new Point(viewWidth - 2, 11));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testSelectionAboveItems() {
         setUp(20, 4);
         model.startSelection(new Point(10, 0));
         model.resizeSelection(new Point(11, 1));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testSelectionBelowItems() {
         setUp(5, 4);
         model.startSelection(new Point(10, VIEWPORT_HEIGHT - 1));
         model.resizeSelection(new Point(11, VIEWPORT_HEIGHT - 2));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testVerticalSelectionBetweenItems() {
         setUp(20, 4);
         model.startSelection(new Point(106, 0));
         model.resizeSelection(new Point(107, 200));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testHorizontalSelectionBetweenItems() {
         setUp(20, 4);
         model.startSelection(new Point(0, 105));
         model.resizeSelection(new Point(200, 106));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testGrowingAndShrinkingSelection() {
         setUp(20, 4);
         model.startSelection(new Point(0, 0));
         model.resizeSelection(new Point(5, 5));
-        assertSelected(new int[] {0});
+        assertSelected(0);
         model.resizeSelection(new Point(109, 109));
-        assertSelected(new int[] {0});
+        assertSelected(0);
         model.resizeSelection(new Point(110, 109));
-        assertSelected(new int[] {0, 1});
+        assertSelected(0, 1);
         model.resizeSelection(new Point(110, 110));
-        assertSelected(new int[] {0, 1, 4, 5});
+        assertSelected(0, 1, 4, 5);
         model.resizeSelection(new Point(214, 214));
-        assertSelected(new int[] {0, 1, 4, 5});
+        assertSelected(0, 1, 4, 5);
         model.resizeSelection(new Point(215, 214));
-        assertSelected(new int[] {0, 1, 2, 4, 5, 6});
+        assertSelected(0, 1, 2, 4, 5, 6);
         model.resizeSelection(new Point(214, 214));
-        assertSelected(new int[] {0, 1, 4, 5});
+        assertSelected(0, 1, 4, 5);
         model.resizeSelection(new Point(110, 110));
-        assertSelected(new int[] {0, 1, 4, 5});
+        assertSelected(0, 1, 4, 5);
         model.resizeSelection(new Point(110, 109));
-        assertSelected(new int[] {0, 1});
+        assertSelected(0, 1);
         model.resizeSelection(new Point(109, 109));
-        assertSelected(new int[] {0});
+        assertSelected(0);
         model.resizeSelection(new Point(5, 5));
-        assertSelected(new int[] {0});
+        assertSelected(0);
         model.resizeSelection(new Point(0, 0));
-        assertSelected(new int[0]);
-        assertEquals(GridModel.NOT_SET, model.getPositionNearestOrigin());
+        assertSelected();
+        assertEquals(NOT_SET, model.getPositionNearestOrigin());
     }
 
     public void testSelectionMovingAroundOrigin() {
         setUp(16, 4);
         model.startSelection(new Point(210, 210));
         model.resizeSelection(new Point(viewWidth - 1, 0));
-        assertSelected(new int[] {2, 3, 6, 7});
+        assertSelected(2, 3, 6, 7);
         model.resizeSelection(new Point(0, 0));
-        assertSelected(new int[] {0, 1, 4, 5});
+        assertSelected(0, 1, 4, 5);
         model.resizeSelection(new Point(0, 420));
-        assertSelected(new int[] {8, 9, 12, 13});
+        assertSelected(8, 9, 12, 13);
         model.resizeSelection(new Point(viewWidth - 1, 420));
-        assertSelected(new int[] {10, 11, 14, 15});
+        assertSelected(10, 11, 14, 15);
         assertEquals(10, model.getPositionNearestOrigin());
     }
 
@@ -154,24 +159,24 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         setUp(40, 4);
         model.startSelection(new Point(0, 0));
         model.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
-        assertSelected(new int[] {0, 4, 8, 12, 16});
+        assertSelected(0, 4, 8, 12, 16);
         scroll(CHILD_VIEW_EDGE_PX);
-        assertSelected(new int[] {0, 4, 8, 12, 16, 20});
+        assertSelected(0, 4, 8, 12, 16, 20);
         model.resizeSelection(new Point(200, VIEWPORT_HEIGHT - 1));
-        assertSelected(new int[] {0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21});
+        assertSelected(0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21);
         scroll(CHILD_VIEW_EDGE_PX);
-        assertSelected(new int[] {0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21, 24, 25});
+        assertSelected(0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 20, 21, 24, 25);
         scroll(-2 * CHILD_VIEW_EDGE_PX);
-        assertSelected(new int[] {0, 1, 4, 5, 8, 9, 12, 13, 16, 17});
+        assertSelected(0, 1, 4, 5, 8, 9, 12, 13, 16, 17);
         model.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
-        assertSelected(new int[] {0, 4, 8, 12, 16});
+        assertSelected(0, 4, 8, 12, 16);
         assertEquals(0, model.getPositionNearestOrigin());
     }
 
-    private static void assertSelected(int[] selectedPositions) {
+    private static void assertSelected(int... selectedPositions) {
         assertEquals(selectedPositions.length, lastSelection.size());
         for (int position : selectedPositions) {
-            assertTrue(lastSelection.get(position));
+            assertTrue(lastSelection.contains(Integer.toString(position)));
         }
     }
 
@@ -246,7 +251,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
         @Override
         public Rect getAbsoluteRectForChildViewAt(int index) {
-            int adapterPosition = getAdapterPositionAt(index);
+            int adapterPosition = (getFirstVisibleRowIndex() * mNumColumns) + index;
             int rowIndex = adapterPosition / mNumColumns;
             int columnIndex = adapterPosition % mNumColumns;
 
@@ -315,6 +320,31 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
         @Override
         public void focusItem(int i) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getModelIdFromAdapterPosition(int position) {
+            return Integer.toString(position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mNumChildren;
+        }
+
+        @Override
+        public List<String> getModelIds() {
+            return null;
+        }
+
+        @Override
+        public void notifyItemChanged(String id, String selectionChangedMarker) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void registerDataObserver(AdapterDataObserver observer) {
             throw new UnsupportedOperationException();
         }
     }

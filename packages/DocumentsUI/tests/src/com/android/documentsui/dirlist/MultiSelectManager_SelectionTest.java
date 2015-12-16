@@ -20,33 +20,43 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
+import com.google.common.collect.Sets;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @SmallTest
 public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     private Selection selection;
 
+    private String[] ids = new String[]{
+            "foo",
+            "43",
+            "auth|id=@53di*/f3#d"
+    };
+
     @Override
     public void setUp() throws Exception {
         selection = new Selection();
-        selection.add(3);
-        selection.add(5);
-        selection.add(9);
+        selection.add(ids[0]);
+        selection.add(ids[1]);
+        selection.add(ids[2]);
     }
 
     public void testAdd() {
         // We added in setUp.
         assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(5);
-        assertContains(9);
+        assertContains(ids[0]);
+        assertContains(ids[1]);
+        assertContains(ids[2]);
     }
 
     public void testRemove() {
-        selection.remove(3);
-        selection.remove(5);
+        selection.remove(ids[0]);
+        selection.remove(ids[2]);
         assertEquals(1, selection.size());
-        assertContains(9);
+        assertContains(ids[1]);
     }
 
     public void testClear() {
@@ -60,10 +70,10 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
         assertTrue(selection.isEmpty());
     }
 
-    public void testSizeAndGet() {
+    public void testSize() {
         Selection other = new Selection();
         for (int i = 0; i < selection.size(); i++) {
-            other.add(selection.get(i));
+            other.add(ids[i]);
         }
         assertEquals(selection.size(), other.size());
     }
@@ -74,9 +84,9 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     public void testEqualsOther() {
         Selection other = new Selection();
-        other.add(3);
-        other.add(5);
-        other.add(9);
+        other.add(ids[0]);
+        other.add(ids[1]);
+        other.add(ids[2]);
         assertEquals(selection, other);
         assertEquals(selection.hashCode(), other.hashCode());
     }
@@ -90,65 +100,78 @@ public class MultiSelectManager_SelectionTest extends AndroidTestCase {
 
     public void testNotEquals() {
         Selection other = new Selection();
-        other.add(789);
+        other.add("foobar");
         assertFalse(selection.equals(other));
     }
 
-    public void testExpandBefore() {
-        selection.expand(2, 10);
-        assertEquals(3, selection.size());
-        assertContains(13);
-        assertContains(15);
-        assertContains(19);
+    public void testIntersection_empty0() {
+        Selection testSelection = new Selection();
+        testSelection.intersect(new HashSet<String>());
+        assertTrue(testSelection.isEmpty());
     }
 
-    public void testExpandAfter() {
-        selection.expand(10, 10);
-        assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(5);
-        assertContains(9);
+    public void testIntersection_empty1() {
+        Selection testSelection = new Selection();
+        testSelection.intersect(Sets.newHashSet("foo"));
+        assertTrue(testSelection.isEmpty());
     }
 
-    public void testExpandSplit() {
-        selection.expand(5, 10);
-        assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(15);
-        assertContains(19);
+    public void testIntersection_empty2() {
+        assertFalse(selection.isEmpty());
+        selection.intersect(new HashSet<String>());
+        assertTrue(selection.isEmpty());
     }
 
-    public void testExpandEncompased() {
-        selection.expand(2, 10);
-        assertEquals(3, selection.size());
-        assertContains(13);
-        assertContains(15);
-        assertContains(19);
+    public void testIntersection_exclusive() {
+        String[] ids0 = new String[]{"foo", "bar", "baz"};
+        String[] ids1 = new String[]{"0", "1", "2"};
+
+        Selection testSelection = new Selection();
+        testSelection.add(ids0[0]);
+        testSelection.add(ids0[1]);
+        testSelection.add(ids0[2]);
+
+        Set<String> set = Sets.newHashSet(ids1);
+        testSelection.intersect(set);
+
+        assertTrue(testSelection.isEmpty());
     }
 
-    public void testCollapseBefore() {
-        selection.collapse(0, 2);
-        assertEquals(3, selection.size());
-        assertContains(1);
-        assertContains(3);
-        assertContains(7);
+    public void testIntersection_subset() {
+        String[] ids0 = new String[]{"foo", "bar", "baz"};
+        String[] ids1 = new String[]{"0", "baz", "1", "foo", "2"};
+
+        Selection testSelection = new Selection();
+        testSelection.add(ids0[0]);
+        testSelection.add(ids0[1]);
+        testSelection.add(ids0[2]);
+
+        testSelection.intersect(Sets.newHashSet(ids1));
+
+        assertTrue(testSelection.contains("foo"));
+        assertFalse(testSelection.contains("bar"));
+        assertTrue(testSelection.contains("baz"));
     }
 
-    public void testCollapseAfter() {
-        selection.collapse(10, 10);
-        assertEquals(3, selection.size());
-        assertContains(3);
-        assertContains(5);
-        assertContains(9);
+    public void testIntersection_all() {
+        String[] ids0 = new String[]{"foo", "bar", "baz"};
+        String[] ids1 = new String[]{"0", "baz", "1", "foo", "2", "bar"};
+
+        Selection testSelection = new Selection();
+        testSelection.add(ids0[0]);
+        testSelection.add(ids0[1]);
+        testSelection.add(ids0[2]);
+
+        Selection control = new Selection();
+        control.copyFrom(testSelection);
+
+        testSelection.intersect(Sets.newHashSet(ids1));
+
+        assertTrue(testSelection.equals(control));
     }
 
-    public void testCollapseAcross() {
-        selection.collapse(0, 10);
-        assertEquals(0, selection.size());
-    }
-
-    private void assertContains(int i) {
-        String err = String.format("Selection %s does not contain %d", selection, i);
-        assertTrue(err, selection.contains(i));
+    private void assertContains(String id) {
+        String err = String.format("Selection %s does not contain %s", selection, id);
+        assertTrue(err, selection.contains(id));
     }
 }

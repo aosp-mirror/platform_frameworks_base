@@ -19,8 +19,8 @@ package com.android.documentsui;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
-import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 
 import android.app.Activity;
@@ -31,7 +31,6 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -419,7 +418,7 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc, DocumentContext context) {
+    public void onDocumentPicked(DocumentInfo doc, SiblingProvider siblings) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isContainer()) {
             openContainerDocument(doc);

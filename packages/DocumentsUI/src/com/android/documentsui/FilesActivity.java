@@ -323,7 +323,7 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc, @Nullable DocumentContext siblings) {
+    public void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings) {
         if (doc.isContainer()) {
             openContainerDocument(doc);
         } else {
@@ -334,7 +334,7 @@ public class FilesActivity extends BaseActivity {
     /**
      * Launches an intent to view the specified document.
      */
-    private void openDocument(DocumentInfo doc, @Nullable DocumentContext siblings) {
+    private void openDocument(DocumentInfo doc, @Nullable SiblingProvider siblings) {
         Intent intent = null;
         if (siblings != null) {
             QuickViewIntentBuilder builder = new QuickViewIntentBuilder(

@@ -156,9 +156,6 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             if (mType == DirectoryFragment.TYPE_SEARCH) {
                 // Filter directories out of search results, for now
                 cursor = new FilteringCursorWrapper(cursor, null, SEARCH_REJECT_MIMES);
-            } else {
-                // Normal directories should have sorting applied
-                cursor = new SortingCursorWrapper(cursor, result.sortOrder);
             }
 
             result.client = client;
