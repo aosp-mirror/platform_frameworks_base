@@ -341,11 +341,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         if (launchState.launchedFromAppWithThumbnail) {
             if (mTask.isLaunchTarget) {
+                ctx.postAnimationTrigger.increment();
                 // Immediately start the dim animation
                 animateDimToProgress(taskViewEnterFromAppDuration,
                         ctx.postAnimationTrigger.decrementOnAnimationEnd());
-                ctx.postAnimationTrigger.increment();
-
                 // Animate the action button in
                 fadeInActionButton(taskViewEnterFromAppDuration);
             } else {
