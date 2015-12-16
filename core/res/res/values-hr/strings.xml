@@ -1449,8 +1449,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurira vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Važnost"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokirano: nikad ne prikazuj te obavijesti"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Nisko: tiho prikaži na dnu popisa obavijesti"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Uobičajeno: prikazuj te obavijesti tiho"</string>
@@ -1530,8 +1529,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> odabranih</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Razno"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Postavili ste važnost tih obavijesti."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Važno je zbog uključenih osoba."</string>
 </resources>

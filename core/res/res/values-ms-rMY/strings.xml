@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dipadamkan oleh pentadbir anda"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan mengehadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Kepentingan"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Disekat: Jangan sekali-kali tunjukkan pemberitahuan ini"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Rendah: Tunjukkan pada bahagian bawah senarai pemberitahuan secara senyap"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Biasa: Tunjukkan pemberitahuan ini secara senyap"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dipilih</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Pelbagai"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Anda menetapkan kepentingan pemberitahuan ini."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Mesej ini penting disebabkan orang yang terlibat."</string>
 </resources>

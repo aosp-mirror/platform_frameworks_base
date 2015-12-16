@@ -1458,8 +1458,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Удалено администратором"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Важность"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Заблокировано: не показывать эти уведомления"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Низкая: показывать без звука в конце списка уведомлений"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Обычная: показывать уведомления без звука"</string>
@@ -1548,8 +1547,6 @@
       <item quantity="other">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Другое"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Вы определили важность этих уведомлений."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Эти люди для вас важны"</string>
 </resources>

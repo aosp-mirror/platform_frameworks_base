@@ -1441,8 +1441,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Администраторуңуз жаңырткан"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Маанилүүлүгү"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Бөгөттөлгөн: Бул эскертмелер эч качан көрсөтүлбөсүн"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Төмөн: Эскертмелер тизмесинин эң ылдыйында үнсүз көрсөтүлсүн"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Кадимки: Бул эскертмелер үнсүз көрсөтүлсүн"</string>
@@ -1513,8 +1512,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> тандалды</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Калган-каткандар"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Бул эскертмелердин маанилүүлүгүн сиз койдуңуз."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Ага катышкан адамдардан улам ал маанилүү."</string>
 </resources>

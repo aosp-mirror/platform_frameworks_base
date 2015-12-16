@@ -1442,8 +1442,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"වැදගත්කම"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"අවහිර කළ: මෙම දැනුම්දීම් කිසිදා නොපෙන්වන්න"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"අඩු: දැනුම්දීම් ලැයිස්තුවෙහි පහළින්ම නිශ්ශබ්දව පෙන්වන්න"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"සාමාන්‍ය: නිශ්ශබ්දව මෙම දැනුම්දීම් පෙන්වන්න"</string>
@@ -1514,8 +1513,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"විවිධාකාර"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"ඔබ මෙම දැනුම්දීම්වල වැදගත්කම සකසා ඇත."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"සම්බන්ධ වූ පුද්ගලයන් නිසා මෙය වැදගත් වේ."</string>
 </resources>

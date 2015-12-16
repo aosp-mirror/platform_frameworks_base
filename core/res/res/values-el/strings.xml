@@ -1440,8 +1440,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ενημερώθηκε από το διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Διαγράφηκε από το διαχειριστή σας"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται έως ότου τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα όταν η συσκευή σας φορτίζει."</string>
-    <!-- no translation found for notification_importance_title (7493989722610008700) -->
-    <skip />
+    <string name="notification_importance_title" msgid="7493989722610008700">"Βαρύτητα"</string>
     <string name="notification_importance_blocked" msgid="7118826900767047125">"Αποκλεισμένες: Να μην εμφανίζονται ποτέ αυτές οι ειδοποιήσεις"</string>
     <string name="notification_importance_low" msgid="6447640449918427187">"Χαμηλής βαρύτητας: Να εμφανίζονται στο κάτω τμήμα της λίστας ειδοποιήσεων χωρίς τη συνοδεία ήχου"</string>
     <string name="notification_importance_default" msgid="7991157697609575271">"Κανονική βαρύτητα: Να εμφανίζονται αυτές οι ειδοποιήσεις χωρίς ήχο"</string>
@@ -1512,8 +1511,6 @@
       <item quantity="one">Επιλέχτηκε <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"Διάφορα"</string>
-    <!-- no translation found for importance_from_topic (3572280439880023233) -->
-    <skip />
-    <!-- no translation found for importance_from_person (9160133597262938296) -->
-    <skip />
+    <string name="importance_from_topic" msgid="3572280439880023233">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
 </resources>

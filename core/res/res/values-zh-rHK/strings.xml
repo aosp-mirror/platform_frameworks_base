@@ -1512,5 +1512,5 @@
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"您可以為這些通知設定重要性。"</string>
-    <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及使用者。"</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及的人。"</string>
 </resources>
