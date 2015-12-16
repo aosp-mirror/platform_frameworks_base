@@ -278,7 +278,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
-                    mItems.add(getBugReportAction());
+                    mItems.add(new BugReportAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
                 if (mShowSilentToggle) {
@@ -367,60 +367,67 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private Action getBugReportAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_bugreport,
-                R.string.bugreport_title) {
+    private class BugReportAction extends SinglePressAction implements LongPressAction {
 
-            public void onPress() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle(com.android.internal.R.string.bugreport_title);
-                builder.setMessage(com.android.internal.R.string.bugreport_message);
-                builder.setNegativeButton(com.android.internal.R.string.cancel, null);
-                builder.setPositiveButton(com.android.internal.R.string.report,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // don't actually trigger the bugreport if we are running stability
-                                // tests via monkey
-                                if (ActivityManager.isUserAMonkey()) {
-                                    return;
-                                }
-                                // Add a little delay before executing, to give the
-                                // dialog a chance to go away before it takes a
-                                // screenshot.
-                                mHandler.postDelayed(new Runnable() {
-                                    @Override public void run() {
-                                        //  TODO: select 'progress' flag according to menu choice
-                                        try {
-                                            ActivityManagerNative.getDefault()
-                                                    .requestBugReport(true);
-                                        } catch (RemoteException e) {
-                                        }
-                                    }
-                                }, 500);
-                            }
-                        });
-                AlertDialog dialog = builder.create();
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                dialog.show();
+        public BugReportAction() {
+            super(com.android.internal.R.drawable.ic_lock_bugreport, R.string.bugreport_title);
+        }
+
+        @Override
+        public void onPress() {
+            // don't actually trigger the bugreport if we are running stability
+            // tests via monkey
+            if (ActivityManager.isUserAMonkey()) {
+                return;
             }
+            // Add a little delay before executing, to give the
+            // dialog a chance to go away before it takes a
+            // screenshot.
+            // TODO: remove once screenshots are handled by Shell (instead of dumpstate)
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Take a "heavy" bugreport: it's more user friendly, but causes more
+                        // interference.
+                        ActivityManagerNative.getDefault().requestBugReport(true);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }, 500);
+        }
 
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            public boolean showBeforeProvisioning() {
+        @Override
+        public boolean onLongPress() {
+            // don't actually trigger the bugreport if we are running stability
+            // tests via monkey
+            if (ActivityManager.isUserAMonkey()) {
                 return false;
             }
-
-            @Override
-            public String getStatus() {
-                return mContext.getString(
-                        com.android.internal.R.string.bugreport_status,
-                        Build.VERSION.RELEASE,
-                        Build.ID);
+            try {
+                // Take a "light" bugreport, with less interference.
+                ActivityManagerNative.getDefault().requestBugReport(false);
+            } catch (RemoteException e) {
             }
-        };
+            return true;
+        }
+
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
+
+        @Override
+        public String getStatus() {
+            return mContext.getString(
+                    com.android.internal.R.string.bugreport_status,
+                    Build.VERSION.RELEASE,
+                    Build.ID);
+        }
     }
 
     private Action getSettingsAction() {
@@ -740,13 +747,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mMessageResId = 0;
             mMessage = message;
             mIcon = icon;
-        }
-
-        protected SinglePressAction(int iconResId, CharSequence message) {
-            mIconResId = iconResId;
-            mMessageResId = 0;
-            mMessage = message;
-            mIcon = null;
         }
 
         public boolean isEnabled() {
