@@ -273,6 +273,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"已停用"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"始终开启"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"自动"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 实现"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"设置 WebView 实现"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"转换为文件加密"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"转换…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"文件已加密"</string>
