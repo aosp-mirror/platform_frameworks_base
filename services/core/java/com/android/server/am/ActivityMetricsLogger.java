@@ -4,6 +4,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
 import android.app.ActivityManager.StackId;
 import android.content.Context;
@@ -49,24 +50,26 @@ class ActivityMetricsLogger {
         }
         mLastLogTimeSecs = now;
 
-        mWindowState = WINDOW_STATE_INVALID;
         ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
         if (stack != null && stack.isStackVisibleLocked()) {
             mWindowState = WINDOW_STATE_SIDE_BY_SIDE;
+            return;
         }
-        if (mWindowState == WINDOW_STATE_INVALID) {
-            stack = mSupervisor.getFocusedStack();
-            if (stack.mStackId == HOME_STACK_ID
-                    || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
-                mWindowState = WINDOW_STATE_STANDARD;
-            } else if (stack.mStackId == DOCKED_STACK_ID) {
-                throw new IllegalStateException("Docked stack shouldn't be the focused stack, "
-                        + "because it reported not being visible.");
-            } else if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-                mWindowState = WINDOW_STATE_FREEFORM;
-            } else if (StackId.isStaticStack(stack.mStackId)) {
-                throw new IllegalStateException("Unknown stack=" + stack);
-            }
+        mWindowState = WINDOW_STATE_INVALID;
+        stack = mSupervisor.getFocusedStack();
+        if (stack.mStackId == PINNED_STACK_ID) {
+            stack = mSupervisor.findStackBehind(stack);
+        }
+        if (stack.mStackId == HOME_STACK_ID
+                || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+            mWindowState = WINDOW_STATE_STANDARD;
+        } else if (stack.mStackId == DOCKED_STACK_ID) {
+            throw new IllegalStateException("Docked stack shouldn't be the focused stack, "
+                    + "because it reported not being visible.");
+        } else if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+            mWindowState = WINDOW_STATE_FREEFORM;
+        } else if (StackId.isStaticStack(stack.mStackId)) {
+            throw new IllegalStateException("Unknown stack=" + stack);
         }
     }
 }

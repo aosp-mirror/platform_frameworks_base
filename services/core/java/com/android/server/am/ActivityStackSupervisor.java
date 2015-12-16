@@ -5293,4 +5293,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    ActivityStack findStackBehind(ActivityStack stack) {
+        // TODO(multi-display): We are only looking for stacks on the default display.
+        final ActivityDisplay display = mActivityDisplays.get(Display.DEFAULT_DISPLAY);
+        if (display == null) {
+            return null;
+        }
+        final ArrayList<ActivityStack> stacks = display.mStacks;
+        for (int i = stacks.size() - 1; i >= 0; i--) {
+            if (stacks.get(i) == stack && i > 0) {
+                return stacks.get(i - 1);
+            }
+        }
+        throw new IllegalStateException("Failed to find a stack behind stack=" + stack
+                + " in=" + stacks);
+    }
 }
