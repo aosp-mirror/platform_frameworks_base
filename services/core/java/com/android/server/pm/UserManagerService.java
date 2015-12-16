@@ -1123,11 +1123,25 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static final void checkManageUsersPermission(String message) {
         final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != 0
+        if (!UserHandle.isSameApp(uid, Process.SYSTEM_UID) && uid != Process.ROOT_UID
                 && ActivityManager.checkComponentPermission(
                         android.Manifest.permission.MANAGE_USERS,
                         uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("You need MANAGE_USERS permission to: " + message);
+        }
+    }
+
+    /**
+     * Enforces that only the system UID or root's UID (on any user) can make certain calls to the
+     * UserManager.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or root
+     */
+    private static void checkSystemOrRoot(String message) {
+        final int uid = Binder.getCallingUid();
+        if (!UserHandle.isSameApp(uid, Process.SYSTEM_UID) && uid != Process.ROOT_UID) {
+            throw new SecurityException("Only system may: " + message);
         }
     }
 
@@ -2071,7 +2085,7 @@ public class UserManagerService extends IUserManager.Stub {
     public Bundle getApplicationRestrictionsForUser(String packageName, int userId) {
         if (UserHandle.getCallingUserId() != userId
                 || !UserHandle.isSameApp(Binder.getCallingUid(), getUidForPackage(packageName))) {
-            checkManageUsersPermission("get application restrictions for other users/apps");
+            checkSystemOrRoot("get application restrictions for other users/apps");
         }
         synchronized (mPackagesLock) {
             // Read the restrictions from XML
@@ -2082,7 +2096,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             int userId) {
-        checkManageUsersPermission("set application restrictions");
+        checkSystemOrRoot("set application restrictions");
         synchronized (mPackagesLock) {
             if (restrictions == null || restrictions.isEmpty()) {
                 cleanAppRestrictionsForPackage(packageName, userId);

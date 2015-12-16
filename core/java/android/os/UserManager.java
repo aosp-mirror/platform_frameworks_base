@@ -1631,12 +1631,23 @@ public class UserManager {
     }
 
     /**
-     * Returns a Bundle containing any saved application restrictions for this user, for the
+     * Returns a {@code Bundle} containing any saved application restrictions for this user, for the
      * given package name. Only an application with this package name can call this method.
+     *
+     * <p>The returned {@link Bundle} consists of key-value pairs, as defined by the application,
+     * where the types of values may be:
+     * <ul>
+     * <li>{@code boolean}
+     * <li>{@code int}
+     * <li>{@code String} or {@code String[]}
+     * <li>From {@link android.os.Build.VERSION_CODES#M}, {@code Bundle} or {@code Bundle[]}
+     * </ul>
+     *
      * @param packageName the package name of the calling application
-     * @return a Bundle with the restrictions as key/value pairs, or null if there are no
-     * saved restrictions. The values can be of type Boolean, String or String[], depending
-     * on the restriction type, as defined by the application.
+     * @return a {@code Bundle} with the restrictions for that package, or {@code null} if there
+     * are no saved restrictions.
+     *
+     * @see #KEY_RESTRICTIONS_PENDING
      */
     public Bundle getApplicationRestrictions(String packageName) {
         try {
