@@ -17,8 +17,6 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.SparseArray;
 import com.android.internal.util.XmlUtils;
 
@@ -142,6 +140,9 @@ public final class PointerIcon implements Parcelable {
     private static final PointerIcon gNullIcon = new PointerIcon(STYLE_NULL);
     private static final SparseArray<PointerIcon> gSystemIcons = new SparseArray<PointerIcon>();
 
+    /** @hide */
+    public static boolean sUseLargeIcons = false;
+
     private final int mStyle;
     private int mSystemIconResourceId;
     private Bitmap mBitmap;
@@ -210,10 +211,7 @@ public final class PointerIcon implements Parcelable {
             styleIndex = getSystemIconStyleIndex(STYLE_DEFAULT);
         }
 
-        int accessibilityConfig = Settings.Secure.getIntForUser(
-                    context.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
-                    0, UserHandle.USER_CURRENT);
-        int defStyle = (accessibilityConfig == 1) ?
+        int defStyle = sUseLargeIcons ?
                 com.android.internal.R.style.LargePointer : com.android.internal.R.style.Pointer;
         TypedArray a = context.obtainStyledAttributes(null,
                 com.android.internal.R.styleable.Pointer,

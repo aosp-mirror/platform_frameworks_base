@@ -320,12 +320,13 @@ public class InputManagerService extends IInputManager.Stub
             public void onReceive(Context context, Intent intent) {
                 updatePointerSpeedFromSettings();
                 updateShowTouchesFromSettings();
-                nativeReloadPointerIcons(mPtr);
+                updateAccessibilityLargePointerFromSettings();
             }
         }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
 
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
+        updateAccessibilityLargePointerFromSettings();
     }
 
     // TODO(BT) Pass in paramter for bluetooth system
@@ -1366,13 +1367,21 @@ public class InputManagerService extends IInputManager.Stub
                 }, UserHandle.USER_ALL);
     }
 
+    public void updateAccessibilityLargePointerFromSettings() {
+        final int accessibilityConfig = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
+                0, UserHandle.USER_CURRENT);
+        PointerIcon.sUseLargeIcons = (accessibilityConfig == 1);
+        nativeReloadPointerIcons(mPtr);
+    }
+
     private void registerAccessibilityLargePointerSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON), true,
                 new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        nativeReloadPointerIcons(mPtr);
+                        updateAccessibilityLargePointerFromSettings();
                     }
                 }, UserHandle.USER_ALL);
     }
