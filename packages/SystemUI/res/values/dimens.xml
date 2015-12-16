@@ -245,6 +245,9 @@
     <!-- The height of the history button. -->
     <dimen name="recents_history_button_height">48dp</dimen>
 
+    <!-- The padding between freeform workspace tasks -->
+    <dimen name="recents_freeform_workspace_task_padding">8dp</dimen>
+
     <!-- Space reserved for the cards behind the top card in the top stack -->
     <dimen name="top_stack_peek_amount">12dp</dimen>
 

@@ -776,8 +776,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (toTransform != null && toTask.key != null) {
             Bitmap thumbnail;
             synchronized (mHeaderBarLock) {
-                int toHeaderWidth = (int) (mHeaderBar.getMeasuredWidth() * toTransform.scale);
+                int toHeaderWidth = (int) toTransform.rect.width();
                 int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
+                mHeaderBar.onTaskViewSizeChanged((int) toTransform.rect.width(),
+                        (int) toTransform.rect.height());
                 thumbnail = Bitmap.createBitmap(toHeaderWidth, toHeaderHeight,
                         Bitmap.Config.ARGB_8888);
                 if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {

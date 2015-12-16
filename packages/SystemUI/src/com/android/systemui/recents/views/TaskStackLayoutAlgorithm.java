@@ -294,7 +294,7 @@ public class TaskStackLayoutAlgorithm {
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         mContext = context;
-        mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm();
+        mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
     }
