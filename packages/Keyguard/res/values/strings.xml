@@ -170,29 +170,29 @@
     <string name="kg_login_too_many_attempts">Too many pattern attempts</string>
     <!-- Message shown in dialog when max number of attempts are reached for PIN screen of keyguard -->
     <string name="kg_too_many_failed_pin_attempts_dialog_message">
-        You have incorrectly typed your PIN <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly typed your PIN <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when max number of attempts are reached for password screen of keyguard -->
     <string name="kg_too_many_failed_password_attempts_dialog_message">
-        You have incorrectly typed your password <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly typed your password <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message">
-        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+        \n\nTry again in <xliff:g id="number">%2$d</xliff:g> seconds.
     </string>
 
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. [CHAR LIMIT=none] -->
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet">
-       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        this tablet will be reset, which will delete all its data.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. [CHAR LIMIT=none] -->
     <string name="kg_failed_attempts_almost_at_wipe" product="default">
-       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        this phone will be reset, which will delete all its data.
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the device will now be wiped [CHAR LIMIT=none] -->
@@ -208,14 +208,14 @@
 
     <!-- Message shown when user is almost at the limit of password attempts where the user will be removed. [CHAR LIMIT=none] -->
     <string name="kg_failed_attempts_almost_at_erase_user" product="tablet">
-       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        this user will be removed, which will delete all user data.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the user will be removed. [CHAR LIMIT=none] -->
     <string name="kg_failed_attempts_almost_at_erase_user" product="default">
-       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        this user will be removed, which will delete all user data.
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the user will be removed. [CHAR LIMIT=none] -->
@@ -231,14 +231,14 @@
 
     <!-- Message shown when user is almost at the limit of password attempts where the profile will be removed. [CHAR LIMIT=none] -->
     <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet">
-       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the work profile will be removed, which will delete all profile data.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the profile will be removed. [CHAR LIMIT=none] -->
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default">
-       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        the work profile will be removed, which will delete all profile data.
     </string>
     <!-- Message shown in dialog when user has exceeded the maximum attempts and the profile will be removed. [CHAR LIMIT=none] -->
@@ -255,18 +255,18 @@
     <!-- Message shown in dialog when user is almost at the limit where they will be
     locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="kg_failed_attempts_almost_at_login" product="tablet">
-       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your tablet using an email account.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
     <!-- Message shown in dialog when user is almost at the limit where they will be
     locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="kg_failed_attempts_almost_at_login" product="default">
-       You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       You have incorrectly drawn your unlock pattern <xliff:g id="number">%1$d</xliff:g> times.
+       After <xliff:g id="number">%2$d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your phone using an email account.\n\n
-       Try again in <xliff:g id="number">%d</xliff:g> seconds.
+       Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
     <!-- Instructions telling the user that they entered the wrong SIM PIN for the last time.
