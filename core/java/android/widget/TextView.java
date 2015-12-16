@@ -393,7 +393,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mOverride = false;
         }
 
-        public void resolveWithLayoutDirection(int layoutDirection) {
+        /**
+         * Updates the list of displayed drawables to account for the current
+         * layout direction.
+         *
+         * @param layoutDirection the current layout direction
+         * @return {@code true} if the displayed drawables changed
+         */
+        public boolean resolveWithLayoutDirection(int layoutDirection) {
+            final Drawable previousLeft = mShowing[Drawables.LEFT];
+            final Drawable previousRight = mShowing[Drawables.RIGHT];
+
             // First reset "left" and "right" drawables to their initial values
             mShowing[Drawables.LEFT] = mDrawableLeftInitial;
             mShowing[Drawables.RIGHT] = mDrawableRightInitial;
@@ -441,16 +451,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         break;
                 }
             }
-            applyErrorDrawableIfNeeded(layoutDirection);
-            updateDrawablesLayoutDirection(layoutDirection);
-        }
 
-        private void updateDrawablesLayoutDirection(int layoutDirection) {
-            for (Drawable dr : mShowing) {
-                if (dr != null) {
-                    dr.setLayoutDirection(layoutDirection);
-                }
-            }
+            applyErrorDrawableIfNeeded(layoutDirection);
+
+            return mShowing[Drawables.LEFT] != previousLeft
+                    || mShowing[Drawables.RIGHT] != previousRight;
         }
 
         public void setErrorDrawable(Drawable dr, TextView tv) {
@@ -9809,7 +9814,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Resolve drawables
         if (mDrawables != null) {
-            mDrawables.resolveWithLayoutDirection(layoutDirection);
+            if (mDrawables.resolveWithLayoutDirection(layoutDirection)) {
+                prepareDrawableForDisplay(mDrawables.mShowing[Drawables.LEFT]);
+                prepareDrawableForDisplay(mDrawables.mShowing[Drawables.RIGHT]);
+                applyCompoundDrawableTint();
+            }
+        }
+    }
+
+    /**
+     * Prepares a drawable for display by propagating layout direction and
+     * drawable state.
+     *
+     * @param dr the drawable to prepare
+     */
+    private void prepareDrawableForDisplay(@Nullable Drawable dr) {
+        if (dr == null) {
+            return;
+        }
+
+        dr.setLayoutDirection(getLayoutDirection());
+
+        if (dr.isStateful()) {
+            dr.setState(getDrawableState());
+            dr.jumpToCurrentState();
         }
     }
 
