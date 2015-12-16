@@ -95,6 +95,8 @@ public class CameraDeviceImpl extends CameraDevice {
             new SimpleEntry<>(REQUEST_ID_NONE, null);
     private final SparseArray<OutputConfiguration> mConfiguredOutputs =
             new SparseArray<>();
+    private final SparseArray<Size> mConfiguredOutputSizes =
+            new SparseArray<>();
 
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
@@ -388,7 +390,14 @@ public class CameraDeviceImpl extends CameraDevice {
                 if (!outputs.contains(outConfig)) {
                     deleteList.add(streamId);
                 } else {
-                    addSet.remove(outConfig);  // Don't create a stream previously created
+                    // Even if same surface and rotation, the surface can have re-sized.
+                    // If so, we must create a new stream to ensure HAL is configured correctly.
+                    Size outSize = SurfaceUtils.getSurfaceSize(outConfig.getSurface());
+                    if (!outSize.equals(mConfiguredOutputSizes.valueAt(i))) {
+                        deleteList.add(streamId);
+                    } else {
+                        addSet.remove(outConfig);  // Don't create a stream previously created
+                    }
                 }
             }
 
@@ -421,13 +430,16 @@ public class CameraDeviceImpl extends CameraDevice {
                 for (Integer streamId : deleteList) {
                     mRemoteDevice.deleteStream(streamId);
                     mConfiguredOutputs.delete(streamId);
+                    mConfiguredOutputSizes.delete(streamId);
                 }
 
                 // Add all new streams
                 for (OutputConfiguration outConfig : outputs) {
                     if (addSet.contains(outConfig)) {
                         int streamId = mRemoteDevice.createStream(outConfig);
+                        Size outSize = SurfaceUtils.getSurfaceSize(outConfig.getSurface());
                         mConfiguredOutputs.put(streamId, outConfig);
+                        mConfiguredOutputSizes.put(streamId, outSize);
                     }
                 }
 
