@@ -17,6 +17,8 @@
 package com.android.mtp;
 
 import android.os.storage.StorageManager;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -26,12 +28,17 @@ import java.io.File;
 public class AppFuseTest extends AndroidTestCase {
     /**
      * TODO: Enable this test after adding SELinux policies for appfuse.
+     * @throws ErrnoException
+     * @throws InterruptedException
      */
-    public void testBasic() {
+    public void disabled_testBasic() throws ErrnoException, InterruptedException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final AppFuse appFuse = new AppFuse("test");
         appFuse.mount(storageManager);
         final File file = appFuse.getMountPoint();
         assertTrue(file.isDirectory());
+        assertEquals(1, Os.stat(file.getPath()).st_ino);
+        appFuse.close();
+        assertTrue(1 != Os.stat(file.getPath()).st_ino);
     }
 }

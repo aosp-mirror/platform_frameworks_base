@@ -18,10 +18,13 @@ package com.android.mtp;
 
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
+import java.io.IOException;
+
 import android.os.Process;
 
 /**
@@ -52,6 +55,21 @@ public class AppFuse {
     void mount(StorageManager storageManager) {
         mDeviceFd = storageManager.mountAppFuse(mName);
         mMessageThread.start();
+    }
+
+    @VisibleForTesting
+    void close() {
+        try {
+            // Remote side of ParcelFileDescriptor is tracking the close of mDeviceFd, and unmount
+            // the corresponding fuse file system. The mMessageThread will receive FUSE_FORGET, and
+            // then terminate itself.
+            mDeviceFd.close();
+            mMessageThread.join();
+        } catch (IOException exp) {
+            Log.e(MtpDocumentsProvider.TAG, "Failed to close device FD.", exp);
+        } catch (InterruptedException exp) {
+            Log.e(MtpDocumentsProvider.TAG, "Failed to terminate message thread.", exp);
+        }
     }
 
     @VisibleForTesting

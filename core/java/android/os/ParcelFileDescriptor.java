@@ -233,6 +233,19 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         final FileDescriptor fd = openInternal(file, mode);
         if (fd == null) return null;
 
+        return fromFd(fd, handler, listener);
+    }
+
+    /** {@hide} */
+    public static ParcelFileDescriptor fromFd(
+            FileDescriptor fd, Handler handler, final OnCloseListener listener) throws IOException {
+        if (handler == null) {
+            throw new IllegalArgumentException("Handler must not be null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("Listener must not be null");
+        }
+
         final FileDescriptor[] comm = createCommSocketPair();
         final ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd, comm[0]);
         final MessageQueue queue = handler.getLooper().getQueue();
