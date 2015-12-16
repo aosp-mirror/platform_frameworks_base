@@ -273,6 +273,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"Desactivat"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"Sempre activat"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"Automàtic"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementació de WebView"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configura la implementació de WebView"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converteix en l\'encriptació de fitxers"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converteix…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"El fitxer ja està encriptat"</string>
