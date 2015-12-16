@@ -124,6 +124,15 @@ public:
         clipSideFlags = OpClipSideFlags::Full;
     }
 
+    Rect computeLocalSpaceClip() const {
+        Matrix4 inverse;
+        inverse.loadInverse(transform);
+
+        Rect outClip(clipRect);
+        inverse.mapRect(outClip);
+        return outClip;
+    }
+
     Matrix4 transform;
     Rect clipRect;
     int clipSideFlags = 0;

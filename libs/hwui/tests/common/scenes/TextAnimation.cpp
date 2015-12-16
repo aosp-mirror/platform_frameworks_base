@@ -17,25 +17,36 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
-class OvalAnimation;
+class TextAnimation;
 
-static TestScene::Registrar _Oval(TestScene::Info{
-    "oval",
-    "Draws 1 oval.",
-    TestScene::simpleCreateScene<OvalAnimation>
+static TestScene::Registrar _Text(TestScene::Info{
+    "text",
+    "Draws a bunch of text.",
+    TestScene::simpleCreateScene<TextAnimation>
 });
 
-class OvalAnimation : public TestScene {
+class TextAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, TestCanvas& canvas) override {
         canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
-        card = TestUtils::createNode(0, 0, 200, 200,
+        card = TestUtils::createNode(0, 0, width, height,
                 [](RenderProperties& props, TestCanvas& canvas) {
             SkPaint paint;
+            paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
             paint.setAntiAlias(true);
+            paint.setTextSize(50);
+
             paint.setColor(Color::Black);
-            canvas.drawOval(0, 0, 200, 200, paint);
+            for (int i = 0; i < 10; i++) {
+                TestUtils::drawTextToCanvas(&canvas, "Test string", paint, 400, i * 100);
+            }
+
+            SkPath path;
+            path.addOval(SkRect::MakeLTRB(100, 100, 300, 300));
+
+            paint.setColor(Color::Blue_500);
+            TestUtils::drawTextToCanvas(&canvas, "This is a neat circle of text!", paint, path);
         });
         canvas.drawRenderNode(card.get());
     }

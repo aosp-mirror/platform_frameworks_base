@@ -56,6 +56,28 @@ TEST(ResolvedRenderState, construct) {
     }
 }
 
+TEST(ResolvedRenderState, computeLocalSpaceClip) {
+    Matrix4 translate10x20;
+    translate10x20.loadTranslate(10, 20, 0);
+
+    SkPaint paint;
+    RectOp recordedOp(Rect(1000, 1000), translate10x20, Rect(100, 200), &paint);
+    {
+        // recorded with transform, no parent transform
+        auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
+        ResolvedRenderState state(*parentSnapshot, recordedOp, false);
+        EXPECT_EQ(Rect(-10, -20, 90, 180), state.computeLocalSpaceClip())
+            << "Local clip rect should be 100x200, offset by -10,-20";
+    }
+    {
+        // recorded with transform + parent transform
+        auto parentSnapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
+        ResolvedRenderState state(*parentSnapshot, recordedOp, false);
+        EXPECT_EQ(Rect(-10, -20, 80, 160), state.computeLocalSpaceClip())
+            << "Local clip rect should be 90x190, offset by -10,-20";
+    }
+}
+
 const float HAIRLINE = 0.0f;
 
 // Note: bounds will be conservative, but not precise for non-hairline

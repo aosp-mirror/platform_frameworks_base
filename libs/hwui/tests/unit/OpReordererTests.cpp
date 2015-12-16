@@ -221,7 +221,35 @@ TEST(OpReorderer, simpleBatching) {
             << "Expect number of ops = 2 * loop count";
 }
 
-TEST(OpReorderer, textStrikethroughBatching) {
+TEST(OpReorderer, textMerging) {
+    class TextMergingTestRenderer : public TestRendererBase {
+    public:
+        void onMergedTextOps(const MergedBakedOpList& opList) override {
+            EXPECT_EQ(0, mIndex);
+            mIndex += opList.count;
+            EXPECT_EQ(2u, opList.count);
+            EXPECT_EQ(OpClipSideFlags::Top, opList.clipSideFlags);
+            EXPECT_EQ(OpClipSideFlags::Top, opList.states[0]->computedState.clipSideFlags);
+            EXPECT_EQ(OpClipSideFlags::None, opList.states[1]->computedState.clipSideFlags);
+        }
+    };
+    auto node = TestUtils::createNode(0, 0, 400, 400,
+            [](RenderProperties& props, TestCanvas& canvas) {
+        SkPaint paint;
+        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+        paint.setAntiAlias(true);
+        paint.setTextSize(50);
+        TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 0); // will be top clipped
+        TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 100); // not clipped
+    });
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
+            createSyncedNodeList(node), sLightCenter);
+    TextMergingTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex()) << "Expect 2 ops";
+}
+
+TEST(OpReorderer, textStrikethrough) {
     const int LOOPS = 5;
     class TextStrikethroughTestRenderer : public TestRendererBase {
     public:
@@ -250,7 +278,7 @@ TEST(OpReorderer, textStrikethroughBatching) {
     TextStrikethroughTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
-            << "Expect number of ops = 2 * loop count"; // TODO: force no merging
+            << "Expect number of ops = 2 * loop count";
 }
 
 TEST(OpReorderer, renderNode) {

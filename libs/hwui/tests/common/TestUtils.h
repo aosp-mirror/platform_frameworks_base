@@ -191,6 +191,9 @@ public:
     static void drawTextToCanvas(TestCanvas* canvas, const char* text,
             const SkPaint& paint, float x, float y);
 
+    static void drawTextToCanvas(TestCanvas* canvas, const char* text,
+            const SkPaint& paint, const SkPath& path);
+
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         node->syncProperties();

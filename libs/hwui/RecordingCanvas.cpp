@@ -503,9 +503,15 @@ void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, i
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 
-void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) {
-    LOG_ALWAYS_FATAL("TODO!");
+    if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
+    glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
+    addOp(new (alloc()) TextOnPathOp(
+            mState.getRenderTargetClipBounds(), // TODO: explicitly define bounds
+            *(mState.currentSnapshot()->transform),
+            mState.getRenderTargetClipBounds(),
+            refPaint(&paint), glyphs, glyphCount, refPath(&path), hOffset, vOffset));
 }
 
 void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {

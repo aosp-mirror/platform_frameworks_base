@@ -705,6 +705,36 @@ void BakedOpDispatcher::onTextOp(BakedOpRenderer& renderer, const TextOp& op, co
     renderTextOp(renderer, op, state, clip, TextRenderType::Flush);
 }
 
+void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPathOp& op, const BakedOpState& state) {
+    // Note: can't trust clipSideFlags since we record with unmappedBounds == clip.
+    // TODO: respect clipSideFlags, once we record with bounds
+    const Rect* renderTargetClip = &state.computedState.clipRect;
+
+    FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
+    fontRenderer.setFont(op.paint, SkMatrix::I());
+    fontRenderer.setTextureFiltering(true);
+
+    Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
+
+    int alpha = PaintUtils::getAlphaDirect(op.paint) * state.alpha;
+    SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(op.paint);
+    TextDrawFunctor functor(&renderer, &state, renderTargetClip,
+            0.0f, 0.0f, false, alpha, mode, op.paint);
+
+    bool mustDirtyRenderTarget = renderer.offscreenRenderTarget();
+    const Rect localSpaceClip = state.computedState.computeLocalSpaceClip();
+    if (fontRenderer.renderTextOnPath(op.paint, &localSpaceClip,
+            reinterpret_cast<const char*>(op.glyphs), op.glyphCount,
+            op.path, op.hOffset, op.vOffset,
+            mustDirtyRenderTarget ? &layerBounds : nullptr, &functor)) {
+        if (mustDirtyRenderTarget) {
+            // manually dirty render target, since TextDrawFunctor won't
+            state.computedState.transform.mapRect(layerBounds);
+            renderer.dirtyRenderTarget(layerBounds);
+        }
+    }
+}
+
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
     OffscreenBuffer* buffer = *op.layerHandle;
 
