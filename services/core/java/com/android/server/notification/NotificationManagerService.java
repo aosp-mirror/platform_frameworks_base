@@ -16,25 +16,25 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CLICK;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_ERROR;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
-import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
-import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
 import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL_ALL;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CLICK;
+import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_ERROR;
+import static android.service.notification.NotificationAssistantService.REASON_GROUP_OPTIMIZATION;
+import static android.service.notification.NotificationAssistantService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL;
 import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL_ALL;
-import static android.service.notification.NotificationAssistantService.REASON_GROUP_SUMMARY_CANCELED;
-import static android.service.notification.NotificationAssistantService.REASON_GROUP_OPTIMIZATION;
+import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
+import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
+import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
-import static  android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -77,7 +77,6 @@ import android.media.AudioSystem;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -113,7 +112,6 @@ import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
-
 import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
@@ -126,9 +124,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.statusbar.StatusBarManagerInternal;
-
 import libcore.io.IoUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -881,7 +877,8 @@ public class NotificationManagerService extends SystemService {
             void onZenModeChanged() {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
                 getContext().sendBroadcastAsUser(
-                        new Intent(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL),
+                        new Intent(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL)
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT),
                         UserHandle.ALL, android.Manifest.permission.MANAGE_NOTIFICATIONS);
                 synchronized(mNotificationList) {
                     updateInterruptionFilterLocked();
