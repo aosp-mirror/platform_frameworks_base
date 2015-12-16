@@ -1042,12 +1042,6 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
-        @SystemApi
-        public void setInstallFlagsQuick() {
-            installFlags |= PackageManager.INSTALL_QUICK;
-        }
-
-        /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
             pw.printHexPair("installFlags", installFlags);
