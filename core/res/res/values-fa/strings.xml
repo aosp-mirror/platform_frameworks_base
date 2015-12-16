@@ -191,7 +191,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"آماده‌سازی برای به‌روزرسانی…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"در حال پردازش بسته‌بندی به‌روز…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"در حال راه‌اندازی مجدد…"</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"بازنشانی به داده‌های کارخانه"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"بازنشانی داده‌های کارخانه"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"در حال راه‌اندازی مجدد…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"در حال خاموش شدن…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"رایانهٔ لوحی شما خاموش می‌شود."</string>
@@ -509,9 +509,9 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"قفل کردن صفحه"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"نحوه و زمان قفل شدن صفحه را کنترل می‌کند."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"پاک کردن تمام داده‌ها"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"با انجام بازنشانی به داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"داده‌های تلویزیون را بدون هشدار با انجام بازنشانی به داده کارخانه پاک کنید."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"با انجام بازنشانی به داده‌های کارخانه، داده‌های تلفن بدون هشدار پاک می‌شود."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"با انجام بازنشانی داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"داده‌های تلویزیون را بدون هشدار با انجام بازنشانی داده‌های کارخانه پاک کنید."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"با انجام بازنشانی داده‌های کارخانه، داده‌های تلفن بدون هشدار پاک می‌شود."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"پاک کردن داده‌های کاربر"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"داده‌های این کاربر را در این رایانه لوحی بدون هشدار پاک می‌کند."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"داده‌های این کاربر را در این تلویزیون بدون هشدار پاک می‌کند."</string>
@@ -671,7 +671,7 @@
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"‏سیم کارت شما به‌طور دائم غیر فعال شده است. \nبرای داشتن سیم کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"آهنگ قبلی"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"آهنگ بعدی"</string>
-    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"توقف موقت"</string>
+    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"مکث"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"پخش"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"توقف"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"عقب بردن"</string>
@@ -1499,7 +1499,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"رویداد"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> آن را بی‌صدا کرد"</string>
-    <string name="system_error_wipe_data" msgid="6608165524785354962">"دستگاهتان یک مشکل داخلی دارد، و ممکن است تا زمانی که بازنشانی به داده کارخانه انجام نگیرد، بی‌ثبات بماند."</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"دستگاهتان یک مشکل داخلی دارد، و ممکن است تا زمانی که بازنشانی داده‌های کارخانه انجام نگیرد، بی‌ثبات بماند."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"دستگاهتان یک مشکل داخلی دارد. برای جزئیات آن با سازنده‌تان تماس بگیرید."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"‏درخواست USSD به درخواست DIAL اصلاح می‌شود."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"‏درخواست USSD به درخواست SS اصلاح می‌شود."</string>

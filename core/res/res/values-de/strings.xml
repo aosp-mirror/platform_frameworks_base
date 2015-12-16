@@ -243,7 +243,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"Telefonanrufe zu tätigen und zu verwalten"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Körpersensoren"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"Auf Sensordaten zu Ihren Vitaldaten zugreifen"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"auf Sensordaten zu Ihren Vitaldaten zuzugreifen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters, mit dem Sie interagieren, werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
