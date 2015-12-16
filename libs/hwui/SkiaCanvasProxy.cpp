@@ -138,15 +138,6 @@ void SkiaCanvasProxy::onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& ce
     SkDEBUGFAIL("SkiaCanvasProxy::onDrawBitmapNine is not yet supported");
 }
 
-void SkiaCanvasProxy::onDrawSprite(const SkBitmap& bitmap, int left, int top,
-        const SkPaint* paint) {
-    // TODO: if bitmap is a subset, do we need to add pixelRefOrigin to src?
-    mCanvas->save(SkCanvas::kMatrixClip_SaveFlag);
-    mCanvas->setMatrix(SkMatrix::I());
-    mCanvas->drawBitmap(bitmap, left, top, paint);
-    mCanvas->restore();
-}
-
 void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkPoint vertices[],
         const SkPoint texs[], const SkColor colors[], SkXfermode*, const uint16_t indices[],
         int indexCount, const SkPaint& paint) {

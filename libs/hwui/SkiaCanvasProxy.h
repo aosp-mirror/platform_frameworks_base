@@ -66,8 +66,6 @@ protected:
                                   const SkPaint* paint, SrcRectConstraint) override;
     virtual void onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& center,
                                   const SkRect& dst, const SkPaint*) override;
-    virtual void onDrawSprite(const SkBitmap&, int left, int top,
-                              const SkPaint*) override;
     virtual void onDrawVertices(VertexMode, int vertexCount, const SkPoint vertices[],
                                 const SkPoint texs[], const SkColor colors[], SkXfermode*,
                                 const uint16_t indices[], int indexCount,
