@@ -176,9 +176,6 @@ public class Task {
 
     /** Set the grouping */
     public void setGroup(TaskGrouping group) {
-        if (group != null && this.group != null) {
-            throw new RuntimeException("This task is already assigned to a group.");
-        }
         this.group = group;
     }
 

@@ -602,6 +602,7 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(TaskStackUpdatedEvent event) {
         mStack.setTasks(event.stack.computeAllTasksList(), true /* notifyStackChanges */);
+        mStack.createAffiliatedGroupings(getContext());
     }
 
     /**

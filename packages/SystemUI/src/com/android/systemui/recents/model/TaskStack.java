@@ -465,9 +465,8 @@ public class TaskStack {
                 if (notifyStackChanges) {
                     mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null);
                 }
-            } else {
-                newTasks.add(task);
             }
+            task.setGroup(null);
         }
 
         // Add any new tasks
@@ -507,6 +506,8 @@ public class TaskStack {
         mHistoryTaskList.set(historyTasks);
         mRawTaskList.clear();
         mRawTaskList.addAll(newTasks);
+        mGroups.clear();
+        mAffinitiesGroups.clear();
     }
 
     /** Gets the front task */
