@@ -23,7 +23,7 @@
         android:orientation="horizontal" >
 
     <ImageView
-            android:id="@+android:id/icon"
+            android:id="@android:id/icon"
             android:layout_width="@dimen/user_icon_view_height"
             android:layout_height="@dimen/user_icon_view_height"
             android:layout_gravity="center"
@@ -32,12 +32,12 @@
             android:paddingTop="@dimen/user_spinner_padding" />
 
     <TextView
-            android:id="@+android:id/title"
+            android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:layout_gravity="center"
-            android:labelFor="@+android:id/icon"
+            android:labelFor="@android:id/icon"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
             android:paddingStart="@dimen/user_spinner_padding"
