@@ -301,7 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"telusuri"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Tidak dapat memulai <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Lainnya"</string>
-    <string name="recents_history_label" msgid="3076213823382198287">"Riwayat"</string>
+    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> Lagi"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Pisahkan Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Pisahkan Vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pisahkan Khusus"</string>
