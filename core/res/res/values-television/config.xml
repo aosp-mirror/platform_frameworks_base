@@ -23,4 +23,12 @@
 
     <!-- Flags enabling default window features. See Window.java -->
     <bool name="config_defaultWindowFeatureOptionsPanel">false</bool>
+
+    <!-- Default bounds [left top right bottom] on screen for picture-in-picture windows. -->
+    <string translatable="false" name="config_defaultPictureInPictureBounds">"1420 100 1820 325"</string>
+
+    <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows, when the PIP
+         is located in center. -->
+    <string translatable="false" name="config_centeredPictureInPictureBounds">"600 331 1320 749"</string>
+
 </resources>
