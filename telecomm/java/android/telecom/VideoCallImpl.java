@@ -42,7 +42,7 @@ public class VideoCallImpl extends VideoCall {
     private final VideoCallListenerBinder mBinder;
     private VideoCall.Callback mCallback;
     private int mVideoQuality = VideoProfile.QUALITY_UNKNOWN;
-    private Call mCall;
+    private int mVideoState = VideoProfile.STATE_AUDIO_ONLY;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -197,13 +197,12 @@ public class VideoCallImpl extends VideoCall {
 
     private Handler mHandler;
 
-    VideoCallImpl(IVideoProvider videoProvider, Call call) throws RemoteException {
+    VideoCallImpl(IVideoProvider videoProvider) throws RemoteException {
         mVideoProvider = videoProvider;
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
         mVideoProvider.addVideoCallback(mBinder);
-        mCall = call;
     }
 
     public void destroy() {
@@ -292,8 +291,7 @@ public class VideoCallImpl extends VideoCall {
      */
     public void sendSessionModifyRequest(VideoProfile requestProfile) {
         try {
-            VideoProfile originalProfile = new VideoProfile(mCall.getDetails().getVideoState(),
-                    mVideoQuality);
+            VideoProfile originalProfile = new VideoProfile(mVideoState, mVideoQuality);
 
             mVideoProvider.sendSessionModifyRequest(originalProfile, requestProfile);
         } catch (RemoteException e) {
@@ -330,5 +328,13 @@ public class VideoCallImpl extends VideoCall {
             mVideoProvider.setPauseImage(uri);
         } catch (RemoteException e) {
         }
+    }
+
+    /**
+     * Sets the video state for the current video call.
+     * @param videoState the new video state.
+     */
+    public void setVideoState(int videoState) {
+        mVideoState = videoState;
     }
 }

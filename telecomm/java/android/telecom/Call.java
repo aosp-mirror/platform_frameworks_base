@@ -684,7 +684,7 @@ public final class Call {
     private int mState;
     private List<String> mCannedTextResponses = null;
     private String mRemainingPostDialSequence;
-    private InCallService.VideoCall mVideoCall;
+    private VideoCallImpl mVideoCallImpl;
     private Details mDetails;
 
     /**
@@ -897,7 +897,7 @@ public final class Call {
      * @return An {@code Call.VideoCall}.
      */
     public InCallService.VideoCall getVideoCall() {
-        return mVideoCall;
+        return mVideoCallImpl;
     }
 
     /**
@@ -1028,10 +1028,14 @@ public final class Call {
             cannedTextResponsesChanged = true;
         }
 
+        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl();
         boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
-                !Objects.equals(mVideoCall, parcelableCall.getVideoCall(this));
+                !Objects.equals(mVideoCallImpl, newVideoCallImpl);
         if (videoCallChanged) {
-            mVideoCall = parcelableCall.getVideoCall(this);
+            mVideoCallImpl = newVideoCallImpl;
+        }
+        if (mVideoCallImpl != null) {
+            mVideoCallImpl.setVideoState(getDetails().getVideoState());
         }
 
         int state = parcelableCall.getState();
@@ -1081,7 +1085,7 @@ public final class Call {
             fireCannedTextResponsesLoaded(mCannedTextResponses);
         }
         if (videoCallChanged) {
-            fireVideoCallChanged(mVideoCall);
+            fireVideoCallChanged(mVideoCallImpl);
         }
         if (parentChanged) {
             fireParentChanged(getParent());
