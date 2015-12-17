@@ -116,6 +116,7 @@ public final class PageContentRepository {
             });
             return;
         }
+        mCloseGuard.close();
 
         mState = STATE_DESTROYED;
         if (DEBUG) {
