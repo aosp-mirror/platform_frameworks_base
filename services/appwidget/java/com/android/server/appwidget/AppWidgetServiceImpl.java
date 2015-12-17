@@ -16,6 +16,7 @@
 
 package com.android.server.appwidget;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -76,6 +77,7 @@ import android.view.Display;
 import android.view.WindowManager;
 import android.widget.RemoteViews;
 
+import com.android.internal.R;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
@@ -83,7 +85,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
-import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 
@@ -139,8 +140,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final int CURRENT_VERSION = 1;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+            final String action = intent.getAction();
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
             if (DEBUG) {
                 Slog.i(TAG, "Received broadcast: " + action);
@@ -148,23 +151,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
             if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 onConfigurationChanged();
-            } else if (Intent.ACTION_USER_STARTED.equals(action)) {
-                onUserStarted(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        UserHandle.USER_NULL));
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                onUserUnlocked(userId);
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-                onUserStopped(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        UserHandle.USER_NULL));
+                onUserStopped(userId);
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                refreshProfileWidgetsMaskedState(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        UserHandle.USER_NULL));
+                refreshProfileWidgetsMaskedState(userId);
             } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED.equals(action)) {
-                UserHandle profile = (UserHandle)intent.getParcelableExtra(Intent.EXTRA_USER);
-                if (profile != null) {
-                    refreshWidgetMaskedState(profile.getIdentifier());
-                }
+                refreshWidgetMaskedState(userId);
             } else {
-                onPackageBroadcastReceived(intent, intent.getIntExtra(
-                        Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
+                onPackageBroadcastReceived(intent, userId);
             }
         }
     };
@@ -263,7 +259,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 sdFilter, null, null);
 
         IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_STARTED);
+        userFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         userFilter.addAction(Intent.ACTION_USER_STOPPED);
         userFilter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
@@ -340,6 +336,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onPackageBroadcastReceived(Intent intent, int userId) {
+        if (!isUserRunningAndUnlocked(userId)) return;
+
         final String action = intent.getAction();
         boolean added = false;
         boolean changed = false;
@@ -419,9 +417,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Refresh the masked state for all profiles under the given user.
      */
     private void refreshProfileWidgetsMaskedState(int userId) {
-        if (userId == UserHandle.USER_NULL) {
-            return;
-        }
+        if (!isUserRunningAndUnlocked(userId)) return;
         List<UserInfo> profiles = mUserManager.getEnabledProfiles(userId);
         if (profiles != null) {
             for (int i = 0; i < profiles.size(); i++) {
@@ -435,6 +431,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Mask/unmask widgets in the given profile, depending on the quiet state of the profile.
      */
     private void refreshWidgetMaskedState(int profileId) {
+        if (!isUserRunningAndUnlocked(profileId)) return;
         final long identity = Binder.clearCallingIdentity();
         try {
             UserInfo user  = mUserManager.getUserInfo(profileId);
@@ -484,6 +481,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void ensureGroupStateLoadedLocked(int userId) {
+        if (!isUserRunningAndUnlocked(userId)) {
+            throw new IllegalStateException(
+                    "User " + userId + " must be unlocked for widgets to be available");
+        }
+
         final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
 
         // Careful lad, we may have already loaded the state for some
@@ -2321,7 +2323,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private void onUserStarted(int userId) {
+    private void onUserUnlocked(int userId) {
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
@@ -2508,6 +2510,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void onWidgetsClearedLocked() {
         mWidgetPackages.clear();
+    }
+
+    private boolean isUserRunningAndUnlocked(int userId) {
+        if (userId == UserHandle.USER_NULL) {
+            return false;
+        } else {
+            return mContext.getSystemService(ActivityManager.class)
+                    .isUserRunningAndUnlocked(userId);
+        }
     }
 
     @Override
