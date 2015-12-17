@@ -2453,6 +2453,9 @@
     <!-- Item on EditText context menu. This action is used to paste from the clipboard into the eidt field -->
     <string name="paste">Paste</string>
 
+    <!-- Item on EditText context menu. This action is used to paste from the clipboard into the eidt field without formatting -->
+    <string name="paste_as_plain_text">Paste as plain text</string>
+
     <!-- Item on EditText context menu. This action is used to replace the current word by other suggested words, suggested by the IME or the spell checker -->
     <string name="replace">Replace\u2026</string>
 
@@ -2464,6 +2467,12 @@
 
     <!-- Item on EditText context menu. Added only when the context menu is not empty, it enable selection context mode. [CHAR LIMIT=20] -->
     <string name="selectTextMode">Select text</string>
+
+    <!-- Item on EditText context menu. This action is used to undo a text edit operation. -->
+    <string name="undo">Undo</string>
+
+    <!-- Item on EditText context menu. This action is used to redo a text edit operation. -->
+    <string name="redo">Redo</string>
 
     <!-- Text selection contextual mode title, displayed in the CAB. [CHAR LIMIT=20] -->
     <string name="textSelectionCABTitle">Text selection</string>

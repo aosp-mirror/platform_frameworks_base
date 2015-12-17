@@ -72,6 +72,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
+import android.view.ContextMenu;
 import android.view.DisplayListCanvas;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -135,13 +136,16 @@ public class Editor {
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
-    // Ordering constants used to place the Action Mode items in their menu.
-    private static final int MENU_ITEM_ORDER_CUT = 1;
-    private static final int MENU_ITEM_ORDER_COPY = 2;
-    private static final int MENU_ITEM_ORDER_PASTE = 3;
-    private static final int MENU_ITEM_ORDER_SHARE = 4;
-    private static final int MENU_ITEM_ORDER_SELECT_ALL = 5;
-    private static final int MENU_ITEM_ORDER_REPLACE = 6;
+    // Ordering constants used to place the Action Mode or context menu items in their menu.
+    private static final int MENU_ITEM_ORDER_UNDO = 1;
+    private static final int MENU_ITEM_ORDER_REDO = 2;
+    private static final int MENU_ITEM_ORDER_CUT = 3;
+    private static final int MENU_ITEM_ORDER_COPY = 4;
+    private static final int MENU_ITEM_ORDER_PASTE = 5;
+    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 6;
+    private static final int MENU_ITEM_ORDER_SHARE = 7;
+    private static final int MENU_ITEM_ORDER_SELECT_ALL = 8;
+    private static final int MENU_ITEM_ORDER_REPLACE = 9;
     private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 10;
 
     // Each Editor manages its own undo stack.
@@ -184,6 +188,7 @@ public class Editor {
 
     boolean mDiscardNextActionUp;
     boolean mIgnoreActionUpEvent;
+    private boolean mIgnoreNextMouseActionUpOrDown;
 
     long mShowCursor;
     Blink mBlink;
@@ -209,6 +214,8 @@ public class Editor {
     boolean mPreserveDetachedSelection;
     boolean mTemporaryDetach;
 
+    boolean mIsBeingLongClicked;
+
     SuggestionsPopupWindow mSuggestionsPopupWindow;
     SuggestionRangeSpan mSuggestionRangeSpan;
     Runnable mShowSuggestionRunnable;
@@ -224,6 +231,7 @@ public class Editor {
     private PositionListener mPositionListener;
 
     float mLastDownPositionX, mLastDownPositionY;
+    private float mContextMenuAnchorX, mContextMenuAnchorY;
     Callback mCustomSelectionActionModeCallback;
     Callback mCustomInsertionActionModeCallback;
 
@@ -238,6 +246,9 @@ public class Editor {
     private static final int TAP_STATE_DOUBLE_TAP = 2;
     // Only for mouse input.
     private static final int TAP_STATE_TRIPLE_CLICK = 3;
+
+    // The button state as of the last time #onTouchEvent is called.
+    private int mLastButtonState;
 
     private Runnable mInsertionActionModeRunnable;
 
@@ -1314,7 +1325,33 @@ public class Editor {
         }
     }
 
+    private boolean shouldFilterOutTouchEvent(MotionEvent event) {
+        if (!event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            return false;
+        }
+        final boolean primaryButtonStateChanged =
+                ((mLastButtonState ^ event.getButtonState()) & MotionEvent.BUTTON_PRIMARY) != 0;
+        final int action = event.getActionMasked();
+        if ((action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP)
+                && !primaryButtonStateChanged) {
+            return true;
+        }
+        if (action == MotionEvent.ACTION_MOVE
+                && !event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
+            return true;
+        }
+        return false;
+    }
+
     void onTouchEvent(MotionEvent event) {
+        final boolean filterOutEvent = shouldFilterOutTouchEvent(event);
+        mLastButtonState = event.getButtonState();
+        if (filterOutEvent) {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                mDiscardNextActionUp = true;
+            }
+            return;
+        }
         updateTapState(event);
         updateFloatingToolbarVisibility(event);
 
@@ -2318,6 +2355,84 @@ public class Editor {
         text.setSpan(mSpanController, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
     }
 
+    void setContextMenuAnchor(float x, float y) {
+        mContextMenuAnchorX = x;
+        mContextMenuAnchorY = y;
+    }
+
+    void onCreateContextMenu(ContextMenu menu) {
+        if (mIsBeingLongClicked || Float.isNaN(mContextMenuAnchorX)
+                || Float.isNaN(mContextMenuAnchorY)) {
+            return;
+        }
+        final int offset = mTextView.getOffsetForPosition(mContextMenuAnchorX, mContextMenuAnchorY);
+        if (offset == -1) {
+            return;
+        }
+        final boolean isOnSelection = mTextView.hasSelection()
+                && offset >= mTextView.getSelectionStart() && offset <= mTextView.getSelectionEnd();
+        if (!isOnSelection) {
+            // Right clicked position is not on the selection. Remove the selection and move the
+            // cursor to the right clicked position.
+            stopTextActionMode();
+            Selection.setSelection((Spannable) mTextView.getText(), offset);
+        }
+
+        // TODO: Add suggestions in the context menu.
+
+        menu.add(Menu.NONE, TextView.ID_UNDO, MENU_ITEM_ORDER_UNDO,
+                com.android.internal.R.string.undo)
+                .setAlphabeticShortcut('z')
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setEnabled(mTextView.canUndo());
+        menu.add(Menu.NONE, TextView.ID_REDO, MENU_ITEM_ORDER_REDO,
+                com.android.internal.R.string.redo)
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setEnabled(mTextView.canRedo());
+
+        menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
+                com.android.internal.R.string.cut)
+                .setAlphabeticShortcut('x')
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setEnabled(mTextView.canCut());
+        menu.add(Menu.NONE, TextView.ID_COPY, MENU_ITEM_ORDER_COPY,
+                com.android.internal.R.string.copy)
+                .setAlphabeticShortcut('c')
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setEnabled(mTextView.canCopy());
+        menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE,
+                com.android.internal.R.string.paste)
+                .setAlphabeticShortcut('v')
+                .setEnabled(mTextView.canPaste())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+                com.android.internal.R.string.paste_as_plain_text)
+                .setEnabled(mTextView.canPaste())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
+                com.android.internal.R.string.share)
+                .setEnabled(mTextView.canShare())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        menu.add(Menu.NONE, TextView.ID_SELECT_ALL, MENU_ITEM_ORDER_SELECT_ALL,
+                com.android.internal.R.string.selectAll)
+                .setAlphabeticShortcut('a')
+                .setEnabled(mTextView.canSelectAllText())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+
+        mPreserveDetachedSelection = true;
+    }
+
+    private final MenuItem.OnMenuItemClickListener mOnContextMenuItemClickListener =
+            new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
+                return true;
+            }
+            return mTextView.onTextContextMenuItem(item.getItemId());
+        }
+    };
+
     /**
      * Controls the {@link EasyEditSpan} monitoring when it is added, and when the related
      * pop-up should be displayed.
@@ -2710,6 +2825,9 @@ public class Editor {
         }
 
         public void hide() {
+            if (!isShowing()) {
+                return;
+            }
             mPopupWindow.dismiss();
             getPositionListener().removeSubscriber(this);
         }
@@ -2759,8 +2877,10 @@ public class Editor {
 
             @Override
             public void dismiss() {
+                if (!isShowing()) {
+                    return;
+                }
                 super.dismiss();
-
                 getPositionListener().removeSubscriber(SuggestionsPopupWindow.this);
 
                 // Safe cast since show() checks that mTextView.getText() is an Editable

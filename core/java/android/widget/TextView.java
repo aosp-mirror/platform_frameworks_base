@@ -111,6 +111,7 @@ import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.ActionMode;
 import android.view.Choreographer;
+import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -8497,6 +8498,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onGenericMotionEvent(event);
     }
 
+    @Override
+    protected void onCreateContextMenu(ContextMenu menu) {
+        if (mEditor != null) {
+            mEditor.onCreateContextMenu(menu);
+        }
+    }
+
+    @Override
+    public boolean showContextMenu() {
+        if (mEditor != null) {
+            mEditor.setContextMenuAnchor(Float.NaN, Float.NaN);
+        }
+        return super.showContextMenu();
+    }
+
+    @Override
+    public boolean showContextMenu(float x, float y) {
+        if (mEditor != null) {
+            mEditor.setContextMenuAnchor(x, y);
+        }
+        return super.showContextMenu(x, y);
+    }
+
     /**
      * @return True iff this TextView contains a text that can be edited, or if this is
      * a selectable TextView.
@@ -9398,12 +9422,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean performLongClick() {
         boolean handled = false;
 
+        if (mEditor != null) {
+            mEditor.mIsBeingLongClicked = true;
+        }
+
         if (super.performLongClick()) {
             handled = true;
         }
 
         if (mEditor != null) {
             handled |= mEditor.performLongClick(handled);
+            mEditor.mIsBeingLongClicked = false;
         }
 
         if (handled) {
