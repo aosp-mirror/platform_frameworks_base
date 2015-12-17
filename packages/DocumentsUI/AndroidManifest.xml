@@ -40,7 +40,7 @@
 
         <activity
             android:name=".DownloadsActivity"
-            android:theme="@style/DocumentsFullScreenTheme"
+            android:theme="@style/DocumentsTheme"
             android:label="@string/downloads_label"
             android:icon="@drawable/ic_doc_text">
             <intent-filter>
@@ -64,7 +64,7 @@
 
         <activity
             android:name=".FilesActivity"
-            android:theme="@style/DocumentsFullScreenTheme"
+            android:theme="@style/DocumentsTheme"
             android:icon="@drawable/ic_files_app"
             android:label="@string/files_label"
             android:documentLaunchMode="intoExisting">

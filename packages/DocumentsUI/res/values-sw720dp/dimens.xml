@@ -15,10 +15,6 @@
 -->
 
 <resources>
-    <bool name="show_as_dialog">true</bool>
-
-    <item type="dimen" name="dialog_width">85%</item>
-
     <dimen name="grid_padding_horiz">16dp</dimen>
     <dimen name="grid_padding_vert">16dp</dimen>
 
