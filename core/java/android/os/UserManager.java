@@ -852,9 +852,14 @@ public class UserManager {
      * @param user to retrieve the unlocked state for.
      */
     public boolean isUserUnlocked(UserHandle user) {
+        return isUserUnlocked(user.getIdentifier());
+    }
+
+    /** {@hide} */
+    public boolean isUserUnlocked(int userId) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(
-                    user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
+            return ActivityManagerNative.getDefault().isUserRunning(userId,
+                    ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException e) {
             return false;
         }

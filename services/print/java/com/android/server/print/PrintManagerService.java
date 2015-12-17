@@ -77,8 +77,8 @@ public final class PrintManagerService extends SystemService {
     }
 
     @Override
-    public void onStartUser(int userHandle) {
-        mPrintManagerImpl.handleUserStarted(userHandle);
+    public void onUnlockUser(int userHandle) {
+        mPrintManagerImpl.handleUserUnlocked(userHandle);
     }
 
     @Override
@@ -473,14 +473,11 @@ public final class PrintManagerService extends SystemService {
                 public void onChange(boolean selfChange, Uri uri, int userId) {
                     if (enabledPrintServicesUri.equals(uri)) {
                         synchronized (mLock) {
-                            if (userId != UserHandle.USER_ALL) {
-                                UserState userState = getOrCreateUserStateLocked(userId);
-                                userState.updateIfNeededLocked();
-                            } else {
-                                final int userCount = mUserStates.size();
-                                for (int i = 0; i < userCount; i++) {
-                                    UserState userState = mUserStates.valueAt(i);
-                                    userState.updateIfNeededLocked();
+                            final int userCount = mUserStates.size();
+                            for (int i = 0; i < userCount; i++) {
+                                if (userId == UserHandle.USER_ALL
+                                        || userId == mUserStates.keyAt(i)) {
+                                    mUserStates.valueAt(i).updateIfNeededLocked();
                                 }
                             }
                         }
@@ -496,6 +493,7 @@ public final class PrintManagerService extends SystemService {
             PackageMonitor monitor = new PackageMonitor() {
                 @Override
                 public void onPackageModified(String packageName) {
+                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
                     synchronized (mLock) {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
@@ -517,6 +515,7 @@ public final class PrintManagerService extends SystemService {
 
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
+                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
                     synchronized (mLock) {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
@@ -544,6 +543,7 @@ public final class PrintManagerService extends SystemService {
                 @Override
                 public boolean onHandleForceStop(Intent intent, String[] stoppedPackages,
                         int uid, boolean doit) {
+                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return false;
                     synchronized (mLock) {
                         // A background user/profile's print jobs are running but there is
                         // no UI shown. Hence, if the packages of such a user change we need
@@ -574,6 +574,8 @@ public final class PrintManagerService extends SystemService {
 
                 @Override
                 public void onPackageAdded(String packageName, int uid) {
+                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
+
                     // A background user/profile's print jobs are running but there is
                     // no UI shown. Hence, if the packages of such a user change we need
                     // to handle it as the change may affect ongoing print jobs.
@@ -634,6 +636,11 @@ public final class PrintManagerService extends SystemService {
         }
 
         private UserState getOrCreateUserStateLocked(int userId) {
+            if (!mUserManager.isUserUnlocked(userId)) {
+                throw new IllegalStateException(
+                        "User " + userId + " must be unlocked for printing to be available");
+            }
+
             UserState userState = mUserStates.get(userId);
             if (userState == null) {
                 userState = new UserState(mContext, userId, mLock);
@@ -642,7 +649,7 @@ public final class PrintManagerService extends SystemService {
             return userState;
         }
 
-        private void handleUserStarted(final int userId) {
+        private void handleUserUnlocked(final int userId) {
             // This code will touch the remote print spooler which
             // must be called off the main thread, so post the work.
             BackgroundThread.getHandler().post(new Runnable() {
