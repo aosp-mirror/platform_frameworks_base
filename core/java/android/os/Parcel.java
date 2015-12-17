@@ -1370,7 +1370,13 @@ public final class Parcel {
             // Must be before Parcelable
             writeInt(VAL_BUNDLE);
             writeBundle((Bundle) v);
+        } else if (v instanceof PersistableBundle) {
+            writeInt(VAL_PERSISTABLEBUNDLE);
+            writePersistableBundle((PersistableBundle) v);
         } else if (v instanceof Parcelable) {
+            // IMPOTANT: cases for classes that implement Parcelable must
+            // come before the Parcelable case, so that their specific VAL_*
+            // types will be written.
             writeInt(VAL_PARCELABLE);
             writeParcelable((Parcelable) v, 0);
         } else if (v instanceof Short) {
@@ -1426,9 +1432,6 @@ public final class Parcel {
         } else if (v instanceof Byte) {
             writeInt(VAL_BYTE);
             writeInt((Byte) v);
-        } else if (v instanceof PersistableBundle) {
-            writeInt(VAL_PERSISTABLEBUNDLE);
-            writePersistableBundle((PersistableBundle) v);
         } else if (v instanceof Size) {
             writeInt(VAL_SIZE);
             writeSize((Size) v);
