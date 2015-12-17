@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -180,6 +181,9 @@ public class NotificationTestList extends TestActivity
 
         new Test("with topic GoodBye") {
             public void run() {
+                Notification.BigPictureStyle picture = new Notification.BigPictureStyle();
+                picture.bigPicture(BitmapFactory.decodeResource(getResources(),
+                        R.id.large_icon_pineapple2));
                 Notification n = new Notification.Builder(NotificationTestList.this)
                         .setSmallIcon(R.drawable.icon1)
                         .setWhen(mActivityCreateTime)
@@ -187,9 +191,27 @@ public class NotificationTestList extends TestActivity
                         .setContentText("This is a notification!!!")
                         .setContentIntent(makeIntent2())
                         .setTopic(new Notification.Topic("bye", "Goodbye"))
+                        .setStyle(picture)
                         .build();
 
                 mNM.notify(9999, n);
+            }
+        },
+        new Test("with topic Bananas") {
+            public void run() {
+                Notification.BigTextStyle bigText = new Notification.BigTextStyle();
+                bigText.bigText("bananas are great\nso tasty\nyum\nyum\nyum\n");
+                Notification n = new Notification.Builder(NotificationTestList.this)
+                        .setSmallIcon(R.drawable.icon1)
+                        .setStyle(bigText)
+                        .setWhen(mActivityCreateTime)
+                        .setContentTitle("bananananana")
+                        .setContentText("This is a banana!!!")
+                        .setContentIntent(makeIntent2())
+                        .setTopic(new Notification.Topic("bananas", "Bananas"))
+                        .build();
+
+                mNM.notify(999, n);
             }
         },
 

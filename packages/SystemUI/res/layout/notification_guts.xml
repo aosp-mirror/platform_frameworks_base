@@ -24,35 +24,23 @@
         android:clickable="true"
         android:gravity="top|start"
         android:orientation="vertical"
-        android:paddingEnd="8dp"
+        android:paddingStart="@*android:dimen/notification_content_margin_start"
+        android:paddingEnd="@*android:dimen/notification_content_margin_end"
         android:background="@color/notification_guts_text_color" >
 
     <!-- header -->
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="@*android:dimen/notification_content_margin_start"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp" >
+            android:paddingBottom="8dp" >
 
         <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/notification_guts_header"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:layout_gravity="center_vertical|start"
                 android:layout_marginEnd="52dp">
-
-                <LinearLayout
-                        android:id="@+id/notification_guts_app_details"
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipChildren="false"
-                        android:layout_gravity="start|top"
-                        android:gravity="center_vertical"
-                        >
-
                     <ImageView
                             android:id="@android:id/icon"
                             android:layout_width="18dp"
@@ -76,22 +64,12 @@
                             android:layout_gravity="bottom|start"
                             android:visibility="gone"
                             android:textColor="#ffffff" />
-                </LinearLayout>
-
-                <TextView
-                        android:id="@+id/topic_details"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@android:style/TextAppearance.Material.Notification.Title"
-                        android:textColor="@color/notification_guts_text_color"
-                        android:layout_alignParentBottom="true"
-                        android:layout_alignParentStart="true" />
-            </LinearLayout>
+        </LinearLayout>
 
         <ImageButton style="@android:style/Widget.Material.Light.Button.Borderless.Small"
                 android:id="@+id/notification_inspect_item"
                 android:layout_width="52dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:gravity="center"
                 android:layout_gravity="center_vertical|end"
@@ -103,7 +81,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:paddingStart="@*android:dimen/notification_content_margin_start"
             android:orientation="vertical"
             android:clickable="false"
             android:focusable="false"
@@ -116,8 +93,7 @@
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 android:textColor="@color/notification_guts_text_color"
                 android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
-                android:text="@*android:string/notification_importance_title"/>
+                android:fadingEdge="horizontal"/>
 
         <TextView
                 android:id="@+id/summary"
@@ -133,7 +109,7 @@
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="6dp" >
+                android:paddingTop="8dp" >
 
             <ImageView
                     android:id="@+id/low_importance"
@@ -162,5 +138,21 @@
                     android:layout_height="24dp"/>
 
         </FrameLayout>
+
+        <RadioGroup android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp">
+            <RadioButton android:id="@+id/apply_to_topic"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:textColor="@color/notification_guts_text_color"
+                         android:visibility="gone"/>
+            <RadioButton android:id="@+id/apply_to_app"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:text="@string/apply_to_app"
+                         android:textColor="@color/notification_guts_text_color"
+                         android:visibility="gone"/>
+        </RadioGroup>
     </LinearLayout>
 </com.android.systemui.statusbar.NotificationGuts>

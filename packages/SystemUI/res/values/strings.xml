@@ -1201,4 +1201,34 @@
     <!-- Bluetooth enablement ok text [CHAR LIMIT=40] -->
     <string name="enable_bluetooth_confirmation_ok">Turn on</string>
 
+    <!-- Apply notification importance setting to a topic [CHAR LIMIT=NONE] -->
+    <string name="apply_to_topic">Apply to <xliff:g id="topic_name" example="Friend Request">%1$s</xliff:g> notifications</string>
+    <!-- Apply notification importance setting to an app [CHAR LIMIT=NONE] -->
+    <string name="apply_to_app">Apply to all notifications from this app</string>
+    <!-- Notification importance title, blocked status-->
+    <string name="blocked_importance">Blocked</string>
+    <!-- Notification importance title, low status-->
+    <string name="low_importance">Low importance</string>
+    <!-- Notification importance title, normal status-->
+    <string name="default_importance">Normal importance</string>
+    <!-- Notification importance title, high status-->
+    <string name="high_importance">High importance</string>
+    <!-- Notification importance title, max status-->
+    <string name="max_importance">Urgent importance</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance slider: blocked importance level description -->
+    <string name="notification_importance_blocked">Never show these notifications</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance slider: low importance level description -->
+    <string name="notification_importance_low">Silently show at the bottom of the notification list</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance slider: normal importance level description -->
+    <string name="notification_importance_default">Silently show these notifications</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance slider: high importance level description -->
+    <string name="notification_importance_high">Show at the top of the notifications list and make sound</string>
+
+    <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
+    <string name="notification_importance_max">Peek onto the screen and make sound</string>
+
 </resources>
