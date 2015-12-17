@@ -204,6 +204,7 @@ public final class Parcel {
     private static final Parcel[] sOwnedPool = new Parcel[POOL_SIZE];
     private static final Parcel[] sHolderPool = new Parcel[POOL_SIZE];
 
+    // Keep in sync with frameworks/native/libs/binder/PersistableBundle.cpp.
     private static final int VAL_NULL = -1;
     private static final int VAL_STRING = 0;
     private static final int VAL_INTEGER = 1;
@@ -704,6 +705,8 @@ public final class Parcel {
             writeInt(-1);
             return;
         }
+        // Keep the format of this Parcel in sync with writeToParcelInner() in
+        // frameworks/native/libs/binder/PersistableBundle.cpp.
         final int N = val.size();
         writeInt(N);
         if (DEBUG_ARRAY_MAP) {
