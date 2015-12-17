@@ -37391,9 +37391,23 @@ package android.text {
 
   public class Html {
     method public static java.lang.String escapeHtml(java.lang.CharSequence);
-    method public static android.text.Spanned fromHtml(java.lang.String);
-    method public static android.text.Spanned fromHtml(java.lang.String, android.text.Html.ImageGetter, android.text.Html.TagHandler);
-    method public static java.lang.String toHtml(android.text.Spanned);
+    method public static deprecated android.text.Spanned fromHtml(java.lang.String);
+    method public static android.text.Spanned fromHtml(java.lang.String, int);
+    method public static deprecated android.text.Spanned fromHtml(java.lang.String, android.text.Html.ImageGetter, android.text.Html.TagHandler);
+    method public static android.text.Spanned fromHtml(java.lang.String, int, android.text.Html.ImageGetter, android.text.Html.TagHandler);
+    method public static deprecated java.lang.String toHtml(android.text.Spanned);
+    method public static java.lang.String toHtml(android.text.Spanned, int);
+    field public static final int FROM_HTML_MODE_COMPACT = 63; // 0x3f
+    field public static final int FROM_HTML_MODE_LEGACY = 0; // 0x0
+    field public static final int FROM_HTML_OPTION_USE_CSS_COLORS = 256; // 0x100
+    field public static final int FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE = 32; // 0x20
+    field public static final int FROM_HTML_SEPARATOR_LINE_BREAK_DIV = 16; // 0x10
+    field public static final int FROM_HTML_SEPARATOR_LINE_BREAK_HEADING = 2; // 0x2
+    field public static final int FROM_HTML_SEPARATOR_LINE_BREAK_LIST = 8; // 0x8
+    field public static final int FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM = 4; // 0x4
+    field public static final int FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH = 1; // 0x1
+    field public static final int TO_HTML_PARAGRAPH_LINES_CONSECUTIVE = 0; // 0x0
+    field public static final int TO_HTML_PARAGRAPH_LINES_INDIVIDUAL = 1; // 0x1
   }
 
   public static abstract interface Html.ImageGetter {
