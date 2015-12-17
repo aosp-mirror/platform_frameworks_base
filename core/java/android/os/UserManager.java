@@ -518,6 +518,16 @@ public class UserManager {
     public static final String DISALLOW_CAMERA = "no_camera";
 
     /**
+     * Specifies if a user is not allowed to use cellular data when roaming. This can only be set by
+     * device owners. The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_DATA_ROAMING = "no_data_roaming";
+
+    /**
      * Allows apps in the parent profile to handle web links from the managed profile.
      *
      * This user restriction has an effect only in a managed profile.
