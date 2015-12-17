@@ -47,6 +47,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String PREFERRED_HELPER = "preferred_activities";
     private static final String NOTIFICATION_HELPER = "notifications";
     private static final String PERMISSION_HELPER = "permissions";
+    private static final String USAGE_STATS_HELPER = "usage_stats";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -96,7 +97,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper());
-
+        addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
         super.onBackup(oldState, data, newState);
     }
 
@@ -131,6 +132,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper());
+        addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
 
         try {
             super.onRestore(data, appVersionCode, newState);
@@ -183,7 +185,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
             if (restoredWallpaper) {
                 IWallpaperManager wallpaper =
                         (IWallpaperManager)ServiceManager.getService(
-                        Context.WALLPAPER_SERVICE);
+                                Context.WALLPAPER_SERVICE);
                 if (wallpaper != null) {
                     try {
                         wallpaper.settingsRestored();

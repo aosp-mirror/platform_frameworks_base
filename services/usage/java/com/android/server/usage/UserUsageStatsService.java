@@ -741,4 +741,12 @@ class UserUsageStatsService {
                 return "UNKNOWN";
         }
     }
+
+    byte[] getBackupPayload(String key){
+        return mDatabase.getBackupPayload(key);
+    }
+
+    void applyRestoredPayload(String key, byte[] payload){
+        mDatabase.applyRestoredPayload(key, payload);
+    }
 }

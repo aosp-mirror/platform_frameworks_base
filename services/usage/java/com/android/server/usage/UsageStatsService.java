@@ -1310,6 +1310,8 @@ public class UsageStatsService extends SystemService implements
             }
             UsageStatsService.this.dump(args, pw);
         }
+
+
     }
 
     /**
@@ -1415,6 +1417,27 @@ public class UsageStatsService extends SystemService implements
         public void removeAppIdleStateChangeListener(
                 AppIdleStateChangeListener listener) {
             UsageStatsService.this.removeListener(listener);
+        }
+
+        @Override
+        public byte[] getBackupPayload(int user, String key) {
+            // Check to ensure that only user 0's data is b/r for now
+            if (user == UserHandle.USER_SYSTEM) {
+                final UserUsageStatsService userStats =
+                        getUserDataAndInitializeIfNeededLocked(user, checkAndGetTimeLocked());
+                return userStats.getBackupPayload(key);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public void applyRestoredPayload(int user, String key, byte[] payload) {
+            if (user == UserHandle.USER_SYSTEM) {
+                final UserUsageStatsService userStats =
+                        getUserDataAndInitializeIfNeededLocked(user, checkAndGetTimeLocked());
+                userStats.applyRestoredPayload(key, payload);
+            }
         }
     }
 }
