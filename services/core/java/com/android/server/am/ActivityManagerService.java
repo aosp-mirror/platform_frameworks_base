@@ -17061,6 +17061,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        // Verify that protected broadcasts are only being sent by system code,
+        // and that system code is only sending protected broadcasts.
         final String action = intent.getAction();
         final boolean isProtectedBroadcast;
         try {
@@ -17070,35 +17072,47 @@ public final class ActivityManagerService extends ActivityManagerNative
             return ActivityManager.BROADCAST_SUCCESS;
         }
 
-        /*
-         * Prevent non-system code (defined here to be non-persistent
-         * processes) from sending protected broadcasts.
-         */
-        int callingAppId = UserHandle.getAppId(callingUid);
-        if (callingAppId == Process.SYSTEM_UID || callingAppId == Process.PHONE_UID
-            || callingAppId == Process.SHELL_UID || callingAppId == Process.BLUETOOTH_UID
-            || callingAppId == Process.NFC_UID || callingUid == 0) {
-            // Always okay.
+        final boolean isCallerSystem;
+        switch (UserHandle.getAppId(callingUid)) {
+            case Process.ROOT_UID:
+            case Process.SYSTEM_UID:
+            case Process.PHONE_UID:
+            case Process.SHELL_UID:
+            case Process.BLUETOOTH_UID:
+            case Process.NFC_UID:
+                isCallerSystem = true;
+                break;
+            default:
+                isCallerSystem = (callerApp != null) && callerApp.persistent;
+                break;
+        }
 
-            // Yell if the system is trying to send a non-protected broadcast.
-            // The vast majority of broadcasts sent from system callers should
-            // be protected to avoid security holes, so exceptions here should
-            // be incredibly rare.
-            if (!isProtectedBroadcast
-                    && !Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                // TODO: eventually switch over to hard throw
+        if (isCallerSystem) {
+            if (isProtectedBroadcast
+                    || Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
+                    || Intent.ACTION_MEDIA_SCANNER_SCAN_FILE.equals(action)
+                    || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
+                    || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
+                // Broadcast is either protected, or it's a public action that
+                // we've relaxed, so it's fine for system internals to send.
+            } else {
+                // The vast majority of broadcasts sent from system internals
+                // should be protected to avoid security holes, so yell loudly
+                // to ensure we examine these cases.
                 Log.wtf(TAG, "Sending non-protected broadcast " + action
                         + " from system", new Throwable());
             }
 
-        } else if (callerApp == null || !callerApp.persistent) {
+        } else {
             if (isProtectedBroadcast) {
                 String msg = "Permission Denial: not allowed to send broadcast "
                         + action + " from pid="
                         + callingPid + ", uid=" + callingUid;
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
-            } else if (AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)) {
+
+            } else if (AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
+                    || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
                 // Special case for compatibility: we don't want apps to send this,
                 // but historically it has not been protected and apps may be using it
                 // to poke their own app widget.  So, instead of making it protected,

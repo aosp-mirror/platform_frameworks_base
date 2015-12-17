@@ -526,6 +526,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (parentHandle != null) {
             intent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
             intent.putExtra(Intent.EXTRA_USER, profileHandle);
+            intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             intent.putExtras(extras);
             mContext.sendBroadcastAsUser(intent, parentHandle);
@@ -2073,6 +2074,7 @@ public class UserManagerService extends IUserManager.Stub {
         managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                 Intent.FLAG_RECEIVER_FOREGROUND);
         managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
+        managedProfileIntent.putExtra(Intent.EXTRA_USER_HANDLE, removedUserId);
         mContext.sendBroadcastAsUser(managedProfileIntent, new UserHandle(parentUserId), null);
     }
 
