@@ -58,6 +58,9 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
   <dt><a href="{@docRoot}tools/help/sqlite3.html">sqlite3</a></dt>
     <dd>Lets you access the SQLite data files created and used by Android applications.</dd>
 
+  <dt><a href="{@docRoot}tools/help/translations-editor.html">Translations Editor</a></dt>
+    <dd>Lets you view and update all your string resource translations in one convenient place.</dd>
+
 </dl>
 
 
