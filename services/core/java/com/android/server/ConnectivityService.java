@@ -753,6 +753,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_STOPPING);
         intentFilter.addAction(Intent.ACTION_USER_ADDED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        intentFilter.addAction(Intent.ACTION_USER_PRESENT);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
@@ -1571,8 +1572,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Try bringing up tracker, but KeyStore won't be ready yet for secondary users so wait
         // for user to unlock device too.
         updateLockdownVpn();
-        final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_PRESENT);
-        mContext.registerReceiverAsUser(mUserPresentReceiver, UserHandle.ALL, filter, null, null);
 
         // Configure whether mobile data is always on.
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON));
@@ -1581,23 +1580,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mPermissionMonitor.startMonitoring();
     }
-
-    private BroadcastReceiver mUserPresentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // User that sent this intent = user that was just unlocked
-            final int unlockedUser = getSendingUserId();
-
-            // Try creating lockdown tracker, since user present usually means
-            // unlocked keystore.
-            if (mUserManager.getUserInfo(unlockedUser).isPrimary() &&
-                    LockdownVpnTracker.isEnabled()) {
-                updateLockdownVpn();
-            } else {
-                updateAlwaysOnVpn(unlockedUser);
-            }
-        }
-    };
 
     /**
      * Setup data activity tracking for the given network.
@@ -3206,11 +3188,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Tear down existing lockdown if profile was removed
         mLockdownEnabled = LockdownVpnTracker.isEnabled();
         if (mLockdownEnabled) {
-            if (!mKeyStore.isUnlocked()) {
-                Slog.w(TAG, "KeyStore locked; unable to create LockdownTracker");
-                return false;
-            }
-
             final String profileName = new String(mKeyStore.get(Credentials.LOCKDOWN_VPN));
             final VpnProfile profile = VpnProfile.decode(
                     profileName, mKeyStore.get(Credentials.VPN + profileName));
@@ -3589,6 +3566,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             userVpn = new Vpn(mHandler.getLooper(), mContext, mNetd, userId);
             mVpns.put(userId, userVpn);
         }
+        if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
+            updateLockdownVpn();
+        } else {
+            updateAlwaysOnVpn(userId);
+        }
     }
 
     private void onUserStop(int userId) {
@@ -3622,6 +3604,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void onUserPresent(int userId) {
+        // User present may be sent because of an unlock, which might mean an unlocked keystore.
+        if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
+            updateLockdownVpn();
+        } else {
+            updateAlwaysOnVpn(userId);
+        }
+    }
+
     private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -3637,6 +3628,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 onUserAdded(userId);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 onUserRemoved(userId);
+            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                onUserPresent(userId);
             }
         }
     };
