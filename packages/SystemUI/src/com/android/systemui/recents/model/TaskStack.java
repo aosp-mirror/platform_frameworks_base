@@ -427,8 +427,6 @@ public class TaskStack {
                 removeGroup(group);
             }
         }
-        // Update the lock-to-app state
-        t.lockToThisTask = false;
     }
 
     /** Removes a task */
@@ -437,9 +435,6 @@ public class TaskStack {
             boolean wasFrontMostTask = (getStackFrontMostTask() == t);
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask();
-            if (newFrontMostTask != null && newFrontMostTask.lockToTaskEnabled) {
-                newFrontMostTask.lockToThisTask = true;
-            }
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask);
@@ -524,10 +519,21 @@ public class TaskStack {
         mAffinitiesGroups.clear();
     }
 
-    /** Gets the front task */
+    /**
+     * Gets the front-most task in the stack.
+     */
     public Task getStackFrontMostTask() {
-        if (mStackTaskList.size() == 0) return null;
-        return mStackTaskList.getTasks().get(mStackTaskList.size() - 1);
+        ArrayList<Task> stackTasks = mStackTaskList.getTasks();
+        if (stackTasks.isEmpty()) {
+            return null;
+        }
+        for (int i = stackTasks.size() - 1; i >= 0; i--) {
+            Task task = stackTasks.get(i);
+            if (!task.isFreeformTask()) {
+                return task;
+            }
+        }
+        return null;
     }
 
     /** Gets the task keys */

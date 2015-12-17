@@ -131,8 +131,6 @@ public class Task {
      */
     public boolean isLaunchTarget;
     public boolean isHistorical;
-    public boolean lockToThisTask;
-    public boolean lockToTaskEnabled;
 
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
@@ -142,8 +140,8 @@ public class Task {
 
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
                 Bitmap thumbnail, String title, String contentDescription, int colorPrimary,
-                boolean isHistorical, boolean lockToThisTask, boolean lockToTaskEnabled,
-                Rect bounds, ActivityManager.TaskDescription taskDescription) {
+                boolean isHistorical, Rect bounds,
+                ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -159,8 +157,6 @@ public class Task {
         this.bounds = bounds;
         this.taskDescription = taskDescription;
         this.isHistorical = isHistorical;
-        this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
-        this.lockToTaskEnabled = lockToTaskEnabled;
     }
 
     /** Copies the other task. */
@@ -178,8 +174,6 @@ public class Task {
         this.bounds = o.bounds;
         this.isLaunchTarget = o.isLaunchTarget;
         this.isHistorical = o.isHistorical;
-        this.lockToThisTask = o.lockToThisTask;
-        this.lockToTaskEnabled = o.lockToTaskEnabled;
     }
 
     /**

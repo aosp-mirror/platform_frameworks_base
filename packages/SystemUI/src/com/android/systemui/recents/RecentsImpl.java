@@ -572,7 +572,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         Rect windowRect = ssp.getWindowRect();
 
         // Update the configuration for the current state
-        config.update(mContext, ssp, ssp.getWindowRect());
+        config.update(windowRect);
 
         if (!RecentsDebugFlags.Static.DisableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we

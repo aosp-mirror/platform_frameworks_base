@@ -74,9 +74,6 @@ public class RecentsConfiguration {
     public int svelteLevel;
     public int searchBarSpaceHeightPx;
 
-    /** Dev options and global settings */
-    public boolean lockToAppEnabled;
-
     public RecentsConfiguration(Context context) {
         // Load only resources that can not change after the first load either through developer
         // settings or via multi window
@@ -106,12 +103,7 @@ public class RecentsConfiguration {
     /**
      * Updates the configuration based on the current state of the system
      */
-    void update(Context context, SystemServicesProxy ssp, Rect windowRect) {
-        // Only update resources that can change after the first load, either through developer
-        // settings or via multi window
-        lockToAppEnabled = !ssp.hasFreeformWorkspaceSupport() &&
-                ssp.getSystemSetting(context, Settings.System.LOCK_TO_APP_ENABLED) != 0;
-
+    void update(Rect windowRect) {
         // Recompute some values based on the given state, since we can not rely on the resource
         // system to get certain values.
         boolean isLandscape = windowRect.width() > windowRect.height();

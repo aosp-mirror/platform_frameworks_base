@@ -33,6 +33,8 @@ public class ViewAnimation {
 
         // These following properties are updated for each task view we start the enter animation on
 
+        // Whether or not screen pinning is enabled
+        boolean isScreenPinningEnabled;
         // Whether or not the current task occludes the launch target
         boolean currentTaskOccludesLaunchTarget;
         // The task rect for the current stack

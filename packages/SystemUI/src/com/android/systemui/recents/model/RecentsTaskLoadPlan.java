@@ -155,7 +155,7 @@ public class RecentsTaskLoadPlan {
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, contentDescription, activityColor, !isStackTask,
-                    (i == (taskCount - 1)), config.lockToAppEnabled, t.bounds, t.taskDescription);
+                    t.bounds, t.taskDescription);
 
             allTasks.add(task);
         }

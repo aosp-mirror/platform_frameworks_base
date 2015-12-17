@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.Settings;
 import android.util.IntProperty;
 import android.util.Log;
 import android.util.Property;
@@ -149,7 +150,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     List<TaskView> mImmutableTaskViews = new ArrayList<>();
     List<TaskView> mTmpTaskViews = new ArrayList<>();
     LayoutInflater mInflater;
+
     boolean mTouchExplorationEnabled;
+    boolean mScreenPinningEnabled;
 
     Interpolator mFastOutSlowInInterpolator;
 
@@ -224,6 +227,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     protected void onAttachedToWindow() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
+        mScreenPinningEnabled = ssp.getSystemSetting(getContext(),
+                Settings.System.LOCK_TO_APP_ENABLED) != 0;
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
         super.onAttachedToWindow();
     }
@@ -1023,8 +1028,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         launchTargetTask);
                 hideTask = launchTargetTask.isFreeformTask() && task.isFreeformTask();
             }
-            tv.prepareEnterRecentsAnimation(task.isLaunchTarget, hideTask, occludesLaunchTarget,
-                    offscreenY);
+            tv.prepareEnterRecentsAnimation(hideTask, occludesLaunchTarget, offscreenY);
         }
 
         // If the enter animation started already and we haven't completed a layout yet, do the
@@ -1087,6 +1091,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 ctx.currentTaskRect = mLayoutAlgorithm.mTaskRect;
                 ctx.currentTaskOccludesLaunchTarget = (launchTargetTask != null) &&
                         launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
+                ctx.isScreenPinningEnabled = mScreenPinningEnabled;
                 ctx.updateListener = mRequestUpdateClippingListener;
                 mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(),
                         ctx.currentTaskTransform, null);
@@ -1271,13 +1276,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             requestSynchronizeStackViewsWithModel(DEFAULT_SYNC_STACK_DURATION);
         }
 
-        // Update the new front most task
-        if (newFrontMostTask != null) {
+        // Update the new front most task's action button
+        if (mScreenPinningEnabled && newFrontMostTask != null) {
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
             if (frontTv != null) {
-                frontTv.onTaskBound(newFrontMostTask);
-                frontTv.fadeInActionButton(getResources().getInteger(
-                        R.integer.recents_task_enter_from_app_duration));
+                frontTv.showActionButton(true /* fadeIn */, DEFAULT_SYNC_STACK_DURATION);
             }
         }
 
@@ -1304,7 +1307,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void prepareViewToEnterPool(TaskView tv) {
-        Task task = tv.getTask();
+        final Task task = tv.getTask();
 
         // Report that this tasks's data is no longer being used
         Recents.getTaskLoader().unloadTaskData(task);
@@ -1314,14 +1317,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the task views list after removing the task view
         updateTaskViewsList();
 
-        // Reset the view properties
+        // Reset the view properties and view state
         tv.resetViewProperties();
-
-        // Reset the focused view state
         tv.setFocusedState(false, false /* animated */, false /* requestViewFocus */);
-
-        // Reset the clip state of the task view
         tv.setClipViewInStack(false);
+        if (mScreenPinningEnabled) {
+            tv.hideActionButton();
+        }
     }
 
     @Override
@@ -1361,6 +1363,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.setClipViewInStack(true);
         if (mFocusedTask == task) {
             tv.setFocusedState(true, false /* animated */, false /* requestViewFocus */);
+        }
+
+        // Restore the action button visibility if it is the front most task view
+        if (mScreenPinningEnabled && tv.getTask() == mStack.getStackFrontMostTask()) {
+            tv.showActionButton(false /* fadeIn */, 0 /* fadeInDuration */);
         }
     }
 
