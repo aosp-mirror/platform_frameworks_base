@@ -96,8 +96,8 @@ public class JobStatus {
         final long elapsedNow = SystemClock.elapsedRealtime();
 
         if (job.isPeriodic()) {
-            earliestRunTimeElapsedMillis = elapsedNow;
             latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
+            earliestRunTimeElapsedMillis = latestRunTimeElapsedMillis - job.getFlexMillis();
         } else {
             earliestRunTimeElapsedMillis = job.hasEarlyConstraint() ?
                     elapsedNow + job.getMinLatencyMillis() : NO_EARLIEST_RUNTIME;

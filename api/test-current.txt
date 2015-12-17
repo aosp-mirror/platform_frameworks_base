@@ -6168,6 +6168,7 @@ package android.app.job {
     method public int describeContents();
     method public int getBackoffPolicy();
     method public android.os.PersistableBundle getExtras();
+    method public long getFlexMillis();
     method public int getId();
     method public long getInitialBackoffMillis();
     method public long getIntervalMillis();
@@ -6185,6 +6186,8 @@ package android.app.job {
     field public static final android.os.Parcelable.Creator<android.app.job.JobInfo> CREATOR;
     field public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 30000L; // 0x7530L
     field public static final long MAX_BACKOFF_DELAY_MILLIS = 18000000L; // 0x112a880L
+    field public static final long MIN_FLEX_MILLIS = 300000L; // 0x493e0L
+    field public static final long MIN_PERIOD_MILLIS = 3600000L; // 0x36ee80L
     field public static final int NETWORK_TYPE_ANY = 1; // 0x1
     field public static final int NETWORK_TYPE_NONE = 0; // 0x0
     field public static final int NETWORK_TYPE_UNMETERED = 2; // 0x2
@@ -6198,6 +6201,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setMinimumLatency(long);
     method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
     method public android.app.job.JobInfo.Builder setPeriodic(long);
+    method public android.app.job.JobInfo.Builder setPeriodic(long, long);
     method public android.app.job.JobInfo.Builder setPersisted(boolean);
     method public android.app.job.JobInfo.Builder setRequiredNetworkType(int);
     method public android.app.job.JobInfo.Builder setRequiresCharging(boolean);

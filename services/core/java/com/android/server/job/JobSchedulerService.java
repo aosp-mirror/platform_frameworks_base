@@ -613,9 +613,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (periodicToReschedule.hasDeadlineConstraint()) {
             runEarly = Math.max(periodicToReschedule.getLatestRunTimeElapsed() - elapsedNow, 0L);
         }
-        long newEarliestRunTimeElapsed = elapsedNow + runEarly;
+        long flex = periodicToReschedule.getJob().getFlexMillis();
         long period = periodicToReschedule.getJob().getIntervalMillis();
-        long newLatestRuntimeElapsed = newEarliestRunTimeElapsed + period;
+        long newLatestRuntimeElapsed = elapsedNow + runEarly + period;
+        long newEarliestRunTimeElapsed = newLatestRuntimeElapsed - flex;
 
         if (DEBUG) {
             Slog.v(TAG, "Rescheduling executed periodic. New execution window [" +

@@ -397,6 +397,7 @@ public class JobStore {
             if (jobStatus.getJob().isPeriodic()) {
                 out.startTag(null, XML_TAG_PERIODIC);
                 out.attribute(null, "period", Long.toString(job.getIntervalMillis()));
+                out.attribute(null, "flex", Long.toString(job.getFlexMillis()));
             } else {
                 out.startTag(null, XML_TAG_ONEOFF);
             }
@@ -594,13 +595,17 @@ public class JobStore {
                     String val = parser.getAttributeValue(null, "period");
                     final long periodMillis = Long.valueOf(val);
                     jobBuilder.setPeriodic(periodMillis);
-                    // As a sanity check, cap the recreated run time to be no later than 2 periods
+                    val = parser.getAttributeValue(null, "flex");
+                    final long flexMillis = (val != null) ? Long.valueOf(val) : periodMillis;
+                    // As a sanity check, cap the recreated run time to be no later than flex+period
                     // from now. This is the latest the periodic could be pushed out. This could
-                    // happen if the periodic ran early (at the start of its period), and then the
+                    // happen if the periodic ran early (at flex time before period), and then the
                     // device rebooted.
-                    if (elapsedRuntimes.second > elapsedNow + 2 * periodMillis) {
-                        final long clampedEarlyRuntimeElapsed = elapsedNow + periodMillis;
-                        final long clampedLateRuntimeElapsed = elapsedNow + 2 * periodMillis;
+                    if (elapsedRuntimes.second > elapsedNow + periodMillis + flexMillis) {
+                        final long clampedLateRuntimeElapsed = elapsedNow + flexMillis
+                                + periodMillis;
+                        final long clampedEarlyRuntimeElapsed = clampedLateRuntimeElapsed
+                                - flexMillis;
                         Slog.w(TAG,
                                 String.format("Periodic job for uid='%d' persisted run-time is" +
                                                 " too big [%s, %s]. Clamping to [%s,%s]",

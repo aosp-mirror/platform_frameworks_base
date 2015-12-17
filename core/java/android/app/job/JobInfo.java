@@ -64,6 +64,11 @@ public class JobInfo implements Parcelable {
      */
     public static final int BACKOFF_POLICY_EXPONENTIAL = 1;
 
+    /* Minimum interval for a periodic job, in milliseconds. */
+    public static final long MIN_PERIOD_MILLIS = 60 * 60 * 1000L;   // 60 minutes
+    /* Minimum flex for a periodic job, in milliseconds. */
+    public static final long MIN_FLEX_MILLIS = 5 * 60 * 1000L; // 5 minutes
+
     /**
      * Default type of backoff.
      * @hide
@@ -83,6 +88,7 @@ public class JobInfo implements Parcelable {
     private final boolean isPeriodic;
     private final boolean isPersisted;
     private final long intervalMillis;
+    private final long flexMillis;
     private final long initialBackoffMillis;
     private final int backoffPolicy;
 
@@ -165,7 +171,17 @@ public class JobInfo implements Parcelable {
      * job does not recur periodically.
      */
     public long getIntervalMillis() {
-        return intervalMillis;
+        return intervalMillis >= MIN_PERIOD_MILLIS ? intervalMillis : MIN_PERIOD_MILLIS;
+    }
+
+    /**
+     * Flex time for this job. Only valid if this is a periodic job.
+     */
+    public long getFlexMillis() {
+        long interval = getIntervalMillis();
+        long percentClamp = 5 * interval / 100;
+        long clampedFlex = Math.max(flexMillis, Math.max(percentClamp, MIN_FLEX_MILLIS));
+        return clampedFlex <= interval ? clampedFlex : interval;
     }
 
     /**
@@ -216,6 +232,7 @@ public class JobInfo implements Parcelable {
         isPeriodic = in.readInt() == 1;
         isPersisted = in.readInt() == 1;
         intervalMillis = in.readLong();
+        flexMillis = in.readLong();
         initialBackoffMillis = in.readLong();
         backoffPolicy = in.readInt();
         hasEarlyConstraint = in.readInt() == 1;
@@ -234,6 +251,7 @@ public class JobInfo implements Parcelable {
         isPeriodic = b.mIsPeriodic;
         isPersisted = b.mIsPersisted;
         intervalMillis = b.mIntervalMillis;
+        flexMillis = b.mFlexMillis;
         initialBackoffMillis = b.mInitialBackoffMillis;
         backoffPolicy = b.mBackoffPolicy;
         hasEarlyConstraint = b.mHasEarlyConstraint;
@@ -258,6 +276,7 @@ public class JobInfo implements Parcelable {
         out.writeInt(isPeriodic ? 1 : 0);
         out.writeInt(isPersisted ? 1 : 0);
         out.writeLong(intervalMillis);
+        out.writeLong(flexMillis);
         out.writeLong(initialBackoffMillis);
         out.writeInt(backoffPolicy);
         out.writeInt(hasEarlyConstraint ? 1 : 0);
@@ -299,6 +318,7 @@ public class JobInfo implements Parcelable {
         private boolean mHasEarlyConstraint;
         private boolean mHasLateConstraint;
         private long mIntervalMillis;
+        private long mFlexMillis;
         // Back-off parameters.
         private long mInitialBackoffMillis = DEFAULT_INITIAL_BACKOFF_MILLIS;
         private int mBackoffPolicy = DEFAULT_BACKOFF_POLICY;
@@ -373,8 +393,21 @@ public class JobInfo implements Parcelable {
          * @param intervalMillis Millisecond interval for which this job will repeat.
          */
         public Builder setPeriodic(long intervalMillis) {
+            return setPeriodic(intervalMillis, intervalMillis);
+        }
+
+        /**
+         * Specify that this job should recur with the provided interval and flex. The job can
+         * execute at any time in a window of flex length at the end of the period.
+         * @param intervalMillis Millisecond interval for which this job will repeat.
+         * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
+         *                   {@link #MIN_FLEX_MILLIS} or 5 percent of the period, whichever is
+         *                   higher.
+         */
+        public Builder setPeriodic(long intervalMillis, long flexMillis) {
             mIsPeriodic = true;
             mIntervalMillis = intervalMillis;
+            mFlexMillis = flexMillis;
             mHasEarlyConstraint = mHasLateConstraint = true;
             return this;
         }
