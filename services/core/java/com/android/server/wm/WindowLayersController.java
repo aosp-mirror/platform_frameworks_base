@@ -116,7 +116,7 @@ public class WindowLayersController {
                         + " anim layer: " + childWindow.mWinAnimator.mAnimLayer);
             }
         }
-        for (int i = mService.mInputMethodDialogs.size(); i >= 0; i--) {
+        for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
             final WindowState dialog = mService.mInputMethodDialogs.get(i);
             dialog.mWinAnimator.mAnimLayer = dialog.mLayer + adj;
             if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
