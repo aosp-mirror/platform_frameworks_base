@@ -16,22 +16,21 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_THUMBNAILS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_THUMBNAILS;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.app.ActivityManager.TaskDescription;
-import android.app.PendingIntent;
-import android.os.PersistableBundle;
-import android.os.Trace;
-
-import com.android.internal.app.ResolverActivity;
-import com.android.internal.content.ReferrerIntent;
-import com.android.internal.util.XmlUtils;
-import com.android.server.AttributeCache;
-import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
-
 import android.app.ActivityOptions;
+import android.app.PendingIntent;
 import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -45,9 +44,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
@@ -57,9 +58,12 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
+import com.android.internal.app.ResolverActivity;
+import com.android.internal.content.ReferrerIntent;
+import com.android.internal.util.XmlUtils;
+import com.android.server.AttributeCache;
+import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +72,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  * An entry in the history stack, representing an activity.
@@ -396,6 +404,11 @@ final class ActivityRecord {
                 // If process died, whatever.
             }
         }
+    }
+
+    boolean isFreeform() {
+        return task != null && task.stack != null
+                && task.stack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
     static class Token extends IApplicationToken.Stub {
