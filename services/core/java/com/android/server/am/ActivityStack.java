@@ -813,10 +813,9 @@ final class ActivityStack {
 
         if (hasVisibleBehindActivity()) {
             // Stop visible behind activity before going to sleep.
-            final ActivityRecord r = mActivityContainer.mActivityDisplay.mVisibleBehindActivity;
+            final ActivityRecord r = getVisibleBehindActivity();
             mStackSupervisor.mStoppingActivities.add(r);
-            if (DEBUG_STATES) Slog.v(TAG_STATES,
-                    "Sleep still waiting to stop visible behind " + r);
+            if (DEBUG_STATES) Slog.v(TAG_STATES, "Sleep still waiting to stop visible behind " + r);
             return true;
         }
 
@@ -1053,7 +1052,7 @@ final class ActivityStack {
             mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
             r.stopped = true;
             r.state = ActivityState.STOPPED;
-            if (mActivityContainer.mActivityDisplay.mVisibleBehindActivity == r) {
+            if (getVisibleBehindActivity() == r) {
                 mStackSupervisor.requestVisibleBehindLocked(r, false);
             }
             if (r.finishing) {
@@ -1214,9 +1213,9 @@ final class ActivityStack {
 
         next.returningOptions = null;
 
-        if (mActivityContainer.mActivityDisplay.mVisibleBehindActivity == next) {
+        if (getVisibleBehindActivity() == next) {
             // When resuming an activity, require it to call requestVisibleBehind() again.
-            mActivityContainer.mActivityDisplay.setVisibleBehindActivity(null);
+            setVisibleBehindActivity(null);
         }
     }
 
