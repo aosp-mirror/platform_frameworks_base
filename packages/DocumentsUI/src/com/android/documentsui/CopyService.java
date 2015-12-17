@@ -501,16 +501,23 @@ public class CopyService extends IntentService {
 
         // If the file is virtual, but can be converted to another format, then try to copy it
         // as such format. Also, append an extension for the target mime type (if known).
-        if (srcInfo.isVirtualDocument() && srcInfo.isTypedDocument()) {
+        if (srcInfo.isVirtualDocument()) {
+            if (!srcInfo.isTypedDocument()) {
+                // Impossible to copy a file which is virtual, but not typed.
+                mFailedFiles.add(srcInfo);
+                return false;
+            }
             final String[] streamTypes = getContentResolver().getStreamTypes(
                     srcInfo.derivedUri, "*/*");
-            if (streamTypes.length > 0) {
+            if (streamTypes != null && streamTypes.length > 0) {
                 dstMimeType = streamTypes[0];
                 final String extension = MimeTypeMap.getSingleton().
                         getExtensionFromMimeType(dstMimeType);
                 dstDisplayName = srcInfo.displayName +
                         (extension != null ? "." + extension : srcInfo.displayName);
             } else {
+                // The provider says that it supports typed documents, but doesn't say
+                // anything about available formats.
                 // TODO: Log failures. b/26192412
                 mFailedFiles.add(srcInfo);
                 return false;
