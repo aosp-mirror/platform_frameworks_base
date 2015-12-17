@@ -226,6 +226,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/carrier/ICarrierMessagingService.aidl \
 	core/java/android/service/gatekeeper/IGateKeeperService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
+	core/java/android/service/notification/INotificationAssistant.aidl \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
 	core/java/android/service/notification/IConditionListener.aidl \
 	core/java/android/service/notification/IConditionProvider.aidl \

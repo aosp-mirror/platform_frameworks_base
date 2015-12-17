@@ -1092,6 +1092,22 @@ public final class Settings {
     public static final String ACTION_HOME_SETTINGS
             = "android.settings.HOME_SETTINGS";
 
+
+
+    /**
+     * Activity Action: Show Default apps settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_DEFAULT_APPS_SETTINGS
+            = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
+
     /**
      * Activity Action: Show notification settings.
      *
@@ -5615,6 +5631,15 @@ public final class Settings {
          * @hide
          */
         public static final String ASSIST_SCREENSHOT_ENABLED = "assist_screenshot_enabled";
+
+        /**
+         * Names of the service component that the current user has explicitly allowed to
+         * see and change the importance of all of the user's notifications.
+         *
+         * @hide
+         */
+        public static final String ENABLED_NOTIFICATION_ASSISTANT
+                = "enabled_notification_assistant";
 
         /**
          * Names of the service components that the current user has explicitly allowed to
