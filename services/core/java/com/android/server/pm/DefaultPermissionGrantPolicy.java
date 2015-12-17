@@ -594,6 +594,14 @@ final class DefaultPermissionGrantPolicy {
                 }
             }
 
+            // Print Spooler
+            PackageParser.Package printSpoolerPackage = getSystemPackageLPr(
+                    "com.android.printspooler");
+            if (printSpoolerPackage != null
+                    && doesPackageSupportRuntimePermissions(printSpoolerPackage)) {
+                grantRuntimePermissionsLPw(printSpoolerPackage, LOCATION_PERMISSIONS, true, userId);
+            }
+
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
         }
     }
